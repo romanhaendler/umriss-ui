@@ -23,889 +23,298 @@
    `render`. A `value` given as a field name has none of it: it comes to one
    reader per name and is compared by that name (value.ts, ADR-0048). */
 
-import { FALLBACK_THEME, resolveColours, resolveTheme, subscribeTheme, type ResolvedTheme } from "./theme";
-import { DEV, invariant, warnOnce } from "./dev";
+import { type ResolvedTheme } from "./theme";
 import { TextMeasurer } from "./measure";
-import { isFieldReader } from "./value";
-import {
-  computeLayout,
-  CLASS_TICK,
-  EMPTY_LAYOUT,
-  insideContainer,
-  spread,
-  type AxisInput,
-  type AxisLayout,
-  type LayoutResult,
-} from "./layout";
-import {
-  drawOverlayLayer,
-  drawSeriesLayer,
-  type DrawBase,
-  type LimitDrawItem,
-  type SeriesDrawItem,
-} from "./draw";
-import { lowerBound, nearestIndex, nearestPoint } from "./hit";
-import type { SilhouetteKind } from "./Silhouette";
+import { EMPTY_LAYOUT, type AxisLayout, type LayoutResult } from "./layout";
+import { type LimitDrawItem, type SeriesDrawItem } from "./draw";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
-import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
-import { downsample, type Course } from "./downsample";
-import { tableRows } from "./table";
-import { stackSeries, type Stacked } from "./stack";
-import { hatchFor, marksFor, stateHatches, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
-import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
-import { cellSize, cellIndex, measureSpacing } from "./cells";
-import { assess } from "./limit";
+import { type Cell } from "./walk";
+import { marksFor, stateHatches, type Hatch, type SeriesMarks } from "./marks";
 import { formatValue } from "./format";
-import { defaultLimits, hidesAll, onlyKnown, onlyVisible, sameSpan, showOnly, toggleHidden, viewKey, zoomSpan, type AxisSpans, type ChartView, type ZoomLimits } from "./view";
-import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
-import {
-  axisExtent,
-  categoriesOf,
-  categoryPlaces,
-  firstKind,
-  firstUnsortedIndex,
-  instantOf,
-  isCategory,
-  isPosition,
-  materializeSeries,
-  visibleExtent,
-  type Baseline,
-  type Extent,
-  type ExtraChannels,
-  BOX_KEYS,
-  BOX_EXTRA_KEYS,
-  firstDisorderedBox,
-} from "./materialize";
-
-/** A box's rows top to bottom as drawn: its further numbers with the median
-    between the quartiles (box-plot B9). */
-const BOX_ROWS = [...BOX_KEYS.slice(0, 2), "median", ...BOX_KEYS.slice(2)] as const;
-
-/** A box's tooltip and table write this many outliers, and count the rest. */
-const OUTLIERS_SHOWN = 5;
-import {
-  barGroups,
-  barPlacement,
-  type BarPlacement,
-  measureStep,
-  effectiveStep,
-} from "./bars";
+import { showOnly, type AxisSpans, type ChartView } from "./view";
+import { type BarPlacement } from "./bars";
 import type {
-  ValueFunction,
-  AreaSeriesConfig,
   AxisConfig,
   LimitConfig,
-  MatrixColoring,
-  MatrixSeriesConfig,
   StateEntry,
   StateSeriesConfig,
   AxisOrientation,
-  BarSeriesConfig,
-  BoxChannels,
-  BoxSeriesConfig,
   ChartPerf,
   HoverState,
   LegendConfig,
-  LineSeriesConfig,
-  MaterializedSeries,
   Padding,
-  Rect,
-  ScatterSeriesConfig,
   SeriesConfig,
   TooltipConfig,
   TooltipHit,
   TooltipPoint,
 } from "./types";
+import {
+  type SeriesEntry,
+  type AxisEntry,
+  type Categories,
+  type LimitEntry,
+  type LegendItem,
+  type LimitLabel,
+  type LayoutSnapshot,
+  type DataTableGroup,
+  type TooltipRow,
+  type LimitText,
+  type StackTotal,
+  type HoverSnapshot,
+  EMPTY_LAYOUT_SNAPSHOT,
+  EMPTY_HOVER_SNAPSHOT,
+  type SyncedX,
+} from "./sceneModel";
+import { forget, fnEqual, takesPalette } from "./sceneConfig";
+import { dataTableGroups } from "./sceneTable";
+import { walkable, emphasised, focus, click, blur, key, keyed } from "./sceneKeys";
+import {
+  applyView,
+  toggleNames,
+  showOnlyNames,
+  hideSome,
+  seriesNames,
+  setHidden,
+  viewMoved,
+  viewToReport,
+  isHidden,
+  hasZoom,
+  zoomAt,
+  panBy,
+  wheel,
+  pointerDown,
+  drag,
+  pointerUp,
+  resetZoom,
+} from "./sceneView";
+import { paletteSlot, nameFor, legendItems, limitItems, limitLabels } from "./sceneColors";
+import { drawItems, placements, lanePx } from "./sceneDraw";
+import { pointerMove, showAt, pointerLeave, clearActive } from "./sceneHit";
+import { boxParts, positionTooltip } from "./sceneTooltip";
+import { validate } from "./sceneChecks";
+import { limitAt, mapFor, gapFor, findAxis, axisExtentOf } from "./sceneLayout";
+import {
+  bind,
+  bindTooltip,
+  bindA11y,
+  setWording,
+  unbind,
+  rebindDprWatch,
+  requestResize,
+  markSeriesDirty,
+  markOverlayDirty,
+  markLayoutDirty,
+} from "./sceneBinding";
+import { pushLayoutSnapshot, pushHoverSnapshot } from "./sceneSnapshots";
+import { registerSeries, updateSeries, registerAxis, updateAxis, registerLimit, updateLimit } from "./sceneRegistry";
 
-interface SeriesEntry {
-  order: number;
-  config: SeriesConfig;
-  /** The place in the palette, assigned on the first registration of the name.
-      Read only for named series; a nameless one has no identity a place could
-      hang on. */
-  slot: number;
-  /** The palette place a nameless series last received - in order to notice that
-      it has changed. */
-  lastSlot: number | null;
-  materialized: MaterializedSeries | null;
-  /** Which of the caller's rows each point came from, where the series is
-      not held row by row: a category axis holds it by place (ADR-0052). */
-  rows: Uint32Array | null;
-  extent: Extent | null;
-  /** Bars only: the smallest x distance, computed once per materialisation. It
-      does not belong in the materialised series - the other series kinds do not
-      need it (ADR-0002). For the matrix the cell width, for a state band the
-      median distance its last segment runs past its last point, for the same
-      reason in the same place. */
-  step: number | null;
-  /** Matrix only: the second cell edge. */
-  cellHeight: number | null;
-  /** Matrix only: the palette index per cell, once per materialisation and
-      colouring - not per redraw, which a legend hover causes as well. */
-  buckets: Int32Array | null;
-  /** Stacked only: the series' own values, as its accessor gave them. Its
-      materialised y holds its top and y0 the stack below (charts-stacking K2);
-      these are what the stack is summed from again when a member changes. */
-  own: Float64Array | null;
-  /** Stacked only: what each point shows as its value - its own, or its share
-      in a normalised stack - and the stack's total there (K4). */
-  stacked: { value: Float64Array; total: Float64Array; normalize: boolean } | null;
-}
 
-/** A series' hit, before the hits are grouped into one tooltip. */
-interface Candidate {
-  entry: SeriesEntry;
-  index: number;
-  color: string;
-  name: string;
-  px: number;
-  py: number;
-  xValue: number;
-  yValue: number;
-  /** Does this hit get a hover marker? Not on a band or a cell: there the
-      mark is the area itself, and a point on it points at nothing. */
-  marked: boolean;
-  /** Does this mark cover an area instead of sitting on a point? A band and a
-      cell lie under the pointer where they cover it - their px is the
-      beginning of the section and not the place being pointed at. */
-  areal: boolean;
-  /** A stacked segment reaching over the pointer's y: under "nearest" it wins
-      over a nearer top, which may be the segment above's. */
-  covers: boolean;
-  level?: number;
-  segment?: { from: number; to: number; label: string };
-  box?: TooltipPoint["box"];
-  /** Where its marker stands, where that is not px: a grouped box's centre
-      (B11). px stays the x value's, so that hits at one x group together. */
-  markX?: number;
-}
 
-interface AxisEntry {
-  order: number;
-  config: AxisConfig;
-}
 
-/** The categories of an axis (ADR-0052): the library keeps the map from
-    category to place, and writes the ticks and their labels a caller once
-    wrote by hand. */
-interface Categories {
-  names: readonly string[];
-  place: ReadonlyMap<string, number>;
-  /** Every place, as the axis' named ticks. */
-  ticks: readonly number[];
-  /** A place's category; a value between two places reads as the nearer. */
-  format: (v: number) => string;
-}
 
-function categoriesFrom(names: readonly string[], topFirst: boolean): Categories {
-  const last = names.length - 1;
-  // Along y the first category stands at the top, as the first row of a list
-  // does: it takes the highest place. The same step turns a place back.
-  const turn = (i: number) => (topFirst ? last - i : i);
-  return {
-    names,
-    place: new Map(names.map((name, i) => [name, turn(i)])),
-    ticks: names.map((_, i) => i),
-    format: (v) => names[turn(Math.min(Math.max(Math.round(v), 0), last))] ?? "",
-  };
-}
 
-/** How much of its category's step a named lane takes: what a bar takes of
-    its own by default. */
-const LANE_WIDTH = 0.8;
 
-const laneOf = (config: SeriesConfig): string | undefined => (config.kind === "state" ? config.lane : undefined);
 
-/** What is written for a place: its category, or the caller's label for it. */
-function labelled(categories: Categories, label: AxisConfig["categoryLabel"]): (v: number) => string {
-  if (label === undefined) return categories.format;
-  return (v) => (categories.names.length === 0 ? "" : label(categories.format(v)));
-}
 
-/** A date with a time, as an API writes an instant. A month or a day alone
-    is as likely a category. */
-const ISO_WITH_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
-/** Takes back everything materialisation gave a series. */
-function forget(entry: SeriesEntry): void {
-  entry.materialized = null;
-  entry.rows = null;
-  entry.extent = null;
-  entry.step = null;
-  entry.cellHeight = null;
-  entry.buckets = null;
-}
 
-interface LimitEntry {
-  order: number;
-  config: LimitConfig;
-}
 
-export interface LegendItem {
-  /** Unique within the legend. A state series yields several entries, so the
-      registration number alone is not enough as a key. */
-  id: string;
-  name: string;
-  /** Its series is hidden - for a state, every band that shows it. */
-  hidden: boolean;
-  /** The series names a click toggles - for a state, every band that shows
-      it; none for a series without a name, which cannot be hidden. */
-  names: string[];
-  /** A CSS background for the chip: a colour, or a matrix' steps side by
-      side. */
-  color: string;
-  /** The series highlighted on hover - several where state bands share a
-      state. */
-  seriesIds: number[];
-  /** Under encoding by marks (charts-alternatives C3), what the chip shows
-      besides the colour; null where the colour stands alone. */
-  mark: LegendMark | null;
-}
 
-/** A legend chip's marks: a line with its dash and marker (a scatter: the
-    marker alone), or swatches with their hatch - one for a bar or a state, one
-    per step for a matrix. An area has both, its dash over one swatch with its
-    fill's `opacity`, hatched in its own colour as the plot does it. `ground`
-    is the colour a hatch is drawn in across any other swatch. */
-export interface LegendMark {
-  dash: readonly number[] | null;
-  marker: MarkerShape | null;
-  swatches: readonly { color: string; hatch: Hatch; opacity?: number }[] | null;
-  ground: string;
-}
 
-/** A labelled limit, ready for the axis band. */
-export interface LimitLabel {
-  id: number;
-  axisKey: string;
-  px: number;
-  /** An x limit's label: its left edge in container coordinates, kept inside
-      the container as a tick label is. */
-  labelLeft: number;
-  /** An x limit's label: its width with its padding; a tick label it reaches
-      over would stand half covered and is left out. */
-  width: number;
-  /** The line a y limit's label takes; a tick label closer than that would
-      stand half covered and is left out. */
-  height: number;
-  /** A y label inside the plot, at its far edge and on its value as in the
-      band - where the band had no room for it (`AxisLayout.limitsInside`). */
-  inside: boolean;
-  label: string;
-  severity: string;
-  role: string;
-  /** The limit's own colour, which its line takes too. The label's text
-      stays in the axis's text colour and a short stroke before it takes this
-      one; without it the stylesheet colours the text by severity and role. */
-  color?: string;
-}
 
-export interface LayoutSnapshot {
-  version: number;
-  layout: LayoutResult;
-  legend: LegendConfig | null;
-  series: readonly LegendItem[];
-  limits: readonly LimitLabel[];
-  /** No visible series has a point to show. */
-  empty: boolean;
-  /** The rows are on their way, as of this layout: it ends with the frame
-      that lays out the answer, not before (chart-loading). */
-  loading: boolean;
-  /** While the chart is loading with nothing to show, the kind of its first
-      series in drawing order - the shape its silhouette takes -, "none"
-      without a series; null otherwise (chart-loading 03). */
-  silhouette: SilhouetteKind | null;
-  /** The registered data table - the id its panel carries, and whether it is
-      open -, or null without one. The legend shows its key. */
-  dataTable: { id: string; open: boolean } | null;
-}
 
-/** One table of the data table: the series of one x axis, or one matrix. Every
-    cell is text already, in the format the tooltip writes. */
-export interface DataTableGroup {
-  key: string;
-  caption: string;
-  columns: readonly string[];
-  /** The first cell of each row is its x - the row's heading. */
-  rows: readonly (readonly string[])[];
-}
 
-/** One row of the built-in tooltip, written out once per hit. */
-export interface TooltipRow {
-  /** The value in the format of the point's y axis; a state's name. */
-  value: string;
-  /** The point's x value in the format of its own x axis - empty where that
-      is the x axis of the header. */
-  x: string;
-  /** Under forced colours the chip's background is forced away, so the chip
-      draws the legend's marks instead (charts-alternatives 04); null draws
-      the point's colour. */
-  chip: { color: string; mark: LegendMark } | null;
-  /** A box's numbers top to bottom as drawn, each named (box-plot B9); null
-      for every other kind, whose value stands alone. */
-  box: readonly { label: string; value: string }[] | null;
-}
 
-/** A labelled limit as the tooltip, the readout and the summary write it. */
-export interface LimitText {
-  name: string;
-  value: string;
-}
 
-/** A stack's total in the built-in tooltip (charts-stacking K4). */
-export interface StackTotal {
-  /** The index of the row it follows - its stack's last member in the hit. */
-  after: number;
-  name: string;
-  value: string;
-}
 
-export interface HoverSnapshot {
-  version: number;
-  hover: HoverState | null;
-  tooltip: TooltipConfig | null;
-  /** The x value in the format of the hit x axis (the built-in tooltip uses
-      it). */
-  xLabel: string;
-  /** Parallel to the hit's points. */
-  rows: readonly TooltipRow[];
-  /** One per stack in the hit. */
-  totals: readonly StackTotal[];
-  /** The labelled limits of the hit's y axis; empty unless `<Tooltip limits />`. */
-  limits: readonly LimitText[];
-}
 
-const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
-  version: 0,
-  layout: EMPTY_LAYOUT,
-  legend: null,
-  series: [],
-  limits: [],
-  // Unknown before the first frame: saying "No data" there would flash.
-  empty: false,
-  loading: false,
-  silhouette: null,
-  dataTable: null,
-};
 
-const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
-  version: 0,
-  hover: null,
-  tooltip: null,
-  xLabel: "",
-  rows: [],
-  totals: [],
-  limits: [],
-};
 
-/** Tolerance within which hits of different series are grouped. */
-const GROUP_TOLERANCE = 4;
 
-/** The stroke before a limit's label in a colour of its own, and its gap to
-    the text (`.uc-limit-mark` in charts.css). */
-const LIMIT_MARK = 10 + 4;
 
-/** Under "nearest", a point this close to the pointer wins over a band or a
-    cell under it: the area covers the pointer everywhere, the point is the
-    precise answer. */
-const SNAP_DISTANCE = 12;
 
-let nextRegistration = 0;
+export { fnEqual } from "./sceneConfig";
+export type {
+  DataTableGroup,
+  HoverSnapshot,
+  LayoutSnapshot,
+  LegendItem,
+  LegendMark,
+  LimitLabel,
+  LimitText,
+  StackTotal,
+  TooltipRow,
+} from "./sceneModel";
 
 /** Charts that share a `syncId`: the pointer's x position goes to all of
     them (charts-long-series 04). */
 const syncGroups = new Map<string, Set<ChartScene>>();
 
-/** A shared x position, in the units of the x axis it was read on. */
-interface SyncedX {
-  axisId: string;
-  value: number;
-}
-
-export function fnEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (typeof a !== "function" || typeof b !== "function") return false;
-  // A field's reader is one per name: identity is the name (value.ts).
-  if (isFieldReader(a) || isFieldReader(b)) return false;
-  const source = String(a);
-  // Every native and every bound function reads "[native code]" - a bound
-  // `Intl.NumberFormat#format` among them. Their text says nothing; identity
-  // does.
-  if (source.includes("[native code]")) return false;
-  return source === String(b);
-}
-
-function sameNames(a: readonly string[], b: readonly string[]): boolean {
-  return a.length === b.length && a.every((name, i) => name === b[i]);
-}
-
-/** A list of categories by its names: an inline array is new on every render. */
-function namesEqual(a: readonly string[] | undefined, b: readonly string[] | undefined): boolean {
-  if (a === b) return true;
-  return a !== undefined && b !== undefined && sameNames(a, b);
-}
-
-/** A calendar by its intervals: an inline array is new on every render, and
-    each new one would map every point again. */
-function calendarEqual(
-  a: AxisConfig["calendar"],
-  b: AxisConfig["calendar"],
-): boolean {
-  if (a === b) return true;
-  if (a === undefined || b === undefined || a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i]?.from !== b[i]?.from || a[i]?.to !== b[i]?.to) return false;
-  }
-  return true;
-}
-
-/** A state band and a matrix colour themselves - by state, by cell - and take
-    no place in the palette: otherwise the line after them would come out in a
-    later colour than the first. */
-function takesPalette(config: SeriesConfig): boolean {
-  return config.kind !== "state" && config.kind !== "matrix";
-}
-
-/** Does a neighbour of the hit lie less than a minute from it? Then the header
-    of a time axis carries the seconds - readings a second apart would
-    otherwise share one header. A property of the data where the pointer is,
-    not of the tick step, which never goes below a minute. */
-function subMinute(hit: Candidate): boolean {
-  const mat = hit.entry.materialized;
-  if (mat === null) return false;
-  const at = mat.x[hit.index] as number;
-  const near = (d: number) => d > 0 && d < MINUTE;
-  return (
-    (hit.index > 0 && near(at - (mat.x[hit.index - 1] as number))) ||
-    (hit.index + 1 < mat.length && near((mat.x[hit.index + 1] as number) - at))
-  );
-}
-
-function listEqual(a: readonly number[] | undefined, b: readonly number[] | undefined): boolean {
-  if (a === b) return true;
-  if (a === undefined || b === undefined) return false;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-  return true;
-}
-
-/** Everything materialisation reads: the y accessor, the data reference, the
-    baseline and the series kind - the kind, because it decides about the
-    baseline and the step. If any of that changes, the channels are stale and have to come
-    into being anew; a field comparison alone is not enough here. */
-function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
-  return (
-    previous.kind === next.kind &&
-    stackOf(previous) === stackOf(next) &&
-    normalizes(previous) === normalizes(next) &&
-    fnEqual(previous.accessor, next.accessor) &&
-    previous.data === next.data &&
-    fnEqual(baselineOf(previous), baselineOf(next)) &&
-    fnEqual(valueChannelOf(previous), valueChannelOf(next)) &&
-    boxChannelsEqual(boxChannelsOf(previous), boxChannelsOf(next))
-  );
-}
-
-/** A box's further accessors (ADR-0011); undefined for every other kind. */
-function boxChannelsOf(config: SeriesConfig): ExtraChannels<unknown>["box"] {
-  if (config.kind !== "box") return undefined;
-  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, count } = config;
-  // A notch takes both bounds or neither: half of one is not drawn wrong but
-  // not drawn, and validate() says so.
-  const notch = config.notchLower !== undefined && config.notchUpper !== undefined;
-  return {
-    lowerQuartile,
-    upperQuartile,
-    lowerWhisker,
-    upperWhisker,
-    outliers,
-    mean,
-    count,
-    notchLower: notch ? config.notchLower : undefined,
-    notchUpper: notch ? config.notchUpper : undefined,
-  };
-}
-
-function boxChannelsEqual(a: ExtraChannels<unknown>["box"], b: ExtraChannels<unknown>["box"]): boolean {
-  if (a === undefined || b === undefined) return a === b;
-  return [...BOX_KEYS, ...BOX_EXTRA_KEYS, "outliers" as const].every((key) => fnEqual(a[key], b[key]));
-}
-
-/** A box's numbers at one point. */
-function boxAt(box: BoxChannels, i: number): NonNullable<TooltipPoint["box"]> {
-  const out = {} as NonNullable<TooltipPoint["box"]>;
-  for (const key of BOX_KEYS) out[key] = box[key][i] as number;
-  for (const key of BOX_EXTRA_KEYS) {
-    const channel = box[key];
-    if (channel !== null) out[key] = channel[i] as number;
-  }
-  const { outliers, outlierOffsets } = box;
-  if (outliers !== null && outlierOffsets !== null) {
-    out.outliers = [...outliers.subarray(outlierOffsets[i], outlierOffsets[i + 1])];
-  }
-  return out;
-}
-
-/** A bar's or a box's width fraction - the two share one group (ADR-0002);
-    0 for every other kind. */
-function widthOf(config: SeriesConfig): number {
-  return config.kind === "bar" ? config.barWidth : config.kind === "box" ? config.boxWidth : 0;
-}
-
-/** The stack a series stands in, as a key: the same id on the same x and y
-    axis (charts-stacking K1); undefined where it stands alone. */
-function stackOf(config: SeriesConfig): string | undefined {
-  if ((config.kind !== "bar" && config.kind !== "area") || config.stack === undefined) return undefined;
-  return `${config.xAxisId}\n${config.yAxisId}\n${config.stack}`;
-}
-
-function normalizes(config: SeriesConfig): boolean {
-  return (config.kind === "bar" || config.kind === "area") && config.stack !== undefined && config.normalize === true;
-}
-
-/** The value channel, where the kind has one (ADR-0011). */
-function valueChannelOf(config: SeriesConfig): ValueFunction<unknown> | undefined {
-  return config.kind === "matrix" ? config.level : undefined;
-}
-
-/** Baseline per series kind; undefined where the kind has none. It enters the
-    extent of the y axis (CONTEXT.md: Baseline). */
-function baselineOf(config: SeriesConfig): Baseline<unknown> | undefined {
-  switch (config.kind) {
-    case "line":
-    case "scatter":
-    case "box":
-      // A box floats where its numbers are; it has no foot at 0.
-      return undefined;
-    case "area":
-      // In a stack the stack below is the foot, not a baseline of its own.
-      return config.stack === undefined ? (config.baseline ?? 0) : 0;
-    case "bar":
-      return 0;
-    case "state":
-    case "matrix":
-      // Neither has a foot: a state is not a height, a cell not a column.
-      return undefined;
-  }
-}
-
-/** Field comparison of the kind-own properties; the base is compared by
-    updateSeries. A new series kind gets an arm here - the compiler demands it. */
-function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
-  if (previous.kind !== next.kind) return false;
-  switch (next.kind) {
-    case "line": {
-      const a = previous as LineSeriesConfig;
-      return (
-        a.strokeWidth === next.strokeWidth &&
-        a.markers === next.markers &&
-        a.step === next.step &&
-        listEqual(a.dash as number[] | undefined, next.dash as number[] | undefined)
-      );
-    }
-    case "area": {
-      const a = previous as AreaSeriesConfig;
-      return (
-        fnEqual(a.baseline, next.baseline) &&
-        a.fillOpacity === next.fillOpacity &&
-        a.strokeWidth === next.strokeWidth &&
-        listEqual(a.dash as number[] | undefined, next.dash as number[] | undefined)
-      );
-    }
-    case "bar": {
-      const a = previous as BarSeriesConfig;
-      return a.barWidth === next.barWidth;
-    }
-    case "box": {
-      const a = previous as BoxSeriesConfig;
-      return a.boxWidth === next.boxWidth;
-    }
-    case "scatter": {
-      const a = previous as ScatterSeriesConfig;
-      return a.radius === next.radius;
-    }
-    case "state": {
-      const a = previous as StateSeriesConfig;
-      return (
-        a.lane === next.lane &&
-        a.laneFrom === next.laneFrom &&
-        a.laneTo === next.laneTo &&
-        statesEqual(a.states, next.states)
-      );
-    }
-    case "matrix": {
-      const a = previous as MatrixSeriesConfig;
-      return coloringEqual(a.coloring, next.coloring);
-    }
-  }
-}
-
-function statesEqual(
-  a: readonly { label: string; color: string }[],
-  b: readonly { label: string; color: string }[],
-): boolean {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i]?.label !== b[i]?.label || a[i]?.color !== b[i]?.color) return false;
-  }
-  return true;
-}
-
-function coloringEqual(a: MatrixColoring, b: MatrixColoring): boolean {
-  if (a === b) return true;
-  if (a.kind !== b.kind) return false;
-  if (a.kind === "assessment" && b.kind === "assessment") return a.limits === b.limits;
-  if (a.kind === "gradient" && b.kind === "gradient") {
-    return (
-      listEqual(a.stops as unknown as number[], b.stops as unknown as number[]) &&
-      listEqual(a.range as number[] | undefined, b.range as number[] | undefined)
-    );
-  }
-  return false;
-}
-
-/* ---------------- Colouring of the matrix ----------------
-
-   The library interpolates no colours. A gradient is exactly the list of its
-   stops: as many steps as the caller names colours. Interpolating between two CSS
-   colours would mean bringing along a colour parser - for arbitrary CSS colour
-   values, in a package that has none and is to get none. */
-
-/** Palette of a colouring. For the assessment three colours: "unknown" is
-    none - a missing value becomes a hole, as everywhere else in this library, and
-    a hole carries no colour. */
-function matrixColors(coloring: MatrixColoring, theme: ResolvedTheme): readonly string[] {
-  if (coloring.kind === "assessment") {
-    return [theme.colorOk, theme.colorWarning, theme.colorAlarm];
-  }
-  return coloring.stops;
-}
-
-/** A legend chip for a colouring: its colours side by side, as hard stops. The
-    matrix draws steps, and its chip shows the same steps - a palette colour
-    there would explain a colour the matrix never draws. */
-function chipOf(colors: readonly string[]): string {
-  const share = 100 / Math.max(1, colors.length);
-  const stops = colors.map((c, k) => `${c} ${k * share}% ${(k + 1) * share}%`);
-  return `linear-gradient(to right, ${stops.join(", ")})`;
-}
-
-/** The value range a gradient spreads over: its own, or that of the data. */
-function gradientRange(
-  w: Float64Array,
-  n: number,
-  range: readonly [number, number] | undefined,
-): readonly [number, number] {
-  let min = range?.[0];
-  let max = range?.[1];
-  if (min === undefined || max === undefined) {
-    min = Number.POSITIVE_INFINITY;
-    max = Number.NEGATIVE_INFINITY;
-    for (let i = 0; i < n; i++) {
-      const v = w[i] as number;
-      if (!Number.isFinite(v)) continue;
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-  }
-  return [min, max];
-}
-
-/** Bucket of one value: the index into the palette, -1 for a hole. `min` and
-    `max` are the gradient's range and mean nothing to an assessment. */
-function bucketOf(
-  v: number,
-  coloring: MatrixColoring,
-  count: number,
-  min: number,
-  max: number,
-): number {
-  if (coloring.kind === "assessment") {
-    const b = assess(v, coloring.limits);
-    // Four outcomes, four answers. Folding "unknown" onto the same bucket as
-    // "ok" would be exactly the defect the limit model is written against: a
-    // value nobody has would look like a good one.
-    return b.verdict === "alarm"
-      ? 2
-      : b.verdict === "warning"
-        ? 1
-        : b.verdict === "ok"
-          ? 0
-          : -1; // unknown: a hole, and a hole carries no colour
-  }
-  if (!Number.isFinite(v)) return -1;
-  const span = max - min;
-  // Degenerate span: everything into the middle, instead of dividing by zero.
-  const share = span > 0 ? (v - min) / span : 0.5;
-  const k = Math.floor(share * count);
-  return k < 0 ? 0 : k >= count ? count - 1 : k;
-}
-
-/** Bucket per cell: the index into the palette, -1 for a hole. Once per frame, so
-    that the drawing loop calls no function per cell. */
-function matrixBuckets(
-  mat: MaterializedSeries,
-  coloring: MatrixColoring,
-  count: number,
-): Int32Array {
-  const n = mat.length;
-  const buckets = new Int32Array(n);
-  const w = mat.w;
-  if (w === null || count === 0) {
-    buckets.fill(-1);
-    return buckets;
-  }
-  const [min, max] =
-    coloring.kind === "gradient" ? gradientRange(w, n, coloring.range) : [0, 0];
-  for (let i = 0; i < n; i++) buckets[i] = bucketOf(w[i] as number, coloring, count, min, max);
-  return buckets;
-}
-
-function domainEqual(
-  a: AxisConfig["domain"],
-  b: AxisConfig["domain"],
-): boolean {
-  if (a === b) return true;
-  if (Array.isArray(a) && Array.isArray(b)) return a[0] === b[0] && a[1] === b[1];
-  return false;
-}
-
-/** The readout waits for the keys to rest this long. */
-const READOUT_REST = 150;
-/** The summary waits for layouts - a zoom - to rest this long. */
-const SUMMARY_REST = 100;
-
-/** The keys that walk a course, a band, bars or points. */
-const MOVES: Readonly<Record<string, Move>> = {
-  ArrowRight: "next",
-  ArrowLeft: "previous",
-  Home: "first",
-  End: "last",
-  PageDown: "pageNext",
-  PageUp: "pagePrevious",
-};
-
-/** The keys that walk a matrix. */
-const CELL_STEPS: Readonly<Record<string, "left" | "right" | "up" | "down">> = {
-  ArrowLeft: "left",
-  ArrowRight: "right",
-  ArrowUp: "up",
-  ArrowDown: "down",
-};
-
-/** One zoom key widens the domain by this much; its opposite narrows it back. */
-const KEY_ZOOM = 1.25;
-
-/** The smallest step of a materialised series, measured once per
-    materialisation - a gesture asks for it on every wheel step. */
-const STEPS = new WeakMap<MaterializedSeries, number>();
-
 export class ChartScene {
-  /* ---------- Registration ---------- */
-  private series = new Map<number, SeriesEntry>();
-  private axes = new Map<number, AxisEntry>();
-  private legend: LegendConfig | null = null;
-  private tooltip: TooltipConfig | null = null;
-  private dataTable: { id: string; open: boolean } | null = null;
+  /* ---------- Registration ----------
+      @internal */
+  series = new Map<number, SeriesEntry>();
+  /** @internal */
+  axes = new Map<number, AxisEntry>();
+  /** @internal */
+  legend: LegendConfig | null = null;
+  /** @internal */
+  tooltip: TooltipConfig | null = null;
+  /** @internal */
+  dataTable: { id: string; open: boolean } | null = null;
   /** `Chart encoding` (charts-alternatives C3). */
   private encoding: "color" | "marks" = "color";
-  private limits = new Map<number, LimitEntry>();
+  /** @internal */
+  limits = new Map<number, LimitEntry>();
 
-  /* ---------- Data and layout inputs ---------- */
-  private data: readonly unknown[] = [];
+  /* ---------- Data and layout inputs ----------
+      @internal */
+  data: readonly unknown[] = [];
   /** The categories of each axis that has them, by orientation and axis id
-      (`x:x`); an axis absent is numeric (ADR-0052). */
-  private readonly categories = new Map<string, Categories>();
+      (`x:x`); an axis absent is numeric (ADR-0052).
+      @internal */
+  readonly categories = new Map<string, Categories>();
   /** The x axes whose rows bring a `Date`: they stand in time without `time`
-      being said (ADR-0052). */
-  private readonly dated = new Set<string>();
-  private padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
+      being said (ADR-0052).
+      @internal */
+  readonly dated = new Set<string>();
+  /** @internal */
+  padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
 
-  /* ---------- DOM binding ---------- */
-  private container: HTMLElement | null = null;
-  private seriesCanvas: HTMLCanvasElement | null = null;
-  private overlayCanvas: HTMLCanvasElement | null = null;
-  private seriesCtx: CanvasRenderingContext2D | null = null;
-  private overlayCtx: CanvasRenderingContext2D | null = null;
-  private tooltipEl: HTMLElement | null = null;
-  /** The readout (polite live region) and the summary the plot is described by. */
-  private readoutEl: HTMLElement | null = null;
-  private summaryEl: HTMLElement | null = null;
-  private readoutTimer: ReturnType<typeof setTimeout> | null = null;
-  private summaryTimer: ReturnType<typeof setTimeout> | null = null;
-  private wording: ChartsWording = DEFAULT_CHARTS_WORDING;
-  private measurer: TextMeasurer | null = null;
+  /* ---------- DOM binding ----------
+      @internal */
+  container: HTMLElement | null = null;
+  /** @internal */
+  seriesCanvas: HTMLCanvasElement | null = null;
+  /** @internal */
+  overlayCanvas: HTMLCanvasElement | null = null;
+  /** @internal */
+  seriesCtx: CanvasRenderingContext2D | null = null;
+  /** @internal */
+  overlayCtx: CanvasRenderingContext2D | null = null;
+  /** @internal */
+  tooltipEl: HTMLElement | null = null;
+  /** The readout (polite live region) and the summary the plot is described by.
+      @internal */
+  readoutEl: HTMLElement | null = null;
+  /** @internal */
+  summaryEl: HTMLElement | null = null;
+  /** @internal */
+  readoutTimer: ReturnType<typeof setTimeout> | null = null;
+  /** @internal */
+  summaryTimer: ReturnType<typeof setTimeout> | null = null;
+  /** @internal */
+  wording: ChartsWording = DEFAULT_CHARTS_WORDING;
+  /** @internal */
+  measurer: TextMeasurer | null = null;
 
-  /* ---------- Size and DPR ---------- */
-  private cssWidth = 0;
-  private cssHeight = 0;
-  private pendingWidth: number | null = null;
-  private pendingHeight: number | null = null;
-  private dpr = 1;
-  private dprMedia: MediaQueryList | null = null;
-  private readonly onDprChange = (): void => {
-    this.rebindDprWatch();
+  /* ---------- Size and DPR ----------
+      @internal */
+  cssWidth = 0;
+  /** @internal */
+  cssHeight = 0;
+  /** @internal */
+  pendingWidth: number | null = null;
+  /** @internal */
+  pendingHeight: number | null = null;
+  /** @internal */
+  dpr = 1;
+  /** @internal */
+  dprMedia: MediaQueryList | null = null;
+  /** @internal */
+  readonly onDprChange = (): void => {
+    rebindDprWatch(this);
     this.pendingWidth = this.cssWidth;
     this.pendingHeight = this.cssHeight;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   };
 
-  /* ---------- Scheduling ---------- */
-  private seriesDirty = false;
-  private overlayDirty = false;
-  private layoutDirty = true;
-  private materialsDirty = false;
-  private frameHandle: number | null = null;
+  /* ---------- Scheduling ----------
+      @internal */
+  seriesDirty = false;
+  /** @internal */
+  overlayDirty = false;
+  /** @internal */
+  layoutDirty = true;
+  /** @internal */
+  materialsDirty = false;
+  /** @internal */
+  frameHandle: number | null = null;
 
-  /* ---------- Theme ---------- */
-  private theme: ResolvedTheme | null = null;
-  private unsubscribeTheme: (() => void) | null = null;
+  /* ---------- Theme ----------
+      @internal */
+  theme: ResolvedTheme | null = null;
+  /** @internal */
+  unsubscribeTheme: (() => void) | null = null;
   /** A caller's colours - `color`, a state's, a gradient stop - resolved
       through the theme's probe, once per colour and theme: a canvas ignores a
-      `var(--…)` or a `light-dark(…)` and keeps the previous fillStyle. */
-  private readonly painted = new Map<string, string>();
+      `var(--…)` or a `light-dark(…)` and keeps the previous fillStyle.
+      @internal */
+  readonly painted = new Map<string, string>();
 
-  /* ---------- Layout and interaction ---------- */
-  private layout: LayoutResult = EMPTY_LAYOUT;
-  private readonly hysteresis = new Map<string, number>();
-  private hover: HoverState | null = null;
-  private hoverKey = "";
-  private hoverXLabel = "";
-  private hoverRows: readonly TooltipRow[] = [];
-  private hoverTotals: readonly StackTotal[] = [];
-  /** The labelled limits of the hit's y axis, where the tooltip asks for them. */
-  private hoverLimits: readonly LimitText[] = [];
-  /** The orders of the series in the current hit, beside its rows. */
-  private hoverOrders: readonly number[] = [];
-  private highlight: readonly number[] | null = null;
+  /* ---------- Layout and interaction ----------
+      @internal */
+  layout: LayoutResult = EMPTY_LAYOUT;
+  /** @internal */
+  readonly hysteresis = new Map<string, number>();
+  /** @internal */
+  hover: HoverState | null = null;
+  /** @internal */
+  hoverKey = "";
+  /** @internal */
+  hoverXLabel = "";
+  /** @internal */
+  hoverRows: readonly TooltipRow[] = [];
+  /** @internal */
+  hoverTotals: readonly StackTotal[] = [];
+  /** The labelled limits of the hit's y axis, where the tooltip asks for them.
+      @internal */
+  hoverLimits: readonly LimitText[] = [];
+  /** The orders of the series in the current hit, beside its rows.
+      @internal */
+  hoverOrders: readonly number[] = [];
+  /** @internal */
+  highlight: readonly number[] | null = null;
   /** Who set the Active point (ADR-0030): the pointer and the keyboard move
-      the same one, the last input winning. */
-  private activeBy: "pointer" | "keyboard" | null = null;
+      the same one, the last input winning.
+      @internal */
+  activeBy: "pointer" | "keyboard" | null = null;
   /** Where the keyboard stands, in x of the emphasised series' axis; a
-      matrix' cell. */
-  private keyX: number | null = null;
-  private keyCell: Cell | null = null;
-  /** The series ↑/↓ chose (its order), read first; null: the first walked. */
-  private emphasis: number | null = null;
-  /** The highlight is the keyboard's, and goes with its Active point. */
-  private keyHighlight = false;
+      matrix' cell.
+      @internal */
+  keyX: number | null = null;
+  /** @internal */
+  keyCell: Cell | null = null;
+  /** The series ↑/↓ chose (its order), read first; null: the first walked.
+      @internal */
+  emphasis: number | null = null;
+  /** The highlight is the keyboard's, and goes with its Active point.
+      @internal */
+  keyHighlight = false;
 
-  /* ---------- Snapshots for the HTML layer ---------- */
-  private layoutSnapshot: LayoutSnapshot = EMPTY_LAYOUT_SNAPSHOT;
-  private hoverSnapshot: HoverSnapshot = EMPTY_HOVER_SNAPSHOT;
-  private readonly layoutSubscribers = new Set<() => void>();
-  private readonly hoverSubscribers = new Set<() => void>();
+  /* ---------- Snapshots for the HTML layer ----------
+      @internal */
+  layoutSnapshot: LayoutSnapshot = EMPTY_LAYOUT_SNAPSHOT;
+  /** @internal */
+  hoverSnapshot: HoverSnapshot = EMPTY_HOVER_SNAPSHOT;
+  /** @internal */
+  readonly layoutSubscribers = new Set<() => void>();
+  /** @internal */
+  readonly hoverSubscribers = new Set<() => void>();
 
-  /* ---------- Instrumentation ---------- */
-  private perf: ChartPerf = { materializeMs: 0, seriesDrawMs: 0, points: 0 };
+  /* ---------- Instrumentation ----------
+      @internal */
+  perf: ChartPerf = { materializeMs: 0, seriesDrawMs: 0, points: 0 };
   /* The palette follows the name. The table only grows: a name
      that goes away keeps its place, so that it finds it again on its return and
-     no other name gets it in the meantime. */
-  private readonly slotsByName = new Map<string, number>();
-  private nextSlot = 0;
+     no other name gets it in the meantime.
+      @internal */
+  readonly slotsByName = new Map<string, number>();
+  /** @internal */
+  nextSlot = 0;
 
-  private onPerf: ((perf: ChartPerf) => void) | null = null;
+  /** @internal */
+  onPerf: ((perf: ChartPerf) => void) | null = null;
 
   setOnPerf(callback: ((perf: ChartPerf) => void) | null): void {
     this.onPerf = callback;
@@ -913,143 +322,33 @@ export class ChartScene {
 
   /* ================= Registration model (R-2.1, R-2.2) ================= */
 
-  /** The palette place for a new registration. On the first mount, in JSX order,
-      it is the same number as the index in the registration - every registration
-      counts on, named or not. */
-  private slotFor(name: string | undefined): number {
-    if (name === undefined) return this.nextSlot++;
-    const known = this.slotsByName.get(name);
-    if (known !== undefined && !this.slotTaken(known)) return known;
-    const next = this.nextSlot++;
-    if (known === undefined) this.slotsByName.set(name, next);
-    return next;
-  }
-
-  /** Is a named series currently standing on this palette place? A taken place is
-      not assigned a second time: two series of the same name standing at once
-      share no colour, and a name that a rename has left behind does not get the
-      colour of the renamed series. */
-  private slotTaken(slot: number, except?: SeriesEntry): boolean {
-    for (const e of this.series.values()) {
-      if (e !== except && e.config.name !== undefined && e.slot === slot) return true;
-    }
-    return false;
-  }
-
   registerSeries(config: SeriesConfig): number {
-    const id = nextRegistration++;
-    this.series.set(id, {
-      order: id,
-      config,
-      slot: takesPalette(config) ? this.slotFor(config.name) : -1,
-      lastSlot: null,
-      materialized: null,
-      rows: null,
-      extent: null,
-      step: null,
-      cellHeight: null,
-      buckets: null,
-      own: null,
-      stacked: null,
-    });
-    this.materialsDirty = true;
-    this.markLayoutDirty();
-    return id;
+    return registerSeries(this, config);
   }
 
   updateSeries(id: number, config: SeriesConfig): void {
-    const entry = this.series.get(id);
-    if (entry === undefined) return;
-    const previous = entry.config;
-    const dataEqual = materialEqual(previous, config);
-    const equal =
-      dataEqual &&
-      previous.xAxisId === config.xAxisId &&
-      previous.yAxisId === config.yAxisId &&
-      previous.name === config.name &&
-      fnEqual(previous.format, config.format) &&
-      previous.color === config.color &&
-      previous.tone === config.tone &&
-      this.isHidden(previous) === this.isHidden(config) &&
-      ownFieldsEqual(previous, config);
-    if (entry.slot < 0 && takesPalette(config)) {
-      entry.slot = this.slotFor(config.name);
-    } else if (previous.name !== config.name && config.name !== undefined && entry.slot >= 0) {
-      // A rename takes its colour with it - unless the new name already has a
-      // free place; then the name wins.
-      const known = this.slotsByName.get(config.name);
-      if (known === undefined) this.slotsByName.set(config.name, entry.slot);
-      else if (!this.slotTaken(known, entry)) entry.slot = known;
-    }
-    entry.config = config;
-    if (equal) return; // no dirty flag without a change of substance
-    // Another lane is another category of the y axis: they are read anew.
-    if (laneOf(previous) !== laneOf(config)) this.materialsDirty = true;
-    entry.buckets = null; // the colouring may have changed
-    // A hidden member leaves its place in the stack: the others sum anew.
-    if (this.isHidden(previous) !== this.isHidden(config) && stackOf(config) !== undefined) this.materialsDirty = true;
-    // On another axis a series lies somewhere else - and its categories and
-    // its lane go with it.
-    if (!dataEqual || previous.xAxisId !== config.xAxisId || previous.yAxisId !== config.yAxisId) {
-      forget(entry);
-      this.materialsDirty = true;
-    }
-    this.markLayoutDirty();
+    updateSeries(this, id, config);
   }
 
   unregisterSeries(id: number): void {
     if (this.series.delete(id)) {
       this.materialsDirty = true;
-      this.markLayoutDirty();
+      markLayoutDirty(this);
     }
   }
 
   registerAxis(config: AxisConfig): number {
-    const id = nextRegistration++;
-    this.axes.set(id, { order: id, config });
-    this.materialsDirty = true; // x materialisation depends on axis accessors
-    this.markLayoutDirty();
-    return id;
+    return registerAxis(this, config);
   }
 
   updateAxis(id: number, config: AxisConfig): void {
-    const entry = this.axes.get(id);
-    if (entry === undefined) return;
-    const previous = entry.config;
-    const accessorEqual =
-      fnEqual(previous.accessor, config.accessor) && calendarEqual(previous.calendar, config.calendar);
-    const equal =
-      accessorEqual &&
-      previous.id === config.id &&
-      previous.orientation === config.orientation &&
-      previous.position === config.position &&
-      previous.label === config.label &&
-      previous.tickCount === config.tickCount &&
-      previous.grid === config.grid &&
-      previous.time === config.time &&
-      previous.alignTicks === config.alignTicks &&
-      listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
-      namesEqual(previous.categories, config.categories) &&
-      fnEqual(previous.categoryLabel, config.categoryLabel) &&
-      domainEqual(previous.domain, config.domain) &&
-      this.zooms(previous) === this.zooms(config) &&
-      fnEqual(previous.tickFormat, config.tickFormat);
-    entry.config = config;
-    if (equal) return;
-    // Another list is other places, and `time` decides whether a string is a
-    // category or an instant: materialisation reads the axis anew.
-    if (!namesEqual(previous.categories, config.categories) || previous.time !== config.time) this.materialsDirty = true;
-    if (!accessorEqual || previous.id !== config.id) {
-      for (const entry of this.series.values()) forget(entry);
-      this.materialsDirty = true;
-    }
-    this.markLayoutDirty();
+    updateAxis(this, id, config);
   }
 
   unregisterAxis(id: number): void {
     if (this.axes.delete(id)) {
       this.materialsDirty = true;
-      this.markLayoutDirty();
+      markLayoutDirty(this);
     }
   }
 
@@ -1058,37 +357,15 @@ export class ChartScene {
      data, no legend entry, no hit. */
 
   registerLimit(config: LimitConfig): number {
-    const id = nextRegistration++;
-    this.limits.set(id, { order: id, config });
-    this.markLayoutDirty();
-    return id;
+    return registerLimit(this, config);
   }
 
   updateLimit(id: number, config: LimitConfig): void {
-    const entry = this.limits.get(id);
-    if (entry === undefined) return;
-    const previous = entry.config;
-    entry.config = config;
-    const equal =
-      previous.kind === config.kind &&
-      previous.axisId === config.axisId &&
-      previous.orientation === config.orientation &&
-      previous.severity === config.severity &&
-      previous.role === config.role &&
-      previous.label === config.label &&
-      previous.color === config.color &&
-      previous.inExtent === config.inExtent &&
-      (previous.kind === "line" && config.kind === "line"
-        ? previous.value === config.value
-        : previous.kind === "band" && config.kind === "band"
-          ? previous.from === config.from && previous.to === config.to
-          : false);
-    if (equal) return;
-    this.markLayoutDirty();
+    updateLimit(this, id, config);
   }
 
   unregisterLimit(id: number): void {
-    if (this.limits.delete(id)) this.markLayoutDirty();
+    if (this.limits.delete(id)) markLayoutDirty(this);
   }
 
   limitsInOrder(): readonly LimitEntry[] {
@@ -1097,23 +374,23 @@ export class ChartScene {
 
   registerLegend(config: LegendConfig): void {
     this.legend = config;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   updateLegend(config: LegendConfig): void {
     if (this.legend !== null && this.legend.placement === config.placement) return;
     this.legend = config;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   unregisterLegend(): void {
     this.legend = null;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   registerTooltip(config: TooltipConfig): void {
     this.tooltip = config;
-    this.pushHoverSnapshot();
+    pushHoverSnapshot(this);
   }
 
   updateTooltip(config: TooltipConfig): void {
@@ -1123,15 +400,15 @@ export class ChartScene {
       return;
     }
     this.tooltip = config;
-    this.pushHoverSnapshot();
+    pushHoverSnapshot(this);
   }
 
   unregisterTooltip(): void {
     this.tooltip = null;
     this.hover = null;
     this.hoverKey = "";
-    this.markOverlayDirty();
-    this.pushHoverSnapshot();
+    markOverlayDirty(this);
+    pushHoverSnapshot(this);
   }
 
   /* The data table (charts-alternatives 01) registers like the legend: one per
@@ -1141,42 +418,45 @@ export class ChartScene {
 
   registerDataTable(id: string): void {
     this.dataTable = { id, open: false };
-    this.pushLayoutSnapshot();
+    pushLayoutSnapshot(this);
   }
 
   unregisterDataTable(): void {
     this.dataTable = null;
-    this.pushLayoutSnapshot();
+    pushLayoutSnapshot(this);
   }
 
   toggleDataTable(): void {
     if (this.dataTable === null) return;
     this.dataTable = { ...this.dataTable, open: !this.dataTable.open };
-    this.pushLayoutSnapshot();
+    pushLayoutSnapshot(this);
   }
 
   setEncoding(encoding: "color" | "marks"): void {
     if (encoding === this.encoding) return;
     this.encoding = encoding;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   /** Is every series drawn with its marks as well as its colour? Under forced
-      colours always: every series is drawn in the one text colour then (C4). */
-  private marked(): boolean {
+      colours always: every series is drawn in the one text colour then (C4).
+      @internal */
+  marked(): boolean {
     return this.encoding === "marks" || this.theme?.forced === true;
   }
 
   /** A series' marks by its palette place - the same place its colour comes
       from; null without encoding by marks, and for the kinds that take no
-      place (a band and a cell are hatched by state and by step instead). */
-  private marksOf(entry: SeriesEntry): SeriesMarks | null {
-    return this.marked() && takesPalette(entry.config) ? marksFor(this.paletteSlot(entry)) : null;
+      place (a band and a cell are hatched by state and by step instead).
+      @internal */
+  marksOf(entry: SeriesEntry): SeriesMarks | null {
+    return this.marked() && takesPalette(entry.config) ? marksFor(paletteSlot(this, entry)) : null;
   }
 
   /** Each state's hatch by its name, across every band of the chart - so the
-      legend and each band agree (charts-alternatives 04). */
-  private stateHatches(): Map<string, Hatch> {
+      legend and each band agree (charts-alternatives 04).
+      @internal */
+  stateHatches(): Map<string, Hatch> {
     const bands: (readonly StateEntry[])[] = [];
     for (const { config } of this.seriesInOrder()) if (config.kind === "state") bands.push(config.states);
     return stateHatches(bands);
@@ -1204,7 +484,7 @@ export class ChartScene {
     this.data = data;
     this.materialsDirty = true;
     for (const entry of this.series.values()) forget(entry);
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   setPadding(padding: Padding): void {
@@ -1218,91 +498,21 @@ export class ChartScene {
       return;
     }
     this.padding = padding;
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
   /* ================= Checks (R-4.12, R-4.13) ================= */
 
   /** Called from the Chart after the child effects; DEV only. */
   validate(): void {
-    if (!DEV) return;
-    const seen = new Set<string>();
-    for (const { config } of this.axesInOrder()) {
-      const key = `${config.orientation}:${config.id}`;
-      const name = config.orientation === "x" ? "XAxis" : "YAxis";
-      invariant(
-        !seen.has(key),
-        `Two <${name}> with the same id "${config.id}". A second ${name} needs an own id (R-4.12).`,
-      );
-      seen.add(key);
-    }
-    const bound = new Set<string>();
-    for (const { config } of this.series.values()) {
-      invariant(
-        seen.has(`x:${config.xAxisId}`),
-        `Series "${config.name ?? "?"}" refers to the unknown x axis "${config.xAxisId}" (R-4.12).`,
-      );
-      invariant(
-        seen.has(`y:${config.yAxisId}`),
-        `Series "${config.name ?? "?"}" refers to the unknown y axis "${config.yAxisId}" (R-4.12).`,
-      );
-      bound.add(`x:${config.xAxisId}`);
-      bound.add(`y:${config.yAxisId}`);
-    }
-    for (const { config } of this.limits.values()) {
-      invariant(
-        seen.has(`${config.orientation}:${this.limitAxisId(config)}`),
-        `A limit refers to the unknown ${config.orientation} axis "${this.limitAxisId(config)}" (R-4.12).`,
-      );
-    }
-    for (const key of seen) {
-      if (!bound.has(key) && this.series.size > 0) {
-        warnOnce(
-          `axis-without-series-${key}`,
-          `Axis "${key}" has no bound series; it is drawn with the domain [0, 1] (R-4.13).`,
-        );
-      }
-    }
-    // A bar group calculates with one width fraction - that of the first member.
-    // Tacitly, that would be an unwritten rule. Boxes stand in the same group.
-    const fractions = new Map<string, number>();
-    for (const { config } of this.seriesInOrder()) {
-      if (config.kind !== "bar" && config.kind !== "box") continue;
-      const first = fractions.get(config.xAxisId);
-      if (first === undefined) {
-        fractions.set(config.xAxisId, widthOf(config));
-      } else if (first !== widthOf(config)) {
-        warnOnce(
-          `bar-width-${config.xAxisId}`,
-          `Bars and boxes on the x axis "${config.xAxisId}" give different barWidth or boxWidth. ` +
-            `A group shares one width fraction; that of the first (${first}) applies (ADR-0002).`,
-        );
-      }
-    }
-    // A notch needs both bounds; one alone is not drawn (box-plot 04).
-    for (const { order, config } of this.series.values()) {
-      if (config.kind !== "box" || (config.notchLower === undefined) === (config.notchUpper === undefined)) continue;
-      const name = config.name ?? "?";
-      warnOnce(
-        `box-notch-${order}`,
-        `BoxPlot "${name}" gives only one of notchLower and notchUpper. A notch needs both bounds; none is drawn.`,
-      );
-    }
-    let gridAxes = 0;
-    for (const axis of this.axesInOrder()) if (axis.config.grid === true) gridAxes++;
-    if (gridAxes > 1) {
-      warnOnce(
-        "multiple-grids",
-        "More than one axis draws grid. Unaligned grids compete visually; " +
-          "`alignTicks` puts a further y axis' ticks on the first one's grid instead (R-4.15).",
-      );
-    }
+    validate(this);
   }
 
   /* ================= Materialisation (R-2.6, R-2.7) ================= */
 
-  /** A limit's axis: the one it names, or the first of its orientation. */
-  private limitAxisId(config: LimitConfig): string {
+  /** A limit's axis: the one it names, or the first of its orientation.
+      @internal */
+  limitAxisId(config: LimitConfig): string {
     if (config.axisId !== undefined) return config.axisId;
     for (const { config: axis } of this.axes.values()) {
       if (axis.orientation === config.orientation) return axis.id;
@@ -1310,1265 +520,139 @@ export class ChartScene {
     return config.orientation;
   }
 
-  private findAxisConfig(orientation: AxisOrientation, id: string): AxisConfig | null {
+  /** @internal */
+  findAxisConfig(orientation: AxisOrientation, id: string): AxisConfig | null {
     for (const { config } of this.axes.values()) {
       if (config.orientation === orientation && config.id === id) return config;
     }
     return null;
   }
 
-  private categoriesAt(orientation: AxisOrientation, id: string): Categories | undefined {
+  /** @internal */
+  categoriesAt(orientation: AxisOrientation, id: string): Categories | undefined {
     return this.categories.get(`${orientation}:${id}`);
-  }
-
-  /** The rows of each series, in the series' order. */
-  private rowsOf(entries: readonly SeriesEntry[]): (readonly unknown[])[] {
-    return entries.map((e) => e.config.data ?? this.data);
-  }
-
-  /** Reads the categories of every axis anew. Where an axis' list changed,
-      every series on it lies somewhere else and is materialised again. */
-  private readCategories(): void {
-    const all = this.seriesInOrder();
-    const live = new Set<string>();
-    for (const { config: axis } of this.axes.values()) {
-      const alongX = axis.orientation === "x";
-      const key = `${axis.orientation}:${axis.id}`;
-      live.add(key);
-      const bound = all.filter((e) => (alongX ? e.config.xAxisId : e.config.yAxisId) === axis.id);
-      // The caller's list is the order and the extent; without one, what the
-      // rows bring along x, and along y what stands on the axis.
-      // An empty list is a list: nothing has a place then.
-      const names = axis.categories ?? (alongX ? this.broughtAlongX(axis, bound) : this.broughtAlongY(bound));
-      if (alongX) this.readDated(axis, bound, names === null);
-      const previous = this.categories.get(key);
-      if (names === null ? previous === undefined : previous !== undefined && sameNames(previous.names, names)) continue;
-      if (names === null) this.categories.delete(key);
-      else this.categories.set(key, categoriesFrom(names, !alongX));
-      for (const entry of bound) forget(entry);
-    }
-    for (const key of [...this.categories.keys()]) if (!live.has(key)) this.categories.delete(key);
-    for (const id of [...this.dated]) if (!live.has(`x:${id}`)) this.dated.delete(id);
-  }
-
-  private broughtAlongX(axis: AxisConfig, bound: readonly SeriesEntry[]): string[] | null {
-    const accessor = axis.accessor;
-    // On an axis that says `time` a string is an instant, never a category.
-    if (accessor === undefined || this.saysTime(axis)) return null;
-    const names = categoriesOf(this.rowsOf(bound), accessor);
-    if (DEV && names !== null && names.every((name) => ISO_WITH_TIME.test(name) && !Number.isNaN(Date.parse(name)))) {
-      warnOnce(
-        `category-instants-${axis.id}`,
-        `The x axis "${axis.id}" reads its rows' strings as categories, and every one is an ISO 8601 instant. ` +
-          "If they are moments, say \`time\` on the axis: a string is an instant only there (ADR-0052).",
-      );
-    }
-    return names;
-  }
-
-  /** Whether an x axis' rows bring a `Date` first: it stands in time then.
-      The series on it are read anew where that changed. */
-  private readDated(axis: AxisConfig, bound: readonly SeriesEntry[], numeric: boolean): void {
-    const accessor = axis.accessor;
-    const dated =
-      numeric &&
-      accessor !== undefined &&
-      !this.saysTime(axis) &&
-      firstKind(this.rowsOf(bound), accessor) === "date";
-    if (dated === this.dated.has(axis.id)) return;
-    if (dated) this.dated.add(axis.id);
-    else this.dated.delete(axis.id);
-    for (const entry of bound) forget(entry);
-  }
-
-  private saysTime(axis: AxisConfig): boolean {
-    return axis.time === true || (axis.calendar !== undefined && axis.calendar.length > 0);
-  }
-
-  /** An axis in time: one that says so, or whose rows bring a `Date`. */
-  private inTime(axis: AxisConfig): boolean {
-    return this.saysTime(axis) || (axis.orientation === "x" && this.dated.has(axis.id));
-  }
-
-  /** Where a row lies on a numeric or a time axis. Numbers go as they come -
-      a week of seconds pays nothing; a series that brings a `Date` or, on a
-      time axis, a string has each read as its instant (ADR-0052). */
-  private placeOnX(config: SeriesConfig, data: readonly unknown[], xAxis: AxisConfig): (d: unknown, index: number) => number {
-    const accessor = xAxis.accessor as (d: unknown, index: number) => unknown;
-    const kind = this.inTime(xAxis) ? firstKind([data], accessor) : "number";
-    if (kind === "number" || kind === null) return accessor as (d: unknown, index: number) => number;
-    if (DEV && kind === "string") {
-      const name = config.name ?? "?";
-      const index = data.findIndex((d, i) => {
-        const v = accessor(d, i);
-        return typeof v === "string" && v !== "" && Number.isNaN(Date.parse(v));
-      });
-      if (index >= 0) {
-        warnOnce(
-          `instant-unread-${xAxis.id}-${name}`,
-          `Series "${name}": row ${index} holds "${String(accessor(data[index], index))}" on the time axis "${xAxis.id}", ` +
-            "which is no ISO 8601 instant. It has no place and is not drawn (ADR-0052).",
-        );
-      }
-    }
-    return (d, i) => instantOf(accessor(d, i));
-  }
-
-  /** A y axis reads no value (ADR-0048): its categories are the lanes its
-      state bands name and the rows its matrices read, in the series' order. */
-  private broughtAlongY(bound: readonly SeriesEntry[]): string[] | null {
-    const names = new Set<string>();
-    for (const { config } of bound) {
-      if (config.kind === "state" && config.lane !== undefined) names.add(config.lane);
-      if (config.kind !== "matrix") continue;
-      for (const name of categoriesOf([config.data ?? this.data], config.accessor) ?? []) names.add(name);
-    }
-    return names.size === 0 ? null : [...names];
-  }
-
-  /** One axis has one kind (ADR-0052): DEV names the series that brings
-      another - a category among numbers, a number or a `Date` among
-      categories -, the one that brings a category its axis does not list,
-      and the one that brings a category twice. */
-  private checkValues(
-    config: SeriesConfig,
-    data: readonly unknown[],
-    where: { orientation: AxisOrientation; id: string },
-    accessor: (d: unknown, index: number) => unknown,
-  ): void {
-    const name = config.name ?? "?";
-    const axis = `${where.orientation} axis "${where.id}"`;
-    const key = `${where.orientation}-${where.id}-${name}`;
-    const other = (what: string, reads: string): void =>
-      warnOnce(
-        `axis-kind-${key}`,
-        `Series "${name}" brings ${what} to the ${axis}, which reads ${reads}. ` +
-          "One axis has one kind: it is no place there and is not drawn (ADR-0052).",
-      );
-    const categories = this.categoriesAt(where.orientation, where.id);
-    if (categories === undefined) {
-      const inTime = where.orientation === "x" && this.dated.has(where.id);
-      const xAxis = where.orientation === "x" ? this.findAxisConfig("x", where.id) : null;
-      if (inTime || (xAxis !== null && this.saysTime(xAxis))) {
-        // A string is an instant here; one that is none is named where it is
-        // read (placeOnX). What is left to say: a series that begins with a
-        // number is read as numbers alone - the fast path - and loses the rest.
-        if (firstKind([data], accessor) !== "number") return;
-        const index = data.findIndex((d, i) => {
-          const v = accessor(d, i);
-          return isCategory(v) || v instanceof Date;
-        });
-        if (index >= 0) {
-          warnOnce(
-            `instant-mixed-${key}`,
-            `Series "${name}": row ${index} holds a date or a string on the time axis "${where.id}" after numbers. ` +
-              "A series that begins with milliseconds is read as milliseconds: that row has no place and is not drawn (ADR-0052).",
-          );
-        }
-        return;
-      }
-      // A numeric axis: the first value that is a place tells the series' kind.
-      for (let i = 0; i < data.length; i++) {
-        const v = accessor(data[i], i);
-        if (isPosition(v)) return;
-        if (isCategory(v)) return other("a category", "numbers");
-        if (v instanceof Date) return other("a Date", "numbers");
-      }
-      return;
-    }
-    // A matrix brings its column once per row and its row once per column.
-    const once = config.kind !== "matrix";
-    const seen = new Set<string>();
-    for (let i = 0; i < data.length; i++) {
-      const v = accessor(data[i], i);
-      if (isPosition(v)) other("a number", "categories");
-      else if (v instanceof Date) other("a Date", "categories");
-      if (!isCategory(v)) continue;
-      if (!categories.place.has(v)) {
-        warnOnce(
-          `category-unlisted-${key}`,
-          `Series "${name}" brings the category "${v}", which the ${axis} does not list in \`categories\`. ` +
-            "It has no place and is not drawn (ADR-0052).",
-        );
-      }
-      if (once && seen.has(v)) {
-        warnOnce(
-          `category-twice-${key}`,
-          `Series "${name}" brings the category "${v}" more than once to the ${axis}. ` +
-            "Both rows are drawn in the one place; add them up before the chart (ADR-0052).",
-        );
-      }
-      seen.add(v);
-    }
-  }
-
-  private materialize(): void {
-    const start = typeof performance === "undefined" ? 0 : performance.now();
-    let points = 0;
-    this.readCategories();
-    for (const entry of this.series.values()) {
-      if (entry.materialized !== null) {
-        points += entry.materialized.length;
-        continue;
-      }
-      const config = entry.config;
-      const data = config.data ?? this.data;
-      const xAxis = this.findAxisConfig("x", config.xAxisId);
-      if (xAxis?.accessor === undefined) continue; // validate() reports a missing axis in DEV
-      const categories = this.categoriesAt("x", xAxis.id);
-      // A category's place is a number like any other x from here on.
-      const places = categories === undefined ? null : categoryPlaces(data, xAxis.accessor, categories.place);
-      entry.rows = places?.rows ?? null;
-      // Along y: a matrix' row is named by the data where its y axis has
-      // categories, a state band lies in its lane - and a value of any other
-      // kind is a number, which is no place among categories.
-      const alongY = this.categoriesAt("y", config.yAxisId);
-      const named = config.kind === "matrix" ? alongY : undefined;
-      const lane = laneOf(config);
-      // A lane the axis does not know is no place either: the band is not
-      // drawn, hit or walked.
-      const unlisted = lane !== undefined && alongY?.place.has(lane) !== true;
-      const misplaced = unlisted || (alongY !== undefined && config.kind !== "matrix" && config.kind !== "state");
-      const rowOf = config.accessor as (d: unknown, index: number) => unknown;
-      if (DEV) {
-        this.checkValues(config, data, xAxis, xAxis.accessor);
-        if (config.kind === "matrix") this.checkValues(config, data, { orientation: "y", id: config.yAxisId }, rowOf);
-        if (misplaced && !unlisted) {
-          warnOnce(
-            `axis-kind-y-${config.yAxisId}-${config.name ?? "?"}`,
-            `Series "${config.name ?? "?"}" brings numbers to the y axis "${config.yAxisId}", which reads categories. ` +
-              "One axis has one kind: a number is no place there and is not drawn (ADR-0052).",
-          );
-        }
-        if (unlisted) {
-          warnOnce(
-            `lane-unlisted-${config.yAxisId}-${lane}`,
-            `StateBand "${config.name ?? "?"}" names the lane "${lane}", which the y axis "${config.yAxisId}" does not list in \`categories\`. ` +
-              "It has no place and is not drawn (ADR-0052).",
-          );
-        }
-      }
-      const material = materializeSeries(
-        data,
-        places === null ? this.placeOnX(config, data, xAxis) : (_d, i) => places.x[i] as number,
-        misplaced
-          ? () => undefined
-          : named === undefined
-            ? config.accessor
-            : (d, i) => {
-                const v = rowOf(d, i);
-                return typeof v === "string" ? named.place.get(v) : undefined;
-              },
-        baselineOf(config),
-        {
-          value: valueChannelOf(config),
-          box: boxChannelsOf(config),
-          rows: entry.rows,
-          xMap: this.mapFor(xAxis),
-          xGap: this.gapFor(xAxis),
-        },
-      );
-      entry.materialized = material.series;
-      entry.own = stackOf(config) === undefined ? null : material.series.y;
-      entry.stacked = null;
-      points += material.series.length;
-      if (config.kind === "bar" || config.kind === "box") {
-        // Neighbouring categories lie one apart, a lone one too.
-        const step = categories === undefined ? measureStep(material.series.x, material.series.length) : 1;
-        entry.step = step;
-        // A bar is centred on its x value, so half the step belongs to the left
-        // and to the right of the extent - otherwise the axis cuts into the first
-        // and the last bar (ADR-0002).
-        const half = step / 2;
-        entry.extent = {
-          ...material.extent,
-          xMin: material.extent.xMin - half,
-          xMax: material.extent.xMax + half,
-        };
-      } else if (config.kind === "matrix") {
-        // As with the bar, only in both directions: a cell is centred on its pair
-        // of values, so half its edge belongs outwards - otherwise the axis cuts
-        // into the border cells (ADR-0002).
-        //
-        // What is stored is the MEASURED spacing, even when it is zero. The
-        // replacement only comes at drawing time out of the axis domain: with a
-        // single row the series span is zero as well, and out of zero and zero no
-        // visible cell arises.
-        // Neighbouring categories lie one apart, along either axis.
-        const dx = categories === undefined ? measureSpacing(material.series.x, material.series.length) : 1;
-        const dy = named === undefined ? measureSpacing(material.series.y, material.series.length) : 1;
-        entry.step = dx;
-        entry.cellHeight = dy;
-        entry.extent = {
-          xMin: material.extent.xMin - dx / 2,
-          xMax: material.extent.xMax + dx / 2,
-          yMin: material.extent.yMin - dy / 2,
-          yMax: material.extent.yMax + dy / 2,
-        };
-      } else if (config.kind === "state") {
-        // A lane says where something is drawn, not what the data span. A state
-        // band therefore contributes no y extent: otherwise the state code 3
-        // would pull the axis onto three lanes.
-        // Its x extent reaches one step past its last point: there its last
-        // state ends where the band reports last (lastSegmentEnd), and a
-        // `domain="data"` would cut it to nothing.
-        const step = medianStep(material.series.x, material.series.length);
-        entry.step = step;
-        entry.extent = {
-          ...material.extent,
-          xMax: material.extent.xMax + step,
-          yMin: Number.POSITIVE_INFINITY,
-          yMax: Number.NEGATIVE_INFINITY,
-        };
-      } else {
-        entry.step = null;
-        entry.extent = material.extent;
-      }
-
-      // Once per materialisation, which is once per change of data - for every
-      // series whose hit is a binary search. A matrix runs row-major and hits
-      // linearly: its x values are unsorted by right.
-      if (DEV && config.kind === "box") {
-        const index = firstDisorderedBox(material.series);
-        if (index >= 0) {
-          const name = config.name ?? "?";
-          warnOnce(
-            `box-order-${entry.order}`,
-            `BoxPlot "${name}": the numbers at index ${index} are out of order - expected lowerWhisker ≤ lowerQuartile ≤ median ≤ upperQuartile ≤ upperWhisker. It is drawn as given.`,
-          );
-        }
-      }
-      if (DEV && config.kind !== "matrix") {
-        const index = firstUnsortedIndex(material.series.x, material.series.length);
-        if (index >= 0) {
-          const name = config.name ?? "?";
-          warnOnce(
-            `x-unsorted-${name}`,
-            `Series "${name}": x values are not sorted ascending (index ${index}). ` +
-              "Binary search and path building assume sortedness; there is no automatic sorting (R-2.6).",
-          );
-        }
-      }
-    }
-    this.stackAll();
-    this.materialsDirty = false;
-    this.perf.materializeMs =
-      (typeof performance === "undefined" ? 0 : performance.now()) - start;
-    this.perf.points = points;
-  }
-
-  /** Sums every stack anew from its members' own values (charts-stacking K2),
-      once per materialisation: a member that changes moves every one above
-      it. The stack is summed before anything is drawn, so an area's
-      downsampling thins the stacked edges - each member keeps its own
-      extremes per pixel column, and inside one column the edge of a member
-      and the foot of the one above may part by a stroke's width. */
-  private stackAll(): void {
-    const stacks = new Map<string, SeriesEntry[]>();
-    for (const entry of this.seriesInOrder()) {
-      const key = stackOf(entry.config);
-      if (key === undefined || this.isHidden(entry.config) || entry.materialized === null || entry.own === null) continue;
-      const members = stacks.get(key);
-      if (members === undefined) stacks.set(key, [entry]);
-      else members.push(entry);
-    }
-    for (const members of stacks.values()) {
-      // Any member normalises the stack, a hidden one too: the axis reads in
-      // percent by the same rule (yTickFormat), and the two must not part.
-      const key = stackOf((members[0] as SeriesEntry).config);
-      const normalize = [...this.series.values()].some((e) => stackOf(e.config) === key && normalizes(e.config));
-      const sums = stackSeries(
-        members.map((e) => ({ ...(e.materialized as MaterializedSeries), y: e.own as Float64Array })),
-        normalize,
-      );
-      members.forEach((entry, k) => {
-        const sum = sums[k] as Stacked;
-        const stacked = { ...(entry.materialized as MaterializedSeries), y: sum.top, y0: sum.bottom };
-        entry.materialized = stacked;
-        entry.stacked = { value: sum.value, total: sum.total, normalize };
-        // The y extent is the stack's now, from its foot to its top.
-        const [yMin, yMax] = visibleExtent(stacked, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
-        if (entry.extent !== null) entry.extent = { ...entry.extent, yMin, yMax };
-      });
-    }
   }
 
   /* ================= DOM binding, DPR, resize ================= */
 
-  bind(
-    container: HTMLElement,
-    seriesCanvas: HTMLCanvasElement,
-    overlayCanvas: HTMLCanvasElement,
-    themeRoot: HTMLElement,
-  ): void {
-    if (this.container !== null && this.container !== container) {
-      warnOnce("chart-twice", "The Chart of one useChart is drawn twice at once: one Chart per useChart - a second chart is a second call.");
-    }
-    this.container = container;
-    this.themeRoot = themeRoot;
-    this.seriesCanvas = seriesCanvas;
-    this.overlayCanvas = overlayCanvas;
-    this.seriesCtx = seriesCanvas.getContext("2d");
-    this.overlayCtx = overlayCanvas.getContext("2d");
-    this.measurer = new TextMeasurer(themeRoot);
-    this.dpr = typeof devicePixelRatio === "number" ? devicePixelRatio : 1;
-    this.rebindDprWatch();
-    this.unsubscribeTheme = subscribeTheme(() => {
-      this.theme = null;
-      this.painted.clear();
-      this.measurer?.clear();
-      this.hysteresis.clear();
-      this.markLayoutDirty();
-    });
-    // A web font that arrives after the first layout makes every measured label
-    // wider than its band: measure anew once it is there. The hysteresis goes
-    // with the cache - it remembers band widths measured in the fallback font,
-    // and would keep a band up to HYSTERESIS - 1 pixels too wide, depending on
-    // whether the first layout ran before or after the font arrived.
-    const fonts = typeof document === "undefined" ? undefined : document.fonts;
-    fonts?.addEventListener?.("loadingdone", this.onFontsLoaded);
-    this.theme = null;
-    this.painted.clear();
-    this.markLayoutDirty();
+  bind(container: HTMLElement, seriesCanvas: HTMLCanvasElement, overlayCanvas: HTMLCanvasElement, themeRoot: HTMLElement): void {
+    bind(this, container, seriesCanvas, overlayCanvas, themeRoot);
   }
 
-  private readonly onFontsLoaded = (): void => {
+  /** @internal */
+  readonly onFontsLoaded = (): void => {
     this.measurer?.clear();
     this.hysteresis.clear();
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   };
 
   bindTooltip(el: HTMLElement | null): void {
-    this.tooltipEl = el;
+    bindTooltip(this, el);
   }
 
   bindA11y(readout: HTMLElement | null, summary: HTMLElement | null): void {
-    this.readoutEl = readout;
-    this.summaryEl = summary;
-    this.scheduleSummary();
+    bindA11y(this, readout, summary);
   }
 
   setWording(wording: ChartsWording): void {
-    if (wording === this.wording) return;
-    this.wording = wording;
-    // The data table's key and caption are written from it, and a percent
-    // axis' labels (K5); a layout pushes both and the summary.
-    this.markLayoutDirty();
+    setWording(this, wording);
   }
 
-  private themeRoot: HTMLElement | null = null;
+  /** @internal */
+  themeRoot: HTMLElement | null = null;
 
   unbind(): void {
-    if (this.frameHandle !== null && typeof cancelAnimationFrame === "function") {
-      cancelAnimationFrame(this.frameHandle);
-      this.frameHandle = null;
-    }
-    this.dprMedia?.removeEventListener("change", this.onDprChange);
-    this.dprMedia = null;
-    this.unsubscribeTheme?.();
-    this.unsubscribeTheme = null;
-    if (typeof document !== "undefined") {
-      document.fonts?.removeEventListener?.("loadingdone", this.onFontsLoaded);
-    }
-    this.measurer?.remove();
-    this.measurer = null;
-    this.container = null;
-    this.themeRoot = null;
-    this.seriesCanvas = null;
-    this.overlayCanvas = null;
-    this.seriesCtx = null;
-    this.overlayCtx = null;
-    this.tooltipEl = null;
-    this.readoutEl = null;
-    this.summaryEl = null;
-    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
-    if (this.summaryTimer !== null) clearTimeout(this.summaryTimer);
-    this.readoutTimer = null;
-    this.summaryTimer = null;
-  }
-
-  /** Detect a change of DPR (a change of monitor): rebind matchMedia. */
-  private rebindDprWatch(): void {
-    if (typeof matchMedia !== "function") return;
-    this.dprMedia?.removeEventListener("change", this.onDprChange);
-    this.dpr = typeof devicePixelRatio === "number" ? devicePixelRatio : 1;
-    this.dprMedia = matchMedia(`(resolution: ${this.dpr}dppx)`);
-    this.dprMedia.addEventListener("change", this.onDprChange);
+    unbind(this);
   }
 
   /** Called by the ResizeObserver; coalesced onto one rAF. */
   requestResize(cssWidth: number, cssHeight: number): void {
-    // Against the size still to come, not the one applied: a resize there and
-    // back within one frame would otherwise leave the "there" pending.
-    if (cssWidth === (this.pendingWidth ?? this.cssWidth) && cssHeight === (this.pendingHeight ?? this.cssHeight)) return;
-    this.pendingWidth = cssWidth;
-    this.pendingHeight = cssHeight;
-    this.markLayoutDirty();
-  }
-
-  private applyPendingSize(): void {
-    if (this.pendingWidth === null || this.pendingHeight === null) return;
-    this.cssWidth = this.pendingWidth;
-    this.cssHeight = this.pendingHeight;
-    this.pendingWidth = null;
-    this.pendingHeight = null;
-    const { seriesCanvas, overlayCanvas, seriesCtx, overlayCtx, dpr } = this;
-    if (!seriesCanvas || !overlayCanvas || !seriesCtx || !overlayCtx) return;
-    const w = Math.max(0, Math.round(this.cssWidth * dpr));
-    const h = Math.max(0, Math.round(this.cssHeight * dpr));
-    for (const canvas of [seriesCanvas, overlayCanvas]) {
-      canvas.width = w;
-      canvas.height = h;
-      canvas.style.width = `${this.cssWidth}px`;
-      canvas.style.height = `${this.cssHeight}px`;
-    }
-    // Every drawing coordinate in CSS pixels:
-    seriesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    requestResize(this, cssWidth, cssHeight);
   }
 
   /* ================= Scheduling ================= */
 
   markSeriesDirty(): void {
-    this.seriesDirty = true;
-    this.requestFrame();
+    markSeriesDirty(this);
   }
 
   markOverlayDirty(): void {
-    this.overlayDirty = true;
-    this.requestFrame();
+    markOverlayDirty(this);
   }
 
   /** A layout-relevant change: it pulls the series and the overlay layer with
       it. */
   markLayoutDirty(): void {
-    this.layoutDirty = true;
-    this.seriesDirty = true;
-    this.overlayDirty = true;
-    this.requestFrame();
-  }
-
-  private requestFrame(): void {
-    if (this.frameHandle !== null) return; // exactly one rAF
-    if (this.container === null) return; // unbound: the flags stay set
-    if (typeof requestAnimationFrame !== "function") return;
-    this.frameHandle = requestAnimationFrame(() => {
-      this.frameHandle = null;
-      this.frame();
-    });
-  }
-
-  private frame(): void {
-    this.applyPendingSize();
-    if (this.theme === null && this.themeRoot !== null) {
-      this.theme = resolveTheme(this.themeRoot);
-    }
-    if (this.cssWidth <= 0 || this.cssHeight <= 0) {
-      // at size 0, neither draw nor throw. The HTML layer gets its state
-      // all the same (the legend does not depend on the plot area); layoutDirty
-      // stays set, and the next resize calculates the layout.
-      if (this.layoutDirty) this.pushLayoutSnapshot();
-      return;
-    }
-    if (this.materialsDirty) this.materialize();
-    if (this.layoutDirty) {
-      this.updateLayout();
-      this.layoutDirty = false;
-      this.pushLayoutSnapshot();
-      // New data or a new layout under a resting pointer: the hit it had names
-      // old values at old pixels. Ask again at the same place.
-      if (this.activeBy === "keyboard") {
-        this.hoverKey = "";
-        this.reapplyKey();
-      } else if (this.hover !== null) {
-        const { mouseX, mouseY } = this.hover;
-        this.hoverKey = "";
-        this.pointerMove(mouseX, mouseY);
-      }
-    }
-    if (this.seriesDirty) {
-      this.drawSeriesLayer();
-      this.seriesDirty = false;
-    }
-    if (this.overlayDirty) {
-      this.drawOverlayLayer();
-      this.overlayDirty = false;
-    }
+    markLayoutDirty(this);
   }
 
   /* ================= Layout ================= */
-
-  /** The effective grid default: only the first registered axis per orientation has a grid. */
-  private gridDefault(): Map<number, boolean> {
-    const out = new Map<number, boolean>();
-    let firstX = true;
-    let firstY = true;
-    for (const [id, entry] of [...this.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
-      const first = entry.config.orientation === "x" ? firstX : firstY;
-      out.set(id, entry.config.grid ?? first);
-      if (entry.config.orientation === "x") firstX = false;
-      else firstY = false;
-    }
-    return out;
-  }
 
   /** Extent of an axis out of the series bound to it.
 
       Materialises on demand and manages without the DOM - that is the seam at
       which extents across series kinds can be tested without asking a canvas.
       The layout path calls extentFor directly. */
-  axisExtent(
-    orientation: AxisOrientation,
-    id: string,
-  ): readonly [number, number] {
-    if (this.materialsDirty) this.materialize();
-    const categories = this.categoriesAt(orientation, id);
-    if (categories !== undefined) {
-      // Every category has its place, half a step to either side - whatever
-      // kind stands on it, and whichever series is shown (ADR-0052).
-      const from = -0.5;
-      const to = categories.names.length - 0.5;
-      const span = { xMin: from, xMax: to, yMin: from, yMax: to };
-      return axisExtent(orientation, id, [{ xAxisId: id, yAxisId: id, extent: span }], this.limitValues(orientation, id));
-    }
-    const visible = orientation === "y" && this.findAxisConfig("y", id)?.domain === "visible";
-    const bindings = [...this.series.values()].map((entry) => ({
-      xAxisId: entry.config.xAxisId,
-      yAxisId: entry.config.yAxisId,
-      // A hidden series has no say: the axis fits what is shown.
-      extent: this.isHidden(entry.config) ? null : visible ? this.visibleExtentOf(entry) : entry.extent,
-    }));
-    return axisExtent(orientation, id, bindings, this.limitValues(orientation, id));
+  axisExtent(orientation: AxisOrientation, id: string): readonly [number, number] {
+    return axisExtentOf(this, orientation, id);
   }
 
-  /** The extent of what a fixed x domain shows. A domain that is not fixed
-      shows every point - "nice" and "data" both contain the data -, and a band
-      and a cell keep theirs: a lane is no value, a cell's edge no point. */
-  private visibleExtentOf(entry: SeriesEntry): Extent | null {
-    const xConfig = this.findAxisConfig("x", entry.config.xAxisId);
-    const domain = xConfig === null ? undefined : this.domainOf(xConfig);
-    const kind = entry.config.kind;
-    if (!Array.isArray(domain) || entry.materialized === null || kind === "state" || kind === "matrix") {
-      return entry.extent;
-    }
-    const [from, to] = domain as readonly [number, number];
-    let [yMin, yMax] = visibleExtent(entry.materialized, from, to);
-    // A fixed foot stands under every point shown, as it does in the extent.
-    const baseline = baselineOf(entry.config);
-    if (typeof baseline === "number" && yMin <= yMax) {
-      yMin = Math.min(yMin, baseline);
-      yMax = Math.max(yMax, baseline);
-    }
-    return { xMin: from, xMax: to, yMin, yMax };
+  /** @internal */
+  limitAt(config: LimitConfig, value: number): number {
+    return limitAt(this, config, value);
   }
 
-  /** The values of the limits that are to pull this axis along. */
-  private limitValues(orientation: AxisOrientation, id: string): number[] {
-    const out: number[] = [];
-    for (const { config } of this.limits.values()) {
-      if (!config.inExtent) continue;
-      if (config.orientation !== orientation || this.limitAxisId(config) !== id) continue;
-      if (config.kind === "line") out.push(this.limitAt(config, config.value));
-      else out.push(this.limitAt(config, config.from), this.limitAt(config, config.to));
-    }
-    return out;
+  /** @internal */
+  mapFor(axis: AxisConfig): ((v: number) => number) | undefined {
+    return mapFor(this, axis);
   }
 
-  /** A limit's value in the units of its axis. An x limit on a working-time
-      axis is named on the wall clock, like the data, and mapped as they are. */
-  private limitAt(config: LimitConfig, value: number): number {
-    if (config.orientation !== "x") return value;
-    const axis = this.findAxisConfig("x", this.limitAxisId(config));
-    const map = axis === null ? undefined : this.mapFor(axis);
-    return map === undefined ? value : map(value);
+  /** @internal */
+  gapFor(axis: AxisConfig): ((v: number) => boolean) | undefined {
+    return gapFor(this, axis);
   }
 
-  /** Pre-mapping of the x values of an axis with a working calendar. The scale
-      stays affine; the mapping happens beforehand, once per point, in
-      materialisation - exactly the route ADR-0001 prescribes for a non-affine
-      axis. */
-  private mapFor(axis: AxisConfig): ((v: number) => number) | undefined {
-    const calendar = this.calendarOf(axis);
-    if (calendar === undefined) return undefined;
-    // Clamped, not NaN: the channel has to stay ascending, otherwise every binary
-    // search over it runs into nothing. The working time module builds a
-    // calendar out of the list once and keeps it; there is therefore no second
-    // cache here.
-    return (v: number) => toWorkingTimeClamped(v, calendar);
-  }
-
-  /** An axis' working calendar - none where it reads categories: a place is
-      no time. */
-  private calendarOf(axis: AxisConfig): AxisConfig["calendar"] {
-    const calendar = axis.calendar;
-    if (calendar === undefined || calendar.length === 0) return undefined;
-    return this.categoriesAt(axis.orientation, axis.id) === undefined ? calendar : undefined;
-  }
-
-  private gapFor(axis: AxisConfig): ((v: number) => boolean) | undefined {
-    const calendar = this.calendarOf(axis);
-    if (calendar === undefined) return undefined;
-    return (v: number) => inRemovedTime(v, calendar);
-  }
-
-  private extentFor(config: AxisConfig): readonly [number, number] {
-    return this.axisExtent(config.orientation, config.id);
-  }
-
-  private updateLayout(): void {
-    const measurer = this.measurer;
-    // A zooming chart keeps the horizontal drag and the pinch; the page keeps
-    // the vertical scroll.
-    if (this.container !== null) this.container.style.touchAction = this.hasZoom() ? "pan-y" : "";
-    const grid = this.gridDefault();
-    const inputs: AxisInput[] = [];
-    for (const [id, entry] of [...this.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
-      const c = entry.config;
-      const categories = this.categoriesAt(c.orientation, c.id);
-      if (categories !== undefined && (c.tickFormat !== undefined || c.ticks !== undefined || c.tickCount !== undefined)) {
-        warnOnce(
-          `category-ticks-${c.orientation}-${c.id}`,
-          `The ${c.orientation} axis "${c.id}" reads categories: tickFormat, ticks and tickCount do not apply - ` +
-            "every category has its tick, and is its own label (ADR-0052).",
-        );
-      }
-      inputs.push({
-        key: `${c.orientation}:${c.id}`,
-        id: c.id,
-        orientation: c.orientation,
-        position: c.position,
-        label: c.label,
-        grid: grid.get(id) ?? false,
-        extent: this.extentFor(c),
-        domainMode: this.domainOf(c),
-        ...(this.zooms(c) && { ownDomainMode: c.domain }),
-        tickCount: categories === undefined ? c.tickCount : undefined,
-        tickFormat:
-          categories === undefined
-            ? c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat
-            : labelled(categories, c.categoryLabel),
-        tickValues: categories?.ticks ?? c.ticks,
-        time: categories === undefined && this.inTime(c) ? true : undefined,
-        calendar: categories === undefined ? c.calendar : undefined,
-        alignTicks: c.alignTicks,
-        limitLabels:
-          c.orientation === "y"
-            ? this.limitsInOrder()
-                .map((l) => l.config)
-                .filter((l) => l.orientation === "y" && this.limitAxisId(l) === c.id && l.label !== undefined && l.label !== "")
-                .map((l) => l.label as string)
-            : undefined,
-      });
-    }
-    this.layout = computeLayout({
-      width: this.cssWidth,
-      height: this.cssHeight,
-      padding: this.padding,
-      axes: inputs,
-      measure: (text, className) =>
-        measurer === null ? { width: 0, height: 0 } : measurer.measure(text, className),
-      hysteresis: this.hysteresis,
-      locale: this.wording.locale,
-    });
-    // A span that is the axis' own domain is its default, no part of the view.
-    for (const axis of this.layout.axes) {
-      const span = this.heldSpans[axis.id];
-      if (axis.ownDomain !== undefined && span !== undefined && sameSpan(span, axis.ownDomain)) {
-        const rest = { ...this.heldSpans };
-        delete rest[axis.id];
-        this.heldSpans = rest;
-      }
-    }
-    // A gesture's span goes out with the frame that draws it, and an axis
-    // declared or gone may take a span out of the view or give it back.
-    this.publishView();
-  }
-
-  private findAxis(orientation: "x" | "y", id: string): AxisLayout | null {
-    for (const axis of this.layout.axes) {
-      if (axis.orientation === orientation && axis.id === id) return axis;
-    }
-    return null;
+  /** @internal */
+  findAxis(orientation: "x" | "y", id: string): AxisLayout | null {
+    return findAxis(this, orientation, id);
   }
 
   /* ================= Series colours and legend entries ================= */
 
-  /** A caller's CSS colour as the canvas can draw it (finding 15). */
-  private paint(color: string): string {
-    const root = this.themeRoot;
-    if (root === null) return color;
-    // Under forced colours a caller's colour is the page's text colour, as
-    // the browser would force it on an element (C4).
-    if (this.theme?.forced === true) return this.theme.colorText;
-    let resolved = this.painted.get(color);
-    if (resolved === undefined) {
-      resolved = resolveColours(root, { color }).color;
-      this.painted.set(color, resolved);
-    }
-    return resolved;
-  }
-
-  private colorFor(entry: SeriesEntry): string {
-    if (entry.config.color !== undefined) return this.paint(entry.config.color);
-    // A band's colours come from its states, a cell's from its colouring.
-    if (!takesPalette(entry.config)) return "";
-    // A tone is not a colour value but a role: the theme resolves it. Canvas knows
-    // no CSS variables - a "var(--uc-color-alarm)" in the color prop would
-    // silently go black.
-    const tone = entry.config.tone;
-    if (tone !== undefined) {
-      const theme = this.theme ?? FALLBACK_THEME;
-      return tone === "alarm" ? theme.colorAlarm : tone === "warning" ? theme.colorWarning : theme.colorOk;
-    }
-    // Before the theme has been read for the first time, the built-in palette
-    // carries, so that series never all briefly get the same colour.
-    const palette = this.theme?.series ?? FALLBACK_THEME.series;
-    return palette[this.paletteSlot(entry) % Math.max(1, palette.length)] ?? FALLBACK_THEME.series[0] ?? "#2563eb";
-  }
-
-  /** Named: the place of the name. Nameless: the position among the series that
-      take a palette place, as before - and a warning as soon as that shifts
-      underneath it. */
-  private paletteSlot(entry: SeriesEntry): number {
-    if (entry.config.name !== undefined) return entry.slot;
-    let index = 0;
-    for (const e of this.series.values()) {
-      if (e.order < entry.order && takesPalette(e.config)) index++;
-    }
-    if (entry.lastSlot !== null && entry.lastSlot !== index) {
-      warnOnce(
-        "series-without-name-colour",
-        "a series without a name has changed its colour, because a series before it went away - with `name` it keeps it.",
-      );
-    }
-    entry.lastSlot = index;
-    return index;
-  }
-
-  private nameFor(entry: SeriesEntry, index: number): string {
-    if (entry.config.name !== undefined) return entry.config.name;
-    // The last resort of the legend, and it stays one: the package has no text
-    // layer, so every word it brings along itself is one word too many. Instead of
-    // replacing it, it is made conspicuous.
-    warnOnce(
-      "series-without-name",
-      `a series without a name is called "Series ${index + 1}" in the legend and the tooltip - the name belongs in \`name\`.`,
-    );
-    return `Series ${index + 1}`;
+  /** @internal */
+  nameFor(entry: SeriesEntry, index: number): string {
+    return nameFor(this, entry, index);
   }
 
   legendItems(): LegendItem[] {
-    const out: LegendItem[] = [];
-    // Three lanes share one state list. The legend explains colours, not
-    // series - so it explains every colour once. Twelve entries for four states
-    // would not be a legend but a list.
-    // A band that shares an entry is highlighted with it.
-    const seen = new Map<string, LegendItem>();
-    const theme = this.theme ?? FALLBACK_THEME;
-    const hatches = this.marked() ? this.stateHatches() : null;
-    this.seriesInOrder().forEach((entry, i) => {
-      const config = entry.config;
-      if (config.kind === "state") {
-        // A state series does not explain itself but its colours. "Line 4" next to
-        // a grey box says nothing; the reader wants to know what orange means.
-        config.states.forEach((z, k) => {
-          const key = `${z.label}\0${z.color}`;
-          const known = seen.get(key);
-          if (known !== undefined) {
-            if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
-            known.hidden &&= this.isHidden(config);
-            if (config.name !== undefined && !known.names.includes(config.name)) known.names.push(config.name);
-            return;
-          }
-          const item: LegendItem = {
-            id: `${entry.order}:${k}`,
-            name: z.label,
-            hidden: this.isHidden(config),
-            names: config.name === undefined ? [] : [config.name],
-            color: z.color,
-            seriesIds: [entry.order],
-            mark: hatches === null ? null : { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatches.get(z.label) ?? "none" }], ground: theme.colorBg },
-          };
-          seen.set(key, item);
-          out.push(item);
-        });
-        return;
-      }
-      out.push({
-        id: String(entry.order),
-        name: this.nameFor(entry, i),
-        hidden: this.isHidden(config),
-        names: config.name === undefined ? [] : [config.name],
-        color:
-          config.kind === "matrix"
-            ? chipOf(matrixColors(config.coloring, theme))
-            : this.colorFor(entry),
-        seriesIds: [entry.order],
-        mark: this.legendMark(entry, theme),
-      });
-    });
-    return out;
-  }
-
-  /** What a series' chip shows under encoding by marks. */
-  private legendMark(entry: SeriesEntry, theme: ResolvedTheme): LegendMark | null {
-    if (!this.marked()) return null;
-    const config = entry.config;
-    if (config.kind === "matrix") {
-      const swatches = matrixColors(config.coloring, theme).map((c, k) => ({ color: this.paint(c), hatch: hatchFor(k) }));
-      return { dash: null, marker: null, swatches, ground: theme.colorBg };
-    }
-    const marks = this.marksOf(entry);
-    if (marks === null) return null;
-    switch (config.kind) {
-      case "line":
-        return { dash: config.dash ?? marks.dash, marker: marks.marker, swatches: null, ground: theme.colorBg };
-      case "area":
-        return {
-          dash: config.dash ?? marks.dash,
-          marker: null,
-          swatches: [{ color: this.colorFor(entry), hatch: marks.hatch, opacity: config.fillOpacity }],
-          ground: theme.colorBg,
-        };
-      case "scatter":
-        return { dash: null, marker: marks.marker, swatches: null, ground: theme.colorBg };
-      default:
-        return { dash: null, marker: null, swatches: [{ color: this.colorFor(entry), hatch: marks.hatch }], ground: theme.colorBg };
-    }
+    return legendItems(this);
   }
 
   /* ---------- Limits, ready in pixels ---------- */
 
-  private limitColor(config: LimitConfig, theme: ResolvedTheme): string {
-    if (config.color !== undefined) return this.paint(config.color);
-    // A calculated limit carries no severity colour: it does not say "this is
-    // bad" but "this is how this process otherwise behaves" (ADR-0008).
-    if (config.role === "control") return theme.colorAxis;
-    if (config.role === "zone") return theme.colorGrid;
-    return config.severity === "alarm" ? theme.colorAlarm : theme.colorWarning;
-  }
-
-  /** Dash pattern per role. The reader has to be able to see at a glance whether
-      the problem is the process or the tolerance. */
-  private limitDash(config: LimitConfig): readonly number[] {
-    switch (config.role) {
-      case "control":
-        return [];
-      case "zone":
-        return [2, 3];
-      default:
-        return [4, 3];
-    }
-  }
-
   private limitItems(band: boolean): LimitDrawItem[] {
-    const theme = this.theme ?? FALLBACK_THEME;
-    const out: LimitDrawItem[] = [];
-    for (const { config } of this.limitsInOrder()) {
-      if ((config.kind === "band") !== band) continue;
-      const axis = this.findAxis(config.orientation, this.limitAxisId(config));
-      if (axis === null) continue;
-      const color = this.limitColor(config, theme);
-      const dash = this.limitDash(config);
-      if (config.kind === "band") {
-        out.push({
-          orientation: config.orientation,
-          fromPx: axis.scale.toPx(this.limitAt(config, config.from)),
-          toPx: axis.scale.toPx(this.limitAt(config, config.to)),
-          color,
-          band: true,
-          dash,
-          hatch: this.marked(),
-        });
-      } else {
-        const px = axis.scale.toPx(this.limitAt(config, config.value));
-        out.push({
-          orientation: config.orientation,
-          fromPx: px,
-          toPx: px,
-          color,
-          band: false,
-          dash,
-        });
-      }
-    }
-    return out;
+    return limitItems(this, band);
   }
 
   /** Labelled limits for the HTML layer: position and colour, ready. */
   limitLabels(): readonly LimitLabel[] {
-    const out: LimitLabel[] = [];
-    for (const { order, config } of this.limitsInOrder()) {
-      if (config.label === undefined || config.label === "") continue;
-      const axis = this.findAxis(config.orientation, this.limitAxisId(config));
-      if (axis === null) continue;
-      const value =
-        config.kind === "line"
-          ? this.limitAt(config, config.value)
-          : (this.limitAt(config, config.from) + this.limitAt(config, config.to)) / 2;
-      const size = this.measurer?.measure(config.label, CLASS_TICK);
-      const height = size?.height ?? 0;
-      const px = axis.scale.toPx(value);
-      // As wide as a tick label of its text, and its 2 px padding either side;
-      // in a colour of its own, the stroke before the text as well.
-      const width = (size?.width ?? 0) + 4 + (config.color === undefined ? 0 : LIMIT_MARK);
-      out.push({
-        id: order,
-        axisKey: axis.key,
-        px,
-        labelLeft: insideContainer(px, width, this.cssWidth),
-        width,
-        height,
-        inside: axis.limitsInside,
-        label: config.label,
-        severity: config.severity,
-        role: config.role,
-        ...(config.color !== undefined ? { color: config.color } : {}),
-      });
-    }
-    // A y label stands centred on its limit; two limits closer than a line
-    // move apart, so each stays readable.
-    for (const key of new Set(out.map((l) => l.axisKey))) {
-      if (!key.startsWith("y:")) continue;
-      const labels = out.filter((l) => l.axisKey === key);
-      const height = Math.max(...labels.map((l) => l.height));
-      spread(labels.map((l) => l.px), height).forEach((px, i) => ((labels[i] as LimitLabel).px = px));
-    }
-    return out;
+    return limitLabels(this);
   }
 
   /* ================= Drawing ================= */
 
   private drawItems(): SeriesDrawItem[] {
-    const items: SeriesDrawItem[] = [];
-    let hatches: Map<string, Hatch> | undefined;
-    // A hidden bar leaves no empty place in its group.
-    const series = this.seriesInOrder().filter((e) => !this.isHidden(e.config));
-    // A highlight of nothing drawn - a hidden series' legend entry - dims nothing.
-    const lit = this.highlight;
-    const highlight = lit !== null && series.some((e) => lit.includes(e.order)) ? lit : null;
-    const placements = this.placements();
-    series.forEach((entry) => {
-      const mat = entry.materialized;
-      if (mat === null) return;
-      const xAxis = this.findAxis("x", entry.config.xAxisId);
-      const yAxis = this.findAxis("y", entry.config.yAxisId);
-      if (xAxis === null || yAxis === null) return;
-      const dimmed = highlight !== null && !highlight.includes(entry.order);
-      const marks = this.marksOf(entry);
-      const base: DrawBase = {
-        x: mat.x,
-        y: mat.y,
-        length: mat.length,
-        xScale: xAxis.scale,
-        yScale: yAxis.scale,
-        color: this.colorFor(entry),
-        alpha: dimmed ? 0.25 : 1,
-      };
-      const config = entry.config;
-      // A course draws its window, and above two points per pixel column only
-      // what shows (downsample.ts); every other kind draws its points.
-      const course =
-        config.kind === "line" || config.kind === "area"
-          ? downsample(mat, xAxis.scale.domain[0], xAxis.scale.domain[1], xAxis.scale.m, xAxis.scale.b, this.layout.plot.width)
-          : mat;
-      base.x = course.x;
-      base.y = course.y;
-      base.length = course.length;
-      switch (config.kind) {
-        case "line":
-          items.push({
-            ...base,
-            kind: "line",
-            strokeWidth: config.strokeWidth,
-            // A dash of the caller's own wins over the one its place gives.
-            dash: config.dash ?? marks?.dash,
-            markers: config.markers,
-            step: config.step,
-            marker: marks?.marker,
-          });
-          break;
-        case "area":
-          items.push({
-            ...base,
-            kind: "area",
-            y0: course.y0,
-            baseline: 0,
-            fillOpacity: config.fillOpacity,
-            strokeWidth: config.strokeWidth,
-            dash: config.dash ?? marks?.dash,
-            hatch: marks?.hatch,
-            edges: entry.stacked !== null,
-          });
-          break;
-        case "bar": {
-          const placement = placements.get(entry.order);
-          if (placement === undefined) break;
-          items.push({
-            ...base,
-            kind: "bar",
-            y0: mat.y0,
-            baseline: 0,
-            offset: placement.offset,
-            width: placement.width,
-            hatch: marks?.hatch,
-            edges: entry.stacked !== null,
-          });
-          break;
-        }
-        case "box": {
-          const placement = placements.get(entry.order);
-          if (placement === undefined) break;
-          items.push({
-            ...base,
-            kind: "box",
-            box: mat.box as BoxChannels,
-            offset: placement.offset,
-            width: placement.width,
-            hatch: marks?.hatch,
-          });
-          break;
-        }
-        case "scatter":
-          items.push({ ...base, kind: "scatter", radius: config.radius, marker: marks?.marker });
-          break;
-        case "state": {
-          const lane = this.lanePx(config, yAxis);
-          items.push({
-            ...base,
-            kind: "state",
-            colors: config.states.map((z) => this.paint(z.color)),
-            laneTop: lane.top,
-            laneBottom: lane.bottom,
-            lastEnd: this.lastEnd(entry, mat, xAxis),
-            hatches: this.marked() ? config.states.map((z) => (hatches ??= this.stateHatches()).get(z.label) ?? "none") : null,
-          });
-          break;
-        }
-        case "matrix": {
-          const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME).map((c) => this.paint(c));
-          items.push({
-            ...base,
-            kind: "matrix",
-            buckets: (entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length)),
-            colors: colors,
-            hatches: this.marked() ? colors.map((_, k) => hatchFor(k)) : null,
-            width: cellSize(
-              entry.step ?? 0,
-              xAxis.scale.domain[1] - xAxis.scale.domain[0],
-            ),
-            height: cellSize(
-              entry.cellHeight ?? 0,
-              yAxis.scale.domain[1] - yAxis.scale.domain[0],
-            ),
-          });
-          break;
-        }
-      }
-    });
-    return items;
+    return drawItems(this);
   }
 
-  /** Where each visible bar and box stands relative to its x value, by its
-      place in the group of its x axis (ADR-0002). One pass over the series,
-      not over the points. Step and fraction come from the group, not from
-      the series: otherwise members with data of differing density would
-      compute their offsets from different group widths and lie on top of one
-      another. */
-  private placements(): Map<number, BarPlacement> {
-    const series = this.seriesInOrder().filter((e) => !this.isHidden(e.config));
-    const groups = barGroups(
-      series.map((e) => ({
-        order: e.order,
-        kind: e.config.kind,
-        xAxisId: e.config.xAxisId,
-        step: e.step ?? 0,
-        fraction: widthOf(e.config),
-        stack: stackOf(e.config),
-      })),
-    );
-    const out = new Map<number, BarPlacement>();
-    for (const entry of series) {
-      const xAxis = this.findAxis("x", entry.config.xAxisId);
-      if (xAxis === null) continue;
-      const group = groups.get(entry.order);
-      if (group === undefined) continue;
-      const domain = xAxis.scale.domain;
-      out.set(entry.order, barPlacement(effectiveStep(group.step, domain[1] - domain[0]), group.fraction, group.index, group.size));
-    }
-    return out;
+  /** @internal */
+  placements(): Map<number, BarPlacement> {
+    return placements(this);
   }
 
-  /** Where a band's last state ends: the latest x of the visible series on its
-      x axis, one step past its own last point where that is the latest, never
-      beyond the domain (lastSegmentEnd). */
-  private lastEnd(entry: SeriesEntry, mat: MaterializedSeries, xAxis: AxisLayout): number {
-    let latest = Number.NEGATIVE_INFINITY;
-    for (const e of this.series.values()) {
-      const m = e.materialized;
-      if (m === null || m.length === 0 || this.isHidden(e.config) || e.config.xAxisId !== entry.config.xAxisId) continue;
-      const x = m.x[m.length - 1] as number;
-      if (x > latest) latest = x;
-    }
-    return lastSegmentEnd(mat.x, mat.length, latest, entry.step ?? 0, xAxis.scale.domain[1]);
-  }
-
-  /** Lane of a state series in pixels. Without a value the whole domain of its y
-      axis: a single series fills its band, a stack gets a domain with one unit per
-      lane from the caller. */
-  private lanePx(
-    config: StateSeriesConfig,
-    yAxis: AxisLayout,
-  ): { top: number; bottom: number } {
-    const domain = yAxis.scale.domain;
-    let from = config.laneFrom ?? domain[0];
-    let to = config.laneTo ?? domain[1];
-    if (config.lane !== undefined) {
-      // A named lane takes its category's place; one the axis does not know
-      // has none.
-      const place = this.categoriesAt("y", yAxis.id)?.place.get(config.lane);
-      if (place === undefined) return { top: 0, bottom: 0 };
-      from = place - LANE_WIDTH / 2;
-      to = place + LANE_WIDTH / 2;
-    }
-    const a = yAxis.scale.toPx(from);
-    const b = yAxis.scale.toPx(to);
-    return { top: Math.min(a, b), bottom: Math.max(a, b) };
-  }
-
-  private drawSeriesLayer(): void {
-    const ctx = this.seriesCtx;
-    const theme = this.theme;
-    if (!ctx || !theme) return;
-    const start = typeof performance === "undefined" ? 0 : performance.now();
-    drawSeriesLayer(ctx, {
-      width: this.cssWidth,
-      height: this.cssHeight,
-      plot: this.layout.plot,
-      axes: this.layout.axes,
-      theme,
-      series: this.drawItems(),
-      limitBands: this.limitItems(true),
-      limitLines: this.limitItems(false),
-    });
-    this.perf.seriesDrawMs =
-      (typeof performance === "undefined" ? 0 : performance.now()) - start;
-    this.onPerf?.({ ...this.perf });
-  }
-
-  private drawOverlayLayer(): void {
-    const ctx = this.overlayCtx;
-    const theme = this.theme;
-    if (!ctx || !theme) return;
-    drawOverlayLayer(ctx, {
-      width: this.cssWidth,
-      height: this.cssHeight,
-      plot: this.layout.plot,
-      theme,
-      hover: this.hover,
-      syncPx: this.syncedPx(),
-    });
-    this.positionTooltip();
+  /** @internal */
+  lanePx(config: StateSeriesConfig, yAxis: AxisLayout): { top: number; bottom: number } {
+    return lanePx(this, config, yAxis);
   }
 
   /* ================= Interaction (4.4) ================= */
@@ -2577,208 +661,26 @@ export class ChartScene {
     if (this.highlight === ids) return;
     this.highlight = ids;
     // Not a mousemove path: a redraw of the series layer is allowed here.
-    this.markSeriesDirty();
-  }
-
-  private inPlot(x: number, y: number): boolean {
-    const p: Rect = this.layout.plot;
-    return x >= p.x && x <= p.x + p.width && y >= p.y && y <= p.y + p.height;
+    markSeriesDirty(this);
   }
 
   pointerMove(x: number, y: number): void {
-    if (!this.inPlot(x, y)) {
-      this.pointerLeave();
-      return;
-    }
-    if (this.tooltip === null) {
-      // No hit to snap to - the pointer's own x is what a synced chart shows.
-      const axis = this.layout.axes.find((a) => a.orientation === "x");
-      if (axis !== undefined) this.share({ axisId: axis.id, value: axis.scale.fromPx(x) });
-      return;
-    }
-    if (!this.showAt(x, y)) {
-      this.pointerLeave();
-      return;
-    }
-    if (this.activeBy === "keyboard") this.releaseKey();
-    this.activeBy = "pointer";
+    pointerMove(this, x, y);
   }
 
-  /** The Active point at a pixel - the pointer's, or the one a key resolved
-      to. False where nothing is hit there. */
-  private showAt(x: number, y: number): boolean {
-    const hit = this.hitTest(x, y);
-    if (hit === null) return false;
-    const key = hit.key;
-    this.hover = hit.state;
-    this.hover.mouseX = x;
-    this.hover.mouseY = y;
-    this.markOverlayDirty(); // a hover never touches the series layer
-    const xAxis = this.findAxis("x", hit.primary.entry.config.xAxisId);
-    if (xAxis !== null) this.share({ axisId: xAxis.id, value: xAxis.scale.fromPx(hit.state.hit.xPx) });
-    if (key !== this.hoverKey) {
-      // Written out once per hit, not per movement: a format is not free.
-      const xAxisId = hit.primary.entry.config.xAxisId;
-      this.hoverKey = key;
-      this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue, subMinute(hit.primary));
-      this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
-      this.hoverOrders = hit.chosen.map((k) => k.entry.order);
-      this.hoverTotals = this.totalsOf(hit.chosen);
-      this.hoverLimits = this.tooltip?.limits === true ? this.limitTexts(hit.primary.entry.config.yAxisId) : [];
-      this.pushHoverSnapshot();
-    }
-    return true;
+  /** @internal */
+  showAt(x: number, y: number): boolean {
+    return showAt(this, x, y);
   }
 
   /** The pointer went away. A point the keyboard set stays. */
   pointerLeave(): void {
-    if (this.activeBy === "keyboard") return;
-    this.clearActive();
+    pointerLeave(this);
   }
 
-  /** No Active point, by whoever set it. */
-  private clearActive(): void {
-    this.releaseKey();
-    this.activeBy = null;
-    this.share(null);
-    if (this.hover === null && this.hoverKey === "") return;
-    this.hover = null;
-    this.hoverKey = "";
-    this.markOverlayDirty();
-    this.pushHoverSnapshot();
-  }
-
-  private hitTest(
-    mouseX: number,
-    mouseY: number,
-  ): { key: string; state: HoverState; primary: Candidate; chosen: readonly Candidate[] } | null {
-    const mode = this.tooltip?.mode ?? "x";
-    const candidates: Candidate[] = [];
-    let placements: Map<number, BarPlacement> | undefined;
-    this.seriesInOrder().forEach((entry, i) => {
-      const mat = entry.materialized;
-      if (mat === null || mat.length === 0 || this.isHidden(entry.config)) return;
-      const config = entry.config;
-      const xAxis = this.findAxis("x", config.xAxisId);
-      const yAxis = this.findAxis("y", config.yAxisId);
-      if (xAxis === null || yAxis === null) return;
-      // Mouse position in the axis space of this series.
-      const targetX = xAxis.scale.fromPx(mouseX);
-      const targetY = yAxis.scale.fromPx(mouseY);
-      const hit = this.hitIn(entry, mat, xAxis, yAxis, mouseY, targetX, targetY, mode);
-      if (hit === null) return;
-      candidates.push({
-        entry,
-        index: hit.index,
-        color: hit.color ?? this.colorFor(entry),
-        name: this.nameFor(entry, i),
-        px: hit.px,
-        py: hit.py,
-        xValue: hit.xValue,
-        yValue: hit.yValue,
-        marked: hit.marked,
-        areal: hit.areal,
-        covers: hit.covers === true,
-        level: hit.level,
-        segment: hit.segment,
-        box: hit.box,
-        markX:
-          config.kind === "box"
-            ? hit.px + this.centreOf((placements ??= this.placements()).get(entry.order), xAxis)
-            : undefined,
-      });
-    });
-    if (candidates.length === 0) return null;
-
-    /* The primary hit determines the crosshair and the grouping, and for that
-       only whoever has a comparable place counts at all. The px of an area is the
-       BEGINNING of its section and lies arbitrarily far to the left of the
-       pointer; throwing it into the same distance comparison would mean pinning
-       the crosshair to a segment edge. */
-    const pointLike = candidates.filter((k) => !k.areal);
-    const comparable = pointLike.length > 0 ? pointLike : candidates;
-    let primary = comparable[0] as Candidate;
-    if (mode === "nearest") {
-      let best = Number.POSITIVE_INFINITY;
-      const covering = pointLike.filter((k) => k.covers);
-      for (const k of covering.length > 0 ? covering : pointLike) {
-        // A grouped box is near where it is drawn, not at its x value.
-        const dx = (k.markX ?? k.px) - mouseX;
-        const dy = k.py - mouseY;
-        const d = dx * dx + dy * dy; // Euclidean comparison in pixel space
-        // Two stacked segments meet where one's top is the other's foot; a
-        // tie there goes to the upper one, which a segment of zero height is -
-        // otherwise the walk could never land on it.
-        if (d < best || (d === best && k.covers)) {
-          best = d;
-          primary = k;
-        }
-      }
-      // An area covers the pointer wherever it is hit, so its distance is always
-      // zero - it would beat every point. It answers only where no point is
-      // within reach.
-      if (covering.length === 0 && best > SNAP_DISTANCE * SNAP_DISTANCE) {
-        for (const k of candidates) {
-          if (k.areal) {
-            primary = k;
-            break;
-          }
-        }
-      }
-    } else {
-      let best = Number.POSITIVE_INFINITY;
-      for (const k of comparable) {
-        const d = Math.abs(k.px - mouseX);
-        if (d < best) {
-          best = d;
-          primary = k;
-        }
-      }
-    }
-
-    const chosen =
-      mode === "nearest"
-        ? [primary]
-        : candidates.filter(
-            // An area is always included: it covers the pointer, otherwise it
-            // would not have reported a hit at all. Only points have to share the
-            // x position.
-            (k) => k.areal || Math.abs(k.px - primary.px) <= GROUP_TOLERANCE,
-          );
-
-    const points: TooltipPoint[] = chosen.map((k) => {
-      // The caller's row, also where the series is held in another order.
-      const row = k.entry.rows?.[k.index] ?? k.index;
-      return {
-        seriesName: k.name,
-        color: k.color,
-        xValue: k.xValue,
-        yValue: k.yValue,
-        datum: (k.entry.config.data ?? this.data)[row],
-        index: row,
-        level: k.level,
-        segment: k.segment,
-        box: k.box,
-      };
-    });
-    const hit: TooltipHit = {
-      xValue: primary.xValue,
-      points,
-      // An area's px is the beginning of its section; the crosshair and the
-      // tooltip stay with the pointer instead.
-      xPx: primary.areal ? mouseX : primary.px,
-      yPx: primary.py,
-    };
-    const state: HoverState = {
-      hit,
-      marker: chosen
-        .filter((k) => k.marked)
-        .map((k) => ({ x: k.markX ?? k.px, y: k.py, color: k.color })),
-      mouseX,
-      mouseY,
-    };
-    const key = chosen.map((k) => `${k.entry.order}:${k.index}`).join("|");
-    return { key, state, primary, chosen };
+  /** @internal */
+  clearActive(): void {
+    clearActive(this);
   }
 
   /* ---------- The keyboard's walk (ADR-0030) ----------
@@ -2788,33 +690,21 @@ export class ChartScene {
      asking the hit test at its pixel - so the tooltip, the markers and the
      sync are the pointer's own. */
 
-  /** The visible series with points, in registration order. */
-  private walkable(): SeriesEntry[] {
-    return this.seriesInOrder().filter(
-      (e) => !this.isHidden(e.config) && e.materialized !== null && e.materialized.length > 0,
-    );
+  /** @internal */
+  walkable(): SeriesEntry[] {
+    return walkable(this);
   }
 
-  private emphasised(): SeriesEntry | null {
-    const all = this.walkable();
-    return all.find((e) => e.order === this.emphasis) ?? all[0] ?? null;
-  }
-
-  /** What ←/→ walk over: under "nearest" the emphasised series alone, under
-      "x" every series on its x axis. */
-  private walked(emph: SeriesEntry): WalkSeries[] {
-    const alone = this.tooltip?.mode === "nearest";
-    return this.walkable()
-      .filter((e) => (alone ? e === emph : e.config.xAxisId === emph.config.xAxisId))
-      .map((e) => ({ ...(e.materialized as MaterializedSeries), changesOnly: e.config.kind === "state" }));
+  /** @internal */
+  emphasised(): SeriesEntry | null {
+    return emphasised(this);
   }
 
   /** The focus came in: the walk starts at the newest position, unless the
       pointer already stands somewhere. A pointer's focus - a click - does
       not start it. */
   focus(byKeyboard: boolean): void {
-    if (this.tooltip === null || !byKeyboard || this.hover !== null) return;
-    this.walk("last");
+    focus(this, byKeyboard);
   }
 
   /** Who hears the Active point chosen: a click on a hit, Enter on the Active
@@ -2825,377 +715,37 @@ export class ChartScene {
     return this.tooltip !== null;
   }
   /** Where the press that may become a click began; a click after the pointer
-      travelled is the end of a drag, and selects nothing. */
-  private downAt: number | null = null;
-  private travelled = false;
+      travelled is the end of a drag, and selects nothing.
+      @internal */
+  downAt: number | null = null;
+  /** @internal */
+  travelled = false;
 
   /** A click on the plot: reports the hit under the pointer, once. The second
       click of a double click does not (that one resets the zoom). */
   click(event: MouseEvent): void {
-    const travelled = this.travelled;
-    this.travelled = false;
-    if (travelled || event.detail > 1) return;
-    this.select();
-  }
-
-  private select(): boolean {
-    if (this.onSelect === null || this.hover === null) return false;
-    this.onSelect(this.hover.hit);
-    return true;
+    click(this, event);
   }
 
   /** The focus left: a point the keyboard set goes with it. */
   blur(): void {
-    if (this.activeBy === "keyboard") this.clearActive();
+    blur(this);
   }
 
   /** A key on the plot area; true where the chart took it. */
   key(event: KeyboardEvent): boolean {
-    if (event.altKey || event.ctrlKey || event.metaKey) return false;
-    // Without a tooltip there is no Active point to walk: only the zoom keys.
-    if (this.tooltip === null) return this.zoomKey(event);
-    if (event.key === "Enter" && !event.shiftKey) return this.select();
-    if (event.key === "Escape") {
-      if (this.hover === null) return false;
-      this.clearActive();
-      return true;
-    }
-    if (this.zoomKey(event)) return true;
-    const emph = this.emphasised();
-    if (emph === null) return false;
-    if (emph.config.kind === "matrix") return this.cellKey(event.key, emph);
-    const move = event.shiftKey ? undefined : MOVES[event.key];
-    if (move !== undefined) {
-      this.walk(move);
-      return true;
-    }
-    if (!event.shiftKey && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
-      this.changeSeries(event.key === "ArrowDown" ? 1 : -1);
-      return true;
-    }
-    return false;
-  }
-
-  /** Zoom and pan by key, only where an x axis is zoomable: each key
-      does what its gesture would. */
-  private zoomKey(event: KeyboardEvent): boolean {
-    if (!this.hasZoom()) return false;
-    const plot = this.layout.plot;
-    const at = this.hover?.hit.xPx ?? plot.x + plot.width / 2;
-    if (event.key === "+" || event.key === "=") this.zoomAt(at, 1 / KEY_ZOOM);
-    else if (event.key === "-" || event.key === "_") this.zoomAt(at, KEY_ZOOM);
-    else if (event.key === "0") this.resetZoom();
-    else if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight"))
-      this.panBy(((event.key === "ArrowLeft" ? 1 : -1) * plot.width) / 10);
-    else return false;
-    // Nothing to read after a key where no tooltip does: the span in view
-    // is said once the layout has it.
-    if (this.tooltip === null) this.sayView = true;
-    return true;
+    return key(this, event);
   }
 
   /** Whether the plot is a tab stop: it has hits to walk or an axis to zoom. */
   keyed(): boolean {
-    return this.tooltip !== null || this.hasZoom();
-  }
-
-  /** Where the walk starts from: the keyboard's own place, or the pointer's. */
-  private walkFrom(): number | null {
-    if (this.activeBy === "keyboard") return this.keyX;
-    return this.hover?.hit.xValue ?? null;
-  }
-
-  private walk(move: Move): void {
-    const emph = this.emphasised();
-    if (emph?.config.kind === "matrix") {
-      const cell = this.lastCell(emph);
-      if (cell !== null) this.showCell(emph, cell);
-      return;
-    }
-    const xAxis = emph === null ? null : this.findAxis("x", emph.config.xAxisId);
-    if (emph === null || xAxis === null) return;
-    const from = this.activeBy === null ? null : this.walkFrom();
-    const to = stepPosition(this.walked(emph), from, move, xAxis.scale.domain);
-    if (to !== null) this.showPosition(emph, to);
-  }
-
-  private changeSeries(step: 1 | -1): void {
-    const all = this.walkable();
-    const current = this.emphasised();
-    if (current === null || all.length < 2) return;
-    const next = all[(all.indexOf(current) + step + all.length) % all.length] as SeriesEntry;
-    this.emphasis = next.order;
-    // The legend's hover emphasis shows which series is read first.
-    this.setHighlight([next.order]);
-    this.keyHighlight = true;
-    const x = this.walkFrom();
-    const xAxis = this.findAxis("x", next.config.xAxisId);
-    if (xAxis === null) return;
-    const to = x === null ? stepPosition(this.walked(next), null, "last", xAxis.scale.domain) : nearestPosition(this.walked(next), x, xAxis.scale.domain);
-    if (to === null) return;
-    this.keyCell = null;
-    if (next.config.kind === "matrix") {
-      const cell = this.columnStart(next, to);
-      if (cell !== null) this.showCell(next, cell);
-    } else this.showPosition(next, to);
-  }
-
-  /** A matrix walks cell by cell in two dimensions. At the top or
-      bottom of its column ↑/↓ go on to the chart's other series, so a matrix
-      among them does not keep the keys. */
-  private cellKey(key: string, emph: SeriesEntry): boolean {
-    const mat = emph.materialized as MaterializedSeries;
-    const at = this.keyCell ?? this.lastCell(emph);
-    if (at === null) return false;
-    const direction = CELL_STEPS[key];
-    let next: Cell;
-    if (direction !== undefined) next = stepCell(mat, at, direction);
-    else if (key === "Home" || key === "End") next = rowEnd(mat, at, key === "Home" ? "start" : "end");
-    else return false;
-    if (next === at && (direction === "up" || direction === "down") && this.walkable().length > 1) {
-      this.changeSeries(direction === "down" ? 1 : -1);
-      return true;
-    }
-    this.showCell(emph, next);
-    return true;
-  }
-
-  /** Where a matrix' walk starts: the newest column, its lowest row. */
-  private lastCell(emph: SeriesEntry): Cell | null {
-    const mat = emph.materialized as MaterializedSeries;
-    const xAxis = this.findAxis("x", emph.config.xAxisId);
-    const x = xAxis === null ? null : stepPosition([mat], null, "last", xAxis.scale.domain);
-    return x === null ? null : this.columnStart(emph, x);
-  }
-
-  /** The lowest cell with a value in a matrix' column. */
-  private columnStart(emph: SeriesEntry, x: number): Cell | null {
-    const below = { x, y: Number.NEGATIVE_INFINITY };
-    const cell = stepCell(emph.materialized as MaterializedSeries, below, "up");
-    return cell === below ? null : cell;
-  }
-
-  private showCell(emph: SeriesEntry, cell: Cell, speak = true): void {
-    const xAxis = this.findAxis("x", emph.config.xAxisId);
-    const yAxis = this.findAxis("y", emph.config.yAxisId);
-    if (xAxis === null || yAxis === null) return;
-    this.keyCell = cell;
-    this.moveKey(cell.x, xAxis.scale.toPx(cell.x), yAxis.scale.toPx(cell.y), speak);
-  }
-
-  /** How far a bar's or a box's centre stands from its x value, in pixels. */
-  private centreOf(placement: BarPlacement | undefined, xAxis: AxisLayout): number {
-    return placement === undefined ? 0 : (placement.offset + placement.width / 2) * xAxis.scale.m;
-  }
-
-  /** The Active point at a position of the emphasised series. The pixel's y
-      is that series' own, so that "nearest" picks it and a lane is hit. */
-  private showPosition(emph: SeriesEntry, x: number, speak = true): void {
-    const xAxis = this.findAxis("x", emph.config.xAxisId);
-    const yAxis = this.findAxis("y", emph.config.yAxisId);
-    const mat = emph.materialized;
-    if (xAxis === null || yAxis === null || mat === null) return;
-    let py: number;
-    if (emph.config.kind === "state") {
-      const lane = this.lanePx(emph.config, yAxis);
-      py = (lane.top + lane.bottom) / 2;
-    } else {
-      const v = mat.y[nearestIndex(mat.x, mat.length, x)] as number;
-      py = Number.isNaN(v) ? this.layout.plot.y + this.layout.plot.height / 2 : yAxis.scale.toPx(v);
-    }
-    // A grouped box is asked for at its own centre, so that "nearest" picks it.
-    const centre = emph.config.kind === "box" ? this.centreOf(this.placements().get(emph.order), xAxis) : 0;
-    this.moveKey(x, xAxis.scale.toPx(x) + centre, py, speak);
-  }
-
-  private moveKey(x: number, px: number, py: number, speak = true): void {
-    if (!this.showAt(px, py)) return;
-    this.activeBy = "keyboard";
-    this.keyX = x;
-    if (speak) this.scheduleReadout();
+    return keyed(this);
   }
 
   /* ---------- What is spoken ---------- */
 
-  /** The readout, written once the keys rest: a held key speaks where
-      it stops. It reads what the tooltip shows, the emphasised series first. */
-  private scheduleReadout(): void {
-    if (this.readoutEl === null) return;
-    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
-    this.readoutTimer = setTimeout(() => {
-      this.readoutTimer = null;
-      const el = this.readoutEl;
-      if (el !== null && this.activeBy === "keyboard") el.textContent = this.readoutText();
-    }, READOUT_REST);
-  }
-
-  /** Something to hear at once, in the readout's place - not a key's, so
-      not waiting for the keys to rest. */
-  private say(text: string): void {
-    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
-    this.readoutTimer = null;
-    if (this.readoutEl !== null) this.readoutEl.textContent = text;
-  }
-
-  private readoutText(): string {
-    const hover = this.hover;
-    if (hover === null) return "";
-    const rows = hover.hit.points.map((point, k) => {
-      const row = this.hoverRows[k];
-      // A box is heard as its numbers in a list after its name.
-      const box = row?.box?.map((p) => `${p.label} ${p.value}`).join(", ");
-      const name = box === undefined ? point.seriesName : `${point.seriesName}:`;
-      return { order: this.hoverOrders[k], name, value: box ?? row?.value ?? "", x: row?.x ?? "" };
-    });
-    const emph = this.emphasised()?.order;
-    rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
-    // The totals after every series, as the tooltip's last rows.
-    const totals = this.hoverTotals.map((t) => ({ name: t.name, value: t.value, x: "" }));
-    const limits = this.hoverLimits.map((l) => ({ name: l.name, value: l.value, x: "" }));
-    return this.wording.readout(this.hoverXLabel, [...rows, ...totals, ...limits]);
-  }
-
-  /** The labelled limits with their value in their own axis' format, a band's
-      two edges as one value; only those on the y axis `yAxisId` where given. */
-  private limitTexts(yAxisId?: string): LimitText[] {
-    const out: LimitText[] = [];
-    for (const { config } of this.limitsInOrder()) {
-      if (config.label === undefined || config.label === "") continue;
-      const id = this.limitAxisId(config);
-      if (yAxisId !== undefined && (config.orientation !== "y" || id !== yAxisId)) continue;
-      const axis = this.findAxis(config.orientation, id);
-      if (axis === null) continue;
-      const at = (v: number) => axis.format(this.limitAt(config, v));
-      out.push({ name: config.label, value: config.kind === "line" ? at(config.value) : `${at(config.from)} – ${at(config.to)}` });
-    }
-    return out;
-  }
-
-  /** The totals of the stacks in a hit (K4), each after its stack's last
-      member. A normalised stack's total is no share: it is written in the
-      series' own `format`, as its readings would be. */
-  private totalsOf(chosen: readonly Candidate[]): StackTotal[] {
-    const out: StackTotal[] = [];
-    chosen.forEach((k, i) => {
-      const key = stackOf(k.entry.config);
-      const stacked = k.entry.stacked;
-      if (key === undefined || stacked === null) return;
-      if (chosen.some((later, j) => j > i && stackOf(later.entry.config) === key)) return;
-      out.push({ after: i, name: this.wording.stackTotal, value: this.totalText(k.entry, stacked.total[k.index] as number) });
-    });
-    return out;
-  }
-
-  /** A stack's total as text, shared by the tooltip and the data table. */
-  private totalText(entry: SeriesEntry, total: number): string {
-    return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format ?? ((v: number) => formatValue(v, this.wording.locale)))(total) : this.formatY(entry, total);
-  }
-
-  /** The total of the stack `last` closes at the row's x, found in the
-      members' own channels (the table's courses may be thinned); empty where
-      no member reads there. */
-  private totalCell(members: readonly SeriesEntry[], last: SeriesEntry, x: number): string {
-    for (const m of members) {
-      const mat = m.materialized as MaterializedSeries;
-      const at = lowerBound(mat.x, mat.length, x);
-      const total = at < mat.length && mat.x[at] === x ? (m.stacked as NonNullable<SeriesEntry["stacked"]>).total[at] : undefined;
-      if (total !== undefined && !Number.isNaN(total)) return this.totalText(last, total);
-    }
-    return "";
-  }
-
-  /** The summary is rebuilt after a layout, but not on every one: a zoom lays
-      out every frame, and the summary reads every visible point. */
-  private scheduleSummary(): void {
-    if (this.summaryEl === null) return;
-    if (this.summaryTimer !== null) clearTimeout(this.summaryTimer);
-    this.summaryTimer = setTimeout(() => {
-      this.summaryTimer = null;
-      if (this.summaryEl !== null) this.summaryEl.textContent = this.summaryText();
-    }, SUMMARY_REST);
-  }
-
-  /** Kind of content, series by name, the visible stretch, each series' range
-      in it and the keys. A band has no range - its values are states. */
-  private summaryText(): string {
-    const w = this.wording;
-    const series = this.walkable();
-    const parts: string[] = [];
-    const all = this.seriesInOrder();
-    if (series.length > 0) parts.push(w.seriesList(series.map((e) => this.nameFor(e, all.indexOf(e)))));
-    const first = series[0];
-    const xAxis = first === undefined ? null : this.findAxis("x", first.config.xAxisId);
-    if (first !== undefined && xAxis !== null) {
-      const [from, to] = xAxis.scale.domain;
-      parts.push(w.visibleRange(this.xLabel(first.config.xAxisId, from), this.xLabel(first.config.xAxisId, to)));
-    }
-    for (const entry of series) {
-      if (entry.config.kind === "state") continue;
-      const range = this.visibleRange(entry);
-      if (range === null) continue;
-      const name = this.nameFor(entry, all.indexOf(entry));
-      parts.push(w.seriesExtent(name, this.formatY(entry, range[0]), this.formatY(entry, range[1])));
-    }
-    const limits = this.limitTexts();
-    if (limits.length > 0) parts.push(w.limitList(limits));
-    if (this.tooltip !== null) parts.push(w.walkHelp);
-    if (this.tooltip !== null && this.onSelect !== null) parts.push(w.selectHelp);
-    if (this.hasZoom()) parts.push(w.zoomHelp);
-    if (this.legend !== null && this.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
-    return parts.join(" ");
-  }
-
-  /** The lowest and highest value of a series inside its x axis' domain; a
-      cell's value, every other kind's y. */
-  private visibleRange(entry: SeriesEntry): [number, number] | null {
-    const mat = entry.materialized;
-    const xAxis = this.findAxis("x", entry.config.xAxisId);
-    if (mat === null || xAxis === null) return null;
-    const [from, to] = xAxis.scale.domain;
-    // A stacked series' range is its own values', not its tops'.
-    const values = mat.w ?? entry.stacked?.value ?? mat.y;
-    let min = Number.POSITIVE_INFINITY;
-    let max = Number.NEGATIVE_INFINITY;
-    // ponytail: reads every visible point once per summary; debounced above,
-    // so a zoom pays it once when it rests, not per frame.
-    for (let i = lowerBound(mat.x, mat.length, from); i < mat.length && (mat.x[i] as number) <= to; i++) {
-      const v = values[i] as number;
-      if (!Number.isFinite(v) || Number.isNaN(mat.y[i] as number)) continue;
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-    return min <= max ? [min, max] : null;
-  }
-
-  /** A value as the tooltip writes it: the series' format, else its y axis'
-      (a cell's value has no y axis format). */
-  private formatY(entry: SeriesEntry, v: number): string {
-    const config = entry.config;
-    // A share is no reading: it reads as its axis does, in percent. The
-    // series' `format` writes readings - the stack's total among them.
-    if (config.format !== undefined && entry.stacked?.normalize !== true) return config.format(v);
-    if (config.kind === "matrix") return formatValue(v, this.wording.locale);
-    // Only a share takes the percent an axis gives a normalised stack: a line
-    // on the same axis still reads its own values.
-    const own =
-      entry.stacked?.normalize === true
-        ? this.yTickFormat(config.yAxisId)
-        : this.findAxisConfig("y", config.yAxisId)?.tickFormat;
-    return own === undefined ? formatValue(v, this.wording.locale) : own(v);
-  }
-
-  /** A y axis' `tickFormat`; without one, an axis that carries a normalised
-      stack reads in percent (K5). */
-  private yTickFormat(axisId: string): ((v: number) => string) | undefined {
-    const own = this.findAxisConfig("y", axisId)?.tickFormat;
-    if (own !== undefined) return own;
-    for (const e of this.series.values()) {
-      if (e.config.yAxisId === axisId && normalizes(e.config)) return this.percent;
-    }
-    return undefined;
-  }
-
-  private readonly percent = (v: number): string => this.wording.percent(formatValue(v, this.wording.locale));
+  /** @internal */
+  readonly percent = (v: number): string => this.wording.percent(formatValue(v, this.wording.locale));
 
   /* ---------- The data table (charts-alternatives 01) ---------- */
 
@@ -3204,169 +754,7 @@ export class ChartScene {
       Only the visible domain, and above the limit its downsampled course
       (table.ts). Called by the open table, once per layout. */
   dataTableGroups(): DataTableGroup[] {
-    const all = this.seriesInOrder();
-    // In the order their first series came: a matrix alone, the others by
-    // their x axis.
-    const parts: SeriesEntry[][] = [];
-    const byAxis = new Map<string, SeriesEntry[]>();
-    for (const entry of this.walkable()) {
-      const shared = entry.config.kind === "matrix" ? undefined : byAxis.get(entry.config.xAxisId);
-      if (shared !== undefined) shared.push(entry);
-      else {
-        const part = [entry];
-        parts.push(part);
-        if (entry.config.kind !== "matrix") byAxis.set(entry.config.xAxisId, part);
-      }
-    }
-    return parts.flatMap((entries) => {
-      const first = entries[0] as SeriesEntry;
-      if (first.config.kind === "matrix") return this.matrixTable(first, all) ?? [];
-      return this.courseTable(entries, all) ?? [];
-    });
-  }
-
-  /** The series of one x axis, merged on their x. */
-  private courseTable(entries: readonly SeriesEntry[], all: readonly SeriesEntry[]): DataTableGroup | null {
-    const w = this.wording;
-    const axisId = (entries[0] as SeriesEntry).config.xAxisId;
-    const xAxis = this.findAxis("x", axisId);
-    if (xAxis === null) return null;
-    const [from, to] = xAxis.scale.domain;
-    // A stacked series lists its own values, not its tops.
-    const rows = tableRows(
-      entries.map((e) => {
-        const mat = e.materialized as MaterializedSeries;
-        if (e.stacked !== null) return { ...mat, y: e.stacked.value, y0: null };
-        return e.config.kind === "state" ? { ...mat, changesOnly: true } : mat;
-      }),
-      from,
-      to,
-    );
-    // Readings less than a minute apart carry their seconds, as the tooltip's
-    // header does - otherwise rows would share one heading.
-    let seconds = false;
-    for (let r = 1; r < rows.x.length && !seconds; r++) {
-      const d = (rows.x[r] as number) - (rows.x[r - 1] as number);
-      seconds = d > 0 && d < MINUTE;
-    }
-    const caption = w.tableCaption(this.xLabel(axisId, from), this.xLabel(axisId, to));
-    // A stack's total column follows its last member (K4).
-    const closes = (e: SeriesEntry): SeriesEntry[] | null => {
-      const key = stackOf(e.config);
-      if (key === undefined || e.stacked === null) return null;
-      const members = entries.filter((m) => stackOf(m.config) === key);
-      return members[members.length - 1] === e ? members : null;
-    };
-    return {
-      key: `x:${axisId}`,
-      caption: rows.thinned ? `${caption} ${w.downsampled(rows.readings)}` : caption,
-      columns: [
-        this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
-        ...entries.flatMap((e) => {
-          const name = this.nameFor(e, all.indexOf(e));
-          const own = e.config.kind !== "box" ? [name] : this.boxParts(e, null).map((p) => `${name} – ${p.label}`);
-          return closes(e) === null ? own : [...own, w.stackTotal];
-        }),
-      ],
-      rows: rows.x.map((x, r) => [
-        this.xLabel(axisId, x, seconds),
-        ...entries.flatMap((e, s) => {
-          const course = rows.courses[s] as Course;
-          const i = rows.at[r]?.[s] ?? -1;
-          const own = e.config.kind === "box" ? this.boxCells(e, course, i) : [this.cellText(e, course, i)];
-          const members = closes(e);
-          return members === null ? own : [...own, this.totalCell(members, e, x)];
-        }),
-      ]),
-    };
-  }
-
-  /** A box's cells, top to bottom; empty where it has no box. The
-      course may be thinned: its point is found in the channels by its x.
-      ponytail: two boxes at one x read the first's numbers when thinned;
-      carry the index through downsample() should that ever matter. */
-  private boxCells(entry: SeriesEntry, course: Course, i: number): string[] {
-    const mat = entry.materialized as MaterializedSeries;
-    const median = i < 0 ? Number.NaN : (course.y[i] as number);
-    const at = lowerBound(mat.x, mat.length, course.x[i] as number);
-    const v = Number.isNaN(median) || mat.box === null ? null : { ...boxAt(mat.box, at), median };
-    return this.boxParts(entry, v).map((p) => p.value);
-  }
-
-  /** One cell: empty where the series has no reading there or a gap; a
-      state's name; a corridor's two edges; every other value as the tooltip
-      writes it. */
-  private cellText(entry: SeriesEntry, course: Course, i: number): string {
-    if (i < 0) return "";
-    const v = course.y[i] as number;
-    if (Number.isNaN(v)) return "";
-    const config = entry.config;
-    if (config.kind === "state") return config.states[v | 0]?.label ?? "";
-    const lower = course.y0?.[i];
-    if (lower !== undefined && !Number.isNaN(lower)) return `${this.formatY(entry, lower)} – ${this.formatY(entry, v)}`;
-    return this.formatY(entry, v);
-  }
-
-  /** A matrix' table: its cells inside the visible x domain, by column and
-      row, with their value. */
-  private matrixTable(entry: SeriesEntry, all: readonly SeriesEntry[]): DataTableGroup | null {
-    const mat = entry.materialized;
-    const xAxis = this.findAxis("x", entry.config.xAxisId);
-    const yAxis = this.findAxis("y", entry.config.yAxisId);
-    if (mat === null || mat.w === null || xAxis === null || yAxis === null) return null;
-    const [from, to] = xAxis.scale.domain;
-    const rows: string[][] = [];
-    // ponytail: a matrix is listed whole inside the domain, never thinned - a
-    // grid of cells stays small enough to be drawn one rectangle each; a
-    // matrix of hundreds of thousands of cells would want a limit here too.
-    for (let i = 0; i < mat.length; i++) {
-      const x = mat.x[i] as number;
-      const value = mat.w[i] as number;
-      if (x < from || x > to || !Number.isFinite(value)) continue;
-      rows.push([this.xLabel(xAxis.id, x), yAxis.format(mat.y[i] as number), this.formatY(entry, value)]);
-    }
-    const w = this.wording;
-    return {
-      key: `m:${entry.order}`,
-      caption: w.tableCaption(xAxis.format(from), xAxis.format(to)),
-      columns: [
-        this.findAxisConfig("x", entry.config.xAxisId)?.label ?? w.positionColumn,
-        this.findAxisConfig("y", entry.config.yAxisId)?.label ?? w.rowColumn,
-        this.nameFor(entry, all.indexOf(entry)),
-      ],
-      rows,
-    };
-  }
-
-  /** After a layout - new data, a new domain -, the keyboard's point goes to
-      the nearest position still visible, or goes away. */
-  private reapplyKey(): void {
-    const emph = this.emphasised();
-    const xAxis = emph === null ? null : this.findAxis("x", emph.config.xAxisId);
-    const x = emph === null || xAxis === null || this.keyX === null ? null : nearestPosition(this.walked(emph), this.keyX, xAxis.scale.domain);
-    if (emph === null || x === null) {
-      this.clearActive();
-      return;
-    }
-    if (emph.config.kind !== "matrix") this.showPosition(emph, x, false);
-    else {
-      // The cell stays where it still stands; a column zoomed away gives way
-      // to the nearest one still shown, in the same row where it has a value.
-      const kept = this.keyCell;
-      const mat = emph.materialized as MaterializedSeries;
-      const cell = kept !== null && hasCell(mat, { x, y: kept.y }) ? { x, y: kept.y } : this.columnStart(emph, x);
-      if (cell !== null) this.showCell(emph, cell, false);
-    }
-  }
-
-  /** The keyboard lets go: its emphasis leaves the series layer. */
-  private releaseKey(): void {
-    this.keyX = null;
-    this.keyCell = null;
-    if (this.keyHighlight) {
-      this.keyHighlight = false;
-      this.setHighlight(null);
-    }
+    return dataTableGroups(this);
   }
 
   /* ---------- Cursor sync (charts-long-series 04) ----------
@@ -3377,7 +765,8 @@ export class ChartScene {
      caller gives every chart the same controlled domain. */
 
   private syncId: string | null = null;
-  private loading = false;
+  /** @internal */
+  loading = false;
   /** Where another chart's pointer stands; null while none does. */
   private synced: SyncedX | null = null;
   private sent: SyncedX | null = null;
@@ -3391,7 +780,7 @@ export class ChartScene {
       if (group?.size === 0) syncGroups.delete(this.syncId);
       // The crosshair the old group asked for is no longer this chart's.
       this.synced = null;
-      this.markOverlayDirty();
+      markOverlayDirty(this);
     }
     this.syncId = id;
     if (id !== null) {
@@ -3408,7 +797,7 @@ export class ChartScene {
     if (loading === this.loading) return;
     this.loading = loading;
     if (loading) {
-      this.pointerLeave();
+      pointerLeave(this);
       this.share(null);
       // A drag under way would pan on: a captured pointer passes the stale
       // plot's pointer-events.
@@ -3417,11 +806,12 @@ export class ChartScene {
     }
     // Laid out anew: the layout snapshot carries it, so that the empty message
     // waits for the frame that lays out the answer.
-    this.markLayoutDirty();
+    markLayoutDirty(this);
   }
 
-  /** A loading chart shares no position either - its key's point included. */
-  private share(x: SyncedX | null): void {
+  /** A loading chart shares no position either - its key's point included.
+      @internal */
+  share(x: SyncedX | null): void {
     if (this.loading) x = null;
     if (this.syncId === null || (x?.value === this.sent?.value && x?.axisId === this.sent?.axisId)) return;
     this.sent = x;
@@ -3433,11 +823,12 @@ export class ChartScene {
   }
 
   /** The crosshair a synced position asks for, in this chart's pixels. None
-      while loading: it would point at values being replaced. */
-  private syncedPx(): number | null {
+      while loading: it would point at values being replaced.
+      @internal */
+  syncedPx(): number | null {
     const x = this.synced;
     if (x === null || this.loading) return null;
-    const axis = this.findAxis("x", x.axisId) ?? this.layout.axes.find((a) => a.orientation === "x") ?? null;
+    const axis = findAxis(this, "x", x.axisId) ?? this.layout.axes.find((a) => a.orientation === "x") ?? null;
     return axis === null ? null : axis.scale.toPx(x.value);
   }
 
@@ -3448,22 +839,28 @@ export class ChartScene {
      takes a start through `initialView`, goes to a view through `applyView` and reads it through `getView`. */
 
   /** Held, and drawn: the span each zoomable x axis shows, by id - also of
-      an axis not declared at the moment, which gets its span back. */
-  private heldSpans: AxisSpans;
+      an axis not declared at the moment, which gets its span back.
+      @internal */
+  heldSpans: AxisSpans;
   /** Held, and drawn: the hidden series, by name - also of a series not
-      declared at the moment, which comes back hidden. */
-  private heldHidden: readonly string[];
+      declared at the moment, which comes back hidden.
+      @internal */
+  heldHidden: readonly string[];
   /** Reported: what is held less the parts not declared at the moment, as
-      `useChart` reads it - a new object only when its content changed. */
-  private reportedView: ChartView;
-  private readonly viewListeners = new Set<() => void>();
+      `useChart` reads it - a new object only when its content changed.
+      @internal */
+  reportedView: ChartView;
+  /** @internal */
+  readonly viewListeners = new Set<() => void>();
   /** Whether the reader, a setter or `setView` has changed the view
       yet. Until then a change is the start losing what does not occur here -
-      where the chart starts, not a change to report. */
-  private actedOn = false;
+      where the chart starts, not a change to report.
+      @internal */
+  actedOn = false;
   /** A zoom key was pressed on a chart without a tooltip: the next layout
-      says the span it shows. */
-  private sayView = false;
+      says the span it shows.
+      @internal */
+  sayView = false;
   get acted(): boolean {
     return this.actedOn;
   }
@@ -3471,7 +868,7 @@ export class ChartScene {
   constructor(initial: ChartView = {}) {
     this.heldSpans = { ...initial.domains };
     this.heldHidden = [...(initial.hidden ?? [])];
-    this.reportedView = this.viewToReport();
+    this.reportedView = viewToReport(this);
   }
 
   subscribeView = (listener: () => void): (() => void) => {
@@ -3487,9 +884,7 @@ export class ChartScene {
       also the span or the hidden name of a part not declared at the moment,
       which the view reported does not show. */
   applyView(view: ChartView): void {
-    if (viewKey(view) === viewKey(this.heldView())) return;
-    this.heldSpans = { ...view.domains };
-    this.setHidden([...(view.hidden ?? [])]);
+    applyView(this, view);
   }
 
   /** Puts a span in view on a zoomable x axis; `null` shows the axis' own
@@ -3499,132 +894,43 @@ export class ChartScene {
     if (span === null) delete next[axisId];
     else next[axisId] = [span[0], span[1]];
     this.heldSpans = next;
-    this.viewMoved();
+    viewMoved(this);
   };
 
   /** Hides the series `name`, or shows it where it is hidden. */
-  toggleSeries = (name: string): void => this.toggleNames([name]);
+  toggleSeries = (name: string): void => toggleNames(this, [name]);
 
   /** Hides the series `names` together, or shows them where every one is
       hidden - a state's legend entry speaks for every band that shows it. */
   toggleNames(names: readonly string[]): void {
-    this.hideSome(toggleHidden(this.heldHidden, names));
+    toggleNames(this, names);
   }
 
   /** Hides every series but `name`. */
-  showOnly = (name: string): void => this.hideSome(showOnly([name], this.seriesNames()));
+  showOnly = (name: string): void => hideSome(this, showOnly([name], seriesNames(this)));
 
   /** The legend's gesture: shows only the series `names` - or all, where they
       were the only ones visible. `from` is the hidden series it judges by: a
       double click by those before its first click. */
   showOnlyNames(names: readonly string[], from: readonly string[] = this.heldHidden): void {
-    const series = this.seriesNames();
-    this.hideSome(onlyVisible(names, from, series) ? [] : showOnly(names, series));
+    showOnlyNames(this, names, from);
   }
 
   /** Shows every series again. */
-  showAllSeries = (): void => this.setHidden([]);
+  showAllSeries = (): void => setHidden(this, []);
 
   /** The hidden series held now, by name - what a double click comes back
       to. */
   hiddenNames = (): readonly string[] => this.heldHidden;
 
-  /** Hides `next` - unless it hides every series: then all are shown, and
-      the live region says so. */
-  private hideSome(next: string[]): void {
-    if (hidesAll(next, this.seriesNames())) {
-      next = [];
-      this.say(this.wording.allShown);
-    }
-    this.setHidden(next);
+  /** @internal */
+  seriesNames(): (string | undefined)[] {
+    return seriesNames(this);
   }
 
-  /** The name of every series declared, `undefined` for one without. */
-  private seriesNames(): (string | undefined)[] {
-    return [...this.series.values()].map(({ config }) => config.name);
-  }
-
-  private setHidden(next: string[]): void {
-    const before = new Map([...this.series.values()].map((e) => [e, this.isHidden(e.config)]));
-    this.heldHidden = next;
-    // A hidden member leaves its place in the stack: the others sum anew.
-    for (const [entry, was] of before) {
-      if (was !== this.isHidden(entry.config) && stackOf(entry.config) !== undefined) this.materialsDirty = true;
-    }
-    this.viewMoved();
-  }
-
-  private viewMoved(): void {
-    this.actedOn = true;
-    this.publishView();
-    this.markLayoutDirty();
-  }
-
-  /** Everything the scene holds, also of the parts not declared at the
-      moment. */
-  private heldView(): ChartView {
-    const domains = this.heldSpans;
-    const hidden = this.heldHidden;
-    return { ...(Object.keys(domains).length > 0 && { domains }), ...(hidden.length > 0 && { hidden }) };
-  }
-
-  /** What is held as it would be reported now. */
-  private viewToReport(): ChartView {
-    const axes = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
-    const names = this.series.size === 0 ? null : new Set(this.seriesNames().filter((n) => n !== undefined));
-    return onlyKnown(this.heldView(), axes, names);
-  }
-
-  /** Hands the view out where its content changed. A gesture calls it from
-      the frame, so that a pan is reported at most once per frame. */
-  private publishView(): void {
-    const next = this.viewToReport();
-    if (viewKey(next) === viewKey(this.reportedView)) return;
-    this.reportedView = next;
-    for (const listener of this.viewListeners) listener();
-  }
-
-  private isHidden(config: SeriesConfig): boolean {
-    return config.name !== undefined && this.heldHidden.includes(config.name);
-  }
-
-  private zooms(config: AxisConfig): boolean {
-    return config.orientation === "x" && config.zoomable === true;
-  }
-
-  private zoomAxisIds(): string[] {
-    return [...this.axes.values()].filter(({ config }) => this.zooms(config)).map(({ config }) => config.id);
-  }
-
-  /** What an axis shows: on a zoomable x axis the span the view names, and
-      its own `domain` where the view names none. */
-  private domainOf(config: AxisConfig): AxisConfig["domain"] {
-    return (this.zooms(config) ? this.heldSpans[config.id] : undefined) ?? config.domain;
-  }
-
-  /** The narrowest and widest span zoom reaches on an axis: its own, or at
-      most the data's extent and at least three data steps. */
-  private limitsOf(config: AxisConfig): ZoomLimits {
-    return (
-      config.zoomLimits ??
-      defaultLimits(this.axisExtent("x", config.id), this.dataStep(config.id), this.findAxis("x", config.id)?.ownDomain)
-    );
-  }
-
-  /** The smallest distance between two neighbouring points of the series on
-      an x axis; 0 where none can be measured. */
-  private dataStep(axisId: string): number {
-    let step = Number.POSITIVE_INFINITY;
-    for (const { config, materialized } of this.series.values()) {
-      if (config.xAxisId !== axisId || materialized === null) continue;
-      let own = STEPS.get(materialized);
-      if (own === undefined) {
-        own = measureStep(materialized.x, materialized.length);
-        STEPS.set(materialized, own);
-      }
-      if (own > 0) step = Math.min(step, own);
-    }
-    return Number.isFinite(step) ? step : 0;
+  /** @internal */
+  isHidden(config: SeriesConfig): boolean {
+    return isHidden(this, config);
   }
 
   /* ---------- Zoom and pan (charts-long-series 01) ----------
@@ -3635,393 +941,78 @@ export class ChartScene {
      click goes back to the axis' own domain. Each moves the span the view
      holds, only on an axis that is `zoomable`. */
 
-  private readonly pointers = new Map<number, number>();
-  private pinch = 0;
+  /** @internal */
+  readonly pointers = new Map<number, number>();
+  /** @internal */
+  pinch = 0;
 
-  private hasZoom(): boolean {
-    for (const { config } of this.axes.values()) {
-      if (this.zooms(config)) return true;
-    }
-    return false;
+  /** @internal */
+  hasZoom(): boolean {
+    return hasZoom(this);
   }
 
-  /** The x axes a gesture speaks to. */
-  private zoomAxes(): { config: AxisConfig; layout: AxisLayout }[] {
-    const out: { config: AxisConfig; layout: AxisLayout }[] = [];
-    for (const { config } of this.axesInOrder()) {
-      if (!this.zooms(config)) continue;
-      const layout = this.findAxis("x", config.id);
-      if (layout !== null) out.push({ config, layout });
-    }
-    return out;
+  /** @internal */
+  zoomAt(px: number, factor: number): void {
+    zoomAt(this, px, factor);
   }
 
-  /** Moves the span of every zoomable axis; the view is handed out with the
-      next frame. A second wheel step in the same frame builds on the first,
-      not on the domain still drawn. */
-  private move(next: (domain: readonly [number, number], config: AxisConfig) => [number, number]): void {
-    let moved = false;
-    for (const { config, layout } of this.zoomAxes()) {
-      const domain = next(this.heldSpans[config.id] ?? layout.scale.domain, config);
-      if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
-      this.heldSpans = { ...this.heldSpans, [config.id]: domain };
-      moved = true;
-    }
-    if (moved) {
-      this.actedOn = true;
-      this.markLayoutDirty();
-    }
-  }
-
-  /** Zoom by `factor` (below 1 is closer) around a pixel, which keeps its
-      value; the span stays within the axis' zoom limits. */
-  private zoomAt(px: number, factor: number): void {
-    const p = this.layout.plot;
-    const share = p.width > 0 ? Math.min(1, Math.max(0, (px - p.x) / p.width)) : 0.5;
-    this.move((domain, config) => zoomSpan(domain, share, factor, this.limitsOf(config)));
-  }
-
-  /** Pan by a distance in pixels; positive moves the content right. */
-  private panBy(dx: number): void {
-    const width = this.layout.plot.width;
-    if (width <= 0 || dx === 0) return;
-    this.move(([from, to]) => {
-      const delta = (-dx / width) * (to - from);
-      return [from + delta, to + delta];
-    });
+  /** @internal */
+  panBy(dx: number): void {
+    panBy(this, dx);
   }
 
   wheel(event: WheelEvent): void {
-    if (!this.hasZoom()) return;
-    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? this.layout.plot.width : 1;
-    const dx = event.deltaX * unit;
-    const dy = event.deltaY * unit;
-    if (event.ctrlKey || event.metaKey) {
-      event.preventDefault();
-      // A pinch sends small deltas, a mouse wheel large ones.
-      this.zoomAt(event.offsetX, Math.exp(dy * (Math.abs(dy) < 50 ? 0.01 : 0.0015)));
-    } else if (Math.abs(dx) > Math.abs(dy) || event.shiftKey) {
-      event.preventDefault();
-      this.panBy(-(event.shiftKey && dx === 0 ? dy : dx));
-    }
+    wheel(this, event);
   }
 
   pointerDown(event: PointerEvent): void {
-    this.downAt = event.offsetX;
-    this.travelled = false;
-    if (!this.hasZoom()) return;
-    if (event.pointerType !== "touch" && event.button !== 0) return;
-    this.pointers.set(event.pointerId, event.offsetX);
-    this.container?.setPointerCapture?.(event.pointerId);
-    if (this.pointers.size === 2) this.pinch = this.pinchWidth();
+    pointerDown(this, event);
   }
 
   /** A drag pans, two fingers pinch. */
   drag(event: PointerEvent): void {
-    if (this.downAt !== null && Math.abs(event.offsetX - this.downAt) > 4 && event.buttons !== 0) this.travelled = true;
-    const last = this.pointers.get(event.pointerId);
-    if (last === undefined) return;
-    this.pointers.set(event.pointerId, event.offsetX);
-    if (this.pointers.size === 1) {
-      this.panBy(event.offsetX - last);
-      return;
-    }
-    const width = this.pinchWidth();
-    if (this.pinch > 0 && width > 0) {
-      const [a = 0, b = 0] = this.pointers.values();
-      this.zoomAt((a + b) / 2, this.pinch / width);
-    }
-    this.pinch = width;
+    drag(this, event);
   }
 
   pointerUp(event: PointerEvent): void {
-    this.pointers.delete(event.pointerId);
-    this.pinch = this.pinchWidth();
-  }
-
-  private pinchWidth(): number {
-    const [a, b] = this.pointers.values();
-    return a === undefined || b === undefined ? 0 : Math.abs(a - b);
+    pointerUp(this, event);
   }
 
   /** Every zoomable axis back to its own domain: a double click, the key 0
       and 'Show all'. */
   resetZoom(): void {
-    if (!this.hasZoom()) return;
-    const ids = new Set(this.zoomAxisIds());
-    this.heldSpans = Object.fromEntries(Object.entries(this.heldSpans).filter(([id]) => !ids.has(id)));
-    this.viewMoved();
+    resetZoom(this);
   }
 
-  /** An x value in the format of its x axis - the header's, or a point's own. */
-  private xLabel(xAxisId: string, xValue: number, seconds = false): string {
-    const xAxis = this.findAxis("x", xAxisId);
+  /** An x value in the format of its x axis - the header's, or a point's own.
+      @internal */
+  xLabel(xAxisId: string, xValue: number, seconds = false): string {
+    const xAxis = findAxis(this, "x", xAxisId);
     return xAxis === null ? String(xValue) : xAxis.format(xValue, seconds);
-  }
-
-  /** What the built-in tooltip writes for one hit. A state has a name and no
-      meaningful number; a cell has a number that is not its y position, and so
-      no y axis' format; every other value is read against its y axis and
-      written in its format. A series' own `format` comes before either. */
-  private tooltipRow(k: Candidate, headerXAxisId: string): TooltipRow {
-    const config = k.entry.config;
-    const label = k.segment?.label;
-    const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.level ?? k.yValue);
-    const ownX = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
-    // A cell in a named row says which: its level alone would not.
-    const named = config.kind === "matrix" && this.categoriesAt("y", config.yAxisId) !== undefined;
-    const row = named ? (this.findAxis("y", config.yAxisId)?.format(k.yValue) ?? "") : "";
-    const x = [ownX, row].filter((part) => part !== "").join(", ");
-    // A reading the box does not have is no row.
-    const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue }).filter((p) => p.value !== "");
-    return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null, box };
   }
 
   /** A box's readings top to bottom as drawn (B9): the five, then mean,
       notch, n and outliers - each only where the series has it. One list for
       the tooltip's rows and the table's columns; without numbers (a table
-      row with no box) every value is empty, and so is one not given. */
-  private boxParts(
+      row with no box) every value is empty, and so is one not given.
+      @internal */
+  boxParts(
     entry: SeriesEntry,
     v: (NonNullable<TooltipPoint["box"]> & { median: number }) | null,
   ): { label: string; value: string }[] {
-    const w = this.wording;
-    const channels = entry.materialized?.box ?? null;
-    const y = (n: number | undefined) => (n === undefined || !Number.isFinite(n) ? "" : this.formatY(entry, n));
-    const parts = BOX_ROWS.map((key) => ({ label: w[key], value: y(v?.[key]) }));
-    if (channels?.mean != null) parts.push({ label: w.mean, value: y(v?.mean) });
-    if (channels?.notchLower != null) {
-      const lower = y(v?.notchLower);
-      const upper = y(v?.notchUpper);
-      parts.push({ label: w.notch, value: lower === "" || upper === "" ? "" : `${lower} – ${upper}` });
-    }
-    if (channels?.count != null) {
-      const n = v?.count;
-      parts.push({ label: w.count, value: n === undefined || !Number.isFinite(n) ? "" : formatValue(n, this.wording.locale) });
-    }
-    if (channels?.outliers != null) {
-      const list = v?.outliers ?? [];
-      parts.push({ label: w.outliers, value: list.length > 0 ? this.outlierText(entry, list) : "" });
-    }
-    return parts;
+    return boxParts(this, entry, v);
   }
 
-  /** A box's outliers top to bottom as drawn, the first five written out
-      (B9). */
-  private outlierText(entry: SeriesEntry, outliers: readonly number[]): string {
-    const sorted = [...outliers].sort((a, b) => b - a);
-    return this.wording.outlierList(sorted.slice(0, OUTLIERS_SHOWN).map((v) => this.formatY(entry, v)), Math.max(0, sorted.length - OUTLIERS_SHOWN));
-  }
-
-  /** A hit's chip drawn as its legend entry is: a band's state and a cell's
-      step by their hatch, every other series by its marks. */
-  private tooltipChip(k: Candidate, theme: ResolvedTheme): { color: string; mark: LegendMark } | null {
-    const config = k.entry.config;
-    const swatch = (hatch: Hatch) => ({
-      color: theme.colorText,
-      mark: { dash: null, marker: null, swatches: [{ color: theme.colorText, hatch }], ground: theme.colorBg },
-    });
-    if (config.kind === "state") return swatch(this.stateHatches().get(k.segment?.label ?? "") ?? "none");
-    if (config.kind === "matrix") return swatch(hatchFor(k.entry.buckets?.[k.index] ?? 0));
-    const mark = this.legendMark(k.entry, theme);
-    return mark === null ? null : { color: this.colorFor(k.entry), mark };
-  }
-
-  /** The hit of one series - one different question per kind.
-
-      Every mark that is a point asks "which point lies nearest". A band and a
-      cell ask "what lies under the pointer", and that is not the same question:
-      for the right half of every segment the nearest point gives the wrong
-      answer. */
-  private hitIn(
-    entry: SeriesEntry,
-    mat: MaterializedSeries,
-    xAxis: AxisLayout,
-    yAxis: AxisLayout,
-    mouseY: number,
-    targetX: number,
-    targetY: number,
-    mode: "x" | "nearest",
-  ): {
-    index: number;
-    px: number;
-    py: number;
-    xValue: number;
-    yValue: number;
-    marked: boolean;
-    areal: boolean;
-    covers?: boolean;
-    color?: string;
-    level?: number;
-    segment?: { from: number; to: number; label: string };
-    box?: TooltipPoint["box"];
-  } | null {
-    const config = entry.config;
-    const n = mat.length;
-
-    if (config.kind === "state") {
-      const lane = this.lanePx(config, yAxis);
-      // A band is hit only within its lane; otherwise the topmost lane of a stack
-      // would catch everything lying beneath it.
-      if (mouseY < lane.top || mouseY > lane.bottom) return null;
-      const index = segmentIndex(mat.x, n, targetX);
-      if (index < 0) return null;
-      const code = mat.y[index] as number;
-      if (Number.isNaN(code)) return null; // a hole is no hit
-      const from = mat.x[index] as number;
-      const to = segmentEnd(mat.x, n, index, this.lastEnd(entry, mat, xAxis));
-      if (index === n - 1 && !(targetX < to)) return null; // after the last report
-      const state = config.states[code | 0];
-      return {
-        index,
-        px: xAxis.scale.toPx(from),
-        py: (lane.top + lane.bottom) / 2,
-        xValue: from,
-        yValue: code,
-        marked: false,
-        areal: true,
-        color: state?.color,
-        segment: { from, to, label: state?.label ?? "" },
-      };
-    }
-
-    if (config.kind === "matrix") {
-      const index = cellIndex(
-        mat.x,
-        mat.y,
-        n,
-        targetX,
-        targetY,
-        cellSize(entry.step ?? 0, xAxis.scale.domain[1] - xAxis.scale.domain[0]),
-        cellSize(entry.cellHeight ?? 0, yAxis.scale.domain[1] - yAxis.scale.domain[0]),
-      );
-      if (index < 0) return null;
-      const w = mat.w;
-      const level = w === null ? Number.NaN : (w[index] as number);
-      if (!Number.isFinite(level)) return null; // a hole is no hit
-      const xValue = mat.x[index] as number;
-      const yValue = mat.y[index] as number;
-      // The chip shows the cell's own colour, bucketed as the drawing does it.
-      const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME);
-      entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length);
-      return {
-        index,
-        px: xAxis.scale.toPx(xValue),
-        py: yAxis.scale.toPx(yValue),
-        color: colors[entry.buckets[index] as number],
-        xValue,
-        // yValue stays the position on the y axis; the level that carries the
-        // colour stands in a field of its own. Colour alone can transport no
-        // number - which is why the tooltip has to carry it.
-        yValue,
-        level,
-        marked: false,
-        areal: true,
-      };
-    }
-
-    // A scatter's points are not a course: under "nearest" the one the pointer
-    // is at is the nearest in the plane, not the nearest in x.
-    // A step line's value at the pointer is the sample its hold began with,
-    // not the nearer one after it.
-    const index =
-      config.kind === "scatter" && mode === "nearest"
-        ? nearestPoint(mat.x, mat.y, n, targetX, targetY, xAxis.scale, yAxis.scale)
-        : config.kind === "line" && config.step === true
-          ? segmentIndex(mat.x, n, targetX)
-          : nearestIndex(mat.x, n, targetX);
-    if (index < 0) return null;
-    const top = mat.y[index] as number;
-    if (Number.isNaN(top)) return null; // gaps are no hits
-    const xValue = mat.x[index] as number;
-    // A stacked point is marked at its top and named by its own value.
-    const foot = entry.stacked === null || mat.y0 === null ? Number.NaN : (mat.y0[index] as number);
-    return {
-      index,
-      px: xAxis.scale.toPx(xValue),
-      py: yAxis.scale.toPx(top),
-      xValue,
-      yValue: entry.stacked === null ? top : (entry.stacked.value[index] as number),
-      marked: true,
-      areal: false,
-      covers: targetY >= Math.min(foot, top) && targetY <= Math.max(foot, top),
-      box: mat.box === null ? undefined : boxAt(mat.box, index),
-    };
-  }
-
-  /** 12 px to the right of the crosshair, flipping at the right edge,
-      clamped vertically. */
-  private positionTooltip(): void {
-    const el = this.tooltipEl;
-    if (el === null) return;
-    const hover = this.hover;
-    if (hover === null) {
-      el.style.opacity = "0";
-      return;
-    }
-    const width = el.offsetWidth;
-    const height = el.offsetHeight;
-    let x = hover.hit.xPx + 12;
-    if (x + width > this.cssWidth) x = hover.hit.xPx - 12 - width;
-    if (x < 0) x = 0;
-    let y = hover.mouseY - height / 2;
-    y = Math.min(Math.max(y, 0), Math.max(0, this.cssHeight - height));
-    el.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
-    el.style.opacity = "1";
+  /** @internal */
+  positionTooltip(): void {
+    positionTooltip(this);
   }
 
   /* ================= Snapshots for the HTML layer ================= */
 
-  /** Does a visible series have a point to show - a y that is no gap, and for
-      a cell a value? A chart without one says so rather than draw an empty
-      frame on [0, 1]. Stops at the first point found. */
-  private showsAPoint(): boolean {
-    for (const entry of this.series.values()) {
-      const mat = entry.materialized;
-      if (mat === null || this.isHidden(entry.config)) continue;
-      for (let i = 0; i < mat.length; i++) {
-        if (!Number.isNaN(mat.y[i] as number) && (mat.w === null || Number.isFinite(mat.w[i] as number))) return true;
-      }
-    }
-    return false;
-  }
-
-  private pushLayoutSnapshot(): void {
-    this.scheduleSummary();
-    if (this.sayView) {
-      this.sayView = false;
-      const first = this.zoomAxes()[0];
-      if (first !== undefined) {
-        const [from, to] = first.layout.scale.domain;
-        this.say(this.wording.visibleRange(this.xLabel(first.config.id, from), this.xLabel(first.config.id, to)));
-      }
-    }
-    const empty = !this.showsAPoint();
-    this.layoutSnapshot = {
-      version: this.layoutSnapshot.version + 1,
-      layout: this.layout,
-      legend: this.legend,
-      series: this.legendItems(),
-      limits: this.limitLabels(),
-      empty,
-      loading: this.loading,
-      silhouette: this.loading && empty ? (this.seriesInOrder()[0]?.config.kind ?? "none") : null,
-      dataTable: this.dataTable,
-    };
-    for (const notify of this.layoutSubscribers) notify();
-  }
-
-  private pushHoverSnapshot(): void {
-    this.hoverSnapshot = {
-      version: this.hoverSnapshot.version + 1,
-      hover: this.hover,
-      tooltip: this.tooltip,
-      xLabel: this.hoverXLabel,
-      rows: this.hoverRows,
-      totals: this.hoverTotals,
-      limits: this.hoverLimits,
-    };
-    for (const notify of this.hoverSubscribers) notify();
+  /** @internal */
+  pushHoverSnapshot(): void {
+    pushHoverSnapshot(this);
   }
 
   readonly subscribeLayout = (notify: () => void): (() => void) => {
