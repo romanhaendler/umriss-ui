@@ -6,7 +6,7 @@ Date:   2026-10
 A plan has points in time that have no duration: a handover, a release, a
 freeze. The schedule drew work as bars and listed "Milestones" under "Not
 yet"; a caller faked one with a zero-length subtask, which is neither drawn as
-a mark nor safe to drag (`.scratch/schedule-milestones/spec.md`).
+a mark nor safe to drag.
 
 **A milestone is a mark on a lane, `{ id, lane, at, label? }`: read-only, a
 stop in the keyboard walk, and no finding.** It is plain data, declared as

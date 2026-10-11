@@ -14,8 +14,7 @@ was named on its pages and defined on none. That was decided, not overlooked:
 shape then would have been one thing too many. The shape exists now. The
 generator already emitted every export's declaration, JSDoc included, for the
 llms appendix "The rest of the API" - for agents only, and only for what no
-page named. A person on the site had no list of what a package exports at all
-(`.scratch/api-index/spec.md`).
+page named. A person on the site had no list of what a package exports at all.
 
 **Every name a package exports has exactly one canonical place on the site:
 its component page, a props table, or its entry on the package's API index.**

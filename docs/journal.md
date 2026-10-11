@@ -1,5 +1,7 @@
 # The journal
 
+Frozen on 2026-10-11: no new entries; the commit history and the changelogs carry on.
+
 What was worked on in this repository, newest first. It is a work journal and
 **not** a changelog: nothing here is a promise to a caller, and no version number
 is announced. What changes for a caller of a package stands in that package's own

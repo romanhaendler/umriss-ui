@@ -1,4 +1,0 @@
-{
-  "extends": "./tsconfig.typen.json",
-  "include": ["versuch", "typen/api.ts", "typen/env.d.ts"]
-}

@@ -18,8 +18,7 @@ dashboards, monitoring, planning, and the tools in which people read a lot of
 data and act on it (ADR-0035, which replaced this ADR's earlier plant-only
 sentence). What does not serve such an application is not built, however common
 it is elsewhere.** The list below is the "never"; what
-is only "not yet" stands in each package's record and in the open specs under
-`.scratch/`, and waits for a caller who needs it.
+is only "not yet" stands in each package's record and waits for a caller who needs it.
 
 ## Everywhere
 
@@ -48,7 +47,7 @@ is only "not yet" stands in each package's record and in the open specs under
   reports what was typed and applies nothing, the rule ADR-0023 set for the
   schedule. An undo stack in the component would be a second truth beside the
   application's. A clipboard for ranges goes with the ranges; copying rows
-  stays among the "later" items of `.scratch/comparison-roadmap/spec.md`.
+  stays among the "later" items.
   *Instead:* undo in the application's state, where the data lives; select
   rows, not ranges.
 

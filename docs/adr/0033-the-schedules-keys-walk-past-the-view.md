@@ -6,7 +6,7 @@ Date:   2026-09
 The schedule took the charts' pattern for keyboard and screen reader
 (ADR-0030): one tab stop with `role="application"`, one active position shared
 by pointer and keys, a polite readout once the keys rest. Its active position
-is the **Active subtask** (`.scratch/schedule-a11y/spec.md`).
+is the **Active subtask**.
 
 It departs from one consequence of ADR-0030. There, "the walk stays inside the
 visible domain", and pan by key exists only where the caller controls the

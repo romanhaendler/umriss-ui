@@ -8,7 +8,7 @@ above its rows, carrying the value, a count and the aggregates. That form is
 right for a group of forty and wrong for a group of two. Grouping orders by
 customer, where most customers have one or two orders, the prototype needed 25
 lines for 13 orders; nearly every second line was a header, and the table no
-longer read as a table (`.scratch/table-grouping/spec.md`, "The prototype").
+longer read as a table (the prototype).
 
 `@umriss-ui/table` gives a **Row group** one of two forms, and the form follows
 the group's **level** in the grouping and nothing else:

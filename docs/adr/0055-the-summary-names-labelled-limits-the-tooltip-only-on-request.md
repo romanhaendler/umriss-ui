@@ -6,8 +6,7 @@ Date:   2026-10
 A `LimitLine` or `LimitBand` told a reader through colour and a label painted
 in the axis band. Looked at before anything was changed: the label is on the
 plot, in an HTML layer; the summary for a screen reader named no limit; the
-tooltip and the readout after a key named none either
-(`.scratch/charts-bin-and-limits/spec.md`). Both gaps were real. Nothing else
+tooltip and the readout after a key named none either. Both gaps were real. Nothing else
 about limits changes.
 
 **The summary always names a chart's labelled limits; the tooltip names them

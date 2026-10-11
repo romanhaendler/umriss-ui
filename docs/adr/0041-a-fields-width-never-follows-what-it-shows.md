@@ -8,7 +8,7 @@ place gave it a width - a form's column, a grid's cell, a table's cell - that
 was right. Where the place asked the field how wide it is - a row, a toolbar,
 a column lined up at the start - the answer came from whatever the field
 happened to show. A probe of every core control in the table toolbar, at 320
-to 1600 px (`.scratch/control-sizes/spec.md`), found a multiselect 83, 96 and
+to 1600 px, found a multiselect 83, 96 and
 then 133 px wide for none, one and two chosen values, showing one chip on a
 1280 px screen; a select as wide as its longest option, chosen or not; a
 clearable input that grew by its cross with the first letter; and a range

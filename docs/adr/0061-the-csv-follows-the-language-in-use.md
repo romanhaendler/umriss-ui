@@ -55,8 +55,8 @@ context.
 - An English application gets commas, a decimal point and yes/no: a change,
   announced in the changelog. A German application gets the file it got before,
   byte for byte.
-- The sentence in `.scratch/umriss-table/spec.md` ("the export follows German
-  conventions") is not rewritten; this record supersedes it by name.
+- The earlier sentence "the export follows German
+  conventions" is not rewritten; this record supersedes it by name.
 - The same conventions serve the table's copy to the clipboard (tab-separated,
   the formats' decimal mark) and a later XLSX writer.
 - A separator, BOM or line-break option on `Export` is not offered: the

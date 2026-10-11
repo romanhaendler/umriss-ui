@@ -9,8 +9,7 @@ said that to hide an alarm from a human is a safety decision and does not
 belong in a user-interface library, and so an operator could not ask for a
 snooze from the list. The maintainer decided on 10 October 2026 that offering
 is not hiding: the list offers snoozing as an intent it reports, as the
-schedule does (ADR-0023), and applies nothing
-(`.scratch/alarm-list-snooze/spec.md`).
+schedule does (ADR-0023), and applies nothing.
 
 **The alarm list offers snoozing and reports what the operator asked for; the
 application calls `snooze()` on its own data, or refuses.** The rule is

@@ -11,7 +11,7 @@ showed up on the site only inside example source. Beside them sit about 110
 21 in the schedule, 15 in the calculation, 4 in the charts - and seven of those
 appeared on the site too, by the same accident. A developer who styles
 `[data-verdict]` because it is the handle they found had no way of knowing whether
-the next version keeps it (`.scratch/theming-and-wording-reference/spec.md`).
+the next version keeps it.
 
 **The tokens are the public styling API; `data-*` attributes and class names
 are internal.** The `--u-` tokens of core and the `--uc-` tokens of the charts,

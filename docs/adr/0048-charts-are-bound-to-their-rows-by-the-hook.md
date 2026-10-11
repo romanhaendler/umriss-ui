@@ -60,5 +60,3 @@ does.** The view (ADR-0047) lives on what the hook returns, beside the parts.
   packages are declared the same way. Its subtasks, tasks and lanes are the
   library's own types, so it binds no row type; what it gains is the view and
   its setters on what the hook returns, beside `Schedule` and its parts.
-- The work stands in `.scratch/charts-bound-to-rows/`, released together with
-  `.scratch/component-view/`.

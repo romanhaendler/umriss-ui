@@ -58,7 +58,7 @@ an object-valued prop turn out to be read like props, it can be moved.
 
 ## Consequences
 
-The renames are listed in `.scratch/library-audit/issues/09-the-renames.md`.
+The renames are listed in the package changelogs.
 Each ships with the old name as a deprecated alias for one minor version and a
 `Geändert` entry in the package's changelog, so an upgrade never breaks a
 caller silently.

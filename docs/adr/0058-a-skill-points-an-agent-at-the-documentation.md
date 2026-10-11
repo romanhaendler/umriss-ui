@@ -7,7 +7,7 @@ The documentation is already published for coding agents: `llms.txt`, a
 Markdown twin of every page and `docs/llms-full.md` in every package. What was
 missing is one file an agent loads when a user works with umriss-ui, saying
 where the facts are and which rules of this library it would otherwise get
-wrong (`.scratch/agent-skill/spec.md`).
+wrong.
 
 **A skill, `skills/umriss-ui/SKILL.md`, points a coding agent at the
 documentation and names the few rules it cannot guess; the library builds no

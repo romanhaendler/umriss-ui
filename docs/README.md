@@ -18,12 +18,12 @@ what a reader has — the filename is what they are looking for.
 | how a version is published to npm | [`releasing.md`](releasing.md) |
 | what is tested, and how | [`testing.md`](testing.md) |
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
-| what was worked on here, and when | [`journal.md`](journal.md) |
+| what was worked on here until 2026-10-11 (frozen; the commit history carries on) | [`journal.md`](journal.md) |
 | where the work stands today and what comes next | [`../.scratch/open-points-roadmap/next.md`](../.scratch/open-points-roadmap/next.md) |
 | what was still open in October 2026, what was decided about it and in which order it is built | [`research/open-points-2026-10/`](research/open-points-2026-10/), [`../.scratch/open-points-roadmap/spec.md`](../.scratch/open-points-roadmap/spec.md) |
-| how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/), [`../.scratch/comparison-roadmap/spec.md`](../.scratch/comparison-roadmap/spec.md) |
-| what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/), [`../.scratch/docs-roadmap/spec.md`](../.scratch/docs-roadmap/spec.md) |
-| how other chart libraries take their data, and what follows for the charts | [`research/chart-data-input-2026-10/`](research/chart-data-input-2026-10/), [`../.scratch/chart-rows-as-they-come/spec.md`](../.scratch/chart-rows-as-they-come/spec.md) |
+| how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/) |
+| what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/) |
+| how other chart libraries take their data, and what follows for the charts | [`research/chart-data-input-2026-10/`](research/chart-data-input-2026-10/) |
 | how a coding agent reads a package's documentation | `llms.txt` beside each demo online, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once, or `docs/llms-full.md` inside the installed package — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | what a document used to be called | **What moved**, below |
@@ -47,9 +47,7 @@ and a capitalised filename is reserved for the names the ecosystem knows.
 
 `CONTEXT.md` and `docs/adr/` did **not** move: both are addressed by name, and
 the mechanism that keeps the vocabulary in use is worth more than the tidiness
-would have been. The specs under `.scratch/` were not rewritten either — they are
-delivery records, read backwards. Whoever
-follows an old spec into a path that no longer resolves finds it in the table
+would have been. Whoever follows an old pointer into a path that no longer resolves finds it in the table
 above.
 
 ## What is deliberately not here

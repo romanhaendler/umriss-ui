@@ -5,7 +5,7 @@ Date:   2026-09
 
 A chart drew its points on a canvas and offered them to nobody without a
 pointer: the plot area was `role="img"` with a label, and a keyboard could not
-reach a single value (`.scratch/charts-a11y/spec.md`).
+reach a single value.
 
 **A chart with a tooltip is one tab stop.** Its plot area takes the focus,
 carries `role="application"` with `aria-roledescription` "chart", and the arrow
