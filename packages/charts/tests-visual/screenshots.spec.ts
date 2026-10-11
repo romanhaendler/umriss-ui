@@ -81,7 +81,7 @@ test("A course being reloaded", async ({ page }, testInfo) => {
 /* charts-alternatives 01: the data table open over the plot - every reading
    of a shift, and a week downsampled with its caption saying so. The loop
    above photographs both closed, with their key. */
-for (const exampleId of ["data-table", "a-week-as-a-table"]) {
+for (const exampleId of ["data-table", "a-week-as-a-table", "total-of-a-stack"]) {
   test(`An open data table (${exampleId})`, async ({ page }, testInfo) => {
     await openExample(page, "tooltip", exampleId);
     const target = page.locator(`[data-example="${exampleId}"]`);

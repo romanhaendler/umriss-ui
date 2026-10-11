@@ -34,3 +34,5 @@ Capability row, "Later" and the changelog (under "Unreleased / Added") are done.
 No example shows "Show data" over a stack, so there is no baseline to update.
 The release is left: the spec's status and this ticket's `done` wait for the
 version that carries it.
+
+An example was added afterwards, `packages/charts/demo/examples/Tooltip/08-total-of-a-stack.tsx` (Tooltip page): a stacked bar chart with its `DataTable`, so that a reader of the site and the maintainer who accepts the feature can see the Total column. It is in the "open data table" pictures of `screenshots.spec.ts`; its baselines do not exist yet and are looked at before they are accepted.
