@@ -1038,8 +1038,12 @@
     background: var(--u-color-surface-sunken);
   }
 
-  .sticky tbody tr.groupHeader > .pinned {
-    z-index: 2;
+  /* One above the pinned cells of the rows it passes: they come later in the
+     document and, at the same level, would be painted over the sticking line.
+     The span cell of a group's first row sticks the same way. */
+  .sticky tbody tr.groupHeader > .pinned,
+  .sticky tbody tr[data-group-first] > .spanCell.pinned {
+    z-index: 3;
   }
 
   /* The strong line above a group header is drawn inside every cell, not as

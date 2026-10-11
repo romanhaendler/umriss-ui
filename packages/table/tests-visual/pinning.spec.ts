@@ -60,3 +60,25 @@ test("grouped and scrolled: a group header's label and aggregates stick in their
   await scrollTo(page, "middle");
   await expect(table).toHaveScreenshot(shot("grouped", info.project.name));
 });
+
+test("a sticking group line lies over the pinned cells of the rows it passes (table-column-pinning 04)", async ({ page }) => {
+  await openExample(page, "grid-mode", "the-whole-grid");
+  const example = page.locator(`[data-example="the-whole-grid"]`);
+  await example
+    .locator("table")
+    .locator("xpath=..")
+    .evaluate((el) => {
+      el.scrollTop = 150;
+    });
+  const header = example.locator("tbody tr[data-line='header'][data-stuck]").first();
+  await expect(header).toBeVisible();
+  const label = header.locator("td").filter({ hasText: /\S/ }).first();
+  await expect(label).toBeVisible();
+  // What a reader sees where the label stands is the line's own cell, not the pinned cell of a row under it.
+  const covered = await label.evaluate((cell) => {
+    const box = cell.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.left + 24, box.top + box.height / 2);
+    return hit === null || !cell.contains(hit);
+  });
+  expect(covered).toBe(false);
+});
