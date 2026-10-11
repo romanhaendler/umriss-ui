@@ -18,6 +18,35 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — What the night's pieces still owed
+
+The morning after, three things were left of the five pieces: their decisions
+stood in specs only, two of them had named a gap, and the workflows warned.
+All three were finished the same day and released as `@umriss-ui/core` 0.32.0,
+`@umriss-ui/table` 0.15.0, `@umriss-ui/schedule` 0.7.0 and
+`@umriss-ui/calculation` 0.7.2.
+
+- **Six ADRs, 0053 to 0058**, one per decision - the piece "`bin()` and limits"
+  held two. They record what was decided and weighed, not what might have
+  been: where a spec was thin the ADR is short.
+- **The summary counts the milestones.** A reader who never walked far did not
+  learn that a plan has any. `scheduleSummary` takes the count as it takes the
+  blocked times; no new key.
+- **Snoozing can ask for a reason.** `snoozeReason`, `"optional"` or
+  `"required"`, by the maintainer's choice a prop that changes nothing when
+  absent: the menu he had accepted the day before stays. With it "Snooze"
+  opens a panel of core's parts - durations, a field, a button - and
+  `onSnooze` reports the reason third. `snooze()` stores it; the list does not
+  show it, because that would change the signature of a wording a caller may
+  have written out.
+- **The workflows on current actions, on a named runner.** Five actions moved
+  two or three majors each, every breaking change read against how the
+  workflows use them. Two things could not be proved without running: that
+  `pnpm/action-setup` 6 installs the pinned pnpm, and that the tag push still
+  authenticates under `checkout` 7. So the workflow change was pushed alone
+  first, with no version raised - CI and Pages ran whole and warned of
+  nothing - and the tag push was left to the release that followed.
+
 ## Oct. 2026 — Five pieces built without a grilling
 
 A scan of the workspace against what comparable libraries ship (10 Oct 2026)
