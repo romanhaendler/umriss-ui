@@ -45,8 +45,8 @@ and `check:dist`. A version with a hyphen
 version publishes nothing, and the same version is never published twice.
 
 After each package the workflow sets its tag, `<dir>-v<version>` — one per
-package, because the packages count independently. The tag only marks the
-commit; it triggers nothing, and none is set by hand.
+package, though from `0.34.0` all five carry the same number. The tag only
+marks the commit; it triggers nothing, and none is set by hand.
 
 No token is involved: each package on npm trusts that workflow through Trusted
 Publishing (package settings → *Trusted Publisher*: owner `romanhaendler`,
@@ -58,9 +58,21 @@ that bypass it. The workflow packs with pnpm — only pnpm rewrites the
 `workspace:^`) — and uploads the tarball with npm, because pnpm 9.14.4 cannot
 do Trusted Publishing.
 
-1. The version in `packages/<package>/package.json` and a heading of that number
-   in its `CHANGELOG.md`, in one commit. Several packages may move in the same
-   commit.
+1. **One number for all five packages.** From `0.34.0` on, `core`, `charts`,
+   `table`, `schedule` and `calculation` are released together under one
+   number, even where a package has no change of its own; the next release is
+   `0.34.0` for all five (one above the highest today, core's `0.33.0`). The
+   peer ranges between them are then that same number (`^0.34.0`) - there is no
+   table of which version needs which. At the release, in one commit: the
+   `version` of every `packages/*/package.json` and every peer range between
+   the packages move to that number, and each `CHANGELOG.md` gets a heading of
+   it.
+   The changelog is written at the release, from a draft: run `pnpm changelog`
+   (the subjects of the commits since the last `Release:` commit, per package),
+   keep what changes something for a caller, merge what belongs together, and
+   put it under the new heading. The `## Unreleased` sections that exist today
+   are merged into that at the next release; nothing is written to them during
+   development any more.
 2. The package's `README.md` read against what it now claims. Every roadmap
    line against the open work under `.scratch/` — work that
    is done leaves the roadmap; a figure only by a link to the record that

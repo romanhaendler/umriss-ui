@@ -8,6 +8,8 @@ when something is repaired. As long as the first digit is `0`, no number
 promises compatibility — which is why whatever changes existing behaviour stands
 under a heading "Changed" of its own, no matter which digit rose.
 
+From 0.34.0 all five packages share one number: they are released together, and a package without a change of its own still gets a heading for it.
+
 ---
 
 ## 0.7.3 – Core 0.33.0 (Oct. 2026)

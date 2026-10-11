@@ -78,6 +78,9 @@ five role strings, [`docs/agents/domain.md`](docs/agents/domain.md) for how
 
 * **One fact, one place.** A change touches the source, its test, its example
   and — at release — the changelog. Nothing else restates it.
+* **The changelog is written at the release**, from `pnpm changelog` (the
+  commit subjects since the last release); `## Unreleased` is not written to
+  during development.
 * **An ADR is written only for a decision that is costly to reverse.** Anything
   smaller is the commit message.
 * **A comment says what the code does now and why it must be so.** No ticket

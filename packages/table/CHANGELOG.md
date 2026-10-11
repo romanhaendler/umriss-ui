@@ -8,6 +8,8 @@ middle digit rises when something is added, the last one when something is
 repaired, and **whatever changes existing behaviour stands under a heading
 "Changed" of its own**, no matter which digit rose.
 
+From 0.34.0 all five packages share one number: they are released together, and a package without a change of its own still gets a heading for it.
+
 **Names read forwards.** Where an entry describes a name that has since been
 renamed, it is named here as it is called today; names that were removed stand
 as they stood.
