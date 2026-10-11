@@ -26,20 +26,20 @@ export interface DialogChoreography {
    * dialog, and swallows it when the choreography did: the gesture that
    * triggered the closing has then already reported it.
    */
-  beimSchliessen: () => void;
+  onDialogClose: () => void;
   /**
    * Belongs on the <dialog> element's `onCancel`. Escape runs through the same
    * choreography instead of closing hard. Where the browser does not permit
    * the cancel - a second Escape without user activation - it closes itself;
-   * `beimSchliessen` reports that, and nothing is reported here.
+   * `onDialogClose` reports that, and nothing is reported here.
    */
-  beimAbbrechen: (event: SyntheticEvent<HTMLDialogElement>) => void;
+  onDialogCancel: (event: SyntheticEvent<HTMLDialogElement>) => void;
 }
 
 /**
  * Keeps a <dialog> in step with an `open` prop.
  *
- * `abtritt` is the time the window stays standing after being dismissed, so
+ * `exit` is the time the window stays standing after being dismissed, so
  * that the reverse choreography can run - as a number of milliseconds or as
  * the name of a token read off the dialog while closing. The token is the
  * usual case: the duration then stands only once, and the stylesheet that
@@ -50,13 +50,13 @@ export interface DialogChoreography {
  *
  * Reduced motion always takes the same path as `0`.
  *
- * `onClose` is the caller's listener. It is called through `beimSchliessen`
+ * `onClose` is the caller's listener. It is called through `onDialogClose`
  * exactly when the browser closed - every gesture reports itself beforehand,
  * and a second time through the close event would be a duplicate report
  */
 export function useDialogChoreography(
   open: boolean,
-  abtritt: number | `--${string}`,
+  exit: number | `--${string}`,
   onClose: () => void,
 ): DialogChoreography {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -66,17 +66,17 @@ export function useDialogChoreography(
      task, and a quick reopen in between would otherwise turn it into a
      report. `close()` is only called on an open dialog, so the event is
      certain to come. */
-  const selbstGeschlossen = useRef(false);
+  const closedByUs = useRef(false);
 
-  const beimSchliessen = () => {
-    if (selbstGeschlossen.current) {
-      selbstGeschlossen.current = false;
+  const onDialogClose = () => {
+    if (closedByUs.current) {
+      closedByUs.current = false;
       return;
     }
     onClose();
   };
 
-  const beimAbbrechen = (event: SyntheticEvent<HTMLDialogElement>) => {
+  const onDialogCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     if (!event.cancelable) return;
     event.preventDefault();
     onClose();
@@ -96,9 +96,9 @@ export function useDialogChoreography(
     }
 
     if (!dialog.open) return;
-    const abtrittMs = typeof abtritt === "number" ? abtritt : durationFrom(getComputedStyle(dialog), abtritt);
-    if (abtrittMs <= 0 || prefersReducedMotion()) {
-      selbstGeschlossen.current = true;
+    const exitMs = typeof exit === "number" ? exit : durationFrom(getComputedStyle(dialog), exit);
+    if (exitMs <= 0 || prefersReducedMotion()) {
+      closedByUs.current = true;
       dialog.close();
       return;
     }
@@ -107,11 +107,11 @@ export function useDialogChoreography(
     setClosing(true);
     const timer = window.setTimeout(() => {
       setClosing(false);
-      selbstGeschlossen.current = true;
+      closedByUs.current = true;
       dialog.close();
-    }, abtrittMs);
+    }, exitMs);
     return () => window.clearTimeout(timer);
-  }, [open, abtritt]);
+  }, [open, exit]);
 
-  return { dialogRef, closing, beimSchliessen, beimAbbrechen };
+  return { dialogRef, closing, onDialogClose, onDialogCancel };
 }

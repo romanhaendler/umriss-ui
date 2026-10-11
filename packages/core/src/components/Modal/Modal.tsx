@@ -126,7 +126,7 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
      name stands here and not in the hook, because it belongs to the Modal -
      the palette chooses the same routine without an exit. The duration is read
      from the token the stylesheet uses, not repeated as a number. */
-  const { dialogRef, closing, beimSchliessen: handleDialogClose, beimAbbrechen: handleDialogCancel } =
+  const { dialogRef, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {

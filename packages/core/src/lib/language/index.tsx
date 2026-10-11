@@ -54,15 +54,15 @@ export const DEFAULT_LANGUAGE: Language = {
 const LanguageContext = createContext<Language | null>(null);
 
 /** Builds a complete instance from the default and a partial value. */
-export function mergeLanguage(optionen: LanguageOptions | undefined): Language {
-  if (!optionen) return DEFAULT_LANGUAGE;
-  const { presets, ...wortlautRest } = optionen.wording ?? {};
+export function mergeLanguage(options: LanguageOptions | undefined): Language {
+  if (!options) return DEFAULT_LANGUAGE;
+  const { presets, ...wordingRest } = options.wording ?? {};
   return {
-    formats: optionen.formats ? { ...DEFAULT_FORMATS, ...optionen.formats } : DEFAULT_FORMATS,
-    wording: optionen.wording
+    formats: options.formats ? { ...DEFAULT_FORMATS, ...options.formats } : DEFAULT_FORMATS,
+    wording: options.wording
       ? {
           ...DEFAULT_WORDING,
-          ...wortlautRest,
+          ...wordingRest,
           presets: presets ? { ...DEFAULT_WORDING.presets, ...presets } : DEFAULT_WORDING.presets,
         }
       : DEFAULT_WORDING,

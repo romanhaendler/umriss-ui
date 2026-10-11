@@ -751,7 +751,7 @@ export const DEFAULT_WORDING: Wording = {
   freshnessFresh: "Fresh",
   freshnessStale: "Stale",
   freshnessDisconnected: "No connection",
-  asOfAgo: (dauer) => `As of: ${dauer}`,
+  asOfAgo: (duration) => `As of: ${duration}`,
   asOfUnknown: "As-of time unknown",
 
   close: "Close",
