@@ -1,6 +1,6 @@
 # 02 - The decision, the documents, the changelog
 
-Status: ready-for-human
+Status: done
 Type: task
 Size: S
 
@@ -28,3 +28,5 @@ The decision is written down and the change announced.
 ## Comments
 
 ADR-0061 `the-csv-follows-the-language-in-use` written; the table CHANGELOG has the entry under Changed; README line and the Export page text updated. Left for a human: the ADR index row and the pointer in ADR-0024 (`docs/adr/` was being edited elsewhere), the line in `docs/testing.md`, the version bump and the full check (build, visual) - the release is left.
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.

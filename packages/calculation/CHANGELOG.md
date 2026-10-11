@@ -11,7 +11,9 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.7.3 – Core 0.33.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.33; the peer range moves to `^0.33.0`.
 
 ### Added
 

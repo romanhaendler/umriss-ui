@@ -1677,14 +1677,17 @@
     }
   }
 
-  /* Forced colours: the system's selection pair, held as long, with no fade. */
+  /* Forced colours: the system's selection pair in place of the tint. Only the
+     name changes - the time and the curve stay the rule's above, and the
+     reduced-motion one's where that holds too. */
   @media (forced-colors: active) {
     .table [data-copied] {
-      animation: copiedForced 640ms steps(1);
+      animation-name: copiedForced;
     }
 
     @keyframes copiedForced {
-      from {
+      from,
+      45% {
         background: Highlight;
         color: HighlightText;
       }

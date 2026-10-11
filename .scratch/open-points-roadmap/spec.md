@@ -63,6 +63,11 @@ hand. Within a package the specs are independent unless one says otherwise.
 
 ### A - small and clear
 
+*Delivered and released on 11 Oct 2026 (core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1,
+calculation 0.7.3), after the maintainer's look by hand. His look changed two things: what was copied
+flashes, and an open editor copies its value; and it found two faults - the copy key was swallowed by a
+row's checkbox, and a sticking group line lay under the pinned cells of the rows it passed.*
+
 | Spec | Package | What |
 | --- | --- | --- |
 | `alarm-snooze-reason-shown` | table, core | T8 |

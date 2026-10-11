@@ -1,6 +1,6 @@
 # Two claims about the platform, proved
 
-Status: ready-for-human
+Status: done
 Date:   2026-10-11
 Origin: `.scratch/open-points-roadmap/spec.md`, rows X1 and X2 and "Taken as
 agreed" 6; the facts in `docs/research/open-points-2026-10/platform_claims.md`.
@@ -110,3 +110,7 @@ documents say less than that.
 - `check-dist` reads `exports` for its list of files, and runs in `check` as well as before publishing (P9).
 - The directive stands before the stylesheet import, so `check-dist`'s existing "imports the stylesheet first" test and the comment in `importOwnCss.ts` ("at the head of the entry chunk") change to "right after the directive". ADR-0021 names no position and stays untouched.
 - The schedule's server markup is the labelled frame and an empty canvas; lanes, subtasks and the summary's counts arrive on the client after mount, and the first client render is the same frame. Decided by the coordinator on 2026-10-11; to be confirmed by the maintainer at acceptance. The schedule is not refactored for it (P10 claims no more).
+
+## Comments
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.

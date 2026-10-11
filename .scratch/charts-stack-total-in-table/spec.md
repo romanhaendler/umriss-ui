@@ -1,6 +1,6 @@
 # The data table of a stacked chart carries the stack's total
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-11
 Origin: `packages/charts/docs/capabilities.md`, "Later": "A stack's total in
 the data table". The roadmap of 11 Oct 2026 (`open-points-roadmap`, section A)
@@ -93,3 +93,7 @@ Marked *(spec)* are this spec's; the rest follow the tooltip.
 - T1, T2, T3, T7, T9 and T10 are the spec's; the roadmap names only the line.
 - No new wording key: the tooltip's `stackTotal` serves.
 - The normalised total is the sum of readings, as the tooltip has it, not 100.
+
+## Comments
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.
