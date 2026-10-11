@@ -2,10 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import { importOwnCss } from "../../scripts/styles/importOwnCss.ts";
+import { clientDirective } from "../../scripts/styles/useClient.ts";
 import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 
 export default defineConfig({
-  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true }), importOwnCss("charts.js", "charts.css")],
+  /* clientDirective() after importOwnCss(): the directive goes in front of the stylesheet import. */
+  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true }), importOwnCss("charts.js", "charts.css"), clientDirective()],
   build: {
     /* Two entries, as in core: the library, and the German wording as
        `./wording/de` (ADR-0031). `rollupTypes` writes the second's types flat

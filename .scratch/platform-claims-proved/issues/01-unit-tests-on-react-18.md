@@ -37,3 +37,8 @@ Then make it green. The tests that fail under 18 are the finding.
       `>=19`) under `## Comments`. It does not choose.
 - [ ] `docs/testing.md` has a sentence on the job and on how to run the suite
       under 18 by hand (the same two commands), since a developer installs 19.
+
+## Comments
+
+- The CI job `unit-react18` is written (`.github/workflows/ci.yml`): override of `react` and `react-dom` to 18.3.1 in the runner's `package.json`, `pnpm install --no-frozen-lockfile`, a step that fails unless `react` resolves to 18.x, then `pnpm test:unit`. The header comment says why it is not a matrix. The YAML parses; it has not run.
+- Still to do: the local proof under React 18.3.1 (install by hand, run the suite, fix what fails per P3) and the sentence in `docs/testing.md`. The ticket stays `ready-for-agent`.

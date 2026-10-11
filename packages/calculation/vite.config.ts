@@ -2,10 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import { importOwnCss } from "../../scripts/styles/importOwnCss.ts";
+import { clientDirective } from "../../scripts/styles/useClient.ts";
 import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 
 export default defineConfig({
-  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true, tsconfigPath: "./tsconfig.build.json" }), importOwnCss("calculation.js", "calculation.css")],
+  /* clientDirective() after importOwnCss(): the directive goes in front of the stylesheet import. */
+  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true, tsconfigPath: "./tsconfig.build.json" }), importOwnCss("calculation.js", "calculation.css"), clientDirective()],
   build: {
     lib: {
       entry: "src/index.ts",

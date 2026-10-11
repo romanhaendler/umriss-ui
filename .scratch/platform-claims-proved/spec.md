@@ -77,8 +77,8 @@ and is idempotent as it is.
   first row, and the aggregate. Then a second render with `selection` set and
   `loading`, to cover the paths that read the store before an effect.
 - **Schedule (canvas):** `useSchedule` with two lanes, a subtask, a milestone and
-  `now` as a number renders to a string; the markup holds the lane labels and the
-  `ariaLabel`, and the canvas element is present and empty - nothing was drawn
+  `now` as a number renders to a string; the markup holds the labelled frame (the
+  `ariaLabel`) and the canvas elements, present and empty; no lane label is in it - lanes, subtasks and the summary's counts arrive on the client after mount, and the first client render is the same empty frame. Nothing was drawn
   because nothing may touch `getContext` before an effect. `now={true}` is
   rendered as well: it reads the clock, and must not on the server in a way that
   differs from the client's first render (hydration).
@@ -109,3 +109,4 @@ documents say less than that.
 - The directive goes on the wording as well, by reasoning from functions that cannot cross the boundary (P7).
 - `check-dist` reads `exports` for its list of files, and runs in `check` as well as before publishing (P9).
 - The directive stands before the stylesheet import, so `check-dist`'s existing "imports the stylesheet first" test and the comment in `importOwnCss.ts` ("at the head of the entry chunk") change to "right after the directive". ADR-0021 names no position and stays untouched.
+- The schedule's server markup is the labelled frame and an empty canvas; lanes, subtasks and the summary's counts arrive on the client after mount, and the first client render is the same frame. Decided by the coordinator on 2026-10-11; to be confirmed by the maintainer at acceptance. The schedule is not refactored for it (P10 claims no more).

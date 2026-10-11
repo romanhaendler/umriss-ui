@@ -39,6 +39,10 @@ interface was still expected to move before `0.3.0`.
   normalised stack's members show their shares and its total the sum of the
   readings. A hidden member is out of the total.
 
+### Changed
+
+- **Every entry begins with `"use client";`.** The built files `dist/charts.js` and `dist/wording/de.js` start with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
 ---
 
 ## 0.15.0 – A chosen hit, a histogram, and zoom keys without a tooltip (Oct. 2026)

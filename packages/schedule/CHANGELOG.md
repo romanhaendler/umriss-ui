@@ -17,6 +17,10 @@ moves from here under the rule above.
 
 ## Unreleased
 
+### Changed
+
+- **Every entry begins with `"use client";`.** The built file `dist/schedule.js` starts with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
 ---
 
 ## 0.7.0 – The summary counts the milestones (Oct. 2026)

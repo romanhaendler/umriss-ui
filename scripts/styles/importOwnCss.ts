@@ -3,7 +3,8 @@
    Vite's library mode gathers every CSS import into one file beside the bundle
    and drops the imports from the JavaScript, which left a caller with a second
    line to write and an unstyled page when it was forgotten. This step puts the
-   import back at the head of the entry chunk once both files are written.
+   import back at the head of the entry chunk once both files are written -
+   right after the directive, which `clientDirective` puts in front of it.
    `sideEffects: ["**\/*.css"]` in the manifest keeps a caller's bundler from
    shaking it away again. */
 

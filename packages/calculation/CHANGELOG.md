@@ -13,6 +13,10 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ## Unreleased
 
+### Changed
+
+- **Every entry begins with `"use client";`.** The built file `dist/calculation.js` starts with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
 ---
 
 ## 0.7.2 – Core 0.32.0 (Oct. 2026)
