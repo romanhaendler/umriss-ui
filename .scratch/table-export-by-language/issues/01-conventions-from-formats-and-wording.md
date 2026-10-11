@@ -1,6 +1,6 @@
 # 01 - Conventions from the formats and the wording
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M (three source files, the tests, the Export examples' expected text)
 
@@ -26,3 +26,7 @@ the language in use.
 - [ ] BOM, CRLF, ISO dates, no thousands groups, filtered set, visible columns unchanged; tree export (level column) and server mode (page) unchanged apart from the conventions.
 - [ ] `csv.ts` imports neither React nor core.
 - [ ] Typecheck and unit tests pass; tests that meant German say so.
+
+## Comments
+
+Delivered 2026-10-11. `csv.ts` takes `CsvConventions` (English default) and a `CsvColumn` type whose value may be a boolean; `exportValue` keeps booleans; `export.ts` builds the conventions (`conventionsOf`) and `useTable` passes formats and wording. `separatorsOf` was already exported from core's entry. Tests: `csv.test.ts` (one fixture in two languages, German pinned byte for byte), new `exportLanguage.test.tsx` (default, German, mixed, replaced number format, `asCsv()` without provider); mounted tests that only incidentally expected German now expect English.

@@ -265,7 +265,7 @@ describe("Export", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Export" }));
     const text = String(onExport.mock.calls[0]![0]).replace("﻿", "");
-    expect(text.split("\r\n")).toEqual(["Quantity;Order", "7;B-3", "1;B-4"]);
+    expect(text.split("\r\n")).toEqual(["Quantity,Order", "7,B-3", "1,B-4"]);
   });
 });
 

@@ -1,6 +1,6 @@
 # Decisions
 
-Sixty decisions, each one written where it was made and kept afterwards. An
+Sixty-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -37,7 +37,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0021](0021-the-styles-load-themselves-and-touch-nothing-else.md) | The styles load themselves, and they touch nothing else | accepted | architecture |
 | [0022](0022-the-schedule-is-a-package-that-depends-on-core-and-charts.md) | The schedule is a package, and it depends on `@umriss-ui/core` and `@umriss-ui/charts` | accepted | architecture |
 | [0023](0023-editing-is-controlled-the-schedule-reports-intents.md) | Editing is controlled: the schedule reports intents | accepted | schedule |
-| [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | accepted | language |
+| [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | accepted, extended by ADR-0061 | language |
 | [0025](0025-a-lane-group-is-structure-over-lanes-never-a-lane.md) | A lane group is structure over lanes, never a lane | accepted | schedule |
 | [0026](0026-span-leaves-charts-occupancy-is-the-schedules.md) | Span leaves charts; occupancy is the schedule's | accepted | charts |
 | [0027](0027-a-calculation-is-written-as-it-is-shown.md) | A calculation is written as it is shown | accepted | calculation |
@@ -74,5 +74,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | accepted | architecture |
 | [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | accepted, supersedes ADR-0032 in two points | charts |
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | accepted, extends ADR-0032 | scope |
+| [0061](0061-the-csv-follows-the-language-in-use.md) | The CSV follows the language in use | accepted, extends ADR-0024 | table, language |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

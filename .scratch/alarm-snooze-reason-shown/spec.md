@@ -1,6 +1,6 @@
 # A snooze's reason, shown where the list explains the snooze
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-11
 Origin: roadmap `.scratch/open-points-roadmap/spec.md`, row T8; the fact sheet
 `docs/research/open-points-2026-10/export_copy_and_wording.md`, section 5.
@@ -62,3 +62,5 @@ both already read the same sentence.
 - The reason is appended after a colon in both languages; blank means none; no new wording key.
 
 ## Comments
+
+Delivered by `issues/01`.

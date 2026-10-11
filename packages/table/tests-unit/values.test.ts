@@ -123,8 +123,8 @@ describe("The export value", () => {
   it("leaves numbers as numbers and turns points in time into ISO timestamps", () => {
     expect(exportValue(0.42)).toBe(0.42);
     expect(exportValue(new Date(Date.UTC(2026, 2, 17)))).toBe("2026-03-17T00:00:00.000Z");
-    expect(exportValue(true)).toBe("ja");
-    expect(exportValue(false)).toBe("nein");
+    expect(exportValue(true)).toBe(true);
+    expect(exportValue(false)).toBe(false);
     expect(exportValue(undefined)).toBeUndefined();
     expect(exportValue([1])).toBeUndefined();
   });

@@ -4,7 +4,8 @@
    visible page. */
 
 import { describe, expect, it } from "vitest";
-import { asCsv } from "../src/model/csv";
+import { asCsv, asTabbed } from "../src/model/csv";
+import type { CsvConventions } from "../src/model/csv";
 import { column, tableModel } from "../src/model/tableModel";
 
 interface Row {
@@ -26,12 +27,16 @@ const COLUMNS = [PROJECT, BUDGET];
 
 /* The text carries a byte order mark, so that German Excel opens it as UTF-8
    without an import dialog. For the assertions it is in the way. */
+/* Spelled out: the German file is the one the table wrote before conventions
+   followed the language, byte for byte. */
+const GERMAN: CsvConventions = { separator: ";", decimal: ",", yes: "ja", no: "nein" };
+
 const withoutBom = (text: string) => text.replace(/^﻿/, "");
 const lines = (text: string) => withoutBom(text).split("\r\n");
 
 describe("asCsv – structure", () => {
   it("writes the column labels as the header row", () => {
-    expect(lines(asCsv(ROWS, COLUMNS))[0]).toBe("Projekt;Budget");
+    expect(lines(asCsv(ROWS, COLUMNS))[0]).toBe("Projekt,Budget");
   });
 
   it("falls back to the column id when there is no label", () => {
@@ -50,18 +55,18 @@ describe("asCsv – structure", () => {
   it("writes one line per record, in the order passed in", () => {
     const out = lines(asCsv(ROWS, COLUMNS));
     expect(out).toHaveLength(5); // header + four rows
-    expect(out[1]).toBe("Aurora;300");
-    expect(out[4]).toBe("Dorado;100");
+    expect(out[1]).toBe("Aurora,300");
+    expect(out[4]).toBe("Dorado,100");
   });
 
   it("writes only the columns passed in, in their order", () => {
     const reversed = [BUDGET, PROJECT];
-    expect(lines(asCsv(ROWS, reversed))[0]).toBe("Budget;Projekt");
-    expect(lines(asCsv(ROWS, reversed))[1]).toBe("300;Aurora");
+    expect(lines(asCsv(ROWS, reversed))[0]).toBe("Budget,Projekt");
+    expect(lines(asCsv(ROWS, reversed))[1]).toBe("300,Aurora");
   });
 
   it("writes only the header row when there are no records", () => {
-    expect(lines(asCsv([], COLUMNS))).toEqual(["Projekt;Budget"]);
+    expect(lines(asCsv([], COLUMNS))).toEqual(["Projekt,Budget"]);
   });
 });
 
@@ -69,8 +74,8 @@ describe("asCsv – values that could tear the text apart", () => {
   const withValue = (value: string | number) =>
     lines(asCsv([{ id: "x", project: String(value), budget: 0 }], [PROJECT]))[1];
 
-  it("quotes values containing a semicolon", () => {
-    expect(withValue("Nord;Sued")).toBe('"Nord;Sued"');
+  it("quotes values containing the separator", () => {
+    expect(withValue("Nord,Sued")).toBe('"Nord,Sued"');
   });
 
   it("doubles quotation marks and quotes the value", () => {
@@ -103,18 +108,20 @@ describe("asCsv – values that could tear the text apart", () => {
   });
 });
 
-describe("asCsv – German notation", () => {
-  const budget = (value: number) =>
-    lines(asCsv([{ id: "x", project: "", budget: value }], [BUDGET]))[1];
+describe("asCsv – the language's notation", () => {
+  const budget = (value: number, c?: CsvConventions) =>
+    lines(asCsv([{ id: "x", project: "", budget: value }], [BUDGET], c))[1];
 
-  it("writes the decimal comma", () => {
-    expect(budget(1234.56)).toBe("1234,56");
+  it("writes the decimal point in English and the comma in German", () => {
+    expect(budget(1234.56)).toBe("1234.56");
+    expect(budget(1234.56, GERMAN)).toBe("1234,56");
   });
 
   it("does not group thousands", () => {
-    // A thousands dot would be a second separator inside the field for the
-    // spreadsheet - the value would stay readable, but only by luck.
+    // A thousands mark would be a second separator inside the field - the value
+    // would stay readable, but only by luck.
     expect(budget(1234567)).toBe("1234567");
+    expect(budget(1234567, GERMAN)).toBe("1234567");
   });
 
   it("writes whole numbers without decimals", () => {
@@ -122,11 +129,60 @@ describe("asCsv – German notation", () => {
   });
 
   it("writes negative numbers with a sign", () => {
-    expect(budget(-12.5)).toBe("-12,5");
+    expect(budget(-12.5)).toBe("-12.5");
+    expect(budget(-12.5, GERMAN)).toBe("-12,5");
   });
 
   it("writes the zero", () => {
     expect(budget(0)).toBe("0");
+  });
+
+  it("leaves an exponent form as it is", () => {
+    expect(budget(1e-7, GERMAN)).toBe("1e-7");
+  });
+});
+
+/* One fixture, both languages: a decimal, a text holding each separator, a
+   quote, a newline, a boolean and an absent value. */
+describe("asCsv – one fixture in two languages", () => {
+  interface Item {
+    name: string | null;
+    amount: number;
+    done: boolean;
+  }
+  const items: Item[] = [
+    { name: "a,b", amount: 3.5, done: true },
+    { name: "c;d", amount: 2, done: false },
+    { name: 'say "hi"\nthere', amount: 0.25, done: true },
+    { name: null, amount: 1, done: false },
+  ];
+  const columns = [
+    column<Item>("name", { label: "Name", value: (i) => i.name }),
+    column<Item>("amount", { label: "Amount", value: (i) => i.amount }),
+    { id: "done", label: "Done", value: (i: Item) => i.done },
+  ];
+
+  it("writes English by default", () => {
+    expect(asCsv(items, columns)).toBe(
+      '\uFEFFName,Amount,Done\r\n"a,b",3.5,yes\r\nc;d,2,no\r\n"say ""hi""\nthere",0.25,yes\r\n,1,no',
+    );
+  });
+
+  it("writes German byte for byte as the table did before", () => {
+    expect(asCsv(items, columns, GERMAN)).toBe(
+      '\uFEFFName;Amount;Done\r\na,b;3,5;ja\r\n"c;d";2;nein\r\n"say ""hi""\nthere";0,25;ja\r\n;1;nein',
+    );
+  });
+
+  it("writes the same rows as tabbed text with the language's decimal mark", () => {
+    const tabbed = asTabbed(items, columns, GERMAN);
+    expect(tabbed).toBe('Name\tAmount\tDone\na,b\t3,5\tja\nc;d\t2\tnein\n"say ""hi""\nthere"\t0,25\tja\n\t1\tnein');
+    expect(asTabbed(items, columns).split("\n")[1]).toBe("a,b\t3.5\tyes");
+  });
+
+  it("quotes a field holding a tab and writes no trailing break", () => {
+    const text = asTabbed([{ name: "x\ty", amount: 1, done: true }], columns);
+    expect(text).toBe('Name\tAmount\tDone\n"x\ty"\t1\tyes');
   });
 });
 
@@ -139,13 +195,13 @@ describe("asCsv – the filtered set, not the visible page", () => {
 
     const out = lines(asCsv(projection.filtered, COLUMNS));
     expect(out).toHaveLength(5);
-    expect(out[4]).toBe("Dorado;100");
+    expect(out[4]).toBe("Dorado,100");
   });
 
   it("follows the sort of the set passed in", () => {
     const projection = tableModel(ROWS, COLUMNS, {
       sort: { column: "budget", direction: "desc" },
     });
-    expect(lines(asCsv(projection.filtered, COLUMNS))[1]).toBe("Aurora;300");
+    expect(lines(asCsv(projection.filtered, COLUMNS))[1]).toBe("Aurora,300");
   });
 });

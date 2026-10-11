@@ -228,6 +228,9 @@ export const GERMAN_WORDING: Wording = {
   calendarWeek: (week, year) => `KW ${week}/${year}`,
   entries: (count, formatted) => (count === 1 ? "1 Eintrag" : `${formatted} Einträge`),
   selectedCount: (_count, formatted) => `${formatted} ausgewählt`,
+  copiedRows: (count, formatted) => (count === 1 ? "1 Zeile kopiert" : `${formatted} Zeilen kopiert`),
+  copiedCell: "Zelle kopiert",
+  copyFailed: "Kopieren nicht möglich",
   noEntries: "Keine Einträge",
   nothingMatchesFilters: "Nichts passt zu Suche und Filtern",
 
@@ -295,7 +298,7 @@ export const GERMAN_WORDING: Wording = {
   columnFrequency: "Häufigkeit",
   columnAcknowledgement: "Quittierung",
   columnAge: "Alter",
-  availabilitySnoozed: (until, by) => `Zurückgestellt bis ${until} von ${by}`,
+  availabilitySnoozed: (until, by, reason) => `Zurückgestellt bis ${until} von ${by}${reason ? `: ${reason}` : ""}`,
   availabilitySnoozedShort: "Zurückgestellt",
   availabilitySuppressed: "Unterdrückt",
   availabilityDisabled: "Deaktiviert",

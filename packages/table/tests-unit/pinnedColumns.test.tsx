@@ -98,7 +98,7 @@ describe("the pinned blocks", () => {
 
   it("go into the export in the order they stand", () => {
     render(<Plant />);
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Tag;Line;Area;Output;Scrap;Verdict");
+    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Tag,Line,Area,Output,Scrap,Verdict");
   });
 
   it("leave a table without pins as it was - only its row actions stick, at the end", () => {

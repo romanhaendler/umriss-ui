@@ -268,7 +268,7 @@ describe("tree rows - search, footer, export", () => {
     render(<Units />);
     act(() => current!.setSearch("kiel"));
     const lines = current!.asCsv().replace(/^﻿/, "").split("\r\n");
-    expect(lines).toEqual(["Level;Unit;Budget", "1;Sales;300", "2;North;120", "3;Kiel;50"]);
+    expect(lines).toEqual(["Level,Unit,Budget", "1,Sales,300", "2,North,120", "3,Kiel,50"]);
   });
 });
 

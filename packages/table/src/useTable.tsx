@@ -31,7 +31,7 @@ import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
-import { csvOf } from "./export";
+import { csvOf, selectionText } from "./export";
 import { warnOnce } from "./dev";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
@@ -567,7 +567,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     },
     unfoldAllBranches: () => setBranchesState([...liveBranches]),
     foldAllBranches: () => setBranchesState([]),
-    asCsv: () => csvOf(registry, wording.levelColumn),
+    asCsv: () => csvOf(registry, wording.levelColumn, formats, wording),
+    selectionAsText: () => selectionText(registry, formats, wording),
     virtual,
     rowCount: server ? rowCount : b.filtered.length,
     server,

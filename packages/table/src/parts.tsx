@@ -53,7 +53,7 @@ import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
 import type { HookSnapshot, Registry, ColumnSpec, ColumnEntry } from "./registry";
 import { link } from "./registry";
-import { resetSearchAndFilters, visibleColumns } from "./export";
+import { cellText, resetSearchAndFilters, selectedInOrder, selectionText, visibleColumns } from "./export";
 import type { TableProps, TableSnapshot } from "./types";
 import { asText, isAbsent, isRightAligned } from "./values";
 import { withContinuation } from "./model/grouping";
@@ -387,6 +387,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      as React keeps information from previous renders: set while rendering. */
   const [heldBefore, setHeldBefore] = useState(0);
   const grid = useGridState();
+  /* What the live region says after Ctrl+C. The same words again must be heard
+     again: a trailing no-break space is toggled, which the region sees as a
+     change and a reader does not speak. */
+  const [said, setSaid] = useState("");
+  const say = (words: string) => setSaid((old) => (old === words ? `${words} ` : words));
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
   const [sticking, setSticking] = useState({ start: true, end: true });
@@ -635,6 +640,39 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      the page - the walk finds it right beneath the head. */
   const fresh = grid.state.editing?.line === NEW_LINE ? grid.state.editing : null;
   if (fresh && gridLinesNow[0]) gridLinesNow.splice(1, 0, { key: NEW_LINE, cells: gridLinesNow[0].cells, at: -1, row: fresh.fresh });
+  /* Ctrl or Cmd with C (table-copy-rows): the selected rows, or - in a grid with
+     no selection - the Active cell. Heard here by bubbling from rows, cells and
+     headers; the grid's own handler lets the key pass. The browser keeps the
+     key where text is marked or typed in. */
+  const onCopyKey = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.defaultPrevented || event.altKey || event.shiftKey || event.ctrlKey === event.metaKey) return;
+    if (event.key.toLowerCase() !== "c") return;
+    if (!(event.target instanceof Element) || event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) return;
+    if (window.getSelection()?.toString()) return;
+    let text = "";
+    let words = "";
+    const chosen = selectedInOrder(registry);
+    if (chosen.length > 0) {
+      text = selectionText(registry, formats, wording);
+      words = wording.copiedRows(chosen.length, formats.count(chosen.length));
+    } else if (gridMode && grid.state.active) {
+      const { line: key, column } = grid.state.active;
+      const line = gridLinesNow.find((l) => l.key === key);
+      const entry = dataColumns.find((e) => e.spec.id === column);
+      if (!line || line.row === undefined || line.key !== rowLine(hook.rowKey(line.row)) || !entry) return;
+      text = cellText(entry, line.row, formats, wording);
+      words = wording.copiedCell;
+    } else return;
+    event.preventDefault();
+    const failed = (reason: unknown) => {
+      warnOnce("copy-failed", `The clipboard refused the copy (${String(reason)}). It needs a secure context and a focused document.`);
+      say(wording.copyFailed);
+    };
+    Promise.resolve()
+      .then(() => navigator.clipboard.writeText(text))
+      .then(() => say(words), failed);
+  };
+
   const gridIds = [
     ...(selectable ? ["#select"] : []),
     ...(expanderColumn ? ["#detail"] : []),
@@ -881,6 +919,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           if (blocks.start || blocks.end) markUnder(event.currentTarget);
           markBeyond(event.currentTarget, blocks);
         }}
+        onKeyDown={onCopyKey}
         className={styles.scroll}
         style={maxHeight ? { maxHeight } : undefined}
       >
@@ -1019,6 +1058,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           />
         )}
       </div>
+      <VisuallyHidden aria-live="polite">
+        {said}
+      </VisuallyHidden>
       {registry.rowAdding && !registry.showsToolbar() && (
         <div className={styles.newRowBar}>
           <NewRowButton registry={registry} />

@@ -446,6 +446,67 @@ describe("Hidden", () => {
     }
   });
 
+  /* A snooze's reason is the sentence's last word (alarm-snooze-reason-shown 01):
+     in the tip and in what is spoken; the badge stays one word. */
+  describe("a snooze's reason", () => {
+    const withReason = (reason?: string) => {
+      const alarm: Alarm = {
+        id: "h1",
+        type: "temp",
+        lifecycle: "active-unacknowledged",
+        raised: NOW - 6 * MIN,
+        availability: "snoozed",
+        snooze: { until: NOW + 30 * MIN, by: "M. Keller", reason },
+      };
+      return alarmModel({ alarms: [alarm], types: TYPES, asOf: NOW });
+    };
+
+    it("ends the sentence in the tip and in what is spoken, the badge staying one word", async () => {
+      vi.useFakeTimers();
+      try {
+        render(<AlarmList view={withReason("valve being replaced")} />);
+        const word = screen.getByText(DEFAULT_WORDING.availabilitySnoozedShort);
+        const badge = word.closest("[class*='badge']")!;
+        expect(word.textContent).toBe("Snoozed");
+        expect(badge.textContent).toContain("Snoozed until 12:00 by M. Keller: valve being replaced");
+        fireEvent.pointerEnter(badge);
+        await act(() => vi.advanceTimersByTimeAsync(400));
+        expect(screen.getByRole("tooltip").textContent).toBe("Snoozed until 12:00 by M. Keller: valve being replaced");
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("is trimmed, and a blank one leaves the sentence as it was", () => {
+      const { unmount } = render(<AlarmList view={withReason("  valve  ")} />);
+      expect(screen.getByText("Snoozed until 12:00 by M. Keller: valve")).toBeTruthy();
+      unmount();
+      for (const reason of [undefined, "", "   "]) {
+        const again = render(<AlarmList view={withReason(reason)} />);
+        expect(screen.getByText("Snoozed until 12:00 by M. Keller")).toBeTruthy();
+        again.unmount();
+      }
+    });
+
+    it("speaks German with the German sentence", () => {
+      render(
+        <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
+          <AlarmList view={withReason("Ventil wird getauscht")} />
+        </LanguageProvider>,
+      );
+      expect(screen.getByText("Zurückgestellt bis 12:00 von M. Keller: Ventil wird getauscht")).toBeTruthy();
+    });
+
+    it("works with a wording of two parameters, which has no place for the reason", () => {
+      render(
+        <LanguageProvider wording={{ availabilitySnoozed: (until: string, by: string) => `until ${until}, ${by}` }}>
+          <AlarmList view={withReason("valve")} />
+        </LanguageProvider>,
+      );
+      expect(screen.getByText(/until .*, M\. Keller$/)).toBeTruthy();
+    });
+  });
+
   it("names the day of a snooze that ends on another day", () => {
     const snooze = { until: NOW + 26 * 60 * MIN, by: "M. Keller" };
     const alarm: Alarm = { id: "h1", type: "temp", lifecycle: "active-unacknowledged", raised: NOW - 6 * MIN, availability: "snoozed", snooze };

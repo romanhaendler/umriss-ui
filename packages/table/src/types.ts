@@ -744,6 +744,9 @@ export interface TableSnapshot<Z> {
   /** The filtered set in the visible columns as text for a spreadsheet - in
       server mode the page. */
   asCsv: () => string;
+  /** The selected rows within the filtered set as tab-separated text under a
+      header line - the text Ctrl+C writes. `""` with nothing selected. */
+  selectionAsText: () => string;
   /** Whether it virtualises. */
   virtual: boolean;
   /** How many rows the filtered set has - in server mode the server's count. */

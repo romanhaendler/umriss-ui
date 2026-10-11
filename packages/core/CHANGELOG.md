@@ -31,6 +31,16 @@ commit.
 
 ## Unreleased
 
+### Added
+
+- **`availabilitySnoozed(until, by, reason?)`**: a third, optional argument; the English and German sentences append `: ${reason}` for a non-empty reason ("Snoozed until 14:00 by M. Weber: valve being replaced" / "Zurückgestellt bis 14:00 von M. Weber: Ventil wird getauscht"). A wording of two parameters still fits the type and keeps working, with no reason in its sentence.
+
+- **`copiedRows(count, formatted)`, `copiedCell` and `copyFailed`**: what the table says to a screen reader after Ctrl/Cmd+C ("3 rows copied", "Cell copied", "Could not copy"), in English and German. A wording that leaves them out fails its type, as with any new key.
+
+### Changed
+
+- **Every entry begins with `"use client";`.** The built files `dist/core.js` and `dist/wording/de.js` start with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
 ---
 
 ## 0.32.0 – Words for a snooze's reason and a plan's milestones (Oct. 2026)

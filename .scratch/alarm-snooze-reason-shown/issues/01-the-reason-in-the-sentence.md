@@ -1,6 +1,6 @@
 # 01 - The reason in the sentence
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S (four source files and their tests)
 
@@ -26,3 +26,11 @@ The snoozed alarm's sentence carries the stored reason.
 - [ ] The comment in `alarmModel.ts` is true.
 - [ ] Changelogs: core and table under "Added" ("a snooze's reason is shown in the tip and spoken"); schedule and calculation follow the release rule (a new word in core takes them along).
 - [ ] Generated documents pass their guards; typecheck and unit tests pass.
+
+## Comments
+
+Delivered.
+
+- `availabilitySnoozed(until, by, reason?)` in `wording.ts` and `de.ts`: `: ${reason}` appended for a non-empty reason, "Snoozed until 12:00 by M. Keller: valve" / "Zurückgestellt bis 12:00 von M. Keller: Ventil". `AlarmList` passes `snooze.reason?.trim() || undefined`; the badge still reads `short`. `Snooze.reason`'s comment, the `onSnooze` prop doc, example 08's lead, the AlarmList outline paragraph and the snooze spec's "Stored, not shown" paragraph say it is shown now.
+- Tests: `alarmList.test.tsx` (tip and spoken sentence, trimmed, blank, German, a two-parameter wording through the provider - which the typecheck also holds), `core/tests-unit/language.test.tsx` (both languages, with and without; a two-parameter `Partial<Wording>` assignment).
+- Changelogs: core and table under Unreleased/Added. Schedule and calculation take the release rule at the release, which is not done here.

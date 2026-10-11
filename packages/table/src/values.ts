@@ -106,18 +106,13 @@ export function sortValue(
   }
 }
 
-/* The export follows German conventions, and "ja"/"nein" are data there, not a
-   label - lower case, the way a spreadsheet filters them. That is why they
-   stand here and not in the wording. */
-const EXPORT_YES = "ja";
-const EXPORT_NO = "nein";
-
-/** What goes into the export: numbers stay numbers, a point in time becomes an
-    ISO timestamp, an absent value an empty field. */
+/** What goes into the export: numbers and booleans stay what they are - the
+    writer gives them the language's notation (`model/csv.ts`) - a point in time
+    becomes an ISO timestamp, an absent value an empty field. */
 export function exportValue(
   value: unknown,
   own?: (value: never) => unknown,
-): string | number | undefined {
+): string | number | boolean | undefined {
   if (isAbsent(value)) return undefined;
   if (own) return exportValue(own(value as never));
   switch (kindOf(value)) {
@@ -128,7 +123,7 @@ export function exportValue(
     case "date":
       return (value as Date).toISOString();
     case "boolean":
-      return value ? EXPORT_YES : EXPORT_NO;
+      return value as boolean;
     default:
       return undefined;
   }

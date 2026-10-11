@@ -100,10 +100,10 @@ describe("Sorting and exporting", () => {
   it("exports the value, not the verdict", () => {
     render(<Log />);
     const lines = current!.asCsv().replace("﻿", "").split("\r\n");
-    /* The export keeps its decimal comma and its semicolon: that is a machine
-       format for a spreadsheet, argued in `model/csv.ts`, and it never went
-       through the display formats - so ADR-0024 did not move it. */
-    expect(lines).toEqual(["Feature;Value", "Alarm;12,5", "OK;9,5", "Empty;", "Warning;10,3", "Not a number;"]);
+    /* The export takes its separator and decimal mark from the language
+       (ADR-0061) - in English a comma and a point - and never went through
+       the display formats. */
+    expect(lines).toEqual(["Feature,Value", "Alarm,12.5", "OK,9.5", "Empty,", "Warning,10.3", "Not a number,"]);
   });
 });
 

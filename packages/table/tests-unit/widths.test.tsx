@@ -143,7 +143,7 @@ describe("Sticky parts and density", () => {
 
   it("the sticky row header stands first in the column menu and in the export as well", () => {
     render(<List sticky />);
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Order;Line");
+    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Order,Line");
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const menu = screen.getByRole("dialog");
     expect(within(menu).getAllByRole("checkbox").map((k) => k.closest("label")!.textContent)).toEqual(["Order", "Line"]);

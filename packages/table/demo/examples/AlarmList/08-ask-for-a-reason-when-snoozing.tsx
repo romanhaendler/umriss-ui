@@ -22,7 +22,7 @@ const ALERTS: readonly Alarm[] = [
 
 export const title = "Ask for a reason when snoozing";
 
-export const lead = "Pass `snoozeReason` and “Snooze” opens a small panel instead of the menu: the durations, a field for the reason, and a button that reports. With `\"required\"` the button waits for text; your application stores the reason with `snooze()`.";
+export const lead = "Pass `snoozeReason` and “Snooze” opens a small panel instead of the menu: the durations, a field for the reason, and a button that reports. With `\"required\"` the button waits for text; your application stores the reason with `snooze()`, and the list shows it in the snoozed badge's tip and in what is spoken.";
 
 const MIN = 60_000;
 

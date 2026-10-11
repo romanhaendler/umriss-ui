@@ -1,6 +1,6 @@
 # 02 - The decision, the documents, the changelog
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Size: S
 
@@ -24,3 +24,7 @@ The decision is written down and the change announced.
 - [ ] Documents and capability record updated; generated documents pass their guards.
 - [ ] Full check passes.
 - [ ] The spec's status is `done`, with a delivery report under `## Comments`.
+
+## Comments
+
+ADR-0061 `the-csv-follows-the-language-in-use` written; the table CHANGELOG has the entry under Changed; README line and the Export page text updated. Left for a human: the ADR index row and the pointer in ADR-0024 (`docs/adr/` was being edited elsewhere), the line in `docs/testing.md`, the version bump and the full check (build, visual) - the release is left.
