@@ -1,6 +1,6 @@
 # A dock snaps, it does not follow
 
-Status: accepted
+Status: withdrawn. The Dock was removed from `@umriss-ui/core`, so this decision no longer applies to any code.
 Date:   2026-09
 
 Dragging a dock does not move it. The grip follows the pointer, but the dock

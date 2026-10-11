@@ -58,7 +58,6 @@ export const SAMPLE = [
   "modal",
   "commandpalette",
   "treeview",
-  "dock",
   "stat",
   /* The six foundations, each with its page (core-foundations). */
   "switch",

@@ -13,9 +13,7 @@ export function prefersReducedMotion(): boolean {
  * `tokens.css` writes `240ms`; in the built bundle it says `.24s`, because a
  * CSS minifier may rewrite times in the shorter notation. A bare `parseFloat`
  * reads 0.24 out of that - a quarter of a thousandth of a second. The
- * transition did in fact run in the demo, but so briefly that only the tools
- * stood at their old place for a moment and the dock then jumped - exactly the
- * jump ADR-0014 sets out to abolish.
+ * transition did in fact run, but too briefly to be seen.
  *
  * Whoever reads a token back reads the unit with it. With lengths that does not
  * show, because `px` is the only one occurring; with times there are two.

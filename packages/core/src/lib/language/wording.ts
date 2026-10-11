@@ -109,26 +109,6 @@ export interface Wording {
       elsewhere. */
   paletteKeyEsc: string;
 
-  /* -------- Dock -------------------------------------------------- */
-  /* The terms stand in the glossary under "Reaching for a tool" (CONTEXT.md).
-     "Werkzeugleiste", "Leiste" and "Symbolleiste" are expressly on the avoid
-     list there - a dock is not a bar in the flow but something that lies over
-     its host and moves. */
-  /** Accessible name of a dock's tools. */
-  dockTools: string;
-  /** Accessible name of the grip - it says what it does, not what it is. */
-  dockGrip: string;
-  /** The four resting places, named. The keys are the `DockPlace` type's, and a
-      register translates them: the German one answers "oben" where the
-      English one answers "top". */
-  dockPlace: (place: "top" | "right" | "bottom" | "left") => string;
-  /** What the screen reader hears once the dock has taken a place. */
-  dockPlaced: (place: string) => string;
-  /** And what it hears when a place has refused. A refusal is not a fault: a
-      wide, flat host with no room for a standing dock is not a mistake anyone
-      made. */
-  dockNoPlace: (place: string) => string;
-
   /* -------- Date and time ----------------------------------------- */
   datePlaceholder: string;
   /** Accessible name of the panel. Deliberately kept apart from the
@@ -658,12 +638,6 @@ export const DEFAULT_WORDING: Wording = {
   paletteHintChoose: "open",
   paletteHintClose: "close",
   paletteKeyEsc: "Esc",
-
-  dockTools: "Tools",
-  dockGrip: "Move dock",
-  dockPlace: (place) => ({ top: "top", right: "right", bottom: "bottom", left: "left" })[place],
-  dockPlaced: (place) => `Dock at the ${place}`,
-  dockNoPlace: (place) => `No room for the dock on the ${place}`,
 
   datePlaceholder: "Select date",
   datePanel: "Select date",

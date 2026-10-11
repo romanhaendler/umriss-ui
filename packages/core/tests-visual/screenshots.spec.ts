@@ -22,7 +22,7 @@
 
 import { test, expect } from "@playwright/test";
 import { CONFIGURATOR_PAGES, EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
-import { open, openExample, standstill, openScenario } from "./navigation";
+import { open, openExample, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -109,42 +109,12 @@ test("The command palette's window in the resting state", async ({ page }, testI
   await expect(page).toHaveScreenshot(`palette-resting-${testInfo.project.name}.png`);
 });
 
-/* The dock's four resting places, light and dark.
-
-   The example loop above photographs only one of them - the one the dock starts
-   with. The other three are states it has to be brought into first, and the way
-   there is the four arrows on the grip.
-
-   Only RESTING states are photographed. A picture in the middle of a transition
-   would be the picture of a transform on its way to zero, and the baseline
-   thereby a test of timing rather than of appearance (ADR-0014). That is why it
-   waits each time until no animation is running any more - and not for a fixed
-   span of time, which would be too short on a slower machine. */
-for (const [key, place] of [
-  ["ArrowUp", "top"],
-  ["ArrowRight", "right"],
-  ["ArrowDown", "bottom"],
-  ["ArrowLeft", "left"],
-] as const) {
-  test(`The dock at the resting place ${place}`, async ({ page }, testInfo) => {
-    await open(page, "dock");
-    const host = page.locator('[data-dock="spacious"]');
-    await host.getByRole("button", { name: "Move dock" }).focus();
-    await page.keyboard.press(key);
-    await expect(host.getByRole("group", { name: "Tools" })).toHaveAttribute(
-      "data-place",
-      place,
-    );
-    await standstill(page);
-    await expect(host).toHaveScreenshot(`dock-${place}-${testInfo.project.name}.png`);
-  });
-}
-
 /* The drawer standing open, at both edges (core-foundations 03). The example
    loop photographs its examples closed - a button - and the sheet at the edge
    is the one thing about it that is appearance. The whole viewport, because
    the drawer is its edge and the scrim over the page behind; after the
-   entrance has come to rest, for the reason the dock's pictures give. */
+   entrance has come to rest - a picture in the middle of a transition would test
+   timing rather than appearance. */
 for (const [example, button] of [
   ["beside-a-service-list", "Checkout"],
   ["left-and-wider", "Filter the alerts"],

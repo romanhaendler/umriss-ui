@@ -61,8 +61,8 @@ if (typeof window !== "undefined") {
       window.PointerEvent;
   }
 
-  /* jsdom does not know pointer capture. The table (column width) and the dock
-     (grip) both call it, so that a drag goes on when the pointer leaves the
+  /* jsdom does not know pointer capture. The table (column width) and the splitter
+     both call it, so that a drag goes on when the pointer leaves the
      element - a guarantee of the platform that jsdom does not reproduce and that
      a test here could not observe either. The replacement only keeps a record, so
      that `hasPointerCapture` tells the truth during the cleanup. */

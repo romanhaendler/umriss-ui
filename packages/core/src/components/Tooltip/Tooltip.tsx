@@ -54,7 +54,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     if (!open) return;
     /* Dialog, then the setting, then the body - the same function as the
        popover. Without it a tooltip in a modal lay behind the dialog, and
-       with it every tooltip of a dock inside one. */
+       with it every tooltip inside one. */
     setTarget(portalTargetFor(targetRef.current, portalTarget));
   }, [open, portalTarget]);
 

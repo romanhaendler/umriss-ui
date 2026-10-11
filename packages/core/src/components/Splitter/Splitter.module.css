@@ -64,8 +64,7 @@
   }
 
   /* The grip on the line's middle says the line can be taken hold of: quiet
-     at rest, clear under the pointer and while held (core-layout-extras 04).
-     The dock's grip, standing across a stacked splitter's line. */
+     at rest, clear under the pointer and while held (core-layout-extras 04). */
   .grip {
     position: absolute;
     top: 50%;

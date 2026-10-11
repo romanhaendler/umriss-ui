@@ -26,8 +26,8 @@ half a later reader needs most. Exactly one is superseded today.
 | [0010](0010-a-stale-value-keeps-its-verdict.md) | A stale value keeps its verdict | accepted | limits and alarms |
 | [0011](0011-named-channels-never-overloaded.md) | A channel is named, never overloaded | accepted | charts |
 | [0012](0012-a-translucent-material-needs-a-floor.md) | A translucent material needs a floor | accepted | surface and motion |
-| [0013](0013-a-dock-snaps-it-does-not-follow.md) | A dock snaps, it does not follow | accepted | surface and motion |
-| [0014](0014-a-turn-that-cannot-be-a-transition.md) | A turn that cannot be a transition | accepted | surface and motion |
+| [0013](0013-a-dock-snaps-it-does-not-follow.md) | A dock snaps, it does not follow | withdrawn, the Dock was removed | surface and motion |
+| [0014](0014-a-turn-that-cannot-be-a-transition.md) | A turn that cannot be a transition | withdrawn, the Dock was removed | surface and motion |
 | [0015](0015-props-are-english-identifiers-are-german.md) | Props are English, identifiers are German | superseded by ADR-0018 | language |
 | [0016](0016-the-table-is-a-package-that-depends-on-ui.md) | The table is a package, and it depends on `@umriss-ui/core` | accepted | architecture |
 | [0017](0017-columns-are-declared-by-composition.md) | Columns are declared by composition and bound through the hook | accepted | architecture |
