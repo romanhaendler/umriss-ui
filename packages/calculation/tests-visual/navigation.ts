@@ -6,6 +6,6 @@ import { navigation } from "@umriss-ui/demo/checks/navigation";
 import { addressOf } from "../demo/outline";
 
 export { OUTLINE, ALL_PAGES, addressOf } from "../demo/outline";
-export { allWithCode, settle, standstill } from "@umriss-ui/demo/checks/navigation";
+export { allWithCode, aloneStage, settle, standstill } from "@umriss-ui/demo/checks/navigation";
 
 export const { open, openExample, openScenario } = navigation(addressOf);

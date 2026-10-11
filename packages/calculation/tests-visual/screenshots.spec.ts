@@ -8,7 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import { EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
-import { open, openExample, openScenario } from "./navigation";
+import { aloneStage, open, openExample, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 
 /* Not the API index: its content is text, which the guards hold (ADR-0044). */
 for (const pageId of PAGES.filter((one) => one !== "api")) {
-  test(`Seitenkopf ${pageId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
+  test(`Page head ${pageId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await open(page, pageId);
     const target = page.locator(`[data-block="${pageId}"] .pageHead`);
     await target.scrollIntoViewIfNeeded();
@@ -28,14 +28,13 @@ for (const pageId of PAGES.filter((one) => one !== "api")) {
 for (const scenarioId of SCENARIO_IDS) {
   test(`Scenario ${scenarioId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await openScenario(page, scenarioId);
-    const target = page.locator(`[data-scenario="${scenarioId}"] .scenarioStage`);
-    await target.scrollIntoViewIfNeeded();
+    const target = await aloneStage(page, scenarioId);
     await expect(target).toHaveScreenshot(`scenario-${scenarioId}-${testInfo.project.name}.png`);
   });
 }
 
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
-  test(`Beispiel ${name}`, async ({ page }, testInfo) => {
+  test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
     const target = page.locator(`[data-example="${exampleId}"]`);
     await target.scrollIntoViewIfNeeded();
@@ -47,7 +46,7 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
 /* Outside the loop: the loop photographs every example as it starts, folded,
    and a derivation opened beneath its line - the panel, its bar, the line that
    closes it, a derivation inside another - is in no example's first picture. */
-test("Beispiel calculation--oee, opened", async ({ page }, testInfo) => {
+test("Example calculation--oee, opened", async ({ page }, testInfo) => {
   await openExample(page, "calculation", "oee");
   const target = page.locator('[data-example="oee"]');
   for (const label of ["Availability", "Run time", "Performance"]) {
@@ -59,7 +58,7 @@ test("Beispiel calculation--oee, opened", async ({ page }, testInfo) => {
 
 /* Hover across the full row, the falling lines above it: a band that stops
    short of the left edge, or one that covers a line, shows here. */
-test("Beispiel calculation--oee, hovered", async ({ page }, testInfo) => {
+test("Example calculation--oee, hovered", async ({ page }, testInfo) => {
   await openExample(page, "calculation", "oee");
   const target = page.locator('[data-example="oee"]');
   for (const label of ["Availability", "Run time"]) {
@@ -70,7 +69,7 @@ test("Beispiel calculation--oee, hovered", async ({ page }, testInfo) => {
 });
 
 /* A phone's width: the component measures itself, not the window. */
-test("Beispiel calculation--oee, narrow", async ({ page }, testInfo) => {
+test("Example calculation--oee, narrow", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openExample(page, "calculation", "oee");
   const target = page.locator('[data-example="oee"]');
@@ -81,7 +80,7 @@ test("Beispiel calculation--oee, narrow", async ({ page }, testInfo) => {
 
 /* Metrics opened - the closing rows with their units, a derivation inside
    another - and on a phone, where three metrics stand beneath their labels. */
-test("Beispiel metrics--whole-company, opened", async ({ page }, testInfo) => {
+test("Example metrics--whole-company, opened", async ({ page }, testInfo) => {
   await openExample(page, "metrics", "whole-company");
   const target = page.locator('[data-example="whole-company"]');
   for (const label of ["Commercial", "Customer service"]) {
@@ -91,7 +90,7 @@ test("Beispiel metrics--whole-company, opened", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`example-metrics--whole-company-opened-${testInfo.project.name}.png`);
 });
 
-test("Beispiel metrics--whole-company, narrow", async ({ page }, testInfo) => {
+test("Example metrics--whole-company, narrow", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openExample(page, "metrics", "whole-company");
   const target = page.locator('[data-example="whole-company"]');
@@ -112,7 +111,7 @@ for (const [example, group] of [
   ["a-sum-from-data-in-a-tree", "Movements"],
   ["rows-of-both-signs-with-metrics", "Movements"],
 ] as const) {
-  test(`Beispiel rows-from-data--${example}, opened`, async ({ page }, testInfo) => {
+  test(`Example rows-from-data--${example}, opened`, async ({ page }, testInfo) => {
     await openExample(page, "rows-from-data", example);
     const target = page.locator(`[data-example="${example}"]`);
     await target.getByRole("button", { name: `Show how ${group} is derived` }).click();
@@ -121,7 +120,7 @@ for (const [example, group] of [
   });
 }
 
-test("Beispiel calculation--emphasis-inside-a-group, opened", async ({ page }, testInfo) => {
+test("Example calculation--emphasis-inside-a-group, opened", async ({ page }, testInfo) => {
   await openExample(page, "calculation", "emphasis-inside-a-group");
   const target = page.locator('[data-example="emphasis-inside-a-group"]');
   await target.getByRole("button", { name: "Show how Cost centres is derived" }).click();

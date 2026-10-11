@@ -8,7 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import { EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
-import { open, openExample, openScenario } from "./navigation";
+import { aloneStage, open, openExample, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 
 /* Not the API index: its content is text, which the guards hold (ADR-0044). */
 for (const pageId of PAGES.filter((one) => one !== "api")) {
-  test(`Seitenkopf ${pageId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
+  test(`Page head ${pageId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await open(page, pageId);
     const target = page.locator(`[data-block="${pageId}"] .pageHead`);
     await target.scrollIntoViewIfNeeded();
@@ -28,14 +28,13 @@ for (const pageId of PAGES.filter((one) => one !== "api")) {
 for (const scenarioId of SCENARIO_IDS) {
   test(`Scenario ${scenarioId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await openScenario(page, scenarioId);
-    const target = page.locator(`[data-scenario="${scenarioId}"] .scenarioStage`);
-    await target.scrollIntoViewIfNeeded();
+    const target = await aloneStage(page, scenarioId);
     await expect(target).toHaveScreenshot(`scenario-${scenarioId}-${testInfo.project.name}.png`);
   });
 }
 
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
-  test(`Beispiel ${name}`, async ({ page }, testInfo) => {
+  test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
     const target = page.locator(`[data-example="${exampleId}"]`);
     await target.scrollIntoViewIfNeeded();
