@@ -1,6 +1,7 @@
 import { forwardRef, useId, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { inertWhen } from "../../lib/inert";
 import { GripGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -136,7 +137,7 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
     >
       {/* A pane folded to nothing is out of the tab order as well as out of
           sight: the keys would otherwise walk into content nobody sees. */}
-      <div id={firstId} className={styles.pane} inert={value <= 0 || undefined}>
+      <div id={firstId} className={styles.pane} {...inertWhen(value <= 0)}>
         {children[0]}
       </div>
       <div
@@ -170,7 +171,7 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
       >
         <GripGlyph className={styles.grip} />
       </div>
-      <div className={styles.pane} inert={value >= 100 || undefined}>
+      <div className={styles.pane} {...inertWhen(value >= 100)}>
         {children[1]}
       </div>
     </div>

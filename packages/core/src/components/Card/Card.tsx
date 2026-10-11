@@ -1,6 +1,7 @@
 import { createContext, forwardRef, useContext, useId, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { inertWhen } from "../../lib/inert";
 import styles from "./Card.module.css";
 import { useWording } from "../../lib/language";
 
@@ -164,7 +165,7 @@ export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardB
   // stays in the DOM but is inert (no focus, no interaction).
   return (
     <div className={cx(styles.collapse, card.collapsed && styles.collapsed)}>
-      <div className={styles.collapseInner} inert={card.collapsed || undefined}>
+      <div className={styles.collapseInner} {...inertWhen(card.collapsed)}>
         {body}
       </div>
     </div>

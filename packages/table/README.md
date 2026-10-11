@@ -17,7 +17,12 @@ pnpm add @umriss-ui/table @umriss-ui/core
 
 `@umriss-ui/core` is a **peer dependency** (ADR-0016): the table reads its
 provider, its formats and its wording, and enters it by the public entry only.
-React 18 or 19 as a peer as well.
+React 18 or 19 as a peer as well; the unit tests run against 18.3 and 19 in CI.
+
+Every entry begins with `"use client"`, the directive a framework
+with Server Components reads to treat a module as client code. No test runs
+inside such a framework: the
+table is rendered to a string in a test.
 
 ## The smallest table that runs
 

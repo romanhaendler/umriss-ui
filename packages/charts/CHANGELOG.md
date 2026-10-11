@@ -33,6 +33,8 @@ interface was still expected to move before `0.3.0`.
 
 ### Added
 
+- **The unit tests run against React 18.3.1 and 19 in CI**, and the charts are rendered to a string in a test (`tests-unit/ssr.test.tsx`).
+
 - **A stack's total in the data table.** The table of a stacked chart ends each
   stack's members with a "Total" column (German "Summe"): the sum of the
   stack's members at the row's x, written as the tooltip writes it - a
@@ -42,6 +44,8 @@ interface was still expected to move before `0.3.0`.
 ### Changed
 
 - **Every entry begins with `"use client";`.** The built files `dist/charts.js` and `dist/wording/de.js` start with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
+- **Every export is a client component.** A hook called in a Server Component now fails with React's message about a client reference, not one about `useState`.
 
 ---
 

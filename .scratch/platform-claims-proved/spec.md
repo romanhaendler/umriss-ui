@@ -1,6 +1,6 @@
 # Two claims about the platform, proved
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-10-11
 Origin: `.scratch/open-points-roadmap/spec.md`, rows X1 and X2 and "Taken as
 agreed" 6; the facts in `docs/research/open-points-2026-10/platform_claims.md`.

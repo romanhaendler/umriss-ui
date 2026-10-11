@@ -1,6 +1,6 @@
 # 04 - The READMEs, changelogs and testing guide say what is now tested
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -32,3 +32,13 @@ Spec: `.scratch/platform-claims-proved/spec.md` - P10
 - [ ] Each sentence about React or the server matches a test or a check that
       exists; the ticket lists the pairing under `## Comments`.
 - [ ] `docs/journal.md` is not touched (the maintainer's).
+
+## Comments
+
+- Delivered. Pairing of claim and proof:
+  - "the unit tests run against 18.3 and 19 in CI" (five READMEs) - job `unit-react18` and `check` in `.github/workflows/ci.yml`, run locally under both (ticket 01); the job needs the fix named there before it proves it.
+  - "every entry (`./wording/de` included in core and charts) begins with `"use client"`" - `scripts/check-dist.ts`, run by `pnpm -r check:dist` in `check` (ticket 03).
+  - "rendered to a string in a test" - `tests-unit/ssr.test.tsx` in charts, table, schedule and calculation; for core the fields' widths in `fieldWidth.test.tsx` (not in the node environment).
+  - The schedule's sentence: labelled frame and empty canvases on a server, lanes after mount - `packages/schedule/tests-unit/ssr.test.tsx` (ticket 02).
+- Left out on purpose: "hydrated on the client" (the ticket's wording) - no browser hydration test exists (spec, out of scope), so the READMEs say "rendered on a server" only; no Next.js version; no Server Component claim.
+- Changelogs: an "Added" line and a "Changed" line on the client component in each of the five; core also a "Fixed" line for `inert` on 18. `docs/testing.md` has a row on the job, `check:dist` and the ssr tests; `ci.yml`'s header comment lists the new checks. `docs/journal.md` untouched.
