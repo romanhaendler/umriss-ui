@@ -53,7 +53,7 @@ checkShell({
   rows: [
     { query: "--u-accent", label: "--u-color-accent", pageId: "theming", anchor: "token-u-color-accent" },
     { query: "No matches", label: "noMatches", pageId: "language", anchor: "wording-noMatches" },
-    { query: "Stand unbekannt", label: "asOfUnknown", pageId: "language", anchor: "wording-asOfUnknown" },
+    { query: "Wert verringern", label: "decreaseValue", pageId: "language", anchor: "wording-decreaseValue" },
   ],
   elsewhere: [
     {

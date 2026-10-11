@@ -382,7 +382,6 @@ export interface Wording {
   freshnessDisconnected: string;
   /** "As of: 3 minutes ago", where the duration comes from the formats. */
   asOfAgo: (duration: string) => string;
-  asOfUnknown: string;
 
   /* -------- Overlays and states ----------------------------------- */
   close: string;
@@ -752,7 +751,6 @@ export const DEFAULT_WORDING: Wording = {
   freshnessStale: "Stale",
   freshnessDisconnected: "No connection",
   asOfAgo: (duration) => `As of: ${duration}`,
-  asOfUnknown: "As-of time unknown",
 
   close: "Close",
   closeToast: "Close message",
