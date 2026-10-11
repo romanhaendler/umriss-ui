@@ -40,6 +40,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 - **Every export is a client component.** A hook called in a Server Component now fails with React's message about a client reference, not one about `useState`.
 
+### Fixed
+
+- **A sticking group line is no longer covered by the pinned cells of the rows it passes.** With a pinned column and a scrolled body, the line's pinned part - its label, the fold, the checkbox - was painted over by the data rows' pinned cells, and only the part right of the pinned block showed. The line's pinned cells, and a span group's pinned cell, stand one level above them.
+
 ---
 
 ## 0.15.0 – A reason when snoozing (Oct. 2026)
