@@ -81,6 +81,14 @@ interface Alert {
 }
 
 const TONE = { high: "danger", medium: "warning", low: "neutral" } as const;
+const RANK = { high: 0, medium: 1, low: 2 } as const;
+
+/** Worst first: by priority, then what nobody has acknowledged, then the newest. */
+const WORST_FIRST = [
+  { column: "priority", direction: "asc" },
+  { column: "acknowledged", direction: "asc" },
+  { column: "raised", direction: "desc" },
+] as const;
 
 /** The alerts as they stand at 10:30. */
 const ALERTS: readonly Alert[] = [
@@ -98,7 +106,7 @@ export const lead =
 
 export const callouts = [
   "Who carries the pager right now, and how many alerts still wait for someone to see them.",
-  "The alerts stand newest first, each with its priority, its state and when someone acknowledged it. A resolved alert nobody acknowledged stays until someone does.",
+  "The alerts stand worst first: by priority, then what nobody has acknowledged, then the newest. A resolved alert nobody acknowledged stays until someone does.",
   "Tick rows and acknowledge them in one go.",
 ];
 
@@ -117,7 +125,7 @@ const onCall = (rotation: "primary" | "secondary") => {
 export default function WorkThroughTheAlerts() {
   const formats = useFormats();
   const [alerts, setAlerts] = useState<readonly Alert[]>(ALERTS);
-  const t = useTable(alerts, { rowKey: (a) => a.id, defaultSort: { column: "raised", direction: "desc" } });
+  const t = useTable(alerts, { rowKey: (a) => a.id, defaultSort: WORST_FIRST });
   const { Table, Column } = t;
   const waiting = alerts.filter((a) => a.acknowledgedAt === undefined).length;
   const time = (instant: number) => formats.time(new Date(instant), false);
@@ -145,7 +153,7 @@ export default function WorkThroughTheAlerts() {
           <Column value="raised" label="Raised">
             {(raised) => time(raised)}
           </Column>
-          <Column value="priority" label="Priority">
+          <Column value="priority" label="Priority" sortValue={(priority) => RANK[priority]}>
             {(priority) => <Badge tone={TONE[priority]}>{priority}</Badge>}
           </Column>
           <Column value="message" label="Alert" rowHeader />

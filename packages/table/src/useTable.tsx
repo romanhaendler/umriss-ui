@@ -458,7 +458,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      (ADR-0047). The first render's view is where it starts, not a change; the
      key is compared, not the object, so a second render with the same view
      reports nothing. The render after a `setView` takes its view as reported
-     without calling the handler. */
+     without calling the handler; a reader's change committed in that same
+     render is not reported on its own - the next report carries it, being the
+     whole view. */
   const viewNowKey = viewKey(groupedView);
   const viewReported = useRef(viewNowKey);
   const appliedSeen = useRef(0);
