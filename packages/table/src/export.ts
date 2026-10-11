@@ -101,6 +101,11 @@ export function selectionText(registry: Registry, formats: Formats, wording: Wor
 
 /** One cell as the copy writes it: the export's value in the language's notation. */
 export function cellText(entry: ColumnEntry, row: unknown, formats: Formats, wording: Wording): string {
-  const value = exportValue(entry.read(row), entry.spec.ownExportValue);
+  return valueText(entry, entry.read(row), formats, wording);
+}
+
+/** The same for a value that is not (yet) the row's - what an open editor holds. */
+export function valueText(entry: ColumnEntry, raw: unknown, formats: Formats, wording: Wording): string {
+  const value = exportValue(raw, entry.spec.ownExportValue);
   return value === undefined ? "" : plain(value, conventionsOf(formats, wording));
 }

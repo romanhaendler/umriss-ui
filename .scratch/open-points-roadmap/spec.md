@@ -108,7 +108,9 @@ Seven things nobody decided one by one; the maintainer confirmed them together.
    a bulk action's argument there.
 4. An English CSV means comma, decimal point, "yes"/"no"; nothing changes for a
    German one.
-5. Copying is announced to a screen reader and shows no toast.
+5. Copying is announced to a screen reader and shows no toast. Seen by the
+   maintainer on the demo, that was not enough: what was copied flashes as well
+   (table-copy-rows 03).
 6. `"use client"` heads every built entry, so every component is a client
    component.
 7. Versions rise as usual: a new word in core takes table, schedule and

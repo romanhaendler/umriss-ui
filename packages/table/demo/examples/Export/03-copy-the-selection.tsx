@@ -3,7 +3,7 @@ import { useTable } from "../../../src";
 
 export const title = "Copy the selection";
 
-export const lead = "Ctrl or Cmd with C copies the selected rows, tab-separated under a header line; `selectionAsText()` hands the same text to a button of your own.";
+export const lead = "Ctrl or Cmd with C copies the selected rows, tab-separated under a header line, and they flash once; `selectionAsText()` hands the same text to a button of your own.";
 
 interface Shipment {
   id: string;

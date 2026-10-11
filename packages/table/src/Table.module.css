@@ -1650,6 +1650,47 @@
     color: var(--u-color-danger-text);
   }
 
+  /* ---- A copy, seen (table-copy-rows 03) --------------------------------- */
+
+  /* What Ctrl+C copied flashes once: its cells take an accent tint, mixed into
+     the surface so a pinned cell stays opaque, which fades back to what they
+     were. The frame sets `data-copied` and takes it off at `animationend`. No
+     movement, no outline. Reduced motion keeps the tint for the same time and
+     drops the fade - the tokens fall to 0ms there, so the time is written out. */
+  .table [data-copied] {
+    animation: copied calc(var(--u-duration-draw) * 2) var(--u-ease-out);
+  }
+
+  /* Held before it fades: on a selected row the tint stands close to the
+     selection's own, and one that fades from the first frame is gone before it
+     is seen. */
+  @keyframes copied {
+    from,
+    45% {
+      background: color-mix(in srgb, var(--u-color-accent) 28%, var(--u-color-surface));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .table [data-copied] {
+      animation: copied 640ms steps(1);
+    }
+  }
+
+  /* Forced colours: the system's selection pair, held as long, with no fade. */
+  @media (forced-colors: active) {
+    .table [data-copied] {
+      animation: copiedForced 640ms steps(1);
+    }
+
+    @keyframes copiedForced {
+      from {
+        background: Highlight;
+        color: HighlightText;
+      }
+    }
+  }
+
   /* ---- Forced colours (forced-colors 03) ------------------------------- */
 
   /* Forced colours repaint every ground with the page's and drop every

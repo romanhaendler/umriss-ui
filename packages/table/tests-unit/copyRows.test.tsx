@@ -196,15 +196,30 @@ describe("Ctrl+C and Cmd+C", () => {
     expect(writeText).toHaveBeenCalledWith("Sales");
   });
 
-  it("leave a grid editor's own copy alone", () => {
+  const openEditor = () => {
     render(<Units grid editable />);
     const cell = screen.getByText("300").closest<HTMLElement>("td")!;
     act(() => cell.focus());
     fireEvent.focus(cell);
     fireEvent.keyDown(cell, { key: "Enter" });
-    const input = screen.getByLabelText("Edit Budget: Sales");
+    return { cell, input: screen.getByLabelText("Edit Budget: Sales") as HTMLInputElement };
+  };
+
+  it("copy what stands in an open editor when nothing is marked in it", async () => {
+    const { cell, input } = openEditor();
+    fireEvent.change(input, { target: { value: "415" } });
+    expect(copy(input)).toBe(false);
+    expect(await voice()).toBe("Cell copied");
+    expect(writeText).toHaveBeenCalledWith("415");
+    expect(cell.hasAttribute("data-copied")).toBe(true);
+  });
+
+  it("leave the key to the browser where text is marked in the editor", () => {
+    const { cell, input } = openEditor();
+    input.setSelectionRange(0, 2);
     expect(copy(input)).toBe(true);
     expect(writeText).not.toHaveBeenCalled();
+    expect(cell.hasAttribute("data-copied")).toBe(false);
   });
 
   it("say that the copy failed when the clipboard refuses or is missing", async () => {
@@ -219,5 +234,75 @@ describe("Ctrl+C and Cmd+C", () => {
     const before = region()!.firstChild;
     expect(await voice()).toBe("Could not copy");
     expect(region()!.firstChild).not.toBe(before);
+  });
+});
+
+/* The flash (table-copy-rows 03): `data-copied` on the copied cells, taken off
+   when the animation ends. jsdom runs no animation; the end is fired by hand. */
+describe("The flash of a copy", () => {
+  const flashed = () => Array.from(document.querySelectorAll("[data-copied]"));
+
+  it("marks the cells of the copied rows and loses the mark when the animation ends", async () => {
+    render(<Units />);
+    pick("s", "o");
+    copy(screen.getByText("Sales"));
+    await voice();
+    const marked = flashed();
+    expect(marked).toHaveLength(8);
+    expect(new Set(marked.map((c) => c.closest("tr"))).size).toBe(2);
+    marked.forEach((c) => fireEvent.animationEnd(c));
+    expect(flashed()).toHaveLength(0);
+  });
+
+  it("copies, announces and marks the rows with the focus on a checkbox, a row's or the header's", async () => {
+    render(<Units />);
+    const [all, ...boxes] = screen.getAllByRole("checkbox") as HTMLInputElement[];
+    for (const box of [boxes[0]!, boxes[1]!]) {
+      fireEvent.click(box);
+      act(() => box.focus());
+    }
+    expect(copy(document.activeElement!)).toBe(false);
+    expect(await voice()).toBe("2 rows copied");
+    expect(writeText).toHaveBeenLastCalledWith(current!.selectionAsText());
+    expect(flashed().length).toBe(8);
+    flashed().forEach((c) => fireEvent.animationEnd(c));
+    act(() => all!.focus());
+    copy(all!);
+    expect(await voice()).toBe("2 rows copied");
+    expect(flashed().length).toBe(8);
+  });
+
+  it("marks the Active cell alone", async () => {
+    render(<Units grid />);
+    const cell = screen.getByText("Sales").closest<HTMLElement>("th, td")!;
+    act(() => cell.focus());
+    fireEvent.keyDown(cell, { key: "ArrowRight" });
+    copy(document.activeElement!);
+    await voice();
+    expect(flashed()).toEqual([document.activeElement]);
+  });
+
+  it("starts again with a second copy", async () => {
+    render(<Units />);
+    pick("o");
+    copy(screen.getByText("Ops"));
+    await voice();
+    const first = flashed();
+    expect(first.length).toBeGreaterThan(0);
+    const remove = vi.spyOn(first[0]!, "removeAttribute");
+    copy(screen.getByText("Ops"));
+    await voice();
+    expect(remove).toHaveBeenCalledWith("data-copied");
+    expect(flashed()).toHaveLength(first.length);
+  });
+
+  it("marks nothing when the copy fails", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    writeText.mockRejectedValue(new Error("denied"));
+    render(<Units />);
+    pick("s");
+    copy(screen.getByText("Sales"));
+    await voice();
+    expect(flashed()).toHaveLength(0);
   });
 });
