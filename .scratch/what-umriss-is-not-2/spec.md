@@ -1,6 +1,6 @@
 # What umriss is not, second part
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-11
 Origin: `.scratch/open-points-roadmap/spec.md`, rows C6, C7, C8 (the chart kinds)
 and X4, X5 (time zones, form validation, a dashboard a user arranges); the facts

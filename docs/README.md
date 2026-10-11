@@ -10,7 +10,7 @@ what a reader has — the filename is what they are looking for.
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |
-| what umriss deliberately does not build, and what to do instead | [`adr/0032-what-umriss-is-not.md`](adr/0032-what-umriss-is-not.md) |
+| what umriss deliberately does not build, and what to do instead | [`adr/0032-what-umriss-is-not.md`](adr/0032-what-umriss-is-not.md), [`adr/0059-the-set-of-chart-kinds-is-open.md`](adr/0059-the-set-of-chart-kinds-is-open.md), [`adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md`](adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) |
 | how the design language works | [`design-language.md`](design-language.md) |
 | how wide and how tall a control is, and how a new field is built for it | [`design-language.md`](design-language.md), "Sizes" — the decision in [`adr/0041-a-fields-width-never-follows-what-it-shows.md`](adr/0041-a-fields-width-never-follows-what-it-shows.md) |
 | which industrial standards umriss follows (ISA-18.2, ISA-101), and where it does not | [`standards.md`](standards.md) |
@@ -58,7 +58,7 @@ for the components, online at <https://romanhaendler.github.io/umriss-ui/>, buil
 by `pnpm build:pages`. Every demo page is a path with its text prerendered, so
 that a search engine reads it (ADR-0037) — the demos, prerendered, are the
 website. The same build renders a fixed list of the documents here as pages of
-that site — the design language, the standards and ADR-0032 — read from their
+that site — the design language, the standards and ADR-0032, ADR-0059 and ADR-0060 — read from their
 files when it runs, so that no second text exists to drift (ADR-0046). The list
 stands in `packages/demo/src/tooling/documents.ts`; a document not on it stays
 on GitHub.

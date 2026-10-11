@@ -31,6 +31,14 @@ interface was still expected to move before `0.3.0`.
 
 ## Unreleased
 
+### Added
+
+- **A stack's total in the data table.** The table of a stacked chart ends each
+  stack's members with a "Total" column (German "Summe"): the sum of the
+  stack's members at the row's x, written as the tooltip writes it - a
+  normalised stack's members show their shares and its total the sum of the
+  readings. A hidden member is out of the total.
+
 ---
 
 ## 0.15.0 – A chosen hit, a histogram, and zoom keys without a tooltip (Oct. 2026)

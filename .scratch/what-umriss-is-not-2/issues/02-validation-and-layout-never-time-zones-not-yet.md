@@ -1,6 +1,6 @@
 # 02 - ADR: validation and a layout editor are never, time zones are not yet
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -64,5 +64,9 @@ than the reader's, by an ADR that supersedes this entry. Validation needs no cod
 
 ## Acceptance
 
-- [ ] Title, bold decision, the three entries with reason, "instead" or "what an application does today", alternatives, and consequences.
-- [ ] "umriss shows the reader's time." stands once, as written; ADR-0032 changes in its status line only.
+- [x] Title, bold decision, the three entries with reason, "instead" or "what an application does today", alternatives, and consequences.
+- [x] "umriss shows the reader's time." stands once, as written; ADR-0032 changes in its status line only.
+
+## Comments
+
+- Done as ADR-0060. The count in `docs/adr/README.md` reads "Sixty" with both rows; 0061 is the coordinator's.

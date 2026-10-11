@@ -34,6 +34,8 @@ export const DOCUMENTS: readonly SiteDocument[] = [
   { source: "docs/design-language.md", path: "design-language/", title: "Design language – umriss-ui", name: "Design language" },
   { source: "docs/standards.md", path: "standards/", title: "Industrial standards – umriss-ui", name: "Standards" },
   { source: "docs/adr/0032-what-umriss-is-not.md", path: "what-umriss-ui-is-not/", title: "What umriss-ui is not – umriss-ui", name: "What umriss-ui is not" },
+  { source: "docs/adr/0059-the-set-of-chart-kinds-is-open.md", path: "chart-kinds-are-open/", title: "The set of chart kinds is open – umriss-ui", name: "The set of chart kinds is open" },
+  { source: "docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md", path: "validation-layout-time-zones/", title: "Validation, layout and time zones – umriss-ui", name: "Validation, layout and time zones" },
   ...PACKAGES.map((p) => ({ source: `packages/${p.id}/CHANGELOG.md`, path: `${p.id}/changelog/`, title: `Changelog – ${p.npm}`, name: "Changelog", changelogOf: p.id })),
 ];
 
