@@ -125,7 +125,9 @@ stylesheets by hand.
   receives a list.
 * **For monitoring**: `VerdictColumn` reads a measured value against a
   limit set, and `AlarmList` shows alarms with a lifecycle — active or
-  resolved, acknowledged or not. The library generates no alarms (ADR-0009).
+  resolved, acknowledged or not. It offers snoozing and reports what the
+  operator asked for; the application applies it or refuses. The library
+  generates no alarms (ADR-0009).
 * **A million rows on a server**: in server mode (`server: true`, `rowCount`)
   the rows are one page a server answered; the table reports the request -
   search, conditions, sort, page, page size - through `onRequest` once per

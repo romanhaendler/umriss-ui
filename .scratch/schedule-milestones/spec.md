@@ -1,6 +1,6 @@
 # Milestones for the schedule
 
-Status: ready-for-human
+Status: done
 
 ## Problem
 
@@ -51,3 +51,7 @@ second is the builder's.
 4. **The walk.** Milestones are walked among the subtasks (ArrowRight lands on one). Check that this is not noise for a plan with many milestones; the alternative is a separate key.
 5. **Hit area.** The diamond is hit within its half width plus 2 px (Manhattan distance) and wins over the bar beneath.
 6. `CONTEXT.md` has the new term **Milestone**. No ADR was written.
+
+## Comments
+
+**Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/schedule 0.6.0.

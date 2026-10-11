@@ -24,11 +24,12 @@ A scan of the workspace against what comparable libraries ship (10 Oct 2026)
 ranked what to build next. The maintainer asked for the clear pieces to be
 built overnight, each by an agent with a short brief, and for the unclear one
 to be written down instead. None of them went through a grilling: every
-decision stands in its spec under `.scratch/`, each `ready-for-human`, and no
+decision stands in its spec under `.scratch/`; the maintainer checked each by
+hand on the running demo the next morning and accepted them as built. No
 ADR was numbered - two other jobs were taking the same number that night.
 
-- **Milestones** (`.scratch/schedule-milestones/`; `@umriss-ui/schedule`,
-  unreleased). `<Milestones data />`, the sibling of `BlockedTimes`: a diamond
+- **Milestones** (`.scratch/schedule-milestones/`; released as
+  `@umriss-ui/schedule` 0.6.0). `<Milestones data />`, the sibling of `BlockedTimes`: a diamond
   on its lane, a stop in the keyboard's walk, named in the tooltip and the
   readout. Read-only, no finding. The first cut left the word "milestone" out
   of what a screen reader hears, because the wording lives in core and the
@@ -36,7 +37,7 @@ ADR was numbered - two other jobs were taking the same number that night.
   function that reads `target.task` without asking for the kind no longer
   type-checks - noted as a change.
 - **`bin()` and limits a reader can reach** (`.scratch/charts-bin-and-limits/`;
-  `@umriss-ui/charts`, unreleased). A helper after `pareto()` for a histogram
+  released as `@umriss-ui/charts` 0.15.0). A helper after `pareto()` for a histogram
   on the numeric x axis. The last bin is closed, as d3's is, so integer data
   at width 1 puts its two greatest values into one bin; a bin of its own for
   the maximum was weighed and left, because it draws an empty-looking bin past
@@ -46,7 +47,7 @@ ADR was numbered - two other jobs were taking the same number that night.
   click on a hit and Enter on the Active point hand over the hit the tooltip's
   `render` receives; the chart holds and draws nothing.
 - **Snoozing in the alarm list** (`.scratch/alarm-list-snooze/`;
-  `@umriss-ui/table` and four words in core, unreleased). The list's own
+  released as `@umriss-ui/table` 0.14.0, with four words in core 0.31.0). The list's own
   comment had called hiding an alarm a safety decision that does not belong in
   a user-interface library. The maintainer decided it is offered and reported:
   the list shows Snooze with the durations the caller gives and reports
@@ -69,8 +70,8 @@ A scan of every `Status:` line under `.scratch/` on 10 Oct 2026 found a
 handful of tickets that were neither done nor moving; they were decided with
 the maintainer in one sitting and closed.
 
-- **One natural width of twenty characters** (control-sizes 07; `@umriss-ui/core`,
-  unreleased). Sixteen had been chosen because twenty "made a dispatcher's bar
+- **One natural width of twenty characters** (control-sizes 07; released as
+  `@umriss-ui/core` 0.31.0). Sixteen had been chosen because twenty "made a dispatcher's bar
   three lines". Asked again, the maintainer put the rule before the bar: "eine
   Vereinheitlichung der Breiten" is the right way, and the full row is changed
   by hand. Input, Select and Combobox take the multiselect's count, the slider
@@ -85,8 +86,8 @@ the maintainer in one sitting and closed.
   a `Grid` with a `"fill"` column. The first answer stopped there and was
   wrong for the table's toolbar, which a caller cannot lay out - the
   maintainer's objection. There the toolbar is the place that decides
-  (ADR-0041), so its own part offers it: `<Search grow />` (`@umriss-ui/table`,
-  unreleased), grown from its natural width so that it wraps where it did.
+  (ADR-0041), so its own part offers it: `<Search grow />` (released as
+  `@umriss-ui/table` 0.14.0), grown from its natural width so that it wraps where it did.
 - **The copies of `#own-styles` are folded in the build** (06). The plan was to
   keep the first copy of each rule; that would have moved a picture - a
   component's `.sm .input` would have beaten the field's 16 px touch size,
@@ -96,7 +97,7 @@ the maintainer in one sitting and closed.
   without the fold, renewing the 50 baselines the wider fields move, and one
   with the fold and no renewal - 2828 passed, no picture differed.
 - **Zoom keys without a tooltip** (`charts-zoom-keys-without-tooltip`, ADR-0030
-  amended; `@umriss-ui/charts`, unreleased). A chart with a zoomable x axis is
+  amended; released as `@umriss-ui/charts` 0.15.0). A chart with a zoomable x axis is
   one tab stop with the application role; there is no walk, and after a zoom
   or pan key the live region reads the span in view with the wording the
   summary already had.

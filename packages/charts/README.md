@@ -66,8 +66,11 @@ the chart takes it away; a finger swiping over the chart scrolls the page.
 
 **By keyboard and screen reader**, a chart with a `<Tooltip>` is one tab stop:
 the arrows walk its values, ↑/↓ choose the series read first, and a screen
-reader hears each value once the keys rest and a summary of the whole. The
-words are English; German comes from its own subpath:
+reader hears each value once the keys rest and a summary of the whole. A chart
+with a zoomable x axis is one as well, without a tooltip: there is nothing to
+walk, and plus, minus, Shift with an arrow and 0 zoom and pan it. `onSelect` on
+`useChart` hears a click on a hit and Enter on the walked one; the chart keeps
+no selection. The words are English; German comes from its own subpath:
 
 ```tsx
 import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
@@ -114,8 +117,9 @@ loaded: Geist when the application has it, the system fonts otherwise.
   and dims a course already drawn, and where there is nothing yet a
   silhouette of the chart to come shimmers in the plot (ADR-0042).
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
-  rule violations, `pareto()` with a collected remainder, and a working-time
-  axis that takes the empty hours out and marks every removed span.
+  rule violations, `pareto()` with a collected remainder, `bin()` for a
+  histogram, and a working-time axis that takes the empty hours out and marks
+  every removed span. `<Tooltip limits />` reads the labelled limits at a hit.
 * **The pure modules are exported**, not hidden: `assess`, `controlLimits`,
   `zones`, `violations`, `pareto`, `workingCalendar` and the rest. Whoever
   wants to draw something other than the composition offers should reach the

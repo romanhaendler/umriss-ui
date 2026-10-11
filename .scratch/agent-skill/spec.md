@@ -1,6 +1,6 @@
 # Agent skill for people who build with umriss-ui
 
-Status: ready-for-human
+Status: done
 
 ## Problem
 
@@ -36,3 +36,7 @@ get wrong. It must not become a second copy of the documentation.
 2. The listed `intents` (`move`, `lane`, `stretch`, `place`) and the `chars` default of 20 against the current schedule and core.
 3. The ADR-0032 table still matches the ADR. The category scale is left out of it on purpose: ADR-0052 lets an x axis read a category as it comes, and the ADR's own list is amended by `chart-rows-as-they-come` 07.
 4. Whether `skills/` belongs in the published packages' `files` (it does not now).
+
+## Comments
+
+**Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in the repository, with the release of 11 Oct 2026.

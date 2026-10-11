@@ -1,6 +1,6 @@
 # A chart reports the hit a reader chose
 
-Status: ready-for-human
+Status: done
 Date:   2026-10-11
 Origin: `packages/charts/docs/capabilities.md`, "Later": `onSelect`. The
 maintainer decided on 10 Oct 2026: report only, no `selected` prop.
@@ -54,3 +54,7 @@ chart reports the hit and holds, draws and remembers nothing.
 - Tests: `packages/charts/tests-unit/onSelect.jsdom.test.tsx` (click once, double
   click once, Enter, drag does not, summary, warning). No screenshot baseline
   for the example yet.
+
+## Comments
+
+**Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/charts 0.15.0.
