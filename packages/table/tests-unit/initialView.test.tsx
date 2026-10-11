@@ -6,7 +6,7 @@
    checked against the columns only on reading. Unknown names fall away, default
    values are not reported, and the default is what the application set. */
 
-import { StrictMode, useState } from "react";
+import { StrictMode } from "react";
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Pagination, useTable } from "../src";
@@ -41,7 +41,7 @@ function AmountColumn({ of, presentation }: { of: Table<Order>; presentation?: (
   );
 }
 
-function List({ start, presentation, report }: { start?: TableView; presentation?: (m: number) => string; report?: (view: TableView) => void }) {
+function List({ start, presentation, report, tap }: { start?: TableView; presentation?: (m: number) => string; report?: (view: TableView) => void; tap?: (t: Table<Order>) => void }) {
   const t = useTable(ORDERS, {
     rowKey: (a) => a.id,
     pageSize: 2,
@@ -50,6 +50,7 @@ function List({ start, presentation, report }: { start?: TableView; presentation
     onViewChange: report,
   });
   capture(t);
+  tap?.(t);
   const { Table: Frame, Column } = t;
   return (
     <Frame>
@@ -128,44 +129,51 @@ describe("Checking against the registered columns", () => {
   });
 });
 
-describe("A view handed in later (ADR-0047)", () => {
-  it("applies whenever it differs in content from the last one, without a remount", () => {
+describe("setView (ADR-0047)", () => {
+  it("reads initialView once: a different one on a later render is ignored", () => {
     const { rerender } = render(<List start={{ search: "A-" }} />);
-    act(() => current!.toggleColumn("line"));
     rerender(<List start={{ sort: [{ column: "amount", direction: "desc" }] }} />);
-    /* Whatever the new view leaves out is back at its default: it replaces, it does not merge. */
-    expect(current!.view).toEqual({ sort: [{ column: "amount", direction: "desc" }] });
-    expect(current!.visible.map((o) => o.id)).toEqual(["e", "c"]);
+    expect(current!.view).toEqual({ search: "A-" });
   });
 
-  it("changes nothing when handed the same view again, as a new object", () => {
-    const { rerender } = render(<List start={{ search: "A-" }} />);
+  it("applies a whole view: what it leaves out goes back to its default, names no column carries fall out", () => {
+    render(<List start={{ search: "A-" }} />);
     act(() => current!.toggleColumn("line"));
-    rerender(<List start={{ search: "A-" }} />);
-    expect(current!.view).toEqual({ search: "A-", hidden: ["line"] });
-  });
-
-  it("is not gone to when it is a view the table reported, handed back late; one from outside still applies", () => {
-    const keep = vi.fn();
-    const { rerender } = render(<List report={keep} />);
-    act(() => current!.setSearch("A"));
-    act(() => current!.setSearch("A-"));
-    /* The application hands back the first report while the table is at the second: no jump back. */
-    rerender(<List start={{ search: "A" }} report={keep} />);
-    expect(current!.view).toEqual({ search: "A-" });
-    rerender(<List start={{ search: "A-" }} report={keep} />);
-    expect(current!.view).toEqual({ search: "A-" });
-    /* Both came back; the first again is a view from outside now - a restore. */
-    rerender(<List start={{ search: "A" }} report={keep} />);
-    expect(current!.view).toEqual({ search: "A" });
-    rerender(<List start={{ search: "B" }} report={keep} />);
+    act(() => current!.setView({ sort: [{ column: "amount", direction: "desc" }], hidden: ["gone", "line"], widths: { gone: 80 } }));
+    expect(current!.view).toEqual({ sort: [{ column: "amount", direction: "desc" }], hidden: ["line"] });
+    act(() => current!.setView({ search: "B" }));
     expect(current!.view).toEqual({ search: "B" });
   });
 
-  it("lets names no column carries fall out of a view handed in later as well", () => {
-    const { rerender } = render(<List />);
-    rerender(<List start={{ hidden: ["gone", "line"], widths: { gone: 80 } }} />);
-    expect(current!.view).toEqual({ hidden: ["line"] });
+  it("is not reported through onViewChange, and the reader's next change still is", () => {
+    const report = vi.fn();
+    render(<StrictMode><List report={report} /></StrictMode>);
+    act(() => current!.setView({ search: "A-" }));
+    act(() => current!.setView({ search: "A-" }));
+    expect(report).not.toHaveBeenCalled();
+    act(() => current!.setWidth("number", 150));
+    expect(report.mock.calls).toEqual([[{ search: "A-", widths: { number: 150 } }]]);
+  });
+
+  it("keeps two tables linked both ways in step, the other reporting nothing", () => {
+    let a: Table<Order> | null = null;
+    let b: Table<Order> | null = null;
+    const reportA = vi.fn((v: TableView) => b!.setView(v));
+    const reportB = vi.fn((v: TableView) => a!.setView(v));
+    render(
+      <>
+        <List report={reportA} tap={(t) => (a = t)} />
+        <List report={reportB} tap={(t) => (b = t)} />
+      </>,
+    );
+    act(() => a!.toggleSort("amount"));
+    expect(b!.sort).toEqual([{ column: "amount", direction: "asc" }]);
+    expect(reportA).toHaveBeenCalledTimes(1);
+    expect(reportB).not.toHaveBeenCalled();
+    act(() => b!.toggleColumn("line"));
+    expect(a!.hidden).toEqual(["line"]);
+    expect(reportB).toHaveBeenCalledTimes(1);
+    expect(reportA).toHaveBeenCalledTimes(1);
   });
 
   it("reports nothing while untouched", () => {
@@ -174,7 +182,7 @@ describe("A view handed in later (ADR-0047)", () => {
     expect(report).not.toHaveBeenCalled();
   });
 
-  it("reports every change once, always the whole view", () => {
+  it("reports every change the reader makes once, always the whole view", () => {
     const report = vi.fn();
     render(<StrictMode><List report={report} /></StrictMode>);
     act(() => current!.setSearch("A-"));
@@ -183,31 +191,5 @@ describe("A view handed in later (ADR-0047)", () => {
       [{ search: "A-" }],
       [{ search: "A-", widths: { number: 150 } }],
     ]);
-  });
-
-  it("keeps two tables in step through what they report", () => {
-    let a: Table<Order> | null = null;
-    let b: Table<Order> | null = null;
-    function Pair() {
-      const [shared, setShared] = useState<TableView>({});
-      return (
-        <>
-          <List start={shared} report={setShared} />
-          <Spy onTable={(t) => (a = t)} />
-          <List start={shared} report={setShared} />
-          <Spy onTable={(t) => (b = t)} />
-        </>
-      );
-    }
-    /* `current` is whichever rendered last; the spies take it in turn. */
-    function Spy({ onTable }: { onTable: (t: Table<Order>) => void }) {
-      onTable(current!);
-      return null;
-    }
-    render(<Pair />);
-    act(() => a!.toggleSort("amount"));
-    expect(b!.sort).toEqual([{ column: "amount", direction: "asc" }]);
-    act(() => b!.toggleColumn("line"));
-    expect(a!.hidden).toEqual(["line"]);
   });
 });

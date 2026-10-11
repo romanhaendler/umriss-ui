@@ -35,6 +35,9 @@ export function Columns() {
   const t = useTable(orders, { rowKey: (a) => a.id });
   const { Table: Frame, Column } = t;
   const m = useTable(readings, { rowKey: (z) => z.id });
+  t.setView({ search: "A", sort: [{ column: "amount", direction: "desc" }] });
+  // @ts-expect-error a view is an object, not a string
+  t.setView("A");
 
   const amount = column<{ amount: number }>({ value: "amount", label: "Quantity", aggregate: "sum" });
   const textAmount = column<{ amount: string }>({ value: "amount", label: "Quantity" });

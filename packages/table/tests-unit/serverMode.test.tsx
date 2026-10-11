@@ -121,6 +121,19 @@ describe("Server mode - the request goes out", () => {
     expect(reports).toEqual([{ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }]);
   });
 
+  it("asks the server for a view that setView applies exactly where a reader's change would", () => {
+    render(<Server />);
+    settle();
+    act(() => current!.setView({ search: "A-0", widths: { number: 200 } }));
+    expect(reports).toEqual([
+      { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 },
+      { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10 },
+    ]);
+    // The same request again, with a width of its own: nothing to ask.
+    act(() => current!.setView({ search: "A-0", widths: { number: 220 } }));
+    expect(reports).toHaveLength(2);
+  });
+
   it("reports every change of what decides the rows once, and nothing else", () => {
     render(<Server />);
     settle();

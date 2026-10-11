@@ -1,5 +1,6 @@
 /* The view: the part of the table's state an application hands in on the first
-   render (`initialView`) and can read back (`t.view`).
+   render (`initialView`), goes to later (`t.setView`) and can read back
+   (`t.view`).
 
    The table puts it nowhere - not in the address, not in any storage. Whether
    and where a view is kept is the application's decision (table-filters): a
@@ -49,8 +50,8 @@ export type TableRequest<K extends string = string> = Required<Pick<TableView<K>
 export const requestKey = (request: TableRequest): string =>
   JSON.stringify([request.search, request.conditions, request.sort, request.page, request.pageSize]);
 
-/** What a view handed in is compared by (ADR-0047): its content, not its
-    identity - a view written in the call is a new object on every render.
+/** What a view is compared by (ADR-0047): its content, not its identity - a
+    view written in the call is a new object on every render.
     Object keys are sorted, so the order they were written in does not count;
     the hidden columns, the folded groups and the open branches are sets and
     are sorted too; the other lists keep their order, since a sort's, an
@@ -92,41 +93,4 @@ export function onlyKnown(view: TableView, known: ReadonlySet<string>): TableVie
     ...(order?.length ? { order } : {}),
     ...(widths && Object.keys(widths).length ? { widths } : {}),
   };
-}
-
-/** How long a view reported may take to come back as `initialView`. */
-const ECHO_MS = 1000;
-
-/** The views a table reported that may still come back. An application
-    keeping the view hands it back a frame or more late - by then the table has
-    moved on, and going to the view handed in would jump back. So a view handed
-    in that equals one reported since the last one handed in, within a second,
-    is the table's own state coming back, not a view to go to. The echoes
-    come in order: one drops itself and every older report, a view from outside
-    drops them all. The second bounds the list where nothing is handed back,
-    and lets such an application still restore a view it kept. */
-export class Echoes {
-  private reports: { key: string; at: number }[] = [];
-
-  reported(key: string): void {
-    const now = performance.now();
-    this.reports = this.reports.filter((r) => now - r.at < ECHO_MS);
-    this.reports.push({ key, at: now });
-  }
-
-  /** Whether the view handed in is a report coming back. */
-  has(key: string): boolean {
-    return this.at(key) >= 0;
-  }
-
-  /** Forgets what the view handed in answers. */
-  handed(key: string): void {
-    const at = this.at(key);
-    this.reports = at < 0 ? [] : this.reports.slice(at + 1);
-  }
-
-  private at(key: string): number {
-    const now = performance.now();
-    return this.reports.findIndex((r) => r.key === key && now - r.at < ECHO_MS);
-  }
 }
