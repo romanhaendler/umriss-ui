@@ -22,6 +22,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **`footer` on a column and `filter` in the hook's options are gone.** They were the old names of `aggregate` and `preFilter`, deprecated since the rename. A column with `footer="sum"` is `aggregate="sum"`, `useTable(rows, { filter })` is `useTable(rows, { preFilter })`; the old names are no longer read, so they do nothing, and the type `FooterFor` is no longer exported.
+
+---
+
 ## 0.16.0 – Rows are copied, and the CSV follows the language (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.33; the peer range moves to `^0.33.0`.

@@ -65,19 +65,6 @@ describe("D4: a pre-filter may stand in the call", () => {
     expect(rowHeaders(container)).toEqual(["A-2"]);
   });
 
-  it("the old name `filter` renders just as well", () => {
-    function Old() {
-      const { Table: Frame, Column } = useTable(ORDERS, { rowKey: (a) => a.id, filter: (a) => a.plant === "Plant B" });
-      return (
-        <Frame>
-          <Column value="number" label="Order" rowHeader />
-        </Frame>
-      );
-    }
-    const { container } = render(<Old />);
-    expect(rowHeaders(container)).toEqual(["B-1", "B-2"]);
-  });
-
   it("a change of the pre-filter does not reset the page", () => {
     const { container, rerender } = render(<List plant="Plant A" pageSize={1} />);
     fireEvent.click(screen.getByRole("button", { name: "Next" }));

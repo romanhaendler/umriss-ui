@@ -1,5 +1,4 @@
 {
-  "TableOptions.filter": "(g) deprecated alias: the old name of `preFilter`, which Pre-filter/01 shows",
   "SearchProps.className": "(a) pass-through: a class on the field",
   "ToolbarProps.className": "(a) pass-through: a class on the toolbar",
   "PaginationProps.className": "(a) pass-through: a class on the bar",

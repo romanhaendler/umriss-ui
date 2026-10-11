@@ -79,8 +79,6 @@ interface RuntimeColumnProps {
   children?: unknown;
   format?: ColumnSpec["format"];
   aggregate?: ColumnSpec["aggregate"];
-  /** The old name of `aggregate`. */
-  footer?: "sum" | "avg";
   share?: boolean;
   rowHeader?: boolean;
   numeric?: boolean;
@@ -131,9 +129,6 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     warnOnce(`without-id:${props.label}`, `The column "${props.label}" has a computed value but no id. Its label serves as the id.`);
     id = props.label;
   }
-  if (props.footer !== undefined) {
-    warnOnce(`footer:${id}`, `The column "${id}" uses \`footer\`, which is called \`aggregate\` now. The old name goes with the next minor version.`);
-  }
   if (props.children !== undefined && typeof props.children !== "function") {
     warnOnce(`children:${id}`, `The children of the column "${id}" are not a function and are passed over.`);
   }
@@ -143,7 +138,7 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     value: props.value,
     presentation: typeof props.children === "function" ? (props.children as ColumnSpec["presentation"]) : undefined,
     format: props.format,
-    aggregate: props.aggregate ?? props.footer,
+    aggregate: props.aggregate,
     share: props.share,
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,

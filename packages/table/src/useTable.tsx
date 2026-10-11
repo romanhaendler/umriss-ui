@@ -204,7 +204,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const serverInput = useMemo(() => (server ? { rowCount } : undefined), [server, rowCount]);
   registry.setServer(server);
   if (server) {
-    if (options.preFilter ?? options.filter) {
+    if (options.preFilter) {
       warnOnce("server-prefilter", "`preFilter` is passed over in server mode: the server decides which rows the table has.");
     }
     if (options.virtual) {
@@ -240,7 +240,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
      calculates with what it admits. */
-  const preFilter = (options.preFilter ?? options.filter) as ((row: unknown) => boolean) | undefined;
+  const preFilter = (options.preFilter) as ((row: unknown) => boolean) | undefined;
   const admitted = useAdmitted(rowsUnknown, server ? undefined : preFilter);
 
   /* The grouping is held here, not in the companion: which ids it may carry

@@ -66,7 +66,6 @@ export type {
   Absent,
   AggregateFor,
   FilterFor,
-  FooterFor,
   FormatFor,
   GroupFor,
   Present,

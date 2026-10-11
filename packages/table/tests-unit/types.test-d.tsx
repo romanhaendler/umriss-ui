@@ -97,18 +97,18 @@ export function Columns() {
       {/* @ts-expect-error a date format on a computed number */}
       <Column id="netto2" value={(a) => a.amount * 0.81} label="Netto" format="date" />
 
-      {/* footer only for numbers. */}
-      <Column value="amount" label="Quantity" footer="sum" />
-      <Column value="price" label="Preis" footer="avg" />
-      <Column id="wert" value={(a) => (a.price === null ? null : a.amount * a.price)} label="Value" footer="sum">
+      {/* aggregate only for numbers. */}
+      <Column value="amount" label="Quantity" aggregate="sum" />
+      <Column value="price" label="Preis" aggregate="avg" />
+      <Column id="wert" value={(a) => (a.price === null ? null : a.amount * a.price)} label="Value" aggregate="sum">
         {(value) => value.toFixed(2)}
       </Column>
       {/* @ts-expect-error a sum on text */}
-      <Column value="number" label="Number" footer="sum" />
+      <Column value="number" label="Number" aggregate="sum" />
       {/* @ts-expect-error a sum on a date */}
-      <Column value="due" label="Due date" footer="sum" />
+      <Column value="due" label="Due date" aggregate="sum" />
       {/* @ts-expect-error a sum on computed text */}
-      <Column id="name" value={(a) => a.customer.name} label="Name" footer="sum" />
+      <Column id="name" value={(a) => a.customer.name} label="Name" aggregate="sum" />
 
       {/* aggregate (table-grouping 02): typed by the value. */}
       <Column value="amount" label="Quantity" aggregate="sum" />
@@ -137,8 +137,6 @@ export function Columns() {
       <Column id="kunde4" value={(a) => a.customer.name} label="Customer" aggregate="sum" />
       {/* @ts-expect-error an aggregate of one's own that returns another type than the value */}
       <Column value="amount" label="Quantity" aggregate={(values) => values.join(", ")} />
-      {/* @ts-expect-error aggregate and footer together */}
-      <Column value="amount" label="Quantity" aggregate="sum" footer="sum" />
 
       {/* @ts-expect-error without a label */}
       <Column value="number" />
@@ -172,7 +170,7 @@ export function Columns() {
 
 function AmountColumn({ of }: { of: Table<Order> }) {
   const { Column } = of;
-  return <Column value="amount" label="Quantity" footer="sum" />;
+  return <Column value="amount" label="Quantity" aggregate="sum" />;
 }
 
 export function Actions() {
@@ -241,8 +239,6 @@ export function Verdicts() {
 export function PreFilter({ plant }: { plant: string }) {
   // A pre-filter may stand in the call, and it gets the row type.
   useTable(orders, { rowKey: (a) => a.id, preFilter: (a) => a.number !== plant });
-  // The old name still compiles, for one minor version.
-  useTable(orders, { rowKey: (a) => a.id, filter: (a) => a.urgent });
   // @ts-expect-error a field the row does not have
   useTable(orders, { rowKey: (a) => a.id, preFilter: (a) => a.plant === plant });
   return null;
