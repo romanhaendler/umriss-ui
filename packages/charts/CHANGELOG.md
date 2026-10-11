@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.16.0 – A stack's total in the data table (Oct. 2026)
 
 ### Added
 

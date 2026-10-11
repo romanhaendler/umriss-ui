@@ -22,7 +22,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.16.0 – Rows are copied, and the CSV follows the language (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.33; the peer range moves to `^0.33.0`.
 
 ### Added
 

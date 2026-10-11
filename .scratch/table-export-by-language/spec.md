@@ -1,6 +1,6 @@
 # The CSV follows the language in use
 
-Status: ready-for-human
+Status: done
 Date:   2026-10-11
 Origin: roadmap `.scratch/open-points-roadmap/spec.md`, row T6 and "Taken as
 agreed" 4; facts in `docs/research/open-points-2026-10/export_copy_and_wording.md`
@@ -82,3 +82,5 @@ text, numbers without thousands groups, the filtered set, the visible columns.
 - Mixed German wording and English formats is allowed and documented.
 
 ## Comments
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.

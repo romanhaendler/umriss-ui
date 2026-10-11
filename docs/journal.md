@@ -33,7 +33,9 @@ as it stood.
 - **A chart reports a Range and keeps none** - the word chosen so that
   "selection" stays out of the charts (ADR-0003, ADR-0056). Written down, built
   in package B.
-- **Package A, built the same day, unreleased:**
+- **Package A, built the same day** and released as `@umriss-ui/core` 0.33.0,
+  `@umriss-ui/charts` 0.16.0, `@umriss-ui/table` 0.16.0, `@umriss-ui/schedule`
+  0.7.1 and `@umriss-ui/calculation` 0.7.3:
   - *A stack's total in the data table* - the tooltip had it, the table for
     the reader who cannot use the chart did not.
   - *The CSV follows the language in use* (ADR-0061): the decimal mark, the
@@ -56,6 +58,17 @@ as it stood.
   - *What is never and what is not yet* (ADR-0060): no form validation, no
     editor for arranging a dashboard; the reader's time until a case asks for
     another zone.
+- **The maintainer's look by hand found what no test had.** "Im Grid Modus
+  passiert bei mir gar nichts": the copy was announced to a screen reader and
+  shown to nobody - an assumption he had confirmed in a list and could not
+  confirm on the screen. What was copied flashes now, held for a moment and
+  then fading. Behind the same sentence stood a fault: after a click on a
+  row's checkbox the focus stays on it, and the key was turned away from every
+  input, so the main path of the feature copied nothing; the tests had ticked
+  their rows another way. The key stays with the browser only where a reader
+  can have marked text. An open editor copies its value. And a group line that
+  stuck while scrolling lay under the pinned cells of the rows it passed - in
+  the released version too, unseen because every picture is taken unscrolled.
 - **Proving React 18 found a fault.** The READMEs said "React 18 or 19" and
   only 19 was ever installed. Under 18 a boolean `inert` is dropped, so a
   folded accordion panel, a popover in its exit and a splitter's folded pane

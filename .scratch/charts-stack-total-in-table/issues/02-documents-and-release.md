@@ -1,6 +1,6 @@
 # 02 — Documents and release
 
-Status: ready-for-human
+Status: done
 Type: task
 Size: S
 
@@ -36,3 +36,5 @@ The release is left: the spec's status and this ticket's `done` wait for the
 version that carries it.
 
 An example was added afterwards, `packages/charts/demo/examples/Tooltip/08-total-of-a-stack.tsx` (Tooltip page): a stacked bar chart with its `DataTable`, so that a reader of the site and the maintainer who accepts the feature can see the Total column. It is in the "open data table" pictures of `screenshots.spec.ts`; its baselines do not exist yet and are looked at before they are accepted.
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.

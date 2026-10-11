@@ -1,6 +1,6 @@
 # 03 - Documents and release
 
-Status: ready-for-human
+Status: done
 Type: task
 Size: S
 
@@ -25,3 +25,5 @@ Spec: `.scratch/table-copy-rows/spec.md`
 ## Comments
 
 Done: example `Export/03-copy-the-selection.tsx`, Export page text, README line, table and core changelog entries under Added. Left: the release (no version raised), the full check with build and visual, the manual paste check (Excel, Numbers, LibreOffice; VoiceOver and NVDA), and the non-goals wording - no page in `packages/table` calls the row clipboard "later"; only ADR-0032 does, which is not rewritten.
+
+**Released (2026-10-11)** after the maintainer's look by hand, with core 0.33.0, charts 0.16.0, table 0.16.0, schedule 0.7.1 and calculation 0.7.3.

@@ -15,7 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.7.1 – Core 0.33.0, charts 0.16.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.33 and `@umriss-ui/charts` 0.16; the peer ranges move to `^0.33.0` and `^0.16.0`.
 
 ### Added
 
