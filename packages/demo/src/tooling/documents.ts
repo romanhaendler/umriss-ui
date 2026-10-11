@@ -9,6 +9,7 @@
 
 import { Marked, type Token, type Tokens } from "marked";
 import { PACKAGES } from "../packages.ts";
+import { escapeText } from "./escape.ts";
 import { linkAdrs, type AdrLinks } from "./references.ts";
 
 /** A document of the repository that is a page of the site. */
@@ -100,8 +101,6 @@ export function documentHref(href: string, from: string, home: string, exists: (
   return SOURCE_HOME + path + anchor;
 }
 
-const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
 /* The text of inline tokens, without their markup. */
 const plain = (tokens: readonly Token[]): string =>
   tokens.map((token) => ("tokens" in token && token.tokens !== undefined ? plain(token.tokens) : token.type === "br" ? " " : "text" in token ? token.text : "")).join("");
@@ -117,7 +116,7 @@ export function renderDocument(markdown: string, from: string, { home, exists, a
   const seen = new Map<string, number>();
   const marked = new Marked({
     renderer: {
-      html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text),
+      html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeText(text),
       heading({ tokens, depth, text }: Tokens.Heading) {
         const slug = (depth === 2 ? versionAnchor(text) : undefined) ?? text.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
         const count = seen.get(slug) ?? 0;

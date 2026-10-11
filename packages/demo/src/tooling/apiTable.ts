@@ -14,6 +14,7 @@
    generator alike, which is why the import carries its extension. */
 
 import { addressOfPlace } from "../outline.ts";
+import { escapeAttribute } from "./escape.ts";
 import type { PropEntry, ShownIn, TypeEntry } from "./propsReader.ts";
 
 /** A piece of a written text - the marks a page's texts may carry. */
@@ -359,9 +360,6 @@ export function definitionModel(entry: TypeEntry, linkOf: LinkOf, pageId?: strin
 /* HTML                                                              */
 /* ------------------------------------------------------------------ */
 
-export const escape = (value: string) =>
-  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
 /** A link in a text is an ordinary address. `#/page` - the place as the texts
     write it - becomes the page's address relative to the page the table stands
     on, which is one directory below the demo's base on the dev server, on the
@@ -429,10 +427,10 @@ function typeHtml(spans: readonly Span[]): string {
 export function spansHtml(spans: readonly Span[]): string {
   return spans
     .map((span) => {
-      const inner = escape(span.text);
+      const inner = escapeAttribute(span.text);
       if (span.kind === "code") return `<code>${inner}</code>`;
       if (span.kind === "bold") return `<strong>${inner}</strong>`;
-      if (span.kind === "link") return `<a href="${escape(hrefOf(span.href))}">${span.code === true ? `<code>${inner}</code>` : inner}</a>`;
+      if (span.kind === "link") return `<a href="${escapeAttribute(hrefOf(span.href))}">${span.code === true ? `<code>${inner}</code>` : inner}</a>`;
       if (span.kind === "swatch") return `<span class="tokenSwatch" aria-hidden="true" style="background:${inner};color-scheme:${span.scheme}"></span>`;
       return inner;
     })
@@ -451,21 +449,21 @@ function groupHtml(name: string, group: ApiGroup, fold: boolean, home?: string):
     (one) =>
       /* `<Type>-<prop>`: a row is an address -
          the full row alone; a cut one links to it. */
-      (home === undefined ? `<tr id="${escape(`${name}-${one.name}`)}">` : "<tr>") +
+      (home === undefined ? `<tr id="${escapeAttribute(`${name}-${one.name}`)}">` : "<tr>") +
       /* The name is a link to its own row, so that its address can be copied. */
-      `<th scope="row"><a class="apiAnchor" href="${escape(home === undefined ? `#${name}-${one.name}` : hrefOf(`#/${home}/${name}-${one.name}`))}"><code>${escape(one.name)}</code></a>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
+      `<th scope="row"><a class="apiAnchor" href="${escapeAttribute(home === undefined ? `#${name}-${one.name}` : hrefOf(`#/${home}/${name}-${one.name}`))}"><code>${escapeAttribute(one.name)}</code></a>${one.badges.map((badge) => `<span class="apiBadge">${escapeAttribute(badge)}</span>`).join("")}</th>` +
       `<td><code class="apiType">${typeHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${typeHtml([text(one.expansion)])}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
-      `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}${one.shownIn === undefined ? "" : `<p class="apiShown">${spansHtml(one.shownIn)}</p>`}</td>` +
+      `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escapeAttribute(one.origin)}</code></span>`}${one.shownIn === undefined ? "" : `<p class="apiShown">${spansHtml(one.shownIn)}</p>`}</td>` +
       "</tr>",
   );
   const table =
-    `<div class="apiRole"><table class="apiTable" aria-label="${escape(`${name}: ${group.label}`)}">` +
+    `<div class="apiRole"><table class="apiTable" aria-label="${escapeAttribute(`${name}: ${group.label}`)}">` +
     '<thead><tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col">Default</th><th scope="col">Description</th></tr></thead>' +
     `<tbody>${rows.join("")}</tbody></table></div>`;
   if (group.title === undefined) return table;
-  if (fold) return `<details class="apiFold"><summary class="apiGroupTitle">${escape(`${group.title} · ${group.rows.length}`)}</summary>${table}</details>`;
-  return `<h4 class="apiGroupTitle">${escape(group.title)}</h4>${table}`;
+  if (fold) return `<details class="apiFold"><summary class="apiGroupTitle">${escapeAttribute(`${group.title} · ${group.rows.length}`)}</summary>${table}</details>`;
+  return `<h4 class="apiGroupTitle">${escapeAttribute(group.title)}</h4>${table}`;
 }
 
 /** One table as HTML - no whitespace between the elements, as React writes it. */
@@ -473,11 +471,11 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
   const definition = "description" in model ? model : undefined;
   const fold = model.groups.reduce((count, group) => count + group.rows.length, 0) > FOLD_OVER;
   return (
-    `<div class="apiBlock" data-type="${escape(model.name)}">` +
+    `<div class="apiBlock" data-type="${escapeAttribute(model.name)}">` +
     (model.cut !== undefined
       ? `<p class="apiInherited">${spansHtml(model.cut.sentence)}</p>`
-      : `<h${level} class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h${level}>`) +
-    (definition?.from === undefined ? "" : `<p class="apiInherited">From <code>${escape(definition.from)}</code>.</p>`) +
+      : `<h${level} class="apiTitle" id="${escapeAttribute(model.anchor)}"><code>${escapeAttribute(model.heading)}</code></h${level}>`) +
+    (definition?.from === undefined ? "" : `<p class="apiInherited">From <code>${escapeAttribute(definition.from)}</code>.</p>`) +
     (definition === undefined || definition.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(definition.description)}</p>`) +
     (definition?.declaration !== undefined
       ? `<pre class="apiDeclaration"><code>${spansHtml(definition.declaration)}</code></pre>` +

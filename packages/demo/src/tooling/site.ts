@@ -5,7 +5,9 @@
 
    `scripts/build-pages.mjs` writes the forwarders and runs the guard over
    what it wrote; both stand here and not there so that a unit test reaches
-   them. It runs in Node and imports nothing. */
+   them. It runs in Node and imports nothing but `escape.ts`. */
+
+import { escapeAttribute } from "./escape.ts";
 
 /** A page id that changed, as the site sees it. */
 export interface Forwarder {
@@ -16,8 +18,6 @@ export interface Forwarder {
   /** The current page's title. */
   title: string;
 }
-
-const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** The file at an old address. GitHub Pages knows no redirect, so it is a
     page: the script carries the anchor over (`/getting-started/#first-chart`
@@ -32,13 +32,13 @@ export function forwarderHtml({ to, title }: Forwarder): string {
   <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex" />
-    <title>${escape(title)}</title>
-    <link rel="canonical" href="${escape(to)}" />
+    <title>${escapeAttribute(title)}</title>
+    <link rel="canonical" href="${escapeAttribute(to)}" />
     <script>location.replace(${JSON.stringify(path).replace(/</g, "\\u003c")} + location.hash)</script>
-    <meta http-equiv="refresh" content="0; url=${escape(path)}" />
+    <meta http-equiv="refresh" content="0; url=${escapeAttribute(path)}" />
   </head>
   <body>
-    <p>This page has moved to <a href="${escape(path)}">${escape(title)}</a>.</p>
+    <p>This page has moved to <a href="${escapeAttribute(path)}">${escapeAttribute(title)}</a>.</p>
   </body>
 </html>
 `;
@@ -177,7 +177,7 @@ export function typeLinkFaults(files: ReadonlyMap<string, string>): string[] {
 export function apiIndexFaults(url: string, anchors: readonly string[], files: ReadonlyMap<string, string>): string[] {
   const html = files.get(url);
   if (html === undefined) return [`${url}: no API index`];
-  return anchors.filter((anchor) => !html.includes(`id="${escape(anchor)}"`)).map((anchor) => `${url}: no element with the id ${anchor}`);
+  return anchors.filter((anchor) => !html.includes(`id="${escapeAttribute(anchor)}"`)).map((anchor) => `${url}: no element with the id ${anchor}`);
 }
 
 /** A page of a demo as the twins' guard sees it: its address, its name and
@@ -244,7 +244,7 @@ export function documentFaults(documents: readonly string[], files: ReadonlyMap<
       const edit = /<main[\s>][\s\S]*<a\b[^>]*\bhref="([^"]*)"[^>]*>Suggest an edit on GitHub<\/a>[\s\S]*<\/main>/.exec(html)?.[1];
       const query = new URL((edit ?? "about:blank").replace(/&amp;/g, "&")).searchParams;
       const title = /<title>([^<]*)<\/title>/.exec(html)?.[1];
-      return escape(query.get("title") ?? "") === `Docs: ${title}` && query.get("body")?.includes(url) === true
+      return escapeAttribute(query.get("title") ?? "") === `Docs: ${title}` && query.get("body")?.includes(url) === true
         ? []
         : [`${url}: no "Suggest an edit on GitHub" naming its title and address`];
     }),
