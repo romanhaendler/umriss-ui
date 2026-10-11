@@ -74,13 +74,11 @@ describe("fineTicks", () => {
 describe("days", () => {
   it("gives the local days a domain touches, across the clock change", () => {
     const found = days([t("2026-03-28T12:00:00+01:00"), t("2026-03-30T12:00:00+02:00")]);
-    expect(found.map((d) => [d.start, d.end])).toEqual([
-      [t("2026-03-28T00:00:00+01:00"), t("2026-03-29T00:00:00+01:00")],
-      [t("2026-03-29T00:00:00+01:00"), t("2026-03-30T00:00:00+02:00")],
-      [t("2026-03-30T00:00:00+02:00"), t("2026-03-31T00:00:00+02:00")],
+    expect(found.map((d) => d.start)).toEqual([
+      t("2026-03-28T00:00:00+01:00"),
+      t("2026-03-29T00:00:00+01:00"),
+      t("2026-03-30T00:00:00+02:00"),
     ]);
-    // The day of the change has 23 hours.
-    expect(found[1]!.end - found[1]!.start).toBe(23 * HOUR);
   });
 
   it("places a day in working time, collapsed where the calendar removes it", () => {

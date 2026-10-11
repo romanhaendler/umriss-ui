@@ -30,7 +30,7 @@ import { effectiveCollapsed, layOutRows, rowAt, slotOf, type Rows } from "./rows
 import type { IntentKind, Milestone, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
-import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
+import { days, fineStep, wallClockWithin, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
 /** What a pointer is on. */
 export type ScheduleHit =
@@ -117,7 +117,6 @@ export class SceneView {
     return {
       scale: new LinearScale(this.domain, [0, this.width]),
       calendar: this.options.calendar,
-      laneHeight: this.options.laneHeight,
       scrollY: this.scrollY,
       rows: this.rows,
     };
@@ -153,7 +152,7 @@ export class SceneView {
     for (const subtask of this.data.subtasks) {
       const slot = slotOf(this.rows, subtask.lane);
       if (slot === null) continue;
-      const box = subtaskBox(view, subtask, subtask.lane, slot, this.data.depth.get(subtask.id) ?? 0);
+      const box = subtaskBox(view, subtask, slot, this.data.depth.get(subtask.id) ?? 0);
       this.boxes.push(box);
       this.boxById.set(subtask.id, box);
     }
@@ -220,9 +219,7 @@ export class SceneView {
   /** The wall-clock time at a plot x; within the calendar's extent. */
   timeAt(x: number): number {
     const working = this.viewport().scale.fromPx(x);
-    const calendar = calendarFrom(this.options.calendar);
-    if (calendar.intervals.length === 0) return working;
-    return toWallClock(Math.max(0, Math.min(calendar.total, working)), calendar);
+    return wallClockWithin(working, this.options.calendar);
   }
 
   /** The lane at a y, strips included: what the pointer is ON.

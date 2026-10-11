@@ -56,8 +56,6 @@ export function fineTicks(
 export interface Day {
   /** Local midnight at its start, on the wall clock. */
   readonly start: number;
-  /** Local midnight at its end - 23 or 25 hours later on a clock change. */
-  readonly end: number;
   /** Where it begins on the axis, in working time. */
   readonly from: number;
   /** Where it ends on the axis; equal to `from` where the calendar removes it. */
@@ -76,7 +74,6 @@ export function days(domain: readonly [number, number], calendar: CalendarInput 
     const end = cursor.getTime();
     found.push({
       start,
-      end,
       from: toWorkingTimeClamped(start, calendar),
       to: toWorkingTimeClamped(end, calendar),
     });
@@ -135,11 +132,15 @@ export function panDomain(domain: readonly [number, number], delta: number): [nu
   return [domain[0] + delta, domain[1] + delta];
 }
 
-/** The wall-clock extent of the part of a domain that exists: a calendar has
-    no wall clock before 0 or after its total. */
-function wallExtentWithin(domain: readonly [number, number], input: CalendarInput): [number, number] {
+/** The wall-clock time of a working time, within the calendar's extent: a
+    calendar has no wall clock before 0 or after its total. */
+export function wallClockWithin(working: number, input: CalendarInput): number {
   const calendar = calendarFrom(input);
-  if (calendar.intervals.length === 0) return [domain[0], domain[1]];
-  const inside = (v: number) => Math.max(0, Math.min(calendar.total, v));
-  return [toWallClock(inside(domain[0]), calendar), toWallClock(inside(domain[1]), calendar)];
+  if (calendar.intervals.length === 0) return working;
+  return toWallClock(Math.max(0, Math.min(calendar.total, working)), calendar);
+}
+
+/** The wall-clock extent of the part of a domain that exists. */
+function wallExtentWithin(domain: readonly [number, number], input: CalendarInput): [number, number] {
+  return [wallClockWithin(domain[0], input), wallClockWithin(domain[1], input)];
 }
