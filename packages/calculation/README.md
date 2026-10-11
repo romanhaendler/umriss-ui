@@ -16,7 +16,12 @@ pnpm add @umriss-ui/calculation @umriss-ui/core
 
 `@umriss-ui/core` is a **peer dependency**: the calculation takes its styling
 regime, formats, wording, assessment and freshness from there. React 18 or 19
-as a peer as well.
+as a peer as well; the unit tests run against 18.3 and 19 in CI.
+
+Every entry begins with `"use client"`, the directive a framework
+with Server Components reads to treat a module as client code. No test runs
+inside such a framework: the
+calculation is rendered to a string in a test.
 
 ## Two forms, written as they are shown
 

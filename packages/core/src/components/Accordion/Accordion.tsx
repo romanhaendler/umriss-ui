@@ -1,6 +1,7 @@
 import { createContext, forwardRef, useContext, useId, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { inertWhen } from "../../lib/inert";
 import { AngleGlyph } from "../../lib/glyphs";
 import styles from "./Accordion.module.css";
 
@@ -134,7 +135,7 @@ export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(func
       {/* The height animates through the 0fr/1fr grid, as the card's
           collapse does; a folded panel stays in the DOM, inert. */}
       <div className={cx(styles.collapse, !isOpen && styles.collapsed)}>
-        <div className={styles.collapseInner} inert={!isOpen || undefined}>
+        <div className={styles.collapseInner} {...inertWhen(!isOpen)}>
           <div id={panelId} role="region" aria-labelledby={headerId} className={styles.panel}>
             {children}
           </div>

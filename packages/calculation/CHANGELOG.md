@@ -13,9 +13,15 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ## Unreleased
 
+### Added
+
+- **The unit tests run against React 18.3.1 and 19 in CI**, and a calculation is rendered to a string with no `window` in a test (`tests-unit/ssr.test.tsx`).
+
 ### Changed
 
 - **Every entry begins with `"use client";`.** The built file `dist/calculation.js` starts with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
+- **Every export is a client component.** A hook called in a Server Component now fails with React's message about a client reference, not one about `useState`.
 
 ---
 

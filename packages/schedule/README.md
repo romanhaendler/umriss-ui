@@ -19,7 +19,14 @@ Both `@umriss-ui/core` and `@umriss-ui/charts` are **peer dependencies**
 (ADR-0022): the schedule takes its styling regime, provider, formats and
 wording from core, and its time arithmetic — the affine scale, the time steps,
 the working calendar, the canvas colour resolution — from charts. React 18 or
-19 as a peer as well.
+19 as a peer as well; the unit tests run against 18.3 and 19 in CI.
+
+Every entry begins with `"use client"`, the directive a framework
+with Server Components reads to treat a module as client code. No test runs
+inside such a framework: the
+schedule is rendered to a string in a test. On a server it gives its labelled
+frame and empty canvases; the lanes, subtasks and the summary's counts arrive
+on the client after mount.
 
 ## The smallest schedule that runs
 
