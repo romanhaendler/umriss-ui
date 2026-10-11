@@ -38,6 +38,7 @@ import {
   MenuItem,
   Popover,
   VisuallyHidden,
+  announce,
   useDensityFor,
   useFormats,
   usePortalTarget,
@@ -387,11 +388,10 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      as React keeps information from previous renders: set while rendering. */
   const [heldBefore, setHeldBefore] = useState(0);
   const grid = useGridState();
-  /* What the live region says after Ctrl+C. The same words again must be heard
-     again: a trailing no-break space is toggled, which the region sees as a
-     change and a reader does not speak. */
-  const [said, setSaid] = useState("");
-  const say = (words: string) => setSaid((old) => (old === words ? `${words} ` : words));
+  /* What is said after Ctrl+C goes through core's one voice, from the table, so
+     that inside a modal dialog it is the dialog's region that speaks. The same
+     words again are heard again: the voice writes a new node every time. */
+  const say = (words: string) => announce(words, tableRef.current);
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
   const [sticking, setSticking] = useState({ start: true, end: true });
@@ -1058,9 +1058,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           />
         )}
       </div>
-      <VisuallyHidden aria-live="polite">
-        {said}
-      </VisuallyHidden>
       {registry.rowAdding && !registry.showsToolbar() && (
         <div className={styles.newRowBar}>
           <NewRowButton registry={registry} />

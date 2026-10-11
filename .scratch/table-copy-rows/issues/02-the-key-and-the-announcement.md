@@ -32,3 +32,5 @@ Ctrl/Cmd+C does it.
 ## Comments
 
 Delivered 2026-10-11. One `onKeyDown` on the scroll element of `Frame` (parts.tsx) and a visually hidden `aria-live="polite"` span after it, without `role="status"` (a second status would break every query for the toolbar's). The same text again toggles a trailing no-break space. The active cell's text comes from `grid.state.active` and the frame's grid lines. A test pins that the grid's own handler lets Ctrl+C pass. Not tested mounted: server mode (the page's selected rows come through `hook.selectedRows`, unchanged).
+
+Changed 2026-10-11: the table's own `aria-live` span is gone - it gave every table a live region and failed the silent-pages check on 23 demo pages, and the library already has one voice. The three sentences now go through core's `announce(text, at)` (exported for this), from the table element, so a table in a modal dialog speaks from the dialog's region. The no-break-space toggle is gone too: the voice writes a new node each time. The announcement carries `role="status"` again, now in the single region of the body that the listbox components share.

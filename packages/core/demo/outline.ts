@@ -298,7 +298,7 @@ export const OUTLINE: readonly Rubric[] = [
         keys: [{ key: "Tab", action: "Reaches a `focusable` one and shows it while it has focus." }],
         limits: ["It hides from the eye only; to hide something from everyone, do not render it."],
         types: ["VisuallyHiddenProps"],
-        exports: ["VisuallyHidden"],
+        exports: ["VisuallyHidden", "announce"],
       },
     ],
   },

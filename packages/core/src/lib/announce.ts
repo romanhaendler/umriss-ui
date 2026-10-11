@@ -10,7 +10,8 @@
    and not in the provider, so that it works without one and stays one under
    several.
 
-   Internal, like `portalTargetFor`. */
+   Exported for the packages that speak too (the table's copy), through this
+   voice and not a region of their own. */
 
 import { portalTargetFor } from "./portalTarget";
 
@@ -42,6 +43,11 @@ function regionIn(host: Element): HTMLElement {
 }
 
 /**
+ * The library's one voice: says `text` in a polite live region, for what
+ * happened without a visible change in the place a reader is at - a copy made,
+ * a count after a filter. Use it instead of a region of your own: there is one
+ * region, so two announcements never speak over each other.
+ *
  * Says `text` once announcements have rested for `ANNOUNCE_REST`; a later call
  * within the rest replaces an earlier one.
  *

@@ -33,6 +33,8 @@ commit.
 
 ### Added
 
+- **`announce(text, at?)`**: the library's one voice - the polite live region the combobox, the multi-select and the command palette speak through - for another package or an application that has something to say without a visible change. A later call within 150 ms replaces an earlier one; the same words again are heard again; `at` is the element that speaks, so that inside a modal `<dialog>` it is the dialog's own region.
+
 - **The unit tests run against React 18.3.1 and 19 in CI**, and the fields' widths are rendered to a string on a server in a test (`fieldWidth.test.tsx`).
 
 - **`availabilitySnoozed(until, by, reason?)`**: a third, optional argument; the English and German sentences append `: ${reason}` for a non-empty reason ("Snoozed until 14:00 by M. Weber: valve being replaced" / "Zurückgestellt bis 14:00 von M. Weber: Ventil wird getauscht"). A wording of two parameters still fits the type and keeps working, with no reason in its sentence.

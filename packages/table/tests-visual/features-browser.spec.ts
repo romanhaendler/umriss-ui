@@ -209,9 +209,9 @@ test("Export downloads shipments.csv, and in it stands the filtered set in the v
 
   const text = (await readFile((await download.path())!, "utf8")).replace(/^﻿/, "");
   expect(text.trim().split(/\r?\n/)).toEqual([
-    "Shipment;Customer;Parcels;Weight (kg)",
-    "FP-1004249;Northbay Books;2;18,4",
-    "FP-1004223;Northgate Florists;6;41,25",
+    "Shipment,Customer,Parcels,Weight (kg)",
+    "FP-1004249,Northbay Books,2,18.4",
+    "FP-1004223,Northgate Florists,6,41.25",
   ]);
 });
 
