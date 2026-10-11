@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -11,6 +11,12 @@ import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 import { usePortalTarget, useToastConfig } from "../../lib/provider";
 import type { ToastPosition } from "../../lib/provider";
+import { useCardMeasure } from "./useCardMeasure";
+import { keyboardFocus, useDeckOpen } from "./useDeckOpen";
+import type { Place } from "./useDeckPlaces";
+import { useDeckPlaces } from "./useDeckPlaces";
+import { useRegionFocus } from "./useRegionFocus";
+import { useCountdowns, useTimerStore } from "./useToastTimers";
 
 /** How the message turns out; `loading` is a toast still at work. */
 export type ToastTone = "neutral" | "success" | "warning" | "danger" | "loading";
@@ -54,28 +60,11 @@ export interface ToastOptions {
   onClose?: (reason: ToastCloseReason) => void;
 }
 
-interface Place {
-  /** Distance from the region's edge, in px. */
-  offset: number;
-  /** Behind the front card of a closed deck: cut to its height, smaller. */
-  behind: boolean;
-  scale: number;
-  /** Further back than BEHIND in a closed deck. */
-  hidden: boolean;
-  zIndex: number;
-}
-
-interface ToastItem extends ToastOptions {
+export interface ToastItem extends ToastOptions {
   id: number;
   /** Set while it leaves, with the place it stood at: the others close up
       over it. */
   leaving?: Place;
-}
-
-interface TimerInfo {
-  timeout: ReturnType<typeof setTimeout> | null;
-  remaining: number;
-  startedAt: number;
 }
 
 interface ToastContextValue {
@@ -99,31 +88,6 @@ export function useToast(): ToastContextValue {
     throw new Error("useToast requires a <ToastProvider> around the application.");
   }
   return context;
-}
-
-/* The deck. Closed, the newest toast stands in front and at most two stand
-   behind it, each PEEK further back and a little smaller, cut to the front
-   one's height. Open, they stand one after the other, GAP apart. Every card
-   lies absolutely in the region and is moved by a transform, so that opening
-   and closing are one transition - the heights that takes are measured once
-   per card, on its content, which is never cut. */
-const PEEK = 14;
-const GAP = 8;
-const SHRINK = 0.04;
-const BEHIND = 2;
-
-
-/** A focus the deck opens for: on the region itself (Alt+T, the count), or
-    one the browser shows as keyboard focus. Where `:focus-visible` is not
-    understood (an older browser, jsdom), every focus counts - a deck open too
-    often is better than one the keyboard cannot open. */
-function keyboardFocus(element: Element, region: Element): boolean {
-  if (element === region) return true;
-  try {
-    return element.matches(":focus-visible");
-  } catch {
-    return true;
-  }
 }
 
 function ToneGlyph({ tone }: { tone: ToastTone }) {
@@ -181,48 +145,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const nextId = useRef(1);
-  const timers = useRef(new Map<number, TimerInfo>());
-  /* The teardowns of leaving toasts, cancelled with the provider. */
-  const leaves = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const { timersRef, leavesRef, clearTimer } = useTimerStore();
   const regionRef = useRef<HTMLDivElement>(null);
 
-
-  /* The deck opens under the pointer, with the focus inside it, or pinned by
-     its count (a finger has no hover). While it is open every countdown
-     stands still. */
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  /* Alt+T puts the focus on the region by a key, but Chrome shows no
-     `:focus-visible` for a scripted focus after a click: the ring is drawn
-     for this focus by hand. */
-  const [byKeys, setByKeys] = useState(false);
-  const open = hovered || focused || pinned;
-  const openRef = useRef(open);
-
-  /* Where each card stood at the last picture, for the one that leaves. */
-  const lastPlace = useRef(new Map<number, Place>());
-  /* The observed content element of each card. */
-  const observed = useRef(new Map<number, HTMLElement>());
-  const observer = useRef<ResizeObserver | null>(null);
-  const [heights, setHeights] = useState<Record<number, number>>({});
-
-  /** Where Alt+T took the focus from, to give it back. */
-  const returnFocus = useRef<HTMLElement | null>(null);
-  const leaveRegion = useCallback(() => {
-    const back = returnFocus.current;
-    returnFocus.current = null;
-    if (back?.isConnected) back.focus();
-    else (document.activeElement as HTMLElement | null)?.blur();
-  }, []);
+  const { open, setHovered, setFocused, setPinned } = useDeckOpen(regionRef, items);
+  const { heights, measureRef, forget } = useCardMeasure();
+  const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights);
+  const anyStanding = items.some((item) => !item.leaving);
+  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding);
 
   const remove = useCallback(
     (id: number) => {
-      lastPlace.current.delete(id);
-      const element = observed.current.get(id);
-      if (element) observer.current?.unobserve(element);
-      observed.current.delete(id);
-      setHeights((current) => Object.fromEntries(Object.entries(current).filter(([key]) => Number(key) !== id)));
+      lastPlaceRef.current.delete(id);
+      forget(id);
       const rest = itemsRef.current.filter((item) => item.id !== id);
       commit(rest);
       /* An empty deck has nothing to be open about - and a pointer over a
@@ -232,14 +167,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         setPinned(false);
       }
     },
-    [commit],
+    [commit, forget, lastPlaceRef, setHovered, setPinned],
   );
-
-  const clearTimer = useCallback((id: number) => {
-    const info = timers.current.get(id);
-    if (info?.timeout) clearTimeout(info.timeout);
-    timers.current.delete(id);
-  }, []);
 
   /** Starts the leaving: first the choreography, then the teardown. */
   const beginLeave = useCallback(
@@ -267,53 +196,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         remove(id);
         return;
       }
-      const place = lastPlace.current.get(id) ?? { offset: 0, behind: false, scale: 1, hidden: false, zIndex: 0 };
+      const place = lastPlaceRef.current.get(id) ?? { offset: 0, behind: false, scale: 1, hidden: false, zIndex: 0 };
       commit(itemsRef.current.map((entry) => (entry.id === id ? { ...entry, leaving: { ...place, zIndex: 0 } } : entry)));
       const teardown = setTimeout(() => {
-        leaves.current.delete(teardown);
+        leavesRef.current.delete(teardown);
         remove(id);
       }, duration);
-      leaves.current.add(teardown);
+      leavesRef.current.add(teardown);
     },
-    [clearTimer, commit, remove, leaveRegion],
+    [clearTimer, commit, remove, leaveRegion, lastPlaceRef, leavesRef, regionRef],
   );
 
-  const run = useCallback(
-    (id: number, info: TimerInfo) => {
-      info.startedAt = Date.now();
-      info.timeout = setTimeout(() => beginLeave(id, "timeout"), info.remaining);
-    },
-    [beginLeave],
-  );
-
-  /** Counts a toast's duration from now - held while the deck is open. */
-  const startTimer = useCallback(
-    (id: number) => {
-      clearTimer(id);
-      const item = itemsRef.current.find((entry) => entry.id === id);
-      if (!item || item.tone === "loading") return;
-      const ms = item.duration ?? defaultDuration;
-      if (ms <= 0) return;
-      const info: TimerInfo = { timeout: null, remaining: ms, startedAt: 0 };
-      timers.current.set(id, info);
-      if (!openRef.current) run(id, info);
-    },
-    [clearTimer, defaultDuration, run],
-  );
-
-  useEffect(() => {
-    openRef.current = open;
-    timers.current.forEach((info, id) => {
-      if (open && info.timeout) {
-        clearTimeout(info.timeout);
-        info.timeout = null;
-        info.remaining = Math.max(0, info.remaining - (Date.now() - info.startedAt));
-      } else if (!open && !info.timeout) {
-        if (info.remaining <= 0) beginLeave(id, "timeout");
-        else run(id, info);
-      }
-    });
-  }, [open, beginLeave, run]);
+  const startTimer = useCountdowns({ timersRef, clearTimer, itemsRef, open, defaultDuration, beginLeave });
 
   const toast = useCallback(
     (options: ToastOptions) => {
@@ -342,83 +236,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const dismiss = useCallback((id: number) => beginLeave(id, "dismiss"), [beginLeave]);
 
-  useEffect(() => {
-    const map = timers.current;
-    const teardowns = leaves.current;
-    return () => {
-      map.forEach((info) => {
-        if (info.timeout) clearTimeout(info.timeout);
-      });
-      map.clear();
-      teardowns.forEach(clearTimeout);
-      teardowns.clear();
-    };
-  }, []);
-
-  /* ---- Measuring: each card's content, which the deck never cuts. ---- */
-  const measure = useCallback((id: number, height: number) => {
-    setHeights((current) => (current[id] === height ? current : { ...current, [id]: height }));
-  }, []);
-  /** One stable ref for every card's content; the card says which it is. A
-      card that moves to the other live region mounts anew, and the element it
-      leaves behind is let go. */
-  const measureRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      if (!element) return;
-      const id = Number(element.dataset.toast);
-      const before = observed.current.get(id);
-      if (before === element) return;
-      if (before) observer.current?.unobserve(before);
-      observed.current.set(id, element);
-      measure(id, element.offsetHeight);
-      if (typeof ResizeObserver === "undefined") return;
-      /* The border box, unrounded and untransformed: offsetHeight rounds,
-         and eight pixels of gap became 7.6. */
-      observer.current ??= new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const target = entry.target as HTMLElement;
-          measure(Number(target.dataset.toast), entry.borderBoxSize?.[0]?.blockSize ?? target.offsetHeight);
-        }
-      });
-      observer.current.observe(element);
-    },
-    [measure],
-  );
-  useEffect(() => () => observer.current?.disconnect(), []);
-
-  /* ---- Alt+T, and where the focus goes back to. ---- */
-  const anyStanding = items.some((item) => !item.leaving);
-  useEffect(() => {
-    if (!anyStanding) return;
-    const onKey = (event: globalThis.KeyboardEvent) => {
-      /* `code`, not `key`: on a Mac, Alt+T types "†". */
-      if (!event.altKey || event.ctrlKey || event.metaKey || event.code !== "KeyT") return;
-      event.preventDefault();
-      const active = document.activeElement;
-      if (!regionRef.current?.contains(active)) {
-        returnFocus.current = active instanceof HTMLElement ? active : null;
-      }
-      regionRef.current?.focus();
-      setByKeys(true);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [anyStanding]);
-
-  /* A pinned deck closes on a press anywhere else - and gives up the focus it
-     was given, or it would stay open by that. */
-  useEffect(() => {
-    if (!pinned) return;
-    const onDown = (event: globalThis.PointerEvent) => {
-      const region = regionRef.current;
-      if (!region || region.contains(event.target as Node)) return;
-      setPinned(false);
-      if (region.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-  }, [pinned]);
-
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Escape") return;
     setPinned(false);
@@ -433,43 +250,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setFocused(false);
     setPinned(false);
     /* Left by other means than Escape: nothing to give back any more. */
-    returnFocus.current = null;
+    returnFocusRef.current = null;
   };
-  /* An element that leaves the document takes the focus with it and sends no
-     blur: after every change the focus is read again. */
-  useEffect(() => {
-    const region = regionRef.current;
-    const active = document.activeElement;
-    setFocused(!!region && active instanceof HTMLElement && region.contains(active) && keyboardFocus(active, region));
-  }, [items]);
   /* A finger's touch ends in a pointerleave at once; it opens by the count. */
   const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch") setHovered(true);
   };
   const onPointerLeave = () => setHovered(false);
-
-  /* ---- The places. ---- */
-  const standing = items.filter((item) => !item.leaving);
-  const count = standing.length;
-  const byRank = [...standing].reverse();
-  const frontHeight = byRank[0] ? (heights[byRank[0].id] ?? 0) : 0;
-  const places = new Map<number, Place>();
-  let reach = 0;
-  byRank.forEach((item, rank) => {
-    const behind = !open && rank > 0;
-    places.set(item.id, {
-      offset: open ? reach : rank * PEEK,
-      behind,
-      scale: behind ? 1 - rank * SHRINK : 1,
-      hidden: !open && rank > BEHIND,
-      zIndex: count - rank,
-    });
-    reach += (heights[item.id] ?? 0) + GAP;
-  });
-  useLayoutEffect(() => {
-    lastPlace.current = places;
-  });
-  const regionHeight = count === 0 ? 0 : open ? reach - GAP : frontHeight + PEEK * Math.min(count - 1, BEHIND);
 
   const value = useMemo(() => ({ toast, update, dismiss }), [toast, update, dismiss]);
   const wording = useWording();
