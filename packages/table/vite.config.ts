@@ -14,6 +14,9 @@ export default defineConfig({
       formats: ["es"],
       fileName: "table",
     },
+    /* The syntax the sources are written in (tsconfig `target`): no helper is
+       shipped for what an application's own target decides. */
+    target: "es2022",
     cssCodeSplit: false,
     rollupOptions: {
       /* @umriss-ui/core is a peer, like React: it comes from the caller and
