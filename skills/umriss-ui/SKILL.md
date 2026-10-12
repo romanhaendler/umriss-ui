@@ -21,7 +21,7 @@ What changes for a caller stands in the package's `CHANGELOG.md`.
 
 ## How each package is entered
 
-Install what you use. `table` and `calculation` take `core` as a peer; `schedule` takes `core` and `charts`; `charts` takes nothing but React 18 or 19.
+Install what you use. `table` and `calculation` take `core` as a peer; `schedule` takes `core` and `charts`; `charts` takes nothing but React 19 or newer.
 
 ```bash
 pnpm add @umriss-ui/core

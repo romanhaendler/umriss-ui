@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
-import { inertWhen } from "../../lib/inert";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
 import { computePosition, motionOrigin, visibleViewport } from "./position";
@@ -233,7 +232,7 @@ export function Popover({
       /* A panel that is leaving is gone for assistive technology at once: its
          fade is for the eye. `inert` takes it out of reach, `aria-hidden` out
          of the tree - a second dialog beside the one opening would be read. */
-      {...inertWhen(closing)}
+      inert={closing}
       aria-hidden={closing || undefined}
       style={{
         top: position?.top ?? 0,

@@ -1,13 +1,7 @@
-# What can be checked without a screenshot: lint, types, unit tests, build, the
-# built entries (`check:dist`: the directive and the stylesheet import) and the
-# unit tests on React 18.3.1 (`unit-react18`).
+# What can be checked without a screenshot: lint, types, unit tests, build and the
+# built entries (`check:dist`: the directive and the stylesheet import).
 # The screenshot suite stays local - its baselines are taken on darwin
 # (CONTRIBUTING.md, "First run") and would report every image as missing here.
-#
-# `unit-react18` is a job of its own and not a matrix over `check`: it drops
-# the lockfile in the runner and resolves afresh (the override below), and a job
-# that does so must not be the one that checks the lockfile is frozen. Nothing
-# of it is committed.
 name: CI
 
 on:
@@ -37,40 +31,3 @@ jobs:
       - run: pnpm build
       - run: pnpm -r check:dist
 
-  # The packages claim "React 18 or 19"; the devDependencies are 19. This job runs the unit tests on 18.3.1.
-  unit-react18:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      # No install from the lockfile first, and no lockfile for this one: resolved
-      # once for React 19, the testing library keeps its react-dom 19 beside an
-      # overridden react 18, and every render fails. A fresh resolve is the
-      # price of proving 18 - other versions may drift by a patch in this job.
-      - name: Override react and react-dom with 18.3.1
-        run: |
-          rm -f pnpm-lock.yaml
-          node -e '
-            const fs = require("node:fs");
-            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-            pkg.pnpm = { ...pkg.pnpm, overrides: { ...pkg.pnpm?.overrides, react: "18.3.1", "react-dom": "18.3.1" } };
-            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
-          '
-          pnpm install --no-frozen-lockfile
-      # Without this a silent no-op override would pass every test and prove nothing.
-      - name: Fail unless React 18 is installed
-        working-directory: packages/core
-        run: |
-          for name in react react-dom; do
-            version=$(node -p "require('$name/package.json').version")
-            echo "$name $version"
-            case "$version" in 18.*) ;; *) echo "expected $name 18, got $version"; exit 1 ;; esac
-          done
-      # The demos' tests read `demo/.generated`, which `props` writes and the
-      # typecheck no longer does.
-      - run: pnpm -r --if-present props
-      - run: pnpm test:unit

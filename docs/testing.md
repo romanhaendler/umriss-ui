@@ -67,8 +67,6 @@ kind is for.
   run in the light project only.
 * **The accessibility check (axe, WCAG 2.1 AA)** runs a sample of pages in both
   themes inside the same Playwright suite.
-* **React 18**: CI resolves afresh with React 18.3.1 and runs the unit tests
-  once more.
 
 ## Pure modules (the checkable seam)
 

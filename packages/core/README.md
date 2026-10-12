@@ -30,8 +30,10 @@ In an application:
 import { Button, Card } from "@umriss-ui/core";
 ```
 
-Nothing else is required. React 18 or 19 as a peer; the unit tests run against
-18.3 and 19 in CI.
+Nothing else is required. React 19 or newer as a peer.
+
+The package ships ES2022 syntax; an application that serves older browsers
+transpiles it itself.
 
 Every entry, `./wording/de` included, begins with `"use client"`, the directive a framework
 with Server Components reads to treat a module as client code. No test runs

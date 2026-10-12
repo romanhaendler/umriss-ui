@@ -1,6 +1,6 @@
 # 02 - React 19 is the floor
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
