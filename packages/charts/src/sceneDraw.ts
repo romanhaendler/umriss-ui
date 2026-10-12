@@ -116,7 +116,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
       }
       case "scatter":
         // Not windowed: a scatter's rows often come unsorted, and every point
-        // of such a series is still drawn.
+        // of such a series is drawn.
         items.push({ ...base, kind: "scatter", radius: config.radius, marker: marks?.marker });
         break;
       case "state": {
@@ -174,8 +174,8 @@ function ascends(x: Float64Array, n: number): boolean {
     channels (hit.ts, visibleWindow). Bars and state segments have ascending x
     as lines do. */
 function windowOf(mat: MaterializedSeries, xAxis: AxisLayout, reach: number): Course {
-  /* A series whose x does not ascend is drawn whole, as it always was: a window
-     found by bisection would drop marks of it. */
+  /* A series whose x does not ascend is drawn whole: a window found by
+     bisection would drop marks of it. */
   if (!ascends(mat.x, mat.length)) return { x: mat.x, y: mat.y, y0: mat.y0, length: mat.length };
   const [lo, hi] = visibleWindow(mat.x, mat.length, xAxis.scale.domain[0], xAxis.scale.domain[1], reach);
   return {
