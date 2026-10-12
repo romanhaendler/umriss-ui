@@ -110,3 +110,24 @@ rows drawn, not from all of them); the frame's layout effects reading boxes only
 when rows can have moved (the 60 ms of a scroll run that a profile shows is the
 browser laying out the new rows, paid by whichever read comes first, and a scroll
 step does move rows).
+
+## Where the figures stand
+
+The same page, machine and method as the reference run, after everything
+above; 2026-10-12, one run of the page per row.
+
+| Rows | Set | First render | Scroll step | Sort | Search | Page | Fold | Hide column | Re-render |
+|---|---|---|---|---|---|---|---|---|---|
+| 10,000 | virtual | 17.2 | 4.1 | 15.9 | 8.0 | n/a | n/a | 2.9 | 1.6 |
+| 10,000 | grouped | 33.6 | 4.0 | 19.9 | 7.7 | n/a | 2.8 | 3.4 | 1.6 |
+| 10,000 | paged | 30.6 | n/a | 14.0 | 8.4 | 6.3 | n/a | 3.7 | 2.9 |
+| 50,000 | virtual | 48.6 | 3.9 | 39.7 | 13.9 | n/a | n/a | 2.5 | 1.9 |
+| 50,000 | grouped | 91.0 | 3.9 | 56.4 | 17.6 | n/a | 2.9 | 4.8 | 1.8 |
+| 50,000 | paged | 60.1 | n/a | 41.3 | 16.2 | 5.6 | n/a | 3.5 | 2.7 |
+| 200,000 | virtual | 145.9 | 3.7 | 151.0 | 46.6 | n/a | n/a | 2.8 | 1.5 |
+| 200,000 | grouped | 299.4 | 3.7 | 221.7 | 65.3 | n/a | 2.4 | 8.6 | 1.4 |
+| 200,000 | paged | 157.8 | n/a | 153.7 | 47.5 | 6.2 | n/a | 3.6 | 2.2 |
+
+A scroll step, a page, a fold, a hidden column and a re-render of the caller no
+longer grow with the rows. The first render, a sort and a search still do: they
+are the work of reading, ordering and matching every row.

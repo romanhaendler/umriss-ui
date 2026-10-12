@@ -243,3 +243,14 @@ every step crosses a real window of the full height.
 * **Sorting.** The order is the caller's.
 * **A flat source form with a parent reference.** Converting is a three-liner at
   the caller and needs no second contract.
+
+### Where the figures stand
+
+The same page, machine and method, after the changes above; 2026-10-12, one run
+of the page per row.
+
+| Nodes | First render | Per key | Per scroll event |
+|---|---|---|---|
+| 10,000 | 23.2 | 0.27 | 1.43 |
+| 50,000 | 18.6 | 0.24 | 1.13 |
+| 100,000 | 34.4 | 0.26 | 1.21 |
