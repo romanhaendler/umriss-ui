@@ -27,7 +27,7 @@ import type { Pin, Pins } from "./model/pinning";
 import { requestKey, onlyKnown, viewKey } from "./model/view";
 import type { TableRequest, TableView } from "./model/view";
 import type { ModelColumn } from "./model/tableModel";
-import { Registry } from "./registry";
+import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csvOf, selectionText } from "./export";
@@ -95,6 +95,16 @@ function combineConditions(
     }
     return resolved.every((matches) => matches(row));
   };
+}
+
+/** An accessor written in the call, held while the next one is equal to it
+    (fnEqual): its identity keys the memos below. */
+function useAccessor<F>(fn: F): F {
+  // Boxed: useState would call a function as its initialiser.
+  const [held, setHeld] = useState({ fn });
+  if (fnEqual(held.fn, fn)) return held.fn;
+  setHeld({ fn });
+  return fn;
 }
 
 /** The rows the pre-filter admits - with the same identity as long as they are
@@ -251,7 +261,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
-  const rowKey = options.rowKey as (row: unknown) => string;
+  const rowKey = useAccessor(options.rowKey) as (row: unknown) => string;
   /* Tree rows: the rows are the roots, and their levels
      come from their children. A grouping would build levels a second way, and
      pages would tear rows from their parents - both are passed over. The
