@@ -12,6 +12,14 @@ From 0.34.0 all five packages share one number: they are released together, and 
 
 ---
 
+## 0.34.0 – One number for all five packages (Oct. 2026)
+
+From this version all five packages carry one number and are released
+together. Needs `@umriss-ui/core` 0.34; the peer range is `^0.34.0`. No change
+of its own.
+
+---
+
 ## 0.7.3 – Core 0.33.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.33; the peer range moves to `^0.33.0`.

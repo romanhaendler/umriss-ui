@@ -16,7 +16,11 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.34.0 – A view is set, not handed back (Oct. 2026)
+
+From this version all five packages carry one number and are released
+together. Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.34; the peer ranges
+are `^0.34.0`.
 
 ### Changed
 

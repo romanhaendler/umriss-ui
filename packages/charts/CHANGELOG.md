@@ -29,13 +29,22 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.34.0 – A view is set, not handed back, and one locale (Oct. 2026)
+
+From this version all five packages carry one number and are released
+together.
 
 ### Changed
+
+- **Numbers, dates and times follow the wording, not the browser.** Numbers used to be formatted in `navigator.language` and time labels were fixed `en-GB`, so a German browser showed `1.204,5` on an axis under a core `Stat` reading `1,204.5`, and a German application got English month names. The wording now carries the locale as a new field `locale` - `"en-GB"` by default, `"de-DE"` in `@umriss-ui/charts/wording/de` - and every number, date and time the chart formats (ticks, tooltip, data table, what a screen reader hears) follows it. A partial wording without `locale` keeps the default; a `tickFormat` or `format` of your own still wins; the clock stays 24-hour. An application that relied on the browser's language for its numbers passes the German wording, or a wording with its own `locale`.
 
 - **`initialView` is read once, and `setView` is new.** A different `initialView` on a later render is now ignored, as React ignores a changed `defaultValue`; it used to be applied whenever its content differed from the last one handed in. To go to a view later, call the new `setView(view)` that `useChart` returns: it applies a whole view, and what the view leaves out is shown whole again. `setView` is not reported through `onViewChange`, which reports what the reader did, so two charts kept in step by `onViewChange: (v) => other.setView(v)` in both directions do not answer each other. A caller that kept the reported view in state and handed it back as `initialView` writes `setView` instead: restoring a kept view is `setView(kept)`, and the state that mirrors the chart's view becomes `view` from the hook. `Echoes`, the rule that told a view reported and handed back late from one handed in, is no longer exported.
 
 - **Ten exports and one dead member are gone.** `ruleOutlier`, `ruleRun`, `ruleTrend`, `ruleTwoOfThree`, `sigmaFromLimit`, `defaultRules`, `paretoDefaults`, `toWorkingTime`, `mapSeries` and `workingTicks` are no longer exported from the package; nothing in the library or its documentation asked a caller to import them. `ControlChart`'s `rules` prop is unchanged and still takes a `Partial<RuleOptions>`. The static `ChartScene.classTick` is removed as well. `workingCalendar`, `calendarFrom`, `toWallClock` and the other working-time helpers stay.
+
+### Fixed
+
+- **A bound without a finite value is no bound.** A limit of `Infinity` on the lower side, or `-Infinity` on the upper, counted as violated by every value; `@umriss-ui/core` already ignored such a bound, and the two now agree.
 
 ---
 

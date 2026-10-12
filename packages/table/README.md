@@ -83,8 +83,7 @@ Each line gets a group header with its count and its sum under the Quantity
 column; the customers stand beside their orders as a span (ADR-0029). Without
 `defaultGrouping` the user groups from the column menu. `aggregate` takes `sum`,
 `avg`, `min`, `max`, `range`, `count`, `distinct` or a function of one's own, and
-is the footer over the filtered set as well — it used to be called `footer`,
-and the old name still works for this version.
+is the footer over the filtered set as well.
 
 ## Styles
 

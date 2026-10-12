@@ -23,7 +23,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.34.0 – The alarm list leaves, and a view is set (Oct. 2026)
+
+From this version all five packages carry one number and are released
+together. Needs `@umriss-ui/core` 0.34; the peer range is `^0.34.0`.
+
+### Fixed
+
+- **A new row in a tree that is a grid has as many cells as the head.** With `tree`, grid mode, `onRowAdd` and a `RowDetail`, the placeholder row for a new row counted the expander column the tree leaves out, and stood one cell too wide.
+
+- **A tree is never cut into pages.** Where the body computed its rows anew - a column that registers after the hook has run - a tree with a `Pagination` part could be paged; the hook never paged a tree, and the two now agree.
 
 ### Changed
 
