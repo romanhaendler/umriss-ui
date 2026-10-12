@@ -12,11 +12,11 @@ hard outlines or effects.
 
 | Package | Version | What it is |
 |---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.33.0 | The component library — forms, overlays, structure, the tree, the command palette. The package you install first |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.16.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.16.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
-| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.7.1 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
-| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.7.3 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/core`](packages/core/README.md) | 0.34.0 | The component library — forms, overlays, structure, the tree, the command palette. The package you install first |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.34.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.34.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.34.0 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
+| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.34.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
 | `@umriss-ui/demo` | — | The private shell all five demos are built from. Never published |
 
 All five published packages are released under the npm tag `latest`, so a plain
@@ -117,7 +117,7 @@ npx skills add romanhaendler/umriss-ui --skill umriss-ui
 
 ## Maturity
 
-Every package is `0.x`, and while the first digit is `0` no version number
+Every package is `0.x` and the five are released together under one number (from `0.34.0`), and while the first digit is `0` no version number
 promises compatibility. All five are released under `latest`. The release
 candidates of `charts`, `table` and `schedule` stand in their changelogs, and so
 do the numbers `core` counted inside this repository before its first release,

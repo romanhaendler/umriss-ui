@@ -26,9 +26,14 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
+## 0.34.0 – The Dock and the alarm list's words leave (Oct. 2026)
+
+From this version all five packages carry one number and are released
+together.
 
 ### Changed
+
+- **`--u-color-accent-active` and the wording `asOfUnknown` are removed.** No stylesheet read the token and no component read the wording; setting either did nothing. A theme or a wording that still carries them loses nothing (the type checker reports the wording key as unknown).
 
 - **The alarm list's wording keys are removed**: the alarm, priority, lifecycle, snooze, flood, chatter, availability and alarm-column keys. A wording that still carries them is ignored at runtime and reported by the type checker as an unknown key. `verdictAlarm` and the limit model are unchanged.
 

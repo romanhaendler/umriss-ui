@@ -228,9 +228,7 @@ The table is not part of this package. It lives in
 The core scope is complete, and so are the command palette, the
 danger text tone, the pass-through of rules 1 and 2 above, the six basic
 components and the layout extras, forced colours, the listbox
-announcements, and the fields' widths and sizes (ADR-0041). What is still open is one check a person makes: the listbox
-announcements heard through VoiceOver (`.scratch/listbox-announcements/`,
-ticket 02) - put aside by the maintainer on 11 Oct 2026, not closed.
+announcements, and the fields' widths and sizes (ADR-0041).
 
 What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
