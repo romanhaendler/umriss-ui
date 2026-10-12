@@ -26,6 +26,9 @@ export default defineConfig({
       formats: ["es"],
       fileName: (_format, entryName) => (entryName === "index" ? "core.js" : `${entryName}.js`),
     },
+    /* The syntax the sources are written in (tsconfig `target`): no helper is
+       shipped for what an application's own target decides. */
+    target: "es2022",
     cssCodeSplit: false,
     rollupOptions: {
       external: ["react", "react-dom", "react/jsx-runtime"],

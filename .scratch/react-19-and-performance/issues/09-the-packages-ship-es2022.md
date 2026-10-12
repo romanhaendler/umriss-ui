@@ -1,6 +1,6 @@
 # 09 - The packages ship ES2022
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
