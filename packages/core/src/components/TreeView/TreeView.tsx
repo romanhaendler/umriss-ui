@@ -93,15 +93,31 @@ export function TreeView<K, S extends Key = string>({
      window, there is nothing to focus until the window has followed - and
      follow it must even when the tree does not have the focus at all, for
      instance because the active node was set from outside. The effect runs a
-     second time after the window has followed and focuses then. */
+     second time after the window has followed and focuses then.
+
+     The window follows the active node when the node MOVES (or is asked for
+     again), once. A render that merely finds it outside the window - because
+     the person scrolled away - must leave the scroll position alone, and so
+     must not search the flattening for it. */
+  const shown = useRef<{ active: Key | null; count: number } | null>(null);
+  const windowFrom = rowWindow?.from;
+  const windowTo = rowWindow?.to;
+  const showRow = rowWindow?.showRow;
   useEffect(() => {
     const root = rootRef.current;
     if (root === null || tree.active === null) return;
-    if (rowWindow !== undefined) {
-      const index = tree.flattening.findIndex((e) => e.key === tree.active);
-      if (index >= 0 && (index < rowWindow.from || index >= rowWindow.to)) {
-        rowWindow.showRow(index);
-        return;
+    if (showRow !== undefined && windowFrom !== undefined && windowTo !== undefined) {
+      const moved =
+        shown.current === null ||
+        shown.current.active !== tree.active ||
+        shown.current.count !== tree.revealCount;
+      if (moved) {
+        shown.current = { active: tree.active, count: tree.revealCount };
+        const index = tree.flattening.findIndex((e) => e.key === tree.active);
+        if (index >= 0 && (index < windowFrom || index >= windowTo)) {
+          showRow(index);
+          return;
+        }
       }
     }
     // An explicit request "show me this node" is the opposite of an
@@ -113,7 +129,7 @@ export function TreeView<K, S extends Key = string>({
       `[data-key="${CSS.escape(String(tree.active))}"]`,
     );
     if (target !== null && target !== document.activeElement) target.focus();
-  }, [tree.active, tree.flattening, tree.revealCount, rowWindow, rootRef]);
+  }, [tree.active, tree.flattening, tree.revealCount, windowFrom, windowTo, showRow, rootRef]);
 
   useEffect(
     () => () => {
@@ -225,8 +241,10 @@ export function TreeView<K, S extends Key = string>({
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) hasFocus.current = false;
       }}
     >
+      {/* The root is a flex column: without `flexShrink: 0` the fillers give
+          way to the rows and the scroll area is as high as its window. */}
       {rowWindow !== undefined && rowWindow.fillerBefore > 0 ? (
-        <div aria-hidden="true" style={{ height: rowWindow.fillerBefore }} />
+        <div aria-hidden="true" style={{ height: rowWindow.fillerBefore, flexShrink: 0 }} />
       ) : null}
       {rendered.map((entry) => {
         const expandable = entry.branch && !entry.empty;
@@ -304,7 +322,7 @@ export function TreeView<K, S extends Key = string>({
         );
       })}
       {rowWindow !== undefined && rowWindow.fillerAfter > 0 ? (
-        <div aria-hidden="true" style={{ height: rowWindow.fillerAfter }} />
+        <div aria-hidden="true" style={{ height: rowWindow.fillerAfter, flexShrink: 0 }} />
       ) : null}
       {tree.flattening.length === 0 && tree.search.trim() !== "" ? (
         <p className={styles.noMatches}>{wording.treeNoMatches}</p>
