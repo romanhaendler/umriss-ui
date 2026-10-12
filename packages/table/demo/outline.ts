@@ -42,7 +42,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Two packages, no stylesheet to import, and one hook that turns an array of rows into a table.",
         about: [
-          "The command brings the core package along, a peer dependency: the table reads its provider, its formats and its wording (ADR-0016). React 18 or 19 is a peer as well and stays the application's own.",
+          "The command brings the core package along, a peer dependency: the table reads its provider, its formats and its wording (ADR-0016). React 19 or newer is a peer as well and stays the application's own.",
           "There is no stylesheet to import. The table loads its own, and the core package loads the tokens it reads; both lie in cascade layers, so the application's CSS wins. `@umriss-ui/table/styles.css` stays exported for setups that link stylesheets by hand.",
           "A table is read by default: a native table, where every control is one Tab away and a screen reader keeps its table keys. Grid mode makes it one Tab stop whose cells the arrow keys walk, and it is the mode for editing. Switch it on only where people work in the cells (ADR-0034).",
         ],
@@ -478,6 +478,14 @@ export const OUTLINE: readonly Rubric[] = [
           "Paging and virtualisation do not combine; one table does one or the other.",
           "No loading more rows while scrolling: a table on a server pages ([Server mode](#/server-mode)).",
         ],
+        types: [],
+        exports: ["useTable"],
+      },
+      {
+        id: "benchmark",
+        name: "Benchmark",
+        sentence: "Up to two hundred thousand rows, measured in this browser rather than claimed: the first render, a scroll step, a sort, a keystroke, a page, a fold, a hidden column and a re-render of the caller.",
+        about: ["The figures come from the clock around each change, with nothing added to the table. The reference figures in `packages/table/docs/capabilities.md` come from here."],
         types: [],
         exports: ["useTable"],
       },

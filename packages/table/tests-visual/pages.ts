@@ -21,7 +21,14 @@ export const PAGES = ["scenarios", ...ALL_PAGES.map((s) => s.id)] as const;
 
 export type { ExampleAddress };
 
-export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
+/** The examples that are not photographed, each with the rule that excuses it. */
+const NOT_PHOTOGRAPHED: Readonly<Record<string, string>> = {
+  benchmark: "the benchmark measures, and a measurement is not a picture.",
+};
+
+export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR).filter(
+  (e) => NOT_PHOTOGRAPHED[e.exampleId] === undefined,
+);
 
 /** A sample for the accessibility check (table-demo, Testing Decisions): the
     scenarios page, every page that was once part of the two long pages `Table`
