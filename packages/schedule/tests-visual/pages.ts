@@ -20,7 +20,14 @@ export const PAGES = ["scenarios", ...ALL_PAGES.map((s) => s.id)] as const;
 
 export type { ExampleAddress };
 
-export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
+/* Examples that are not photographed, each with the rule that makes it so. */
+const NOT_PHOTOGRAPHED: Readonly<Record<string, string>> = {
+  benchmark: "the benchmark measures, and a measurement is not a picture.",
+};
+
+export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR).filter(
+  (e) => NOT_PHOTOGRAPHED[e.exampleId] === undefined,
+);
 
 /** A sample for the accessibility check: the scenarios page with its
     context menu, the first schedule, the lanes with their headers in markup,
