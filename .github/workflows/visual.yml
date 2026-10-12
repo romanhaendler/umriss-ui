@@ -1,13 +1,14 @@
 # NOT RUN YET: this job has never run on GitHub. The baselines were taken on the
 # maintainer's Mac (-darwin); fonts on the runner may differ from his machine,
 # so the first runs may report image diffs that are not regressions.
-# The full visual suite on every push to main (20-50 minutes), on macOS because
-# the baselines are -darwin. Locally: `pnpm test:visual:quick <package>`.
+# The full visual suite (20-50 minutes), on macOS because the baselines are
+# -darwin. Started by hand (Actions → Visual → Run workflow) until a run has
+# been green; then `push: branches: [main]` goes back in beside the dispatch.
+# Locally: `pnpm test:visual:quick <package>`.
 name: Visual
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read

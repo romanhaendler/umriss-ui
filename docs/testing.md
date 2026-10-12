@@ -232,8 +232,10 @@ re-sorts them should expect baselines to wander.
   to "did this fail before me?". It refuses to start while one of ports
   4173-4177 is in use.
 
-On every push to `main`, `.github/workflows/visual.yml` runs the full suite on
-macOS (not run yet; the runner's fonts may differ from the maintainer's).
+`.github/workflows/visual.yml` runs the full suite on macOS when started by
+hand (Actions → Visual → Run workflow). It has not run yet, and the runner's
+fonts may differ from the maintainer's; once a run is green it goes on every
+push to `main`.
 
 ## Known open
 
