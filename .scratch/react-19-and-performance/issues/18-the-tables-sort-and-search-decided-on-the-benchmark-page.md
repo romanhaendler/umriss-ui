@@ -1,6 +1,6 @@
 # 18 - The table's sort and search, decided on the benchmark page
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M (two candidates, each tried and measured)
 
