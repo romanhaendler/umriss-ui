@@ -1,6 +1,6 @@
 # 21 - The schedule, decided on the benchmark page
 
-Status: ready-for-agent
+Status: wontfix
 Type: task
 Size: M (three candidates, each tried and measured)
 
@@ -30,3 +30,11 @@ the benchmark page and kept only if the page shows it.
       the accessibility check of the schedule's pages passes.
 - [ ] No screenshot moves.
 - [ ] `pnpm check schedule` passes.
+
+## Comments
+
+Not tried, decided on the page's figures (2026-10-12): after tickets 19 and 20
+an event at 5,000 subtasks costs 0.4 to 1.2 ms in all (hit test included) and
+its frame ends after 17 ms, the figure of a plan of 200. No candidate can win
+more than that, so none was built; the capability record says so under "What
+was not tried".

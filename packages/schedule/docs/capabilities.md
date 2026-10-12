@@ -55,3 +55,12 @@ Figures are the pointer walks of the benchmark page, as above (ms per event / re
 | | 200 subtasks | Wheel zoom | 0.36 / 19.0 | 0.09 / 19.1 |
 | | 5,000 subtasks | Pan | 2.27 / 23.3 | 0.07 / 24.2 |
 | | 5,000 subtasks | Wheel zoom | 2.21 / 23.1 | 0.05 / 22.1 |
+
+### What was not tried
+
+Three further changes were on the list: a hit test that does not scan every
+box, lane headers rendered only in view, and a lane's overlap depth without
+comparing every pair. None was built. After the two changes above, an event at
+5,000 subtasks costs 0.4 to 1.2 ms in all and its frame ends where the frame of
+a plan of 200 ends, so there is nothing left on this page for any of them to
+win. They become worth trying when a plan several times this size is measured.
