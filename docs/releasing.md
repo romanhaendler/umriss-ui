@@ -60,19 +60,17 @@ do Trusted Publishing.
 
 1. **One number for all five packages.** From `0.34.0` on, `core`, `charts`,
    `table`, `schedule` and `calculation` are released together under one
-   number, even where a package has no change of its own; the next release is
-   `0.34.0` for all five (one above the highest today, core's `0.33.0`). The
-   peer ranges between them are then that same number (`^0.34.0`) - there is no
-   table of which version needs which. At the release, in one commit: the
-   `version` of every `packages/*/package.json` and every peer range between
-   the packages move to that number, and each `CHANGELOG.md` gets a heading of
-   it.
+   number, even where a package has no change of its own. The peer ranges
+   between them are that same number - `workspace:^` in the manifests, which
+   pnpm writes out as `^<version>` when it packs - so there is no table of
+   which version needs which. At the release, in one commit: the `version` of
+   every `packages/*/package.json` moves to the new number, and each
+   `CHANGELOG.md` gets a heading of it.
    The changelog is written at the release, from a draft: run `pnpm changelog`
    (the subjects of the commits since the last `Release:` commit, per package),
    keep what changes something for a caller, merge what belongs together, and
-   put it under the new heading. The `## Unreleased` sections that exist today
-   are merged into that at the next release; nothing is written to them during
-   development any more.
+   put it under the new heading. A changelog has no `## Unreleased` section:
+   nothing is written to it during development.
 2. The package's `README.md` read against what it now claims. Every roadmap
    line against the open work under `.scratch/` — work that
    is done leaves the roadmap; a figure only by a link to the record that
