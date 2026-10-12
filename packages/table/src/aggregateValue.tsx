@@ -66,7 +66,11 @@ export function AggregateValue({
        decimals of its most precise value, an average one more - whole hours
        average to tenths, not to 13.3333333333. A fixed count, so that the
        totals of a column stand aligned on the point. */
-    const places = Math.max(0, ...rows.map((row) => entry.read(row)).filter(isFiniteNumber).map(decimalsOf));
+    let places = 0;
+    for (const row of rows) {
+      const read = entry.read(row);
+      if (isFiniteNumber(read)) places = Math.max(places, decimalsOf(read));
+    }
     content = formats.number(value, Math.min(10, kind === "avg" ? places + 1 : places));
   }
   else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown])) {

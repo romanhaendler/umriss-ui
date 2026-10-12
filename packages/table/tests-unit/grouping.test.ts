@@ -92,6 +92,18 @@ describe("aggregates", () => {
     expect(aggregate(due("range"), line1)).toEqual([day(2), day(14)]);
   });
 
+  it("takes minimum, maximum and range over 200 000 values, numbers and dates", () => {
+    const rows = Array.from({ length: 200_000 }, (_, i) => i);
+    const num = (kind: AggregateColumn<number>["aggregate"]): AggregateColumn<number> => ({ id: "n", read: (n) => n, aggregate: kind });
+    const date = (kind: AggregateColumn<number>["aggregate"]): AggregateColumn<number> => ({ id: "d", read: (n) => new Date(n), aggregate: kind });
+    expect(aggregate(num("min"), rows)).toBe(0);
+    expect(aggregate(num("max"), rows)).toBe(199_999);
+    expect(aggregate(num("range"), rows)).toEqual([0, 199_999]);
+    expect(aggregate(date("min"), rows)).toEqual(new Date(0));
+    expect(aggregate(date("max"), rows)).toEqual(new Date(199_999));
+    expect(aggregate(date("range"), rows)).toEqual([new Date(0), new Date(199_999)]);
+  });
+
   it("counts the values present and the different ones", () => {
     expect(aggregate(scrap("count"), line1)).toBe(5);
     const customer: AggregateColumn<Order> = { id: "customer", read: (o) => o.customer, aggregate: "distinct" };
