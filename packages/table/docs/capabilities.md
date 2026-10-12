@@ -83,9 +83,30 @@ Same machine and page as above; milliseconds.
 | Sort keys read once per row and sort | 200,000 | paged | Sort | 211.6 | 166.4 (kept) |
 | Deferred value for the search | 50,000 | virtual | Search | 13.8 | 3.7 (dropped) |
 | Deferred value for the search | 200,000 | virtual | Search | 50.0 | 14.8 (dropped) |
+| Toolbar skips the selected-rows scan when nothing is selected | 50,000 | virtual | Re-render | 4.0 | 1.0 (kept) |
+| Toolbar skips the selected-rows scan when nothing is selected | 200,000 | virtual | Re-render | 12.5 | 2.8 (kept) |
+| Toolbar skips the selected-rows scan when nothing is selected | 200,000 | virtual | Scroll step | 6.7 | 4.3 (kept) |
+| Toolbar skips the selected-rows scan when nothing is selected | 200,000 | grouped | Re-render | 12.9 | 1.0 (kept) |
 
 The sort keys are kept: the order is unchanged and the sort falls by a tenth to
 a quarter. The deferred search is dropped: its figure falls only because the
 page times a synchronous `setSearch`, and the filtering moves into a later
 render; the rows a person sees match no sooner, and the field, controlled by
 the same state, was held up by at most one filtering (14 ms at 50,000 rows).
+
+What still grew with the rows was the toolbar: each render filtered the whole
+filtered set for the selected rows, although nothing was selected. With an
+empty selection it now holds no row without the pass; the rows a selection
+holds are found as before. A profile of the re-render at 200,000 rows named it
+(15 of the 30 ms of script); nothing else in a render grows with the rows now.
+
+Not tried, because the figures leave nothing to win: memoised rows and cells (a
+re-render costs 1 to 3 ms at 200,000 rows with some thirty rows drawn, and a
+scroll step replaces nearly every row, so a held row would be drawn anyway); a
+row's position in its group and a group checkbox's state without a scan of the
+group (a grouped scroll step is 2.7 ms at 200,000 rows); the per-render maps of
+tree rows and of the grid, built once per projection (they are built from the
+rows drawn, not from all of them); the frame's layout effects reading boxes only
+when rows can have moved (the 60 ms of a scroll run that a profile shows is the
+browser laying out the new rows, paid by whichever read comes first, and a scroll
+step does move rows).

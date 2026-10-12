@@ -1,6 +1,6 @@
 # 17 - The table's rows, decided on the benchmark page
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: L (four candidates, each tried and measured)
 

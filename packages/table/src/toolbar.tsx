@@ -66,8 +66,9 @@ export function TableToolbar({
     /* The selection WITHIN the filtered set - the same set the user sees and
        the one "select all" acts on. What lies outside stays selected but is
        not treated along with it: a button that does more than it announces is
-       the worst kind of button. */
-    const selected = own
+       the worst kind of button. An empty selection holds no row and says so
+       without a pass over the filtered set. */
+    const selected = own || snapshot.selection.count === 0
       ? []
       : (hook.selectedRows ?? snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row))));
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
