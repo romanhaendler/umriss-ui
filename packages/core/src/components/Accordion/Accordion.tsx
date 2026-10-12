@@ -11,7 +11,7 @@ interface AccordionContextValue {
   headingLevel: 2 | 3 | 4 | 5 | 6;
 }
 
-const AccordionContext = createContext<AccordionContextValue | null>(null);
+const AccordionContext = /* @__PURE__ */ createContext<AccordionContextValue | null>(null);
 
 /* ------------------------------------------------------------------ */
 /* Accordion                                                           */
@@ -90,7 +90,7 @@ export function Accordion({
 
   return (
     <div ref={ref} className={cx(styles.accordion, className)} {...rest} data-accordion="" onKeyDown={handleKeyDown}>
-      <AccordionContext.Provider value={{ open, toggle, headingLevel }}>{children}</AccordionContext.Provider>
+      <AccordionContext value={{ open, toggle, headingLevel }}>{children}</AccordionContext>
     </div>
   );
 }

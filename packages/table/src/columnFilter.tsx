@@ -252,8 +252,8 @@ function ListInput({
   );
 }
 
-const LIST = builtIn<readonly unknown[]>(
-  columnFilter<unknown, readonly unknown[]>({
+const LIST = /* @__PURE__ */ builtIn<readonly unknown[]>(
+  /* @__PURE__ */ columnFilter<unknown, readonly unknown[]>({
     matches: (value, condition) => keysOf(condition).has(filterKey(value)),
     Input: ListInput,
     describe: (condition) => condition.map((value) => (isAbsent(value) ? "–" : String(value))).join(", "),
@@ -372,8 +372,8 @@ function RangeInput(props: FilterInputProps<unknown, Range> & BuiltInEnv) {
   return props.kind === "date" ? <PeriodInput {...props} /> : <NumberRangeInput {...props} />;
 }
 
-const RANGE = builtIn<Range>(
-  columnFilter<unknown, Range>({
+const RANGE = /* @__PURE__ */ builtIn<Range>(
+  /* @__PURE__ */ columnFilter<unknown, Range>({
     matches: (value, condition) => {
       const number = isDate(value) ? value.getTime() : isNumber(value) ? value : undefined;
       if (number === undefined) return false;

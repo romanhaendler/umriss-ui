@@ -237,7 +237,7 @@ export function buildParts(registry: Registry): Parts {
     const contextValue = useMemo<TableContextValue>(() => ({ registry, footerTarget }), [footerTarget]);
 
     return (
-      <TableContext.Provider value={contextValue}>
+      <TableContext value={contextValue}>
         <div className={cx(styles.frame, props.className)}>
           <div ref={childrenRef} className={styles.children}>
             {props.children}
@@ -249,7 +249,7 @@ export function buildParts(registry: Registry): Parts {
           <Frame registry={registry} props={props} />
           <div ref={setFooterTarget} className={styles.footerTarget} />
         </div>
-      </TableContext.Provider>
+      </TableContext>
     );
   }
 

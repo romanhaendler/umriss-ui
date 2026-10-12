@@ -283,7 +283,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   };
 
   return (
-    <ChartContext.Provider value={scene}>
+    <ChartContext value={scene}>
       <div
         ref={rootRef}
         className={className ? `uc-root ${className}` : "uc-root"}
@@ -337,7 +337,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
         <div ref={summaryRef} id={summaryId} className="uc-sr" />
         {children}
       </div>
-    </ChartContext.Provider>
+    </ChartContext>
   );
 }
 

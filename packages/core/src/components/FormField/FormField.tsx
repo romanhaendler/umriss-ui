@@ -18,7 +18,7 @@ interface FormFieldContextValue {
   required: boolean;
 }
 
-const FormFieldContext = createContext<FormFieldContextValue | null>(null);
+const FormFieldContext = /* @__PURE__ */ createContext<FormFieldContextValue | null>(null);
 
 /** Used by Input, Select and Checkbox to wire up id and aria automatically. */
 export function useFormField(): FormFieldContextValue | null {
@@ -33,7 +33,7 @@ export function useFormField(): FormFieldContextValue | null {
  * again immediately.
  */
 export function FormFieldBoundary({ children }: { children: ReactNode }) {
-  return <FormFieldContext.Provider value={null}>{children}</FormFieldContext.Provider>;
+  return <FormFieldContext value={null}>{children}</FormFieldContext>;
 }
 
 /** The props of `FormField`. */
@@ -77,11 +77,11 @@ export function FormField({ ref, label, hint, error, required = false, fieldId, 
           </span>
         )}
       </label>
-      <FormFieldContext.Provider
+      <FormFieldContext
         value={{ id, labelId, describedBy: hasMessage ? messageId : undefined, invalid: Boolean(error), required }}
       >
         {children}
-      </FormFieldContext.Provider>
+      </FormFieldContext>
       {hasMessage && (
         <p id={messageId} className={cx(styles.message, error ? styles.error : styles.hint)}>
           {error ?? hint}

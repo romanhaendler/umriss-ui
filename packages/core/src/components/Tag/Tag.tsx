@@ -26,7 +26,7 @@ export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
 /* The context carries no state: the tag only asks whether it stands inside a
    group. On that depends whether it reports itself as a list entry and who
    manages its tab stop – inside the group, the group does. */
-const TagGroupContext = createContext<boolean>(false);
+const TagGroupContext = /* @__PURE__ */ createContext<boolean>(false);
 
 /* ------------------------------------------------------------------ */
 /* TagGroup – roving tabindex across the tags                          */
@@ -111,7 +111,7 @@ export function TagGroup({ ref, className, children, onKeyDown, onFocus, ...rest
       onFocus={handleFocus}
       {...rest}
     >
-      <TagGroupContext.Provider value={true}>{children}</TagGroupContext.Provider>
+      <TagGroupContext value={true}>{children}</TagGroupContext>
     </div>
   );
 }

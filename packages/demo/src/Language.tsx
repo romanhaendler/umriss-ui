@@ -56,7 +56,7 @@ export function useLanguage(): [Language, (next: Language) => void] {
 }
 
 /** The German pair while DE is chosen, nothing while EN is. */
-export const ShownGerman = createContext<German | undefined>(undefined);
+export const ShownGerman = /* @__PURE__ */ createContext<German | undefined>(undefined);
 
 /** The header's two buttons. Plain elements, as the rest of the frame. */
 export function LanguageSwitch({ language, onChoose }: { language: Language; onChoose: (next: Language) => void }) {

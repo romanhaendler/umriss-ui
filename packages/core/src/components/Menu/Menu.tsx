@@ -21,7 +21,7 @@ interface MenuContextValue {
 /* Internal: `ContextMenu` provides the same context and the same keyboard
    handling, so that its entries close it the way they close a menu. Neither
    leaves the package - `index.ts` names what does. */
-export const MenuContext = createContext<MenuContextValue | null>(null);
+export const MenuContext = /* @__PURE__ */ createContext<MenuContextValue | null>(null);
 
 /** Arrow keys, Home and End over the enabled entries; Tab closes. `close`
     gives the focus back to where the menu came from, and the Tab then moves on
@@ -128,7 +128,7 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
         className={styles.panel}
       >
         <div ref={attachPanel} className={styles.content} onKeyDown={handlePanelKeyDown}>
-          <MenuContext.Provider value={{ close: closeMenu }}>{children}</MenuContext.Provider>
+          <MenuContext value={{ close: closeMenu }}>{children}</MenuContext>
         </div>
       </Popover>
     </>

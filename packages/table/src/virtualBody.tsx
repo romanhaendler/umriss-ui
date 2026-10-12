@@ -29,7 +29,7 @@ export function LoadingRows({ columns, rightAligned = [], rows = 4 }: { columns:
    rows that are not rendered yet - scroll first, then focus - and exactly one
    row carries the tab stop. */
 
-export const TabStopContext = createContext<number>(0);
+export const TabStopContext = /* @__PURE__ */ createContext<number>(0);
 
 export function FillerRow({ height, colSpan }: { height: number | string; colSpan: number }) {
   if (typeof height === "number" && height <= 0) return null;
@@ -91,11 +91,11 @@ export function VirtualBody({
         if (row) setTabStop(Number(row.dataset.row));
       }}
     >
-      <TabStopContext.Provider value={tabStopInWindow}>
+      <TabStopContext value={tabStopInWindow}>
         <FillerRow height={fillerBefore} colSpan={colSpan} />
         {children}
         <FillerRow height={fillerAfter} colSpan={colSpan} />
-      </TabStopContext.Provider>
+      </TabStopContext>
     </tbody>
   );
 }

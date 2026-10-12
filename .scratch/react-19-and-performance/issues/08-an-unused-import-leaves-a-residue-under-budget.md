@@ -1,6 +1,6 @@
 # 08 - An unused import leaves a residue under budget
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

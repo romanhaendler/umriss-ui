@@ -91,7 +91,7 @@ export interface GridContextValue {
   wording: Wording;
 }
 
-export const GridContext = createContext<GridContextValue | null>(null);
+export const GridContext = /* @__PURE__ */ createContext<GridContextValue | null>(null);
 
 /** The editor of a cell, when this cell is open - the one edited, or one of
     a Row draft's. */

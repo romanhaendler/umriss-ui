@@ -9,14 +9,14 @@
 import { createContext, useContext, useEffect, useRef } from "react";
 import type { GroupConfig, LaneConfig, LayerConfig, ScheduleScene } from "./scene";
 
-export const ScheduleContext = createContext<ScheduleScene | null>(null);
+export const ScheduleContext = /* @__PURE__ */ createContext<ScheduleScene | null>(null);
 
 /** The **Lane group** a child is declared inside, or null at the top level.
 
     A lane never names its group: the group gives its id downwards, so that a
     group reads in JSX as it reads in the organisation and moving a lane between
     groups is moving a line of JSX (ADR-0025). */
-export const LaneGroupContext = createContext<string | null>(null);
+export const LaneGroupContext = /* @__PURE__ */ createContext<string | null>(null);
 
 export function useLaneGroup(): string | null {
   return useContext(LaneGroupContext);

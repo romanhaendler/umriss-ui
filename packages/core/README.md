@@ -40,6 +40,16 @@ with Server Components reads to treat a module as client code. No test runs
 inside such a framework: the package is rendered to a string in a test,
 and the fields' widths a server writes into the markup are checked there.
 
+### What an import costs
+
+An application whose bundler shakes the tree pays for what it imports, not for
+the package. Minified and gzipped, the stylesheet not counted: an import that
+uses nothing 1.1 kB, `Button` 5.2 kB, `Select` 9.4 kB, `DatePicker` 10.4 kB,
+everything 50.5 kB. The figures come from bundling an entry that imports from
+the built `dist/core.js` with Rollup - the peers external, the stylesheet
+resolved to nothing - then minifying with esbuild and gzipping. `check:dist`
+holds the first of them under 1.5 kB in every package.
+
 ## Styles
 
 **They load themselves.** `dist/core.js` imports its stylesheet, and the

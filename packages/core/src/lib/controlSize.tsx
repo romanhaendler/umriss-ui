@@ -19,7 +19,7 @@ import type { ReactNode } from "react";
     otherwise. */
 export type ControlSize = "sm" | "md";
 
-const ControlSizeContext = createContext<ControlSize | null>(null);
+const ControlSizeContext = /* @__PURE__ */ createContext<ControlSize | null>(null);
 
 /** The props of `ControlSizeProvider`. */
 export interface ControlSizeProviderProps {
@@ -33,13 +33,13 @@ export interface ControlSizeProviderProps {
     it unless it says its own. A popover, dialog or tooltip opened from inside
     starts without it. */
 export function ControlSizeProvider({ size, children }: ControlSizeProviderProps) {
-  return <ControlSizeContext.Provider value={size}>{children}</ControlSizeContext.Provider>;
+  return <ControlSizeContext value={size}>{children}</ControlSizeContext>;
 }
 
 /** Where a surface of its own begins: no size from the place it was opened
     from. */
 export function SurfaceSizeReset({ children }: { children: ReactNode }) {
-  return <ControlSizeContext.Provider value={null}>{children}</ControlSizeContext.Provider>;
+  return <ControlSizeContext value={null}>{children}</ControlSizeContext>;
 }
 
 /** A control's size: its own, else the provider's around it, else `md`. */

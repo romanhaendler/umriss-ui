@@ -79,7 +79,7 @@ interface ToastContextValue {
   dismiss: (id: number) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+const ToastContext = /* @__PURE__ */ createContext<ToastContextValue | null>(null);
 
 /** Access to `toast()`, `update()` and `dismiss()`; requires a ToastProvider. */
 export function useToast(): ToastContextValue {
@@ -351,7 +351,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   } as CSSProperties;
 
   return (
-    <ToastContext.Provider value={value}>
+    <ToastContext value={value}>
       {children}
       {createPortal(
         /* Two live regions that stand before the first message arrives: a
@@ -382,6 +382,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         </div>,
         portalTarget() ?? document.body,
       )}
-    </ToastContext.Provider>
+    </ToastContext>
   );
 }
