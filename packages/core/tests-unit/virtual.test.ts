@@ -136,3 +136,41 @@ describe("useVirtual – the measured row height", () => {
     expect(result.current.fillerBefore + result.current.fillerAfter + (result.current.to - result.current.from) * 37.5).toBe(20_000 * 37.5);
   });
 });
+
+/* The window is the state: a scroll event that leaves the window where it is
+   renders nothing. Rows are 40 px, the viewport 400 px, overscan 4. */
+describe("useVirtual – scrolling renders only when the window moves", () => {
+  it("renders the caller only for the scroll events that cross the window", async () => {
+    const { renderHook, act } = await import("@testing-library/react");
+    const frame = document.createElement("div");
+    Object.defineProperty(frame, "clientHeight", { value: 400 });
+    let renders = 0;
+    const { result } = renderHook(() => {
+      renders += 1;
+      const rows = useVirtual(1000, { rowHeight: 40, overscan: 4 });
+      rows.scrollRef.current = frame as HTMLDivElement;
+      return rows;
+    });
+    const scrollTo = (top: number) =>
+      act(() => {
+        frame.scrollTop = top;
+        result.current.onScroll();
+      });
+
+    const before = renders;
+    scrollTo(10);
+    scrollTo(39);
+    expect(renders).toBe(before);
+    expect(result.current.from).toBe(0);
+
+    scrollTo(4000); // row 100 is the first visible one
+    expect(renders).toBe(before + 1);
+    expect(result.current.from).toBe(96);
+    expect(result.current.to).toBe(100 + 11 + 4);
+    expect(result.current.fillerBefore).toBe(96 * 40);
+    expect(result.current.fillerAfter).toBe((1000 - 115) * 40);
+
+    scrollTo(4030);
+    expect(renders).toBe(before + 1);
+  });
+});

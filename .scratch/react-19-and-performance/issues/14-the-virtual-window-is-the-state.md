@@ -1,6 +1,6 @@
 # 14 - The virtual window is the state
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
