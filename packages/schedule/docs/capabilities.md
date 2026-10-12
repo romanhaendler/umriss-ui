@@ -40,3 +40,14 @@ uses `performance.now()`, a `MutationObserver` and `requestAnimationFrame`.
 | small (20 lanes) | 200 | 181 | 31.0 | 0.27 | 239 | 18.8 | 0.41 | 202 | 18.8 | 0.44 | 19.0 | 0.36 | 19.0 |
 | medium (50 lanes) | 1,000 | 951 | 30.4 | 0.30 | 239 | 20.4 | 0.60 | 214 | 20.1 | 0.82 | 20.4 | 0.81 | 20.3 |
 | large (100 lanes) | 5,000 | 4,901 | 51.6 | 0.46 | 239 | 23.9 | 1.46 | 214 | 23.5 | 2.27 | 23.3 | 2.21 | 23.1 |
+
+## What changed the figures
+
+Figures are the pointer walks of the benchmark page, as above (ms per event / renders / ms to end of frame).
+
+| Change | Plan | Figure | Before | After |
+|---|---|---|---|---|
+| A hover publishes the tooltip and cursor into the snapshot as it stands, and draws the overlay alone | 200 subtasks | Walk, one bar | 0.27 / 239 / 18.8 | 0.14 / 239 / 17.1 |
+| | 200 subtasks | Walk, many | 0.41 / 202 / 18.8 | 0.18 / 202 / 17.1 |
+| | 5,000 subtasks | Walk, one bar | 0.46 / 239 / 23.9 | 0.42 / 239 / 17.2 |
+| | 5,000 subtasks | Walk, many | 1.46 / 214 / 23.5 | 1.20 / 214 / 17.1 |

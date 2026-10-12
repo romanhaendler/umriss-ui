@@ -48,6 +48,9 @@ export interface GestureHost {
   viewMoved(time: boolean): void;
   /** Only interaction state changed: publish and draw. */
   interactionChanged(): void;
+  /** Only the hover's own state changed - the tooltip, the cursor: publish
+      those and redraw the overlay, nothing else. */
+  hoverChanged(): void;
 }
 
 export type EditMode = "move" | "stretch-from" | "stretch-to" | "leadIn" | "leadOut";

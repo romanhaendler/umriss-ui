@@ -169,6 +169,8 @@ export class ScheduleScene {
   private overlayCanvas: HTMLCanvasElement | null = null;
   private colours: Colours | null = null;
   private frame = 0;
+  /** Whether the data canvas is out of date; a hover alone leaves it be. */
+  private dataStale = true;
   private domainFrame = 0;
   private unsubscribeTheme: (() => void) | null = null;
   private snapshot: ScheduleSnapshot = EMPTY_SNAPSHOT;
@@ -194,6 +196,7 @@ export class ScheduleScene {
         if (time) this.reportDomain();
       },
       interactionChanged: () => this.interactionChanged(),
+      hoverChanged: () => this.hoverChanged(),
     });
     this.keys = new SceneKeys({
       data: this.data,
@@ -363,6 +366,7 @@ export class ScheduleScene {
     this.overlayCanvas = overlay;
     this.unsubscribeTheme = subscribeTheme(() => {
       this.colours = null;
+      this.dataStale = true;
       this.requestDraw();
     });
     this.viewChanged();
@@ -420,7 +424,17 @@ export class ScheduleScene {
   }
 
   private interactionChanged(): void {
+    this.dataStale = true;
     this.publish();
+    this.requestDraw();
+  }
+
+  /** A hover moved along its hit or on to another: the tooltip and the cursor
+      are republished into the snapshot as it stands, whose headers, bars and
+      summary do not depend on the pointer, and only the overlay is drawn. */
+  private hoverChanged(): void {
+    this.snapshot = { ...this.snapshot, cursor: this.gestures.cursor, tooltip: this.tooltip() };
+    for (const listener of this.listeners) listener();
     this.requestDraw();
   }
 
@@ -589,9 +603,10 @@ export class ScheduleScene {
       this.publish();
     }
     const { width, height } = this.view;
-    const data = prepareCanvas(this.dataCanvas, width, height);
+    const data = this.dataStale ? prepareCanvas(this.dataCanvas, width, height) : null;
     const overlay = prepareCanvas(this.overlayCanvas, width, height);
-    if (data === null || overlay === null || width === 0) return;
+    if (overlay === null || width === 0 || (this.dataStale && data === null)) return;
+    this.dataStale = false;
     const input = {
       data: this.data,
       view: this.view,
@@ -602,7 +617,7 @@ export class ScheduleScene {
       hover: this.gestures.hover,
       ghost: this.gestures.ghostDrawing(),
     };
-    drawData(data, input);
+    if (data !== null) drawData(data, input);
     drawOverlay(overlay, input);
   }
 
