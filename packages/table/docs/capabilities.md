@@ -49,3 +49,25 @@ Machine / browser / date: Apple M2, 16 GB; Chromium headless (Playwright 1.62);
 These are the figures every later change compares with. They were taken after
 the table stopped throwing above roughly 125,000 rows with an aggregate, and
 before anything else about its speed was changed.
+
+## What changed the figures
+
+An accessor written in the call (a column's `value`, `sortValue`, `groupValue`
+and the `rowKey`) is held while the next one has the same source text; a native
+or bound function is compared by identity. A closure over a changed outer
+variable reads as unchanged. The `preFilter` is not compared this way: it is
+applied on every render and its result reconciled, because a pre-filter that
+reads the caller's state is the ordinary case. With it, an aggregate is computed
+once for a set of rows, and a scroll inside the virtual window renders nothing.
+Same machine and page as above; milliseconds.
+
+| Change | Rows | Set | Figure | Before | After |
+|---|---|---|---|---|---|
+| Inline accessors compared by source text | 50,000 | virtual | Scroll step | 36.2 | 5.2 |
+| Inline accessors compared by source text | 50,000 | virtual | Re-render | 77.6 | 4.0 |
+| Inline accessors compared by source text | 50,000 | grouped | Scroll step | 71.0 | 4.0 |
+| Inline accessors compared by source text | 50,000 | grouped | Re-render | 102.7 | 4.2 |
+| Inline accessors compared by source text | 200,000 | virtual | Scroll step | 135.2 | 7.9 |
+| Inline accessors compared by source text | 200,000 | virtual | Re-render | 308.4 | 15.9 |
+| Inline accessors compared by source text | 200,000 | grouped | Scroll step | 269.1 | 9.0 |
+| Inline accessors compared by source text | 200,000 | grouped | Re-render | 420.9 | 22.0 |

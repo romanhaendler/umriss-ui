@@ -94,6 +94,30 @@ const columnEntry = (key: string, spec: ColumnSpec): ColumnEntry => {
   return entry;
 };
 
+/** Two accessors are the same when they are one function or have the same
+    source text; a native or bound function reads "[native code]" whatever it
+    does, so only identity counts for it. A closure over a changed outer
+    variable reads as unchanged: a new function text, or the variable carried
+    in the row data, is the way out. */
+export function fnEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (typeof a !== "function" || typeof b !== "function") return false;
+  const source = String(a);
+  if (source.includes("[native code]")) return false;
+  return source === String(b);
+}
+
+/** The spec with the accessors it already held, where the new ones are equal to
+    them: the identity the aggregate caches and the model's columns key on stays
+    as it was through a re-render with inline accessors. */
+function holdEqual(old: ColumnSpec, next: ColumnSpec): ColumnSpec {
+  const value = fnEqual(old.value, next.value) ? old.value : next.value;
+  const ownSortValue = fnEqual(old.ownSortValue, next.ownSortValue) ? old.ownSortValue : next.ownSortValue;
+  const ownGroupValue = fnEqual(old.ownGroupValue, next.ownGroupValue) ? old.ownGroupValue : next.ownGroupValue;
+  if (value === next.value && ownSortValue === next.ownSortValue && ownGroupValue === next.ownGroupValue) return next;
+  return { ...next, value, ownSortValue, ownGroupValue };
+}
+
 export class Registry {
   readonly columns = new List<ColumnEntry>("data-umriss-column");
   readonly actions = new List<ActionEntry>("data-umriss-action");
@@ -184,6 +208,7 @@ export class Registry {
       this.structure++;
     } else {
       const old = existing.spec;
+      spec = holdEqual(old, spec);
       if (this.signatures.get(key) !== signature) this.structure++;
       if (old.value !== spec.value || old.ownSortValue !== spec.ownSortValue || old.ownGroupValue !== spec.ownGroupValue) {
         this.values++;
@@ -285,6 +310,7 @@ export class Registry {
       this.groupKeys.entries.set(key, entry);
       this.structure++;
     } else {
+      spec = holdEqual(existing.spec, spec);
       if (this.signatures.get(key) !== signature) this.structure++;
       if (existing.spec.value !== spec.value || existing.spec.ownGroupValue !== spec.ownGroupValue) this.values++;
       existing.spec = spec;

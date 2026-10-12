@@ -1,6 +1,6 @@
 # 13 - An aggregate is computed once for a set of rows
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

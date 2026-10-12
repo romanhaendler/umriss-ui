@@ -1,6 +1,6 @@
 # 15 - An inline accessor costs what a stable one costs
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
