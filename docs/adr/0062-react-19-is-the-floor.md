@@ -23,9 +23,8 @@ five packages, a component takes `ref` as a prop and is never wrapped in
   nowhere else.
 - `inert` is written as the boolean attribute it is; the helper that chose
   between two spellings is gone.
-- The pass-through guard asks that the ref arrives at the root, not how. While
-  components are being taken out of their wrappers, a wrapped and a plain one
-  both pass; when the last wrapper is gone the guard asks for the plain form.
+- The pass-through guard asks that the ref arrives at the root of a plain
+  function component; an export that is a `forwardRef` object fails it, named.
 - `ref` is declared once, as `RefProp<E>` in core (`lib/refProp.ts`, exported):
   the props type extends it with the element the pass-through guard names as
   the root, `interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, RefProp<HTMLButtonElement>`,

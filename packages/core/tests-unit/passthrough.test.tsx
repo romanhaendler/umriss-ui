@@ -1,4 +1,4 @@
-/* The pass-through guard (core-passthrough 01): principle 1 of the README,
+/* The pass-through guard: principle 1 of the README,
    held by a test rather than by a list in prose.
 
    Every component the package exports is rendered with a ref, a class, a
@@ -9,16 +9,17 @@
    can then hang a tooltip on a `Stat`, measure a `Card` or set a
    `data-testid`, which is the whole point.
 
-   It does not ask how the ref gets there. React 19 hands a plain function
-   component its `ref` as an ordinary prop, so a component passes wrapped in
-   `forwardRef` or plain, as long as the ref arrives at the root; both forms
-   stand in the package while the wrappers are being taken away.
+   It also asks for the form: React 19 hands a plain function component its
+   `ref` as an ordinary prop, so a `forwardRef` object among the exports fails,
+   named. The wrapper is a call at the top of a module, which a bundler has to
+   keep with everything it reaches - the package would stop shaking
+   (ADR-0062) - and the props types declare `ref` themselves (`RefProp`).
 
    The list of exports is read, not written: a new component that stands in
    neither the cases nor the exceptions fails the first test. */
 
 import { describe, expect, it } from "vitest";
-import { createRef } from "react";
+import { createRef, forwardRef } from "react";
 import type { CSSProperties, ReactElement, Ref } from "react";
 import { render } from "@testing-library/react";
 import * as core from "../src";
@@ -239,9 +240,15 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
    on the main action. */
 const STYLE_ON_WRAPPER = new Set(Object.keys(CLASS_ON_WRAPPER).filter((name) => name !== "SplitButton"));
 
-/** What the package exports that React can render: a component is a function
-    with a capital name or a `forwardRef` object. Constants (`DEFAULT_*`) are
-    neither. */
+/** The names of the exports that are `forwardRef` objects. */
+const wrappedIn = (exports: Record<string, unknown>): string[] =>
+  Object.entries(exports)
+    .filter(([, value]) => (value as { $$typeof?: symbol } | null)?.$$typeof === Symbol.for("react.forward_ref"))
+    .map(([name]) => name);
+
+/** What the package exports that React can render: a function with a capital
+    name, or a wrapped object (which the guard then refuses). Constants
+    (`DEFAULT_*`) are neither. */
 const components = Object.entries(core)
   .filter(
     ([name, value]) =>
@@ -260,6 +267,12 @@ describe("Every exported component passes ref, class, style and the rest through
       (name) => !components.includes(name),
     );
     expect(stale).toEqual([]);
+  });
+
+  it("refuses an export wrapped in forwardRef, by name", () => {
+    const Wrapped = forwardRef<HTMLDivElement>((_props, ref) => <div ref={ref} />);
+    expect(wrappedIn({ Wrapped, Plain: () => null })).toEqual(["Wrapped"]);
+    expect(wrappedIn(core)).toEqual([]);
   });
 
   it.each(Object.keys(CASES).sort())("%s", (name) => {

@@ -146,7 +146,7 @@ export function exportedDeclarations(packageDir: string): ExportedDeclaration[] 
     return parsedFile;
   };
 
-  /* A component renders: a forwardRef or memo result (`$$typeof`), or a
+  /* A component renders: a wrapped result such as `memo` (`$$typeof`), or a
      function of one props object that returns an element or nothing. */
   const rendersAnElement = (type: ts.Type): boolean =>
     type.aliasSymbol?.name === "ReactNode" ||
