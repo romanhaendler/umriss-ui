@@ -1,6 +1,6 @@
 # React 19 is the floor, and what it buys: bundles that shake, a table that holds at size
 
-Status: ready-for-human
+Status: done
 Date:   2026-10-12
 Origin: a measurement of the five built packages and a reading of their hot
 paths on 2026-10-12, at the commit of the 0.34.0 release. The figures stand

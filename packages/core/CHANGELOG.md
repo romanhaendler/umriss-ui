@@ -26,6 +26,32 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.35.0 – React 19 is the floor, and an import pays for what it uses (Oct. 2026)
+
+### Changed
+
+- **React 19 is required.** The peers `react` and `react-dom` are `>=19`; `0.34.0` is the last version that serves React 18 (ADR-0062).
+
+- **`ref` is a prop of every component, and none is a `forwardRef` object.** A component is a plain function that takes `ref` with its props, and its props type says so: it extends the new exported type `RefProp<Element>`, with the element the component renders at its root. A `ref` works as it did; a `ref` of the wrong element type is now a type error, and code that looked for `$$typeof` on a component no longer finds one.
+
+- **The package ships ES2022 syntax.** An application that serves older browsers transpiles it itself.
+
+### Fixed
+
+- **A virtualised tree that was scrolled stays where it was scrolled.** Once its active node had been moved by key, the tree pulled the view back to that node on every render, so a wheel could not leave it. The view now follows the active node only when the node moves.
+
+- **A virtualised tree scrolls its whole length inside a container of fixed height.** Its filler rows were squeezed to nothing there, and the scroll area was only as high as its window.
+
+### Otherwise
+
+- **An import pays for what it uses.** Every component was a call at the top of its module, which a bundler has to keep with everything it reaches, so one `Button` brought the package. Minified and gzipped, `Button` alone is now 5.2 kB where it was 43.5 kB, `Select` 9.4 kB, and an import that uses nothing leaves 1.1 kB. A check on the built package holds it.
+
+- **A key in a large tree costs what it costs in a small one.** The flattening was computed again for every move of the active node; at 100,000 nodes a key took 14 ms and now takes 0.3 ms.
+
+- **`useVirtual` renders its caller only when the window of rows changes.** It used to render on every scroll event.
+
+---
+
 ## 0.34.0 – The Dock and the alarm list's words leave (Oct. 2026)
 
 From this version all five packages carry one number and are released

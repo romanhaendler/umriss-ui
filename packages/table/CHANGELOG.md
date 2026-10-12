@@ -23,6 +23,28 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.35.0 – React 19 is the floor, and a table that holds at two hundred thousand rows (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.35; the peer range is `^0.35.0`.
+
+### Fixed
+
+- **A table with an aggregate no longer throws above roughly 125,000 rows.** A minimum, a maximum or a range, and the decimals of a footer's sum or average, passed every row's value as an argument of one call, which the engine refuses with a `RangeError`.
+
+### Changed
+
+- **React 19 is required.** The peers `react` and `react-dom` are `>=19`; `0.34.0` is the last version that serves React 18.
+
+- **A column's `value`, `sortValue` and `groupValue` and the `rowKey` are compared by their source text.** A caller who writes them in the call hands the table a new function on every render; the table now takes a function with the same text for the same function, so nothing is filtered, sorted or keyed again. The limit: a function that reads an outer variable which has changed counts as unchanged, and the table keeps showing the old values. Give such a function a new text, or carry the variable in the row data. A bound or native function is compared by identity, and the `preFilter` is not compared this way at all: it may read the caller's state as before.
+
+- **The package ships ES2022 syntax.** An application that serves older browsers transpiles it itself.
+
+### Otherwise
+
+- **Scrolling, paging, folding and re-rendering no longer grow with the rows.** The model is computed in stages, each held while what it reads is unchanged; an aggregate is computed once for a set of rows; a scroll inside the virtual window renders nothing. At 200,000 rows a scroll step takes 3.7 ms where it took 135 ms, a re-render of the caller with nothing changed 1.5 ms (308), a page turned 6.2 ms (312), a group folded 2.4 ms (902), a column hidden 2.8 ms (486). A sort reads each row's value once and takes 151 ms (488). The figures and how they were taken stand in the package's capability record.
+
+---
+
 ## 0.34.0 – The alarm list leaves, and a view is set (Oct. 2026)
 
 From this version all five packages carry one number and are released

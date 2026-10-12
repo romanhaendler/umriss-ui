@@ -16,6 +16,27 @@ moves from here under the rule above.
 
 ---
 
+## 0.35.0 – React 19 is the floor, and a hover that leaves the plan alone (Oct. 2026)
+
+Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.35; the peer ranges are
+`^0.35.0`.
+
+### Changed
+
+- **React 19 is required.** The peers `react` and `react-dom` are `>=19`; `0.34.0` is the last version that serves React 18.
+
+- **`ref` is a prop of the schedule.** `ScheduleProps` declares it as `Ref<ScheduleHandle>`, and the component is no `forwardRef` object any more. The handle arrives as it did.
+
+- **The package ships ES2022 syntax.** An application that serves older browsers transpiles it itself.
+
+### Otherwise
+
+- **A hover redraws what the hover shows.** A pointer moving along a bar published the whole plan again and drew both canvases on every event; it now publishes the tooltip and the cursor and draws the overlay alone. At 5,000 subtasks the frame of a hover ends after 17 ms where it took 24 ms - the figure of a plan of 200.
+
+- **A pan or a zoom lays the plan out once per frame**, however many events the frame holds, and a dependency wholly outside the view is not stroked.
+
+---
+
 ## 0.34.0 – A view is set, not handed back (Oct. 2026)
 
 From this version all five packages carry one number and are released
