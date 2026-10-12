@@ -1,0 +1,42 @@
+# Schedule - capability record
+
+## Performance (reference run)
+
+Measured through the demo build's Benchmark page (`#/benchmark`), which draws
+a plan of a set size and drives the schedule itself with dispatched pointer and
+wheel events on its canvas. Nothing in the schedule is instrumented: the page
+uses `performance.now()`, a `MutationObserver` and `requestAnimationFrame`.
+
+**Method.**
+
+- Machine, browser and date: Apple M2, 16 GB; Chromium headless (Playwright 1.62); 2026-10-12. One run of the page per row, driven by a script.
+- Build: the demo build (`pnpm --filter @umriss-ui/schedule build:demo` and a
+  preview).
+- Each figure is the median of five loads; the page is reloaded for every
+  load and the measurement started with its button, the page's `status` reading
+  `done` before the figure is read.
+- The plan: lane 0 holds one long bar (the probe); the other lanes share the
+  subtasks in 20-minute bars every half hour, one task per lane; every bar after
+  the first on a lane is joined to the one before it by a dependency of lag 0.
+  The view shows eight hours and the schedule is 440 px high with lanes of
+  44 px.
+- First render: from the click on the size to the second animation frame after
+  the commit (canvases drawn).
+- Pointer walk, pan and wheel zoom: 240 events, one to a frame. *ms per event*
+  is the time the dispatch itself took (the synchronous work). *ms to end of
+  frame* is the mean time from the dispatch to a task queued from the next
+  animation frame callback, which runs once that frame, with the schedule's
+  canvas draw, is done; it therefore includes the wait for the frame (up to one
+  frame interval, about 16.7 ms at 60 Hz) and is read against that floor.
+  *renders* is the number of batches of changes to the schedule's markup a
+  `MutationObserver` saw during the run (the production build has no profiler).
+  The walk along one bar stays on the probe; the walk across
+  many crosses the visible lanes and changes the bar under the pointer on
+  nearly every event. The pan drags to the left and back; the wheel zoom
+  alternates in and out with Ctrl held.
+
+| Plan | Subtasks | Dependencies | First render (click to frame) | Walk, one bar (ms/event) | Walk, one bar (renders) | Walk, one bar (ms to end of frame) | Walk, many (ms/event) | Walk, many (renders) | Walk, many (ms to end of frame) | Pan (ms/event) | Pan (ms to end of frame) | Zoom (ms/event) | Zoom (ms to end of frame) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| small (20 lanes) | 200 | 181 | 31.0 | 0.27 | 239 | 18.8 | 0.41 | 202 | 18.8 | 0.44 | 19.0 | 0.36 | 19.0 |
+| medium (50 lanes) | 1,000 | 951 | 30.4 | 0.30 | 239 | 20.4 | 0.60 | 214 | 20.1 | 0.82 | 20.4 | 0.81 | 20.3 |
+| large (100 lanes) | 5,000 | 4,901 | 51.6 | 0.46 | 239 | 23.9 | 1.46 | 214 | 23.5 | 2.27 | 23.3 | 2.21 | 23.1 |

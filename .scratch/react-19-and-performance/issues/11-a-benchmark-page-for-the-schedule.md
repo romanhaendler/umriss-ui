@@ -1,6 +1,6 @@
 # 11 - A benchmark page for the schedule
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

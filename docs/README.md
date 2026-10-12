@@ -17,7 +17,7 @@ what a reader has — the filename is what they are looking for.
 | how this repository is worked in | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
 | how a version is published to npm | [`releasing.md`](releasing.md) |
 | what is tested, and how | [`testing.md`](testing.md) |
-| what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
+| what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/table/docs/capabilities.md`](../packages/table/docs/capabilities.md), [`../packages/schedule/docs/capabilities.md`](../packages/schedule/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | what was worked on here until 2026-10-11 (frozen; the commit history carries on) | [`journal.md`](journal.md) |
 | where the work stands today and what comes next | [`../.scratch/open-points-roadmap/next.md`](../.scratch/open-points-roadmap/next.md) |
 | what was still open in October 2026, what was decided about it and in which order it is built | [`research/open-points-2026-10/`](research/open-points-2026-10/), [`../.scratch/open-points-roadmap/spec.md`](../.scratch/open-points-roadmap/spec.md) |
