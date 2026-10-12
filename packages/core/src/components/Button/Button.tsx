@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { useControlSize } from "../../lib/controlSize";
 import type { ControlSize } from "../../lib/controlSize";
 import { Spinner } from "../Spinner";
@@ -15,7 +15,7 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "plain" | "dange
 export type ButtonSize = ControlSize;
 
 /** The props of `Button`: a native button's attributes and its look. */
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, RefProp<HTMLButtonElement> {
   /** How loud the button is. `primary` exactly once per surface - two main
       actions side by side are no longer a main action. `ghost` is quiet in the
       accent, `plain` quiet and neutral. */
@@ -29,10 +29,17 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 /** A button with a label. `primary` once per surface; `loading` shows a
     spinner and locks it. `type` is `button` unless you say otherwise. */
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "secondary", size: ownSize, loading = false, disabled, className, children, type, ...rest },
+export function Button({
   ref,
-) {
+  variant = "secondary",
+  size: ownSize,
+  loading = false,
+  disabled,
+  className,
+  children,
+  type,
+  ...rest
+}: ButtonProps) {
   const size = useControlSize(ownSize);
   return (
     <button
@@ -47,7 +54,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       <span className={styles.label}>{children}</span>
     </button>
   );
-});
+}
 
 /** The props of `IconButton`: a `Button`'s, with a required `aria-label` and
     the icon as its only child. */
@@ -66,13 +73,10 @@ export interface IconButtonProps
 
 /** A button that shows only an icon: square, named by its `aria-label`, and
     that name shown as a tooltip. Everything else is a `Button`'s. */
-export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { variant = "plain", className, ...rest },
-  ref,
-) {
+export function IconButton({ ref, variant = "plain", className, ...rest }: IconButtonProps) {
   return (
     <Tooltip content={rest["aria-label"]}>
       <Button ref={ref} variant={variant} className={cx(styles.square, className)} {...rest} />
     </Tooltip>
   );
-});
+}
