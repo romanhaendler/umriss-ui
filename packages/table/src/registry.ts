@@ -531,7 +531,7 @@ export class Registry {
       filter: hook.filter,
       sort: b.sort,
       page: b.page,
-      pageSize: b.virtual ? 0 : b.pageSize,
+      pageSize: b.virtual || hook.tree ? 0 : b.pageSize,
       hidden: b.hidden,
       order: b.order,
       grouping: this.groupingFor(hook),
