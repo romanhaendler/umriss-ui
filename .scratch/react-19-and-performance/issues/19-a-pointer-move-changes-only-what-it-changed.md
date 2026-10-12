@@ -1,6 +1,6 @@
 # 19 - On the schedule, a pointer move changes only what it changed
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

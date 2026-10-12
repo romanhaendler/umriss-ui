@@ -507,7 +507,7 @@ export class SceneGestures {
     this.hoverPoint = { x, y };
     if (key === this.hoverKey) {
       /* The tooltip follows the pointer along its target. */
-      if (hit.kind === "subtask" || hit.kind === "dependency" || hit.kind === "milestone") this.host.interactionChanged();
+      if (hit.kind === "subtask" || hit.kind === "dependency" || hit.kind === "milestone") this.host.hoverChanged();
       return;
     }
     this.setHover(hit, key);
@@ -529,7 +529,7 @@ export class SceneGestures {
     if (key === this.hoverKey) return;
     this.hoverKey = key;
     this.hover = hit;
-    this.host.interactionChanged();
+    this.host.hoverChanged();
   }
 
   private setCursor(cursor: string): void {
