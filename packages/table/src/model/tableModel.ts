@@ -168,52 +168,13 @@ const defaultCompare = (a: string | number, b: string | number): number =>
     ? a - b
     : DEFAULT_FORMATS.compareText(String(a), String(b));
 
-export function tableModel<Z, K extends string = string>(
-  rows: readonly Z[],
+/* The free-text search and the additional filter together. */
+function matcherOf<Z, K extends string>(
   columns: readonly ModelColumn<Z, K>[],
-  input: TableInput<Z, K>,
-): TableProjection<Z, K> {
-  const {
-    search = "",
-    filter,
-    sort = null,
-    page = 1,
-    pageSize,
-    hidden,
-    order,
-  } = input;
-
-  /* 0. Order the columns and sift them. Order first, then hide - the order
-        must not change because of what happens to be away. Hiding is pure
-        presentation: the pipeline below goes on working with all columns, so
-        that a sort by a hidden column is preserved. */
-  const ordered = orderColumns(columns, order);
-
-  const visibleColumns = hidden?.length
-    ? ordered.filter((s) => s.hideable === false || !hidden.includes(s.id))
-    : ordered;
-
-  /* Server mode: the rows stand as the server sent them. Only the page count
-     is the table's, from the server's total; the page is clamped only against
-     a total that is known - with none yet (the first request is still out),
-     the page of a view handed in would otherwise fall back to one. */
-  if (input.server) {
-    const { rowCount } = input.server;
-    const size = pageSize && pageSize > 0 ? pageSize : Math.max(rowCount, 1);
-    const pageCount = Math.max(1, Math.ceil(rowCount / size));
-    const currentPage = rowCount > 0 ? Math.min(Math.max(1, page), pageCount) : Math.max(1, page);
-    return {
-      columns: visibleColumns,
-      filtered: [...rows],
-      visible: [...rows],
-      page: currentPage,
-      pageCount,
-      columnCount: visibleColumns.length,
-    };
-  }
-
-  // 1. Filter - free text and the additional filter together.
-  const term = search.trim().toLowerCase();
+  search: string | undefined,
+  filter: ((row: Z) => boolean) | undefined,
+) {
+  const term = (search ?? "").trim().toLowerCase();
   const searchColumns = columns.filter((s) => s.searchable && s.value);
   const matchesSearch = (row: Z) =>
     !term ||
@@ -221,15 +182,19 @@ export function tableModel<Z, K extends string = string>(
       const value = s.value!(row);
       return !absent(value) && String(value).toLowerCase().includes(term);
     });
-  const matches = (row: Z) => matchesSearch(row) && (filter ? filter(row) : true);
+  return { term, matches: (row: Z) => matchesSearch(row) && (filter ? filter(row) : true) };
+}
 
-  /* 2. Sort - stable, so that equal values keep their order. Levels act in
-        turn: the next one comes into play only where the previous stays
-        undecided. Levels without a matching column are passed over - a stale
-        reference (from a stored link, say) must not blow up the
-        projection. */
-  const levels = (Array.isArray(sort) ? sort : sort ? [sort] : []) as
-    readonly SortLevel<K>[];
+/* Sort - stable, so that equal values keep their order. Levels act in
+   turn: the next one comes into play only where the previous stays
+   undecided. Levels without a matching column are passed over - a stale
+   reference (from a stored link, say) must not blow up the
+   projection. */
+function sorterOf<Z, K extends string>(
+  columns: readonly ModelColumn<Z, K>[],
+  sort: TableInput<Z, K>["sort"],
+) {
+  const levels = (Array.isArray(sort) ? sort : sort ? [sort] : []) as readonly SortLevel<K>[];
 
   const comparators = levels
     .map((level) => {
@@ -266,46 +231,126 @@ export function tableModel<Z, K extends string = string>(
           }
           return 0;
         });
+  return { levels, sorted };
+}
 
-  if (input.tree) return treeProjection(rows, input.tree, sorted, term || filter ? matches : undefined, visibleColumns);
+/* The pipeline is three stages, each reading only what it names, so that a
+   caller can hold the result of one while a later input changes:
+   1. `filterSort` - rows, the columns' values, search, filter, sort.
+   2. `groupStage` and `linesOf` - the result of 1 and the grouping; folding
+      touches only `linesOf`.
+   3. `pageStage` - the result of 2, the page, the order and visibility of
+      columns. */
 
-  const filtered = sorted(rows.filter(matches));
+/** Stage 1: the rows the search and the filter leave, sorted. `levels` are the
+    sort levels as the grouping needs them. */
+export function filterSort<Z, K extends string = string>(
+  rows: readonly Z[],
+  columns: readonly ModelColumn<Z, K>[],
+  input: Pick<TableInput<Z, K>, "search" | "filter" | "sort">,
+): { filtered: Z[]; levels: readonly SortLevel<K>[] } {
+  const { matches } = matcherOf(columns, input.search, input.filter);
+  const { levels, sorted } = sorterOf(columns, input.sort);
+  return { filtered: sorted(rows.filter(matches)), levels };
+}
 
-  /* 3. Group - after the sort, so that the rows within a group keep its
-        order. A page then counts lines. */
-  if (input.grouping?.levels.length) {
-    const { folded, ...grouping } = input.grouping;
-    const groups = groupRows(filtered, { ...grouping, sort: levels });
-    const lines = linesOf(groups, folded);
-    const paged = pageLines(lines, page, pageSize ?? 0);
+/** Stage 2: the groups of the sorted set, with their aggregates - after the
+    sort, so that the rows within a group keep its order. */
+export function groupStage<Z, K extends string = string>(
+  filtered: readonly Z[],
+  levels: readonly SortLevel<K>[],
+  grouping: NonNullable<TableInput<Z, K>["grouping"]>,
+): RowGroup<Z>[] {
+  return groupRows(filtered, { levels: grouping.levels, aggregates: grouping.aggregates, compareText: grouping.compareText, sort: levels });
+}
+
+/** Stage 3: the visible columns and the page. With a grouping a page counts
+    lines, not rows; the page count is never zero, so that display and controls
+    cannot contradict each other. */
+export function pageStage<Z, K extends string = string>(
+  columns: readonly ModelColumn<Z, K>[],
+  input: Pick<TableInput<Z, K>, "page" | "pageSize" | "hidden" | "order">,
+  filtered: Z[],
+  grouped?: { groups: RowGroup<Z>[]; lines: Line<Z>[] },
+): TableProjection<Z, K> {
+  const { page = 1, pageSize, hidden, order } = input;
+  const visibleColumns = visibleOf(columns, hidden, order);
+  if (grouped) {
+    const paged = pageLines(grouped.lines, page, pageSize ?? 0);
     return {
       columns: visibleColumns,
       filtered,
       visible: rowsOf(paged.lines),
-      groups,
-      lines,
+      groups: grouped.groups,
+      lines: grouped.lines,
       visibleLines: paged.lines,
       page: paged.page,
       pageCount: paged.pageCount,
       columnCount: visibleColumns.length,
     };
   }
-
-  // 4. Page - the page count is never zero, so that display and controls
-  //    cannot contradict each other.
   const size = pageSize && pageSize > 0 ? pageSize : filtered.length || 1;
   const pageCount = Math.max(1, Math.ceil(filtered.length / size));
   const currentPage = Math.min(Math.max(1, page), pageCount);
-  const visible = filtered.slice((currentPage - 1) * size, currentPage * size);
-
   return {
     columns: visibleColumns,
     filtered,
-    visible,
+    visible: filtered.slice((currentPage - 1) * size, currentPage * size),
     page: currentPage,
     pageCount,
     columnCount: visibleColumns.length,
   };
+}
+
+/* Order first, then hide - the order must not change because of what happens
+   to be away. Hiding is pure presentation: the pipeline works with all
+   columns, so that a sort by a hidden column is preserved. */
+const visibleOf = <Z, K extends string>(
+  columns: readonly ModelColumn<Z, K>[],
+  hidden: readonly K[] | undefined,
+  order: readonly K[] | undefined,
+) => {
+  const ordered = orderColumns(columns, order);
+  return hidden?.length ? ordered.filter((s) => s.hideable === false || !hidden.includes(s.id)) : ordered;
+};
+
+export function tableModel<Z, K extends string = string>(
+  rows: readonly Z[],
+  columns: readonly ModelColumn<Z, K>[],
+  input: TableInput<Z, K>,
+): TableProjection<Z, K> {
+  const { page = 1, pageSize, hidden, order } = input;
+
+  /* Server mode: the rows stand as the server sent them. Only the page count
+     is the table's, from the server's total; the page is clamped only against
+     a total that is known - with none yet (the first request is still out),
+     the page of a view handed in would otherwise fall back to one. */
+  if (input.server) {
+    const visibleColumns = visibleOf(columns, hidden, order);
+    const { rowCount } = input.server;
+    const size = pageSize && pageSize > 0 ? pageSize : Math.max(rowCount, 1);
+    const pageCount = Math.max(1, Math.ceil(rowCount / size));
+    const currentPage = rowCount > 0 ? Math.min(Math.max(1, page), pageCount) : Math.max(1, page);
+    return {
+      columns: visibleColumns,
+      filtered: [...rows],
+      visible: [...rows],
+      page: currentPage,
+      pageCount,
+      columnCount: visibleColumns.length,
+    };
+  }
+
+  if (input.tree) {
+    const { term, matches } = matcherOf(columns, input.search, input.filter);
+    const { sorted } = sorterOf(columns, input.sort);
+    return treeProjection(rows, input.tree, sorted, term || input.filter ? matches : undefined, visibleOf(columns, hidden, order));
+  }
+
+  const { filtered, levels } = filterSort(rows, columns, input);
+  if (!input.grouping?.levels.length) return pageStage(columns, input, filtered);
+  const groups = groupStage(filtered, levels, input.grouping);
+  return pageStage(columns, input, filtered, { groups, lines: linesOf(groups, input.grouping.folded) });
 }
 
 /* Tree rows: the levels are sorted one by one and handed to core's

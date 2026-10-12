@@ -12,8 +12,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
-import { tableModel } from "./tableModel";
-import { rowsOf } from "./grouping";
+import { filterSort, groupStage, pageStage, tableModel } from "./tableModel";
+import { linesOf, rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
@@ -178,21 +178,33 @@ export function useTableState<Z, K extends string = string>(
      table without paging. */
   const modelPageSize = virtual || tree ? 0 : pageSize;
 
+  /* The projection in the model's stages, each held while what it reads is
+     unchanged: a page, a fold, a hidden or moved column does not filter and
+     sort again. Server mode and tree rows are not staged; the model computes
+     them whole. */
+  const staged = !server && !tree;
+  const sortedSet = useMemo(
+    () => (staged ? filterSort(rows, columns, { search, filter, sort }) : null),
+    [staged, rows, columns, search, filter, sort],
+  );
+  const groupLevels = grouping?.levels.length ? grouping : undefined;
+  const groups = useMemo(
+    () => (sortedSet && groupLevels ? groupStage(sortedSet.filtered, sortedSet.levels, groupLevels) : undefined),
+    // The fold is not an input of the grouping: it only chooses lines.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sortedSet, groupLevels?.levels, groupLevels?.aggregates, groupLevels?.compareText],
+  );
+  const lines = useMemo(
+    () => (groups && groupLevels ? linesOf(groups, groupLevels.folded) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [groups, groupLevels?.folded],
+  );
   const projection = useMemo(
     () =>
-      tableModel(rows, columns, {
-        search,
-        filter,
-        sort,
-        page,
-        pageSize: modelPageSize,
-        hidden,
-        order,
-        grouping,
-        server,
-        tree,
-      }),
-    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, server, tree],
+      sortedSet
+        ? pageStage(columns, { page, pageSize: modelPageSize, hidden, order }, sortedSet.filtered, groups && lines ? { groups, lines } : undefined)
+        : tableModel(rows, columns, { search, filter, sort, page, pageSize: modelPageSize, hidden, order, grouping, server, tree }),
+    [sortedSet, groups, lines, columns, page, modelPageSize, hidden, order, rows, search, filter, sort, grouping, server, tree],
   );
 
   /* The hook always runs - the number of hooks must not hang on whether it
