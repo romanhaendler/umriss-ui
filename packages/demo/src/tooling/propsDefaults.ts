@@ -6,24 +6,14 @@ import { placeOf, withPlace, type Ctx } from "./propsContext.ts";
 import type { PropEntry } from "./propsReader.ts";
 import { declarationOf, tagOf, textOf, type Declaration } from "./propsSyntax.ts";
 
-/** Does this function belong to this props type?
-
-    Two shapes occur, and both are checked rather than guessed from the name:
-    an annotation on the parameter (`{ … }: TabsProps`) and a type argument
-    on the surrounding `forwardRef<HTMLDivElement, TabsProps>`. */
+/** Does this function belong to this props type? Checked by the annotation on
+    the parameter (`{ … }: TabsProps`), not guessed from the name. */
 export const belongsTo = (
   checker: ts.TypeChecker,
-  fn: ts.Node,
   parameter: ts.ParameterDeclaration,
   declaration: Declaration,
 ): boolean => {
   if (parameter.type !== undefined && declarationOf(checker, parameter.type) === declaration) return true;
-  const parentNode: ts.Node | undefined = fn.parent;
-  if (parentNode !== undefined && ts.isCallExpression(parentNode)) {
-    for (const argument of parentNode.typeArguments ?? []) {
-      if (declarationOf(checker, argument) === declaration) return true;
-    }
-  }
   return false;
 };
 
@@ -70,7 +60,7 @@ export const defaultValues = (ctx: Ctx, declaration: Declaration): Map<string, t
       node.parameters.length > 0
     ) {
       const first = node.parameters[0]!;
-      if (belongsTo(checker, node, first, declaration)) {
+      if (belongsTo(checker, first, declaration)) {
         if (ts.isObjectBindingPattern(first.name)) take(first.name);
         else if (ts.isIdentifier(first.name) && node.body !== undefined) {
           const props = checker.getSymbolAtLocation(first.name);

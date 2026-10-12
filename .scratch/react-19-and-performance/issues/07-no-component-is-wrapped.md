@@ -1,6 +1,6 @@
 # 07 - No component is wrapped: the guard turns round
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
