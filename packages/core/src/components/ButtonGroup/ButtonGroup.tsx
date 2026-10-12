@@ -7,9 +7,9 @@
    left, the trigger for its variants on the right. It opens the existing menu;
    anchoring, dismissing and returning focus come from the popover seam. */
 
-import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { ControlSizeProvider, useControlSize } from "../../lib/controlSize";
 import { Button } from "../Button";
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../Button";
@@ -18,7 +18,7 @@ import styles from "./ButtonGroup.module.css";
 import { useWording } from "../../lib/language";
 
 /** The props of `ButtonGroup`. */
-export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
+export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label"?: string;
   /** The size of the buttons in it that do not say their own - one group,
@@ -29,16 +29,13 @@ export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
 
 /** Buttons standing side by side as one control: square inside, rounded
     outside, a hairline between them. `size` sets one height for all. */
-export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function ButtonGroup(
-  { size, className, children, ...rest },
-  ref,
-) {
+export function ButtonGroup({ ref, size, className, children, ...rest }: ButtonGroupProps) {
   return (
     <div ref={ref} role="group" className={cx(styles.group, className)} {...rest}>
       {size ? <ControlSizeProvider size={size}>{children}</ControlSizeProvider> : children}
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* SplitButton                                                         */
@@ -68,20 +65,18 @@ export interface SplitButtonProps extends Omit<ButtonProps, "children" | "size" 
 /** A main action with a menu of its variants: the button on the left runs
     `onClick`, the arrow on the right opens `menu`. The ref goes to the main
     button. */
-export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(function SplitButton(
-  {
-    children,
-    menu,
-    variant = "secondary",
-    size: ownSize,
-    menuLabel,
-    align = "end",
-    disabled,
-    className,
-    ...rest
-  },
+export function SplitButton({
   ref,
-) {
+  children,
+  menu,
+  variant = "secondary",
+  size: ownSize,
+  menuLabel,
+  align = "end",
+  disabled,
+  className,
+  ...rest
+}: SplitButtonProps) {
   const wording = useWording();
   const size = useControlSize(ownSize);
   return (
@@ -116,4 +111,4 @@ export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(funct
       </Menu>
     </ButtonGroup>
   );
-});
+}

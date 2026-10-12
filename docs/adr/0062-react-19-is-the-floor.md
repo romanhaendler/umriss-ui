@@ -26,6 +26,13 @@ five packages, a component takes `ref` as a prop and is never wrapped in
 - The pass-through guard asks that the ref arrives at the root, not how. While
   components are being taken out of their wrappers, a wrapped and a plain one
   both pass; when the last wrapper is gone the guard asks for the plain form.
+- `ref` is declared once, as `RefProp<E>` in core (`lib/refProp.ts`, exported):
+  the props type extends it with the element the pass-through guard names as
+  the root, `interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, RefProp<HTMLButtonElement>`,
+  and the component is `export function Button({ ref, ...rest }: ButtonProps)`.
+  The props table and `API.md` read the row from `RefProp`, so `ref` shows
+  with its element type and one description; a wrong element is a type error
+  (tested in `iconButton.test.tsx`).
 - The CI job that resolved React 18.3.1 is gone. The version switches are
   not to be restored: a line of code that asks which React is running is a
   line that proves the floor was not set.

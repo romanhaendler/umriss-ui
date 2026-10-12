@@ -80,6 +80,7 @@ export { ControlSizeProvider } from "./lib/controlSize";
 export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
 
 export { announce } from "./lib/announce";
+export type { RefProp } from "./lib/refProp";
 
 /* The segmented control stands at the end for the
    same rule, not at "RadioGroup" beside its mechanics. */

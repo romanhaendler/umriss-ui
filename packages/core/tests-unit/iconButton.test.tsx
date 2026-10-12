@@ -6,7 +6,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { act, createRef } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { IconButton, Menu, MenuItem } from "../src";
+import { Button, ButtonGroup, IconButton, Menu, MenuItem, SplitButton } from "../src";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -81,5 +81,33 @@ describe("IconButton", () => {
     // @ts-expect-error - `aria-label` is required: an icon alone names nothing.
     const unnamed = <IconButton>×</IconButton>;
     expect(unnamed).toBeTruthy();
+  });
+});
+
+describe("the ref of the buttons", () => {
+  it("arrives at the element the component renders at its root", () => {
+    const button = createRef<HTMLButtonElement>();
+    const group = createRef<HTMLDivElement>();
+    render(
+      <ButtonGroup ref={group}>
+        <Button ref={button}>Plain</Button>
+      </ButtonGroup>,
+    );
+    expect(group.current).toBeInstanceOf(HTMLDivElement);
+    expect(button.current).toBeInstanceOf(HTMLButtonElement);
+  });
+
+  it("does not type-check with the wrong element", () => {
+    const div = createRef<HTMLDivElement>();
+    const wrong = createRef<HTMLButtonElement>();
+    // @ts-expect-error - a Button renders a <button>, not a <div>.
+    const button = <Button ref={div}>x</Button>;
+    // @ts-expect-error - an IconButton renders a <button>, not a <div>.
+    const icon = <IconButton aria-label="x" ref={div}>x</IconButton>;
+    // @ts-expect-error - a SplitButton's ref goes to a <button>, not a <div>.
+    const split = <SplitButton menu={null} ref={div}>x</SplitButton>;
+    // @ts-expect-error - a ButtonGroup renders a <div>, not a <button>.
+    const group = <ButtonGroup ref={wrong} />;
+    expect([button, icon, split, group]).toHaveLength(4);
   });
 });
