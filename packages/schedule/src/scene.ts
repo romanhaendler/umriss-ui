@@ -421,7 +421,6 @@ export class ScheduleScene {
   }
 
   private viewChanged(): void {
-    this.movePending = false;
     this.view.collapsed = new Set(this.folded);
     if (this.data.rebuild()) {
       this.colours = null;

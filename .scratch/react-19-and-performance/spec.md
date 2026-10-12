@@ -1,6 +1,6 @@
 # React 19 is the floor, and what it buys: bundles that shake, a table that holds at size
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-10-12
 Origin: a measurement of the five built packages and a reading of their hot
 paths on 2026-10-12, at the commit of the 0.34.0 release. The figures stand
@@ -510,3 +510,31 @@ memoise their values and its formats are built once per locale; the table
 keeps its selection in a set and caches its grouping model.
 
 ## Comments
+
+**Delivery, 2026-10-12.** Tickets 01 to 20, 22 and 23 are done; 21 is closed
+without code; 24 waits for the maintainer, because a version is released by
+raising it. What was built departs from the text above in these places:
+
+- **The pre-filter is not compared by its source text** (decision "An accessor
+  is compared the way the charts compare theirs", user story 28). Two existing
+  tests hold that a pre-filter reading the caller's state takes effect, and
+  that is the ordinary way to write one. It is applied on every render and its
+  result reconciled, as before. A column's `value`, `sortValue`, `groupValue`
+  and the `rowKey` are compared as decided.
+- **An aggregate is held per set of rows beside the projection**, not on it;
+  the effect is the one decided.
+- **Decided on the benchmark pages:** the table's four row candidates and the
+  schedule's three were not tried, because the figures left nothing for them to
+  win - for the table a profile named one other cause (the toolbar looked for
+  selected rows in an empty selection), which was fixed. The deferred search
+  and the bisecting matrix hit test were tried and dropped. Scatter is not
+  windowed: its rows often come unsorted.
+- **The schedule's benchmark page** shows that a pan's frame did not get
+  shorter; only the synchronous cost of an event fell.
+- **Two defects were found and fixed that the text did not know:** a
+  virtualised tree's filler rows were squeezed by its flex column, and
+  `NumberInput` and `CommandPalette` carry lint exceptions the hook rules had
+  not asked for while the components were wrapped.
+
+The figures stand in the capability records of the four packages and in core's
+README; the changelog draft stands in ticket 24.

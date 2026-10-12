@@ -46,6 +46,7 @@ const aggregateWord = (kind: string, wording: Wording): string =>
 interface Summary {
   spec: unknown;
   reader: unknown;
+  aligned: boolean | undefined;
   value: unknown;
   places: number;
   numeric: boolean;
@@ -58,19 +59,24 @@ function summaryOf(entry: ColumnEntry, rows: readonly unknown[], known?: { value
   if (!byEntry) summaries.set(rows, (byEntry = new Map()));
   const hit = byEntry.get(entry);
   const reader = entry.spec.value;
-  if (hit && hit.spec === spec && hit.reader === reader && (known === undefined || hit.value === known.value)) return hit;
+  const aligned = entry.spec.rightAligned;
+  /* A value the group already holds is the aggregate of these same rows, so
+     it needs no comparison: what is held for the rows stands for it. */
+  if (hit && hit.spec === spec && hit.reader === reader && hit.aligned === aligned) return hit;
   const value = known
     ? known.value
     : aggregate({ id: entry.spec.id, read: entry.read, aggregate: spec as AggregateColumn<unknown>["aggregate"] }, rows);
   let places = 0;
-  if ((spec === "sum" || spec === "avg") && entry.spec.format === undefined && typeof value === "number") {
+  /* Found whatever the column's format is, so that what is held does not
+     depend on a format that may change while the rows stay. */
+  if ((spec === "sum" || spec === "avg") && typeof value === "number") {
     for (const row of rows) {
       const read = entry.read(row);
       if (isFiniteNumber(read)) places = Math.max(places, decimalsOf(read));
     }
   }
-  const numeric = spec === "count" || spec === "distinct" || (entry.spec.rightAligned ?? columnKind(rows, entry.read) === "number");
-  const made = { spec, reader, value, places, numeric };
+  const numeric = spec === "count" || spec === "distinct" || (aligned ?? columnKind(rows, entry.read) === "number");
+  const made = { spec, reader, aligned, value, places, numeric };
   byEntry.set(entry, made);
   return made;
 }
@@ -150,7 +156,7 @@ const sameYear = ([from, to]: [unknown, unknown]): boolean =>
 
 /** Whether an aggregate stands right-aligned in tabular figures: counts and
     numbers do, a point in time or a range of them follows its column. */
-export function aggregateIsNumeric(entry: ColumnEntry, rows: readonly unknown[]): boolean {
+export function aggregateIsNumeric(entry: ColumnEntry, rows: readonly unknown[], known?: { value: unknown }): boolean {
   if (!entry.spec.aggregate) return false;
-  return summaryOf(entry, rows).numeric;
+  return summaryOf(entry, rows, known).numeric;
 }

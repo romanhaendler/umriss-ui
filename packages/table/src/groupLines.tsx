@@ -408,7 +408,7 @@ function AggregateCell({
     }
   }
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows, { value: group.aggregates[spec.id] }) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
       {bar ? (
         <span className={styles.shareHost}>
           <AggregateValue entry={entry} rows={group.rows} known={{ value: group.aggregates[spec.id] }} formats={formats} wording={wording} />

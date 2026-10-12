@@ -190,7 +190,7 @@ The table is not part of this package. It lives in
 
 ## Principles for new components
 
-1. Pass `forwardRef`, `className` and `...rest` through to the root element –
+1. Pass `ref`, `className` and `...rest` through to the root element –
    every component that renders a root element. Excepted are the wrappers that
    have none: `Popover` renders into a portal, `Tooltip` around the caller's
    child, `Menu`, `ContextMenu` and `ToastProvider` are composed of other
