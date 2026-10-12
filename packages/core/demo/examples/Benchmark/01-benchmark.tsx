@@ -11,7 +11,7 @@
    that frame quantisation does not enter the figure. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TreeView, useTree } from "../../../src";
+import { Button, Text, TreeView, useTree } from "../../../src";
 import type { NodeReader } from "../../../src";
 
 export const title = "Measure a large tree";
@@ -186,39 +186,39 @@ export default function Benchmark() {
 
   return (
     <>
-      <div className="demo-actions">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
         {SIZES.map((n) => (
-          <button key={n} className="demo-button" data-role={`size-${n}`} aria-pressed={n === size} onClick={() => choose(n)}>
+          <Button key={n} size="sm" data-role={`size-${n}`} aria-pressed={n === size} onClick={() => choose(n)}>
             {n.toLocaleString("en-US")} nodes
-          </button>
+          </Button>
         ))}
-        <button className="demo-button" data-role="walk" onClick={walk}>
+        <Button size="sm" data-role="walk" onClick={walk}>
           Walk {KEYS} keys
-        </button>
-        <button className="demo-button" data-role="scroll" onClick={scroll}>
+        </Button>
+        <Button size="sm" data-role="scroll" onClick={scroll}>
           Scroll {SCROLLS} steps
-        </button>
+        </Button>
       </div>
-      <dl className="metrics">
+      <dl style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", margin: 0 }}>
         <div>
-          <dt>Status</dt>
-          <dd data-role="status">{status}</dd>
+          <Text as="dt">Status</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="status">{status}</Text>
         </div>
         <div>
-          <dt>Nodes</dt>
-          <dd data-role="nodes">{size}</dd>
+          <Text as="dt">Nodes</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="nodes">{size}</Text>
         </div>
         <div>
-          <dt>First render (ms)</dt>
-          <dd data-role="first-render">{show(figures.firstRender)}</dd>
+          <Text as="dt">First render (ms)</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="first-render">{show(figures.firstRender)}</Text>
         </div>
         <div>
-          <dt>Per key (ms)</dt>
-          <dd data-role="per-key">{show(figures.perKey)}</dd>
+          <Text as="dt">Per key (ms)</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="per-key">{show(figures.perKey)}</Text>
         </div>
         <div>
-          <dt>Per scroll event (ms)</dt>
-          <dd data-role="per-scroll">{show(figures.perScroll)}</dd>
+          <Text as="dt">Per scroll event (ms)</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="per-scroll">{show(figures.perScroll)}</Text>
         </div>
       </dl>
       <div ref={host}>
