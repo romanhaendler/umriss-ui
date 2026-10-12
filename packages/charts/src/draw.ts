@@ -714,7 +714,11 @@ function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: R
     if (path === undefined) continue;
     // A cell is centred on its pair of values.
     const px = (xs[i] as number) * xm + xb - widthPx / 2;
+    // Its x channel runs row by row and cannot be searched; a cell wholly
+    // outside the plot is left out of the path instead.
+    if (px + widthPx < plot.x || px > plot.x + plot.width) continue;
     const py = (ys[i] as number) * ym + yb - heightPx / 2;
+    if (py + heightPx < plot.y || py > plot.y + plot.height) continue;
     path.rect(px, py, widthPx, heightPx);
   }
 
