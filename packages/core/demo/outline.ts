@@ -47,7 +47,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "What an application does once before its first component: install the package, choose the fonts and let light and dark follow the page. The styles load themselves, and no provider is needed.",
         about: [
-          "The command installs the package alone: React 18 or newer is its only peer and stays the application's own. Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
+          "The command installs the package alone: React 19 or newer is its only peer and stays the application's own. Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
           "Colours, sizes, fonts and light and dark are tokens, `--u-…` custom properties you override with ordinary CSS: [Theming](#/theming) lists them. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
         ],
         limits: [
@@ -1190,6 +1190,15 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: ["TreeViewProps", "TreeSearchProps"],
         exports: ["TreeView", "TreeSearch", "useTree"],
+      },
+      {
+        id: "benchmark",
+        name: "Benchmark",
+        sentence: "A large virtualised tree, measured in this browser rather than claimed: the first render, a walk down it with the arrow keys and a scroll.",
+        about: ["The figures in `packages/core/docs/capabilities-tree.md` come from here. The page adds nothing to the tree; it times it from outside."],
+        keysOf: ["treeview"],
+        types: [],
+        exports: ["useVirtual"],
       },
     ],
   },

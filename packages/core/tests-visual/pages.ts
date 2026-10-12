@@ -31,7 +31,16 @@ export const PAGES = ["scenarios", ...ALL_PAGES.map((p) => p.id)] as const;
 
 export type { ExampleAddress };
 
-export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
+/** A named exception (CONTEXT.md, **Named exception**), and the only gap in this
+    derived list. The benchmark measures the moment it runs, and a picture of it
+    would compare one machine's run against another's. */
+const NOT_PHOTOGRAPHED: Readonly<Record<string, string>> = {
+  benchmark: "the benchmark measures, and a measurement is not a picture.",
+};
+
+export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR).filter(
+  (e) => NOT_PHOTOGRAPHED[e.exampleId] === undefined,
+);
 
 /** The pages that open with a configurator: one file each in
     `demo/configurators/`, named after its page (.scratch/configurator). */

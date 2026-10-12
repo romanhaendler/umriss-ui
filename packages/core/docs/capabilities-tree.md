@@ -136,6 +136,34 @@ State: `tree-view` 01–06 and `tree-view-reach` 01–06 delivered.
 | Expanding everything triggers no loading | ADR-0005 | Unit (model) |
 | The window arithmetic is the table's, unchanged | — | Unit, `tests-unit/virtual.test.ts` |
 
+## Performance (reference run)
+
+Measured through the demo's Benchmark page (`#/benchmark`), which times the tree
+from outside and adds no prop. Every folder is open, so the visible rows are the
+nodes: a forest of roots with 6 groups of 7 leaves each, cut off at the node
+count; row height 26 px, a 320 px scroll area, `virtual` on.
+
+Method. Each figure is the mean of one scripted run, the median of five loads per
+row. A clock stops after two macrotasks and a forced layout read - React has
+committed by then - not at the paint, so frame quantisation is not in it.
+
+* **First render** - from the size button's click to that point, with the tree
+  mounted anew: flattening and the first window.
+* **Per key** - 200 `ArrowDown` keydowns on the focused Active node, each timed
+  from dispatch to the settled commit.
+* **Per scroll event** - 100 steps of 10 rows; the clock starts as the scroll
+  event is dispatched, before React's handler runs.
+
+Machine: -. Browser: -. Date: -.
+
+| Nodes | First render | Per key | Per scroll event |
+|---|---|---|---|
+| 10,000 | - | - | - |
+| 50,000 | - | - | - |
+| 100,000 | - | - | - |
+
+All figures in milliseconds.
+
 ## Keyboard: typeahead and spans
 
 | Capability | Decision | Proved at |
