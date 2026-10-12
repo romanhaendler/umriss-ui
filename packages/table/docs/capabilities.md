@@ -77,3 +77,15 @@ Same machine and page as above; milliseconds.
 | Pipeline in stages | 200,000 | paged | Page turned | 204.8 | 19.2 |
 | Pipeline in stages | 200,000 | grouped | Group folded | 445.9 | 16.8 |
 | Pipeline in stages | 200,000 | virtual | Column hidden | 212.8 | 17.3 |
+| Sort keys read once per row and sort | 50,000 | virtual | Sort | 44.7 | 40.6 (kept) |
+| Sort keys read once per row and sort | 50,000 | paged | Sort | 50.0 | 40.9 (kept) |
+| Sort keys read once per row and sort | 200,000 | virtual | Sort | 189.4 | 161.1 (kept) |
+| Sort keys read once per row and sort | 200,000 | paged | Sort | 211.6 | 166.4 (kept) |
+| Deferred value for the search | 50,000 | virtual | Search | 13.8 | 3.7 (dropped) |
+| Deferred value for the search | 200,000 | virtual | Search | 50.0 | 14.8 (dropped) |
+
+The sort keys are kept: the order is unchanged and the sort falls by a tenth to
+a quarter. The deferred search is dropped: its figure falls only because the
+page times a synchronous `setSearch`, and the filtering moves into a later
+render; the rows a person sees match no sooner, and the field, controlled by
+the same state, was held up by at most one filtering (14 ms at 50,000 rows).

@@ -185,6 +185,12 @@ function matcherOf<Z, K extends string>(
   return { term, matches: (row: Z) => matchesSearch(row) && (filter ? filter(row) : true) };
 }
 
+/* A row with the values the sort reads from it. */
+interface Keyed<Z> {
+  row: Z;
+  keys: (string | number | null | undefined)[];
+}
+
 /* Sort - stable, so that equal values keep their order. Levels act in
    turn: the next one comes into play only where the previous stays
    undecided. Levels without a matching column are passed over - a stale
@@ -196,6 +202,9 @@ function sorterOf<Z, K extends string>(
 ) {
   const levels = (Array.isArray(sort) ? sort : sort ? [sort] : []) as readonly SortLevel<K>[];
 
+  /* Each level reads its value once per row and sort, not once per comparison:
+     the rows are decorated with their values, sorted, and undecorated. */
+  const readers: (((row: Z) => string | number | null | undefined) | undefined)[] = [];
   const comparators = levels
     .map((level) => {
       /* `found`, not `column`: within this module the name `column` already
@@ -206,31 +215,36 @@ function sorterOf<Z, K extends string>(
       const direction = level.direction === "asc" ? 1 : -1;
       const own = found.compare;
       const read = found.value;
-      if (!read) return (a: Z, b: Z) => own!(a, b) * direction;
+      const slot = readers.length;
+      readers.push(read);
+      if (!read) return (a: Keyed<Z>, b: Keyed<Z>) => own!(a.row, b.row) * direction;
       /* Absence is decided BEFORE the direction: multiplied by it, an absent
          value would stand first when descending. That holds even before a
          comparison of one's own, as soon as the column has a value from which
          "absent" can be read. */
-      return (a: Z, b: Z) => {
-        const va = read(a);
-        const vb = read(b);
+      return (a: Keyed<Z>, b: Keyed<Z>) => {
+        const va = a.keys[slot];
+        const vb = b.keys[slot];
         if (absent(va) || absent(vb)) return absent(va) === absent(vb) ? 0 : absent(va) ? 1 : -1;
-        return (own ? own(a, b) : defaultCompare(va, vb)) * direction;
+        return (own ? own(a.row, b.row) : defaultCompare(va!, vb!)) * direction;
       };
     })
-    .filter((v): v is (a: Z, b: Z) => number => v !== null);
+    .filter((v): v is (a: Keyed<Z>, b: Keyed<Z>) => number => v !== null);
 
   const sorted = (list: readonly Z[]): Z[] =>
     // Array#sort is stable (ES2019), equal values keep their order.
     comparators.length === 0
       ? [...list]
-      : [...list].sort((a, b) => {
-          for (const compare of comparators) {
-            const result = compare(a, b);
-            if (result !== 0) return result;
-          }
-          return 0;
-        });
+      : list
+          .map((row) => ({ row, keys: readers.map((read) => read?.(row)) }))
+          .sort((a, b) => {
+            for (const compare of comparators) {
+              const result = compare(a, b);
+              if (result !== 0) return result;
+            }
+            return 0;
+          })
+          .map((entry) => entry.row);
   return { levels, sorted };
 }
 
