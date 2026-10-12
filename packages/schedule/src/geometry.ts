@@ -143,6 +143,24 @@ export function inView(box: SubtaskBox, plotWidth: number, plotHeight: number): 
   return box.outerTo >= 0 && box.outerFrom <= plotWidth && box.y + box.height >= 0 && box.y <= plotHeight;
 }
 
+/** Whether a dependency's drawn line, with its ends and stroke, touches the
+    plot. It is the box around the whole route, so a route that crosses the plot
+    with both ends outside it is in. */
+export function pathInView(path: DependencyPath, plotWidth: number, plotHeight: number): boolean {
+  const reach = 8;
+  let x0 = Math.min(path.x1, path.x2, path.c1x, path.c2x);
+  let x1 = Math.max(path.x1, path.x2, path.c1x, path.c2x);
+  let y0 = Math.min(path.y1, path.y2);
+  let y1 = Math.max(path.y1, path.y2);
+  for (let i = 0; i + 1 < path.points.length; i += 2) {
+    x0 = Math.min(x0, path.points[i]!);
+    x1 = Math.max(x1, path.points[i]!);
+    y0 = Math.min(y0, path.points[i + 1]!);
+    y1 = Math.max(y1, path.points[i + 1]!);
+  }
+  return x1 >= -reach && x0 <= plotWidth + reach && y1 >= -reach && y0 <= plotHeight + reach;
+}
+
 /** The narrowest bar that still gets a label.
 
     Measured, not guessed: at the type size the labels are set in, a 47-pixel

@@ -171,6 +171,8 @@ export class ScheduleScene {
   private frame = 0;
   /** Whether the data canvas is out of date; a hover alone leaves it be. */
   private dataStale = true;
+  /** A pan or zoom whose consequences wait for the frame. */
+  private movePending = false;
   private domainFrame = 0;
   private unsubscribeTheme: (() => void) | null = null;
   private snapshot: ScheduleSnapshot = EMPTY_SNAPSHOT;
@@ -191,10 +193,7 @@ export class ScheduleScene {
       selectedSubtask: () => this.selected,
       select: (task, subtask) => this.select(task, subtask),
       viewChanged: () => this.viewChanged(),
-      viewMoved: (time) => {
-        this.viewChanged();
-        if (time) this.reportDomain();
-      },
+      viewMoved: (time) => this.viewMoved(time),
       interactionChanged: () => this.interactionChanged(),
       hoverChanged: () => this.hoverChanged(),
     });
@@ -205,10 +204,7 @@ export class ScheduleScene {
       handlers: () => this.handlersNow,
       visibleDomain: () => this.visibleDomain(),
       select: (task, subtask) => this.select(task, subtask),
-      viewMoved: (time) => {
-        this.viewChanged();
-        if (time) this.reportDomain();
-      },
+      viewMoved: (time) => this.viewMoved(time),
       spokenChanged: () => this.publish(),
     });
   }
@@ -382,6 +378,7 @@ export class ScheduleScene {
     if (this.frame !== 0) cancelAnimationFrame(this.frame);
     if (this.domainFrame !== 0) cancelAnimationFrame(this.domainFrame);
     this.frame = this.domainFrame = 0;
+    this.movePending = false;
     this.root = this.plot = this.dataCanvas = this.overlayCanvas = null;
   }
 
@@ -409,15 +406,37 @@ export class ScheduleScene {
   /* Changes                                                           */
   /* ---------------------------------------------------------------- */
 
+  /** The span or the scroll moved. The layout is made when something reads
+      it (`SceneView.boxes`), so a hit, a key or a report sees the current
+      view; the rest of `viewChanged` - the hover and key targets, the
+      snapshot, the drawing - runs once in the frame, however many events came. */
+  private viewMoved(time: boolean): void {
+    if (this.dataCanvas === null || typeof requestAnimationFrame !== "function") this.viewChanged();
+    else {
+      this.view.invalidate();
+      this.movePending = true;
+      this.requestDraw();
+    }
+    if (time) this.reportDomain();
+  }
+
   private viewChanged(): void {
+    this.movePending = false;
     this.view.collapsed = new Set(this.folded);
     if (this.data.rebuild()) {
       this.colours = null;
       if (this.selected !== null && !this.data.subtaskById.has(this.selected)) this.selected = null;
     }
     if (this.domainInView === null && !this.fitted) this.fit();
-    this.publishView();
     this.view.layout();
+    this.moveSettled();
+  }
+
+  /** What a pan or zoom changes beyond the layout: the view's listeners, the
+      hover and key targets read anew, the snapshot and the drawing. */
+  private moveSettled(): void {
+    this.movePending = false;
+    this.publishView();
     this.gestures.refreshHover();
     this.keys.refresh();
     this.interactionChanged();
@@ -587,6 +606,7 @@ export class ScheduleScene {
   private requestDraw(): void {
     if (this.frame !== 0 || this.dataCanvas === null || typeof requestAnimationFrame !== "function") return;
     this.frame = requestAnimationFrame(() => {
+      if (this.movePending) this.moveSettled();
       this.frame = 0;
       this.draw();
     });

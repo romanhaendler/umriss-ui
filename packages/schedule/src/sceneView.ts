@@ -84,9 +84,36 @@ export class SceneView {
   /** The groups a gesture in flight holds open. Dropped when it ends; the
       caller's list never learns of it. */
   openForGesture: ReadonlySet<string> = new Set();
-  boxes: SubtaskBox[] = [];
-  boxById = new Map<string, SubtaskBox>();
-  paths: DependencyPath[] = [];
+  private laidBoxes: SubtaskBox[] = [];
+  private laidBoxById = new Map<string, SubtaskBox>();
+  private laidPaths: DependencyPath[] = [];
+  /** Whether the domain or the scroll moved since the layout; the layout is
+      then made when it is read and not once per event. */
+  private moved = false;
+
+  get boxes(): SubtaskBox[] {
+    this.current();
+    return this.laidBoxes;
+  }
+
+  get boxById(): Map<string, SubtaskBox> {
+    this.current();
+    return this.laidBoxById;
+  }
+
+  get paths(): DependencyPath[] {
+    this.current();
+    return this.laidPaths;
+  }
+
+  /** Says the domain or the scroll moved: the next read of the layout makes it. */
+  invalidate(): void {
+    this.moved = true;
+  }
+
+  private current(): void {
+    if (this.moved) this.layout();
+  }
 
   constructor(private readonly data: SceneData) {}
 
@@ -139,6 +166,7 @@ export class SceneView {
 
   /** Lays the rows out, clamps the scroll, and lays the data out anew. */
   layout(): void {
+    this.moved = false;
     this.rows = layOutRows({
       lanes: this.data.lanes,
       groups: this.data.groups,
@@ -147,21 +175,21 @@ export class SceneView {
     });
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY));
     const view = this.viewport();
-    this.boxes = [];
-    this.boxById = new Map();
+    this.laidBoxes = [];
+    this.laidBoxById = new Map();
     for (const subtask of this.data.subtasks) {
       const slot = slotOf(this.rows, subtask.lane);
       if (slot === null) continue;
       const box = subtaskBox(view, subtask, slot, this.data.depth.get(subtask.id) ?? 0);
-      this.boxes.push(box);
-      this.boxById.set(subtask.id, box);
+      this.laidBoxes.push(box);
+      this.laidBoxById.set(subtask.id, box);
     }
-    this.paths = [];
+    this.laidPaths = [];
     for (const dependency of this.data.dependencies) {
       const from = this.boxById.get(dependency.from);
       const to = this.boxById.get(dependency.to);
       if (from === undefined || to === undefined) continue;
-      this.paths.push(dependencyPath(view, dependency, from, to, this.options));
+      this.laidPaths.push(dependencyPath(view, dependency, from, to, this.options));
     }
   }
 
