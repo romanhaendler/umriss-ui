@@ -1,12 +1,12 @@
-import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { useFormats, useWording } from "../../lib/language";
 import { clampFraction, percentDisplay } from "../DataViz/scale";
 import styles from "./ProgressBar.module.css";
 
 /** The props of `ProgressBar`. */
-export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
+export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** How far the task has come, from 0 to 1. Left out, the bar is
       indeterminate: the task runs, and nobody knows how far it is. */
   value?: number;
@@ -31,10 +31,7 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
    An upload that is 90 per cent done is not a warning. (CONTEXT.md, Progress.) */
 /** How far a task has come, from 0 to 1 - or, without a value, that it runs.
     It has no tone: a measured value judged against limits is a `Meter`. */
-export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function ProgressBar(
-  { value, label, valueText, showLabel = false, className, ...rest },
-  ref,
-) {
+export function ProgressBar({ ref, value, label, valueText, showLabel = false, className, ...rest }: ProgressBarProps) {
   const formats = useFormats();
   const wording = useWording();
   const determinate = value !== undefined;
@@ -63,4 +60,4 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function
       {showLabel && determinate && <span className={styles.label}>{formats.percent(fraction)}</span>}
     </div>
   );
-});
+}

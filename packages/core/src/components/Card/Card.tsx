@@ -1,6 +1,7 @@
-import { createContext, forwardRef, useContext, useId, useState } from "react";
+import { createContext, useContext, useId, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Card.module.css";
 import { useWording } from "../../lib/language";
 
@@ -18,7 +19,7 @@ const CardContext = createContext<CardContextValue | null>(null);
 /* ------------------------------------------------------------------ */
 
 /** The props of `Card`. */
-export interface CardProps extends HTMLAttributes<HTMLElement> {
+export interface CardProps extends HTMLAttributes<HTMLElement>, RefProp<HTMLElement> {
   /** Allows collapsing and expanding the body through the header. */
   collapsible?: boolean;
   /** Initial state of the collapse mechanism; afterwards it belongs to the
@@ -36,18 +37,16 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
 /** A surface that groups content under a head: `CardHeader` and `CardBody`
     inside a `section`. With `collapsible` the header gets a key that folds the
     body away. */
-export const Card = forwardRef<HTMLElement, CardProps>(function Card(
-  {
-    collapsible = false,
-    defaultCollapsed = false,
-    collapsed: collapsedProp,
-    onCollapsedChange,
-    className,
-    children,
-    ...rest
-  },
+export function Card({
   ref,
-) {
+  collapsible = false,
+  defaultCollapsed = false,
+  collapsed: collapsedProp,
+  onCollapsedChange,
+  className,
+  children,
+  ...rest
+}: CardProps) {
   const [ownCollapsed, setOwnCollapsed] = useState(defaultCollapsed);
   const controlled = collapsedProp !== undefined;
   const collapsed = controlled ? collapsedProp : ownCollapsed;
@@ -66,7 +65,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       </CardContext.Provider>
     </section>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* CardHeader                                                          */
@@ -74,7 +73,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
 
 /** The props of `CardHeader`: a div's attributes, with `title` taking a node
     instead of the HTML attribute. */
-export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, RefProp<HTMLDivElement> {
   /** The heading of the card. A node and not merely text, so that an
       identifier with markup can stand in it too. */
   title: ReactNode;
@@ -92,10 +91,7 @@ export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "t
 
 /** The head of a `Card`: title, an optional eyebrow and actions on the right.
     In a collapsible card it carries the fold key. */
-export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function CardHeader(
-  { title, eyebrow, actions, divider = false, className, ...rest },
-  ref,
-) {
+export function CardHeader({ ref, title, eyebrow, actions, divider = false, className, ...rest }: CardHeaderProps) {
   const card = useContext(CardContext);
   const wording = useWording();
 
@@ -123,14 +119,14 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function C
       )}
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* CardBody                                                           */
 /* ------------------------------------------------------------------ */
 
 /** The props of `CardBody`. */
-export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardBodyProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** Removes the inner padding, e.g. for flush tables. */
   flush?: boolean;
 }
@@ -139,10 +135,7 @@ export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {
    goes with the class to the body itself, the element a caller dresses. */
 /** The content of a `Card`; the part that folds away in a collapsible card.
     `flush` removes the padding for a table or a log. */
-export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardBody(
-  { flush = false, className, children, ...rest },
-  ref,
-) {
+export function CardBody({ ref, flush = false, className, children, ...rest }: CardBodyProps) {
   const card = useContext(CardContext);
 
   const body = (
@@ -169,4 +162,4 @@ export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardB
       </div>
     </div>
   );
-});
+}

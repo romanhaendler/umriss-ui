@@ -1,9 +1,10 @@
-import { forwardRef, useId, useMemo, useRef, useState } from "react";
-import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactElement } from "react";
+import { useId, useMemo, useRef, useState } from "react";
+import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Listbox, optionId } from "../../lib/listbox";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Combobox.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -25,7 +26,7 @@ export interface ComboboxOption<T extends string = string> {
 
 /** The props of `Combobox`. */
 export interface ComboboxProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
@@ -59,8 +60,9 @@ export interface ComboboxProps<T extends string = string>
 }
 
 /** A searchable select field (the combobox pattern with a listbox panel). */
-export const Combobox = forwardRef(function Combobox<T extends string = string>(
+export function Combobox<T extends string = string>(
   {
+    ref,
     options,
     value,
     onChange,
@@ -80,7 +82,6 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     "aria-describedby": ariaDescribedBy,
     ...rest
   }: ComboboxProps<T>,
-  ref: ForwardedRef<HTMLDivElement>,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -266,6 +267,4 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
       />
     </>
   );
-}) as <T extends string = string>(
-  props: ComboboxProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
-) => ReactElement;
+}

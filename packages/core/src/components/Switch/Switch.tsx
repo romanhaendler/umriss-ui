@@ -1,12 +1,12 @@
-import { forwardRef } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Switch.module.css";
 import { useControlSize } from "../../lib/controlSize";
 
 /** The props of `Switch`: a native checkbox's attributes and its label. */
-export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size" | "role"> {
+export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size" | "role">, RefProp<HTMLInputElement> {
   /** Label to the right of the switch. */
   label?: ReactNode;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
@@ -25,10 +25,7 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    is the pass-through: the class on the label, ref and rest on the input. */
 /** An on/off switch that takes effect at once - a native checkbox with
     `role="switch"`. Where the choice waits for a Save button, use `Checkbox`. */
-export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { label, size: ownSize, invalid, className, style, id, ...rest },
-  ref,
-) {
+export function Switch({ ref, label, size: ownSize, invalid, className, style, id, ...rest }: SwitchProps) {
   const size = useControlSize(ownSize);
   const field = useFormField();
   const inputId = id ?? field?.id;
@@ -54,4 +51,4 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
       {label && <span className={styles.label}>{label}</span>}
     </label>
   );
-});
+}

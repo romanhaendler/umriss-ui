@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Badge.module.css";
 
 /** What a badge stands for - never the only statement, a word stands beside
@@ -8,7 +8,7 @@ import styles from "./Badge.module.css";
 export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 /** The props of `Badge`. */
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTMLSpanElement> {
   /** What the badge stands for. There is always a word beside it: a colour on
       its own is not a statement. */
   tone?: BadgeTone;
@@ -18,13 +18,10 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** Compact status label; as a `pill` for counters. */
-export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { tone = "neutral", pill = false, className, children, ...rest },
-  ref,
-) {
+export function Badge({ ref, tone = "neutral", pill = false, className, children, ...rest }: BadgeProps) {
   return (
     <span ref={ref} className={cx(styles.badge, pill && styles.pill, styles[tone], className)} {...rest}>
       {children}
     </span>
   );
-});
+}

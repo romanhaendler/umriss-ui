@@ -5,10 +5,11 @@
    at the point. */
 
 import { describe, expect, it, vi } from "vitest";
-import { useState } from "react";
+import { createRef, useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { Button } from "../src/components/Button";
 import { ContextMenu } from "../src/components/ContextMenu";
-import { MenuItem, MenuSeparator } from "../src/components/Menu";
+import { Menu, MenuItem, MenuSeparator } from "../src/components/Menu";
 
 function Harness({ onFirst = vi.fn(), onThird = vi.fn() }) {
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
@@ -124,5 +125,17 @@ describe("ContextMenu - closing", () => {
     openAtPoint();
     fireEvent.mouseDown(screen.getByRole("button", { name: "Elsewhere" }));
     expect(screen.queryByRole("menu")).toBeNull();
+  });
+});
+
+describe("Menu - the trigger's ref", () => {
+  it("holds the trigger element when the caller put a ref on it", () => {
+    const ref = createRef<HTMLButtonElement>();
+    render(
+      <Menu trigger={<Button ref={ref}>Actions</Button>}>
+        <MenuItem>Split</MenuItem>
+      </Menu>,
+    );
+    expect(ref.current).toBe(screen.getByRole("button", { name: "Actions" }));
   });
 });

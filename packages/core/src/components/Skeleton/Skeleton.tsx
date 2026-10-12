@@ -1,10 +1,10 @@
-import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Skeleton.module.css";
 
 /** The props of `Skeleton`. */
-export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement> {
+export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTMLSpanElement> {
   /** Width, e.g. "120px" or "60%".
       @default "100%" */
   width?: string | number;
@@ -16,10 +16,7 @@ export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** Loading placeholder with a restrained pulse; respects prefers-reduced-motion. */
-export const Skeleton = forwardRef<HTMLSpanElement, SkeletonProps>(function Skeleton(
-  { width, height, circle = false, className, style, ...rest },
-  ref,
-) {
+export function Skeleton({ ref, width, height, circle = false, className, style, ...rest }: SkeletonProps) {
   return (
     <span
       ref={ref}
@@ -29,4 +26,4 @@ export const Skeleton = forwardRef<HTMLSpanElement, SkeletonProps>(function Skel
       {...rest}
     />
   );
-});
+}

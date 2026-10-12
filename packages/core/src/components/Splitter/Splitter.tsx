@@ -1,13 +1,16 @@
-import { forwardRef, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { GripGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Splitter.module.css";
 
 /** The props of `Splitter`. */
-export interface SplitterProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue" | "children"> {
+export interface SplitterProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue" | "children">,
+    RefProp<HTMLDivElement> {
   /** How the two panes stand: `horizontal` side by side, `vertical` one
       above the other - a trend above, its alarms below. */
   orientation?: "horizontal" | "vertical";
@@ -41,24 +44,22 @@ export interface SplitterProps extends Omit<HTMLAttributes<HTMLDivElement>, "onC
    share. */
 /** Two panes and the line between them. The line can be dragged, moved with
     the arrow keys, and Enter collapses the first pane and brings it back. */
-export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Splitter(
-  {
-    orientation = "horizontal",
-    value: valueProp,
-    defaultValue = 50,
-    onChange,
-    min = 0,
-    max = 100,
-    step = 5,
-    separatorLabel,
-    className,
-    style,
-    onKeyDown,
-    children,
-    ...rest
-  },
+export function Splitter({
   ref,
-) {
+  orientation = "horizontal",
+  value: valueProp,
+  defaultValue = 50,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 5,
+  separatorLabel,
+  className,
+  style,
+  onKeyDown,
+  children,
+  ...rest
+}: SplitterProps) {
   const wording = useWording();
   const firstId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -175,4 +176,4 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
       </div>
     </div>
   );
-});
+}

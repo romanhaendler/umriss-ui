@@ -26,10 +26,10 @@
    draws stands here, once. */
 
 import type { SVGProps } from "react";
-import { forwardRef } from "react";
+import type { RefProp } from "../refProp";
 
 /** The props of a glyph: an SVG's attributes and its edge length. */
-export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "children"> {
+export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "children">, RefProp<SVGSVGElement> {
   /**
    * Edge length in pixels. The default is the size the glyph is drawn at in
    * the components.
@@ -39,10 +39,7 @@ export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "c
 
 /** The cross that clears a field, removes a tag or a chip, and closes a
     dialog, a toast or an alert - one drawing at the size of its place. */
-export const CrossGlyph = forwardRef<SVGSVGElement, GlyphProps>(function CrossGlyph(
-  { size = 9, ...rest },
-  ref,
-) {
+export function CrossGlyph({ ref, size = 9, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
@@ -54,31 +51,25 @@ export const CrossGlyph = forwardRef<SVGSVGElement, GlyphProps>(function CrossGl
       />
     </svg>
   );
-});
+}
 
 /** The plus of `NumberInput`'s step buttons. */
-export const PlusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function PlusGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function PlusGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path d="M5 2v6M2 5h6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
-});
+}
 
 /** The minus of `NumberInput`'s step buttons. */
-export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function MinusGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path d="M2 5h6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
-});
+}
 
 /* The component tips the chevron by 90 degrees when the branch is open, so
    that the motion has the same spring as everywhere else.
@@ -88,10 +79,7 @@ export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGl
 
 /** The chevron that expands and collapses a branch. Drawn pointing right;
     rotate it by 90 degrees for an open branch. */
-export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function AngleGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
@@ -104,14 +92,11 @@ export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGl
       />
     </svg>
   );
-});
+}
 
 /** The grip a drag is taken by: two grooves. Dots are fill, and point 4 of
     the specification draws with the stroke. */
-export const GripGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GripGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function GripGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
@@ -123,14 +108,11 @@ export const GripGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GripGlyp
       />
     </svg>
   );
-});
+}
 
 /** The grid laid over an area. Two by two lines; the frame is missing on
     purpose, otherwise it would be a window. */
-export const GridGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GridGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function GridGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
@@ -142,14 +124,11 @@ export const GridGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GridGlyp
       />
     </svg>
   );
-});
+}
 
 /** Measuring: a line with two end marks. Not a ruler with a scale: the teeth
     would be a grey stripe at ten nominal units. */
-export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MeasureGlyph(
-  { size = 10, ...rest },
-  ref,
-) {
+export function MeasureGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
@@ -162,16 +141,13 @@ export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function Measu
       />
     </svg>
   );
-});
+}
 
 /* The date pickers' two characters, set at 12 pixels. */
 
 /** A calendar leaf: a sheet with its header and two rings. With `range`, a
     bar across the sheet stands for the span a range picker chooses. */
-export const CalendarGlyph = forwardRef<SVGSVGElement, GlyphProps & { range?: boolean }>(function CalendarGlyph(
-  { size = 12, range = false, ...rest },
-  ref,
-) {
+export function CalendarGlyph({ ref, size = 12, range = false, ...rest }: GlyphProps & { range?: boolean }) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <rect x="1" y="1.6" width="8" height="7.7" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -184,13 +160,10 @@ export const CalendarGlyph = forwardRef<SVGSVGElement, GlyphProps & { range?: bo
       />
     </svg>
   );
-});
+}
 
 /** A clock face at a quarter past - the time pickers' character. */
-export const ClockGlyph = forwardRef<SVGSVGElement, GlyphProps>(function ClockGlyph(
-  { size = 12, ...rest },
-  ref,
-) {
+export function ClockGlyph({ ref, size = 12, ...rest }: GlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <circle cx="5" cy="5" r="4.1" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -204,4 +177,4 @@ export const ClockGlyph = forwardRef<SVGSVGElement, GlyphProps>(function ClockGl
       />
     </svg>
   );
-});
+}

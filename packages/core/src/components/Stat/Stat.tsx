@@ -10,9 +10,9 @@
    (ADR-0010) and does not turn into `unknown`: a lost connection must not
    take away the last picture. */
 
-import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { assess, type LimitSet, type Verdict } from "../../lib/limit";
 import { useFreshness } from "../../lib/useFreshness";
 import type { FreshnessAges } from "../../lib/freshness";
@@ -22,7 +22,7 @@ import { Sparkline } from "../DataViz";
 import styles from "./Stat.module.css";
 
 /** The props of `Stat`. */
-export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
   /** What is being measured. */
   label: string;
   /** The measured value. Absent or non-finite gives the verdict `unknown` –
@@ -98,10 +98,7 @@ function FreshnessLine({
 }
 
 /** Metric tile: one value, read against its limits. */
-export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
-  { label, value, unit, decimals, limits, history, asOf, ages, className, ...rest },
-  ref,
-) {
+export function Stat({ ref, label, value, unit, decimals, limits, history, asOf, ages, className, ...rest }: StatProps) {
   const formats = useFormats();
   const wording = useWording();
 
@@ -164,4 +161,4 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
       </div>
     </div>
   );
-});
+}

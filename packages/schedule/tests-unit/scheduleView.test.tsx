@@ -45,6 +45,15 @@ function Plan(options: ScheduleOptions) {
   );
 }
 
+/* The ref of `Schedule` is a `ScheduleHandle`: a ref of another type does not compile. */
+declare const anElement: import("react").RefObject<HTMLDivElement | null>;
+function WrongRef() {
+  const { Schedule } = useSchedule();
+  // @ts-expect-error - a ref to an element is not a ref to the handle
+  return <Schedule ref={anElement} ariaLabel="x" />;
+}
+void WrongRef;
+
 const lanes = (host: HTMLElement) => host.querySelectorAll("[data-schedule-headers] [data-lane]").length;
 
 describe("the span in view", () => {

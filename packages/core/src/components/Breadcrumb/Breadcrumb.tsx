@@ -1,9 +1,10 @@
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { AngleGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import { Menu, MenuItem } from "../Menu";
 import { foldedCount } from "./fold";
 import styles from "./Breadcrumb.module.css";
@@ -24,7 +25,7 @@ export interface BreadcrumbEntry {
 }
 
 /** The props of `Breadcrumb`. */
-export interface BreadcrumbProps extends HTMLAttributes<HTMLElement> {
+export interface BreadcrumbProps extends HTMLAttributes<HTMLElement>, RefProp<HTMLElement> {
   /** The trail from the root to the current page; the last is the page. */
   items: readonly BreadcrumbEntry[];
 }
@@ -38,10 +39,7 @@ const separator = <AngleGlyph size={8} className={styles.separator} />;
    `foldedCount` decides. */
 /** Where a page stands: the trail from the root to the current page. Where it
     is wider than its place, the middle levels fold into a menu. */
-export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Breadcrumb(
-  { items, className, ...rest },
-  ref,
-) {
+export function Breadcrumb({ ref, items, className, ...rest }: BreadcrumbProps) {
   const wording = useWording();
   const navRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLOListElement>(null);
@@ -157,4 +155,4 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Brea
       </ol>
     </nav>
   );
-});
+}

@@ -6,9 +6,9 @@
    from: the parts, the view and its setters. The parts are the same on every
    render, whatever the view does, so nothing is remounted. */
 
-import { createElement, forwardRef, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
-import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
+import { createElement, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import type { ReactNode } from "react";
+import { Schedule as ScheduleOn, type ScheduleProps } from "./Schedule";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Milestones, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
 import { viewKey, type ScheduleView } from "./view";
@@ -32,7 +32,7 @@ export interface ScheduleOptions {
     it, its view and the setters that change it. */
 export interface ScheduleParts {
   /** The schedule. One per `useSchedule`: a second schedule is a second call. */
-  Schedule: ForwardRefExoticComponent<ScheduleProps & RefAttributes<ScheduleHandle>>;
+  Schedule: (props: ScheduleProps) => ReactNode;
   Lane: typeof Lane;
   LaneGroup: typeof LaneGroup;
   Subtasks: typeof Subtasks;
@@ -68,7 +68,7 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
      effect below compares the view against. */
   const reported = useRef("");
   const [parts] = useState(() => {
-    const Schedule = forwardRef<ScheduleHandle, ScheduleProps>((props, ref) => createElement(ScheduleOn, { ...props, scene, ref }));
+    const Schedule = (props: ScheduleProps) => createElement(ScheduleOn, { ...props, scene });
     Schedule.displayName = "Schedule";
     return {
       Schedule,

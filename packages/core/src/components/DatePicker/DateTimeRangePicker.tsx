@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { Button } from "../Button";
@@ -14,6 +14,7 @@ import { dstChoiceFor, resolveFields, pad2 } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { TimeField } from "./TimeField";
 import { rangeFromDays, order, orderByDay } from "./contract";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
@@ -64,7 +65,7 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  * DateTimePicker, separately per end of the range.
  */
 export interface DateTimeRangePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
   /** The time span with times at both ends; `null` means none. */
   value: DateRange | null;
   /** Runs only on "Apply" and on clearing (`null`), never between the two
@@ -117,8 +118,9 @@ export interface DateTimeRangePickerProps
  * - Missing and doubled hours of the daylight-saving change are recognised per
  *   end and treated honestly, as in the DateTimePicker.
  */
-export const DateTimeRangePicker = forwardRef<HTMLSpanElement, DateTimeRangePickerProps>(function DateTimeRangePicker(
+export function DateTimeRangePicker(
   {
+    ref,
     value,
     onChange,
     withSeconds = false,
@@ -131,8 +133,7 @@ export const DateTimeRangePicker = forwardRef<HTMLSpanElement, DateTimeRangePick
     presets,
     className,
     ...rest
-  },
-  ref,
+  }: DateTimeRangePickerProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -509,4 +510,4 @@ export const DateTimeRangePicker = forwardRef<HTMLSpanElement, DateTimeRangePick
       </Popover>
     </>
   );
-});
+}

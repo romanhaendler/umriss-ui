@@ -12,13 +12,13 @@
    choose. The mechanics are the radio group's own, shared through
    `useRadioGroup`. */
 
-import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormField } from "../FormField";
 import { useRadioGroup } from "../RadioGroup/useRadioGroup";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./SegmentedControl.module.css";
 
 /** One possibility of a `SegmentedControl`: its value and its short label. */
@@ -38,7 +38,7 @@ export interface SegmentedOption<T extends string> {
 
 /** The props of `SegmentedControl`. */
 export interface SegmentedControlProps<T extends string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, two to four, in the order in which they stand. */
   options: readonly SegmentedOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
@@ -72,8 +72,9 @@ export interface SegmentedControlProps<T extends string>
     segment for each - a radio group in what it says and how the keys move.
     Controlled through `value` and `onChange`, or uncontrolled from
     `defaultValue`. */
-export const SegmentedControl = forwardRef(function SegmentedControl<T extends string>(
+export function SegmentedControl<T extends string>(
   {
+    ref,
     options,
     value,
     defaultValue,
@@ -87,7 +88,6 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     onKeyDown,
     ...rest
   }: SegmentedControlProps<T>,
-  ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -137,6 +137,4 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
       ))}
     </div>
   );
-}) as <T extends string>(
-  props: SegmentedControlProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> },
-) => React.ReactElement;
+}

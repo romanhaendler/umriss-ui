@@ -1,4 +1,4 @@
-import { forwardRef, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
@@ -6,6 +6,7 @@ import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
 import { startOfDay } from "./contract";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
@@ -18,7 +19,7 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * along with it.
  */
 export interface DatePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
   /** The day, as a `Date` on local midnight; `null` means none. */
   value: Date | null;
   /** Runs as soon as a day is settled - on a click in the grid, on "Today" and
@@ -47,8 +48,9 @@ export interface DatePickerProps
 }
 
 /** A date selection with a calendar panel; weeks begin on Monday. */
-export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function DatePicker(
+export function DatePicker(
   {
+    ref,
     value,
     onChange,
     placeholder,
@@ -59,8 +61,7 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
     clearable = false,
     className,
     ...rest
-  },
-  ref,
+  }: DatePickerProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -154,4 +155,4 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
       </Popover>
     </>
   );
-});
+}

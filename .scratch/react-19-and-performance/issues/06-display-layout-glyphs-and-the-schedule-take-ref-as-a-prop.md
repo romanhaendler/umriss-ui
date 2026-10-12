@@ -1,6 +1,6 @@
 # 06 - Display, layout, the glyphs and the schedule take `ref` as a prop
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

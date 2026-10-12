@@ -17,10 +17,11 @@
    doing so and hidden from the screen reader, so that nothing is announced
    twice. */
 
-import { forwardRef, useEffect, useId, useRef } from "react";
-import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { useEffect, useId, useRef } from "react";
+import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import { AngleGlyph } from "../../lib/glyphs";
 import { Checkbox } from "../Checkbox";
 import { Spinner } from "../Spinner";
@@ -35,7 +36,8 @@ const TYPEAHEAD_PAUSE = 600;
 
 /** The props of `TreeView`. */
 export interface TreeViewProps<K, S extends Key = string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "children">,
+    RefProp<HTMLDivElement> {
   /** The tree from `useTree`. It is the whole state: flattening, active node,
       checks, anchor. The view holds nothing beside it. */
   tree: Tree<K, S>;
@@ -51,21 +53,19 @@ export interface TreeViewProps<K, S extends Key = string>
 /** The tree as a control: draws the nodes of a `Tree` from `useTree` as a
     `tree` with keyboard navigation, typeahead and, with `checkable`, ticks.
     What a node says is yours - `children` renders it. */
-export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
-  {
-    tree,
-    ariaLabel,
-    checkable = false,
-    children,
-    className,
-    onKeyDown,
-    onFocus,
-    onBlur,
-    onScroll,
-    ...rest
-  }: TreeViewProps<K, S>,
-  ref: ForwardedRef<HTMLDivElement>,
-) {
+export function TreeView<K, S extends Key = string>({
+  ref,
+  tree,
+  ariaLabel,
+  checkable = false,
+  children,
+  className,
+  onKeyDown,
+  onFocus,
+  onBlur,
+  onScroll,
+  ...rest
+}: TreeViewProps<K, S>) {
   const wording = useWording();
   // Namespace of the box ids: two trees with the same keys must not share one.
   const idBase = useId();
@@ -311,6 +311,4 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
       ) : null}
     </div>
   );
-}) as <K, S extends Key = string>(
-  props: TreeViewProps<K, S> & { ref?: ForwardedRef<HTMLDivElement> },
-) => ReactNode;
+}

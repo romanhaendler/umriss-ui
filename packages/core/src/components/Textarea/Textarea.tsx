@@ -9,7 +9,6 @@
    against a surface that changes its height. */
 
 import {
-  forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -21,6 +20,7 @@ import type { TextareaHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { clampedHeight, remainingChars } from "./measure";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Textarea.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -28,7 +28,7 @@ import { extentStyle } from "../../lib/extent";
 /* The native `cols` is left out: the field's width is `chars`. */
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
     place of `cols`. */
-export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols"> {
+export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols">, RefProp<HTMLTextAreaElement> {
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -56,8 +56,9 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
     `autoGrow` lets it grow with its content up to `maxRows`, `showCount` counts
     against `maxLength`. Inside a `FormField` it takes the field's id,
     description and invalid state. */
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+export function Textarea(
   {
+    ref,
     size: ownSize,
     chars,
     invalid,
@@ -72,8 +73,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     rows = 3,
     onInput,
     ...rest
-  },
-  ref,
+  }: TextareaProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -155,4 +155,4 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
       )}
     </span>
   );
-});
+}

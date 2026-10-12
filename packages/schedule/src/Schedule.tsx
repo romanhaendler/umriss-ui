@@ -29,7 +29,6 @@
    summary and reads the **Active subtask** into a live region beside it. */
 
 import {
-  forwardRef,
   useEffect,
   useImperativeHandle,
   useId,
@@ -40,6 +39,7 @@ import {
   useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
+  type Ref,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { AngleGlyph, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
@@ -54,6 +54,8 @@ import styles from "./Schedule.module.css";
 
 /** The props of `Schedule`. */
 export interface ScheduleProps {
+  /** Receives the `ScheduleHandle` - not an element. */
+  ref?: Ref<ScheduleHandle>;
   /** What the schedule shows, for a screen reader: "Plan of week 38". */
   ariaLabel: string;
   /** Height in CSS pixels, both bands included. The width is the host's.
@@ -186,8 +188,9 @@ export interface ScheduleHandle {
     zooms and drags, and every drag ends as an **Intent** through `onIntent`.
     The data changes only where the caller applies it; without `intents` the
     schedule is read-only. A ref gives the `ScheduleHandle`. */
-export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: ScheduleScene }>(function Schedule(props, ref): ReactNode {
+export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): ReactNode {
   const {
+    ref,
     scene,
     ariaLabel,
     height = 400,
@@ -651,7 +654,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: Sche
       {children}
     </ScheduleContext.Provider>
   );
-});
+}
 
 /** Did the focus come by keyboard? A click focuses the plot too, and must not
     start the walk. Where the selector is unknown, it is taken as yes. */

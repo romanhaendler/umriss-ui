@@ -1,6 +1,7 @@
-import { createContext, forwardRef, useContext, useId } from "react";
+import { createContext, useContext, useId } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./FormField.module.css";
 
 interface FormFieldContextValue {
@@ -36,7 +37,7 @@ export function FormFieldBoundary({ children }: { children: ReactNode }) {
 }
 
 /** The props of `FormField`. */
-export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
+export interface FormFieldProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** The label of the field. It is mandatory: a field without a name is a
       field without a question for a screen reader. */
   label: ReactNode;
@@ -59,10 +60,7 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
 /** A label, a hint or error and the control they belong to. The control
     inside takes the field's id, description, required and invalid state by
     itself - no wiring by hand. */
-export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function FormField(
-  { label, hint, error, required = false, fieldId, className, children, ...rest },
-  ref,
-) {
+export function FormField({ ref, label, hint, error, required = false, fieldId, className, children, ...rest }: FormFieldProps) {
   const generatedId = useId();
   const id = fieldId ?? generatedId;
   const messageId = `${id}-message`;
@@ -91,4 +89,4 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
       )}
     </div>
   );
-});
+}

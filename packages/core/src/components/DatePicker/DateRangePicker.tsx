@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { Button } from "../Button";
@@ -10,6 +10,7 @@ import { MonthPair, PresetColumn } from "./RangePanel";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { DateRange, RangePreset } from "./range";
 import { rangeFromDays } from "./contract";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
@@ -26,7 +27,7 @@ export type { DateRange, RangePreset } from "./range";
  * Both ends count inclusively. There is no error state.
  */
 export interface DateRangePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
   /** The time span, both ends on local midnight and both inclusive; `null`
       means none. */
   value: DateRange | null;
@@ -77,8 +78,9 @@ export interface DateRangePickerProps
  * - Two chained months: paging on the outside, no day appears twice.
  * - The same day clicked twice = a one-day time span.
  */
-export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>(function DateRangePicker(
+export function DateRangePicker(
   {
+    ref,
     value,
     onChange,
     placeholder,
@@ -90,8 +92,7 @@ export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>
     presets,
     className,
     ...rest
-  },
-  ref,
+  }: DateRangePickerProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -259,4 +260,4 @@ export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>
       </Popover>
     </>
   );
-});
+}

@@ -4,13 +4,13 @@
    with a label it really separates something and becomes a named
    separator. */
 
-import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Divider.module.css";
 
 /** The props of `Divider`. */
-export interface DividerProps extends HTMLAttributes<HTMLDivElement> {
+export interface DividerProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** Horizontally it separates rows, vertically it separates columns. */
   orientation?: "horizontal" | "vertical";
   /** A stronger line - for section boundaries rather than row separation. */
@@ -20,10 +20,7 @@ export interface DividerProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /** A line between rows or columns; with `label` a named separator. */
-export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider(
-  { orientation = "horizontal", strong = false, label, className, ...rest },
-  ref,
-) {
+export function Divider({ ref, orientation = "horizontal", strong = false, label, className, ...rest }: DividerProps) {
   const shared = cx(
     styles.divider,
     orientation === "vertical" ? styles.vertical : styles.horizontal,
@@ -51,4 +48,4 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider
       <span className={styles.label}>{label}</span>
     </div>
   );
-});
+}

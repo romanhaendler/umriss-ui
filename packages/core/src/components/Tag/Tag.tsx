@@ -11,9 +11,10 @@
    keys travel, Delete and Backspace remove. After removing, the focus travels
    to the neighbour - otherwise it falls back to the start of the page. */
 
-import { createContext, forwardRef, useCallback, useContext, useEffect, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Tag.module.css";
 import { useWording } from "../../lib/language";
@@ -32,17 +33,14 @@ const TagGroupContext = createContext<boolean>(false);
 /* ------------------------------------------------------------------ */
 
 /** The props of `TagGroup`: a div's attributes, with a required name. */
-export interface TagGroupProps extends HTMLAttributes<HTMLDivElement> {
+export interface TagGroupProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label": string;
 }
 
 /** A list of `Tag`s with one tab stop: the arrow keys move between them, and
     the focus stays in the group when one is removed. */
-export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGroup(
-  { className, children, onKeyDown, onFocus, ...rest },
-  ref,
-) {
+export function TagGroup({ ref, className, children, onKeyDown, onFocus, ...rest }: TagGroupProps) {
   const groupRef = useRef<HTMLDivElement>(null);
 
   const tags = useCallback(
@@ -116,14 +114,14 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
       <TagGroupContext.Provider value={true}>{children}</TagGroupContext.Provider>
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Tag                                                                 */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Tag`. */
-export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemove"> {
+export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemove">, RefProp<HTMLSpanElement> {
   /** What the label stands for. The tone is never the only information: the
       text beside it says the same thing once more. */
   tone?: TagTone;
@@ -144,10 +142,7 @@ export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemov
 /** A short label with a tone; with `onRemove` it carries a cross that removes
     it. Inside a `TagGroup` it is a list entry, and Delete or Backspace remove
     it too. */
-export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
-  { tone = "neutral", children, onRemove, removeLabel, disabled = false, className, onKeyDown, ...rest },
-  ref,
-) {
+export function Tag({ ref, tone = "neutral", children, onRemove, removeLabel, disabled = false, className, onKeyDown, ...rest }: TagProps) {
   const inGroup = useContext(TagGroupContext);
   const wording = useWording();
   const removable = Boolean(onRemove) && !disabled;
@@ -222,4 +217,4 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
       )}
     </span>
   );
-});
+}
