@@ -71,3 +71,9 @@ Same machine and page as above; milliseconds.
 | Inline accessors compared by source text | 200,000 | virtual | Re-render | 308.4 | 15.9 |
 | Inline accessors compared by source text | 200,000 | grouped | Scroll step | 269.1 | 9.0 |
 | Inline accessors compared by source text | 200,000 | grouped | Re-render | 420.9 | 22.0 |
+| Pipeline in stages (filter and sort, grouping, page and columns) | 50,000 | paged | Page turned | 55.8 | 6.3 |
+| Pipeline in stages | 50,000 | grouped | Group folded | 74.9 | 4.2 |
+| Pipeline in stages | 50,000 | virtual | Column hidden | 47.8 | 4.0 |
+| Pipeline in stages | 200,000 | paged | Page turned | 204.8 | 19.2 |
+| Pipeline in stages | 200,000 | grouped | Group folded | 445.9 | 16.8 |
+| Pipeline in stages | 200,000 | virtual | Column hidden | 212.8 | 17.3 |

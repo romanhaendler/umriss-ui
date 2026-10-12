@@ -1,6 +1,6 @@
 # 16 - The table's pipeline is staged
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
