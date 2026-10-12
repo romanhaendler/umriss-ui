@@ -117,3 +117,31 @@ describe("a computed aggregate without float noise", () => {
     expect(footer(container, "avg")).toBe("⌀Average 13.33");
   });
 });
+
+describe("a footer over 200 000 rows", () => {
+  interface Reading {
+    id: string;
+    at: Date;
+    value: number;
+  }
+  const READINGS: Reading[] = Array.from({ length: 200_000 }, (_, i) => ({ id: String(i), at: new Date(2026, 0, 1 + (i % 10)), value: i % 100 }));
+
+  function Readings() {
+    const { Table, Column } = useTable(READINGS, { rowKey: (r) => r.id, virtual: true });
+    return (
+      <Table>
+        <Column value="id" label="Reading" rowHeader />
+        <Column value="at" label="At" format="date" aggregate="range" />
+        <Column value="value" label="Value" aggregate="sum" />
+        <Column id="mean" value={(r) => r.value} label="Mean" aggregate="avg" />
+      </Table>
+    );
+  }
+
+  it("renders without a spread overflowing the call, and sums right", () => {
+    const { container } = render(<Readings />);
+    expect(footer(container, "range")).toBe("Range 01/01–10/01");
+    expect(footer(container, "sum")).toBe("ΣSum 9,900,000");
+    expect(footer(container, "avg")).toBe("⌀Average 49.5");
+  });
+});

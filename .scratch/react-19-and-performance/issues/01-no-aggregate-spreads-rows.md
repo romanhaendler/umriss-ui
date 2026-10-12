@@ -1,6 +1,6 @@
 # 01 - No aggregate spreads rows into a call
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 

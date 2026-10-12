@@ -58,17 +58,25 @@ export function aggregate<Z>(spec: AggregateColumn<Z>, rows: readonly Z[]): unkn
   const numbers = present.map((v) => numeric(v)!);
   const dates = present[0] instanceof Date;
   const at = (n: number) => (dates ? new Date(n) : n);
+  /* A loop, not Math.min(...numbers): a spread of 125 000 values and more
+     overflows the call's arguments. */
+  let low = Infinity;
+  let high = -Infinity;
+  for (const n of numbers) {
+    if (n < low) low = n;
+    if (n > high) high = n;
+  }
   switch (kind) {
     case "sum":
       return numbers.reduce((a, b) => a + b, 0);
     case "avg":
       return numbers.reduce((a, b) => a + b, 0) / numbers.length;
     case "min":
-      return at(Math.min(...numbers));
+      return at(low);
     case "max":
-      return at(Math.max(...numbers));
+      return at(high);
     case "range":
-      return [at(Math.min(...numbers)), at(Math.max(...numbers))];
+      return [at(low), at(high)];
   }
 }
 
