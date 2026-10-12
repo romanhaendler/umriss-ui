@@ -432,6 +432,49 @@ a zoomed three quarters of an hour in 0.6 ms.
 The hover stays at 60 FPS in every case. That is the actual statement: it draws
 only the overlay layer, and the series kind changes nothing about that.
 
+### The other series kinds at volume
+
+The benchmark page also shows one series of each of bars, scatter, a state band
+and a matrix (`kind-bars`, `kind-scatter`, `kind-state`, `kind-matrix`; a matrix
+of 200 rows). "Zoomed" is a span of 400 points (400 columns for the matrix) in
+the middle of the data (`zoom`). Series draw is the median of five draws, the
+pointer move the mean of the handler time over 60 moves; Chromium headless, one
+machine, one day.
+
+Reference, before any change:
+
+| Kind | Volume | Draw, whole | Draw, zoomed | Pointer move, whole | Pointer move, zoomed |
+|---|---|---|---|---|---|
+| Bars | 100,000 | 4.7 ms | 5.1 ms | 0.04 ms | 0.06 ms |
+| Scatter | 100,000 | 18.1 ms | 0.5 ms | 0.07 ms | 0.09 ms |
+| State | 100,000 | 10.4 ms | 5.4 ms | 0.08 ms | 0.05 ms |
+| Matrix | 100,000 | 5.1 ms | 4.8 ms | 0.12 ms | 0.19 ms |
+| Bars | 1,000,000 | 51.4 ms | 47.2 ms | 0.04 ms | 0.07 ms |
+| Scatter | 1,000,000 | 146.3 ms | 4.0 ms | 0.04 ms | 0.05 ms |
+| State | 1,000,000 | 52.5 ms | 50.1 ms | 0.04 ms | 0.07 ms |
+| Matrix | 1,000,000 | 68.7 ms | 49.9 ms | 0.53 ms | 0.61 ms |
+
+A pan or zoom into a small part of the data cost as much as the whole view for
+bars, the state band and the matrix, and for scatter only its walk.
+
+**Windowing bars, the state band and the matrix to the visible range: kept.**
+Bars and the state band are drawn from the slice of their ascending x that can
+show, with a mark's reach and one point beyond each edge (`visibleWindow`); the
+matrix, whose x runs row by row and cannot be searched, leaves a cell wholly
+outside the plot out of its path. Series draw while zoomed, 1,000,000 points:
+bars 47.2 to 0.1 ms, state 50.1 to 0.1 ms, matrix 49.9 to 7.8 ms (the walk over
+every cell remains). **Scatter is not windowed:** its rows often come unsorted,
+every point of such a series is drawn today, and a window found by bisection
+would drop some; its zoomed draw was 4 ms at 1,000,000 points. The whole view is
+the same code path and did not move; later runs on a busier machine read higher
+for both the changed and an unchanged build alike.
+
+**A matrix hit test that does not walk every cell: dropped.** Bisecting to the
+row of the pointer where the rows ascend took a pointer move at 1,000,000 cells
+from 0.53 to 0.06 ms whole and from 0.61 to 0.07 ms zoomed. Half a millisecond
+at a million cells is nothing a person notices, and it cost a second code path
+and a remembered check of the order; the walk over every cell stays.
+
 The hover path is not free of allocation: the hit test builds a handful of
 small objects per move (candidates, the hit, its key). Measured directly in
 `charts-fixes` 12 - `pointerMove` 20,000 times over three lines in jsdom -

@@ -4,9 +4,11 @@
 
 import { barGroups, barPlacement, type BarPlacement, effectiveStep } from "./bars";
 import { cellSize } from "./cells";
-import { downsample } from "./downsample";
+import { downsample, type Course } from "./downsample";
 import { drawOverlayLayer, drawSeriesLayer, type DrawBase, type SeriesDrawItem } from "./draw";
+import { visibleWindow } from "./hit";
 import { type AxisLayout } from "./layout";
+import { firstUnsortedIndex } from "./materialize";
 import { hatchFor, type Hatch } from "./marks";
 import type { ChartScene } from "./scene";
 import { matrixColors, matrixBuckets, paint, colorFor, limitItems } from "./sceneColors";
@@ -82,10 +84,15 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
       case "bar": {
         const placement = placed.get(entry.order);
         if (placement === undefined) break;
+        // A bar reaches from its x by its offset and width.
+        const seen = windowOf(mat, xAxis, Math.abs(placement.offset) + placement.width);
         items.push({
           ...base,
+          x: seen.x,
+          y: seen.y,
+          length: seen.length,
           kind: "bar",
-          y0: mat.y0,
+          y0: seen.y0,
           baseline: 0,
           offset: placement.offset,
           width: placement.width,
@@ -108,12 +115,19 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
         break;
       }
       case "scatter":
+        // Not windowed: a scatter's rows often come unsorted, and every point
+        // of such a series is still drawn.
         items.push({ ...base, kind: "scatter", radius: config.radius, marker: marks?.marker });
         break;
       case "state": {
         const lane = lanePx(s, config, yAxis);
+        // A segment runs to the next point, which the window keeps.
+        const seen = windowOf(mat, xAxis, 0);
         items.push({
           ...base,
+          x: seen.x,
+          y: seen.y,
+          length: seen.length,
           kind: "state",
           colors: config.states.map((z) => paint(s, z.color)),
           laneTop: lane.top,
@@ -145,6 +159,31 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
     }
   });
   return items;
+}
+
+/** Whether a channel ascends, found once per materialised channel: a channel
+    is never changed in place, so its array stands for its content. */
+const ascending = new WeakMap<Float64Array, boolean>();
+function ascends(x: Float64Array, n: number): boolean {
+  let known = ascending.get(x);
+  if (known === undefined) ascending.set(x, (known = firstUnsortedIndex(x, n) < 0));
+  return known;
+}
+
+/** The points of a series that can show in its x axis' span, as views onto its
+    channels (hit.ts, visibleWindow). Bars and state segments have ascending x
+    as lines do. */
+function windowOf(mat: MaterializedSeries, xAxis: AxisLayout, reach: number): Course {
+  /* A series whose x does not ascend is drawn whole, as it always was: a window
+     found by bisection would drop marks of it. */
+  if (!ascends(mat.x, mat.length)) return { x: mat.x, y: mat.y, y0: mat.y0, length: mat.length };
+  const [lo, hi] = visibleWindow(mat.x, mat.length, xAxis.scale.domain[0], xAxis.scale.domain[1], reach);
+  return {
+    x: mat.x.subarray(lo, hi),
+    y: mat.y.subarray(lo, hi),
+    y0: mat.y0 === null ? null : mat.y0.subarray(lo, hi),
+    length: hi - lo,
+  };
 }
 
 /** Where each visible bar and box stands relative to its x value, by its

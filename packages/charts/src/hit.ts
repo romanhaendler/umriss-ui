@@ -36,6 +36,23 @@ export function lowerBound(x: Float64Array, n: number, v: number): number {
   return lo;
 }
 
+/** The slice [lo, hi) of an ascending channel that can show in the span
+    [from, to]: every point within `reach` of it - a mark's extent in domain
+    units - and one more beyond each edge, so that a mark partly in view and a
+    segment running out of it are kept. */
+export function visibleWindow(
+  x: Float64Array,
+  n: number,
+  from: number,
+  to: number,
+  reach: number,
+): [number, number] {
+  const lo = Math.max(0, lowerBound(x, n, from - reach) - 1);
+  let hi = lowerBound(x, n, to + reach);
+  while (hi < n && (x[hi] as number) <= to + reach) hi++;
+  return [lo, Math.min(n, hi + 1)];
+}
+
 /** Index of the point nearest in pixel space, in x and y - a scatter under
     "nearest", where the point straight above the pointer is not the one it
     points at. -1 where there is none; a gap (NaN in y) is never one. Walks

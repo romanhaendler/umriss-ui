@@ -1,6 +1,6 @@
 # 23 - The other series kinds, decided on the charts' benchmark page
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M (two candidates, each tried and measured)
 
