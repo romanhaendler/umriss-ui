@@ -29,6 +29,20 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.35.0 – React 19 is the floor, and a zoomed chart draws what it shows (Oct. 2026)
+
+### Changed
+
+- **React 19 is required.** The peers `react` and `react-dom` are `>=19`; `0.34.0` is the last version that serves React 18.
+
+- **The package ships ES2022 syntax.** An application that serves older browsers transpiles it itself.
+
+### Otherwise
+
+- **Bars, a state band and a matrix draw what the view shows.** Zoomed into a small part of the data they still walked every value on each frame, as lines and areas do not. Bars and the state band are now drawn from the slice of their x that can show - where that x ascends; a series whose x does not is drawn whole - and a matrix leaves a cell outside the plot out of its path. Zoomed into a million points a draw takes 0.1 ms for bars and for a state band where it took about 50 ms, and 8 ms for a matrix. Scatter is unchanged: its rows often come unsorted, and every point of such a series is drawn.
+
+---
+
 ## 0.34.0 – A view is set, not handed back, and one locale (Oct. 2026)
 
 From this version all five packages carry one number and are released

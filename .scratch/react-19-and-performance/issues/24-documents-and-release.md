@@ -1,6 +1,6 @@
 # 24 - Documents and release
 
-Status: ready-for-human
+Status: done
 Type: task
 Size: S
 
@@ -103,3 +103,7 @@ All five packages
 `@umriss-ui/calculation`
 
 - No change of its own beyond the two at the top.
+
+**Release (2026-10-12):** the five versions are raised to 0.35.0 and the
+changelogs written from the draft above, in the release commit; the full
+check ran on that commit before it was pushed.

@@ -12,6 +12,20 @@ From 0.34.0 all five packages share one number: they are released together, and 
 
 ---
 
+## 0.35.0 – React 19 is the floor (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.35; the peer range is `^0.35.0`.
+
+### Changed
+
+- **React 19 is required.** The peers `react` and `react-dom` are `>=19`; `0.34.0` is the last version that serves React 18.
+
+- **The package ships ES2022 syntax.** An application that serves older browsers transpiles it itself.
+
+No other change of its own.
+
+---
+
 ## 0.34.0 – One number for all five packages (Oct. 2026)
 
 From this version all five packages carry one number and are released
