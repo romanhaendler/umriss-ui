@@ -363,6 +363,20 @@ export function GroupLine({
   );
 }
 
+/* The sum a share bar divides by: once per filtered set, column and the
+   function the column reads its values with. */
+const wholes = new WeakMap<readonly unknown[], Map<ColumnEntry, { reader: unknown; sum: unknown }>>();
+function wholeOf(entry: ColumnEntry, total: readonly unknown[]): unknown {
+  let byEntry = wholes.get(total);
+  if (!byEntry) wholes.set(total, (byEntry = new Map()));
+  let hit = byEntry.get(entry);
+  if (!hit || hit.reader !== entry.spec.value) {
+    hit = { reader: entry.spec.value, sum: aggregate({ id: entry.spec.id, read: entry.read, aggregate: "sum" }, total) };
+    byEntry.set(entry, hit);
+  }
+  return hit.sum;
+}
+
 function AggregateCell({
   entry,
   pin,
@@ -384,7 +398,7 @@ function AggregateCell({
   if (!spec.aggregate) return <td className={cx(styles.td, pin.className)} style={pin.style} />;
   let bar: ReactNode = null;
   if (share && spec.aggregate === "sum" && spec.share !== false) {
-    const whole = aggregate({ id: spec.id, read: entry.read, aggregate: "sum" }, total);
+    const whole = wholeOf(entry, total);
     const part = group.aggregates[spec.id];
     if (typeof whole === "number" && whole > 0 && typeof part === "number" && part > 0) {
       const share = Math.min(1, part / whole);
@@ -397,11 +411,11 @@ function AggregateCell({
     <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
       {bar ? (
         <span className={styles.shareHost}>
-          <AggregateValue entry={entry} rows={group.rows} formats={formats} wording={wording} />
+          <AggregateValue entry={entry} rows={group.rows} known={{ value: group.aggregates[spec.id] }} formats={formats} wording={wording} />
           {bar}
         </span>
       ) : (
-        <AggregateValue entry={entry} rows={group.rows} formats={formats} wording={wording} />
+        <AggregateValue entry={entry} rows={group.rows} known={{ value: group.aggregates[spec.id] }} formats={formats} wording={wording} />
       )}
     </td>
   );
