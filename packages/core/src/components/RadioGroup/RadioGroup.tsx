@@ -6,10 +6,10 @@
    Operation - one tab stop, arrow keys that move and choose - stands in
    `useRadioGroup`, which the segmented control shares. */
 
-import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./RadioGroup.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useRadioGroup } from "./useRadioGroup";
@@ -31,7 +31,7 @@ export interface RadioOption<T extends string> {
 
 /** The props of `RadioGroup`. */
 export interface RadioGroupProps<T extends string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, in the order in which they are meant to stand. */
   options: readonly RadioOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
@@ -57,8 +57,9 @@ export interface RadioGroupProps<T extends string>
 /** One choice out of a few possibilities, all of them visible. Controlled
     through `value` and `onChange`, or uncontrolled from `defaultValue`; the
     arrow keys move between the possibilities. */
-export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
+export function RadioGroup<T extends string>(
   {
+    ref,
     options,
     value,
     defaultValue,
@@ -71,7 +72,6 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
     onKeyDown,
     ...rest
   }: RadioGroupProps<T>,
-  ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const size = useControlSize(ownSize);
   const radio = useRadioGroup({
@@ -126,6 +126,4 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
       })}
     </div>
   );
-}) as <T extends string>(
-  props: RadioGroupProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> },
-) => React.ReactElement;
+}

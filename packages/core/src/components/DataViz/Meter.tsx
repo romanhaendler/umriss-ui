@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { clampFraction, percentDisplay } from "./scale";
 import styles from "./DataViz.module.css";
 import { useFormats, useWording } from "../../lib/language";
@@ -9,7 +9,7 @@ import { useFormats, useWording } from "../../lib/language";
 export type MeterTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 /** The props of `Meter`. */
-export interface MeterProps extends HTMLAttributes<HTMLSpanElement> {
+export interface MeterProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTMLSpanElement> {
   /** Fill level from 0 to 1. */
   value: number;
   /** The colour of the bar. It comes from an assessment and not from taste:
@@ -32,10 +32,7 @@ export interface MeterProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** A narrow fill-level bar, e.g. for utilisation in table cells. */
-export const Meter = forwardRef<HTMLSpanElement, MeterProps>(function Meter(
-  { value, tone = "accent", showLabel = true, label, className, ...rest },
-  ref,
-) {
+export function Meter({ ref, value, tone = "accent", showLabel = true, label, className, ...rest }: MeterProps) {
   const formats = useFormats();
   const wording = useWording();
   const fraction = clampFraction(value);
@@ -59,4 +56,4 @@ export const Meter = forwardRef<HTMLSpanElement, MeterProps>(function Meter(
       {showLabel && <span className={styles.meterLabel}>{formats.percent(fraction)}</span>}
     </span>
   );
-});
+}

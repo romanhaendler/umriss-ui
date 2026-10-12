@@ -1,9 +1,10 @@
-import { createContext, forwardRef, useContext, useId, useRef } from "react";
+import { createContext, useContext, useId, useRef } from "react";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import type { DialogHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Modal.module.css";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
@@ -27,7 +28,7 @@ export type ModalSize = "sm" | "md" | "lg";
 
 /** The props of `Modal`: a native dialog's attributes, controlled through
     `open` and `onClose`. */
-export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "onClose"> {
+export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "onClose">, RefProp<HTMLDialogElement> {
   /** Whether the window stands. Controlled: the opening is the caller's
       decision, and only the caller knows whether something may be open. */
   open: boolean;
@@ -47,10 +48,7 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
     focus trap, Escape and scroll lock come from the browser. Controlled through
     `open` and `onClose`; inside it stand `ModalHeader`, `ModalBody` and
     `ModalFooter`. */
-export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
-  { size = "md", closeOnBackdrop = true, ...rest },
-  ref,
-) {
+export function Modal({ ref, size = "md", closeOnBackdrop = true, ...rest }: ModalProps) {
   return (
     <DialogFrame
       ref={ref}
@@ -60,7 +58,7 @@ export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
       {...rest}
     />
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Drawer – the same dialog, entering from an edge.                    */
@@ -82,10 +80,7 @@ export interface DrawerProps extends Omit<ModalProps, "size"> {
 /** A `Modal` that stands at an edge of the window and enters from it - the
     same dialog with the same head, body and foot. Its width is the token
     `--u-drawer-width`. */
-export const Drawer = forwardRef<HTMLDialogElement, DrawerProps>(function Drawer(
-  { side = "right", className, ...rest },
-  ref,
-) {
+export function Drawer({ ref, side = "right", className, ...rest }: DrawerProps) {
   return (
     <DialogFrame
       ref={ref}
@@ -95,7 +90,7 @@ export const Drawer = forwardRef<HTMLDialogElement, DrawerProps>(function Drawer
       {...rest}
     />
   );
-});
+}
 
 interface DialogFrameProps extends Omit<ModalProps, "size"> {
   sheetClassName?: string;
@@ -104,22 +99,20 @@ interface DialogFrameProps extends Omit<ModalProps, "size"> {
   side?: "right" | "left";
 }
 
-const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function DialogFrame(
-  {
-    open,
-    onClose,
-    closeOnBackdrop = true,
-    sheetClassName,
-    spacers = false,
-    side,
-    className,
-    children,
-    onCancel,
-    onMouseDown,
-    ...rest
-  },
+function DialogFrame({
   ref,
-) {
+  open,
+  onClose,
+  closeOnBackdrop = true,
+  sheetClassName,
+  spacers = false,
+  side,
+  className,
+  children,
+  onCancel,
+  onMouseDown,
+  ...rest
+}: DialogFrameProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
@@ -172,7 +165,7 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
       {spacers && <div className={styles.spacerBottom} aria-hidden="true" />}
     </dialog>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* ModalHeader                                                         */
@@ -180,7 +173,7 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
 
 /** The props of `ModalHeader`: a div's attributes, with `title` taking a node
     instead of the HTML attribute. */
-export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, RefProp<HTMLDivElement> {
   /** The heading of the window. It names it for the screen reader at the same
       time – a dialog without a name says only "dialog". */
   title: ReactNode;
@@ -192,10 +185,7 @@ export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "
 
 /** The head of a `Modal` or `Drawer`: its title, which names the dialog for a
     screen reader, an optional sentence below it, and the close cross. */
-export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function ModalHeader(
-  { title, description, hideClose = false, className, ...rest },
-  ref,
-) {
+export function ModalHeader({ ref, title, description, hideClose = false, className, ...rest }: ModalHeaderProps) {
   const modal = useContext(ModalContext);
   const wording = useWording();
 
@@ -214,7 +204,7 @@ export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function
       )}
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* ModalBody / ModalFooter                                             */
@@ -222,25 +212,29 @@ export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function
 
 /** The content of a `Modal` or `Drawer` - the part that scrolls while head and
     foot stand fast. */
-export const ModalBody = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function ModalBody(
-  { className, children, ...rest },
+export function ModalBody({
   ref,
-) {
+  className,
+  children,
+  ...rest
+}: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>) {
   return (
     <div ref={ref} className={cx(styles.body, className)} {...rest}>
       {children}
     </div>
   );
-});
+}
 
 /** The foot of a `Modal` or `Drawer`, for its buttons; they stand at the end. */
-export const ModalFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function ModalFooter(
-  { className, children, ...rest },
+export function ModalFooter({
   ref,
-) {
+  className,
+  children,
+  ...rest
+}: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>) {
   return (
     <div ref={ref} className={cx(styles.footer, className)} {...rest}>
       {children}
     </div>
   );
-});
+}

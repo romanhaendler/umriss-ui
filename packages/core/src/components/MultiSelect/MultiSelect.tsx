@@ -1,5 +1,5 @@
-import { forwardRef, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactElement } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { Button } from "../Button";
@@ -8,6 +8,7 @@ import { Input } from "../Input";
 import { useFormField } from "../FormField";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./MultiSelect.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -28,7 +29,7 @@ export interface MultiSelectOption<T extends string = string> {
 
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
@@ -79,8 +80,9 @@ type Scope = "all" | "selected";
  * "selected" scope, rows that have been unticked stay visible until the scope
  * changes, so that nothing jumps away from under the mouse pointer.
  */
-export const MultiSelect = forwardRef(function MultiSelect<T extends string = string>(
+export function MultiSelect<T extends string = string>(
   {
+    ref,
     options,
     value,
     onChange,
@@ -101,7 +103,6 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     "aria-describedby": ariaDescribedBy,
     ...rest
   }: MultiSelectProps<T>,
-  ref: ForwardedRef<HTMLDivElement>,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -554,6 +555,4 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
       </Popover>
     </>
   );
-}) as <T extends string = string>(
-  props: MultiSelectProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
-) => ReactElement;
+}

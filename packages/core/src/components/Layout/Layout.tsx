@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import type { CSSProperties, HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Layout.module.css";
 
 /** A step of the spacing scale, from 1 (4 px) to 8 (40 px) - the tokens
@@ -14,7 +14,7 @@ const gapVar = (step: SpaceStep) => `var(--u-space-${step})`;
 /* ------------------------------------------------------------------ */
 
 /** The props of `Stack`. */
-export interface StackProps extends HTMLAttributes<HTMLDivElement> {
+export interface StackProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** Below one another or beside one another. Below is the direction content
       stands in anyway, without being asked. */
   direction?: "row" | "column";
@@ -30,10 +30,7 @@ export interface StackProps extends HTMLAttributes<HTMLDivElement> {
 
 /** Children below or beside one another, spaced by a step of the spacing
     scale. */
-export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
-  { direction = "column", gap = 3, align, justify, wrap = false, className, style, children, ...rest },
-  ref,
-) {
+export function Stack({ ref, direction = "column", gap = 3, align, justify, wrap = false, className, style, children, ...rest }: StackProps) {
   return (
     <div
       ref={ref}
@@ -51,7 +48,7 @@ export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
       {children}
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Grid – a fixed column count, columns of their own widths, or        */
@@ -67,7 +64,7 @@ const FILL = "minmax(0, 1fr)";
 export type GridColumnWidth = number | "fill";
 
 /** The props of `Grid`. */
-export interface GridProps extends HTMLAttributes<HTMLDivElement> {
+export interface GridProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** How many columns, all of one width - or a list with one width per
       column: a number in pixels, or `"fill"` for a share of what is left.
       Overridden by minItemWidth. */
@@ -82,10 +79,7 @@ export interface GridProps extends HTMLAttributes<HTMLDivElement> {
 
 /** Children in a grid: a fixed number of columns, a list of column widths,
     or as many columns as fit at `minItemWidth`. */
-export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
-  { columns = 2, minItemWidth, gap = 4, className, style, children, ...rest },
-  ref,
-) {
+export function Grid({ ref, columns = 2, minItemWidth, gap = 4, className, style, children, ...rest }: GridProps) {
   return (
     <div
       ref={ref}
@@ -104,4 +98,4 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
       {children}
     </div>
   );
-});
+}

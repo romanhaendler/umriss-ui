@@ -1,9 +1,10 @@
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { CrossGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import { VisuallyHidden } from "../VisuallyHidden";
 import { rowWidth, stackedWidth, stepperFit } from "./fit";
 import type { StepperFit } from "./fit";
@@ -21,7 +22,7 @@ export interface StepperStep {
 }
 
 /** The props of `Stepper`. */
-export interface StepperProps extends HTMLAttributes<HTMLOListElement> {
+export interface StepperProps extends HTMLAttributes<HTMLOListElement>, RefProp<HTMLOListElement> {
   /** The steps in the order they are walked. */
   steps: readonly StepperStep[];
   /** The index of the step being worked on. The steps before it are done,
@@ -45,10 +46,7 @@ const stateOf = (step: StepperStep, index: number, current: number): StepState =
    the stepper has no key of its own. */
 /** Where a procedure stands: its steps in order, done, current, upcoming or
     failed. Moving on is yours - `current` is a prop. */
-export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepper(
-  { steps, current, orientation = "horizontal", className, ...rest },
-  ref,
-) {
+export function Stepper({ ref, steps, current, orientation = "horizontal", className, ...rest }: StepperProps) {
   const wording = useWording();
   const listRef = useRef<HTMLOListElement>(null);
   const [fit, setFit] = useState<StepperFit>("row");
@@ -168,4 +166,4 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
       })}
     </ol>
   );
-});
+}

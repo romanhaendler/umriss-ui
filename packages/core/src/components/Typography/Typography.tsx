@@ -7,9 +7,9 @@
    `Heading` separates level and size: a visually small heading can still be
    the second level of the page. */
 
-import { forwardRef } from "react";
 import type { AnchorHTMLAttributes, ElementType, HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Typography.module.css";
 
 /** A type size of the token set. */
@@ -25,7 +25,7 @@ export type TextTracking = "normal" | "tight" | "display" | "caps";
 export type TextLeading = "normal" | "tight";
 
 /** The props of `Text`. */
-export interface TextProps extends HTMLAttributes<HTMLElement> {
+export interface TextProps extends HTMLAttributes<HTMLElement>, RefProp<HTMLElement> {
   /** Element to render as. */
   as?: ElementType;
   /** Type size from the token set. It is independent of the element: a `p`
@@ -48,21 +48,19 @@ export interface TextProps extends HTMLAttributes<HTMLElement> {
 
 /** Body text from the token set; `as` chooses the element, independent of the
     size. */
-export const Text = forwardRef<HTMLElement, TextProps>(function Text(
-  {
-    as: Element = "p",
-    size = "md",
-    weight = "regular",
-    tone = "default",
-    mono = false,
-    tracking = "normal",
-    leading = "normal",
-    className,
-    children,
-    ...rest
-  },
+export function Text({
   ref,
-) {
+  as: Element = "p",
+  size = "md",
+  weight = "regular",
+  tone = "default",
+  mono = false,
+  tracking = "normal",
+  leading = "normal",
+  className,
+  children,
+  ...rest
+}: TextProps) {
   return (
     <Element
       ref={ref}
@@ -81,14 +79,14 @@ export const Text = forwardRef<HTMLElement, TextProps>(function Text(
       {children}
     </Element>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Heading – level and size are independent                            */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Heading`. */
-export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
+export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement>, RefProp<HTMLHeadingElement> {
   /** The page's outline level (h1–h6). */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   /** Optical size; independent of the level.
@@ -112,10 +110,16 @@ const sizeForLevel: Record<1 | 2 | 3 | 4 | 5 | 6, TextSize> = {
 
 /** A heading whose level and size are independent: a small heading can still
     be the second level of the page. */
-export const Heading = forwardRef<HTMLHeadingElement, HeadingProps>(function Heading(
-  { level = 2, size, weight = "semibold", tone = "default", className, children, ...rest },
+export function Heading({
   ref,
-) {
+  level = 2,
+  size,
+  weight = "semibold",
+  tone = "default",
+  className,
+  children,
+  ...rest
+}: HeadingProps) {
   const Element = `h${level}` as "h1";
   const effectiveSize = size ?? sizeForLevel[level];
 
@@ -137,14 +141,14 @@ export const Heading = forwardRef<HTMLHeadingElement, HeadingProps>(function Hea
       {children}
     </Element>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Link                                                                */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Link`. */
-export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, RefProp<HTMLAnchorElement> {
   /** Size from the token set – a link has to match its body text. */
   size?: TextSize;
   /** Opens in a new tab and sets the necessary protective attributes. */
@@ -153,10 +157,7 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
 
 /** A link in the size of its text; `external` opens it in a new tab with the
     protective attributes set. */
-export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  { size = "md", external = false, className, children, ...rest },
-  ref,
-) {
+export function Link({ ref, size = "md", external = false, className, children, ...rest }: LinkProps) {
   return (
     <a
       ref={ref}
@@ -168,4 +169,4 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       {children}
     </a>
   );
-});
+}

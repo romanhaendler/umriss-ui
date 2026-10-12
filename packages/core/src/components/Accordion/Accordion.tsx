@@ -1,6 +1,7 @@
-import { createContext, forwardRef, useContext, useId, useState } from "react";
+import { createContext, useContext, useId, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { AngleGlyph } from "../../lib/glyphs";
 import styles from "./Accordion.module.css";
 
@@ -17,7 +18,9 @@ const AccordionContext = createContext<AccordionContextValue | null>(null);
 /* ------------------------------------------------------------------ */
 
 /** The props of `Accordion`. */
-export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+export interface AccordionProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">,
+    RefProp<HTMLDivElement> {
   /** `single` keeps at most one section open, `multiple` any number. */
   type?: "single" | "multiple";
   /** Controlled: the values of the open sections. A list for both types, so
@@ -38,10 +41,18 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "on
    between the headers. The height animates as `Card`'s collapse does. */
 /** Sections behind headers that open and close: one at a time (`single`) or
     any number (`multiple`). The arrow keys move between the headers. */
-export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
-  { type = "single", value: valueProp, defaultValue = [], onChange, headingLevel = 3, className, onKeyDown, children, ...rest },
+export function Accordion({
   ref,
-) {
+  type = "single",
+  value: valueProp,
+  defaultValue = [],
+  onChange,
+  headingLevel = 3,
+  className,
+  onKeyDown,
+  children,
+  ...rest
+}: AccordionProps) {
   const [own, setOwn] = useState<readonly string[]>(defaultValue);
   const controlled = valueProp !== undefined;
   const open = controlled ? valueProp : own;
@@ -82,7 +93,7 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
       <AccordionContext.Provider value={{ open, toggle, headingLevel }}>{children}</AccordionContext.Provider>
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* AccordionItem                                                       */
@@ -90,7 +101,7 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
 
 /** The props of `AccordionItem`: a div's attributes, with `title` taking the
     header's node instead of the HTML attribute. */
-export interface AccordionItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface AccordionItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, RefProp<HTMLDivElement> {
   /** What names the section in the accordion's `value`. */
   value: string;
   /** The header's text. It names the section's region too. */
@@ -100,10 +111,7 @@ export interface AccordionItemProps extends Omit<HTMLAttributes<HTMLDivElement>,
 }
 
 /** One section of an `Accordion`: its header and the content it opens. */
-export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(function AccordionItem(
-  { value, title, disabled = false, className, children, ...rest },
-  ref,
-) {
+export function AccordionItem({ ref, value, title, disabled = false, className, children, ...rest }: AccordionItemProps) {
   const accordion = useContext(AccordionContext);
   const id = useId();
   const headerId = `${id}-header`;
@@ -138,4 +146,4 @@ export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(func
       </div>
     </div>
   );
-});
+}

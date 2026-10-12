@@ -1,4 +1,4 @@
-import { cloneElement, createContext, forwardRef, useCallback, useContext, useId, useRef, useState } from "react";
+import { cloneElement, createContext, useCallback, useContext, useId, useRef, useState } from "react";
 import type {
   ButtonHTMLAttributes,
   HTMLAttributes,
@@ -10,6 +10,7 @@ import type {
 import { cx } from "../../lib/cx";
 import { elementRef } from "../../lib/elementRef";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import { Popover } from "../Popover";
 import styles from "./Menu.module.css";
 
@@ -140,7 +141,7 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
 
 /** The props of `MenuItem`: a button's attributes, with `onSelect` for what
     the entry does. */
-export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onSelect"> {
+export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onSelect">, RefProp<HTMLButtonElement> {
   /** What the entry does. The menu closes afterwards by itself: a menu that
       stays open after something has happened hides the result. */
   onSelect?: () => void;
@@ -150,10 +151,7 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
 
 /** An entry of a `Menu` or a `ContextMenu`. It runs `onSelect` and closes the
     menu. */
-export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function MenuItem(
-  { onSelect, tone = "default", className, children, onClick, ...rest },
-  ref,
-) {
+export function MenuItem({ ref, onSelect, tone = "default", className, children, onClick, ...rest }: MenuItemProps) {
   const menu = useContext(MenuContext);
 
   return (
@@ -176,12 +174,9 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       {children}
     </button>
   );
-});
+}
 
 /** Fine dividing line between groups of menu entries. */
-export const MenuSeparator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function MenuSeparator(
-  { className, ...rest },
-  ref,
-) {
+export function MenuSeparator({ ref, className, ...rest }: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>) {
   return <div ref={ref} className={cx(styles.separator, className)} {...rest} role="separator" />;
-});
+}

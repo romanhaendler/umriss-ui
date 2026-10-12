@@ -1,12 +1,13 @@
-import { forwardRef } from "react";
 import type { DialogHTMLAttributes, ReactNode } from "react";
+import type { RefProp } from "../../lib/refProp";
 import { Button } from "../Button";
 import { Modal, ModalFooter, ModalHeader } from "./Modal";
 import { useWording } from "../../lib/language";
 
 /** The props of `ConfirmDialog`. */
 export interface ConfirmDialogProps
-  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "title" | "children"> {
+  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "title" | "children">,
+    RefProp<HTMLDialogElement> {
   /** Whether the query stands. */
   open: boolean;
   /** Cancelling: Escape, cross, backdrop or the second button. */
@@ -33,21 +34,19 @@ export interface ConfirmDialogProps
 }
 
 /** Compact confirmation dialog on the basis of Modal. */
-export const ConfirmDialog = forwardRef<HTMLDialogElement, ConfirmDialogProps>(function ConfirmDialog(
-  {
-    open,
-    onClose,
-    onConfirm,
-    title,
-    description,
-    confirmLabel,
-    cancelLabel,
-    tone = "primary",
-    loading = false,
-    ...rest
-  },
+export function ConfirmDialog({
   ref,
-) {
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  tone = "primary",
+  loading = false,
+  ...rest
+}: ConfirmDialogProps) {
   const wording = useWording();
   return (
     <Modal ref={ref} {...rest} open={open} onClose={onClose} size="sm" closeOnBackdrop={!loading}>
@@ -62,4 +61,4 @@ export const ConfirmDialog = forwardRef<HTMLDialogElement, ConfirmDialogProps>(f
       </ModalFooter>
     </Modal>
   );
-});
+}

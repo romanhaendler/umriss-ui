@@ -1,11 +1,11 @@
-import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./EmptyState.module.css";
 
 /** The props of `EmptyState`: a div's attributes, with `title` taking a node
     instead of the HTML attribute. */
-export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, RefProp<HTMLDivElement> {
   /** What is missing here - as a statement, not as an apology. */
   title: ReactNode;
   /** One sentence on why nothing is here and what would put something here. */
@@ -17,10 +17,7 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "t
 }
 
 /** An empty surface as an invitation to act - not as a dead end. */
-export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
-  { title, description, action, icon, className, ...rest },
-  ref,
-) {
+export function EmptyState({ ref, title, description, action, icon, className, ...rest }: EmptyStateProps) {
   return (
     <div ref={ref} className={cx(styles.empty, className)} {...rest}>
       {icon && <div className={styles.icon}>{icon}</div>}
@@ -29,4 +26,4 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
       {action && <div className={styles.action}>{action}</div>}
     </div>
   );
-});
+}

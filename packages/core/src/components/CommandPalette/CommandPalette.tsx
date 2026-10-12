@@ -22,10 +22,11 @@
    carry two anatomies. What is shared instead is exactly the mechanics both
    need: `useDialogChoreography`. */
 
-import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { DialogHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import { idPart } from "../../lib/idPart";
 import { useWording } from "../../lib/language";
@@ -73,7 +74,8 @@ export interface CommandPaletteItem {
 
 /** The props of `CommandPalette`. */
 export interface CommandPaletteProps
-  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "children"> {
+  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "children">,
+    RefProp<HTMLDialogElement> {
   /** Controlled like the modal: opening is the caller's decision. */
   open: boolean;
   /** Reports every wish to close - Escape, an outside click, a choice. */
@@ -115,23 +117,21 @@ export interface CommandPaletteProps
 /** A window above the application in which one types and finds: it searches
     `items` by subsequence, ranks and marks the matches, and reports the chosen
     candidate's `id` to `onChoose`. Controlled through `open` and `onClose`. */
-export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>(function CommandPalette(
-  {
-    open,
-    onClose,
-    items,
-    onChoose,
-    restingItems,
-    maxFinds,
-    className,
-    onCancel,
-    onMouseDown,
-    onKeyDown: callerKeyDown,
-    onKeyDownCapture,
-    ...rest
-  },
+export function CommandPalette({
   ref,
-) {
+  open,
+  onClose,
+  items,
+  onChoose,
+  restingItems,
+  maxFinds,
+  className,
+  onCancel,
+  onMouseDown,
+  onKeyDown: callerKeyDown,
+  onKeyDownCapture,
+  ...rest
+}: CommandPaletteProps) {
   const wording = useWording();
   const baseId = useId();
   const listId = `${baseId}-list`;
@@ -159,6 +159,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     previouslyFocused.current = document.activeElement;
     /* Every opening starts in the resting state: an empty field, no rows. That
        is what makes the growth on the first keystroke visible at all. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery("");
     setHeld(null);
     keyboardTakesOver();
@@ -349,4 +350,4 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
       </div>
     </dialog>
   );
-});
+}

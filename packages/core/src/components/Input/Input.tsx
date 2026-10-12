@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
 import type { InputHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Input.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -10,7 +10,7 @@ import { CrossGlyph } from "../../lib/glyphs";
 
 /** The props of `Input`: a native input's attributes, with `size` meaning the
     control's height. */
-export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">, RefProp<HTMLInputElement> {
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -41,10 +41,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 /** A one-line text field. `chars` sets its width in characters, `numeric`
     sets figures right-aligned and tabular, `clearable` offers a cross. Inside
     a `FormField` it takes the field's id, description and invalid state. */
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, ...rest },
-  ref,
-) {
+export function Input({ ref, size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, ...rest }: InputProps) {
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
@@ -91,4 +88,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       )}
     </span>
   );
-});
+}

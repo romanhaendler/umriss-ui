@@ -3,8 +3,7 @@
    Its own building block and not a prop on the tree, so that it can stand
    elsewhere - in a toolbar, in a panel header. */
 
-import { forwardRef } from "react";
-import type { ChangeEvent, ForwardedRef, ReactNode } from "react";
+import type { ChangeEvent } from "react";
 import { Input } from "../Input";
 import type { InputProps } from "../Input";
 import { useWording } from "../../lib/language";
@@ -22,10 +21,7 @@ export interface TreeSearchProps<K, S extends Key = string>
 
 /** The search field of a tree: an `Input` that writes into the tree's search
     text, so that the `TreeView` filters on it. */
-export const TreeSearch = forwardRef(function TreeSearch<K, S extends Key = string>(
-  { tree, placeholder, ...rest }: TreeSearchProps<K, S>,
-  ref: ForwardedRef<HTMLInputElement>,
-) {
+export function TreeSearch<K, S extends Key = string>({ ref, tree, placeholder, ...rest }: TreeSearchProps<K, S>) {
   const wording = useWording();
   return (
     <Input
@@ -37,6 +33,4 @@ export const TreeSearch = forwardRef(function TreeSearch<K, S extends Key = stri
       {...rest}
     />
   );
-}) as <K, S extends Key = string>(
-  props: TreeSearchProps<K, S> & { ref?: ForwardedRef<HTMLInputElement> },
-) => ReactNode;
+}

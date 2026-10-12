@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
@@ -10,6 +10,7 @@ import {
   stepNumber,
 } from "./number";
 import type { NumberConstraints } from "./number";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./NumberInput.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -20,7 +21,7 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "size" | "prefix" | "type"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement> {
   /** The number, or `null` for "not stated". An empty field is not zero:
       a quantity that was not measured is not a quantity of zero. */
   value: number | null;
@@ -74,8 +75,9 @@ const adornmentChars = (adornment: ReactNode) =>
  * present on hover or focus. Holding one down repeats the step (a short
  * run-up, then briskly); min/max disable the respective button.
  */
-export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
+export function NumberInput(
   {
+    ref,
     value,
     onChange,
     min,
@@ -95,8 +97,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     onBlur,
     onKeyDown,
     ...rest
-  },
-  ref,
+  }: NumberInputProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -119,6 +120,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   // Adopt values set from outside, as long as nobody is typing.
   useEffect(() => {
     if (focused) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setText(value === null ? "" : write(value));
     // `write` is created anew on every render and reads only `decimals` and
     // `formats` - both are in the list.
@@ -139,8 +141,10 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   // Mirror the current state in a ref so that the hold repetition (the
   // setTimeout loop) never computes on stale closures.
   const textRef = useRef(text);
+  // eslint-disable-next-line react-hooks/refs
   textRef.current = text;
   const valueRef = useRef(value);
+  // eslint-disable-next-line react-hooks/refs
   valueRef.current = value;
 
   const stepBy = (direction: 1 | -1, factor = 1) => {
@@ -255,4 +259,4 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
       </span>
     </span>
   );
-});
+}

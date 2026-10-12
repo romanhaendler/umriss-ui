@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DragEvent, InputHTMLAttributes } from "react";
 import { announce } from "../../lib/announce";
 import { cx } from "../../lib/cx";
@@ -8,12 +8,13 @@ import type { Formats } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useFormField } from "../FormField";
 import { accepts } from "./accept";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./FileInput.module.css";
 
 /** The props of `FileInput`: a native file input's attributes, with the files
     as the value. */
 export interface FileInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement> {
   /** Controlled: the chosen files. Uncontrolled, the input keeps its own and
       starts empty. */
   value?: readonly File[];
@@ -44,10 +45,7 @@ const sizeOf = (bytes: number, formats: Formats) =>
    and rest on the input. */
 /** A file field with a drop zone: choose or drop files, and remove them from
     the list again. Nothing is uploaded - that is the application's. */
-export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function FileInput(
-  { value, onChange, invalid, accept, multiple = false, disabled = false, className, style, id, ...rest },
-  ref,
-) {
+export function FileInput({ ref, value, onChange, invalid, accept, multiple = false, disabled = false, className, style, id, ...rest }: FileInputProps) {
   const wording = useWording();
   const formats = useFormats();
   const field = useFormField();
@@ -173,4 +171,4 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
       ))}
     </div>
   );
-});
+}

@@ -1,12 +1,13 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { useControlSize } from "../../lib/controlSize";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Checkbox.module.css";
 
 /** The props of `Checkbox`: a native checkbox's attributes and its label. */
-export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
+export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size">, RefProp<HTMLInputElement> {
   /** Label to the right of the checkbox. */
   label?: ReactNode;
   /** Partially checked (e.g. "select all" with a mixed selection). */
@@ -15,10 +16,7 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
 
 /** A native checkbox with its label beside it; `indeterminate` shows the mixed
     state. Inside a `FormField` it takes the field's id and description. */
-export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { label, indeterminate = false, className, style, id, ...rest },
-  ref,
-) {
+export function Checkbox({ ref, label, indeterminate = false, className, style, id, ...rest }: CheckboxProps) {
   const innerRef = useRef<HTMLInputElement>(null);
   useImperativeHandle(ref, () => innerRef.current as HTMLInputElement);
 
@@ -54,4 +52,4 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
       {label && <span className={styles.label}>{label}</span>}
     </label>
   );
-});
+}

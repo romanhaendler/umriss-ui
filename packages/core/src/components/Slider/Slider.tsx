@@ -1,8 +1,9 @@
-import { forwardRef, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormats } from "../../lib/language";
 import { useFormField } from "../FormField";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Slider.module.css";
 
 /** A mark on the track: a value, or a value with the word beneath it. */
@@ -10,7 +11,7 @@ export type SliderMark = number | { value: number; label?: ReactNode };
 
 /** The props of `Slider`. */
 export interface SliderProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step">, RefProp<HTMLInputElement> {
   /** Controlled: the value. */
   value?: number;
   /** Uncontrolled: the value to start at.
@@ -82,8 +83,9 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
    the input. */
 /** One value on a track between `min` and `max`, on the native range input;
     `marks` set labelled points on the track. */
-export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
+export function Slider(
   {
+    ref,
     value: valueProp,
     defaultValue,
     onChange,
@@ -99,8 +101,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
     disabled,
     onKeyDown,
     ...rest
-  },
-  ref,
+  }: SliderProps,
 ) {
   const formats = useFormats();
   const field = useFormField();
@@ -173,4 +174,4 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
       )}
     </div>
   );
-});
+}

@@ -1,7 +1,8 @@
-import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent, SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Select.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -18,7 +19,7 @@ import type { ListboxItem } from "../../lib/listbox";
    it (ADR-0041). */
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
-export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
+export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">, RefProp<HTMLSelectElement> {
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -47,8 +48,9 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * Combobox's - and under a finger the system's picker (ADR-0043). The arrow is
  * drawn in CSS and therefore follows the theme tokens.
  */
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
+export function Select(
   {
+    ref,
     size: ownSize,
     chars,
     invalid,
@@ -64,8 +66,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
     onKeyDown,
     onBlur,
     ...rest
-  },
-  ref,
+  }: SelectProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -267,7 +268,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       )}
     </span>
   );
-});
+}
 
 /** The keys that open the system's list open ours (ADR-0043). Not Enter: a
     closed select passes it on, to a form or a table's grid that commits an

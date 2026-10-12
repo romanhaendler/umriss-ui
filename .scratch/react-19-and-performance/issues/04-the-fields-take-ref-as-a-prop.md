@@ -1,6 +1,6 @@
 # 04 - The fields take `ref` as a prop
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

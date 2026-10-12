@@ -1,4 +1,4 @@
-import { forwardRef, useId, useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
@@ -8,6 +8,7 @@ import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
@@ -26,7 +27,7 @@ import { ClockGlyph } from "../../lib/glyphs";
  * with "Apply", "Now" or "Clear", not already on the click on a day.
  */
 export interface DateTimePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
   /** The instant; `null` means none. */
   value: Date | null;
   /** Runs only on completion - "Apply", "Now" or "Clear" - and not already on
@@ -60,8 +61,9 @@ export interface DateTimePickerProps
     an exact instant and is reported only on "Apply", "Now" or "Clear"; the
     missing and doubled hours of a daylight-saving change are asked about, not
     guessed. */
-export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(function DateTimePicker(
+export function DateTimePicker(
   {
+    ref,
     value,
     onChange,
     withSeconds = false,
@@ -73,8 +75,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
     clearable = false,
     className,
     ...rest
-  },
-  ref,
+  }: DateTimePickerProps,
 ) {
   const size = useControlSize(ownSize);
   const field = useFormField();
@@ -272,4 +273,4 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
       </Popover>
     </>
   );
-});
+}

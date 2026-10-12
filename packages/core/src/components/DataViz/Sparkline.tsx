@@ -1,11 +1,12 @@
-import { forwardRef, useId } from "react";
+import { useId } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import type { RefProp } from "../../lib/refProp";
 import { project } from "./scale";
 import styles from "./DataViz.module.css";
 
 /** The props of `Sparkline`. */
-export interface SparklineProps extends HTMLAttributes<HTMLSpanElement> {
+export interface SparklineProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTMLSpanElement> {
   /** Values in chronological order; at least two. */
   data: readonly number[];
   /** Width in pixels; the default is a row width, not a chart width. `"fill"`
@@ -22,10 +23,7 @@ export interface SparklineProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** A miniature trend line for table cells; the end point carries the accent. */
-export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sparkline(
-  { data, width = 96, height = 28, tone = "ink", className, ...rest },
-  ref,
-) {
+export function Sparkline({ ref, data, width = 96, height = 28, tone = "ink", className, ...rest }: SparklineProps) {
   const id = useId();
   if (data.length < 2) return null;
 
@@ -81,4 +79,4 @@ export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sp
       {fill && <span className={styles.sparklineEnd} style={{ left: `${endX}%`, top: `${endY}%` }} />}
     </span>
   );
-});
+}

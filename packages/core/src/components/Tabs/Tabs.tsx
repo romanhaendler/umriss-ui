@@ -1,8 +1,9 @@
-import { createContext, forwardRef, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { idPart } from "../../lib/idPart";
 import { mergeRefs } from "../../lib/mergeRefs";
+import type { RefProp } from "../../lib/refProp";
 import styles from "./Tabs.module.css";
 
 interface TabsContextValue {
@@ -27,7 +28,9 @@ function useTabs(component: string): TabsContextValue {
 /* ------------------------------------------------------------------ */
 
 /** The props of `Tabs`. */
-export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+export interface TabsProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">,
+    RefProp<HTMLDivElement> {
   /** The value of the visible tab. Controlled, `Tabs` remember nothing, so
       that the tab can come out of an address. */
   value?: string;
@@ -41,10 +44,7 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChang
 
 /** Tabs: a `TabList` of `Tab`s and one `TabPanel` per value. Controlled
     through `value` and `onChange`, or uncontrolled from `defaultValue`. */
-export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
-  { value, defaultValue, onChange, className, children, ...rest },
-  ref,
-) {
+export function Tabs({ ref, value, defaultValue, onChange, className, children, ...rest }: TabsProps) {
   const idBase = useId();
   const [ownValue, setOwnValue] = useState(defaultValue ?? "");
   const controlled = value !== undefined;
@@ -60,7 +60,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
       </TabsContext.Provider>
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* TabList – the arrow keys switch and activate                        */
@@ -68,10 +68,13 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
 
 /** The row of `Tab`s inside `Tabs`. The arrow keys, Home and End move
     between the tabs and choose them. */
-export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function TabList(
-  { className, children, onKeyDown, ...rest },
+export function TabList({
   ref,
-) {
+  className,
+  children,
+  onKeyDown,
+  ...rest
+}: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>) {
   const tabs = useTabs("TabList");
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
@@ -142,24 +145,21 @@ export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
       )}
     </div>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Tab                                                                 */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Tab`. */
-export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement>, RefProp<HTMLButtonElement> {
   /** The value this tab reports – and under which its panel stands. */
   value: string;
 }
 
 /** One tab of a `TabList`; choosing it shows the `TabPanel` of the same
     `value`. */
-export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
-  { value, className, children, onClick, ...rest },
-  ref,
-) {
+export function Tab({ ref, value, className, children, onClick, ...rest }: TabProps) {
   const tabs = useTabs("Tab");
   const selected = tabs.value === value;
   /* Uncontrolled without `defaultValue` no tab is chosen yet; then every tab
@@ -190,14 +190,14 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
       {children}
     </button>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* TabPanel                                                            */
 /* ------------------------------------------------------------------ */
 
 /** The props of `TabPanel`. */
-export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
+export interface TabPanelProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** The value of the tab this panel belongs to. Only the matching panel
       stands in the document – a hidden panel would keep focus, scroll
       position and live regions that nobody sees. */
@@ -206,10 +206,7 @@ export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
 
 /** The content of one tab. Only the panel whose `value` is chosen stands in
     the document. */
-export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel(
-  { value, className, children, ...rest },
-  ref,
-) {
+export function TabPanel({ ref, value, className, children, ...rest }: TabPanelProps) {
   const tabs = useTabs("TabPanel");
   if (tabs.value !== value) return null;
 
@@ -226,4 +223,4 @@ export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPa
       {children}
     </div>
   );
-});
+}

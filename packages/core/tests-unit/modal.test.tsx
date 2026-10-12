@@ -10,7 +10,7 @@
    sends in its place is therefore triggered directly. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, useState } from "react";
+import { act, createRef, useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Modal, ModalBody, ModalHeader } from "../src/components/Modal";
 
@@ -110,5 +110,14 @@ describe("Modal – named by its header", () => {
       </Modal>,
     );
     expect(dialog().getAttribute("aria-labelledby")).toBe("own");
+  });
+
+  it("takes a ref to a <dialog> and no other element's", () => {
+    const dialogRef = createRef<HTMLDialogElement>();
+    const divRef = createRef<HTMLDivElement>();
+    const ok = <Modal open onClose={() => {}} ref={dialogRef} />;
+    // @ts-expect-error - a Modal renders a <dialog>, not a <div>.
+    const wrong = <Modal open onClose={() => {}} ref={divRef} />;
+    expect([ok, wrong]).toHaveLength(2);
   });
 });
