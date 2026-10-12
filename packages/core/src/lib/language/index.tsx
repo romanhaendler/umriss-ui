@@ -48,7 +48,7 @@ export const DEFAULT_LANGUAGE: Language = {
 /* null means "no provider". The default does not live in the context, so that
    `useContext` can tell the two cases apart - and so that a provider passing
    nothing does not do the same work twice. */
-const LanguageContext = createContext<Language | null>(null);
+const LanguageContext = /* @__PURE__ */ createContext<Language | null>(null);
 
 /** Builds a complete instance from the default and a partial value. */
 export function mergeLanguage(options: LanguageOptions | undefined): Language {
@@ -78,7 +78,7 @@ export interface LanguageProviderProps extends LanguageOptions {
  */
 export function LanguageProvider({ formats, wording, children }: LanguageProviderProps) {
   const value = useMemo(() => mergeLanguage({ formats, wording }), [formats, wording]);
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return <LanguageContext value={value}>{children}</LanguageContext>;
 }
 
 /** Formatting and wording together; without a provider, the defaults. */

@@ -15,7 +15,7 @@ import type {
   TooltipConfig,
 } from "./types";
 
-export const ChartContext = createContext<ChartScene | null>(null);
+export const ChartContext = /* @__PURE__ */ createContext<ChartScene | null>(null);
 
 /** Scene out of the context; throws in DEV outside a Chart. */
 export function useChartScene(componentName: string): ChartScene | null {

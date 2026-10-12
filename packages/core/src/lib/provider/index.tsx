@@ -158,13 +158,13 @@ export function UmrissProvider({
   );
 
   return (
-    <UmrissContext.Provider value={value}>
+    <UmrissContext value={value}>
       <LanguageProvider
         formats={language ? language.formats : outer.formats}
         wording={language ? language.wording : outer.wording}
       >
         {children}
       </LanguageProvider>
-    </UmrissContext.Provider>
+    </UmrissContext>
   );
 }

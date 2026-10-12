@@ -12,7 +12,7 @@ interface TabsContextValue {
   idBase: string;
 }
 
-const TabsContext = createContext<TabsContextValue | null>(null);
+const TabsContext = /* @__PURE__ */ createContext<TabsContextValue | null>(null);
 
 function useTabs(component: string): TabsContextValue {
   const context = useContext(TabsContext);
@@ -55,9 +55,9 @@ export function Tabs({ ref, value, defaultValue, onChange, className, children, 
 
   return (
     <div ref={ref} className={className} {...rest}>
-      <TabsContext.Provider value={{ value: controlled ? value : ownValue, onChange: change, idBase }}>
+      <TabsContext value={{ value: controlled ? value : ownValue, onChange: change, idBase }}>
         {children}
-      </TabsContext.Provider>
+      </TabsContext>
     </div>
   );
 }

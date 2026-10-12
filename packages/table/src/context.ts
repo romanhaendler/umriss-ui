@@ -12,7 +12,7 @@ export interface TableContextValue {
   footerTarget: HTMLElement | null;
 }
 
-export const TableContext = createContext<TableContextValue | null>(null);
+export const TableContext = /* @__PURE__ */ createContext<TableContextValue | null>(null);
 
 const neverSubscribe = () => () => undefined;
 const nothing = () => 0;

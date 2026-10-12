@@ -17,7 +17,7 @@ export interface UmrissContextValue extends UmrissConfig {
 
 /* null means "no provider" - the default does not live in the context, so that
    the hooks can tell the two cases apart. */
-export const UmrissContext = createContext<UmrissContextValue | null>(null);
+export const UmrissContext = /* @__PURE__ */ createContext<UmrissContextValue | null>(null);
 
 /**
  * A component's `density`: its own value, else the density the provider

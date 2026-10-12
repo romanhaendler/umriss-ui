@@ -12,7 +12,7 @@ interface CardContextValue {
   bodyId: string;
 }
 
-const CardContext = createContext<CardContextValue | null>(null);
+const CardContext = /* @__PURE__ */ createContext<CardContextValue | null>(null);
 
 /* ------------------------------------------------------------------ */
 /* Card                                                                */
@@ -58,11 +58,11 @@ export function Card({
 
   return (
     <section ref={ref} className={cx(styles.card, className)} {...rest}>
-      <CardContext.Provider
+      <CardContext
         value={{ collapsible, collapsed, toggle, bodyId }}
       >
         {children}
-      </CardContext.Provider>
+      </CardContext>
     </section>
   );
 }

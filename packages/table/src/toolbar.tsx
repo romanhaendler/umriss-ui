@@ -118,7 +118,7 @@ export function TableToolbar({
   }
 
   return (
-    <ToolbarSizeContext.Provider value={size}>
+    <ToolbarSizeContext value={size}>
       {/* The controls a caller puts in take the toolbar's size as well - a
           select or a multiselect of one's own stands level with the search
           without a word (ADR-0041). */}
@@ -131,6 +131,6 @@ export function TableToolbar({
           {right}
         </div>
       </ControlSizeProvider>
-    </ToolbarSizeContext.Provider>
+    </ToolbarSizeContext>
   );
 }

@@ -164,10 +164,10 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
           )}
         >
           <HeadRow registry={registry} hook={hook} layout={layout} props={props} wording={wording} />
-          <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
+          <GridContext value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
             {fresh && newRowBody(body, fresh)}
             {shown.body}
-          </GridContext.Provider>
+          </GridContext>
           {footerShown && <FootRow layout={layout} gridMode={gridMode} formats={formats} wording={wording} />}
         </table>
         </ControlSizeProvider>

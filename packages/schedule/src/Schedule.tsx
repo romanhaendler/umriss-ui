@@ -437,7 +437,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
   }, [point, pointKey, snapshot.width, snapshot.height]);
 
   return (
-    <ScheduleContext.Provider value={scene}>
+    <ScheduleContext value={scene}>
       <div
         ref={rootRef}
         role="figure"
@@ -652,7 +652,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         </VisuallyHidden>
       </div>
       {children}
-    </ScheduleContext.Provider>
+    </ScheduleContext>
   );
 }
 

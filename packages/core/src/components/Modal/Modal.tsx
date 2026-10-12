@@ -16,7 +16,7 @@ interface ModalContextValue {
   titleId: string;
 }
 
-const ModalContext = createContext<ModalContextValue | null>(null);
+const ModalContext = /* @__PURE__ */ createContext<ModalContextValue | null>(null);
 
 /* ------------------------------------------------------------------ */
 /* Modal – on the basis of the native <dialog>: focus trap, Escape and */
@@ -159,7 +159,7 @@ function DialogFrame({
         {/* A dialog keeps a dialog's controls, whatever size the place it
             was opened from has (ADR-0041). */}
         <SurfaceSizeReset>
-          <ModalContext.Provider value={{ onClose, titleId }}>{children}</ModalContext.Provider>
+          <ModalContext value={{ onClose, titleId }}>{children}</ModalContext>
         </SurfaceSizeReset>
       </div>
       {spacers && <div className={styles.spacerBottom} aria-hidden="true" />}

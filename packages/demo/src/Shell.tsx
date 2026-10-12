@@ -189,7 +189,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
   );
 
   return (
-    <ShownGerman.Provider value={language === "de" ? german : undefined}>
+    <ShownGerman value={language === "de" ? german : undefined}>
       <div className="shell">
         {/* One bar for every page of every demo: the way to the front page, to
             the four other packages and out of the site. The wordmark and the
@@ -310,6 +310,6 @@ export function Shell({ demo, sentence, german }: ShellProps) {
           />
         </LanguageProvider>
       </div>
-    </ShownGerman.Provider>
+    </ShownGerman>
   );
 }

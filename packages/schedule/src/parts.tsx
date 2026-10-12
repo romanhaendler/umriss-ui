@@ -51,7 +51,7 @@ export function LaneGroup({ id, label, children }: LaneGroupProps): ReactNode {
   const parent = useLaneGroup();
   const config = useMemo(() => ({ id, label: label ?? id, ...(parent === null ? {} : { parent }) }), [id, label, parent]);
   useLaneGroupRegistration(config);
-  return <LaneGroupContext.Provider value={id}>{children}</LaneGroupContext.Provider>;
+  return <LaneGroupContext value={id}>{children}</LaneGroupContext>;
 }
 
 /** The props of `Subtasks`. */
