@@ -59,10 +59,20 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
   const [viewportHeight, setViewportHeight] = useState(0);
   const [rowHeight, setRowHeight] = useState(expected);
 
+  /* Only the window is derived from the scroll position - the fillers follow
+     from `from`, `to`, the row height and the count, never from the exact
+     position. A scroll event that leaves the window as it is therefore keeps the
+     state object and renders nothing. */
   const onScroll = useCallback(() => {
     const el = scrollRef.current;
-    if (el) setScrollTop(el.scrollTop);
-  }, []);
+    if (!el) return;
+    const top = el.scrollTop;
+    const input = { count, rowHeight, viewportHeight, overscan };
+    const a = visibleWindow({ ...input, scrollTop });
+    const b = visibleWindow({ ...input, scrollTop: top });
+    if (a.from === b.from && a.to === b.to) return;
+    setScrollTop(top);
+  }, [count, rowHeight, viewportHeight, overscan, scrollTop]);
 
   /* The visible height lives in the layout, not in the properties. It changes
      with the window, with a collapsed card and with a scrollbar appearing -
@@ -70,7 +80,12 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const measure = () => setViewportHeight(el.clientHeight);
+    /* The position is re-read too: a kept scroll position may lag the real one
+       by less than a window, and a new viewport height moves the window. */
+    const measure = () => {
+      setViewportHeight(el.clientHeight);
+      setScrollTop(el.scrollTop);
+    };
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(measure);
@@ -91,7 +106,10 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
     const row = el.querySelector<HTMLElement>("[data-row]");
     if (!row) return;
     const measured = row.getBoundingClientRect().height;
-    if (measured > 0 && Math.abs(measured - rowHeight) > 0.01) setRowHeight(measured);
+    if (measured > 0 && Math.abs(measured - rowHeight) > 0.01) {
+      setRowHeight(measured);
+      setScrollTop(el.scrollTop);
+    }
   }, [count, viewportHeight, rowHeight]);
 
   const rowWindow: RowWindow = visibleWindow({ count, rowHeight, scrollTop, viewportHeight, overscan });
