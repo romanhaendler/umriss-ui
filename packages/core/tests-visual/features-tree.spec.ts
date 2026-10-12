@@ -110,6 +110,20 @@ test("Showing a node brings it into the window and focuses it", async ({ page })
   expect(await example(page).innerText()).toContain("Last revealed: f33-2");
 });
 
+test("A scrolled virtualised tree stays where it was scrolled", async ({ page }) => {
+  const large = tree(page, "Large body");
+  await large.getByRole("treeitem").first().click();
+  await large.press("ArrowDown");
+  // The active node is at the top; the wheel takes the window far away from it.
+  await large.hover();
+  await page.mouse.wheel(0, 1500);
+  await expect.poll(() => large.evaluate((el) => el.scrollTop)).toBeGreaterThan(500);
+  const scrolled = await large.evaluate((el) => el.scrollTop);
+  // Nothing may pull the view back to the active node on a later render.
+  await page.waitForTimeout(500);
+  expect(await large.evaluate((el) => el.scrollTop)).toBe(scrolled);
+});
+
 test("Folding everything open and closed", async ({ page }) => {
   const large = tree(page, "Large body");
   const closed = await large.getByRole("treeitem").count();

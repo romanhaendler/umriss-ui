@@ -185,10 +185,31 @@ export function useTree<K, S extends Key = string>(
     ],
   );
 
-  const flattening = useMemo(
-    () => treeModel(roots, reader, snapshot),
-    [roots, reader, snapshot],
+  /* The flattening depends on what is open, ticked and found - not on which
+     entry is active, and not on the anchor. It is computed without an active
+     node and the active entry is set on top, so that a key press copies the
+     array and replaces one entry instead of walking the whole tree again. All
+     other entries keep their identity. */
+  const { expanded: openSet, checked: tickedSet, search: searchText, active: activeKey } = snapshot;
+  const base = useMemo(
+    () =>
+      treeModel(roots, reader, {
+        expanded: openSet,
+        checked: tickedSet,
+        active: null,
+        anchor: null,
+        search: searchText,
+      }),
+    [roots, reader, openSet, tickedSet, searchText],
   );
+  const flattening = useMemo(() => {
+    if (activeKey === null) return base;
+    const at = base.findIndex((e) => e.key === activeKey);
+    if (at < 0) return base;
+    const next = base.slice();
+    next[at] = { ...base[at]!, active: true };
+    return next;
+  }, [base, activeKey]);
 
   /* Duplicate keys break the cascade and the active node silently. The check
      goes over the whole tree: development only, in an effect, when the roots

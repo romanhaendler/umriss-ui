@@ -127,6 +127,8 @@ State: `tree-view` 01–06 and `tree-view-reach` 01–06 delivered.
 | Exactly one tab stop with a window too | — | Unit (search/size) |
 | The keyboard reaches nodes outside the window | — | Unit (search/size) |
 | Virtualisation can be switched off and is off by default | — | Unit (search/size) |
+| A scrolled tree stays where it was scrolled; the window follows the active node only when it moves | — | Interaction |
+| Moving the active node does not flatten again; untouched entries keep their identity | — | Unit, `tests-unit/treeWalk.test.tsx` |
 | Revealing a node: ancestors open, into the window, focused | — | Unit (model), Interaction |
 | An explicit reveal takes the focus, even from outside | — | Interaction |
 | Reports the deepest key reached | — | Unit (model) |
@@ -152,9 +154,7 @@ committed by then - not at the paint, so frame quantisation is not in it.
 * **Per key** - 200 `ArrowDown` keydowns on the focused Active node, each timed
   from dispatch to the settled commit.
 * **Per scroll event** - 100 steps of 10 rows; the clock starts as the scroll
-  event is dispatched, before React's handler runs. Taken before the walk:
-  after a walk with the keys a scroll position set by the page does not hold,
-  and a step measures nothing.
+  event is dispatched, before React's handler runs.
 
 Machine: Apple M2, 16 GB. Browser: Chromium headless (Playwright 1.62). Date:
 2026-10-12. One run of the page per row, driven by a script.
@@ -166,6 +166,24 @@ Machine: Apple M2, 16 GB. Browser: Chromium headless (Playwright 1.62). Date:
 | 100,000 | 28.8 | 14.25 | 0.70 |
 
 All figures in milliseconds.
+
+### What changed the figures
+
+Same page, machine and method as above; the figures are for the same three sizes.
+
+| Change | Nodes | Figure | Before | After |
+|---|---|---|---|---|
+| The flattening ignores the active node: a key press copies the array and replaces one entry | 10,000 | Per key | 1.61 | 0.20 |
+| | 50,000 | Per key | 7.26 | 0.19 |
+| | 100,000 | Per key | 14.25 | 0.19 |
+| The window follows the active node only when it moves; the fillers no longer shrink | 10,000 | Per scroll event | 1.13 | 1.22 |
+| | 50,000 | Per scroll event | 0.65 | 1.02 |
+| | 100,000 | Per scroll event | 0.70 | 1.08 |
+
+The scroll rows are not a regression: before, the fillers were squeezed to
+nothing by the flex column and the scroll area was only as high as its window, so
+the step moved a few rows at most and the figure measured a nearly idle tree. Now
+every step crosses a real window of the full height.
 
 ## Keyboard: typeahead and spans
 

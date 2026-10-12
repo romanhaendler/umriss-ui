@@ -1,6 +1,6 @@
 # 22 - Walking a large tree
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
@@ -35,3 +35,22 @@ as the keys are pressed, and a scrolled tree stays where it was scrolled.
       in the tree's capability record.
 - [ ] No screenshot moves.
 - [ ] `pnpm check core` passes.
+
+## Comments
+
+Observed in headless Chromium on the benchmark page (10 000 nodes): focus the
+tree, four ArrowDown, then six wheel steps of 400 px. The scroll position did
+not hold: it jumped back to the active node and flipped between two values
+(148 and 122) over the next second. A defect: the effect that brings the active
+node into view ran on every render and moved the view whenever the node lay
+outside the window. It now acts once when the active node (or the reveal count)
+changes. A browser test is in `tests-visual/features-tree.spec.ts` ("A scrolled
+virtualised tree stays where it was scrolled"); written, not run.
+
+A second defect showed on the way: the root is a flex column and the fillers
+shrank to zero height, so the scroll area was only 468 px high at 10 000 nodes
+and a wheel could not reach far. The fillers carry `flexShrink: 0` now.
+
+The flattening is computed without the active node and the active entry is set
+on top (array copy, one entry replaced). The new unit test was written after the
+change, so it was not seen failing.
