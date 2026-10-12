@@ -152,15 +152,18 @@ committed by then - not at the paint, so frame quantisation is not in it.
 * **Per key** - 200 `ArrowDown` keydowns on the focused Active node, each timed
   from dispatch to the settled commit.
 * **Per scroll event** - 100 steps of 10 rows; the clock starts as the scroll
-  event is dispatched, before React's handler runs.
+  event is dispatched, before React's handler runs. Taken before the walk:
+  after a walk with the keys a scroll position set by the page does not hold,
+  and a step measures nothing.
 
-Machine: -. Browser: -. Date: -.
+Machine: Apple M2, 16 GB. Browser: Chromium headless (Playwright 1.62). Date:
+2026-10-12. One run of the page per row, driven by a script.
 
 | Nodes | First render | Per key | Per scroll event |
 |---|---|---|---|
-| 10,000 | - | - | - |
-| 50,000 | - | - | - |
-| 100,000 | - | - | - |
+| 10,000 | 23.5 | 1.61 | 1.13 |
+| 50,000 | 15.0 | 7.26 | 0.65 |
+| 100,000 | 28.8 | 14.25 | 0.70 |
 
 All figures in milliseconds.
 

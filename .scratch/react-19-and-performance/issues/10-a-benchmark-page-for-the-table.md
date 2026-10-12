@@ -1,6 +1,6 @@
 # 10 - A benchmark page for the table
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

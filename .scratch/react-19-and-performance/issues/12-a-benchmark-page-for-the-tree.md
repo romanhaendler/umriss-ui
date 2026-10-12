@@ -1,6 +1,6 @@
 # 12 - A benchmark page for the tree
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
