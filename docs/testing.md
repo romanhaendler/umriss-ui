@@ -67,6 +67,15 @@ kind is for.
   run in the light project only.
 * **The accessibility check (axe, WCAG 2.1 AA)** runs a sample of pages in both
   themes inside the same Playwright suite.
+* **The check on the built package** (`check:dist`, before publishing and in
+  CI) holds what only the built file shows: the directive, the stylesheet
+  import, the rules of ADR-0021 - and the **residue**: an entry that imports a
+  built entry and uses nothing is bundled, and what remains must stay under one
+  budget. An unmarked call at the top of a module fails it, named.
+* **The benchmark pages** of the charts, the table, the schedule and core's
+  tree are no tests. They are opened by hand (or driven by a script through
+  their `data-role` names), they assert nothing, and their figures are written
+  into the package's capability record with the machine they were taken on.
 
 ## Pure modules (the checkable seam)
 
@@ -116,9 +125,10 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 * Photographs are taken only with the code **collapsed**. An open code block
   would tie the baseline to the source, and a renamed variable in an example
   would become an image diff.
-* The charts' benchmark example is excluded from the screenshots (R-5.1). It is
-  the one gap in a derived list, and it carries its rule at the place where it is
-  made (`packages/charts/tests-visual/pages.ts`).
+* The benchmark examples of the charts, the table, the schedule and core are
+  excluded from the screenshots (R-5.1 for the charts). They are the gaps in a
+  derived list, and each carries its rule at the place where it is made (the
+  package's `tests-visual/pages.ts`).
 * **A demo resolves the neighbouring package's stylesheet from source, and that
   is the one path exception.** `@umriss-ui/core/styles.css` exists only after a
   build, so the demos of `@umriss-ui/table` and `@umriss-ui/charts` alias it to a

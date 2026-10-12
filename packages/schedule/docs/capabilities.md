@@ -64,3 +64,17 @@ comparing every pair. None was built. After the two changes above, an event at
 5,000 subtasks costs 0.4 to 1.2 ms in all and its frame ends where the frame of
 a plan of 200 ends, so there is nothing left on this page for any of them to
 win. They become worth trying when a plan several times this size is measured.
+
+### Where the figures stand
+
+The same page, machine and method as the reference run, after the changes
+above; 2026-10-12, one run of the page per row.
+
+| Plan | First render | Walk, one bar (ms/event / ms to end of frame) | Walk, many | Pan | Zoom |
+|---|---|---|---|---|---|
+| 200 subtasks | 30.1 | 0.19 / 17.3 | 0.30 / 17.3 | 0.11 / 20.2 | 0.07 / 20.8 |
+| 1,000 subtasks | 31.2 | 0.26 / 17.2 | 0.64 / 17.3 | 0.08 / 21.3 | 0.06 / 21.7 |
+| 5,000 subtasks | 47.6 | 0.49 / 17.2 | 1.90 / 17.2 | 0.07 / 23.2 | 0.04 / 23.7 |
+
+A hover's frame no longer grows with the plan. A pan's or a zoom's still does:
+the frame lays the plan out and draws it, once.
