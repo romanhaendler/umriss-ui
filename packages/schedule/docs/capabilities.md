@@ -51,3 +51,7 @@ Figures are the pointer walks of the benchmark page, as above (ms per event / re
 | | 200 subtasks | Walk, many | 0.41 / 202 / 18.8 | 0.18 / 202 / 17.1 |
 | | 5,000 subtasks | Walk, one bar | 0.46 / 239 / 23.9 | 0.42 / 239 / 17.2 |
 | | 5,000 subtasks | Walk, many | 1.46 / 214 / 23.5 | 1.20 / 214 / 17.1 |
+| A pan or zoom lays the plan out once per frame, however many events the frame holds (the layout is made when read, the rest in the frame); a dependency wholly outside the view is not stroked. Pan and zoom rows read ms per event / ms to end of frame | 200 subtasks | Pan | 0.44 / 19.0 | 0.14 / 19.7 |
+| | 200 subtasks | Wheel zoom | 0.36 / 19.0 | 0.09 / 19.1 |
+| | 5,000 subtasks | Pan | 2.27 / 23.3 | 0.07 / 24.2 |
+| | 5,000 subtasks | Wheel zoom | 2.21 / 23.1 | 0.05 / 22.1 |

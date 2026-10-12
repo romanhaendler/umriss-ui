@@ -1,6 +1,6 @@
 # 20 - Panning a large plan stays smooth
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 

@@ -12,6 +12,7 @@ import {
   CAP,
   CAP_INSET,
   inView,
+  pathInView,
   milestoneMark,
   subtaskBox,
   dependencyPath,
@@ -182,7 +183,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
     if (layer.kind === "blocked" || layer.kind === "milestones") continue;
     const own = new Set<unknown>(layer.data);
     if (layer.kind === "dependencies") {
-      for (const path of view.paths) if (own.has(path.dependency)) drawDependency(ctx, input, path, false);
+      for (const path of view.paths) if (own.has(path.dependency) && pathInView(path, view.width, view.height)) drawDependency(ctx, input, path, false);
     } else {
       for (const box of view.boxes) if (own.has(box.subtask)) drawSubtask(ctx, input, box, 1);
     }
