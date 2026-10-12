@@ -487,6 +487,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Benchmark",
         sentence: "Up to two hundred thousand rows, measured in this browser rather than claimed: the first render, a scroll step, a sort, a keystroke, a page, a fold, a hidden column and a re-render of the caller.",
         about: ["The figures come from the clock around each change, with nothing added to the table. The reference figures in `packages/table/docs/capabilities.md` come from here."],
+        keysOf: ["first-table", "virtualisation", core("Button")],
         types: [],
         exports: ["useTable"],
       },

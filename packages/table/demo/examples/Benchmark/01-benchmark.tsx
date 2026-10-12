@@ -15,7 +15,7 @@
 
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Badge, Button, Stack } from "@umriss-ui/core";
+import { Badge, Button, Stack, Text } from "@umriss-ui/core";
 import { Pagination, Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Measure two hundred thousand rows";
@@ -270,17 +270,17 @@ export default function Benchmark() {
       </Stack>
       <dl style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", margin: 0 }}>
         <div>
-          <dt>Status</dt>
-          <dd data-role="status" style={{ margin: 0 }}>{status}</dd>
+          <Text as="dt">Status</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="status">{status}</Text>
         </div>
         <div>
-          <dt>Rows</dt>
-          <dd data-role="rows" style={{ margin: 0 }}>{load.rows.length}</dd>
+          <Text as="dt">Rows</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="rows">{load.rows.length}</Text>
         </div>
         {FIGURES.map((f) => (
           <div key={f}>
-            <dt>{f} (ms)</dt>
-            <dd data-role={f} style={{ margin: 0 }}>{figures[f] ?? "-"}</dd>
+            <Text as="dt">{f} (ms)</Text>
+            <Text as="dd" mono style={{ margin: 0 }} data-role={f}>{figures[f] ?? "-"}</Text>
           </div>
         ))}
       </dl>

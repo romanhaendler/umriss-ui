@@ -6,6 +6,7 @@
    it measures the moment it runs. */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Button, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
 import type { Dependency, ScheduleInteraction, Subtask, Task } from "../../../src";
 
@@ -242,47 +243,47 @@ export default function Benchmark() {
   const busy = status === "running";
   return (
     <>
-      <div className="demo-actions">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
         {(Object.keys(SIZES) as Size[]).map((s) => (
-          <button key={s} className="demo-button" data-role={`size-${s}`} disabled={busy} onClick={() => show(s)}>
+          <Button key={s} size="sm" data-role={`size-${s}`} disabled={busy} onClick={() => show(s)}>
             {SIZES[s].subtasks.toLocaleString("en-US")} subtasks
-          </button>
+          </Button>
         ))}
         {RUNS.map(([name, label]) => (
-          <button
+          <Button
             key={name}
-            className="demo-button"
+            size="sm"
             data-role={`run-${name}`}
             disabled={busy}
             onClick={() => void measure(name, host.current, meter, sinks, STEPS[name]!.step, STEPS[name]!.drag)}
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
-      <dl>
+      <dl style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", margin: 0 }}>
         <div>
-          <dt>Status</dt>
-          <dd data-role="status">{status}</dd>
+          <Text as="dt">Status</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="status">{status}</Text>
         </div>
         <div>
-          <dt>Lanes</dt>
-          <dd data-role="plan-lanes">{data.lanes.length}</dd>
+          <Text as="dt">Lanes</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="plan-lanes">{data.lanes.length}</Text>
         </div>
         <div>
-          <dt>Subtasks</dt>
-          <dd data-role="plan-subtasks">{data.subtasks.length}</dd>
+          <Text as="dt">Subtasks</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="plan-subtasks">{data.subtasks.length}</Text>
         </div>
         <div>
-          <dt>Dependencies</dt>
-          <dd data-role="plan-dependencies">{data.dependencies.length}</dd>
+          <Text as="dt">Dependencies</Text>
+          <Text as="dd" mono style={{ margin: 0 }} data-role="plan-dependencies">{data.dependencies.length}</Text>
         </div>
         {FIGURES.map(([role, name]) => {
           const value = figures[role];
           return (
             <div key={role}>
-              <dt>{name}</dt>
-              <dd data-role={role}>{value === undefined ? "-" : value.toFixed(role.endsWith("ms") ? 2 : 0)}</dd>
+              <Text as="dt">{name}</Text>
+              <Text as="dd" mono style={{ margin: 0 }} data-role={role}>{value === undefined ? "-" : value.toFixed(role.endsWith("ms") ? 2 : 0)}</Text>
             </div>
           );
         })}
