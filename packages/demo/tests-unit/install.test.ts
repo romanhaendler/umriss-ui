@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { dependencyLine, installCommand } from "../src/tooling/install";
 
-const REACT = { react: ">=18", "react-dom": ">=18" };
+const REACT = { react: ">=19", "react-dom": ">=19" };
 
 describe("installCommand", () => {
   it("names core alone", () => {

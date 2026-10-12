@@ -16,10 +16,12 @@ lint rule over `packages/charts/src/**` holds that fast.
 pnpm add @umriss-ui/charts
 ```
 
-React 18 or 19 as a peer, and nothing else; the unit tests run against 18.3 and
-19 in CI. `@umriss-ui/core` is **not** a
+React 19 or newer as a peer, and nothing else. `@umriss-ui/core` is **not** a
 dependency and not a peer dependency — if an application uses both packages, it
 does so because it chose to, not because this one required it (ADR-0020).
+
+The package ships ES2022 syntax; an application that serves older browsers
+transpiles it itself.
 
 Every entry, `./wording/de` included, begins with `"use client"`, the directive a framework
 with Server Components reads to treat a module as client code. No test runs

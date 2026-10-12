@@ -9,11 +9,10 @@
    can then hang a tooltip on a `Stat`, measure a `Card` or set a
    `data-testid`, which is the whole point.
 
-   Beside the four it asks for `forwardRef`. React 19 hands a plain function
-   component its `ref` as an ordinary prop, so a component that merely spreads
-   `...rest` passes the runtime check by accident - and drops the ref under
-   React 18, where the package's peer range begins. Only `forwardRef` carries
-   it on both, and gives the prop its type.
+   It does not ask how the ref gets there. React 19 hands a plain function
+   component its `ref` as an ordinary prop, so a component passes wrapped in
+   `forwardRef` or plain, as long as the ref arrives at the root; both forms
+   stand in the package while the wrappers are being taken away.
 
    The list of exports is read, not written: a new component that stands in
    neither the cases nor the exceptions fails the first test. */
@@ -240,8 +239,6 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
    on the main action. */
 const STYLE_ON_WRAPPER = new Set(Object.keys(CLASS_ON_WRAPPER).filter((name) => name !== "SplitButton"));
 
-const FORWARD_REF =Symbol.for("react.forward_ref");
-
 /** What the package exports that React can render: a component is a function
     with a capital name or a `forwardRef` object. Constants (`DEFAULT_*`) are
     neither. */
@@ -266,7 +263,6 @@ describe("Every exported component passes ref, class, style and the rest through
   });
 
   it.each(Object.keys(CASES).sort())("%s", (name) => {
-    const component = (core as Record<string, unknown>)[name] as { $$typeof?: symbol };
     const ref = createRef<Element>();
     const { container } = render(
       CASES[name]!({
@@ -280,7 +276,6 @@ describe("Every exported component passes ref, class, style and the rest through
     /* The four are asked together, so that one failure names everything that
        is missing - not only the first. */
     expect({
-      forwardRef: component.$$typeof === FORWARD_REF,
       ref: element instanceof Element,
       className:
         name in CLASS_ON_WRAPPER
@@ -294,7 +289,7 @@ describe("Every exported component passes ref, class, style and the rest through
           : false,
       rest: element?.getAttribute("data-probe") === name,
       root: element ? (ROOT[name]?.(element) ?? true) : false,
-    }).toEqual({ forwardRef: true, ref: true, className: true, style: true, rest: true, root: true });
+    }).toEqual({ ref: true, className: true, style: true, rest: true, root: true });
     // Nothing else in the rendered tree carries the probe: it went to one place.
     expect(container.ownerDocument.querySelectorAll(`[data-probe="${name}"]`)).toHaveLength(1);
   });

@@ -66,8 +66,8 @@
   },
   "peerDependencies": {
     "@umriss-ui/core": "workspace:^",
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "devDependencies": {
     "@fontsource/geist-mono": "^5.3.0",

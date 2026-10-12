@@ -1,6 +1,6 @@
 # Decisions
 
-Sixty-one decisions, each one written where it was made and kept afterwards. An
+Sixty-two decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -75,5 +75,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | Chart kinds are an open set | accepted, supersedes ADR-0032 in two points | charts |
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | Never built: form validation, layout editor, time zones | accepted, extends ADR-0032 | scope |
 | [0061](0061-the-csv-follows-the-language-in-use.md) | The CSV follows the language in use | CSV follows the active language | accepted, extends ADR-0024 | table, language |
+| [0062](0062-react-19-is-the-floor.md) | React 19 is the floor: the peers are `>=19`, a component takes `ref` as a prop and is never wrapped, and no code reads React's version | React 19 is the floor | accepted | core, packages |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

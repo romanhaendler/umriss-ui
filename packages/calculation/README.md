@@ -15,8 +15,11 @@ pnpm add @umriss-ui/calculation @umriss-ui/core
 ```
 
 `@umriss-ui/core` is a **peer dependency**: the calculation takes its styling
-regime, formats, wording, assessment and freshness from there. React 18 or 19
-as a peer as well; the unit tests run against 18.3 and 19 in CI.
+regime, formats, wording, assessment and freshness from there. React 19 or newer
+as a peer as well.
+
+The package ships ES2022 syntax; an application that serves older browsers
+transpiles it itself.
 
 Every entry begins with `"use client"`, the directive a framework
 with Server Components reads to treat a module as client code. No test runs

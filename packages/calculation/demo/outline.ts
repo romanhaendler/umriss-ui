@@ -24,7 +24,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Show a figure together with how it came about (a derivation, a statement of account): the operator before each number, the result above a double rule, and every figure opening into the numbers it came from.",
         about: [
-          "The command brings the core package along, a peer dependency: it gives the calculation its formats, its wording and the assessment of targets and limits. React 18 or 19 is a peer as well and stays the application's own.",
+          "The command brings the core package along, a peer dependency: it gives the calculation its formats, its wording and the assessment of targets and limits. React 19 or newer is a peer as well and stays the application's own.",
           "The stylesheet loads itself: the package imports it and marks CSS as a side effect, so a bundler keeps it. `@umriss-ui/calculation/styles.css` stays exported for setups that link stylesheets by hand.",
           "You write the figure as elements and hand in only the givens; the calculation performs every operation it shows, so the screen cannot disagree with the number. Start with [Calculation](#/calculation).",
         ],
