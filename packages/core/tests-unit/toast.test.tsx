@@ -7,7 +7,7 @@
 
 import TOKENS from "../src/styles/tokens.css?raw";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, useEffect } from "react";
+import { StrictMode, act, useEffect } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import type { ToastTone } from "../src/components/Toast";
@@ -382,5 +382,164 @@ describe("Toast – Alt+T", () => {
     fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
     expect(screen.queryByRole("region")).toBeNull();
     expect(document.activeElement).toBe(document.body);
+  });
+});
+
+/* jsdom has no top layer and no Popover API: these run the fallback, a plain
+   fixed box inside the dialog. The setup's `showModal()` and `close()` only
+   set and remove `open`; the tracker's callback is a microtask. */
+describe("Toast – inside a modal dialog", () => {
+  const dialogs: HTMLDialogElement[] = [];
+  const dialog = () => {
+    const element = document.createElement("dialog");
+    document.body.append(element);
+    dialogs.push(element);
+    return element;
+  };
+  const settle = () => act(async () => {});
+  const open = async (element: HTMLDialogElement) => {
+    act(() => element.showModal());
+    await settle();
+  };
+  const close = async (element: HTMLDialogElement) => {
+    act(() => element.close());
+    await settle();
+  };
+  const region = () => document.querySelector("[data-edge]")!;
+
+  afterEach(() => {
+    dialogs.splice(0).forEach((element) => element.remove());
+  });
+
+  const mountIn = (portalTarget?: HTMLElement | (() => HTMLElement | null), strict = false) => {
+    const apiRef: { current: Api | null } = { current: null };
+    function Grab() {
+      const api = useToast();
+      useEffect(() => {
+        apiRef.current = api;
+      });
+      return null;
+    }
+    const tree = (
+      <UmrissProvider portalTarget={portalTarget}>
+        <ToastProvider>
+          <Grab />
+        </ToastProvider>
+      </UmrissProvider>
+    );
+    render(strict ? <StrictMode>{tree}</StrictMode> : tree);
+    return <T,>(fn: (a: Api) => T): T => {
+      let out!: T;
+      act(() => {
+        out = fn(apiRef.current!);
+      });
+      return out;
+    };
+  };
+
+  it("stands in a dialog opened with showModal(), before and after a toast arrives", async () => {
+    const call = mountIn();
+    const first = dialog();
+    await open(first);
+    expect(first.contains(region())).toBe(true);
+    call((t) => t.toast({ title: "Saved" }));
+    expect(first.contains(region())).toBe(true);
+  });
+
+  it("stands in a dialog that was open before the provider mounted", async () => {
+    const first = dialog();
+    first.showModal();
+    mountIn();
+    await settle();
+    expect(first.contains(region())).toBe(true);
+  });
+
+  it("returns to the body when the dialog closes", async () => {
+    const first = dialog();
+    mountIn();
+    await open(first);
+    await close(first);
+    expect(region().parentElement).toBe(document.body);
+  });
+
+  it("returns to the provider's portal target", async () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const first = dialog();
+    mountIn(host);
+    expect(host.contains(region())).toBe(true);
+    await open(first);
+    expect(first.contains(region())).toBe(true);
+    await close(first);
+    expect(host.contains(region())).toBe(true);
+    host.remove();
+  });
+
+  it("finds a portal target that enters the document after the provider", () => {
+    const find = () => document.getElementById("late-host");
+    const call = mountIn(find);
+    expect(region().parentElement).toBe(document.body);
+    const host = document.createElement("div");
+    host.id = "late-host";
+    document.body.append(host);
+    call((t) => t.toast({ title: "Saved" }));
+    expect(host.contains(region())).toBe(true);
+    host.remove();
+  });
+
+  it("follows the dialog opened last, and goes to the first when the second closes", async () => {
+    const first = dialog();
+    const second = dialog();
+    mountIn();
+    await open(first);
+    await open(second);
+    expect(second.contains(region())).toBe(true);
+    await close(second);
+    expect(first.contains(region())).toBe(true);
+  });
+
+  it("is given back when the dialog leaves the document while open", async () => {
+    const first = dialog();
+    mountIn();
+    await open(first);
+    act(() => first.remove());
+    await settle();
+    expect(document.body.contains(region())).toBe(true);
+    expect(first.contains(region())).toBe(false);
+  });
+
+  it("stands in the body without a dialog, with no popover attribute", async () => {
+    const call = mountIn();
+    call((t) => t.toast({ title: "Saved" }));
+    expect(region().parentElement).toBe(document.body);
+    expect(region().hasAttribute("popover")).toBe(false);
+  });
+
+  it("runs the action and reports it when pressed inside the dialog", async () => {
+    const call = mountIn();
+    const first = dialog();
+    await open(first);
+    const onClick = vi.fn();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Failed", duration: 0, action: { label: "Retry", onClick }, onClose }));
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledWith("action");
+  });
+
+  it("has both live regions inside the dialog before the next message arrives", async () => {
+    mountIn();
+    const first = dialog();
+    await open(first);
+    expect(first.querySelector("[role=status]")).not.toBeNull();
+    expect(first.querySelector("[role=alert]")).not.toBeNull();
+  });
+
+  it("is one region, inside the dialog, under StrictMode", async () => {
+    mountIn(undefined, true);
+    const first = dialog();
+    await open(first);
+    expect(document.querySelectorAll("[data-edge]")).toHaveLength(1);
+    expect(first.contains(region())).toBe(true);
   });
 });
