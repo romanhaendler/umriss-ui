@@ -1,6 +1,6 @@
 # 01 - Toasts follow the topmost modal dialog
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

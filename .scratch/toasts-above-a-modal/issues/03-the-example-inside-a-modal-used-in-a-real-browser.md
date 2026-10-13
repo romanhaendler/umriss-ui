@@ -1,6 +1,6 @@
 # 03 - The example "inside a modal", used in a real browser
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

@@ -1,6 +1,6 @@
 # 02 - A move is neither seen nor heard
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

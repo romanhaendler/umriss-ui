@@ -29,6 +29,11 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.36.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
 ## 0.35.0 – React 19 is the floor, and a zoomed chart draws what it shows (Oct. 2026)
 
 ### Changed

@@ -1,6 +1,6 @@
 # 05 - A tooltip lies above the toasts in a dialog
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

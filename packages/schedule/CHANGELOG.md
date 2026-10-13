@@ -16,6 +16,11 @@ moves from here under the rule above.
 
 ---
 
+## 0.36.0 – No change of its own (Oct. 2026)
+
+Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.36; the peer ranges are
+`^0.36.0`. No change of its own.
+
 ## 0.35.0 – React 19 is the floor, and a hover that leaves the plan alone (Oct. 2026)
 
 Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.35; the peer ranges are
