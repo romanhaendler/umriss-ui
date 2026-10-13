@@ -1,0 +1,724 @@
+<title>Dashboard-Anordnung Prototyp</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: question and walkthroughs on top, the switches under them, then one
+     simulated application window at a chosen width, and what is stored below it. */
+  :root {
+    --bg: #f4f4f5;
+    --surface: #ffffff;
+    --sunken: #e9e9eb;
+    --fg: #171717;
+    --fg-2: #565656;
+    --muted: #8b8b8b;
+    --edge: rgba(23, 23, 23, 0.10);
+    --edge-strong: rgba(23, 23, 23, 0.22);
+    --accent: #0e7d72;
+    --accent-subtle: #e9f4f2;
+    --on-accent: #ffffff;
+    --ok: #217a4b;
+    --warn: #8a5c00;
+    --warn-subtle: #f7efdb;
+    --bad: #b13636;
+    --shadow: 0 1px 2px rgba(23, 23, 23, 0.06), 0 0 0 1px rgba(23, 23, 23, 0.08);
+    --lift: 0 12px 28px rgba(23, 23, 23, 0.22), 0 0 0 1px rgba(23, 23, 23, 0.12);
+    --font: "Geist", -apple-system, "Segoe UI", system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f0f11; --surface: #19191c; --sunken: #26262a; --fg: #ededed; --fg-2: #a5a5ab;
+      --muted: #77777e; --edge: rgba(255, 255, 255, 0.11); --edge-strong: rgba(255, 255, 255, 0.24);
+      --accent: #17a292; --accent-subtle: #142e2b; --on-accent: #072522; --ok: #4fae7c;
+      --warn: #d0a24d; --warn-subtle: #2b2415; --bad: #d0655c;
+      --shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+      --lift: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f11; --surface: #19191c; --sunken: #26262a; --fg: #ededed; --fg-2: #a5a5ab;
+    --muted: #77777e; --edge: rgba(255, 255, 255, 0.11); --edge-strong: rgba(255, 255, 255, 0.24);
+    --accent: #17a292; --accent-subtle: #142e2b; --on-accent: #072522; --ok: #4fae7c;
+    --warn: #d0a24d; --warn-subtle: #2b2415; --bad: #d0655c;
+    --shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --lift: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font); }
+  h1, h2, h3, p, ol, ul { margin: 0; }
+  ol, ul { padding: 0; list-style: none; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:focus-visible, .w:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .page { max-width: 1680px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 72px; display: flex; flex-direction: column; gap: 28px; }
+
+  .intro { display: flex; flex-direction: column; gap: 10px; }
+  .badge { align-self: flex-start; font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn); background: var(--warn-subtle); padding: 5px 8px; border-radius: 4px; }
+  h1 { font-size: 24px; line-height: 1.2; font-weight: 600; text-wrap: balance; }
+  .intro p { max-width: 72ch; color: var(--fg-2); }
+  h2 { font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+
+  /* Walkthroughs */
+  .walks { background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tabs button { border: 0; background: none; padding: 6px 12px; border-radius: 6px; color: var(--fg-2); font-weight: 500; }
+  .tabs button[aria-selected="true"] { background: var(--accent-subtle); color: var(--accent); }
+  .walk-text { max-width: 78ch; color: var(--fg-2); }
+  .walk-text strong { color: var(--fg); font-weight: 600; }
+  .steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .steps button { border: 0; background: var(--sunken); padding: 7px 12px; border-radius: 6px; display: flex; gap: 8px; align-items: baseline; text-align: left; }
+  .steps button .n { font: 500 11px/1 var(--mono); color: var(--muted); }
+  .steps button.next { background: var(--accent); color: var(--on-accent); }
+  .steps button.next .n { color: var(--on-accent); opacity: 0.75; }
+  .steps button:disabled { cursor: default; opacity: 0.55; }
+  .steps button.reset { background: none; box-shadow: inset 0 0 0 1px var(--edge-strong); }
+  .see { max-width: 78ch; padding: 10px 12px; border-radius: 8px; background: var(--accent-subtle); }
+  .see:empty { display: none; }
+
+  /* Switches */
+  .controls { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end; }
+  .control { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .seg { display: inline-flex; flex-wrap: wrap; background: var(--sunken); border-radius: 8px; padding: 2px; gap: 2px; }
+  .seg button { border: 0; background: none; padding: 5px 10px; border-radius: 6px; color: var(--fg-2); }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); font-weight: 500; }
+  .seg button:disabled { opacity: 0.4; cursor: default; }
+  .width-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .width-row input[type="range"] { width: min(260px, 60vw); accent-color: var(--accent); }
+  .width-row output { font: 500 13px/1 var(--mono); font-variant-numeric: tabular-nums; min-width: 7ch; }
+
+  /* The simulated window */
+  .stage { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .scale-note { color: var(--muted); font-size: 12px; }
+  #scaler { width: 100%; overflow: hidden; }
+  #win { transform-origin: top left; background: var(--bg); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--edge-strong); padding: 0 16px 16px; }
+  .appbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-block: 12px; }
+  .appbar .name { font-size: 16px; font-weight: 600; margin-right: auto; }
+  .appbar .draft { color: var(--warn); font-size: 12px; }
+  .btn { border: 0; background: var(--surface); box-shadow: var(--shadow); padding: 6px 12px; border-radius: 6px; font-weight: 500; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+  .catalogue { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-bottom: 12px; color: var(--fg-2); }
+  .catalogue .btn { font-weight: 400; padding: 4px 10px; }
+
+  #canvas { position: relative; }
+  .w { position: absolute; background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+       transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease, box-shadow 180ms ease; }
+  .w-head { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px 2px; min-width: 0; }
+  .w-head h3 { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .w-size { margin-left: auto; font: 400 11px/1 var(--mono); color: var(--muted); white-space: nowrap; display: none; }
+  .w-body { flex: 1 1 auto; min-height: 0; padding: 4px 12px 10px; overflow: hidden; display: flex; gap: 12px; }
+  .w-tools { position: absolute; top: 5px; right: 5px; display: none; gap: 2px; background: var(--surface); box-shadow: var(--shadow); border-radius: 7px; padding: 2px; }
+  .w-tools button { border: 0; background: none; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 5px; font-size: 12px; }
+  .w-tools button:hover { background: var(--sunken); }
+
+  .editing .w { cursor: grab; touch-action: none; user-select: none; }
+  .editing .w-body { pointer-events: none; }
+  .editing .w-size { display: block; }
+  .editing .w:hover .w-tools, .editing .w:focus-within .w-tools, .editing .w:focus .w-tools { display: flex; }
+  @media (hover: none) { .editing .w .w-tools { display: flex; } }
+  .coords .w-tools [data-act="earlier"], .coords .w-tools [data-act="later"] { display: none; }
+  .w.dragging { transition: none; z-index: 5; box-shadow: var(--lift); cursor: grabbing; }
+  .w.fresh { box-shadow: 0 0 0 2px var(--accent); }
+  .w[data-type="abstand"] { background: none; box-shadow: none; }
+  .w[data-type="abstand"] .w-head { visibility: hidden; }
+  .editing .w[data-type="abstand"] { box-shadow: inset 0 0 0 1px var(--edge-strong); background: repeating-linear-gradient(135deg, transparent 0 7px, var(--edge) 7px 8px); }
+  .editing .w[data-type="abstand"] .w-head { visibility: visible; }
+  #slot { position: absolute; border-radius: 12px; border: 2px dashed var(--accent); background: var(--accent-subtle); transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease; }
+
+  /* Widget contents */
+  .kz { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+  .kz-value { font-size: 26px; line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kz-unit { font-size: 12px; color: var(--muted); margin-left: 4px; font-weight: 400; }
+  .kz-sub { font-size: 12px; color: var(--fg-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); border-radius: 2px; } .dot.bad { background: var(--bad); border-radius: 0; transform: rotate(45deg); }
+  .chart { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .chart svg { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
+  .chart .line { fill: none; stroke: var(--accent); stroke-width: 1.75; vector-effect: non-scaling-stroke; }
+  .chart .prev { fill: none; stroke: var(--muted); stroke-width: 1.25; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+  .chart .area { fill: var(--accent); opacity: 0.09; stroke: none; }
+  .chart .rule { fill: none; stroke: var(--edge); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--fg-2); }
+  .legend i { display: inline-block; width: 14px; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 5px; }
+  .legend i.p { border-top: 2px dashed var(--muted); }
+  .rows { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .rows li { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--edge); font-size: 13px; min-width: 0; }
+  .rows li:first-child { border-top: 0; }
+  .rows .t { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rows .m { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 8px 6px 0; white-space: nowrap; }
+  td { padding: 5px 8px 5px 0; border-top: 1px solid var(--edge); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0; }
+  td.num, th.num { text-align: right; }
+
+  /* What holds, what is stored */
+  .state { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px 40px; }
+  .state section { display: flex; flex-direction: column; gap: 10px; min-width: 0; border-top: 1px solid var(--edge-strong); padding-top: 12px; }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+  .facts dt { color: var(--fg-2); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .meter { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; margin-top: 5px; max-width: 220px; }
+  .meter i { display: block; height: 100%; background: var(--accent); }
+  .meter.low i { background: var(--bad); }
+  .alert { color: var(--bad); }
+  .stored li { display: flex; gap: 10px; padding: 4px 0; border-top: 1px solid var(--edge); min-width: 0; }
+  .stored li:first-child { border-top: 0; }
+  .stored .i { font: 400 12px/1.6 var(--mono); color: var(--muted); min-width: 2ch; text-align: right; }
+  .stored .t { flex: 1 1 0; min-width: 0; }
+  .stored .s { font: 400 12px/1.6 var(--mono); color: var(--fg-2); white-space: nowrap; }
+  .stored .changed .t { color: var(--accent); font-weight: 500; }
+  .stored .gone .t { text-decoration: line-through; color: var(--muted); }
+  .hint { color: var(--muted); font-size: 12px; max-width: 60ch; }
+
+  @media (prefers-reduced-motion: reduce) { .w, #slot { transition: none; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <span class="badge">Prototyp · Wegwerfcode</span>
+    <h1>Bleibt die räumliche Logik einer Anordnung erhalten?</h1>
+    <p>Ein Anwender ordnet sein Dashboard an einem Monitor an und öffnet es an einem anderen. Dieser Prototyp zeigt dieselbe gespeicherte Anordnung bei jeder Fensterbreite und lässt dich die Modelle umschalten, über die noch zu entscheiden ist: feste Spalten oder Spalten, die der Breite folgen; Lücken, die frei bleiben oder sich füllen; eine Reihenfolge oder freie Koordinaten.</p>
+  </header>
+
+  <section class="walks" aria-label="Geführte Fälle">
+    <h2>Geführte Fälle</h2>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <p class="walk-text" id="walk-text"></p>
+    <div class="steps" id="steps"></div>
+    <p class="see" id="see" aria-live="polite"></p>
+  </section>
+
+  <section class="controls" aria-label="Frei ausprobieren">
+    <div class="control">
+      <h2>Fensterbreite</h2>
+      <div class="width-row">
+        <div class="seg" id="presets">
+          <button data-w="390">Telefon</button><button data-w="820">Tablet</button><button data-w="1280">Laptop</button><button data-w="1920">Monitor</button><button data-w="2560">Ultrawide</button>
+        </div>
+        <input type="range" id="width" min="340" max="2600" step="10" aria-label="Fensterbreite in Pixeln">
+        <output id="width-out" for="width"></output>
+      </div>
+    </div>
+    <div class="control">
+      <h2>Spalten</h2>
+      <div class="seg" data-set="columns"><button data-val="fixed">Immer sechs</button><button data-val="follow">Folgen der Breite</button></div>
+    </div>
+    <div class="control">
+      <h2>Lücken</h2>
+      <div class="seg" data-set="packing"><button data-val="strict">Bleiben frei</button><button data-val="dense">Füllen sich</button></div>
+    </div>
+    <div class="control">
+      <h2>Gespeichert wird</h2>
+      <div class="seg" data-set="placement"><button data-val="sequence">Eine Reihenfolge</button><button data-val="coordinates">Koordinaten</button></div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Simuliertes Fenster">
+    <p class="scale-note" id="scale-note"></p>
+    <div id="scaler">
+      <div id="win">
+        <div class="appbar" id="appbar"></div>
+        <div class="catalogue" id="catalogue" hidden></div>
+        <div id="canvas"><div id="slot" hidden></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="state" aria-label="Zustand">
+    <section>
+      <h2>Was gerade gilt</h2>
+      <dl class="facts" id="facts"></dl>
+    </section>
+    <section>
+      <h2 id="stored-title">Was gespeichert ist</h2>
+      <ol class="stored" id="stored"></ol>
+      <p class="hint">Diese Liste ändert sich nur durch die Hand des Anwenders, nie durch die Fensterbreite.</p>
+    </section>
+  </section>
+</div>
+
+<script id="arrangement">
+// The part worth keeping: an arrangement and the picture it gives. No DOM.
+// A view is a list of widgets { id, type, size, options } - with col and row
+// added when coordinates are stored instead of an order.
+const Arrangement = (() => {
+  const GAP = 12, ROW = 112;
+  const spanOf = (types, widget) => types[widget.type].sizes[widget.size];
+  const byReading = (a, b) => a.row - b.row || a.col - b.col;
+  const overlap = (a, b) => a.col < b.col + b.w && b.col < a.col + a.w && a.row < b.row + b.h && b.row < a.row + a.h;
+
+  // A sequence becomes a picture. Strict: each widget goes to the first place
+  // at or after the one before it, so the drawn order is the stored order.
+  // Dense: each widget goes to the first place at all, so later ones move up.
+  function pack(view, types, columns, dense) {
+    const taken = new Set(), placed = [];
+    const isFree = (r, c, w, h) => {
+      for (let dr = 0; dr < h; dr++) for (let dc = 0; dc < w; dc++) if (taken.has((r + dr) + "," + (c + dc))) return false;
+      return true;
+    };
+    let cursor = 0;
+    for (const widget of view) {
+      let [w, h] = spanOf(types, widget);
+      w = Math.min(w, columns);
+      for (let i = dense ? 0 : cursor; ; i++) {
+        const r = Math.floor(i / columns), c = i % columns;
+        if (c + w > columns || !isFree(r, c, w, h)) continue;
+        for (let dr = 0; dr < h; dr++) for (let dc = 0; dc < w; dc++) taken.add((r + dr) + "," + (c + dc));
+        placed.push({ id: widget.id, col: c, row: r, w, h });
+        cursor = i;
+        break;
+      }
+    }
+    return placed;
+  }
+
+  function atCoordinates(view, types, columns) {
+    return view.map((widget) => {
+      let [w, h] = spanOf(types, widget);
+      w = Math.min(w, columns);
+      return { id: widget.id, col: Math.max(0, Math.min(widget.col, columns - w)), row: Math.max(0, widget.row), w, h };
+    });
+  }
+
+  // Coordinates only: the widget just moved stays, whatever it lands on is pushed down.
+  function settle(view, types, columns, movedId) {
+    const boxes = atCoordinates(view, types, columns);
+    const moved = boxes.find((b) => b.id === movedId);
+    const done = moved ? [moved] : [];
+    for (const box of boxes.filter((b) => b.id !== movedId).sort(byReading)) {
+      while (done.some((d) => overlap(d, box))) box.row++;
+      done.push(box);
+    }
+    return view.map((widget) => {
+      const box = done.find((d) => d.id === widget.id);
+      return { ...widget, col: box.col, row: box.row };
+    });
+  }
+
+  // model: { columns: "fixed" | "follow", count, minColumn, followColumn,
+  //          packing: "strict" | "dense", placement: "sequence" | "coordinates" }
+  function layout(view, types, model, width) {
+    let columns, form = "grid";
+    if (model.columns === "fixed") {
+      columns = model.count;
+      if ((width - GAP * (columns - 1)) / columns < model.minColumn) { columns = 1; form = "list"; }
+    } else {
+      columns = Math.max(1, Math.floor((width + GAP) / (model.followColumn + GAP)));
+      if (columns === 1) form = "list";
+    }
+    const stored = model.placement === "coordinates";
+    const placed = stored && form === "grid"
+      ? atCoordinates(view, types, columns)
+      : pack(stored ? [...view].sort(byReading) : view, types, columns, !stored && model.packing === "dense");
+    const colWidth = (width - GAP * (columns - 1)) / columns;
+    const boxes = placed.map((p) => ({
+      ...p,
+      left: p.col * (colWidth + GAP), top: p.row * (ROW + GAP),
+      width: p.w * colWidth + (p.w - 1) * GAP, height: p.h * ROW + (p.h - 1) * GAP,
+    }));
+    const rows = Math.max(0, ...placed.map((p) => p.row + p.h));
+    return { form, columns, colWidth, boxes, rows, height: rows ? rows * ROW + (rows - 1) * GAP : 0 };
+  }
+
+  // Who stands beside whom and above whom: the spatial logic, as a set of sentences.
+  function neighbours(boxes) {
+    const set = new Set();
+    for (const a of boxes) for (const b of boxes) {
+      if (a === b) continue;
+      if (a.col + a.w === b.col && a.row < b.row + b.h && b.row < a.row + a.h) set.add(a.id + " neben " + b.id);
+      if (a.row + a.h === b.row && a.col < b.col + b.w && b.col < a.col + a.w) set.add(a.id + " über " + b.id);
+    }
+    return set;
+  }
+
+  const moveTo = (view, id, index) => {
+    const widget = view.find((w) => w.id === id), rest = view.filter((w) => w.id !== id);
+    return [...rest.slice(0, index), widget, ...rest.slice(index)];
+  };
+  const shift = (view, id, by) => {
+    const i = view.findIndex((w) => w.id === id);
+    return moveTo(view, id, Math.max(0, Math.min(view.length - 1, i + by)));
+  };
+  const resize = (view, id, size) => view.map((w) => (w.id === id ? { ...w, size } : w));
+  const remove = (view, id) => view.filter((w) => w.id !== id);
+
+  // Dragging in a sequence: the place in the order whose picture puts the widget
+  // nearest to where it is held. The order it has now wins a tie.
+  function nearestPlace(view, types, model, width, id, x, y) {
+    const distance = (candidate) => {
+      const box = layout(candidate, types, model, width).boxes.find((b) => b.id === id);
+      return (box.left - x) ** 2 + (box.top - y) ** 2;
+    };
+    let best = view, least = distance(view);
+    for (let i = 0; i < view.length; i++) {
+      const candidate = moveTo(view, id, i), d = distance(candidate);
+      if (d < least) { least = d; best = candidate; }
+    }
+    return best;
+  }
+
+  // Dragging with coordinates: the cell under the widget's corner.
+  function toCell(view, types, model, width, id, x, y) {
+    const { colWidth, columns } = layout(view, types, model, width);
+    const col = Math.round(x / (colWidth + GAP)), row = Math.max(0, Math.round(y / (ROW + GAP)));
+    return settle(view.map((w) => (w.id === id ? { ...w, col, row } : w)), types, columns, id);
+  }
+
+  const toCoordinates = (view, types, columns) => {
+    const placed = pack(view, types, columns, false);
+    return view.map((w) => { const p = placed.find((b) => b.id === w.id); return { ...w, col: p.col, row: p.row }; });
+  };
+  const toSequence = (view) => [...view].sort(byReading).map(({ col, row, ...w }) => w);
+
+  return { GAP, ROW, spanOf, byReading, pack, settle, layout, neighbours, moveTo, shift, resize, remove, nearestPlace, toCell, toCoordinates, toSequence };
+})();
+if (typeof module !== "undefined") module.exports = Arrangement;
+</script>
+
+<script>
+// The throwaway shell around it.
+const FIGURES = {
+  Bestellungen: { value: "1 284", unit: "pro Tag", verdict: "ok", sub: "+3,1 % zur Vorwoche" },
+  Auslastung: { value: "87,4", unit: "%", verdict: "ok", sub: "im Ziel" },
+  Reklamationen: { value: "2,9", unit: "%", verdict: "warn", sub: "knapp über dem Ziel" },
+  Liefertreue: { value: "96,2", unit: "%", verdict: "ok", sub: "im Ziel" },
+  Durchlaufzeit: { value: "4,6", unit: "Tage", verdict: "ok", sub: "−0,3 zur Vorwoche" },
+  Rückstand: { value: "38", unit: "Aufträge", verdict: "bad", sub: "Ziel verfehlt" },
+};
+const TYPES = {
+  kennzahl: { name: "Kennzahl", sizes: { klein: [1, 1], breit: [2, 1] }, start: "klein", figure: true },
+  verlauf: { name: "Verlauf", sizes: { mittel: [2, 2], breit: [3, 2], "groß": [4, 2], voll: [6, 2] }, start: "breit", figure: true },
+  meldungen: { name: "Meldungen", sizes: { mittel: [2, 2], hoch: [2, 3], "groß": [3, 3] }, start: "mittel" },
+  auftraege: { name: "Aufträge", sizes: { breit: [3, 2], "groß": [4, 3], voll: [6, 3] }, start: "groß" },
+  abstand: { name: "Abstand", sizes: { klein: [1, 1], breit: [2, 1], hoch: [1, 2] }, start: "klein" },
+};
+const titleOf = (w) =>
+  w.type === "kennzahl" ? w.options.figure
+  : w.type === "verlauf" ? w.options.figure + " · Verlauf"
+  : w.type === "meldungen" ? "Offene Meldungen"
+  : w.type === "auftraege" ? "Aufträge" : "Abstand";
+
+const widget = (id, type, size, figure) => ({ id, type, size, options: figure ? { figure } : {} });
+const PRESET_A = () => [
+  widget("v1", "verlauf", "groß", "Bestellungen"),
+  widget("k1", "kennzahl", "klein", "Bestellungen"), widget("k2", "kennzahl", "klein", "Auslastung"),
+  widget("k3", "kennzahl", "klein", "Reklamationen"), widget("k4", "kennzahl", "klein", "Liefertreue"),
+  widget("m1", "meldungen", "hoch"), widget("a1", "auftraege", "groß"),
+  widget("v2", "verlauf", "breit", "Reklamationen"), widget("v3", "verlauf", "breit", "Liefertreue"),
+];
+const PRESET_B = () => [
+  widget("k1", "kennzahl", "klein", "Bestellungen"), widget("k2", "kennzahl", "klein", "Auslastung"),
+  widget("k3", "kennzahl", "klein", "Liefertreue"), widget("k4", "kennzahl", "klein", "Durchlaufzeit"),
+  widget("a1", "auftraege", "voll"),
+  widget("k5", "kennzahl", "klein", "Reklamationen"), widget("k6", "kennzahl", "klein", "Rückstand"),
+  widget("v1", "verlauf", "groß", "Reklamationen"),
+];
+
+const BASE = { columns: "fixed", count: 6, minColumn: 110, followColumn: 196, packing: "strict", placement: "sequence" };
+const S = { width: 1280, model: { ...BASE }, saved: PRESET_A(), draft: null, arrangedAt: 1280, drag: null, fresh: null, walk: { i: 0, step: 0, see: "" } };
+let nextId = 1;
+const INSET = 32; // the window's own padding, left and right
+const $ = (s) => document.querySelector(s);
+const view = () => S.draft ?? S.saved;
+const inner = (w) => w - INSET;
+const change = (fn) => { if (S.draft) S.draft = fn(S.draft); else { S.saved = fn(S.saved); S.arrangedAt = S.width; } };
+const coords = () => S.model.placement === "coordinates";
+
+function load(preset, model, width) {
+  S.model = { ...BASE, ...model }; S.width = width; S.arrangedAt = width; S.draft = null; S.drag = null; S.fresh = null;
+  S.saved = coords() ? Arrangement.toCoordinates(preset(), TYPES, S.model.count) : preset();
+}
+function setPlacement(placement) {
+  if (placement === S.model.placement) return;
+  const convert = (v) => v && (placement === "coordinates" ? Arrangement.toCoordinates(v, TYPES, S.model.count) : Arrangement.toSequence(v));
+  S.saved = convert(S.saved); S.draft = convert(S.draft);
+  S.model.placement = placement;
+  if (placement === "coordinates") S.model.columns = "fixed";
+}
+const act = {
+  edit() { S.draft = S.saved.map((w) => ({ ...w })); },
+  done() { if (S.draft) { S.saved = S.draft; S.draft = null; S.arrangedAt = S.width; } },
+  cancel() { S.draft = null; },
+  resize(id, size) {
+    change((v) => { const next = Arrangement.resize(v, id, size); return coords() ? Arrangement.settle(next, TYPES, S.model.count, id) : next; });
+  },
+  nextSize(id) {
+    const w = view().find((x) => x.id === id), names = Object.keys(TYPES[w.type].sizes);
+    act.resize(id, names[(names.indexOf(w.size) + 1) % names.length]);
+  },
+  remove(id) { change((v) => Arrangement.remove(v, id)); },
+  shift(id, by) { change((v) => Arrangement.shift(v, id, by)); },
+  nudge(id, dc, dr) {
+    change((v) => Arrangement.settle(v.map((w) => (w.id === id ? { ...w, col: w.col + dc, row: Math.max(0, w.row + dr) } : w)), TYPES, S.model.count, id));
+  },
+  add(type) {
+    const t = TYPES[type], used = view().filter((w) => w.type === type).map((w) => w.options.figure);
+    const figure = t.figure ? Object.keys(FIGURES).find((f) => !used.includes(f)) ?? Object.keys(FIGURES)[used.length % 6] : null;
+    const w = widget("n" + nextId++, type, t.start, figure);
+    change((v) => {
+      if (!coords()) return [...v, w];
+      const bottom = Math.max(0, ...Arrangement.layout(v, TYPES, S.model, inner(1280)).boxes.map((b) => b.row + b.h));
+      return [...v, { ...w, col: 0, row: bottom }];
+    });
+    S.fresh = w.id;
+  },
+};
+
+// ── Walkthroughs ──────────────────────────────────────────────────────
+const WALKS = [
+  {
+    tab: "Andere Monitore",
+    text: "Die Anordnung hat eine Absicht: links der <strong>Verlauf der Bestellungen</strong>, rechts daneben seine vier Kennzahlen als <strong>Block aus zwei mal zwei</strong>, darunter die <strong>Meldungen neben den Aufträgen</strong>, unten <strong>zwei Verläufe als Paar</strong>. Angeordnet wurde am Laptop. Zuerst folgt die Spaltenzahl der Fensterbreite, danach bleibt sie fest. Achte auf den Zähler „Nachbarn erhalten“ unter dem Fenster.",
+    reset: () => load(PRESET_A, { columns: "follow" }, 1280),
+    steps: [
+      ["Am großen Monitor öffnen", () => { S.width = 1920; }, "Neun Spalten statt sechs. Der Block aus vier Kennzahlen ist zu einer Zeile geworden, die Meldungen stehen jetzt rechts von den Aufträgen statt links, und das Paar der Verläufe ist auseinandergerissen."],
+      ["Am Tablet öffnen", () => { S.width = 820; }, "Drei Spalten. Drei Kennzahlen stehen unter dem Verlauf, die vierte allein in der nächsten Zeile, und unter ihr bleibt ein Loch. Von der Anordnung ist nur die Lesefolge geblieben."],
+      ["Feste Spalten einschalten", () => { S.model.columns = "fixed"; }, "Dasselbe Tablet, jetzt immer sechs Spalten. Das Bild ist das vom Laptop, nur schmaler: jeder Nachbar steht, wo er stand. Der Preis ist sichtbar – die Kennzahlen sind eng."],
+      ["Am großen Monitor öffnen", () => { S.width = 1920; }, "Wieder dasselbe Bild, breiter. Mehr Widgets nebeneinander gibt es nicht; die vorhandenen bekommen mehr Raum."],
+      ["Am Ultrawide öffnen", () => { S.width = 2560; }, "Hier zeigt sich der Preis am anderen Ende: eine Kennzahl ist über 400 Pixel breit. Die Anwendung kann dem Dashboard eine Höchstbreite geben."],
+      ["Am Telefon öffnen", () => { S.width = 390; }, "Unter der Mindestbreite je Spalte wechselt das Dashboard in die Liste: alles untereinander, in Lesefolge. Die räumliche Logik wird hier offen aufgegeben, nicht verzerrt. Gespeichert bleibt, was es war."],
+    ],
+  },
+  {
+    tab: "Lücken",
+    text: "Dieser Anwender hat seine erste Zeile mit vier Kennzahlen <strong>bewusst beendet</strong> – zwei Plätze bleiben frei, dann kommt die Auftragstabelle über die volle Breite. Ganz unten steht sein Thema Reklamationen: zwei Kennzahlen und der Verlauf dazu.",
+    reset: () => load(PRESET_B, {}, 1280),
+    steps: [
+      ["Lücken füllen sich von selbst", () => { S.model.packing = "dense"; }, "Reklamationen und Rückstand sind in die freie Stelle der ersten Zeile gesprungen. Der Platz ist genutzt, aber die untere Zeile, die ein Thema war, ist zerrissen – und niemand hat etwas angefasst. Gezeichnete und gespeicherte Folge stimmen nicht mehr überein."],
+      ["Lücken bleiben frei", () => { S.model.packing = "strict"; }, "Alles steht wieder, wie es angeordnet wurde. Die zwei freien Plätze oben sind eine Entscheidung des Anwenders."],
+      ["Die Lücke von Hand füllen", () => { act.shift("k6", -2); }, "Will er den Platz nutzen, schiebt er selbst etwas hinein: hier „Rückstand“ zwei Plätze nach vorn. In strikter Folge füllt sich eine Lücke, wenn der Anwender es will, und nur dann."],
+    ],
+  },
+  {
+    tab: "Bearbeiten",
+    text: "Das Dashboard steht still, bis der Anwender es bearbeiten will. Im Bearbeitungsmodus ist jedes Widget am ganzen Rahmen zu greifen; die Werkzeuge oben rechts im Widget tun dasselbe ohne Ziehen, und die Pfeiltasten verschieben das fokussierte Widget. <strong>Zieh nach dem ersten Schritt selbst</strong>, zum Beispiel die Meldungen rechts neben die Aufträge.",
+    reset: () => load(PRESET_A, {}, 1280),
+    steps: [
+      ["Bearbeiten", () => act.edit(), "Jetzt von Hand: ein Widget greifen und ziehen. Die anderen machen live Platz, der gestrichelte Rahmen zeigt, wo es landet. Unter dem Fenster steht der Entwurf; gespeichert ist noch nichts."],
+      ["Verlauf Bestellungen auf volle Breite", () => act.resize("v1", "voll"), "Der Verlauf nimmt die ganze Zeile. Die vier Kennzahlen rücken als Zeile darunter, Meldungen und Aufträge schließen an. Nichts überlappt und nichts wurde weggeschoben; rechts neben den Aufträgen bleibt unten ein freier Platz."],
+      ["Einen Abstand hinzufügen", () => act.add("abstand"), "Ein leeres Widget, das der Entwickler anbieten kann. Es landet wie jedes neue Widget am Ende und lässt sich an jede Stelle ziehen, an der eine absichtliche Lücke stehen soll."],
+      ["Abbrechen", () => act.cancel(), "Alles steht wie vor dem Bearbeiten. Der Entwurf ist verworfen, gemeldet wurde der Anwendung nichts."],
+    ],
+  },
+  {
+    tab: "Koordinaten zum Vergleich",
+    text: "Dieselbe Anordnung, aber gespeichert wird für jedes Widget <strong>Spalte und Zeile</strong> statt einer Reihenfolge. Der Anwender kann überall ablegen und Lücken lassen. Dafür muss das Dashboard entscheiden, was mit einem Widget geschieht, auf dem ein anderes landet.",
+    reset: () => load(PRESET_A, { placement: "coordinates" }, 1280),
+    steps: [
+      ["Bearbeiten", () => act.edit(), "Zieh ein Widget irgendwohin, auch weit nach unten ins Leere. Es bleibt dort."],
+      ["Kennzahl Auslastung entfernen", () => act.remove("k2"), "Das Loch bleibt, bis der Anwender es selbst schließt."],
+      ["Verlauf Bestellungen auf volle Breite", () => act.resize("v1", "voll"), "Was im Weg stand, wurde nach unten geschoben, und was darunter stand, gleich mit. Es bleiben Löcher, die der Anwender von Hand aufräumt."],
+      ["Dieselben zwei Schritte mit Reihenfolge", () => { load(PRESET_A, {}, 1280); act.edit(); act.remove("k2"); act.resize("v1", "voll"); }, "Zum Vergleich: Beim Entfernen ist der Rest nachgerückt. Freie Stellen gibt es auch hier, diesmal sogar größere, weil die hohen Meldungen den Aufträgen die Zeile versperren. Aber nichts wurde verdrängt, die Folge ist geblieben, und ein Zug räumt das meiste auf: die Meldungen hinter die Aufträge ziehen."],
+    ],
+  },
+];
+function startWalk(i) { S.walk = { i, step: 0, see: "" }; WALKS[i].reset(); render(); }
+function doStep(k) {
+  const walk = WALKS[S.walk.i];
+  if (k !== S.walk.step) return;
+  walk.steps[k][1]();
+  S.walk.step = k + 1; S.walk.see = walk.steps[k][2];
+  render();
+}
+
+// ── Widget contents: what a type shows at each size ───────────────────────
+function series(seed, n = 28) {
+  let s = [...seed].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7), v = 50;
+  return Array.from({ length: n }, () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    v = Math.max(10, Math.min(90, v + (s / 4294967296 - 0.5) * 24));
+    return v;
+  });
+}
+const path = (values) => values.map((v, i) => (i ? "L" : "M") + ((i / (values.length - 1)) * 100).toFixed(2) + " " + (100 - v).toFixed(2)).join(" ");
+function chartSvg(name, withPrevious) {
+  const now = series(name), d = path(now);
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <path class="rule" d="M0 25H100M0 50H100M0 75H100"/>
+    <path class="area" d="${d} L100 100 L0 100 Z"/>
+    ${withPrevious ? `<path class="prev" d="${path(series(name + " Vorwoche"))}"/>` : ""}
+    <path class="line" d="${d}"/></svg>`;
+}
+const MESSAGES = [
+  ["bad", "Lieferung 4471 überfällig", "Versand", "12 min"], ["warn", "Reklamation zu Auftrag 4418", "Qualität", "34 min"],
+  ["warn", "Bestand Karton B2 niedrig", "Lager", "1 h"], ["ok", "Wartung Linie 3 abgeschlossen", "Technik", "2 h"],
+  ["warn", "Rückfrage Kunde Brandt", "Vertrieb", "3 h"],
+];
+const CUSTOMERS = ["Brandt GmbH", "Ostwind AG", "Keller & Söhne", "Nordlicht KG", "Faber Technik", "Weiss Logistik", "Lindner AG", "Auer GmbH", "Mohn & Co"];
+const STATES = ["in Arbeit", "geplant", "in Arbeit", "wartet", "geplant", "in Arbeit", "fertig", "geplant", "wartet"];
+const PEOPLE = ["Aksoy", "Berger", "Demir", "Hoff", "Krüger", "Lang", "Nowak", "Peters", "Voss"];
+function content(w) {
+  if (w.type === "kennzahl") {
+    const f = FIGURES[w.options.figure];
+    return `<div class="kz"><div class="kz-value">${f.value}<span class="kz-unit">${f.unit}</span></div><div class="kz-sub"><span class="dot ${f.verdict}"></span>${f.sub}</div></div>`
+      + (w.size === "breit" ? `<div class="chart">${chartSvg(w.options.figure, false)}</div>` : "");
+  }
+  if (w.type === "verlauf") {
+    const more = w.size !== "mittel";
+    return `<div class="chart">${more ? `<div class="legend"><span><i></i>diese Woche</span><span><i class="p"></i>Vorwoche</span></div>` : ""}${chartSvg(w.options.figure, more)}</div>`;
+  }
+  if (w.type === "meldungen") {
+    const count = w.size === "mittel" ? 4 : 5;
+    return `<ul class="rows">${MESSAGES.slice(0, count).map(([sev, text, where, when]) =>
+      `<li><span class="dot ${sev}"></span><span class="t">${text}</span>${w.size === "groß" ? `<span class="m">${where}</span>` : ""}${w.size !== "mittel" ? `<span class="m">vor ${when}</span>` : ""}</li>`).join("")}</ul>`;
+  }
+  if (w.type === "auftraege") {
+    const cols = w.size === "breit" ? ["Nr.", "Kunde", "Status"] : w.size === "groß" ? ["Nr.", "Kunde", "Menge", "Fällig", "Status"] : ["Nr.", "Kunde", "Menge", "Fällig", "Status", "Bearbeitung"];
+    const cell = { "Nr.": (i) => 4470 - i * 7, Kunde: (i) => CUSTOMERS[i], Menge: (i) => (120 + ((i * 370) % 900)).toLocaleString("de-DE"), "Fällig": (i) => (14 + i) + ".10.", Status: (i) => STATES[i], Bearbeitung: (i) => PEOPLE[i] };
+    const num = (c) => (c === "Menge" ? ' class="num"' : "");
+    const rows = w.size === "breit" ? 5 : 9;
+    return `<table><thead><tr>${cols.map((c) => `<th${num(c)}>${c}</th>`).join("")}</tr></thead><tbody>${Array.from({ length: rows }, (_, i) =>
+      `<tr>${cols.map((c) => `<td${num(c)}>${cell[c](i)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  return "";
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────
+const canvas = $("#canvas"), win = $("#win"), scaler = $("#scaler"), slot = $("#slot");
+const els = new Map();
+let scale = 1;
+function elementFor(w) {
+  let el = els.get(w.id);
+  if (el) return el;
+  el = document.createElement("article");
+  el.className = "w"; el.dataset.id = w.id; el.dataset.type = w.type;
+  el.innerHTML = `<header class="w-head"><h3></h3><span class="w-size"></span></header><div class="w-body"></div>
+    <div class="w-tools"><button data-act="earlier" title="Einen Platz nach vorn" aria-label="Einen Platz nach vorn">←</button><button data-act="later" title="Einen Platz nach hinten" aria-label="Einen Platz nach hinten">→</button><button data-act="size" title="Nächste Größe"></button><button data-act="remove" title="Entfernen" aria-label="Entfernen">✕</button></div>`;
+  canvas.appendChild(el); els.set(w.id, el);
+  return el;
+}
+
+function render() {
+  const v = view(), editing = !!S.draft;
+  const lay = Arrangement.layout(v, TYPES, S.model, inner(S.width));
+  scale = Math.min(1, scaler.clientWidth / S.width);
+  win.style.width = S.width + "px"; win.style.transform = `scale(${scale})`;
+  win.classList.toggle("editing", editing); win.classList.toggle("coords", coords());
+  canvas.style.height = Math.max(lay.height, 120) + "px";
+
+  for (const [id, el] of els) if (!v.some((w) => w.id === id)) { el.remove(); els.delete(id); }
+  for (const w of v) {
+    const el = elementFor(w), box = lay.boxes.find((b) => b.id === w.id), dragging = S.drag && S.drag.id === w.id;
+    const key = w.type + w.size + (w.options.figure ?? "");
+    if (el.dataset.key !== key) { el.dataset.key = key; el.querySelector(".w-body").innerHTML = content(w); }
+    el.querySelector("h3").textContent = titleOf(w);
+    const [sw, sh] = Arrangement.spanOf(TYPES, w);
+    el.querySelector(".w-size").textContent = `${w.size} ${sw}×${sh}`;
+    el.querySelector('[data-act="size"]').textContent = w.size;
+    el.tabIndex = editing ? 0 : -1;
+    el.setAttribute("aria-label", titleOf(w));
+    el.classList.toggle("dragging", !!dragging); el.classList.toggle("fresh", S.fresh === w.id);
+    el.style.width = box.width + "px"; el.style.height = box.height + "px";
+    el.style.left = (dragging ? S.drag.x : box.left) + "px"; el.style.top = (dragging ? S.drag.y : box.top) + "px";
+    if (dragging) Object.assign(slot.style, { left: box.left + "px", top: box.top + "px", width: box.width + "px", height: box.height + "px" });
+  }
+  slot.hidden = !S.drag;
+
+  $("#appbar").innerHTML = `<span class="name">Mein Dashboard</span>` + (editing
+    ? `<span class="draft">Entwurf, noch nicht gespeichert</span><button class="btn" data-bar="cancel">Abbrechen</button><button class="btn primary" data-bar="done">Fertig</button>`
+    : `<button class="btn" data-bar="edit">Bearbeiten</button>`);
+  const cat = $("#catalogue"); cat.hidden = !editing;
+  cat.innerHTML = `<span>Hinzufügen:</span>` + Object.entries(TYPES).map(([k, t]) => `<button class="btn" data-add="${k}">${t.name}</button>`).join("");
+
+  scaler.style.height = win.offsetHeight * scale + "px";
+  $("#scale-note").textContent = `Fenster ${S.width} px breit` + (scale < 1 ? `, hier auf ${Math.round(scale * 100)} % verkleinert` : "");
+  $("#width").value = S.width; $("#width-out").textContent = S.width + " px";
+  document.querySelectorAll("#presets button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.w === S.width)));
+  document.querySelectorAll(".seg[data-set] button").forEach((b) => {
+    const set = b.parentElement.dataset.set;
+    b.setAttribute("aria-pressed", String(S.model[set] === b.dataset.val));
+    b.disabled = coords() && ((set === "columns" && b.dataset.val === "follow") || set === "packing");
+  });
+  renderState(v, lay); renderWalk();
+}
+
+function renderState(v, lay) {
+  const real = (boxes) => boxes.filter((b) => v.find((w) => w.id === b.id).type !== "abstand");
+  const refWidth = S.draft ? S.width : S.arrangedAt;
+  const ref = Arrangement.neighbours(real(Arrangement.layout(v, TYPES, S.model, inner(refWidth)).boxes));
+  const now = Arrangement.neighbours(real(lay.boxes));
+  const kept = [...ref].filter((n) => now.has(n)).length, share = ref.size ? kept / ref.size : 1;
+  const drawn = [...lay.boxes].sort(Arrangement.byReading).map((b) => b.id), stored = v.map((w) => w.id);
+  const jumped = coords() ? [] : drawn.filter((id, i) => stored.indexOf(id) > i).map((id) => titleOf(v.find((w) => w.id === id)));
+  $("#facts").innerHTML = `
+    <dt>Form</dt><dd>${lay.form === "list" ? "Liste – alles untereinander" : `Raster, ${lay.columns} Spalten zu je ${Math.round(lay.colWidth)} px`}</dd>
+    <dt>Nachbarn erhalten</dt><dd>${kept} von ${ref.size}, gemessen an der Anordnung bei ${refWidth} px
+      <div class="meter ${share < 0.6 ? "low" : ""}"><i style="width:${Math.round(share * 100)}%"></i></div></dd>
+    <dt>Gezeichnete Folge</dt><dd>${coords() ? "–" : jumped.length ? `<span class="alert">weicht von der gespeicherten ab: ${jumped.join(", ")} ${jumped.length > 1 ? "stehen" : "steht"} weiter vorn</span>` : "wie gespeichert"}</dd>
+    <dt>Bearbeitung</dt><dd>${S.draft ? "Entwurf offen" : "nichts offen"}</dd>`;
+  $("#stored-title").textContent = S.draft ? "Entwurf – noch nicht gespeichert" : "Was gespeichert ist";
+  const line = (w, i, cls, note) => {
+    const [sw, sh] = Arrangement.spanOf(TYPES, w);
+    return `<li class="${cls}"><span class="i">${i}</span><span class="t">${titleOf(w)}${note ? ` · ${note}` : ""}</span><span class="s">${w.size} ${sw}×${sh}${coords() ? ` · Spalte ${w.col + 1}, Zeile ${w.row + 1}` : ""}</span></li>`;
+  };
+  const before = S.draft ? S.saved : v;
+  $("#stored").innerHTML = v.map((w, i) => {
+    const was = before.find((b) => b.id === w.id), at = before.findIndex((b) => b.id === w.id);
+    const note = !was ? "neu" : was.size !== w.size ? "Größe geändert" : (coords() ? was.col !== w.col || was.row !== w.row : at !== i) ? "verschoben" : "";
+    return line(w, i + 1, note ? "changed" : "", note);
+  }).join("") + before.filter((b) => !v.some((w) => w.id === b.id)).map((w) => line(w, "–", "gone", "entfernt")).join("");
+}
+
+function renderWalk() {
+  const walk = WALKS[S.walk.i];
+  $("#tabs").innerHTML = WALKS.map((w, i) => `<button role="tab" aria-selected="${i === S.walk.i}" data-walk="${i}">${w.tab}</button>`).join("");
+  $("#walk-text").innerHTML = walk.text;
+  $("#steps").innerHTML = walk.steps.map(([label], k) =>
+    `<button data-step="${k}" class="${k === S.walk.step ? "next" : ""}" ${k === S.walk.step ? "" : "disabled"}><span class="n">${k < S.walk.step ? "✓" : k + 1}</span>${label}</button>`).join("")
+    + `<button class="reset" data-walk="${S.walk.i}">Von vorn</button>`;
+  $("#see").textContent = S.walk.see;
+}
+
+// ── Wiring ────────────────────────────────────────────────────────────────
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.walk !== undefined) return startWalk(+t.dataset.walk);
+  if (t.dataset.step !== undefined) return doStep(+t.dataset.step);
+  if (t.dataset.w) S.width = +t.dataset.w;
+  else if (t.dataset.val) { const set = t.parentElement.dataset.set; if (set === "placement") setPlacement(t.dataset.val); else S.model[set] = t.dataset.val; }
+  else if (t.dataset.bar) act[t.dataset.bar]();
+  else if (t.dataset.add) act.add(t.dataset.add);
+  else if (t.dataset.act) {
+    const id = t.closest(".w").dataset.id;
+    if (t.dataset.act === "earlier") act.shift(id, -1);
+    if (t.dataset.act === "later") act.shift(id, 1);
+    if (t.dataset.act === "size") act.nextSize(id);
+    if (t.dataset.act === "remove") act.remove(id);
+  } else return;
+  render();
+});
+$("#width").addEventListener("input", (e) => { S.width = +e.target.value; render(); });
+addEventListener("resize", render);
+
+const point = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }; };
+canvas.addEventListener("pointerdown", (e) => {
+  const el = e.target.closest(".w");
+  if (!S.draft || !el || e.target.closest("button")) return;
+  const p = point(e);
+  S.fresh = null;
+  S.drag = { id: el.dataset.id, dx: p.x - parseFloat(el.style.left), dy: p.y - parseFloat(el.style.top), x: parseFloat(el.style.left), y: parseFloat(el.style.top), from: S.draft };
+  canvas.setPointerCapture(e.pointerId);
+  render();
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (!S.drag) return;
+  const p = point(e), d = S.drag;
+  d.x = p.x - d.dx; d.y = p.y - d.dy;
+  S.draft = coords()
+    ? Arrangement.toCell(d.from, TYPES, S.model, inner(S.width), d.id, d.x, d.y)
+    : Arrangement.nearestPlace(S.draft, TYPES, S.model, inner(S.width), d.id, d.x, d.y);
+  render();
+});
+const drop = () => { if (S.drag) { S.drag = null; render(); } };
+canvas.addEventListener("pointerup", drop);
+canvas.addEventListener("pointercancel", drop);
+canvas.addEventListener("keydown", (e) => {
+  const el = e.target.closest(".w"), step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+  if (!S.draft || !el || e.target !== el || !step) return;
+  e.preventDefault();
+  if (coords()) act.nudge(el.dataset.id, step[0], step[1]); else act.shift(el.dataset.id, step[0] + step[1]);
+  render();
+});
+
+startWalk(0);
+</script>
