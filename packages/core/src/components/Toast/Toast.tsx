@@ -146,6 +146,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const nextId = useRef(1);
+  /* When each standing toast arrived (`performance.now()`): a region that
+     moves hands its cards their age, so that an entrance goes on. */
+  const arrivedRef = useRef(new Map<number, number>());
   const { timersRef, leavesRef, clearTimer } = useTimerStore();
   const regionRef = useRef<HTMLDivElement>(null);
 
@@ -158,6 +161,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const remove = useCallback(
     (id: number) => {
       lastPlaceRef.current.delete(id);
+      arrivedRef.current.delete(id);
       forget(id);
       const rest = itemsRef.current.filter((item) => item.id !== id);
       commit(rest);
@@ -211,6 +215,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const toast = useCallback(
     (options: ToastOptions) => {
       const id = nextId.current++;
+      arrivedRef.current.set(id, performance.now());
       commit([...itemsRef.current, { ...options, id }]);
       const standing = itemsRef.current.filter((item) => !item.leaving);
       /* Over the limit the oldest gives way - as if closed. A queue would
@@ -237,19 +242,27 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Escape") return;
+    /* The key is the deck's: left alone, the browser's cancel would go on to
+       the dialog the region stands in and close it. */
+    event.preventDefault();
     setPinned(false);
     leaveRegion();
   };
   /* The deck opens for the keyboard's focus, not for the focus a click
      leaves on a button: a closed toast would otherwise hold it open. */
   const onFocus = (event: FocusEvent<HTMLDivElement>) => setFocused(keyboardFocus(event.target, event.currentTarget));
+  /* What the focus held open, and the focus to give back: given up when the
+     focus leaves the region by other means than Escape, and when the region
+     moves. */
+  const letGoOfFocus = useCallback(() => {
+    setFocused(false);
+    setPinned(false);
+    returnFocusRef.current = null;
+  }, [setFocused, setPinned, returnFocusRef]);
   const onBlur = (event: FocusEvent<HTMLDivElement>) => {
     setByKeys(false);
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
-    setFocused(false);
-    setPinned(false);
-    /* Left by other means than Escape: nothing to give back any more. */
-    returnFocusRef.current = null;
+    letGoOfFocus();
   };
   /* A finger's touch ends in a pointerleave at once; it opens by the count. */
   const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
@@ -266,9 +279,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
      target may enter the document later, and the next toast has to find it. */
   const dialog = useTopmostModalDialog();
   const [target, setTarget] = useState<Element | null>(null);
-  /* The cards that stood when the region last changed its place: they arrive
-     settled, without the entrance they have played already. */
-  const [settled, setSettled] = useState<ReadonlySet<number>>(new Set());
+  /* The age in ms of each card that stood when the region last changed its
+     place. The cards are built anew there, and an entrance that is running
+     goes on from where it was (a negative `animation-delay`); one that is over
+     stays over. */
+  const [ages, setAges] = useState<ReadonlyMap<number, number>>(new Map());
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;
@@ -276,13 +291,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       /* The old region is gone and sent neither leave nor blur: what they
          held open would stay open, and every countdown with it. */
       setHovered(false);
-      setFocused(false);
-      setPinned(false);
-      returnFocusRef.current = null;
-      setSettled(new Set(itemsRef.current.map((item) => item.id)));
+      letGoOfFocus();
+      const now = performance.now();
+      setAges(new Map(itemsRef.current.map((item) => [item.id, Math.round(now - (arrivedRef.current.get(item.id) ?? now))])));
     }
     setTarget(next);
-  }, [dialog, portalTarget, items, target, setHovered, setFocused, setPinned, returnFocusRef]);
+  }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus]);
 
   useShownInTopLayer(regionRef);
 
@@ -299,6 +313,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       "--_y": `${edge === "bottom" ? -(place?.offset ?? 0) : (place?.offset ?? 0)}px`,
       "--_scale": place?.scale ?? 1,
       "--_front": place?.behind ? `${frontHeight}px` : undefined,
+      "--_delay": ages.has(item.id) ? `-${ages.get(item.id)}ms` : undefined,
       zIndex: place?.zIndex ?? 0,
     } as CSSProperties;
     return (
@@ -308,7 +323,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           styles.card,
           place?.behind && styles.behind,
           place?.hidden && styles.hidden,
-          settled.has(item.id) && styles.settled,
           item.leaving && styles.leaving,
         )}
         style={cardStyle}

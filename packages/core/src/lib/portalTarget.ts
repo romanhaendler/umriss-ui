@@ -46,8 +46,8 @@ export function toastTargetFor(
 }
 
 /* Where `:modal` is not understood (jsdom, old browsers) "has `open`" stands
-   in for it. Every use of the selector goes through here: the unit test
-   environment throws on it. */
+   in for it. The one use of the selector: the unit test environment throws on
+   it. */
 function isModal(dialog: HTMLDialogElement): boolean {
   try {
     return dialog.matches(":modal");
@@ -83,7 +83,9 @@ export function topLayerPopover(target: Element | null): "manual" | undefined {
 export function useShownInTopLayer(ref: RefObject<HTMLElement | null>): void {
   useLayoutEffect(() => {
     const surface = ref.current;
-    if (!surface || surface.getAttribute("popover") !== "manual") return;
+    /* A surface whose dialog left the document is no longer anywhere to show:
+       `showPopover` throws on it. */
+    if (!surface?.isConnected || surface.getAttribute("popover") !== "manual") return;
     let open = false;
     try {
       open = surface.matches(":popover-open");
@@ -92,16 +94,6 @@ export function useShownInTopLayer(ref: RefObject<HTMLElement | null>): void {
     }
     if (!open) surface.showPopover();
   });
-}
-
-function modalDialogs(): HTMLDialogElement[] {
-  let found: NodeListOf<HTMLDialogElement>;
-  try {
-    found = document.querySelectorAll("dialog:modal");
-  } catch {
-    found = document.querySelectorAll("dialog[open]");
-  }
-  return [...found];
 }
 
 /**
@@ -118,7 +110,7 @@ export function useTopmostModalDialog(): HTMLDialogElement | null {
   const [topmost, setTopmost] = useState<HTMLDialogElement | null>(null);
 
   useEffect(() => {
-    let order = modalDialogs();
+    let order = [...document.querySelectorAll("dialog")].filter(isModal);
     const observer = new MutationObserver((records) => {
       for (const record of records) {
         const node = record.target;

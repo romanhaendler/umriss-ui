@@ -59,7 +59,9 @@ and `--u-z-tooltip` order the surfaces.**
   is measured, since a popover has no size until it is shown, and takes the
   browser's sheet back. The table's tip for a cut value, drawn on the
   tooltip's token, repeats the step by hand, as it repeats the order of portal
-  targets; core exports nothing for it. The conditions and the showing stand
+  targets; core exports nothing for it, and a conformance test in the table
+  holds its decision against the tooltip's in the four cases of a dialog or
+  not, with the Popover API or without. The conditions and the showing stand
   once in `lib/portalTarget.ts` (`topLayerPopover`, `useShownInTopLayer`) for
   the region and the tooltip.
 - **The fallback without the Popover API** (Firefox 120 to 124 lie inside the
@@ -72,24 +74,32 @@ and `--u-z-tooltip` order the surfaces.**
   `onClose` is not called, no countdown starts afresh, `update` and `dismiss`
   still reach a toast by its id. Hover, focus and the pin are given up on
   every change of place, since the old node sends neither a leave nor a blur;
-  the cards standing at that moment arrive without the entrance they have
-  played. The tracker hands a change on synchronously, and only a change: for
+  the cards standing at that moment are built anew with their age as a negative
+  `animation-delay`, so that an entrance still running goes on from where it
+  was (no restart, no cut), one that is over stays over, and a card not yet
+  painted enters once, in the new place. Their measured heights survive the
+  move: a region that is a popover not yet shown is `display: none` and reads
+  every card as 0, and a reading of 0 is not kept. The tracker hands a change on synchronously, and only a change: for
   one frame after a dialog closed (about 4 runs in 40 in Chromium) a toast
   stood in the dialog no longer drawn, because the change was applied in a
   task of its own.
 
 ## What the browsers showed
 
-- **Escape in the deck needed no guard.** With the focus in the toasts above a
-  modal, Escape closes only the deck and does not cancel the dialog, in
-  Chromium and WebKit. Nothing is prevented.
+- **Escape in the deck had to be kept from the dialog.** With the focus in the
+  toasts above a modal, Escape gave the focus back and, as the browser's
+  `cancel` went on to the dialog, closed the modal once its exit had run (a
+  test that looks right after the key sees the dialog still standing in its
+  exit). The region prevents the default of Escape while the focus is inside
+  it.
 - **A tooltip in a dialog that transforms itself stood wrongly before.** It
   stood off by exactly the dialog's transform; in the top layer it stands at
   its trigger. A tooltip in `Modal` and `Drawer` stands where it always did.
-- **A toast shown in the same tick as a dialog that closes at once arrives
-  without an entrance:** it was mounted in the dialog first and counts as
-  having entered. `Modal` and `Drawer` stay open until their exit ends, so
-  there the toast enters as always.
+- **A toast shown in the same tick as a dialog that closes at once enters
+  once, outside it:** it was mounted in the dialog first, never painted, and
+  its age at the move is nil. `Modal` and `Drawer` stay open until their exit
+  ends, so there the toast is moved some way into its entrance and goes on with
+  it.
 
 ## What it costs
 
@@ -102,11 +112,15 @@ and `--u-z-tooltip` order the surfaces.**
   place less.
 - A dialog with controls in the corner where the toasts stand has them
   covered, as the page is.
-- Not tested: a dialog that only centres itself by `transform` at rest; a menu
-  under a toast in a modal (true by construction, `Popover` is untouched); a
-  tooltip with no delay opened by the focus a modal sets. The browser tests
-  run in Chromium; the same tests were also run once in WebKit and passed;
-  Firefox was not run. The fallback is proven by the unit tests alone.
+- `close()` and `showModal()` on the same dialog in one tick leave the list of
+  open dialogs unchanged, so nothing moves, and the region stays shown below
+  the dialog's new place in the top layer: a toast lies behind that dialog.
+  Rare, and not built for.
+- Not tested: a dialog that only centres itself by `transform` at rest; a
+  tooltip with no delay opened by the focus a modal sets. A list opened in a
+  modal lying under a toast is tested. The browser tests run in Chromium; the
+  tests of this decision were also run in WebKit and passed; Firefox was not
+  run. The fallback is proven by the unit tests alone.
 - Whether a standing toast is read a second time after a move is not
   checkable by a test; it is listened to once with VoiceOver, by a person.
 

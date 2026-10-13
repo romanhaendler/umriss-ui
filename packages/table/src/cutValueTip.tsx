@@ -66,7 +66,9 @@ export function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableEle
   const inTopLayer = !!tip && tip.target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype;
   useLayoutEffect(() => {
     const el = tipRef.current;
-    if (!inTopLayer || !el) return;
+    /* A tip whose dialog left the document is nowhere to show: `showPopover`
+       throws on it. */
+    if (!inTopLayer || !el?.isConnected) return;
     let open = false;
     try {
       open = el.matches(":popover-open");

@@ -17,6 +17,10 @@ export function useCardMeasure() {
   }, []);
 
   const measure = useCallback((id: number, height: number) => {
+    /* A card whose region is not shown yet (a popover before its showing) is
+       `display: none` and reads 0: the height it had stays until it reads one
+       again, and a card never has none. */
+    if (height === 0) return;
     setHeights((current) => (current[id] === height ? current : { ...current, [id]: height }));
   }, []);
   /** One stable ref for every card's content; the card says which it is. A
