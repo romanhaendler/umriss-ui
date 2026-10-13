@@ -579,8 +579,9 @@ test("Drawer holds the focus, closes on Escape and gives the focus back", async 
   await opener.click();
   const drawer = page.getByRole("dialog", { name: "Shipment SH-1042" });
   await expect(drawer).toBeVisible();
-  // It stands at the right edge of the window, once it has come in.
-  const sheet = drawer.locator("> div");
+  // It stands at the right edge of the window, once it has come in. The toast
+  // region stands in the open dialog too, and is not the sheet.
+  const sheet = drawer.locator("> div:not([data-edge])");
   await sheet.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const box = (await sheet.boundingBox())!;
   expect(Math.round(box.x + box.width)).toBe(page.viewportSize()!.width);
@@ -632,7 +633,7 @@ test("Drawer appears and goes at once under reduced motion", async ({ page }) =>
   await page.getByRole("button", { name: "Show the shipment" }).click();
   const drawer = page.getByRole("dialog", { name: "Shipment SH-1042" });
   await expect(drawer).toBeVisible();
-  expect(await drawer.locator("> div").evaluate((el) => el.getAnimations().length)).toBe(0);
+  expect(await drawer.locator("> div:not([data-edge])").evaluate((el) => el.getAnimations().length)).toBe(0);
   await page.keyboard.press("Escape");
   await expect(drawer).toBeHidden();
 });
