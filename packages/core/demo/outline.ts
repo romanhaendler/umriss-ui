@@ -95,7 +95,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",
           "A token that names another resolves where it is declared: set `--u-color-accent` on a region, and `--u-focus-ring`, which names it on `:root`, still draws the application's accent there. Set the naming token in the region too.",
-          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root` - as for the toasts' distance from the window's edge, `--u-toast-inset-top` and `--u-toast-inset-bottom`.",
+          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from; inside a dialog the toasts take the tokens of the dialog's place. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root` - as for the toasts' distance from the window's edge, `--u-toast-inset-top` and `--u-toast-inset-bottom`.",
         ],
         types: [],
         exports: [],
@@ -840,6 +840,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Two live regions stand in the corner before the first message, since a region that arrives with its text is often not read: a neutral, success or loading toast goes into a polite `status`, a warning or danger one into an `alert` that interrupts, the table [Alert](#/alert) follows too. While a toast stands, the corner is a region named \"Messages (Alt+T)\".",
           "The count on a deck of several is out of the tab order, since a focus on it would open the deck and take the count away; the keyboard opens the deck by Alt + T or by moving into it. A loading toast has no cross and does not leave by itself: `update` turns it into its outcome.",
           "With reduced motion toasts appear, stack and leave without movement.",
+          "Inside a modal dialog the live regions move with the toasts, so a message is heard there as well as outside.",
         ],
         limits: [
           "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
