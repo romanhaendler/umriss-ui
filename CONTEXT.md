@@ -1357,6 +1357,20 @@ What a developer declares and a reader chooses from when adding to a
 **Dashboard**: what a **Widget** of this kind shows and which sizes it allows.
 _Avoid_: widget (for the kind rather than the placed one), template, component
 
+**Options**:
+What one **Widget** was told to show - which figure, which period - as distinct
+from another widget of the same **Widget type**. Every type brings options to
+start from, so a widget just added shows something at once. They belong to the
+dashboard's **View** and mean nothing to the dashboard itself; the form that
+changes them is the application's.
+_Avoid_: settings (a word **View** avoids), configuration (which **Provider**
+avoids), props, parameters
+
+**Catalogue**:
+The list a reader adds to a **Dashboard** from: every **Widget type**, each with
+its name, a sentence and a preview. Choosing one puts a widget at the end.
+_Avoid_: gallery, library, palette (which is the command palette's), store
+
 
 ## Public names
 
