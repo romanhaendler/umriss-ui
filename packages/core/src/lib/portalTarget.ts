@@ -72,10 +72,12 @@ export function topLayerPopover(target: Element | null): "manual" | undefined {
 /**
  * Shows the surface `ref` when it carries `popover` (`topLayerPopover`), in a
  * layout effect so that nothing is painted between the attribute and the
- * showing. A surface shown already is left alone: StrictMode runs the effect
- * twice, and `showPopover` throws on an open popover.
+ * showing. It runs after every commit, since a surface that comes and goes
+ * (a tooltip) is a new element each time; it must stand before the effects
+ * that measure the surface. A surface shown already is left alone: StrictMode
+ * runs the effect twice, and `showPopover` throws on an open popover.
  */
-export function useShownInTopLayer(ref: RefObject<HTMLElement | null>, target: Element | null): void {
+export function useShownInTopLayer(ref: RefObject<HTMLElement | null>): void {
   useLayoutEffect(() => {
     const surface = ref.current;
     if (!surface || surface.getAttribute("popover") !== "manual") return;
@@ -86,7 +88,7 @@ export function useShownInTopLayer(ref: RefObject<HTMLElement | null>, target: E
       /* A browser that has `showPopover` has the selector; a stand-in may not. */
     }
     if (!open) surface.showPopover();
-  }, [ref, target]);
+  });
 }
 
 function modalDialogs(): HTMLDialogElement[] {

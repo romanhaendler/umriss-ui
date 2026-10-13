@@ -2,7 +2,7 @@ import { cloneElement, useEffect, useId, useLayoutEffect, useRef, useState } fro
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "../../lib/provider";
-import { portalTargetFor } from "../../lib/portalTarget";
+import { portalTargetFor, topLayerPopover, useShownInTopLayer } from "../../lib/portalTarget";
 import { computePosition, motionOrigin, visibleViewport } from "../Popover/position";
 import { usePresence } from "../../lib/motion";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -54,6 +54,9 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     // Dialog, then the setting, then the body - the same function as the popover.
     setTarget(portalTargetFor(targetRef.current, portalTarget));
   }, [open, portalTarget]);
+
+  /* Shown before the measuring below: a popover has no size until it is shown. */
+  useShownInTopLayer(panelRef);
 
   /* Mount first, then measure and set: the measured height decides the
      flipping. Runs before painting. */
@@ -139,6 +142,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
             ref={panelRef}
             id={id}
             role="tooltip"
+            popover={topLayerPopover(target)}
             className={styles.tooltip}
             data-closing={!open || undefined}
             // Leaving, it is gone for assistive technology at once; the fade is for the eye.
