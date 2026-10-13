@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
+import { toastTargetFor, useTopmostModalDialog } from "../../lib/portalTarget";
 import { roleFromTone } from "../../lib/roleFromTone";
 import { motionOrigin } from "../Popover/position";
 import { Spinner } from "../Spinner";
@@ -259,6 +260,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ toast, update, dismiss }), [toast, update, dismiss]);
   const wording = useWording();
   const portalTarget = usePortalTarget();
+  /* Dialog, then the setting, then the body (`toastTargetFor`). It reads the
+     DOM, so it runs in the effect; until then nothing is portalled. With
+     every change of the toasts too, not only of the dialog: a configured
+     target may enter the document later, and the next toast has to find it. */
+  const dialog = useTopmostModalDialog();
+  const [target, setTarget] = useState<Element | null>(null);
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTarget(toastTargetFor(dialog, portalTarget));
+  }, [dialog, portalTarget, items]);
 
   const pinOpen = () => {
     setPinned(true);
@@ -353,7 +364,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext value={value}>
       {children}
-      {createPortal(
+      {target && createPortal(
         /* Two live regions that stand before the first message arrives: a
            region that enters the document with its text is often not read out.
            The message goes into the region of its tone, by the same table as
@@ -380,7 +391,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
           </div>
         </div>,
-        portalTarget() ?? document.body,
+        target,
       )}
     </ToastContext>
   );
