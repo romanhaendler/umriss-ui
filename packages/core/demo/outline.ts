@@ -819,6 +819,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Short feedback in the corner of the window that interrupts nothing and goes away by itself (also called a snackbar or notification). Reach for it to confirm what has just happened: saved, exported, approved.",
         about: [
           "`useToast` needs a `ToastProvider` around the application, once, at the root.",
+          "Toasts stand above an open modal dialog and can be used there: they are seen, pressed and heard, and stay where they were while a dialog opens or closes.",
           "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
           "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
           "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",

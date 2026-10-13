@@ -76,5 +76,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | Never built: form validation, layout editor, time zones | accepted, extends ADR-0032 | scope |
 | [0061](0061-the-csv-follows-the-language-in-use.md) | The CSV follows the language in use | CSV follows the active language | accepted, extends ADR-0024 | table, language |
 | [0062](0062-react-19-is-the-floor.md) | React 19 is the floor: the peers are `>=19`, a component takes `ref` as a prop and is never wrapped, and no code reads React's version | React 19 is the floor | accepted | core, packages |
+| [0063](0063-inside-a-modal-dialog-the-toasts-and-the-tooltips-stand-in-the-top-layer.md) | Inside a modal dialog the toasts and the tooltips stand in the top layer, and everywhere else the token scale orders them | Toasts above a modal | accepted | core, table |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
