@@ -140,15 +140,10 @@ test("The inset tokens move the toasts above a modal as they do without one", as
       }),
     )
     .toBeCloseTo(await place.evaluate((element) => (element.getAttribute("data-edge") === "top" ? 72 : 64)), 0);
-  const side = await place.evaluate((element) => element.getAttribute("data-along"));
+  /* The example's toasts stand at the end side. */
   await expect
-    .poll(() =>
-      place.evaluate((element) => {
-        const rect = element.getBoundingClientRect();
-        return element.getAttribute("data-along") === "start" ? rect.left : document.documentElement.clientWidth - rect.right;
-      }),
-    )
-    .toBeCloseTo(side === "start" ? 88 : 96, 0);
+    .poll(() => place.evaluate((element) => document.documentElement.clientWidth - element.getBoundingClientRect().right))
+    .toBeCloseTo(96, 0);
 });
 
 /* Inside a dialog the region stands in the top layer: a dialog that moves,
@@ -426,11 +421,12 @@ test("A tooltip outside a dialog carries no popover attribute", async ({ page })
   await expect(page.getByRole("tooltip")).not.toHaveAttribute("popover", /.*/);
 });
 
-/* The distance from the window's edge is a token per edge. Unset, the region
-   stands where it always stood - 20 px, 16 px on a phone; set on `:root`, it
-   moves every position of its edge at every width and leaves the other edges
-   alone. On a phone the region takes the window's width, so each side token is
-   the room at its side at all six positions. */
+/* The distance from the window's top and bottom edge is a token per edge, the
+   distance from its sides a token per side. Unset, the region stands 20 px
+   away, 16 px on a phone; set on `:root`, a token moves every position of its
+   edge or side at every width and leaves the others alone. On a phone the
+   region takes the window's width, so each side token is the room at its side
+   at all six positions. */
 const TOAST_POSITIONS = ["Top start", "Top center", "Top end", "Bottom start", "Bottom center", "Bottom end"];
 
 async function toastInsets(page: import("@playwright/test").Page, width: number, tokens = "") {
@@ -488,7 +484,7 @@ for (const width of [1280, 320]) {
     }
   });
 
-  test(`The start token moves the start toasts only (${width} px)`, async ({ page }) => {
+  test(`The start token moves the toasts' start side only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-start: 88px;");
     for (const [name, inset] of Object.entries(insets)) {
       expect(inset.edge, name).toBeCloseTo(unset, 0);
@@ -496,7 +492,7 @@ for (const width of [1280, 320]) {
     }
   });
 
-  test(`The end token moves the end toasts only (${width} px)`, async ({ page }) => {
+  test(`The end token moves the toasts' end side only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-end: 88px;");
     for (const [name, inset] of Object.entries(insets)) {
       expect(inset.edge, name).toBeCloseTo(unset, 0);
@@ -504,6 +500,18 @@ for (const width of [1280, 320]) {
     }
   });
 }
+
+test("In a right-to-left page the start token is the distance from the right", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  await page.addStyleTag({ content: ":root { --u-toast-inset-start: 88px; }" });
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  await page.getByRole("button", { name: "Top start", exact: true }).click();
+  const region = page.locator("[data-edge]").filter({ has: page.getByText("Standing top start.") });
+  await expect(region).toBeVisible();
+  const fromTheRight = await region.evaluate((element) => document.documentElement.clientWidth - element.getBoundingClientRect().right);
+  expect(fromTheRight).toBeCloseTo(88, 0);
+});
 
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");

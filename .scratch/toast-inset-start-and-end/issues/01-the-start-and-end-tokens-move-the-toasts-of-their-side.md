@@ -39,24 +39,24 @@ it sets the top and bottom distance: `--u-toast-inset-start` and
 
 ## Acceptance
 
-- [ ] Unset, every one of the six positions stands 20 px from its side at
+- [x] Unset, every one of the six positions stands 20 px from its side at
       1280 px, and 16 px from both sides at 320 px.
-- [ ] `--u-toast-inset-start` set on `:root` moves the `*-start` toasts to
+- [x] `--u-toast-inset-start` set on `:root` moves the `*-start` toasts to
       that distance at 1280 px and leaves `*-end` at 20 px; at 320 px it is
       the start side's distance at all six positions, the end side staying at
       16 px.
-- [ ] `--u-toast-inset-end` likewise, mirrored.
-- [ ] At 1280 px the center positions stay centred in the window with either
+- [x] `--u-toast-inset-end` likewise, mirrored.
+- [x] At 1280 px the center positions stay centred in the window with either
       token set.
-- [ ] Neither side token moves the top or bottom distance, and neither of
+- [x] Neither side token moves the top or bottom distance, and neither of
       those moves a side: the existing tests of the top and bottom tokens read
       the sides too.
-- [ ] With the example's modal open, the toasts stand at the set distance from
+- [x] With the example's modal open, the toasts stand at the set distance from
       their side.
-- [ ] Both tokens appear in the Theming page's token table with default and
+- [x] Both tokens appear in the Theming page's token table with default and
       description; `pnpm check:site` passes.
-- [ ] The example's lead and the Theming note name all four tokens.
-- [ ] `pnpm check core` passes; `API.md` is unchanged.
-- [ ] `pnpm test:visual:quick core` passes, and the Toast page's pictures pass
+- [x] The example's lead and the Theming note name all four tokens.
+- [x] `pnpm check core` passes; `API.md` is unchanged.
+- [x] `pnpm test:visual:quick core` passes, and the Toast page's pictures pass
       in both themes and under forced colours after the renewal; every renewed
       baseline is named in the commit message with why it moved.
