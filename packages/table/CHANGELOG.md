@@ -23,6 +23,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.36.0 – The tip for a cut value lies above the toasts in a dialog (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.36; the peer range is `^0.36.0`.
+
+### Changed
+
+- **The tip that shows the whole of a cut value lies above the toasts inside a modal dialog,** as core's tooltip does: there it stands in the top layer, where the browser has the Popover API. Outside a dialog nothing changes.
+
 ## 0.35.0 – React 19 is the floor, and a table that holds at two hundred thousand rows (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.35; the peer range is `^0.35.0`.

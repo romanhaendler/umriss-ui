@@ -26,6 +26,22 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.36.0 – Toasts stand above a modal dialog (Oct. 2026)
+
+### Changed
+
+- **Toasts stand above an open modal dialog and can be used there.** A toast shown while a `Modal`, `Drawer`, `ConfirmDialog`, `CommandPalette` or a `<dialog>` of your own opened with `showModal()` was open lay behind it and was inert; it is now seen, pressed, reached by Alt + T and read out. It stands at the same place in the window, and a toast that was standing does not move, restart its entrance or its clock, or call `onClose` when a dialog opens or closes behind it. Escape in the deck gives the focus back and leaves the dialog open (ADR-0063).
+
+- **Where the toast region stands in the DOM.** While a modal dialog is open the region is a descendant of the one opened last; when it closes the region returns to the provider's `portalTarget`, else the body. A dialog opened with `show()` leaves it where it was. Check a selector or a test that expects the region under `<body>`, or that takes the one child of an open `<dialog>` for its content, and dialogs with controls in the corner where the toasts stand: they are covered there, as the page is.
+
+- **Inside a modal dialog the toasts and the tooltips are ordered by the top layer,** not by `--u-z-toast` and `--u-z-tooltip`, so an override of either decides nothing there; a tooltip lies above a toast and a popover under it, as in the page. Outside a dialog the tokens order them as before and no `popover` attribute is set. Where the browser has no Popover API both are fixed boxes inside the dialog, ordered by the tokens, and the deck moves with a dialog that transforms itself.
+
+### Fixed
+
+- **A tooltip in a dialog that transforms itself stands at its trigger.** It stood off by the dialog's transform.
+
+- **The first toast is heard where a `portalTarget` is set.** With a `portalTarget` given as a function that reads an element above the `ToastProvider`, the toast region stood in the body until the first toast and moved to the target together with it, and a live region that arrives with its text is often not read out. The region now stands in the target from the start.
+
 ## 0.35.0 – React 19 is the floor, and an import pays for what it uses (Oct. 2026)
 
 ### Changed

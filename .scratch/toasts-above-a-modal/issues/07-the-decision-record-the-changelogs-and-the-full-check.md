@@ -1,6 +1,6 @@
 # 07 - The decision record, the changelogs and the full check
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -109,3 +109,13 @@ touched. A draft of what the changelogs say, for 0.36.0:
 
 - The tip that shows the whole of a cut value lies above the toasts inside a
   dialog, as core's tooltip does.
+
+**Release prepared (2026-10-13):** the draft above went into the changelogs of
+core and the table under 0.36.0, with one more entry under Fixed in core (the
+first toast is heard where a `portalTarget` is set) and one more thing to check
+under Changed (a selector that takes the one child of an open `<dialog>` for
+its content) - both from the full visual run. The other three packages carry a
+heading without a change of their own. The full check ran: lint, types, unit
+and build over the workspace, and the visual suite, whose five failures in
+core were followed up and whose second run over core was green. The delivery
+report stands in the spec.

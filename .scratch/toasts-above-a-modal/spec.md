@@ -1,6 +1,6 @@
 # Toasts stand above a modal dialog, and can be used there
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-13
 Origin: a guide written from the portal application against core 0.35.0, with
 a throwaway prototype in Chromium and WebKit; checked against the toast's
@@ -583,3 +583,69 @@ release.
   for one case, "the stacking order is a token scale", stands in core's
   changelog and in the comment over the stacking tokens, not in a record -
   which is one more reason to write this one.
+
+## Comments
+
+**Delivered (2026-10-13)** on the branch `toasts-above-a-modal`, in seven
+tickets, two reviews and one full check; ADR-0063 holds the decision as built.
+Prepared for release as 0.36.0.
+
+**What was built as the spec has it:** the toast region follows the modal
+dialog opened last and returns to the provider's portal target, else the body;
+inside a dialog the region, the tooltip and the table's tip for a cut value
+are manual popovers in the top layer, shown before they are measured; outside
+a dialog, and without the Popover API, the tokens order them as before; the
+example "Inside a modal" on the Toast page; no new prop, export or token.
+
+**Where what was built departs from the spec:**
+
+- **The browser tests run in Chromium.** The visual suite has no WebKit
+  project, which the spec assumed. The new tests were also run in WebKit
+  through a temporary configuration, and passed; that is a look, not a guard.
+  Firefox was not run.
+- **The tracker hands a change on synchronously, and only a change.** Applied
+  in a task of its own, the move let one frame be drawn with a toast inside a
+  dialog no longer shown (about 4 runs in 40 in Chromium).
+- **The entrance at a move goes on from the card's age,** by a negative
+  `animation-delay`, where the spec had a class for the commit of the move.
+  The class cut an entrance still running - "Save" reports and closes the
+  modal - and left a toast shown in the same tick as a dialog closing at once
+  without any.
+- **A reading of no height is not kept.** The cards were measured before the
+  region was shown as a popover, read 0, and a deck of several shrank for a
+  moment as it moved.
+- **Escape in the deck is kept from the dialog.** The spec left it to be found
+  out; the first browser test looked while the modal still stood in its exit
+  and reported the opposite.
+- **The showing runs after every commit,** not keyed on the target: a tooltip
+  is a new element each time it opens. A surface whose dialog left the
+  document in the same tick is not shown; `showPopover` throws on it.
+- **Core's unit tests supply the Popover API too,** not only the table's. A
+  conformance test in the table holds its hand-written step against the
+  tooltip's.
+- **Without a dialog one thing is not as in 0.35.0:** a `portalTarget` given
+  as a function that reads an element above the `ToastProvider` now holds the
+  region from the start, where the region used to arrive there with the first
+  toast. It is in the changelog under Fixed, and the UmrissProvider page
+  gained an Accessibility section for it.
+- **Existing tests edited:** two of the drawer, which took the one `div` in
+  its dialog for its sheet.
+- **Baselines renewed on purpose,** all on the Toast page and all moved by the
+  one sentence in its introduction: the page head, the examples show-a-toast,
+  undo and until-closed, the deck closed and open, the loading toast, and the
+  first example under forced colours - each in both themes.
+
+**Known and not built:** `close()` and `showModal()` on the same dialog in one
+tick leave the toasts behind it.
+
+**Not tested:** a dialog that only centres itself by `transform` at rest; a
+tooltip with no delay opened by the focus a modal sets; the table's tip
+against a toast in a browser (no page shows a table in a dialog).
+
+**Seen and not followed up:** the existing test "Toast deck closes again after
+a click on a close button" fails in WebKit; whether it did before this branch
+was not checked, and the suite does not run WebKit.
+
+**Left to the maintainer:** listening once with VoiceOver for whether a
+standing toast is read a second time after a move; merging into `main` and
+pushing, which publishes.

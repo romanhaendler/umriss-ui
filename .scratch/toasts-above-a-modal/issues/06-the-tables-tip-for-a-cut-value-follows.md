@@ -1,6 +1,6 @@
 # 06 - The table's tip for a cut value follows
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 

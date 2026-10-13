@@ -1,6 +1,6 @@
 # 04 - Inside a dialog the toasts stand in the top layer
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
