@@ -1,0 +1,825 @@
+<title>Dashboard-Baukasten Prototyp</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: the question and the guided cases on top, the application's switches
+     under them, one simulated window, and below it what is stored and reported. */
+  :root {
+    --bg: #f4f4f5;
+    --surface: #ffffff;
+    --sunken: #e9e9eb;
+    --fg: #171717;
+    --fg-2: #565656;
+    --muted: #8b8b8b;
+    --edge: rgba(23, 23, 23, 0.10);
+    --edge-strong: rgba(23, 23, 23, 0.22);
+    --accent: #0e7d72;
+    --accent-subtle: #e9f4f2;
+    --on-accent: #ffffff;
+    --ok: #217a4b;
+    --warn: #8a5c00;
+    --warn-subtle: #f7efdb;
+    --bad: #b13636;
+    --bad-subtle: #f8eaea;
+    --shadow: 0 1px 2px rgba(23, 23, 23, 0.06), 0 0 0 1px rgba(23, 23, 23, 0.08);
+    --lift: 0 12px 28px rgba(23, 23, 23, 0.22), 0 0 0 1px rgba(23, 23, 23, 0.12);
+    --font: "Geist", -apple-system, "Segoe UI", system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f0f11; --surface: #19191c; --sunken: #26262a; --fg: #ededed; --fg-2: #a5a5ab;
+      --muted: #77777e; --edge: rgba(255, 255, 255, 0.11); --edge-strong: rgba(255, 255, 255, 0.24);
+      --accent: #17a292; --accent-subtle: #142e2b; --on-accent: #072522; --ok: #4fae7c;
+      --warn: #d0a24d; --warn-subtle: #2b2415; --bad: #d0655c; --bad-subtle: #2f1b1d;
+      --shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+      --lift: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f11; --surface: #19191c; --sunken: #26262a; --fg: #ededed; --fg-2: #a5a5ab;
+    --muted: #77777e; --edge: rgba(255, 255, 255, 0.11); --edge-strong: rgba(255, 255, 255, 0.24);
+    --accent: #17a292; --accent-subtle: #142e2b; --on-accent: #072522; --ok: #4fae7c;
+    --warn: #d0a24d; --warn-subtle: #2b2415; --bad: #d0655c; --bad-subtle: #2f1b1d;
+    --shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --lift: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font); }
+  h1, h2, h3, p, ol, ul, dl { margin: 0; }
+  ol, ul { padding: 0; list-style: none; }
+  button, select, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, .w-head:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .page { max-width: 1680px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 72px; display: flex; flex-direction: column; gap: 28px; }
+  .intro { display: flex; flex-direction: column; gap: 10px; }
+  .badge { align-self: flex-start; font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn); background: var(--warn-subtle); padding: 5px 8px; border-radius: 4px; }
+  h1 { font-size: 24px; line-height: 1.2; font-weight: 600; text-wrap: balance; }
+  .intro p { max-width: 72ch; color: var(--fg-2); }
+  h2 { font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+
+  .walks { background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tabs button { border: 0; background: none; padding: 6px 12px; border-radius: 6px; color: var(--fg-2); font-weight: 500; }
+  .tabs button[aria-selected="true"] { background: var(--accent-subtle); color: var(--accent); }
+  .walk-text { max-width: 78ch; color: var(--fg-2); }
+  .walk-text strong { color: var(--fg); font-weight: 600; }
+  .steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .steps button { border: 0; background: var(--sunken); padding: 7px 12px; border-radius: 6px; display: flex; gap: 8px; align-items: baseline; text-align: left; }
+  .steps button .n { font: 500 11px/1 var(--mono); color: var(--muted); }
+  .steps button.next { background: var(--accent); color: var(--on-accent); }
+  .steps button.next .n { color: var(--on-accent); opacity: 0.75; }
+  .steps button:disabled { cursor: default; opacity: 0.55; }
+  .steps button.reset { background: none; box-shadow: inset 0 0 0 1px var(--edge-strong); }
+  .see { max-width: 78ch; padding: 10px 12px; border-radius: 8px; background: var(--accent-subtle); }
+  .see:empty { display: none; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end; }
+  .control { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .seg { display: inline-flex; flex-wrap: wrap; background: var(--sunken); border-radius: 8px; padding: 2px; gap: 2px; }
+  .seg button { border: 0; background: none; padding: 5px 10px; border-radius: 6px; color: var(--fg-2); }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); font-weight: 500; }
+  .width-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .width-row input[type="range"] { width: min(260px, 60vw); accent-color: var(--accent); }
+  .width-row output { font: 500 13px/1 var(--mono); font-variant-numeric: tabular-nums; min-width: 7ch; }
+
+  /* The simulated window */
+  .stage { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .scale-note { color: var(--muted); font-size: 12px; }
+  #scaler { width: 100%; overflow: hidden; }
+  #win { position: relative; transform-origin: top left; background: var(--bg); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--edge-strong); padding: 0 16px 16px; }
+  #win.editing { box-shadow: inset 0 0 0 2px var(--accent); }
+  .appbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-block: 12px; }
+  .appbar .name { font-size: 16px; font-weight: 600; }
+  .appbar .mode { font: 500 11px/1 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--on-accent); background: var(--accent); padding: 5px 8px; border-radius: 4px; }
+  .appbar .push { margin-left: auto; }
+  .btn { border: 0; background: var(--surface); box-shadow: var(--shadow); padding: 6px 12px; border-radius: 6px; font-weight: 500; white-space: nowrap; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; margin-bottom: 12px; border-radius: 8px; background: var(--warn-subtle); color: var(--fg); }
+  .notice span { flex: 1 1 24ch; min-width: 0; }
+
+  .catalogue { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; padding-bottom: 14px; }
+  .cat { background: var(--surface); box-shadow: var(--shadow); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .cat h3 { font-size: 13px; font-weight: 600; }
+  .cat p { color: var(--fg-2); font-size: 12px; flex: 1 1 auto; }
+  .cat svg { width: 96px; height: 48px; display: block; }
+  .cat svg .ground { fill: var(--sunken); }
+  .cat svg .foot { fill: var(--accent); opacity: 0.55; }
+  .cat .btn { align-self: flex-start; background: var(--sunken); box-shadow: none; }
+
+  #canvas { position: relative; }
+  .empty { padding: 40px 16px; text-align: center; color: var(--fg-2); border: 1px dashed var(--edge-strong); border-radius: 12px; }
+  .w { position: absolute; background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+       transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease, box-shadow 180ms ease; }
+  .w-head { display: flex; align-items: center; gap: 6px; padding: 7px 8px 0 12px; min-width: 0; min-height: 34px; border-radius: 12px 12px 0 0; }
+  .w-head h3 { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
+  .w-grip { flex: none; width: 10px; height: 14px; display: none; background: radial-gradient(circle, var(--muted) 1.2px, transparent 1.4px) 0 0 / 5px 5px; }
+  .w-size { font: 400 11px/1 var(--mono); color: var(--muted); white-space: nowrap; display: none; }
+  .w-more { flex: none; display: none; border: 0; background: none; width: 26px; height: 26px; border-radius: 6px; font-size: 16px; line-height: 1; }
+  .w-more:hover, .w-more[aria-expanded="true"] { background: var(--sunken); }
+  .w-body { flex: 1 1 auto; min-height: 0; padding: 2px 12px 10px; overflow: hidden; display: flex; gap: 12px; }
+
+  .editing .w-head { cursor: grab; touch-action: none; user-select: none; background: var(--sunken); padding-bottom: 5px; }
+  .editing .w-grip, .editing .w-more { display: block; }
+  .editing .w-size { display: block; }
+  .editing .w-body { pointer-events: none; user-select: none; padding-top: 8px; }
+  .w.dragging { transition: none; z-index: 5; box-shadow: var(--lift); }
+  .w.dragging .w-head { cursor: grabbing; }
+  .w.fresh { box-shadow: 0 0 0 2px var(--accent); }
+  .w[data-type="ueberschrift"] { background: none; box-shadow: none; overflow: visible; }
+  .w[data-type="ueberschrift"] .w-head { padding: 0 8px 0 2px; align-items: flex-end; height: 100%; border-radius: 8px; }
+  .w[data-type="ueberschrift"] h3 { font-size: 16px; font-weight: 600; padding-bottom: 6px; }
+  .w[data-type="ueberschrift"] .w-body { display: none; }
+  .editing .w[data-type="ueberschrift"] .w-head { align-items: center; padding-left: 12px; }
+  .editing .w[data-type="ueberschrift"] h3 { padding-bottom: 0; }
+  #slot { position: absolute; border-radius: 12px; border: 2px dashed var(--accent); background: var(--accent-subtle); transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease; }
+
+  /* The menu of one widget */
+  #menu { position: absolute; z-index: 10; width: 230px; background: var(--surface); box-shadow: var(--lift); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+  .m-group { display: flex; flex-direction: column; }
+  .m-group + .m-group { border-top: 1px solid var(--edge); padding-top: 6px; }
+  .m-label { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 4px 8px 2px; }
+  #menu button { border: 0; background: none; text-align: left; padding: 6px 8px; border-radius: 6px; display: flex; justify-content: space-between; gap: 12px; }
+  #menu button:hover:not(:disabled) { background: var(--sunken); }
+  #menu button:disabled { opacity: 0.4; cursor: default; }
+  #menu button[aria-pressed="true"] { background: var(--accent-subtle); color: var(--accent); font-weight: 500; }
+  #menu button.danger { color: var(--bad); }
+  .m-hint { color: var(--muted); font-size: 12px; }
+  #menu select, #menu input { margin: 2px 8px 6px; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--edge-strong); background: var(--surface); min-width: 0; }
+
+  /* Widget contents */
+  .kz { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+  .kz-value { font-size: 26px; line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kz-unit { font-size: 12px; color: var(--muted); margin-left: 4px; font-weight: 400; }
+  .kz-sub { font-size: 12px; color: var(--fg-2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); border-radius: 2px; } .dot.bad { background: var(--bad); border-radius: 0; transform: rotate(45deg); }
+  .chart { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .chart svg { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
+  .chart .line { fill: none; stroke: var(--accent); stroke-width: 1.75; vector-effect: non-scaling-stroke; }
+  .chart .prev { fill: none; stroke: var(--muted); stroke-width: 1.25; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+  .chart .area { fill: var(--accent); opacity: 0.09; stroke: none; }
+  .chart .rule { fill: none; stroke: var(--edge); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--fg-2); }
+  .legend i { display: inline-block; width: 14px; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 5px; }
+  .legend i.p { border-top: 2px dashed var(--muted); }
+  .rows { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .rows li { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--edge); font-size: 13px; min-width: 0; }
+  .rows li:first-child { border-top: 0; }
+  .rows .t { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rows .m { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 8px 6px 0; white-space: nowrap; }
+  td { padding: 5px 8px 5px 0; border-top: 1px solid var(--edge); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0; }
+  td.num, th.num { text-align: right; }
+  .failed { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 4px; color: var(--fg-2); }
+  .failed strong { color: var(--bad); font-weight: 500; }
+
+  /* What holds, what is stored, what was reported */
+  .state { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px 40px; }
+  .state section { display: flex; flex-direction: column; gap: 10px; min-width: 0; border-top: 1px solid var(--edge-strong); padding-top: 12px; }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+  .facts dt { color: var(--fg-2); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .said { padding: 10px 12px; border-radius: 8px; background: var(--sunken); min-height: 2.9em; }
+  .stored li, .reports li { display: flex; gap: 10px; padding: 4px 0; border-top: 1px solid var(--edge); min-width: 0; }
+  .stored li:first-child, .reports li:first-child { border-top: 0; }
+  .stored .i { font: 400 12px/1.6 var(--mono); color: var(--muted); min-width: 2ch; text-align: right; }
+  .stored .t { flex: 1 1 0; min-width: 0; }
+  .stored .s { font: 400 12px/1.6 var(--mono); color: var(--fg-2); white-space: nowrap; }
+  .stored .changed .t { color: var(--accent); font-weight: 500; }
+  .stored .gone .t { text-decoration: line-through; color: var(--muted); }
+  .hint { color: var(--muted); font-size: 12px; max-width: 60ch; }
+
+  @media (prefers-reduced-motion: reduce) { .w, #slot { transition: none; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <span class="badge">Prototyp 2 · Wegwerfcode</span>
+    <h1>Das entschiedene Dashboard zum Benutzen</h1>
+    <p>Zwölf feste Spalten mit Höchstbreite, eine gespeicherte Reihenfolge, benannte Größen, Bearbeiten als Entwurf mit Rückgängig, ein Menü an jedem Widget und eine Vorgabe der Anwendung, zu der „Zurücksetzen“ führt. Hier gibt es keine Modelle mehr umzuschalten. Die Frage ist, ob es sich richtig anfühlt, wenn man damit arbeitet, und wo es hakt.</p>
+  </header>
+
+  <section class="walks" aria-label="Geführte Fälle">
+    <h2>Geführte Fälle</h2>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <p class="walk-text" id="walk-text"></p>
+    <div class="steps" id="steps"></div>
+    <p class="see" id="see"></p>
+  </section>
+
+  <section class="controls" aria-label="Was die Anwendung einstellt">
+    <div class="control">
+      <h2>Fensterbreite</h2>
+      <div class="width-row">
+        <div class="seg" id="presets">
+          <button data-w="390">Telefon</button><button data-w="820">Tablet</button><button data-w="1280">Laptop</button><button data-w="1920">Monitor</button><button data-w="2560">Ultrawide</button>
+        </div>
+        <input type="range" id="width" min="340" max="2600" step="10" aria-label="Fensterbreite in Pixeln">
+        <output id="width-out" for="width"></output>
+      </div>
+    </div>
+    <div class="control">
+      <h2>Rolle des Anwenders</h2>
+      <div class="seg" data-set="role"><button data-val="disposition">Disposition</button><button data-val="leitung">Leitung</button></div>
+    </div>
+    <div class="control">
+      <h2>Bearbeiten</h2>
+      <div class="seg" data-set="locked"><button data-val="no">Erlaubt</button><button data-val="yes">Gesperrt</button></div>
+    </div>
+    <div class="control">
+      <h2>Anwendung</h2>
+      <button class="btn" data-app="leave">Woandershin navigieren</button>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Simuliertes Fenster">
+    <p class="scale-note" id="scale-note"></p>
+    <div id="scaler">
+      <div id="win">
+        <div class="appbar" id="appbar"></div>
+        <div class="notice" id="notice" hidden></div>
+        <div class="catalogue" id="catalogue" hidden></div>
+        <div id="canvas"><div id="slot" hidden></div></div>
+        <div id="menu" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="state" aria-label="Zustand">
+    <section>
+      <h2>Was gerade gilt</h2>
+      <dl class="facts" id="facts"></dl>
+      <h2>Letzte Ansage für Screenreader</h2>
+      <p class="said" id="said" role="status" aria-live="polite"></p>
+    </section>
+    <section>
+      <h2 id="stored-title">Was gespeichert ist</h2>
+      <ol class="stored" id="stored"></ol>
+    </section>
+    <section>
+      <h2>Was der Anwendung gemeldet wurde</h2>
+      <ol class="reports" id="reports"></ol>
+      <p class="hint">Gemeldet wird einmal je „Fertig“, mit der ganzen Anordnung. Wo sie aufbewahrt wird, entscheidet die Anwendung.</p>
+    </section>
+  </section>
+</div>
+
+<script id="arrangement">
+// The part worth keeping: an arrangement and the picture it gives. No DOM.
+// A view is { widgets: [{ id, type, size, options }] } - an object, so that a
+// level of groups can join it later without breaking what was stored.
+const Arrangement = (() => {
+  const GAP = 12, ROW = 50;
+  const spanOf = (types, widget) => types[widget.type].sizes[widget.size];
+
+  // The order becomes a picture: each widget goes to the first place at or
+  // after the one before it, so the drawn order is the stored order.
+  function pack(widgets, types, columns) {
+    const taken = new Set(), placed = [];
+    const isFree = (r, c, w, h) => {
+      for (let dr = 0; dr < h; dr++) for (let dc = 0; dc < w; dc++) if (taken.has((r + dr) + "," + (c + dc))) return false;
+      return true;
+    };
+    let cursor = 0;
+    for (const widget of widgets) {
+      let [w, h] = spanOf(types, widget);
+      w = Math.min(w, columns);
+      for (let i = cursor; ; i++) {
+        const r = Math.floor(i / columns), c = i % columns;
+        if (c + w > columns || !isFree(r, c, w, h)) continue;
+        for (let dr = 0; dr < h; dr++) for (let dc = 0; dc < w; dc++) taken.add((r + dr) + "," + (c + dc));
+        placed.push({ id: widget.id, col: c, row: r, w, h });
+        cursor = i;
+        break;
+      }
+    }
+    return placed;
+  }
+
+  // grid: { columns, minColumn, maxWidth }. The columns never change in number;
+  // below the width at which one would be narrower than minColumn, it is a list.
+  function layout(widgets, types, grid, available) {
+    const width = Math.min(available, grid.maxWidth);
+    let columns = grid.columns, form = "grid";
+    if ((width - GAP * (columns - 1)) / columns < grid.minColumn) { columns = 1; form = "list"; }
+    const colWidth = (width - GAP * (columns - 1)) / columns;
+    const placed = pack(widgets, types, columns);
+    const boxes = placed.map((p) => ({
+      ...p,
+      left: p.col * (colWidth + GAP), top: p.row * (ROW + GAP),
+      width: p.w * colWidth + (p.w - 1) * GAP, height: p.h * ROW + (p.h - 1) * GAP,
+    }));
+    const rows = Math.max(0, ...placed.map((p) => p.row + p.h));
+    return { form, columns, width, colWidth, capped: available > grid.maxWidth, boxes, height: rows ? rows * ROW + (rows - 1) * GAP : 0 };
+  }
+
+  const moveTo = (widgets, id, index) => {
+    const widget = widgets.find((w) => w.id === id), rest = widgets.filter((w) => w.id !== id);
+    return [...rest.slice(0, index), widget, ...rest.slice(index)];
+  };
+  const resize = (widgets, id, size) => widgets.map((w) => (w.id === id ? { ...w, size } : w));
+  const setOptions = (widgets, id, options) => widgets.map((w) => (w.id === id ? { ...w, options: { ...w.options, ...options } } : w));
+  const remove = (widgets, id) => widgets.filter((w) => w.id !== id);
+
+  // Dragging: the place in the order whose picture puts the widget nearest to
+  // where it is held. Always worked out from the order the drag began with, so
+  // the answer depends on where the pointer is and on nothing else.
+  function nearestPlace(from, types, grid, available, id, x, y) {
+    let best = from, least = Infinity;
+    for (let i = 0; i < from.length; i++) {
+      const candidate = moveTo(from, id, i);
+      const box = layout(candidate, types, grid, available).boxes.find((b) => b.id === id);
+      const d = (box.left - x) ** 2 + (box.top - y) ** 2;
+      if (d < least) { least = d; best = candidate; }
+    }
+    return best;
+  }
+
+  // Reading what an application kept: a widget of a type that is gone falls
+  // out, a size its type no longer offers falls back to the type's own.
+  function read(stored, types) {
+    const dropped = [], resized = [], widgets = [];
+    for (const w of (stored && stored.widgets) || []) {
+      const type = types[w.type];
+      if (!type) { dropped.push(w); continue; }
+      if (!type.sizes[w.size]) { resized.push(w); widgets.push({ ...w, size: type.start }); } else widgets.push(w);
+    }
+    return { view: { widgets }, dropped, resized };
+  }
+
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  return { GAP, ROW, spanOf, pack, layout, moveTo, resize, setOptions, remove, nearestPlace, read, same };
+})();
+if (typeof module !== "undefined") module.exports = Arrangement;
+</script>
+
+<script>
+// The throwaway shell around it.
+const FIGURES = {
+  Bestellungen: { value: "1 284", unit: "pro Tag", verdict: "ok", sub: "+3,1 % zur Vorwoche" },
+  Auslastung: { value: "87,4", unit: "%", verdict: "ok", sub: "im Ziel" },
+  Reklamationen: { value: "2,9", unit: "%", verdict: "warn", sub: "knapp über dem Ziel" },
+  Liefertreue: { value: "96,2", unit: "%", verdict: "ok", sub: "im Ziel" },
+  Durchlaufzeit: { value: "4,6", unit: "Tage", verdict: "ok", sub: "−0,3 zur Vorwoche" },
+  Rückstand: { value: "38", unit: "Aufträge", verdict: "bad", sub: "Ziel verfehlt" },
+};
+const TYPES = {
+  kennzahl: { name: "Kennzahl", about: "Eine Zahl mit ihrem Urteil. Größer zeigt den Verlauf dazu.", sizes: { klein: [2, 2], mittel: [3, 2], breit: [4, 2] }, start: "mittel", figure: true },
+  verlauf: { name: "Verlauf", about: "Eine Kennzahl über die letzten vier Wochen. Ab „breit“ mit der Vorwoche.", sizes: { mittel: [4, 4], breit: [6, 4], "groß": [8, 4], voll: [12, 4] }, start: "breit", figure: true },
+  meldungen: { name: "Offene Meldungen", about: "Was gerade Aufmerksamkeit braucht, das Dringendste oben.", sizes: { mittel: [4, 4], hoch: [4, 6], "groß": [6, 6] }, start: "mittel" },
+  auftraege: { name: "Aufträge", about: "Der Arbeitsvorrat als Tabelle. Größer zeigt mehr Spalten und Zeilen.", sizes: { breit: [6, 4], "groß": [8, 6], voll: [12, 6] }, start: "groß" },
+  ueberschrift: { name: "Überschrift", about: "Eine Zeile über die ganze Breite, die das Dashboard gliedert.", sizes: { voll: [12, 1] }, start: "voll", text: true },
+};
+const FRACTION = { 2: "⅙ breit", 3: "¼ breit", 4: "⅓ breit", 6: "½ breit", 8: "⅔ breit", 12: "ganze Breite" };
+const titleOf = (w) =>
+  w.type === "kennzahl" ? w.options.figure
+  : w.type === "verlauf" ? w.options.figure + " · Verlauf"
+  : w.type === "ueberschrift" ? w.options.text
+  : TYPES[w.type] ? TYPES[w.type].name : w.type;
+
+const widget = (id, type, size, options = {}) => ({ id, type, size, options });
+const DEFAULTS = {
+  disposition: () => ({ widgets: [
+    widget("h1", "ueberschrift", "voll", { text: "Überblick" }),
+    widget("k1", "kennzahl", "mittel", { figure: "Bestellungen" }), widget("k2", "kennzahl", "mittel", { figure: "Auslastung" }),
+    widget("k3", "kennzahl", "mittel", { figure: "Reklamationen" }), widget("k4", "kennzahl", "mittel", { figure: "Liefertreue" }),
+    widget("h2", "ueberschrift", "voll", { text: "Verlauf" }),
+    widget("v1", "verlauf", "groß", { figure: "Bestellungen" }), widget("v2", "verlauf", "mittel", { figure: "Reklamationen" }),
+    widget("h3", "ueberschrift", "voll", { text: "Arbeitsvorrat" }),
+    widget("a1", "auftraege", "groß"), widget("m1", "meldungen", "hoch"),
+  ] }),
+  leitung: () => ({ widgets: [
+    widget("h1", "ueberschrift", "voll", { text: "Überblick" }),
+    widget("k1", "kennzahl", "mittel", { figure: "Bestellungen" }), widget("k2", "kennzahl", "mittel", { figure: "Liefertreue" }),
+    widget("k3", "kennzahl", "mittel", { figure: "Rückstand" }), widget("k4", "kennzahl", "mittel", { figure: "Durchlaufzeit" }),
+    widget("h2", "ueberschrift", "voll", { text: "Entwicklung" }),
+    widget("v1", "verlauf", "voll", { figure: "Bestellungen" }),
+    widget("v2", "verlauf", "breit", { figure: "Liefertreue" }), widget("v3", "verlauf", "breit", { figure: "Reklamationen" }),
+  ] }),
+};
+const ROLE_NAME = { disposition: "Disposition", leitung: "Leitung" };
+const GRID = { columns: 12, minColumn: 52, maxWidth: 1560 };
+const INSET = 32;
+
+const S = {
+  width: 1280, role: "disposition", locked: false, saved: {}, history: null, at: 0,
+  drag: null, pending: null, fresh: null, menu: null, catalogue: false, broken: null,
+  notice: null, said: "", reports: [], walk: { i: 0, step: 0, see: "" },
+};
+let nextId = 1;
+const $ = (s) => document.querySelector(s);
+const inner = () => S.width - INSET;
+const saved = () => S.saved[S.role] ?? DEFAULTS[S.role]();
+const editing = () => !!S.history;
+const widgets = () => (editing() ? S.history[S.at] : saved().widgets);
+const shown = () => (S.drag ? S.drag.order : widgets());
+const placeOf = (list, id) => list.findIndex((w) => w.id === id) + 1;
+const say = (text) => { S.said = text; };
+// One step of the draft: everything after the current step is forgotten.
+const step = (next, text) => { S.history = [...S.history.slice(0, S.at + 1), next]; S.at++; S.fresh = null; say(text); };
+
+const act = {
+  edit() { if (S.locked || editing()) return; S.history = [saved().widgets]; S.at = 0; say("Bearbeitungsmodus. Jedes Widget hat ein Menü zum Verschieben, für die Größe und zum Entfernen."); },
+  done() {
+    if (!editing()) return;
+    const next = { widgets: widgets() }, steps = S.at;
+    const changed = !Arrangement.same(next, saved());
+    if (changed) { S.saved[S.role] = next; S.reports.push({ role: S.role, count: next.widgets.length, steps }); }
+    close(); say(changed ? "Anordnung gespeichert." : "Nichts geändert, nichts gemeldet.");
+  },
+  cancel() { if (!editing()) return; close(); say("Entwurf verworfen. Alles steht wie zuvor."); },
+  undo() { if (editing() && S.at > 0) { S.at--; S.menu = null; S.fresh = null; say("Letzter Schritt zurückgenommen."); } },
+  redo() { if (editing() && S.at < S.history.length - 1) { S.at++; S.menu = null; S.fresh = null; say("Schritt wiederholt."); } },
+  reset() { if (editing() && !Arrangement.same(widgets(), DEFAULTS[S.role]().widgets)) step(DEFAULTS[S.role]().widgets, "Auf die Vorgabe für " + ROLE_NAME[S.role] + " zurückgesetzt. Rückgängig holt deine Anordnung zurück."); },
+  place(id, index) {
+    const list = widgets(), from = placeOf(list, id), to = Math.max(0, Math.min(list.length - 1, index)) + 1;
+    if (from === to) return;
+    step(Arrangement.moveTo(list, id, to - 1), `${titleOf(list.find((w) => w.id === id))}: von Platz ${from} auf Platz ${to} von ${list.length} verschoben.`);
+  },
+  shift(id, by) { act.place(id, placeOf(widgets(), id) - 1 + by); },
+  resize(id, size) {
+    const w = widgets().find((x) => x.id === id);
+    if (w.size !== size) step(Arrangement.resize(widgets(), id, size), `${titleOf(w)}: Größe ${size}, ${FRACTION[TYPES[w.type].sizes[size][0]]}.`);
+  },
+  options(id, options) {
+    const next = Arrangement.setOptions(widgets(), id, options);
+    step(next, `Zeigt jetzt: ${titleOf(next.find((w) => w.id === id))}.`);
+  },
+  remove(id) {
+    const w = widgets().find((x) => x.id === id);
+    step(Arrangement.remove(widgets(), id), `${titleOf(w)} entfernt. Rückgängig holt es zurück.`);
+    S.menu = null;
+    if (S.broken === id) S.broken = null;
+  },
+  add(type) {
+    const t = TYPES[type], used = widgets().filter((w) => w.type === type).map((w) => w.options.figure);
+    const options = t.figure ? { figure: Object.keys(FIGURES).find((f) => !used.includes(f)) ?? Object.keys(FIGURES)[used.length % 6] } : t.text ? { text: "Neuer Abschnitt" } : {};
+    const w = widget("n" + nextId++, type, t.start, options), next = [...widgets(), w];
+    step(next, `${titleOf(w)} hinzugefügt, Platz ${next.length} von ${next.length}.`);
+    S.fresh = w.id;
+  },
+};
+function close() { S.history = null; S.at = 0; S.menu = null; S.catalogue = false; S.drag = null; S.pending = null; S.fresh = null; S.notice = null; }
+
+// What only the application does.
+const app = {
+  leave() {
+    if (editing() && S.at > 0) S.notice = "leave";
+    else { close(); say("Die Anwendung navigiert. Es war nichts offen."); }
+  },
+  discardAndLeave() { close(); say("Entwurf verworfen, die Anwendung navigiert."); },
+  stay() { S.notice = null; },
+  role(role) { close(); S.role = role; say("Vorgabe für " + ROLE_NAME[role] + "."); },
+  lock(locked) { if (locked) close(); S.locked = locked; say(locked ? "Bearbeiten ist gesperrt." : "Bearbeiten ist erlaubt."); },
+  loadOld() {
+    const old = DEFAULTS.disposition();
+    old.widgets.splice(5, 0, widget("x1", "wetter", "klein"));
+    old.widgets = old.widgets.map((w) => (w.id === "v1" ? { ...w, size: "riesig" } : w));
+    const result = Arrangement.read(old, TYPES);
+    close(); S.role = "disposition"; S.saved.disposition = result.view;
+    say(`Gelesen: ${result.dropped.length} Widget unbekannten Typs entfallen, ${result.resized.length} auf seine Standardgröße gesetzt.`);
+  },
+};
+
+// ── Walkthroughs ──────────────────────────────────────────────────────────
+function fresh(width = 1280) {
+  Object.assign(S, { width, role: "disposition", locked: false, saved: {}, broken: null, reports: [], said: "" });
+  close();
+}
+const WALKS = [
+  {
+    tab: "Andere Monitore",
+    text: "Die Vorgabe der Anwendung für die Disposition: drei Abschnitte, jeder mit einer <strong>Überschrift über die ganze Breite</strong>, oben <strong>vier Kennzahlen in einer Zeile</strong>. Geh mit derselben Anordnung über die Bildschirme und achte darauf, ob jedes Widget dort bleibt, wo du es erwartest.",
+    reset: () => fresh(),
+    steps: [
+      ["Am großen Monitor öffnen", () => { S.width = 1920; }, "Das Dashboard ist bei seiner Höchstbreite stehen geblieben. Der Raum rechts gehört der Anwendung; sie kann die Höchstbreite ändern oder ihn nutzen."],
+      ["Am Ultrawide öffnen", () => { S.width = 2560; }, "Dasselbe Bild wie am Monitor. Ohne Höchstbreite wäre jede Kennzahl jetzt über 600 Pixel breit."],
+      ["Am Tablet öffnen", () => { S.width = 820; }, "Dieselben zwölf Spalten, schmaler. Jeder Nachbar steht, wo er stand. Die Tabelle wird eng; hier liegt die Grenze des Rasters."],
+      ["Am Telefon öffnen", () => { S.width = 390; }, "Unter der Mindestbreite je Spalte ist das Dashboard eine Liste in derselben Reihenfolge. Die Überschriften gliedern sie weiter, und jedes Widget behält seine Höhe."],
+    ],
+  },
+  {
+    tab: "Umbauen",
+    text: "Bearbeiten ist ein eigener Modus und ein Entwurf. Der Kopf eines Widgets ist der Griff; rechts im Kopf sitzt das Menü, das alles auch ohne Ziehen kann. <strong>Probier nach dem ersten Schritt selbst:</strong> ein Widget am Kopf ziehen, das Menü öffnen, oder den Kopf mit Tab ansteuern und die Pfeiltasten drücken.",
+    reset: () => fresh(),
+    steps: [
+      ["Bearbeiten", () => act.edit(), "Der Rahmen des Fensters, das Schild „Bearbeitungsmodus“ und die grauen Köpfe zeigen den Modus an. Der Inhalt der Widgets ruht, solange er dauert."],
+      ["Meldungen einen Platz nach vorn", () => act.shift("m1", -1), "Die Meldungen stehen jetzt links, die Aufträge rücken nach rechts. Unter dem Fenster steht, was ein Screenreader dazu gesagt bekäme."],
+      ["Verlauf Bestellungen auf volle Breite", () => act.resize("v1", "voll"), "Der Verlauf nimmt die ganze Zeile, der zweite Verlauf rückt darunter, und rechts neben ihm bleibt Raum frei. Gefüllt wird er nicht von selbst."],
+      ["Rückgängig", () => act.undo(), "Ein Schritt zurück, nicht alle. Die Meldungen bleiben vorn."],
+      ["Eine Kennzahl hinzufügen", () => { S.catalogue = true; act.add("kennzahl"); }, "Der Katalog zeigt jeden Typ mit Namen, einem Satz und seinem Platzbedarf. Die neue Kennzahl zeigt sofort etwas und steht am Ende; von dort wird sie an ihren Platz gezogen."],
+      ["Fertig", () => act.done(), "Jetzt erst, und nur einmal, wurde der Anwendung die Anordnung gemeldet. Rechts unten steht der Eintrag."],
+    ],
+  },
+  {
+    tab: "Wenn etwas schiefgeht",
+    text: "Ziehen ist fehleranfällig, und ein entferntes Widget samt dem, was es zeigen sollte, darf nicht verloren sein. Dieser Fall geht die Auswege durch: <strong>Rückgängig</strong> für einen Schritt, <strong>Abbrechen</strong> für alle, und die Warnung der Anwendung, wenn jemand mit offenem Entwurf geht.",
+    reset: () => fresh(),
+    steps: [
+      ["Bearbeiten", () => act.edit(), "Der Entwurf beginnt beim gespeicherten Stand."],
+      ["Aufträge entfernen", () => act.remove("a1"), "Ohne Rückfrage entfernt. Die Meldungen sind nachgerückt."],
+      ["Meldungen auf groß", () => act.resize("m1", "groß"), "Zwei Schritte im Entwurf. Gespeichert ist weiter der alte Stand, siehe unten."],
+      ["Woandershin navigieren", () => app.leave(), "Die Bibliothek sagt der Anwendung, dass ein Entwurf offen ist. Was sie daraus macht, ist ihre Sache; hier fragt sie nach."],
+      ["Weiter bearbeiten", () => app.stay(), "Der Entwurf ist unberührt."],
+      ["Rückgängig", () => act.undo(), "Die Meldungen haben ihre alte Größe, die Aufträge fehlen noch."],
+      ["Abbrechen", () => act.cancel(), "Alles steht wie vor dem Bearbeiten, die Aufträge eingeschlossen. Gemeldet wurde nichts."],
+    ],
+  },
+  {
+    tab: "Was die Anwendung regiert",
+    text: "Die Anordnung ist ein Wert, den die Anwendung aufbewahrt und vorgibt. Dieser Fall zeigt, was die Bibliothek ihr dafür schuldet: <strong>nachsichtiges Einlesen</strong> alter Werte, einen Rahmen, der ein abgestürztes Widget überlebt, und <strong>Zurücksetzen</strong> auf ihre Vorgabe.",
+    reset: () => fresh(),
+    steps: [
+      ["Eine alte gespeicherte Anordnung laden", () => app.loadOld(), "Der gespeicherte Wert nannte ein Wetter-Widget, das es nicht mehr gibt, und einen Verlauf in der Größe „riesig“, die der Typ nicht mehr anbietet. Das eine ist entfallen, der andere steht in seiner Standardgröße; deshalb ist rechts neben den Verläufen jetzt Raum frei. Nichts ist kaputt."],
+      ["Ein Widget stürzt ab", () => { S.broken = "v2"; }, "Der Inhalt des zweiten Verlaufs hat beim Zeichnen einen Fehler geworfen. Sein Rahmen steht, alles andere arbeitet weiter."],
+      ["Bearbeiten und es entfernen", () => { act.edit(); act.remove("v2"); }, "Auch ein kaputtes Widget hat seinen Kopf und sein Menü und lässt sich entfernen."],
+      ["Auf die Vorgabe zurücksetzen", () => act.reset(), "Zurücksetzen führt zur Vorgabe der Anwendung für diese Rolle. Es ist ein Schritt im Entwurf wie jeder andere: Rückgängig holt die eigene Anordnung zurück."],
+      ["Fertig", () => act.done(), "Gemeldet. Die gespeicherte Anordnung entspricht wieder der Vorgabe."],
+      ["Die Anwendung sperrt das Bearbeiten", () => app.lock(true), "Ohne Bearbeiten ist das Dashboard ein vollwertiger Fall: dieselbe Anordnung, kein Knopf, kein Modus."],
+      ["Ein Anwender der Leitung meldet sich an", () => app.role("leitung"), "Eine andere Vorgabe für eine andere Rolle. Jede Rolle hat ihren eigenen gespeicherten Wert."],
+    ],
+  },
+];
+function startWalk(i) { S.walk = { i, step: 0, see: "" }; WALKS[i].reset(); render(); }
+function doStep(k) {
+  const walk = WALKS[S.walk.i];
+  if (k !== S.walk.step) return;
+  walk.steps[k][1]();
+  S.walk.step = k + 1; S.walk.see = walk.steps[k][2];
+  render();
+}
+
+// ── Widget contents: what a type shows at each size ───────────────────────
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function series(seed, n = 28) {
+  let s = [...seed].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7), v = 50;
+  return Array.from({ length: n }, () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    v = Math.max(10, Math.min(90, v + (s / 4294967296 - 0.5) * 24));
+    return v;
+  });
+}
+const path = (values) => values.map((v, i) => (i ? "L" : "M") + ((i / (values.length - 1)) * 100).toFixed(2) + " " + (100 - v).toFixed(2)).join(" ");
+function chartSvg(name, withPrevious) {
+  const d = path(series(name));
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <path class="rule" d="M0 25H100M0 50H100M0 75H100"/>
+    <path class="area" d="${d} L100 100 L0 100 Z"/>
+    ${withPrevious ? `<path class="prev" d="${path(series(name + " Vorwoche"))}"/>` : ""}
+    <path class="line" d="${d}"/></svg>`;
+}
+const MESSAGES = [
+  ["bad", "Lieferung 4471 überfällig", "Versand", "12 min"], ["warn", "Reklamation zu Auftrag 4418", "Qualität", "34 min"],
+  ["warn", "Bestand Karton B2 niedrig", "Lager", "1 h"], ["ok", "Wartung Linie 3 abgeschlossen", "Technik", "2 h"],
+  ["warn", "Rückfrage Kunde Brandt", "Vertrieb", "3 h"],
+];
+const CUSTOMERS = ["Brandt GmbH", "Ostwind AG", "Keller & Söhne", "Nordlicht KG", "Faber Technik", "Weiss Logistik", "Lindner AG", "Auer GmbH", "Mohn & Co"];
+const STATES = ["in Arbeit", "geplant", "in Arbeit", "wartet", "geplant", "in Arbeit", "fertig", "geplant", "wartet"];
+const PEOPLE = ["Aksoy", "Berger", "Demir", "Hoff", "Krüger", "Lang", "Nowak", "Peters", "Voss"];
+function content(w) {
+  if (S.broken === w.id) throw new Error("Der Inhalt dieses Widgets ist abgestürzt.");
+  if (w.type === "kennzahl") {
+    const f = FIGURES[w.options.figure];
+    return `<div class="kz"><div class="kz-value">${f.value}<span class="kz-unit">${f.unit}</span></div>${w.size === "klein" ? `<div class="kz-sub"><span class="dot ${f.verdict}"></span></div>` : `<div class="kz-sub"><span class="dot ${f.verdict}"></span>${f.sub}</div>`}</div>`
+      + (w.size === "breit" ? `<div class="chart">${chartSvg(w.options.figure, false)}</div>` : "");
+  }
+  if (w.type === "verlauf") {
+    const more = w.size !== "mittel";
+    return `<div class="chart">${more ? `<div class="legend"><span><i></i>diese Woche</span><span><i class="p"></i>Vorwoche</span></div>` : ""}${chartSvg(w.options.figure, more)}</div>`;
+  }
+  if (w.type === "meldungen") {
+    const count = w.size === "mittel" ? 4 : 5;
+    return `<ul class="rows">${MESSAGES.slice(0, count).map(([sev, text, where, when]) =>
+      `<li><span class="dot ${sev}"></span><span class="t">${text}</span>${w.size === "groß" ? `<span class="m">${where}</span>` : ""}${w.size !== "mittel" ? `<span class="m">vor ${when}</span>` : ""}</li>`).join("")}</ul>`;
+  }
+  if (w.type === "auftraege") {
+    const cols = w.size === "breit" ? ["Nr.", "Kunde", "Status"] : w.size === "groß" ? ["Nr.", "Kunde", "Menge", "Fällig", "Status"] : ["Nr.", "Kunde", "Menge", "Fällig", "Status", "Bearbeitung"];
+    const cell = { "Nr.": (i) => 4470 - i * 7, Kunde: (i) => CUSTOMERS[i], Menge: (i) => (120 + ((i * 370) % 900)).toLocaleString("de-DE"), "Fällig": (i) => (14 + i) + ".10.", Status: (i) => STATES[i], Bearbeitung: (i) => PEOPLE[i] };
+    const num = (c) => (c === "Menge" ? ' class="num"' : "");
+    const rows = w.size === "breit" ? 5 : 9;
+    return `<table><thead><tr>${cols.map((c) => `<th${num(c)}>${c}</th>`).join("")}</tr></thead><tbody>${Array.from({ length: rows }, (_, i) =>
+      `<tr>${cols.map((c) => `<td${num(c)}>${cell[c](i)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  return "";
+}
+// The frame stands whatever the content does.
+function safeContent(w) {
+  try { return content(w); } catch { return `<div class="failed"><strong>Kann gerade nichts zeigen.</strong><span>Die anderen Widgets sind nicht betroffen.</span></div>`; }
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────
+const canvas = $("#canvas"), win = $("#win"), scaler = $("#scaler"), slot = $("#slot"), menu = $("#menu");
+const els = new Map();
+let scale = 1;
+function elementFor(w) {
+  let el = els.get(w.id);
+  if (el) return el;
+  el = document.createElement("article");
+  el.className = "w"; el.dataset.id = w.id; el.dataset.type = w.type;
+  el.innerHTML = `<header class="w-head"><span class="w-grip" aria-hidden="true"></span><h3></h3><span class="w-size"></span><button class="w-more" aria-haspopup="true">⋯</button></header><div class="w-body"></div>`;
+  canvas.appendChild(el); els.set(w.id, el);
+  return el;
+}
+
+function render() {
+  const list = shown(), edit = editing();
+  const lay = Arrangement.layout(list, TYPES, GRID, inner());
+  scale = Math.min(1, scaler.clientWidth / S.width);
+  win.style.width = S.width + "px"; win.style.transform = `scale(${scale})`;
+  win.classList.toggle("editing", edit);
+  canvas.style.width = lay.width + "px";
+  canvas.style.height = (list.length ? lay.height : 130) + "px";
+
+  for (const [id, el] of els) if (!list.some((w) => w.id === id)) { el.remove(); els.delete(id); }
+  let empty = canvas.querySelector(".empty");
+  if (!list.length && !empty) { empty = document.createElement("p"); empty.className = "empty"; canvas.appendChild(empty); }
+  if (empty) { if (list.length) empty.remove(); else empty.textContent = edit ? "Noch kein Widget. Füge eines aus dem Katalog hinzu." : "Dieses Dashboard ist leer."; }
+
+  list.forEach((w, i) => {
+    const el = elementFor(w), box = lay.boxes.find((b) => b.id === w.id), dragging = S.drag && S.drag.id === w.id;
+    const key = w.type + w.size + JSON.stringify(w.options) + (S.broken === w.id);
+    if (el.dataset.key !== key) { el.dataset.key = key; el.querySelector(".w-body").innerHTML = safeContent(w); }
+    const title = titleOf(w), head = el.querySelector(".w-head"), more = el.querySelector(".w-more");
+    el.querySelector("h3").textContent = title;
+    el.querySelector(".w-size").textContent = Object.keys(TYPES[w.type].sizes).length > 1 ? w.size : "";
+    more.setAttribute("aria-label", "Menü für " + title);
+    more.setAttribute("aria-expanded", String(S.menu === w.id));
+    if (edit) {
+      head.tabIndex = 0; head.setAttribute("role", "group");
+      head.setAttribute("aria-label", `${title}, Platz ${i + 1} von ${list.length}. Pfeiltasten verschieben.`);
+    } else { head.removeAttribute("tabindex"); head.removeAttribute("role"); head.removeAttribute("aria-label"); }
+    el.classList.toggle("dragging", !!dragging); el.classList.toggle("fresh", S.fresh === w.id);
+    el.style.width = box.width + "px"; el.style.height = box.height + "px";
+    el.style.left = (dragging ? S.drag.x : box.left) + "px"; el.style.top = (dragging ? S.drag.y : box.top) + "px";
+    if (dragging) Object.assign(slot.style, { left: box.left + "px", top: box.top + "px", width: box.width + "px", height: box.height + "px" });
+  });
+  slot.hidden = !S.drag;
+
+  $("#appbar").innerHTML = `<span class="name">Mein Dashboard</span>` + (edit
+    ? `<span class="mode">Bearbeitungsmodus</span><span class="push"></span>
+       <button class="btn" data-bar="undo" ${S.at > 0 ? "" : "disabled"}>↶ Rückgängig</button>
+       <button class="btn" data-bar="redo" ${S.at < S.history.length - 1 ? "" : "disabled"}>↷ Wiederholen</button>
+       <button class="btn" data-bar="reset" ${Arrangement.same(widgets(), DEFAULTS[S.role]().widgets) ? "disabled" : ""}>Zurücksetzen</button>
+       <button class="btn" data-bar="catalogue" aria-expanded="${S.catalogue}">Widget hinzufügen</button>
+       <button class="btn" data-bar="cancel">Abbrechen</button><button class="btn primary" data-bar="done">Fertig</button>`
+    : S.locked ? `` : `<span class="push"></span><button class="btn" data-bar="edit">Bearbeiten</button>`);
+  const notice = $("#notice"); notice.hidden = S.notice !== "leave";
+  notice.innerHTML = `<span>Die Anwendung fragt: Du hast ${S.at} ungespeicherte ${S.at === 1 ? "Änderung" : "Änderungen"} am Dashboard. Verwerfen und gehen?</span><button class="btn" data-app="stay">Weiter bearbeiten</button><button class="btn" data-app="discardAndLeave">Verwerfen und gehen</button>`;
+  const cat = $("#catalogue"); cat.hidden = !(edit && S.catalogue);
+  cat.innerHTML = Object.entries(TYPES).map(([k, t]) => {
+    const [w, h] = t.sizes[t.start];
+    return `<div class="cat"><svg viewBox="0 0 12 6" preserveAspectRatio="none" aria-hidden="true"><rect class="ground" width="12" height="6" rx="0.4"/><rect class="foot" width="${w}" height="${h}" rx="0.4"/></svg>
+      <h3>${t.name}</h3><p>${t.about}</p><button class="btn" data-add="${k}">Hinzufügen</button></div>`;
+  }).join("");
+
+  renderMenu(list);
+  scaler.style.height = win.offsetHeight * scale + "px";
+  $("#scale-note").textContent = `Fenster ${S.width} px breit` + (scale < 1 ? `, hier auf ${Math.round(scale * 100)} % verkleinert` : "");
+  $("#width").value = S.width; $("#width-out").textContent = S.width + " px";
+  document.querySelectorAll("#presets button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.w === S.width)));
+  document.querySelectorAll(".seg[data-set] button").forEach((b) => {
+    const set = b.parentElement.dataset.set;
+    b.setAttribute("aria-pressed", String(set === "role" ? S.role === b.dataset.val : S.locked === (b.dataset.val === "yes")));
+  });
+  renderState(list, lay); renderWalk();
+}
+
+function renderMenu(list) {
+  const w = S.menu && list.find((x) => x.id === S.menu);
+  menu.hidden = !w;
+  if (!w) return;
+  const i = list.indexOf(w), n = list.length, sizes = Object.entries(TYPES[w.type].sizes), t = TYPES[w.type];
+  menu.setAttribute("role", "group"); menu.setAttribute("aria-label", "Menü für " + titleOf(w));
+  menu.innerHTML = `
+    <div class="m-group"><span class="m-label">Platz ${i + 1} von ${n}</span>
+      <button data-m="first" ${i === 0 ? "disabled" : ""}>An den Anfang</button>
+      <button data-m="earlier" ${i === 0 ? "disabled" : ""}>Einen Platz nach vorn</button>
+      <button data-m="later" ${i === n - 1 ? "disabled" : ""}>Einen Platz nach hinten</button>
+      <button data-m="last" ${i === n - 1 ? "disabled" : ""}>Ans Ende</button></div>
+    ${sizes.length > 1 ? `<div class="m-group"><span class="m-label">Größe</span>${sizes.map(([name, [cw]]) =>
+      `<button data-m="size" data-size="${name}" aria-pressed="${w.size === name}">${name}<span class="m-hint">${FRACTION[cw]}</span></button>`).join("")}</div>` : ""}
+    ${t.figure ? `<div class="m-group"><label class="m-label" for="opt-figure">Zeigt</label><select id="opt-figure" data-opt="figure">${Object.keys(FIGURES).map((f) =>
+      `<option ${f === w.options.figure ? "selected" : ""}>${f}</option>`).join("")}</select></div>` : ""}
+    ${t.text ? `<div class="m-group"><label class="m-label" for="opt-text">Text</label><input id="opt-text" data-opt="text" value="${esc(w.options.text)}"></div>` : ""}
+    <div class="m-group"><button data-m="remove" class="danger">Entfernen</button></div>`;
+  const b = els.get(w.id).querySelector(".w-more").getBoundingClientRect(), r = win.getBoundingClientRect();
+  const right = (b.right - r.left) / scale, bottom = (b.bottom - r.top) / scale;
+  menu.style.left = Math.max(8, Math.min(right - 230, S.width - 238)) + "px";
+  menu.style.top = bottom + 4 + "px";
+}
+
+function renderState(list, lay) {
+  const def = DEFAULTS[S.role]().widgets;
+  $("#facts").innerHTML = `
+    <dt>Form</dt><dd>${lay.form === "list" ? "Liste – alles untereinander" : `Raster, 12 Spalten zu je ${Math.round(lay.colWidth)} px`}</dd>
+    <dt>Breite</dt><dd>${Math.round(lay.width)} px${lay.capped ? ", an der Höchstbreite" : ""}</dd>
+    <dt>Rolle</dt><dd>${ROLE_NAME[S.role]}${S.locked ? ", Bearbeiten gesperrt" : ""}</dd>
+    <dt>Zur Vorgabe</dt><dd>${Arrangement.same(list, def) ? "entspricht ihr" : "weicht ab"}</dd>
+    <dt>Entwurf</dt><dd>${editing() ? `offen, ${S.at} ${S.at === 1 ? "Schritt" : "Schritte"}` : "keiner"}</dd>`;
+  $("#said").textContent = S.said || "Noch nichts gesagt.";
+  $("#stored-title").textContent = editing() ? "Entwurf – noch nicht gespeichert" : "Was gespeichert ist";
+  const before = saved().widgets;
+  const line = (w, i, cls, note) => `<li class="${cls}"><span class="i">${i}</span><span class="t">${esc(titleOf(w))}${note ? ` · ${note}` : ""}</span><span class="s">${w.type} · ${w.size}</span></li>`;
+  $("#stored").innerHTML = list.map((w, i) => {
+    const was = before.find((b) => b.id === w.id), at = before.findIndex((b) => b.id === w.id);
+    const note = !was ? "neu" : was.size !== w.size ? "Größe geändert" : !Arrangement.same(was.options, w.options) ? "zeigt anderes" : at !== i ? "verschoben" : "";
+    return line(w, i + 1, note ? "changed" : "", note);
+  }).join("") + before.filter((b) => !list.some((w) => w.id === b.id)).map((w) => line(w, "–", "gone", "entfernt")).join("");
+  $("#reports").innerHTML = S.reports.length
+    ? S.reports.map((r, i) => `<li><span class="i">${i + 1}</span><span class="t">${ROLE_NAME[r.role]}: ${r.count} Widgets, nach ${r.steps} ${r.steps === 1 ? "Schritt" : "Schritten"} im Entwurf</span></li>`).join("")
+    : `<li><span class="t">Noch nichts.</span></li>`;
+}
+
+function renderWalk() {
+  const walk = WALKS[S.walk.i];
+  $("#tabs").innerHTML = WALKS.map((w, i) => `<button role="tab" aria-selected="${i === S.walk.i}" data-walk="${i}">${w.tab}</button>`).join("");
+  $("#walk-text").innerHTML = walk.text;
+  $("#steps").innerHTML = walk.steps.map(([label], k) =>
+    `<button data-step="${k}" class="${k === S.walk.step ? "next" : ""}" ${k === S.walk.step ? "" : "disabled"}><span class="n">${k < S.walk.step ? "✓" : k + 1}</span>${label}</button>`).join("")
+    + `<button class="reset" data-walk="${S.walk.i}">Von vorn</button>`;
+  $("#see").textContent = S.walk.see;
+}
+
+// ── Wiring ────────────────────────────────────────────────────────────────
+const focusMore = (id) => { const el = els.get(id); if (el) el.querySelector(".w-more").focus(); };
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (S.menu && !e.target.closest("#menu") && !(t && t.classList.contains("w-more"))) { S.menu = null; if (!t) return render(); }
+  if (!t) return;
+  if (t.dataset.walk !== undefined) return startWalk(+t.dataset.walk);
+  if (t.dataset.step !== undefined) return doStep(+t.dataset.step);
+  if (t.dataset.w) S.width = +t.dataset.w;
+  else if (t.dataset.val) { const set = t.parentElement.dataset.set; if (set === "role") app.role(t.dataset.val); else app.lock(t.dataset.val === "yes"); }
+  else if (t.dataset.app) app[t.dataset.app]();
+  else if (t.dataset.bar === "catalogue") S.catalogue = !S.catalogue;
+  else if (t.dataset.bar) act[t.dataset.bar]();
+  else if (t.dataset.add) act.add(t.dataset.add);
+  else if (t.classList.contains("w-more")) { const id = t.closest(".w").dataset.id; S.menu = S.menu === id ? null : id; S.fresh = null; }
+  else if (t.dataset.m) {
+    const id = S.menu, at = placeOf(widgets(), id) - 1, m = t.dataset.m;
+    if (m === "first") act.place(id, 0);
+    if (m === "earlier") act.place(id, at - 1);
+    if (m === "later") act.place(id, at + 1);
+    if (m === "last") act.place(id, widgets().length - 1);
+    if (m === "size") act.resize(id, t.dataset.size);
+    if (m === "remove") act.remove(id);
+    S.menu = null; render(); return focusMore(id);
+  } else return;
+  render();
+  if (S.fresh && els.get(S.fresh)) els.get(S.fresh).scrollIntoView({ block: "nearest", behavior: "smooth" });
+});
+menu.addEventListener("change", (e) => {
+  const opt = e.target.dataset.opt; if (!opt || !S.menu) return;
+  const id = S.menu; act.options(id, { [opt]: e.target.value || "Abschnitt" }); S.menu = null; render(); focusMore(id);
+});
+$("#width").addEventListener("input", (e) => { S.width = +e.target.value; S.menu = null; render(); });
+addEventListener("resize", render);
+
+// Dragging takes hold of the head only, and only after the pointer has moved a little.
+const point = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }; };
+canvas.addEventListener("pointerdown", (e) => {
+  const head = e.target.closest(".w-head");
+  if (!editing() || !head || e.target.closest("button") || e.button > 0) return;
+  const el = head.closest(".w"), p = point(e);
+  S.pending = { id: el.dataset.id, x0: p.x, y0: p.y, dx: p.x - parseFloat(el.style.left), dy: p.y - parseFloat(el.style.top) };
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener("pointermove", (e) => {
+  const p = point(e), g = S.pending;
+  if (g && !S.drag && Math.hypot(p.x - g.x0, p.y - g.y0) > 4) { S.drag = { id: g.id, from: widgets(), order: widgets(), x: 0, y: 0 }; S.menu = null; S.fresh = null; }
+  if (!S.drag) return;
+  S.drag.x = p.x - g.dx; S.drag.y = p.y - g.dy;
+  S.drag.order = Arrangement.nearestPlace(S.drag.from, TYPES, GRID, inner(), g.id, S.drag.x, S.drag.y);
+  render();
+});
+function drop(keep) {
+  const d = S.drag; S.drag = null; S.pending = null;
+  if (!d) return;
+  if (keep) act.place(d.id, placeOf(d.order, d.id) - 1); else say("Ziehen abgebrochen.");
+  render();
+}
+canvas.addEventListener("pointerup", () => drop(true));
+canvas.addEventListener("pointercancel", () => drop(false));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (S.drag) return drop(false);
+    if (S.menu) { const id = S.menu; S.menu = null; render(); return focusMore(id); }
+  }
+  const head = e.target.closest && e.target.closest(".w-head");
+  const by = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key];
+  if (!editing() || !head || e.target !== head) return;
+  const id = head.closest(".w").dataset.id;
+  if (by) act.shift(id, by);
+  else if (e.key === "Home") act.place(id, 0);
+  else if (e.key === "End") act.place(id, widgets().length - 1);
+  else return;
+  e.preventDefault(); render();
+});
+
+startWalk(0);
+</script>
