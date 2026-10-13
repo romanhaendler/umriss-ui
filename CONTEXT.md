@@ -1334,6 +1334,29 @@ value** in one metric makes absent only what depends on it in that metric.
 _Avoid_: column (which is a table's), Spalte as an identifier, series (which is
 the charts'), measure, Kennzahl
 
+### Dashboards
+
+**Dashboard**:
+A surface of **Widgets** whose arrangement its reader chose: which widgets
+stand on it, in what order, and each at which of its sizes. The order is a
+sequence and never a set of coordinates, so one arrangement holds at every
+width. It stands still until its reader asks to edit it; only then can a widget
+be moved, resized, added or removed. The arrangement is its **View**. A screen
+a developer laid out is not a dashboard, however much it looks like one.
+_Avoid_: board, layout editor, tile grid, home screen; "dashboard" for a kind
+of application, outside the positioning sentence
+
+**Widget**:
+One placed thing on a **Dashboard**: an instance of a **Widget type**, at one of
+the sizes its type allows. The same type can stand on a dashboard several
+times, each widget on its own.
+_Avoid_: tile, Kachel, card (which is the surface), panel, gadget, **Cell**
+
+**Widget type**:
+What a developer declares and a reader chooses from when adding to a
+**Dashboard**: what a **Widget** of this kind shows and which sizes it allows.
+_Avoid_: widget (for the kind rather than the placed one), template, component
+
 
 ## Public names
 
