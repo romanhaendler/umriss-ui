@@ -1,6 +1,6 @@
 # 01 - The start and end tokens move the toasts of their side
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 

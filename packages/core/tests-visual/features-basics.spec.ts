@@ -128,7 +128,9 @@ test("A dialog opened with show() leaves the toasts where they were", async ({ p
 
 test("The inset tokens move the toasts above a modal as they do without one", async ({ page }) => {
   const { region } = await failToSave(page);
-  await page.addStyleTag({ content: ":root { --u-toast-inset-top: 72px; --u-toast-inset-bottom: 64px; }" });
+  await page.addStyleTag({
+    content: ":root { --u-toast-inset-top: 72px; --u-toast-inset-bottom: 64px; --u-toast-inset-start: 88px; --u-toast-inset-end: 96px; }",
+  });
   const place = region.locator("xpath=ancestor-or-self::*[@data-edge][1]");
   await expect
     .poll(() =>
@@ -138,6 +140,15 @@ test("The inset tokens move the toasts above a modal as they do without one", as
       }),
     )
     .toBeCloseTo(await place.evaluate((element) => (element.getAttribute("data-edge") === "top" ? 72 : 64)), 0);
+  const side = await place.evaluate((element) => element.getAttribute("data-along"));
+  await expect
+    .poll(() =>
+      place.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return element.getAttribute("data-along") === "start" ? rect.left : document.documentElement.clientWidth - rect.right;
+      }),
+    )
+    .toBeCloseTo(side === "start" ? 88 : 96, 0);
 });
 
 /* Inside a dialog the region stands in the top layer: a dialog that moves,
@@ -415,24 +426,29 @@ test("A tooltip outside a dialog carries no popover attribute", async ({ page })
   await expect(page.getByRole("tooltip")).not.toHaveAttribute("popover", /.*/);
 });
 
-/* toast-inset-tokens 01: the distance from the window's edge is a token per
-   edge. Unset, the region stands where it always stood - 20 px, 16 px on a
-   phone; set on `:root`, it moves every position of its edge at every width
-   and leaves the other edge alone. */
+/* The distance from the window's edge is a token per edge. Unset, the region
+   stands where it always stood - 20 px, 16 px on a phone; set on `:root`, it
+   moves every position of its edge at every width and leaves the other edges
+   alone. On a phone the region takes the window's width, so each side token is
+   the room at its side at all six positions. */
 const TOAST_POSITIONS = ["Top start", "Top center", "Top end", "Bottom start", "Bottom center", "Bottom end"];
 
 async function toastInsets(page: import("@playwright/test").Page, width: number, tokens = "") {
   await page.setViewportSize({ width, height: 800 });
   await openExample(page, "toast", "where-they-stand");
   if (tokens !== "") await page.addStyleTag({ content: `:root { ${tokens} }` });
-  const insets: Record<string, number> = {};
+  const insets: Record<string, { edge: number; start: number; end: number }> = {};
   for (const name of TOAST_POSITIONS) {
     await page.getByRole("button", { name, exact: true }).click();
     const region = page.locator("[data-edge]").filter({ has: page.getByText(`Standing ${name.toLowerCase()}.`) });
     await expect(region).toBeVisible();
     insets[name] = await region.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      return element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom;
+      return {
+        edge: element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom,
+        start: rect.left,
+        end: document.documentElement.clientWidth - rect.right,
+      };
     });
   }
   return insets;
@@ -440,19 +456,52 @@ async function toastInsets(page: import("@playwright/test").Page, width: number,
 
 for (const width of [1280, 320]) {
   const unset = width === 320 ? 16 : 20;
+  const phone = width === 320;
+  /* A position stands at its own side, on a phone at both; a center one above
+     600 px at neither, in the middle of the window. */
+  const expectSides = (name: string, inset: { start: number; end: number }, start: number, end: number) => {
+    if (phone || name.endsWith("start")) expect(inset.start, name).toBeCloseTo(start, 0);
+    if (phone || name.endsWith("end")) expect(inset.end, name).toBeCloseTo(end, 0);
+    if (!phone && name.endsWith("center")) expect(inset.start, name).toBeCloseTo(inset.end, 0);
+  };
 
   test(`Toasts stand where they always stood without the tokens (${width} px)`, async ({ page }) => {
-    for (const [name, inset] of Object.entries(await toastInsets(page, width))) expect(inset, name).toBeCloseTo(unset, 0);
+    for (const [name, inset] of Object.entries(await toastInsets(page, width))) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
   });
 
   test(`The top token moves the top toasts only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-top: 72px;");
-    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Top") ? 72 : unset, 0);
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(name.startsWith("Top") ? 72 : unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
   });
 
   test(`The bottom token moves the bottom toasts only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-bottom: 64px;");
-    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Bottom") ? 64 : unset, 0);
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(name.startsWith("Bottom") ? 64 : unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
+  });
+
+  test(`The start token moves the start toasts only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-start: 88px;");
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, 88, unset);
+    }
+  });
+
+  test(`The end token moves the end toasts only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-end: 88px;");
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, unset, 88);
+    }
   });
 }
 
