@@ -291,11 +291,13 @@ push to `main`.
   element: jsdom reports every element as zero-sized, and there is no layout
   there. Dismissal, focus and roles do run in jsdom.
 * The tooltip takes its geometry from the primitive (`align: "center"`,
-  `side: "top"`) and, since library-audit 01, its portal rule as well – the same
-  function `portalTargetFor` (dialog, then the setting, then the body), so that a
-  tooltip inside a modal no longer sits behind the dialog. It does not take the
-  element: it has neither focus nor dismissal, its entrance is a different one,
-  and on scrolling it disappears instead of travelling along. The remaining
-  difference is therefore only behaviour, not a layer.
+  `side: "top"`) and its portal rule as well - the same function
+  `portalTargetFor` (dialog, then the setting, then the body). Inside a dialog
+  it also stands in the top layer, as a manual popover shown before it is
+  measured, so that it lies above the toasts there and a transforming dialog
+  does not move it. It does not take the element: it has neither focus nor
+  dismissal, its entrance is a different one, and on scrolling it disappears
+  instead of travelling along. The remaining difference is therefore only
+  behaviour, not a layer.
 * jsdom is pinned to ^26: jsdom 30 pulls a pure ESM package in through
   `require()`, which does not load on Node 22.11 and prevented every vitest run.

@@ -108,12 +108,13 @@ export interface UmrissProviderProps {
    */
   density?: Density;
   /**
-   * Where overlays portal to. A function is evaluated on every opening - a
-   * target that only enters the tree later cannot be given otherwise; `null`
-   * means "as before". The callers' own rules take precedence: the popover
-   * seam portals into the nearest `<dialog>` ancestor, because a portal at the
-   * body does not reach the top layer, and the toasts follow the topmost modal
-   * dialog, because a toast outside it lies behind it and is inert.
+   * Where overlays portal to, unless an open dialog takes them. A function is
+   * evaluated on every opening - a target that only enters the tree later
+   * cannot be given otherwise; `null` means "as before".
+   * The callers' own rules take precedence: the popover seam portals into the
+   * nearest `<dialog>` ancestor, because a portal at the body does not reach
+   * the top layer, and the toasts follow the topmost modal dialog, because a
+   * toast outside it lies behind it and is inert.
    */
   portalTarget?: PortalTarget;
   /** The setting for toasts: the display duration where the individual toast

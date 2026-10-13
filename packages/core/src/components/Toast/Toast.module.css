@@ -115,6 +115,9 @@
     overflow: hidden;
     transform-origin: var(--_origin);
     animation: toastIn var(--u-duration-medium) var(--u-ease-out);
+    /* A card built anew by a move is as old as the toast: the entrance goes on
+       from where it was, and is over for a card older than it is long. */
+    animation-delay: var(--_delay, 0ms);
     /* Leaving through a transition – does not collide with the entrance animation. */
     transition:
       height var(--u-duration-medium) var(--u-ease-out),
@@ -142,11 +145,6 @@
 
   .region[data-edge="top"] .toast {
     animation-name: toastInFromTop;
-  }
-
-  /* A card that stood when the region changed its place has entered already. */
-  .card.settled .toast {
-    animation: none;
   }
 
   @keyframes toastIn {

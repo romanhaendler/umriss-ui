@@ -81,8 +81,9 @@ touched. A draft of what the changelogs say, for 0.36.0:
   `<dialog>` of your own opened with `showModal()` is open was drawn behind it
   and was inert; it is now seen, pressed, reached by Alt + T and read out. It
   stands at the same place in the window, and a toast that was standing does
-  not move, enter again, restart its clock or call `onClose` when a dialog
-  opens or closes behind it (ADR-0063).
+  not move, restart its entrance or its clock or call `onClose` when a dialog
+  opens or closes behind it; an entrance that is running goes on (ADR-0063).
+  Escape in the deck gives the focus back and leaves the modal open.
 - **Where the toast region stands in the DOM.** While a modal dialog is open
   the region is a descendant of the topmost one; when it closes the region
   returns to the provider's `portalTarget`, else the body. A dialog opened

@@ -644,6 +644,37 @@ describe("Toast – inside a modal dialog", () => {
       }
     });
 
+    it("hands the cards standing at a move their age as a negative animation delay", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      const delay = (title: string) =>
+        screen.getByText(title).closest<HTMLElement>("[data-toast]")!.parentElement!.parentElement!.style.getPropertyValue("--_delay");
+      call((t) => t.toast({ title: "Older", duration: 0 }));
+      act(() => vi.advanceTimersByTime(100));
+      call((t) => t.toast({ title: "Newer", duration: 0 }));
+      act(() => vi.advanceTimersByTime(150));
+      expect(delay("Older")).toBe("");
+      await open(first);
+      expect(delay("Older")).toBe("-250ms");
+      expect(delay("Newer")).toBe("-150ms");
+      call((t) => t.toast({ title: "Latest", duration: 0 }));
+      expect(delay("Latest")).toBe("");
+    });
+
+    it("lets a toast shown in the tick of a dialog that closes at once begin its entrance at the start", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      await open(first);
+      act(() => {
+        call((t) => t.toast({ title: "Saved", duration: 0 }));
+        first.close();
+      });
+      await settle();
+      expect(screen.getByText("Saved").closest<HTMLElement>("[data-toast]")!.parentElement!.parentElement!.style.getPropertyValue("--_delay")).toBe("-0ms");
+    });
+
     it("keeps the same toasts in the same two regions", async () => {
       const call = mountIn();
       const first = dialog();
@@ -670,6 +701,8 @@ describe("Toast – the top layer", () => {
   /* jsdom has no Popover API: a test that wants one supplies it. */
   const withPopoverApi = () => {
     HTMLElement.prototype.showPopover = function (this: HTMLElement) {
+      /* The browser's own refusal. */
+      if (!this.isConnected) throw new DOMException("Invalid on disconnected popover elements.", "InvalidStateError");
       shown(this);
     };
   };
@@ -715,5 +748,17 @@ describe("Toast – the top layer", () => {
     expect(document.querySelectorAll("[data-edge]")).toHaveLength(1);
     expect(region().getAttribute("popover")).toBe("manual");
     expect(shown.mock.calls.filter(([element]) => element === region()).length).toBeGreaterThan(0);
+  });
+
+  it("is not shown again once its dialog left the document while open", async () => {
+    withPopoverApi();
+    const element = await mountInDialog();
+    act(() => {
+      element.close();
+      element.remove();
+    });
+    await act(async () => {});
+    expect(document.body.contains(region())).toBe(true);
+    expect(region().hasAttribute("popover")).toBe(false);
   });
 });

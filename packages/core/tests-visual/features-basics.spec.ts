@@ -3,8 +3,9 @@
    Run only in the light ui project (behaviour is theme-independent;
    screenshots cover dark). */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import { openExample } from "./navigation";
+import { failToSave, openTheModal, sampleFrames, seen } from "./insideAModal";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
@@ -65,18 +66,6 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
 
 /* The toasts above an open modal dialog: the unit setup's dialog makes nothing
    inert, so only a browser shows that a toast in the dialog can be pressed. */
-async function failToSave(page: import("@playwright/test").Page) {
-  await openExample(page, "toast", "inside-a-modal");
-  await page.getByRole("button", { name: "Edit the profile" }).click();
-  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
-  await expect(dialog).toBeVisible();
-  const save = dialog.getByRole("button", { name: "Save" });
-  await save.click();
-  const region = page.getByRole("region", { name: "Messages (Alt+T)" });
-  await expect(region.getByText("Profile not saved")).toBeVisible();
-  return { dialog, save, region };
-}
-
 test("A toast above a modal is pressable and closes without closing the modal", async ({ page }) => {
   const { dialog, region } = await failToSave(page);
   const cross = region.getByRole("button", { name: "Close message" });
@@ -111,6 +100,18 @@ test("Alt+T inside a modal moves the focus into the toasts, and Escape gives it 
   await expect(dialog).toBeVisible();
 });
 
+test("Escape in the deck above a modal leaves the modal open once its exit would have run", async ({ page }) => {
+  const { dialog, save, region } = await failToSave(page);
+  await save.focus();
+  await page.keyboard.press("Alt+KeyT");
+  await expect(region).toBeFocused();
+  await page.keyboard.press("Escape");
+  /* Well past the modal's exit: a cancel that reached it closes it by then. */
+  await page.waitForTimeout(800);
+  await expect(dialog).toBeVisible();
+  await expect(save).toBeFocused();
+});
+
 test("A dialog opened with show() leaves the toasts where they were", async ({ page }) => {
   const { dialog, region } = await failToSave(page);
   await dialog.getByRole("button", { name: "Cancel" }).click();
@@ -140,50 +141,51 @@ test("The inset tokens move the toasts above a modal as they do without one", as
 });
 
 /* Inside a dialog the region stands in the top layer: a dialog that moves,
-   clips or fades itself leaves the toast where it was. The card is looked up
-   anew in every frame, since a move builds the region again. The box is read
-   in the page, in every animation frame, over `span` ms. */
-function sampleBoxes(page: import("@playwright/test").Page, text: string, span = 600) {
-  return page.evaluate(
-    ({ text, span }) =>
-      new Promise<{ x: number[]; y: number[]; missing: number }>((resolve) => {
-        const xs = new Set<number>();
-        const ys = new Set<number>();
-        let missing = 0;
-        const start = performance.now();
-        const frame = () => {
-          const card = [...document.querySelectorAll("[data-toast]")].find((entry) => entry.textContent?.includes(text));
-          if (card) {
-            const box = card.getBoundingClientRect();
-            xs.add(Math.round(box.x));
-            ys.add(Math.round(box.y));
-          } else missing += 1;
-          if (performance.now() - start < span) requestAnimationFrame(frame);
-          else resolve({ x: [...xs], y: [...ys], missing });
-        };
-        frame();
-      }),
-    { text, span },
-  );
-}
-
+   clips or fades itself leaves the toast where it was. Every card's box is
+   read in every animation frame (`sampleFrames`). */
 test("A toast standing before the modal opens, and while it closes, does not move", async ({ page }) => {
   const { dialog, region } = await failToSave(page);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(dialog).toBeHidden();
   await expect(page.getByText("Profile not saved")).toBeVisible();
 
-  const opening = sampleBoxes(page, "Profile not saved");
+  const stopOpening = await sampleFrames(page);
   await page.getByRole("button", { name: "Edit the profile" }).click();
-  const whileOpening = await opening;
-  expect(whileOpening).toEqual({ x: [expect.any(Number)], y: [expect.any(Number)], missing: 0 });
+  await page.waitForTimeout(600);
+  const opening = await stopOpening();
+  expect(seen(opening, 0, "x")).toEqual({ values: [expect.any(Number)], missing: 0 });
+  expect(seen(opening, 0, "y")).toEqual({ values: [expect.any(Number)], missing: 0 });
   await expect(dialog).toBeVisible();
   await expect(region).toHaveAttribute("popover", "manual");
   await expect(region).toHaveCount(1);
 
-  const closing = sampleBoxes(page, "Profile not saved");
+  const stopClosing = await sampleFrames(page);
   await dialog.getByRole("button", { name: "Cancel" }).click();
-  expect(await closing).toEqual({ x: whileOpening.x, y: whileOpening.y, missing: 0 });
+  await page.waitForTimeout(600);
+  const closing = await stopClosing();
+  expect(seen(closing, 0, "x")).toEqual({ values: seen(opening, 0, "x").values, missing: 0 });
+  expect(seen(closing, 0, "y")).toEqual({ values: seen(opening, 0, "y").values, missing: 0 });
+});
+
+test("Two toasts standing before the modal opens keep their boxes while it opens and closes", async ({ page }) => {
+  const { dialog, save } = await failToSave(page);
+  await save.click();
+  await expect(page.locator("[data-toast]")).toHaveCount(2);
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+
+  for (const move of ["opens", "closes"]) {
+    const stop = await sampleFrames(page);
+    if (move === "opens") await page.getByRole("button", { name: "Edit the profile" }).click();
+    else await dialog.getByRole("button", { name: "Cancel" }).click();
+    await page.waitForTimeout(600);
+    const frames = await stop();
+    for (const index of [0, 1]) {
+      for (const field of ["x", "y", "width", "height", "surface"] as const) {
+        expect(seen(frames, index, field), `${move}: card ${index}, ${field}`).toEqual({ values: [expect.any(Number)], missing: 0 });
+      }
+    }
+  }
 });
 
 test("A toast stands still in a dialog that slides by transform and clips its content", async ({ page }) => {
@@ -193,44 +195,72 @@ test("A toast stands still in a dialog that slides by transform and clips its co
   await expect(page.getByText("Profile not saved")).toBeVisible();
 
   const at = await page.locator("[data-toast]").filter({ hasText: "Profile not saved" }).boundingBox();
-  const sampled = await page.evaluate(
-    () =>
-      new Promise<{ x: number[]; y: number[]; missing: number }>((resolve) => {
-        const plain = document.createElement("dialog");
-        plain.textContent = "Slides in";
-        plain.style.cssText = "width: 220px; height: 120px; overflow: hidden; padding: 0; transform: translateX(0);";
-        document.body.append(plain);
-        const xs = new Set<number>();
-        const ys = new Set<number>();
-        let missing = 0;
-        const start = performance.now();
-        const frame = () => {
-          const card = [...document.querySelectorAll("[data-toast]")].find((entry) => entry.textContent?.includes("Profile not saved"));
-          if (card) {
-            const box = card.getBoundingClientRect();
-            xs.add(Math.round(box.x));
-            ys.add(Math.round(box.y));
-          } else missing += 1;
-          if (performance.now() - start < 1300) requestAnimationFrame(frame);
-          else {
-            plain.remove();
-            resolve({ x: [...xs], y: [...ys], missing });
-          }
-        };
-        plain.showModal();
-        plain.animate([{ transform: "translateX(-300px)" }, { transform: "translateX(0)" }], { duration: 400, easing: "ease-out" });
-        frame();
-        /* Out again: it slides away, then closes. */
-        setTimeout(() => {
-          plain
-            .animate([{ transform: "translateX(0)" }, { transform: "translateX(300px)" }], { duration: 300, fill: "forwards" })
-            .finished.then(() => plain.close());
-        }, 700);
-      }),
-  );
-  expect(sampled.missing).toBe(0);
-  expect(sampled.x).toEqual([Math.round(at!.x)]);
-  expect(sampled.y).toEqual([Math.round(at!.y)]);
+  const stop = await sampleFrames(page);
+  await page.evaluate(() => {
+    const plain = document.createElement("dialog");
+    plain.textContent = "Slides in";
+    plain.id = "slides-in";
+    plain.style.cssText = "width: 220px; height: 120px; overflow: hidden; padding: 0; transform: translateX(0);";
+    document.body.append(plain);
+    plain.showModal();
+    plain.animate([{ transform: "translateX(-300px)" }, { transform: "translateX(0)" }], { duration: 400, easing: "ease-out" });
+    /* Out again: it slides away, then closes. */
+    setTimeout(() => {
+      plain
+        .animate([{ transform: "translateX(0)" }, { transform: "translateX(300px)" }], { duration: 300, fill: "forwards" })
+        .finished.then(() => plain.close());
+    }, 700);
+  });
+  await page.waitForTimeout(1300);
+  const frames = await stop();
+  await page.locator("#slides-in").evaluate((element) => element.remove());
+  expect(seen(frames, 0, "x")).toEqual({ values: [Math.round(at!.x)], missing: 0 });
+  expect(seen(frames, 0, "y")).toEqual({ values: [Math.round(at!.y)], missing: 0 });
+});
+
+/* The entrance takes two seconds here, so that a card cut or restarted at the
+   move shows in the opacity: the modal's exit is shorter than the entrance
+   it runs into. */
+const SLOW_ENTRANCE = ":root { --u-duration-medium: 2000ms; }";
+
+test("A toast arriving as the modal closes goes on with its entrance in the new place", async ({ page }) => {
+  await openTheModal(page);
+  await page.addStyleTag({ content: SLOW_ENTRANCE });
+  const stop = await sampleFrames(page);
+  /* "Save" fails and "Cancel" closes in one tick: the move comes some 160 ms into the entrance. */
+  await page.evaluate(() => {
+    const dialog = document.querySelector("dialog")!;
+    const press = (name: string) => [...dialog.querySelectorAll("button")].find((button) => button.textContent === name)!.click();
+    press("Save");
+    press("Cancel");
+  });
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await page.waitForTimeout(2300);
+  const opacities = (await stop()).flatMap((cards) => cards.slice(0, 1).map((card) => card.opacity));
+  expect(opacities.at(-1)).toBe(1);
+  expect(opacities.length).toBeGreaterThan(20);
+  /* No restart (a fall) and no cut (a jump) at the move. */
+  const steps = opacities.slice(1).map((opacity, index) => opacity - opacities[index]!);
+  expect(Math.min(...steps)).toBeGreaterThanOrEqual(-0.01);
+  expect(Math.max(...steps)).toBeLessThan(0.25);
+});
+
+test("A toast shown in the tick of a dialog that closes at once enters once, outside it", async ({ page }) => {
+  await openTheModal(page);
+  await page.addStyleTag({ content: SLOW_ENTRANCE });
+  const stop = await sampleFrames(page);
+  await page.evaluate(() => {
+    const dialog = document.querySelector("dialog")!;
+    [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Save")!.click();
+    dialog.close();
+  });
+  await page.waitForTimeout(2300);
+  const opacities = (await stop()).flatMap((cards) => cards.slice(0, 1).map((card) => card.opacity));
+  expect(opacities[0]).toBeLessThan(0.3);
+  expect(opacities.at(-1)).toBe(1);
+  const steps = opacities.slice(1).map((opacity, index) => opacity - opacities[index]!);
+  expect(Math.min(...steps)).toBeGreaterThanOrEqual(-0.01);
+  expect(Math.max(...steps)).toBeLessThan(0.25);
 });
 
 test("At a phone's width a toast above a modal takes the window's width", async ({ page }) => {
@@ -267,42 +297,47 @@ test("In forced colours the deck above a modal has no box of its own", async ({ 
 
 test("With reduced motion a toast above a modal appears and leaves without movement", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await openExample(page, "toast", "inside-a-modal");
-  await page.getByRole("button", { name: "Edit the profile" }).click();
-  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
-  await expect(dialog).toBeVisible();
-  const appearing = sampleBoxes(page, "Profile not saved", 400);
+  const dialog = await openTheModal(page);
+  const stopAppearing = await sampleFrames(page);
   await dialog.getByRole("button", { name: "Save" }).click();
-  const [appeared] = await Promise.all([appearing]);
+  await page.waitForTimeout(400);
+  const appearing = await stopAppearing();
+  const appeared = { x: seen(appearing, 0, "x").values, y: seen(appearing, 0, "y").values };
   const stands = (await page.locator("[data-toast]").filter({ hasText: "Profile not saved" }).boundingBox())!;
   expect(appeared.x.length).toBeLessThanOrEqual(2);
   expect(appeared.y.length).toBeLessThanOrEqual(2);
   expect(appeared.x.at(-1)).toBe(Math.round(stands.x));
   expect(appeared.y.at(-1)).toBe(Math.round(stands.y));
-  const leaving = sampleBoxes(page, "Profile not saved", 400);
+  const stopLeaving = await sampleFrames(page);
   await page.getByRole("button", { name: "Close message" }).click();
-  const left = await leaving;
-  expect(left.x).toEqual(appeared.x.slice(-1));
-  expect(left.y).toEqual(appeared.y.slice(-1));
+  await page.waitForTimeout(400);
+  const leaving = await stopLeaving();
+  expect(seen(leaving, 0, "x").values).toEqual(appeared.x.slice(-1));
+  expect(seen(leaving, 0, "y").values).toEqual(appeared.y.slice(-1));
 });
 
 /* A tooltip in a dialog stands in the top layer, shown later than the toast
    region: it lies above the toasts, a menu does not. The window is narrow so
    that the deck, which takes its width, covers the modal's Preview button. A
    tooltip takes no pointer events; the question is asked with it hit-testable. */
-async function previewTip(page: import("@playwright/test").Page, size = { width: 390, height: 520 }, low = false) {
+async function previewTip(page: Page, { size = { width: 390, height: 520 }, low = false } = {}) {
   await page.setViewportSize(size);
   const { dialog, region } = await failToSave(page);
   const preview = dialog.getByRole("button", { name: "Preview" });
   /* Low in the window, where the deck stands. */
   if (low) await preview.evaluate((element) => Object.assign(element.style, { position: "fixed", bottom: "60px", left: "40px" }));
-  /* The pointer entering the trigger, which works where it is covered by the deck and in every engine. */
+  return { dialog, region, preview, tip: await hoverPreview(page, preview) };
+}
+
+/* The pointer entering the trigger, which works where it is covered by the
+   deck and in every engine. Past the tooltip's entry, so that its box is the
+   one it keeps. */
+async function hoverPreview(page: Page, preview: Locator) {
   await preview.dispatchEvent("pointerover");
   const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
   await expect(tip).toBeVisible();
-  /* Past its entry, so that its box is the one it keeps. */
   await page.waitForTimeout(300);
-  return { dialog, region, preview, tip };
+  return tip;
 }
 
 function overlap(a: { x: number; y: number; width: number; height: number }, b: typeof a) {
@@ -314,7 +349,7 @@ function overlap(a: { x: number; y: number; width: number; height: number }, b: 
 }
 
 test("A tooltip in a modal lies above a toast where the two overlap", async ({ page }) => {
-  const { tip } = await previewTip(page, undefined, true);
+  const { tip } = await previewTip(page, { low: true });
   await expect(tip).toHaveAttribute("popover", "manual");
   await tip.evaluate((element) => ((element as HTMLElement).style.pointerEvents = "auto"));
   const card = page.locator("[data-toast]").filter({ hasText: "Profile not saved" });
@@ -323,8 +358,22 @@ test("A tooltip in a modal lies above a toast where the two overlap", async ({ p
   expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest("[role]")?.getAttribute("role"), point!)).toBe("tooltip");
 });
 
+test("A list opened in a modal lies under a toast where the two overlap", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 520 });
+  const { dialog } = await failToSave(page);
+  await dialog.getByRole("combobox", { name: "Language" }).click();
+  const list = page.getByRole("listbox");
+  await expect(list).toBeVisible();
+  /* Past the entries of the list and of the toast, so that their boxes are the ones they keep. */
+  await page.waitForTimeout(400);
+  const card = page.locator("[data-toast]").filter({ hasText: "Profile not saved" });
+  const point = overlap((await list.boundingBox())!, (await card.boundingBox())!);
+  expect(point).not.toBeNull();
+  expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest("[data-toast], [role=listbox]")?.getAttribute("role") ?? "toast", point!)).toBe("toast");
+});
+
 test("A tooltip in a modal stands centred above its trigger", async ({ page }) => {
-  const { tip, preview } = await previewTip(page, { width: 800, height: 700 });
+  const { tip, preview } = await previewTip(page, { size: { width: 800, height: 700 } });
   const t = (await tip.boundingBox())!;
   const p = (await preview.boundingBox())!;
   expect(t.x + t.width / 2).toBeCloseTo(p.x + p.width / 2, 0);
@@ -333,10 +382,7 @@ test("A tooltip in a modal stands centred above its trigger", async ({ page }) =
 
 test("A tooltip in a modal flips below its trigger where the window ends above", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 700 });
-  await openExample(page, "toast", "inside-a-modal");
-  await page.getByRole("button", { name: "Edit the profile" }).click();
-  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
-  await expect(dialog).toBeVisible();
+  const dialog = await openTheModal(page);
   const preview = dialog.getByRole("button", { name: "Preview" });
   /* The button is moved to the window's top, where there is no room above it. */
   await preview.evaluate((element) => {
@@ -344,11 +390,7 @@ test("A tooltip in a modal flips below its trigger where the window ends above",
     element.style.top = "4px";
     element.style.left = "300px";
   });
-  /* The pointer entering the trigger, which works where it is covered by the deck and in every engine. */
-  await preview.dispatchEvent("pointerover");
-  const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
-  await expect(tip).toBeVisible();
-  await page.waitForTimeout(300);
+  const tip = await hoverPreview(page, preview);
   const t = (await tip.boundingBox())!;
   const p = (await preview.boundingBox())!;
   expect(Math.abs(t.y - (p.y + p.height + 8))).toBeLessThanOrEqual(1);
@@ -356,16 +398,10 @@ test("A tooltip in a modal flips below its trigger where the window ends above",
 
 test("A tooltip in a dialog that transforms itself stands at its trigger", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 700 });
-  await openExample(page, "toast", "inside-a-modal");
-  await page.getByRole("button", { name: "Edit the profile" }).click();
-  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
-  await expect(dialog).toBeVisible();
+  const dialog = await openTheModal(page);
   await dialog.evaluate((element) => ((element as HTMLElement).style.transform = "translate(37px, 23px) scale(1)"));
   const preview = dialog.getByRole("button", { name: "Preview" });
-  await preview.dispatchEvent("pointerover");
-  const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
-  await expect(tip).toBeVisible();
-  await page.waitForTimeout(300);
+  const tip = await hoverPreview(page, preview);
   const t = (await tip.boundingBox())!;
   const p = (await preview.boundingBox())!;
   expect(t.x + t.width / 2).toBeCloseTo(p.x + p.width / 2, 0);

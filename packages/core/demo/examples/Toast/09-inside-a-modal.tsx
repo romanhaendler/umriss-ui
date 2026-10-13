@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, FormField, Input, Modal, ModalBody, ModalFooter, ModalHeader, Text, ToastProvider, Tooltip, useToast } from "../../../src";
+import { Button, FormField, Input, Modal, ModalBody, ModalFooter, ModalHeader, Select, Text, ToastProvider, Tooltip, useToast } from "../../../src";
 
 export const title = "Inside a modal";
 export const lead = "A toast stands above an open modal dialog and can be pressed there: the dialog's \"Save\" fails, and the toast carries \"Retry\" next to the form it belongs to.";
@@ -26,6 +26,14 @@ function Content() {
         <ModalBody>
           <FormField label="Display name">
             <Input defaultValue="Maya Lindgren" />
+          </FormField>
+          <FormField label="Language">
+            <Select defaultValue="en">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+            </Select>
           </FormField>
           <Tooltip content="Shows the profile as colleagues see it.">
             <Button size="sm" variant="secondary">
