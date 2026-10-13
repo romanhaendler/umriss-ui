@@ -130,6 +130,11 @@
     animation-name: toastInFromTop;
   }
 
+  /* A card that stood when the region changed its place has entered already. */
+  .card.settled .toast {
+    animation: none;
+  }
+
   @keyframes toastIn {
     from {
       opacity: 0;
