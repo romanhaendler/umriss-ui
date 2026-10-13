@@ -24,6 +24,7 @@ what a reader has — the filename is what they are looking for.
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/) |
 | what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/) |
 | how other chart libraries take their data, and what follows for the charts | [`research/chart-data-input-2026-10/`](research/chart-data-input-2026-10/) |
+| how dashboards that users arrange themselves are built elsewhere, what their users ask for, and what follows for a dashboard package | [`research/user-dashboards-2026-10/`](research/user-dashboards-2026-10/) (`report.md` is the synthesis, in German) |
 | how a coding agent reads a package's documentation | `llms.txt` beside each demo online, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once, or `docs/llms-full.md` inside the installed package — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | what a document used to be called | **What moved**, below |
