@@ -1,6 +1,6 @@
 # The toasts' distance from the window's sides is two tokens
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-13
 Origin: a proposal made the day core 0.36.0 was released, after the toasts had
 learned to stand above a modal dialog. Checked against the toast's stylesheet,
@@ -209,3 +209,28 @@ Toast page's example on where the toasts stand names all four.
   the tokens stand in a layer: a value set plainly on `:root` holds at every
   width. That is how the top and bottom tokens behave, and the tests at 320 px
   hold it for the sides.
+
+## Comments
+
+### Delivery report (2026-10-13, core 0.37.0)
+
+Built as specified: `--u-toast-inset-start` and `--u-toast-inset-end` in the
+token sheet's Toast group, read by the toast's stylesheet in the three places
+that held the number; nothing in the component, `API.md` unchanged.
+
+Where what was built departs from the spec, or adds to it:
+
+- **A test for a right-to-left page**, which the spec's test cases did not
+  list: there the start token is the distance from the right (story 16).
+- **Above a modal only the end side is asserted.** The example's toasts stand
+  at `bottom-end`, as only the bottom token is read there; the start token
+  above a modal is held by the same rules and by no test of its own.
+- **The Theming page's group is called "Toast".** Its heading in the token
+  sheet carried the name of the effort that added the first two tokens; the
+  page printed it.
+- **Ten pictures renewed, not only those of one example**: "Where they stand"
+  itself, the three toast pictures whose page behind the toasts moved, and the
+  two examples below it, which stand a fraction of a pixel higher - each in
+  both themes. No picture under forced colours moved.
+- **Wording**: the lead and the token group's note keep "edge" for top and
+  bottom and say "sides" for start and end.

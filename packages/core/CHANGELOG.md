@@ -26,6 +26,12 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.37.0 – The toasts' distance from the window's sides (Oct. 2026)
+
+### Added
+
+- **`--u-toast-inset-start` and `--u-toast-inset-end`**, the toasts' distance from the window's sides. The default is the distance they had: `--u-space-5`, `--u-space-4` up to 600 px wide. Set on `:root`, the start one moves the `*-start` positions - beside a navigation rail, at the page's gutter - and the end one the `*-end` positions; on a phone, where the toast takes the window's width, each is the room at its side at every position. The center positions stay in the middle of the window, and in a right-to-left page start is the right side. With `--u-toast-inset-top` and `--u-toast-inset-bottom` every edge of the window has its token. A rule on the region's `data-along` is no longer needed, and was never safe (ADR-0045).
+
 ## 0.36.0 – Toasts stand above a modal dialog (Oct. 2026)
 
 ### Changed

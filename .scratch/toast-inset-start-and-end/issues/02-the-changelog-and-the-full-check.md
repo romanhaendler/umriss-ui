@@ -1,6 +1,6 @@
 # 02 - The changelog and the full check
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -25,10 +25,20 @@ The work is handed over ready for a release.
 
 ## Acceptance
 
-- [ ] The changelog draft for core stands under `## Comments`.
-- [ ] The full check: lint, types, unit, build, visual - parallel suites
+- [x] The changelog draft for core stands under `## Comments`.
+- [x] The full check: lint, types, unit, build, visual - parallel suites
       waited for, ports 4173-4177 free, the machine kept awake.
-- [ ] Every generated document is current (`pnpm check:site`).
-- [ ] The spec's status set to `done` with the delivery report under
+- [x] Every generated document is current (`pnpm check:site`).
+- [x] The spec's status set to `done` with the delivery report under
       `## Comments`, naming every place where what was built departs from it;
       both tickets set to `done`.
+
+## Comments
+
+2026-10-13. The release followed at once, so the draft went straight into
+core's `CHANGELOG.md` under 0.37.0 instead of standing here first. The full
+check ran on the commit before the release: lint, types, the site gates, unit
+tests, build and the whole visual suite. It found two more pictures on the
+Toast page - the examples below "Where they stand", a fraction of a pixel
+higher - and nothing else; they were renewed and every toast test of core ran
+again.
