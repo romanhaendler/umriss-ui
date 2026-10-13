@@ -5,7 +5,8 @@
 
    Internal, like `computePosition`. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { flushSync } from "react-dom";
 
 /**
  * The portal target for a surface at the anchor `anker`, in this order:
@@ -55,6 +56,39 @@ function isModal(dialog: HTMLDialogElement): boolean {
   }
 }
 
+/**
+ * Whether a surface portalled to `target` stands in the top layer: inside a
+ * dialog, where the dialog's own `transform`, `overflow` and `filter` would
+ * otherwise cut or move a fixed box, and only where the Popover API exists.
+ * Elsewhere `z-index` orders the surface.
+ *
+ * The value for the surface's `popover` attribute, or `undefined`. The surface
+ * is shown by `useShownInTopLayer`.
+ */
+export function topLayerPopover(target: Element | null): "manual" | undefined {
+  return target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype ? "manual" : undefined;
+}
+
+/**
+ * Shows the surface `ref` when it carries `popover` (`topLayerPopover`), in a
+ * layout effect so that nothing is painted between the attribute and the
+ * showing. A surface shown already is left alone: StrictMode runs the effect
+ * twice, and `showPopover` throws on an open popover.
+ */
+export function useShownInTopLayer(ref: RefObject<HTMLElement | null>, target: Element | null): void {
+  useLayoutEffect(() => {
+    const surface = ref.current;
+    if (!surface || surface.getAttribute("popover") !== "manual") return;
+    let open = false;
+    try {
+      open = surface.matches(":popover-open");
+    } catch {
+      /* A browser that has `showPopover` has the selector; a stand-in may not. */
+    }
+    if (!open) surface.showPopover();
+  }, [ref, target]);
+}
+
 function modalDialogs(): HTMLDialogElement[] {
   let found: NodeListOf<HTMLDialogElement>;
   try {
@@ -85,16 +119,25 @@ export function useTopmostModalDialog(): HTMLDialogElement | null {
         const node = record.target;
         if (node instanceof HTMLDialogElement && isModal(node) && !order.includes(node)) order.push(node);
       }
-      update();
+      /* A closed dialog is not drawn, and what stands inside it goes with it:
+         the move has to land before the next frame, not in a task of its own. */
+      update(true);
     });
     const watch = (hosted: boolean) =>
       observer.observe(document, { subtree: true, attributes: true, attributeFilter: ["open"], childList: hosted });
-    function update() {
+    /* Only a change is passed on: while a dialog is the answer this runs on
+       every DOM change of the page. */
+    let current: HTMLDialogElement | null = null;
+    function update(sync = false) {
       order = order.filter((dialog) => dialog.isConnected && isModal(dialog));
       const next = order.at(-1) ?? null;
+      if (next === current) return;
+      current = next;
       watch(next !== null);
-      setTopmost(next);
+      if (sync) flushSync(() => setTopmost(next));
+      else setTopmost(next);
     }
+    watch(false);
     update();
     return () => observer.disconnect();
   }, []);

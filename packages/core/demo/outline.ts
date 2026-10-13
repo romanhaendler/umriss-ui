@@ -846,6 +846,7 @@ export const OUTLINE: readonly Rubric[] = [
           "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
           "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
           "No queue: a toast over the limit pushes the oldest out rather than waiting.",
+          "Without the Popover API the deck moves with a dialog that transforms itself: inside a dialog the toasts stand in the top layer only where the browser has it, and elsewhere they are a fixed box in the dialog.",
         ],
         types: ["ToastOptions", "ToastAction"],
         exports: ["ToastProvider", "useToast"],
