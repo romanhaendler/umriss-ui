@@ -36,6 +36,11 @@ handed over ready for a release.
     selector or a test that expects the region under `<body>`, and dialogs
     with controls in the corner where the toasts stand.
   - Table, under **Changed**: one line for the tip of a cut value.
+- **The sentence ticket 03 left out.** The Toast page's introduction says that
+  toasts stand above an open modal dialog and can be used there, after the
+  line on `ToastProvider`. It adds a line to the page head and so moves the
+  pictures below it - the page head and the toast pictures of that page, in
+  both themes. Those baselines are renewed here, on purpose, and no other.
 - **The full check before a release.**
 - **Left to the maintainer**, said plainly in the report: listening once with
   VoiceOver for whether a standing toast is read a second time after a move,
@@ -46,6 +51,8 @@ handed over ready for a release.
 - [ ] The decision record exists, is listed in the index, and contradicts
       nothing the tickets built.
 - [ ] The changelog drafts for core and the table stand under `## Comments`.
+- [ ] The Toast page's introduction carries the sentence; the baselines it
+      moved are renewed, and only those.
 - [ ] The full check: lint, types, unit, build, visual - parallel suites
       waited for, ports 4173-4177 free, the machine kept awake.
 - [ ] Every generated document is current (`pnpm check:site`).

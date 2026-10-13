@@ -31,7 +31,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { TOLERATED, STANDARDS, OPEN, findings } from "@umriss-ui/demo/checks/accessibility";
 import { CONFIGURATOR_PAGES, SAMPLE } from "./pages";
-import { allWithCode, open } from "./navigation";
+import { allWithCode, open, openExample } from "./navigation";
 
 
 test.beforeEach(async ({ page }) => {
@@ -83,6 +83,19 @@ test("a page with all code blocks open is accessible", async ({ page }, testInfo
   const report = findings(result);
 
   expect(report, `code open (${testInfo.project.name})`).toEqual([]);
+});
+
+/* A toast standing inside an open modal dialog: the dialog, the toast and the
+   live regions that moved into it. */
+test("a toast inside a modal is accessible", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "inside-a-modal");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("region", { name: "Messages (Alt+T)" }).getByText("Profile not saved")).toBeVisible();
+  const result = await new AxeBuilder({ page }).include("dialog[open]").withTags(STANDARDS).analyze();
+
+  expect(findings(result), `toast in a modal (${testInfo.project.name})`).toEqual([]);
 });
 
 test("every tolerated colour carries a written reason", () => {

@@ -63,6 +63,82 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
   await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
 });
 
+/* The toasts above an open modal dialog: the unit setup's dialog makes nothing
+   inert, so only a browser shows that a toast in the dialog can be pressed. */
+async function failToSave(page: import("@playwright/test").Page) {
+  await openExample(page, "toast", "inside-a-modal");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+  const save = dialog.getByRole("button", { name: "Save" });
+  await save.click();
+  const region = page.getByRole("region", { name: "Messages (Alt+T)" });
+  await expect(region.getByText("Profile not saved")).toBeVisible();
+  return { dialog, save, region };
+}
+
+test("A toast above a modal is pressable and closes without closing the modal", async ({ page }) => {
+  const { dialog, region } = await failToSave(page);
+  const cross = region.getByRole("button", { name: "Close message" });
+  const box = (await cross.boundingBox())!;
+  const hit = await page.evaluate(
+    ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.getAttribute("aria-label"),
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
+  expect(hit).toBe("Close message");
+  await cross.click();
+  await expect(region.getByText("Profile not saved")).toBeHidden();
+  await expect(dialog).toBeVisible();
+});
+
+test("The action of a toast above a modal runs", async ({ page }) => {
+  const { region } = await failToSave(page);
+  const first = await region.getByText("Profile not saved").elementHandle();
+  await region.getByRole("button", { name: "Retry" }).click();
+  /* Retry closes its toast and saves again: a new toast stands in its place. */
+  await expect.poll(() => first!.evaluate((element) => element.isConnected)).toBe(false);
+  await expect(region.getByText("Profile not saved")).toBeVisible();
+});
+
+test("Alt+T inside a modal moves the focus into the toasts, and Escape gives it back and leaves the modal", async ({ page }) => {
+  const { dialog, save, region } = await failToSave(page);
+  /* WebKit leaves a pressed button unfocused. */
+  await save.focus();
+  await page.keyboard.press("Alt+KeyT");
+  await expect(region).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(save).toBeFocused();
+  await expect(dialog).toBeVisible();
+});
+
+test("A dialog opened with show() leaves the toasts where they were", async ({ page }) => {
+  const { dialog, region } = await failToSave(page);
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+  await page.evaluate(() => {
+    const plain = document.createElement("dialog");
+    plain.textContent = "Not modal";
+    document.body.append(plain);
+    plain.show();
+  });
+  await expect(page.getByText("Not modal")).toBeVisible();
+  expect(await region.evaluate((element) => element.closest("dialog"))).toBeNull();
+});
+
+test("The inset tokens move the toasts above a modal as they do without one", async ({ page }) => {
+  const { region } = await failToSave(page);
+  await page.addStyleTag({ content: ":root { --u-toast-inset-top: 72px; --u-toast-inset-bottom: 64px; }" });
+  const place = region.locator("xpath=ancestor-or-self::*[@data-edge][1]");
+  await expect
+    .poll(() =>
+      place.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom;
+      }),
+    )
+    .toBeCloseTo(await place.evaluate((element) => (element.getAttribute("data-edge") === "top" ? 72 : 64)), 0);
+});
+
 /* toast-inset-tokens 01: the distance from the window's edge is a token per
    edge. Unset, the region stands where it always stood - 20 px, 16 px on a
    phone; set on `:root`, it moves every position of its edge at every width
