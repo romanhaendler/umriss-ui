@@ -284,7 +284,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setTarget(next);
   }, [dialog, portalTarget, items, target, setHovered, setFocused, setPinned, returnFocusRef]);
 
-  useShownInTopLayer(regionRef, target);
+  useShownInTopLayer(regionRef);
 
   const pinOpen = () => {
     setPinned(true);

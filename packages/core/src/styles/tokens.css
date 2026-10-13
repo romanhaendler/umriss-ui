@@ -281,9 +281,11 @@
 
   /* ---- Stacking order ----
      Popovers portal into the nearest <dialog> ancestor, and this scale
-     orders the rest. The toasts also move into the topmost modal dialog; there
-     they and the tooltips stand in the top layer, which orders by the moment
-     of showing and not by these numbers. */
+     orders the rest. The toasts also move into the topmost modal dialog. Inside
+     a dialog the toasts and the tooltips stand in the top layer, which orders
+     by the moment of showing and not by these numbers: a tooltip is shown
+     after the toasts and lies above them, as the scale has it; popovers stay
+     under the toasts. */
   :root {
     --u-z-popover: 900;
     --u-z-toast: 1000;

@@ -286,6 +286,99 @@ test("With reduced motion a toast above a modal appears and leaves without movem
   expect(left.y).toEqual(appeared.y.slice(-1));
 });
 
+/* A tooltip in a dialog stands in the top layer, shown later than the toast
+   region: it lies above the toasts, a menu does not. The window is narrow so
+   that the deck, which takes its width, covers the modal's Preview button. A
+   tooltip takes no pointer events; the question is asked with it hit-testable. */
+async function previewTip(page: import("@playwright/test").Page, size = { width: 390, height: 520 }, low = false) {
+  await page.setViewportSize(size);
+  const { dialog, region } = await failToSave(page);
+  const preview = dialog.getByRole("button", { name: "Preview" });
+  /* Low in the window, where the deck stands. */
+  if (low) await preview.evaluate((element) => Object.assign(element.style, { position: "fixed", bottom: "60px", left: "40px" }));
+  /* The pointer entering the trigger, which works where it is covered by the deck and in every engine. */
+  await preview.dispatchEvent("pointerover");
+  const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
+  await expect(tip).toBeVisible();
+  /* Past its entry, so that its box is the one it keeps. */
+  await page.waitForTimeout(300);
+  return { dialog, region, preview, tip };
+}
+
+function overlap(a: { x: number; y: number; width: number; height: number }, b: typeof a) {
+  const left = Math.max(a.x, b.x);
+  const top = Math.max(a.y, b.y);
+  const right = Math.min(a.x + a.width, b.x + b.width);
+  const bottom = Math.min(a.y + a.height, b.y + b.height);
+  return right > left && bottom > top ? { x: (left + right) / 2, y: (top + bottom) / 2 } : null;
+}
+
+test("A tooltip in a modal lies above a toast where the two overlap", async ({ page }) => {
+  const { tip } = await previewTip(page, undefined, true);
+  await expect(tip).toHaveAttribute("popover", "manual");
+  await tip.evaluate((element) => ((element as HTMLElement).style.pointerEvents = "auto"));
+  const card = page.locator("[data-toast]").filter({ hasText: "Profile not saved" });
+  const point = overlap((await tip.boundingBox())!, (await card.boundingBox())!);
+  expect(point).not.toBeNull();
+  expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest("[role]")?.getAttribute("role"), point!)).toBe("tooltip");
+});
+
+test("A tooltip in a modal stands centred above its trigger", async ({ page }) => {
+  const { tip, preview } = await previewTip(page, { width: 800, height: 700 });
+  const t = (await tip.boundingBox())!;
+  const p = (await preview.boundingBox())!;
+  expect(t.x + t.width / 2).toBeCloseTo(p.x + p.width / 2, 0);
+  expect(Math.abs(t.y + t.height + 8 - p.y)).toBeLessThanOrEqual(1);
+});
+
+test("A tooltip in a modal flips below its trigger where the window ends above", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 700 });
+  await openExample(page, "toast", "inside-a-modal");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+  const preview = dialog.getByRole("button", { name: "Preview" });
+  /* The button is moved to the window's top, where there is no room above it. */
+  await preview.evaluate((element) => {
+    element.style.position = "fixed";
+    element.style.top = "4px";
+    element.style.left = "300px";
+  });
+  /* The pointer entering the trigger, which works where it is covered by the deck and in every engine. */
+  await preview.dispatchEvent("pointerover");
+  const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
+  await expect(tip).toBeVisible();
+  await page.waitForTimeout(300);
+  const t = (await tip.boundingBox())!;
+  const p = (await preview.boundingBox())!;
+  expect(Math.abs(t.y - (p.y + p.height + 8))).toBeLessThanOrEqual(1);
+});
+
+test("A tooltip in a dialog that transforms itself stands at its trigger", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 700 });
+  await openExample(page, "toast", "inside-a-modal");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+  await dialog.evaluate((element) => ((element as HTMLElement).style.transform = "translate(37px, 23px) scale(1)"));
+  const preview = dialog.getByRole("button", { name: "Preview" });
+  await preview.dispatchEvent("pointerover");
+  const tip = page.getByRole("tooltip").filter({ hasText: "Shows the profile" });
+  await expect(tip).toBeVisible();
+  await page.waitForTimeout(300);
+  const t = (await tip.boundingBox())!;
+  const p = (await preview.boundingBox())!;
+  expect(t.x + t.width / 2).toBeCloseTo(p.x + p.width / 2, 0);
+  expect(Math.abs(t.y + t.height + 8 - p.y)).toBeLessThanOrEqual(1);
+});
+
+test("A tooltip outside a dialog carries no popover attribute", async ({ page }) => {
+  await openExample(page, "tooltip", "a-tooltip");
+  await page.getByRole("button", { name: "Duplicate the board" }).hover();
+  await expect(page.getByRole("tooltip")).toBeVisible();
+  await expect(page.getByRole("tooltip")).not.toHaveAttribute("popover", /.*/);
+});
+
 /* toast-inset-tokens 01: the distance from the window's edge is a token per
    edge. Unset, the region stands where it always stood - 20 px, 16 px on a
    phone; set on `:root`, it moves every position of its edge at every width
