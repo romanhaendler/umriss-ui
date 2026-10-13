@@ -66,7 +66,10 @@ function isModal(dialog: HTMLDialogElement): boolean {
  * is shown by `useShownInTopLayer`.
  */
 export function topLayerPopover(target: Element | null): "manual" | undefined {
-  return target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype ? "manual" : undefined;
+  /* Nothing is read from the DOM for no target: on a server there is none. */
+  return target !== null && target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype
+    ? "manual"
+    : undefined;
 }
 
 /**
