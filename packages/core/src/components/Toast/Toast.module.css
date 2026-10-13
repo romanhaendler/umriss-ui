@@ -15,6 +15,20 @@
     transition: height var(--u-duration-medium) var(--u-ease-out);
   }
 
+  /* In the top layer (inside a dialog) the region is a manual popover, and the
+     browser's sheet gives it a zero inset, an auto margin, a border, a padding,
+     scrolling overflow and canvas colours. All of it is taken back here, before
+     the rules for the edge, the place along it and the phone's width: those
+     have the same specificity and must win. */
+  .region[popover] {
+    inset: auto;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
   .region[data-keys]:focus {
     outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);

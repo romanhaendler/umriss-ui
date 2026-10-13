@@ -3,7 +3,7 @@ import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode 
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
-import { toastTargetFor, useTopmostModalDialog } from "../../lib/portalTarget";
+import { toastTargetFor, topLayerPopover, useShownInTopLayer, useTopmostModalDialog } from "../../lib/portalTarget";
 import { roleFromTone } from "../../lib/roleFromTone";
 import { motionOrigin } from "../Popover/position";
 import { Spinner } from "../Spinner";
@@ -284,6 +284,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setTarget(next);
   }, [dialog, portalTarget, items, target, setHovered, setFocused, setPinned, returnFocusRef]);
 
+  useShownInTopLayer(regionRef, target);
+
   const pinOpen = () => {
     setPinned(true);
     regionRef.current?.focus();
@@ -387,6 +389,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <div
           ref={regionRef}
           className={styles.region}
+          popover={topLayerPopover(target)}
           data-edge={edge}
           data-along={along}
           data-keys={byKeys ? "" : undefined}

@@ -139,6 +139,153 @@ test("The inset tokens move the toasts above a modal as they do without one", as
     .toBeCloseTo(await place.evaluate((element) => (element.getAttribute("data-edge") === "top" ? 72 : 64)), 0);
 });
 
+/* Inside a dialog the region stands in the top layer: a dialog that moves,
+   clips or fades itself leaves the toast where it was. The card is looked up
+   anew in every frame, since a move builds the region again. The box is read
+   in the page, in every animation frame, over `span` ms. */
+function sampleBoxes(page: import("@playwright/test").Page, text: string, span = 600) {
+  return page.evaluate(
+    ({ text, span }) =>
+      new Promise<{ x: number[]; y: number[]; missing: number }>((resolve) => {
+        const xs = new Set<number>();
+        const ys = new Set<number>();
+        let missing = 0;
+        const start = performance.now();
+        const frame = () => {
+          const card = [...document.querySelectorAll("[data-toast]")].find((entry) => entry.textContent?.includes(text));
+          if (card) {
+            const box = card.getBoundingClientRect();
+            xs.add(Math.round(box.x));
+            ys.add(Math.round(box.y));
+          } else missing += 1;
+          if (performance.now() - start < span) requestAnimationFrame(frame);
+          else resolve({ x: [...xs], y: [...ys], missing });
+        };
+        frame();
+      }),
+    { text, span },
+  );
+}
+
+test("A toast standing before the modal opens, and while it closes, does not move", async ({ page }) => {
+  const { dialog, region } = await failToSave(page);
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText("Profile not saved")).toBeVisible();
+
+  const opening = sampleBoxes(page, "Profile not saved");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const whileOpening = await opening;
+  expect(whileOpening).toEqual({ x: [expect.any(Number)], y: [expect.any(Number)], missing: 0 });
+  await expect(dialog).toBeVisible();
+  await expect(region).toHaveAttribute("popover", "manual");
+  await expect(region).toHaveCount(1);
+
+  const closing = sampleBoxes(page, "Profile not saved");
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  expect(await closing).toEqual({ x: whileOpening.x, y: whileOpening.y, missing: 0 });
+});
+
+test("A toast stands still in a dialog that slides by transform and clips its content", async ({ page }) => {
+  const { dialog } = await failToSave(page);
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText("Profile not saved")).toBeVisible();
+
+  const at = await page.locator("[data-toast]").filter({ hasText: "Profile not saved" }).boundingBox();
+  const sampled = await page.evaluate(
+    () =>
+      new Promise<{ x: number[]; y: number[]; missing: number }>((resolve) => {
+        const plain = document.createElement("dialog");
+        plain.textContent = "Slides in";
+        plain.style.cssText = "width: 220px; height: 120px; overflow: hidden; padding: 0; transform: translateX(0);";
+        document.body.append(plain);
+        const xs = new Set<number>();
+        const ys = new Set<number>();
+        let missing = 0;
+        const start = performance.now();
+        const frame = () => {
+          const card = [...document.querySelectorAll("[data-toast]")].find((entry) => entry.textContent?.includes("Profile not saved"));
+          if (card) {
+            const box = card.getBoundingClientRect();
+            xs.add(Math.round(box.x));
+            ys.add(Math.round(box.y));
+          } else missing += 1;
+          if (performance.now() - start < 1300) requestAnimationFrame(frame);
+          else {
+            plain.remove();
+            resolve({ x: [...xs], y: [...ys], missing });
+          }
+        };
+        plain.showModal();
+        plain.animate([{ transform: "translateX(-300px)" }, { transform: "translateX(0)" }], { duration: 400, easing: "ease-out" });
+        frame();
+        /* Out again: it slides away, then closes. */
+        setTimeout(() => {
+          plain
+            .animate([{ transform: "translateX(0)" }, { transform: "translateX(300px)" }], { duration: 300, fill: "forwards" })
+            .finished.then(() => plain.close());
+        }, 700);
+      }),
+  );
+  expect(sampled.missing).toBe(0);
+  expect(sampled.x).toEqual([Math.round(at!.x)]);
+  expect(sampled.y).toEqual([Math.round(at!.y)]);
+});
+
+test("At a phone's width a toast above a modal takes the window's width", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  const { region } = await failToSave(page);
+  await expect(region).toHaveAttribute("popover", "manual");
+  const box = (await region.boundingBox())!;
+  expect(box.x).toBeCloseTo(16, 0);
+  expect(box.width).toBeCloseTo(390 - 32, 0);
+});
+
+test("After Alt+T above a modal the region's focus ring is drawn", async ({ page }) => {
+  const { save, region } = await failToSave(page);
+  await save.focus();
+  await page.keyboard.press("Alt+KeyT");
+  await expect(region).toBeFocused();
+  expect(await region.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe("none");
+});
+
+test("In forced colours the deck above a modal has no box of its own", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  const { region } = await failToSave(page);
+  const own = await region.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      border: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth],
+      padding: [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft],
+      background: style.backgroundColor,
+    };
+  });
+  expect(own.background).toMatch(/, 0\)$/);
+  expect(own).toMatchObject({ border: ["0px", "0px", "0px", "0px"], padding: ["0px", "0px", "0px", "0px"] });
+});
+
+test("With reduced motion a toast above a modal appears and leaves without movement", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openExample(page, "toast", "inside-a-modal");
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+  const appearing = sampleBoxes(page, "Profile not saved", 400);
+  await dialog.getByRole("button", { name: "Save" }).click();
+  const [appeared] = await Promise.all([appearing]);
+  const stands = (await page.locator("[data-toast]").filter({ hasText: "Profile not saved" }).boundingBox())!;
+  expect(appeared.x.length).toBeLessThanOrEqual(2);
+  expect(appeared.y.length).toBeLessThanOrEqual(2);
+  expect(appeared.x.at(-1)).toBe(Math.round(stands.x));
+  expect(appeared.y.at(-1)).toBe(Math.round(stands.y));
+  const leaving = sampleBoxes(page, "Profile not saved", 400);
+  await page.getByRole("button", { name: "Close message" }).click();
+  const left = await leaving;
+  expect(left.x).toEqual(appeared.x.slice(-1));
+  expect(left.y).toEqual(appeared.y.slice(-1));
+});
+
 /* toast-inset-tokens 01: the distance from the window's edge is a token per
    edge. Unset, the region stands where it always stood - 20 px, 16 px on a
    phone; set on `:root`, it moves every position of its edge at every width

@@ -656,3 +656,64 @@ describe("Toast – inside a modal dialog", () => {
     });
   });
 });
+
+describe("Toast – the top layer", () => {
+  const shown = vi.fn();
+  const region = () => document.querySelector("[data-edge]")!;
+
+  afterEach(() => {
+    delete (HTMLElement.prototype as Partial<HTMLElement>).showPopover;
+    shown.mockClear();
+    document.querySelectorAll("dialog").forEach((element) => element.remove());
+  });
+
+  /* jsdom has no Popover API: a test that wants one supplies it. */
+  const withPopoverApi = () => {
+    HTMLElement.prototype.showPopover = function (this: HTMLElement) {
+      shown(this);
+    };
+  };
+  const tree = (
+    <UmrissProvider>
+      <ToastProvider>{null}</ToastProvider>
+    </UmrissProvider>
+  );
+  const mountInDialog = async (strict = false) => {
+    const element = document.createElement("dialog");
+    document.body.append(element);
+    render(strict ? <StrictMode>{tree}</StrictMode> : tree);
+    act(() => element.showModal());
+    await act(async () => {});
+    return element;
+  };
+
+  it("carries no popover attribute without a dialog", async () => {
+    withPopoverApi();
+    render(tree);
+    await act(async () => {});
+    expect(region().hasAttribute("popover")).toBe(false);
+    expect(shown).not.toHaveBeenCalled();
+  });
+
+  it("carries no popover attribute inside a dialog where the Popover API is missing", async () => {
+    const element = await mountInDialog();
+    expect(element.contains(region())).toBe(true);
+    expect(region().hasAttribute("popover")).toBe(false);
+  });
+
+  it("is a manual popover, shown once, inside a dialog where the Popover API exists", async () => {
+    withPopoverApi();
+    const element = await mountInDialog();
+    expect(element.contains(region())).toBe(true);
+    expect(region().getAttribute("popover")).toBe("manual");
+    expect(shown).toHaveBeenCalledTimes(1);
+  });
+
+  it("is shown inside a dialog under StrictMode without a second region", async () => {
+    withPopoverApi();
+    await mountInDialog(true);
+    expect(document.querySelectorAll("[data-edge]")).toHaveLength(1);
+    expect(region().getAttribute("popover")).toBe("manual");
+    expect(shown.mock.calls.filter(([element]) => element === region()).length).toBeGreaterThan(0);
+  });
+});
