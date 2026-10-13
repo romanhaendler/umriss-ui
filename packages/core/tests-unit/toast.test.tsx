@@ -8,7 +8,7 @@
 import TOKENS from "../src/styles/tokens.css?raw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StrictMode, act, useEffect } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import type { ToastTone } from "../src/components/Toast";
 import { DEFAULT_WORDING } from "../src/lib/language";
@@ -541,5 +541,118 @@ describe("Toast – inside a modal dialog", () => {
     await open(first);
     expect(document.querySelectorAll("[data-edge]")).toHaveLength(1);
     expect(first.contains(region())).toBe(true);
+  });
+
+  describe("when the region moves", () => {
+    afterEach(() => vi.useRealTimers());
+
+    it("does not call onClose and does not restart a countdown", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      const onClose = vi.fn();
+      call((t) => t.toast({ title: "Saved", duration: 5000, onClose }));
+      act(() => vi.advanceTimersByTime(3000));
+      await open(first);
+      expect(first.contains(region())).toBe(true);
+      expect(onClose).not.toHaveBeenCalled();
+      act(() => vi.advanceTimersByTime(1999));
+      expect(screen.queryByText("Saved")).not.toBeNull();
+      act(() => vi.advanceTimersByTime(1));
+      expect(onClose).toHaveBeenCalledWith("timeout");
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes a deck open under the pointer, and the countdowns run again", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      call((t) => t.toast({ title: "Saved", duration: 5000 }));
+      fireEvent.pointerEnter(region());
+      act(() => vi.advanceTimersByTime(60_000));
+      expect(screen.queryByText("Saved")).not.toBeNull();
+      await open(first);
+      act(() => vi.advanceTimersByTime(5000));
+      expect(screen.queryByText("Saved")).toBeNull();
+    });
+
+    it("closes a deck holding the focus, and a later Escape gives nothing back", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      const before = document.createElement("button");
+      document.body.append(before);
+      before.focus();
+      call((t) => t.toast({ title: "Saved", duration: 5000 }));
+      fireEvent.keyDown(document, { code: "KeyT", altKey: true });
+      expect(document.activeElement).toBe(region());
+      await open(first);
+      act(() => vi.advanceTimersByTime(5000));
+      expect(screen.queryByText("Saved")).toBeNull();
+      const elsewhere = document.createElement("button");
+      document.body.append(elsewhere);
+      elsewhere.focus();
+      call((t) => t.toast({ title: "Again", duration: 0 }));
+      fireEvent.keyDown(region(), { key: "Escape" });
+      expect(document.activeElement).not.toBe(before);
+      before.remove();
+      elsewhere.remove();
+    });
+
+    it("reaches a toast by its id: a loading toast turns into its outcome after the dialog closed", async () => {
+      vi.useFakeTimers();
+      const call = mountIn();
+      const first = dialog();
+      await open(first);
+      const id = call((t) => t.toast({ title: "Saving…", tone: "loading" }));
+      await close(first);
+      call((t) => t.update(id, { title: "Saved", tone: "success", duration: 1000 }));
+      expect(screen.getByText("Saved")).toBeTruthy();
+      expect(region().parentElement).toBe(document.body);
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.queryByText("Saved")).toBeNull();
+    });
+
+    it("dismisses a toast by its id", async () => {
+      const call = mountIn();
+      const first = dialog();
+      await open(first);
+      const onClose = vi.fn();
+      const id = call((t) => t.toast({ title: "Saved", duration: 0, onClose }));
+      await close(first);
+      call((t) => t.dismiss(id));
+      expect(onClose).toHaveBeenCalledWith("dismiss");
+      expect(screen.queryByText("Saved")).toBeNull();
+    });
+
+    it("leaves a toast shown with the closing dialog standing once, outside it", async () => {
+      for (const toastFirst of [true, false]) {
+        const call = mountIn();
+        const first = dialog();
+        await open(first);
+        const onClose = vi.fn();
+        act(() => {
+          if (toastFirst) call((t) => t.toast({ title: "Saved", duration: 0, onClose }));
+          first.close();
+          if (!toastFirst) call((t) => t.toast({ title: "Saved", duration: 0, onClose }));
+        });
+        await settle();
+        expect(screen.getAllByText("Saved")).toHaveLength(1);
+        expect(first.contains(region())).toBe(false);
+        expect(onClose).not.toHaveBeenCalled();
+        cleanup();
+      }
+    });
+
+    it("keeps the same toasts in the same two regions", async () => {
+      const call = mountIn();
+      const first = dialog();
+      call((t) => t.toast({ title: "Saved", duration: 0 }));
+      call((t) => t.toast({ title: "Failed", tone: "danger", duration: 0 }));
+      await open(first);
+      const live = (role: string) => [...region().querySelectorAll(`[role=${role}] p`)].map((p) => p.textContent);
+      expect(live("status")).toEqual(["Saved"]);
+      expect(live("alert")).toEqual(["Failed"]);
+    });
   });
 });

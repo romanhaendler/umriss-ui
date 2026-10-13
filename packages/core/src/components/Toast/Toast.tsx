@@ -266,10 +266,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
      target may enter the document later, and the next toast has to find it. */
   const dialog = useTopmostModalDialog();
   const [target, setTarget] = useState<Element | null>(null);
+  /* The cards that stood when the region last changed its place: they arrive
+     settled, without the entrance they have played already. */
+  const [settled, setSettled] = useState<ReadonlySet<number>>(new Set());
   useLayoutEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTarget(toastTargetFor(dialog, portalTarget));
-  }, [dialog, portalTarget, items]);
+    const next = toastTargetFor(dialog, portalTarget);
+    if (next === target) return;
+    if (target) {
+      /* The old region is gone and sent neither leave nor blur: what they
+         held open would stay open, and every countdown with it. */
+      setHovered(false);
+      setFocused(false);
+      setPinned(false);
+      returnFocusRef.current = null;
+      setSettled(new Set(itemsRef.current.map((item) => item.id)));
+    }
+    setTarget(next);
+  }, [dialog, portalTarget, items, target, setHovered, setFocused, setPinned, returnFocusRef]);
 
   const pinOpen = () => {
     setPinned(true);
@@ -293,6 +306,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           styles.card,
           place?.behind && styles.behind,
           place?.hidden && styles.hidden,
+          settled.has(item.id) && styles.settled,
           item.leaving && styles.leaving,
         )}
         style={cardStyle}
