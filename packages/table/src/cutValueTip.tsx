@@ -60,6 +60,22 @@ export function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableEle
       window.removeEventListener("scroll", hide, true);
     };
   }, [tableRef, portalTarget]);
+  /* Inside a dialog the tip is a manual popover, in the top layer above the
+     toasts that stand there. Shown before it is measured, since a popover has
+     no size until then; once per tip, which is a new element each time. */
+  const inTopLayer = !!tip && tip.target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype;
+  useLayoutEffect(() => {
+    const el = tipRef.current;
+    if (!inTopLayer || !el) return;
+    let open = false;
+    try {
+      open = el.matches(":popover-open");
+    } catch {
+      /* A browser that has `showPopover` has the selector; a stand-in may not. */
+    }
+    /* StrictMode runs the effect twice, and `showPopover` throws on an open popover. */
+    if (!open) el.showPopover();
+  });
   /* Placed once it is measured: below its cell, above it where the window
      ends, and inside the window's sides. */
   useLayoutEffect(() => {
@@ -73,7 +89,7 @@ export function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableEle
   }, [tip]);
   if (!tip) return null;
   return createPortal(
-    <div ref={tipRef} role="tooltip" className={styles.cutTip} style={{ visibility: "hidden", top: 0, left: 0 }}>
+    <div ref={tipRef} role="tooltip" popover={inTopLayer ? "manual" : undefined} className={styles.cutTip} style={{ visibility: "hidden", top: 0, left: 0 }}>
       {tip.text}
     </div>,
     tip.target,

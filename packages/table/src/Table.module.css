@@ -243,6 +243,16 @@
     animation: cutTipIn var(--u-duration-fast) var(--u-ease-out);
   }
 
+  /* As a manual popover (inside a dialog) the browser's sheet gives the tip a
+     zero inset, an auto margin, a border and scrolling overflow; the place
+     comes from the top and left it is given, the rest is taken back. */
+  .cutTip[popover] {
+    inset: auto;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+  }
+
   @keyframes cutTipIn {
     from {
       opacity: 0;
