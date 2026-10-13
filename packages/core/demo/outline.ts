@@ -71,6 +71,9 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Only the wording or the formats of one section differ", use: "language" },
         ],
         keysOf: ["button", "menu", "datepicker"],
+        accessibility: [
+          "Where a `ToastProvider` stands inside it, the toasts' two live regions stand where the overlays go: in the `portalTarget` before the first message, so that it is heard there, and inside the topmost modal dialog while one is open. [Toast](#/toast) describes them.",
+        ],
         limits: ["No theme and no default variants for components: a component is configured by its own props."],
         types: ["UmrissProviderProps", "ToastConfig"],
         exports: ["UmrissProvider"],
