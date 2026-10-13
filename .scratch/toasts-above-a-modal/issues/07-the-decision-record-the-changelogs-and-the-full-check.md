@@ -59,3 +59,52 @@ handed over ready for a release.
 - [ ] The spec's status set to `done` with the delivery report under
       `## Comments`, naming every place where what was built departs from it;
       every ticket's status set to `done`.
+
+## Comments
+
+**Done here (2026-10-13):** the decision record is ADR-0063, listed in the
+index; the Toast page's introduction carries its sentence, and the pictures it
+moved are renewed (the Toast page's head, its examples, the deck and phone
+pictures of the page, in both themes).
+
+**Left to the maintainer:** listening once with VoiceOver for whether a
+standing toast is read a second time after a move; the release itself. A
+version is released by raising it, so no manifest and no `CHANGELOG.md` was
+touched. A draft of what the changelogs say, for 0.36.0:
+
+`@umriss-ui/core`
+
+### Changed
+
+- **Toasts stand above an open modal dialog and can be used there.** A toast
+  shown while a `Modal`, `Drawer`, `ConfirmDialog`, `CommandPalette` or a
+  `<dialog>` of your own opened with `showModal()` is open was drawn behind it
+  and was inert; it is now seen, pressed, reached by Alt + T and read out. It
+  stands at the same place in the window, and a toast that was standing does
+  not move, enter again, restart its clock or call `onClose` when a dialog
+  opens or closes behind it (ADR-0063).
+- **Where the toast region stands in the DOM.** While a modal dialog is open
+  the region is a descendant of the topmost one; when it closes the region
+  returns to the provider's `portalTarget`, else the body. A dialog opened
+  with `show()` leaves it where it was. Check a selector or a test that expects
+  the region under `<body>`, and dialogs with controls in the corner where the
+  toasts stand: they are covered there, as the page is.
+- **Inside a modal dialog the toasts and the tooltips are ordered by the top
+  layer,** not by `--u-z-toast` and `--u-z-tooltip`, so an override of either
+  decides nothing there; a tooltip lies above a toast and a popover under it,
+  as in the page. Outside a dialog the tokens order them as before and no
+  `popover` attribute is set. Where the browser has no Popover API both are
+  fixed boxes inside the dialog ordered by the tokens, and the deck moves with
+  a dialog that transforms itself.
+
+### Fixed
+
+- A tooltip in a dialog that transforms itself stood off by the dialog's
+  transform; it stands at its trigger.
+
+`@umriss-ui/table`
+
+### Changed
+
+- The tip that shows the whole of a cut value lies above the toasts inside a
+  dialog, as core's tooltip does.
