@@ -1339,10 +1339,16 @@ the charts'), measure, Kennzahl
 **Dashboard**:
 A surface of **Widgets** whose arrangement its reader chose: which widgets
 stand on it, in what order, and each at which of its sizes. The order is a
-sequence and never a set of coordinates, so one arrangement holds at every
-width. It stands still until its reader asks to edit it; only then can a widget
-be moved, resized, added or removed. The arrangement is its **View**. A screen
-a developer laid out is not a dashboard, however much it looks like one.
+sequence and never a set of coordinates, and it is drawn as it is stored: a
+widget that no longer fits its row starts the next, and the room it leaves
+stays free until the reader fills it. The grid has the same columns at every
+width, so a widget keeps its neighbours on every screen; below the width at
+which a column would be too narrow to read, the dashboard is a list instead,
+one widget under the other in the same order. It stands still until its reader
+asks to edit it; what they then move, resize, add or remove is a draft, kept or
+discarded as a whole. The arrangement is its **View**, and the application
+supplies the one a reader starts from and returns to. A screen a developer laid
+out is not a dashboard, however much it looks like one.
 _Avoid_: board, layout editor, tile grid, home screen; "dashboard" for a kind
 of application, outside the positioning sentence
 
