@@ -36,6 +36,7 @@ const ENTRIES: Readonly<Record<string, readonly string[]>> = {
   table: ["src/index.ts"],
   schedule: ["src/index.ts"],
   calculation: ["src/index.ts"],
+  dashboard: ["src/index.ts"],
 };
 
 /** Every name the entries export - values and types alike, re-exports
@@ -132,4 +133,5 @@ const KNOWN: Readonly<Record<string, { defined: readonly string[]; declared: rea
   table: { defined: ["TableRef", "Limit"], declared: ["useTable"], handed: [] },
   schedule: { defined: ["Intent"], declared: ["applyIntent"], handed: ["Schedule", "Lane", "LaneGroup", "Subtasks", "Dependencies", "BlockedTimes"] },
   calculation: { defined: ["Limit"], declared: [], handed: [] },
+  dashboard: { defined: [], declared: ["useDashboard"], handed: ["WidgetType"] },
 };
