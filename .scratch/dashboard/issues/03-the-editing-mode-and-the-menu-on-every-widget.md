@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The library draws a bar with "Edit"; in the mode it shows a label for the mode, "Cancel" and "Done". The mode is shown by at least two signs, and the widgets' bodies are inert in it.
 - [ ] Every change in the mode is a step of a draft; outside the mode nothing can be changed.

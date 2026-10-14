@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The bar has "Add widget" in the mode; it opens the catalogue in core's `Drawer`.
 - [ ] The application chooses which widget types the catalogue lists, the built-in heading included or not.

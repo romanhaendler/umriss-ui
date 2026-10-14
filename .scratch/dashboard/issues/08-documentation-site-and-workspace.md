@@ -4,7 +4,7 @@
 
 **Blocked by:** 02, 04, 05, 06, 07
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The package has a README in the style of the other packages, with its place in the family (depends on core only).
 - [ ] The demo's outline states the dashboard's limits and points to ADR-0064 for what is not yet and never.

@@ -1,6 +1,6 @@
 # Dashboard
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-14
 Origin: grilling session of 13 and 14 Oct 2026; ADR-0064, which supersedes
 ADR-0060's "never" for a dashboard a user arranges; research in
@@ -200,3 +200,26 @@ frames, the empty and failed states - with its wording in English and German.
 - Three behaviours were chosen by the prototypes, not by evidence, and are the first things to watch with real readers: making room while dragging rather than only marking the place; all four arrow keys meaning earlier or later; free room left free rather than filled.
 - Prototype 2 (`PROTOTYPE-2-dashboard.html` on the branch `prototype/dashboard`) is the behaviour to match; its four guided cases are the acceptance walk. Prototype 1 (`PROTOTYPE-arrangement.html`, same branch) shows why the columns are fixed (neighbours kept at other widths). Both stay out of `main`.
 - The research found that most readers keep the default and the rest change little: the default arrangement per role, the lenient reading and "Reset" are the parts most readers will meet; the editing mode is the exception above them.
+
+## Comments
+
+**Delivery report, 14 Oct 2026.** All eight tickets are built on the local
+branch `worktree-dashboard-package`: `@umriss-ui/dashboard` as the seventh
+package (port 4178), with `useDashboard`, `WidgetType`, the built-in
+`HeadingType`, strict packing on twelve columns and the list below about
+756 px, the editing mode as a draft with undo, redo and reset, one menu per
+widget, the keyboard on the head, dragging by the head, the catalogue and
+options forms, lenient reading and failed widgets, and the package named
+wherever the workspace names its packages. A review on two axes (standards,
+spec) was fixed in one pass: the heading has a head and a form, every view is
+read leniently, the hook's actions announce themselves, a failed widget
+retries, focus after removal, the size entries in the wording, core's tokens.
+
+Checked: `pnpm check` for all packages, `pnpm check:site`, `pnpm typecheck`,
+and the dashboard's browser suite in light and dark (Chromium; 39 passed),
+core's Grid and Splitter page heads unchanged.
+
+Open for the release: `packages/dashboard/CHANGELOG.md` needs a released
+heading before `pnpm build:pages` can build the site, and the full visual suite
+of all six demos runs before it. Firefox was not run (it cannot launch in a
+background job).
