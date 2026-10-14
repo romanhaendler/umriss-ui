@@ -516,6 +516,7 @@ export interface Wording {
   dashboardRemoved: (title: string) => string;
   dashboardKept: string;
   dashboardCancelled: string;
+  dashboardFailed: string;
 
   /* -------- @umriss-ui/calculation --------------------------------- */
   /* The calculation's entries stand here for the table's reason: one provider
@@ -850,6 +851,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardRemoved: (title) => `${title} removed`,
   dashboardKept: "Changes kept",
   dashboardCancelled: "Changes discarded",
+  dashboardFailed: "This widget cannot show anything.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

@@ -323,6 +323,7 @@ export const GERMAN_WORDING: Wording = {
   dashboardRemoved: (title) => `${title} entfernt`,
   dashboardKept: "Änderungen übernommen",
   dashboardCancelled: "Änderungen verworfen",
+  dashboardFailed: "Dieses Widget kann nichts anzeigen.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

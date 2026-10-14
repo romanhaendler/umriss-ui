@@ -11,8 +11,10 @@ import type { ReactNode } from "react";
 import { DashboardOf } from "./Dashboard";
 import type { DashboardProps } from "./Dashboard";
 import type { Edit } from "./edit";
+import { readView } from "./model";
 import type { DashboardView } from "./model";
 import { WidgetType } from "./WidgetType";
+import type { WidgetTypeProps } from "./WidgetType";
 
 /** What `useDashboard` takes. */
 export interface DashboardOptions {
@@ -61,6 +63,8 @@ export interface Editor {
   cancel: () => void;
   /** Applies one change to the draft. */
   step: (edit: Edit) => void;
+  /** Tells the hook which widget types the dashboard declares, to read a view by. */
+  register: (types: Map<string, WidgetTypeProps<unknown>>) => void;
 }
 
 interface State {
@@ -71,8 +75,8 @@ interface State {
 /** Declares a dashboard: hands back `Dashboard`, `WidgetType`, the view in
     view, `setView` and the editing actions. */
 export function useDashboard({ defaultView, initialView, allowEdit = true, onViewChange, onDraftChange }: DashboardOptions): DashboardParts {
-  const store = useRef<{ state: State; listeners: Set<() => void> } | null>(null);
-  store.current ??= { state: { view: initialView ?? defaultView, draft: null }, listeners: new Set() };
+  const store = useRef<{ state: State; listeners: Set<() => void>; types: Map<string, WidgetTypeProps<unknown>> } | null>(null);
+  store.current ??= { state: { view: initialView ?? defaultView, draft: null }, listeners: new Set(), types: new Map() };
   const own = store.current;
 
   /* The latest of the caller's values, read by the actions, which stand still. */
@@ -93,13 +97,13 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
 
     const edit = () => {
       if (!latest.current.allowEdit || own.state.draft) return;
-      put({ ...own.state, draft: own.state.view });
+      put({ ...own.state, draft: readView(own.state.view, own.types) });
       latest.current.onDraftChange?.(true);
     };
     const leave = (keep: boolean) => {
       const { view, draft } = own.state;
       if (!draft) return;
-      const changed = keep && JSON.stringify(draft) !== JSON.stringify(view);
+      const changed = keep && JSON.stringify(draft) !== JSON.stringify(readView(view, own.types));
       put({ view: changed ? draft : view, draft: null });
       latest.current.onDraftChange?.(false);
       if (changed) latest.current.onViewChange?.(draft);
@@ -110,6 +114,9 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
+      register: (types: Map<string, WidgetTypeProps<unknown>>) => {
+        own.types = types;
+      },
       step: (change) => {
         const { draft } = own.state;
         if (draft) put({ ...own.state, draft: change(draft) });
