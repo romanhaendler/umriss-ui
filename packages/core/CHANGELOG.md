@@ -32,6 +32,8 @@ commit.
 
 - **Lasting and `loading` toasts no longer give way to the limit.** A toast with `duration: 0` and a `loading` toast are never pushed out by newer toasts and do not count toward `limit`: with the default of 3, up to three timed toasts stand, plus every lasting and every loading one. A failure with "Retry" stays until it is closed, and a `loading` toast stays until `update` turns it into its outcome, which counts toward the limit from the next arrival on. Check pages that sent many toasts with `duration: 0` or `loading`: they no longer thin out by themselves.
 
+- **A second `ToastProvider` mounted while another stands now logs a warning in development.** Two providers put two decks at the same place; use one at the application's root. Nothing changes in production.
+
 ## 0.38.0 – Holding the toasts back, and a deck that glides (Oct. 2026)
 
 ### Added
