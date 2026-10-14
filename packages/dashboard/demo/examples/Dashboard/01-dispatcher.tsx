@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge, Stack, Text } from "@umriss-ui/core";
 import { useDashboard } from "../../../src";
 import type { DashboardView } from "../../../src";
@@ -51,9 +52,16 @@ function Line({ values }: { values: readonly number[] }) {
 }
 
 export default function Dispatcher() {
-  const { Dashboard, WidgetType } = useDashboard({ defaultView: VIEW });
+  const [open, setOpen] = useState(false);
+  const [kept, setKept] = useState(0);
+  const { Dashboard, WidgetType } = useDashboard({
+    defaultView: VIEW,
+    allowEdit: true,
+    onDraftChange: setOpen,
+    onViewChange: () => setKept((count) => count + 1),
+  });
   return (
-    <Dashboard aria-label="Dispatch, today">
+    <Dashboard aria-label="Dispatch, today" data-draft={open || undefined} data-kept={kept}>
       <WidgetType
         name="figure"
         label="Figure"
