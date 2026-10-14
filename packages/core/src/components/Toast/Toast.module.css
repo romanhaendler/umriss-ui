@@ -47,12 +47,13 @@
     transition: height var(--u-duration-medium) var(--u-ease-out);
   }
 
-  /* The deck glides to a new distance only while a toast stands (the region
-     is a landmark then): a distance changed while none stands is taken at
-     once, so that the first toast does not glide in from the old place. A
-     region drawn anew stands at once unless it is given the old place (the
-     starting style below). */
-  .region[role="region"] {
+  /* The deck glides to a new distance only from a place it was seen at
+     (`data-seen`, set by the component): while a toast stands, not held back,
+     and drawn since the hold began or ended. A distance changed while none is
+     seen is taken at once, so that the first toast, or a deck coming back from
+     a hold, does not glide in from the old place. A region drawn anew stands
+     at once unless it is given the old place (the starting style below). */
+  .region[data-seen] {
     transition:
       height var(--u-duration-medium) var(--u-ease-out),
       --_toast-top var(--u-duration-medium) var(--u-ease-out),
@@ -65,7 +66,7 @@
      the old one was seen (`--_from-*`, set by the component) and glides from
      there; where they are the same, or without them, nothing moves. */
   @starting-style {
-    .region[role="region"] {
+    .region[data-seen] {
       --_toast-top: var(--_from-top, var(--u-toast-inset-top));
       --_toast-bottom: var(--_from-bottom, var(--u-toast-inset-bottom));
       --_toast-start: var(--_from-start, var(--u-toast-inset-start));
@@ -430,7 +431,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .region,
-    .region[role="region"],
+    .region[data-seen],
     .card,
     .region[data-open] .card,
     .region[data-open] .card.leaving,
