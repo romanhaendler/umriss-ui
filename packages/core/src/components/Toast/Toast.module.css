@@ -157,6 +157,15 @@
       z-index 0s var(--u-duration-medium);
   }
 
+  /* A card that leaves drops behind the others at once, so that the cards
+     closing up over its place lie above it: the card's own transition,
+     without the wait of the order. */
+  .region[data-open] .card.leaving {
+    transition:
+      transform var(--u-duration-medium) var(--u-ease-out),
+      opacity var(--u-duration-medium) var(--u-ease-out);
+  }
+
   .region[data-edge="bottom"] .card {
     bottom: 0;
     transform-origin: top center;
@@ -424,6 +433,7 @@
     .region[role="region"],
     .card,
     .region[data-open] .card,
+    .region[data-open] .card.leaving,
     .toast,
     .content {
       animation: none;
