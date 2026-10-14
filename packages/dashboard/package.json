@@ -1,0 +1,81 @@
+{
+  "name": "@umriss-ui/dashboard",
+  "version": "0.36.0",
+  "description": "React dashboard for data-dense applications - widgets a reader arranges, packed in order on twelve columns.",
+  "license": "MIT",
+  "author": "Roman Händler",
+  "homepage": "https://romanhaendler.github.io/umriss-ui/dashboard/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanhaendler/umriss-ui.git",
+    "directory": "packages/dashboard"
+  },
+  "bugs": {
+    "url": "https://github.com/romanhaendler/umriss-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "react-components",
+    "dashboard",
+    "widgets",
+    "typescript",
+    "umriss"
+  ],
+  "type": "module",
+  "files": [
+    "dist",
+    "docs/llms-full.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/dashboard.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/dashboard.js"
+    },
+    "./styles.css": "./dist/dashboard.css"
+  },
+  "scripts": {
+    "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "prepack": "pnpm run props",
+    "predev": "pnpm run props",
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "vite build",
+    "prebuild:demo": "pnpm run props",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:demo": "pnpm run props && tsc --noEmit -p tsconfig.demo.json",
+    "check:site": "pnpm run props -- --check",
+    "preview:demo": "vite preview --config vite.demo.config.ts --port 4178 --strictPort",
+    "test:unit": "vitest run",
+    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
+    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts dashboard.js dashboard.css"
+  },
+  "peerDependencies": {
+    "@umriss-ui/core": "workspace:^",
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@fontsource/geist-mono": "^5.3.0",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@umriss-ui/core": "workspace:*",
+    "@umriss-ui/demo": "workspace:*",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

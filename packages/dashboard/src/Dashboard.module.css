@@ -1,0 +1,57 @@
+/* The dashboard: twelve equal columns and rows of a fixed height, under a
+   maximum width, at the start of the container. The library writes each
+   widget's place as custom properties; the browser sizes the columns.
+
+   Below the width at which a column would be narrower than about 52px (12
+   columns and 11 gaps of 12px, 756px) the dashboard is a list: the same
+   order, one widget under the other, each at its size's height. Decided on
+   the dashboard's own width, as a container, so that the markup of a server
+   is right before anything is measured.
+
+   The maximum width, the row unit and the gap are tokens, read with the
+   defaults that stand here (ADR-0045). */
+
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  .root {
+    container-type: inline-size;
+    width: 100%;
+    --row-unit: var(--u-dashboard-row, 50px);
+    --gap: var(--u-dashboard-gap, 12px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: var(--row-unit);
+    gap: var(--gap);
+    max-width: var(--u-dashboard-max-width, 1560px);
+  }
+
+  .item {
+    grid-column: var(--column) / span var(--columns);
+    grid-row: var(--row) / span var(--rows);
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  @container (max-width: 755px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: auto;
+    }
+
+    .item {
+      grid-column: 1;
+      grid-row: auto;
+      height: calc(var(--rows) * var(--row-unit) + (var(--rows) - 1) * var(--gap));
+    }
+  }
+}

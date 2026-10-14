@@ -5,7 +5,7 @@
 // demo runs in the shared shell and may - the table depends on
 // @umriss-ui/core, never the other way round (ADR-0016), and the schedule on
 // @umriss-ui/core and @umriss-ui/charts, and nothing on it (ADR-0022); the
-// calculation on @umriss-ui/core only, and nothing on it.
+// calculation and the dashboard on @umriss-ui/core only, and nothing on them.
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
@@ -18,6 +18,7 @@ const PACKAGES = [
   "packages/table/**/*.{ts,tsx}",
   "packages/schedule/**/*.{ts,tsx}",
   "packages/calculation/**/*.{ts,tsx}",
+  "packages/dashboard/**/*.{ts,tsx}",
   "packages/demo/**/*.{ts,tsx}",
 ];
 
@@ -44,6 +45,12 @@ const NO_SCHEDULE = {
 const NO_CALCULATION = {
   group: ["@umriss-ui/calculation", "@umriss-ui/calculation/*"],
   message: "@umriss-ui/calculation depends on @umriss-ui/core, not the other way round.",
+};
+
+/* Nor the dashboard: it sits on core alone. */
+const NO_DASHBOARD = {
+  group: ["@umriss-ui/dashboard", "@umriss-ui/dashboard/*"],
+  message: "@umriss-ui/dashboard depends on @umriss-ui/core, not the other way round.",
 };
 
 export default [
@@ -79,6 +86,7 @@ export default [
             NO_TABLE,
             NO_SCHEDULE,
             NO_CALCULATION,
+            NO_DASHBOARD,
           ],
         },
       ],
@@ -89,7 +97,7 @@ export default [
     files: ["packages/charts/**/*.{ts,tsx}"],
     ignores: ["packages/charts/src/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD] }],
     },
   },
   {
@@ -99,7 +107,7 @@ export default [
     files: ["packages/core/**/*.{ts,tsx}"],
     ignores: ["packages/core/demo/scenarios/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD] }],
     },
   },
   {
@@ -136,6 +144,7 @@ export default [
             },
             NO_SCHEDULE,
             NO_CALCULATION,
+            NO_DASHBOARD,
           ],
         },
       ],
@@ -170,6 +179,7 @@ export default [
             },
             NO_TABLE,
             NO_CALCULATION,
+            NO_DASHBOARD,
           ],
         },
       ],
@@ -203,6 +213,41 @@ export default [
             },
             NO_TABLE,
             NO_SCHEDULE,
+            NO_DASHBOARD,
+          ],
+        },
+      ],
+    },
+  },
+  {
+    /* The dashboard takes @umriss-ui/core through its public entry only, as
+       the table does (ADR-0016), and no other package. */
+    files: ["packages/dashboard/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@umriss-ui/core/*",
+                "!@umriss-ui/core/styles.css",
+                "!@umriss-ui/core/wording",
+                "!@umriss-ui/core/wording/de",
+              ],
+              message: "@umriss-ui/dashboard imports only the public entry of @umriss-ui/core.",
+            },
+            {
+              group: ["**/core/src/**", "**/packages/core/**", "../../core/**", "../core/**"],
+              message: "@umriss-ui/dashboard does not reach into @umriss-ui/core by path.",
+            },
+            {
+              group: ["@umriss-ui/charts", "@umriss-ui/charts/*"],
+              message: "@umriss-ui/dashboard depends on @umriss-ui/core only.",
+            },
+            NO_TABLE,
+            NO_SCHEDULE,
+            NO_CALCULATION,
           ],
         },
       ],
@@ -238,6 +283,7 @@ export default [
             NO_TABLE,
             NO_SCHEDULE,
             NO_CALCULATION,
+            NO_DASHBOARD,
           ],
         },
       ],
