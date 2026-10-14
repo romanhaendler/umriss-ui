@@ -3,7 +3,7 @@
    draft's place without these knowing. A change that changes nothing returns
    the view it was given. */
 
-import type { DashboardView, WidgetSize } from "./model";
+import type { DashboardView, DashboardWidget, WidgetSize } from "./model";
 
 /** One step of a draft. */
 export type Edit = (view: DashboardView) => DashboardView;
@@ -33,3 +33,20 @@ export const remove =
   (id: string): Edit =>
   (view) =>
     view.widgets.some((widget) => widget.id === id) ? { ...view, widgets: view.widgets.filter((widget) => widget.id !== id) } : view;
+
+/** An id no widget of the view has: the type's name and the first free number. */
+export const newId = (view: DashboardView, type: string): string => {
+  let n = 1;
+  while (view.widgets.some((widget) => widget.id === `${type}-${n}`)) n++;
+  return `${type}-${n}`;
+};
+
+/** Appends a widget. */
+export const add =
+  (widget: DashboardWidget): Edit =>
+  (view) => ({ ...view, widgets: [...view.widgets, widget] });
+
+/** Gives a widget other options. */
+export const setOptions =
+  (id: string, options: unknown): Edit =>
+  (view) => ({ ...view, widgets: view.widgets.map((widget) => (widget.id === id ? { ...widget, options } : widget)) });

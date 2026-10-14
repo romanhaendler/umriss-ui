@@ -1,7 +1,7 @@
-import { Children, isValidElement } from "react";
+import { Children, isValidElement, useEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
-import { announce, Button, Card, CardBody, CardHeader, Menu, MenuItem, MenuSeparator, useWording } from "@umriss-ui/core";
-import { move, remove, resize } from "./edit";
+import { announce, Button, Card, CardBody, CardHeader, Drawer, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, useWording } from "@umriss-ui/core";
+import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
 import type { DashboardView, WidgetSize } from "./model";
@@ -18,12 +18,15 @@ const COLUMNS = 12;
 export interface DashboardProps extends HTMLAttributes<HTMLDivElement> {
   /** The `WidgetType`s of this dashboard. */
   children?: ReactNode;
+  /** The `name`s of the widget types the catalogue lists.
+      @default every declared type */
+  catalogue?: ReadonlyArray<string>;
 }
 
 type AnyType = WidgetTypeProps<unknown>;
 
 /** The Dashboard of `useDashboard`, drawing a view. */
-export function DashboardOf({ view, editor, className, children, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
+export function DashboardOf({ view, editor, className, children, catalogue, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
   const wording = useWording();
   const types = new Map<string, AnyType>();
   for (const child of Children.toArray(children)) {
@@ -36,6 +39,16 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
   });
   const places = pack(shown.map((one) => one.span), COLUMNS);
 
+  const [optionsFor, setOptionsFor] = useState<string | null>(null);
+  const anchor = useRef<HTMLElement | null>(null);
+  const grid = useRef<HTMLDivElement>(null);
+  const added = useRef<string | null>(null);
+  useEffect(() => {
+    if (!added.current) return;
+    grid.current?.querySelector(`[data-widget="${added.current}"]`)?.scrollIntoView?.({ block: "nearest" });
+    added.current = null;
+  });
+
   const { editing } = editor;
   const total = view.widgets.length;
   const area = (span: { columns: number; rows: number }) => span.columns * span.rows;
@@ -43,6 +56,15 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
     const divisor = (a: number, b: number): number => (b === 0 ? a : divisor(b, a % b));
     return `${columns / divisor(columns, COLUMNS)}/${COLUMNS / divisor(columns, COLUMNS)}`;
   };
+  const listed = [...types.values()].filter((type) => !catalogue || catalogue.includes(type.name));
+  const addType = (type: AnyType) => {
+    const widget = { id: newId(view, type.name), type: type.name, size: type.start, options: type.defaultOptions };
+    added.current = widget.id;
+    editor.step(add(widget));
+    announce(wording.dashboardAdded(type.title?.(widget.options) ?? type.label, total + 1, total + 1));
+  };
+  const optionsType = optionsFor ? types.get(view.widgets.find((widget) => widget.id === optionsFor)?.type ?? "") : undefined;
+  const optionsWidget = view.widgets.find((widget) => widget.id === optionsFor);
   const moveTo = (id: string, title: string, to: number) => {
     const from = view.widgets.findIndex((widget) => widget.id === id);
     const target = Math.max(0, Math.min(total - 1, to));
@@ -58,6 +80,7 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
           {editing ? (
             <>
               <span className={styles.mode}>{wording.dashboardEditing}</span>
+              <Button size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
               <Button size="sm" onClick={() => { editor.cancel(); announce(wording.dashboardCancelled); }}>{wording.dashboardCancel}</Button>
               <Button size="sm" variant="primary" onClick={() => { editor.done(); announce(wording.dashboardKept); }}>{wording.dashboardDone}</Button>
             </>
@@ -66,7 +89,9 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
           )}
         </div>
       )}
-      <div className={styles.grid}>
+      {editing && total === 0 && <p>{wording.dashboardEmptyEditing}</p>}
+      {!editing && total === 0 && <p>{wording.dashboardEmpty}</p>}
+      <div className={styles.grid} ref={grid}>
         {shown.map(({ widget, type }, i) => {
           const place = places[i]!;
           const style = {
@@ -134,6 +159,19 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
                           })}
                         </>
                       )}
+                      {type.form && (
+                        <>
+                          <MenuSeparator />
+                          <MenuItem
+                            onSelect={() => {
+                              anchor.current = grid.current?.querySelector<HTMLElement>(`[data-widget="${widget.id}"] button[aria-label="${wording.dashboardMenu(title)}"]`) ?? null;
+                              setOptionsFor(widget.id);
+                            }}
+                          >
+                            {wording.dashboardOptions}
+                          </MenuItem>
+                        </>
+                      )}
                       <MenuSeparator />
                       <MenuItem
                         tone="danger"
@@ -153,6 +191,39 @@ export function DashboardOf({ view, editor, className, children, ...rest }: Dash
           );
         })}
       </div>
+      <Drawer open={editor.catalogue} onClose={() => editor.setCatalogue(false)}>
+        <ModalHeader title={wording.dashboardCatalogue} description={wording.dashboardCatalogueSentence} />
+        <ModalBody>
+          <ul className={styles.catalogue}>
+            {listed.map((type) => {
+              const span = type.sizes[type.start]!;
+              return (
+                <li key={type.name} className={styles.entry}>
+                  <div className={styles.footprint} role="img" aria-label={wording.dashboardFootprint(span.columns, span.rows)}>
+                    <span style={{ width: `${(span.columns / COLUMNS) * 100}%`, height: `${Math.min(1, span.rows / 4) * 100}%` }} />
+                  </div>
+                  <div className={styles.entryText}>
+                    <strong>{type.label}</strong>
+                    <span>{type.sentence}</span>
+                  </div>
+                  <Button size="sm" aria-label={wording.dashboardAddType(type.label)} onClick={() => addType(type)}>{wording.dashboardAdd}</Button>
+                </li>
+              );
+            })}
+          </ul>
+        </ModalBody>
+      </Drawer>
+      {optionsType?.form && optionsWidget && (
+        <Popover open anchorRef={anchor} onOpenChange={() => setOptionsFor(null)} role="dialog" ariaLabel={wording.dashboardOptions}>
+          {optionsType.form({
+            options: optionsWidget.options,
+            change: (options) => {
+              editor.step(setOptions(optionsWidget.id, options));
+              announce(wording.dashboardOptionsChanged(optionsType.title?.(options) ?? optionsType.label));
+            },
+          })}
+        </Popover>
+      )}
     </div>
   );
 }

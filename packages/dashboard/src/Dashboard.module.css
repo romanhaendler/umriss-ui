@@ -73,4 +73,35 @@
       height: calc(var(--rows) * var(--row-unit) + (var(--rows) - 1) * var(--gap));
     }
   }
+
+  .catalogue {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--u-space-3, 12px);
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr auto;
+    align-items: center;
+    gap: var(--u-space-3, 12px);
+  }
+
+  .footprint {
+    aspect-ratio: 3 / 1;
+    border: 1px solid var(--u-color-border, currentColor);
+    border-radius: 2px;
+  }
+
+  .footprint > span {
+    display: block;
+    background: var(--u-color-accent, currentColor);
+    opacity: 0.5;
+  }
+
+  .entryText {
+    display: grid;
+  }
 }
