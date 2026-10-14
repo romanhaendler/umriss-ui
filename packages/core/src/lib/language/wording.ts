@@ -856,7 +856,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardShare: (fraction) => `${fraction} wide`,
   dashboardMoved: (title, from, to, of) => `${title}: moved from place ${from} to place ${to} of ${of}`,
   dashboardResized: (title, size) => `${title}: size ${size}`,
-  dashboardRemoved: (title) => `${title} removed`,
+  dashboardRemoved: (title) => `${title} removed. Undo brings it back.`,
   dashboardKept: "Changes kept",
   dashboardCancelled: "Changes discarded",
   dashboardUndone: "Undone",

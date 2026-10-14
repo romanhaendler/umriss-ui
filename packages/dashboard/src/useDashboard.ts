@@ -127,7 +127,11 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     };
     const step = (change: Edit) => {
       const { draft } = own.state;
-      if (draft) put({ ...own.state, draft: { steps: [...draft.steps.slice(0, draft.at + 1), change(draft.steps[draft.at]!)], at: draft.at + 1 } });
+      if (!draft) return;
+      const current = draft.steps[draft.at]!;
+      const next = change(current);
+      /* A change that changes nothing is no step: it would leave an undo that does nothing. */
+      if (next !== current) put({ ...own.state, draft: { steps: [...draft.steps.slice(0, draft.at + 1), next], at: draft.at + 1 } });
     };
     const go = (by: number) => {
       const { draft } = own.state;
