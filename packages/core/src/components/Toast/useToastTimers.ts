@@ -11,6 +11,11 @@ interface TimerInfo {
   startedAt: number;
 }
 
+/** Whether a toast goes away on its own: it has a time, and is not still at work. */
+export function leavesByItself(item: ToastItem, defaultDuration: number) {
+  return (item.duration ?? defaultDuration) > 0 && item.tone !== "loading";
+}
+
 /** The running timers and the teardowns of leaving toasts, all cancelled with
     the provider. */
 export function useTimerStore() {
@@ -72,9 +77,8 @@ export function useCountdowns({
     (id: number) => {
       clearTimer(id);
       const item = itemsRef.current.find((entry) => entry.id === id);
-      if (!item || item.tone === "loading") return;
+      if (!item || !leavesByItself(item, defaultDuration)) return;
       const ms = item.duration ?? defaultDuration;
-      if (ms <= 0) return;
       const info: TimerInfo = { timeout: null, remaining: ms, startedAt: 0 };
       timersRef.current.set(id, info);
       if (!stillRef.current) run(id, info);

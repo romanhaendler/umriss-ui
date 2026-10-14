@@ -126,6 +126,20 @@ test("Go offline, then Scan four parcels: one deck, and Working offline still st
   expect(new Set(places).size, places.join(" ")).toBe(places.length);
 });
 
+/* The setting of one example stays when another writes its own key. */
+test("Hold the toasts on and off leaves the limit of How many stand at once", async ({ page }) => {
+  await openExample(page, "toast", "hold-the-toasts");
+  const hold = page.locator('[data-example="hold-the-toasts"]').locator("label", { hasText: "Hold the toasts" });
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await expect(page.locator("[data-toast]")).toHaveCount(2);
+  await hold.click();
+  await hold.click();
+  await page.getByRole("button", { name: "Send a toast" }).click();
+  await page.getByRole("button", { name: "Send a toast" }).click();
+  await page.waitForTimeout(500);
+  await expect(page.locator("[data-toast]")).toHaveCount(2);
+});
+
 /* The toasts above an open modal dialog: the unit setup's dialog makes nothing
    inert, so only a browser shows that a toast in the dialog can be pressed. */
 test("A toast above a modal is pressable and closes without closing the modal", async ({ page }) => {
