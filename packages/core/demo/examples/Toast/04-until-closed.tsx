@@ -1,4 +1,4 @@
-import { Button, ToastProvider, useToast } from "../../../src";
+import { Button, useToast } from "../../../src";
 
 export const title = "Keep it until it is closed";
 export const lead = "`duration: 0` keeps a toast until the reader closes it – for the rare message whose loss costs something.";
@@ -25,9 +25,5 @@ function Content() {
 /* `useToast` needs a `ToastProvider` above it; at the root of an application
    one provider serves every screen. */
 export default function UntilClosed() {
-  return (
-    <ToastProvider>
-      <Content />
-    </ToastProvider>
-  );
+  return <Content />;
 }

@@ -2,8 +2,8 @@
 
    The rule behind it: the file IS the example. What runs is exactly what
    stands there - not out of discipline, but because there is only one file.
-   These two functions are the only permitted difference between the file on
-   disk and what the reader reads, and both are pure string functions without
+   These functions are the only permitted difference between the file on
+   disk and what the reader reads, and all are pure string functions without
    any further transformation: no reformatting, no re-indenting, no stripping
    of comments.
 
@@ -19,8 +19,31 @@
       example has to run. Imports of other packages stand as they are written;
       an example's data stands in the file itself (`checks/ownData`).
 
-   Should a third rule ever become tempting, that is the moment to question
-   `?raw` at all, and not the moment to add a third rule. */
+   3. The demo's seam to its page falls away. A page of the demo is one
+      application with one `ToastProvider` at its root; an example about a
+      setting of that root (the toast position, the limit, `held`) cannot wrap
+      its own provider, so it hands the setting to the page's root through a
+      seam only this demo has (`demo/pageToast.tsx`). The reader must see what
+      an application writes - `UmrissProvider toast={...}` at its root - and
+      never the seam. The example file marks the part with three comment lines,
+      each alone on its line:
+
+          // demo-only:start      what runs here (the seam, its import)
+          // demo-only:shown      what an application writes, every line
+          // demo-only:end        commented out with `// `
+
+      From `start` to `end` the display carries only the lines after `shown`,
+      their `// ` taken off, at the indent they have. A part may show nothing
+      (the seam's import). Still pure string work, no parsing, nothing
+      reformatted: the file stays the one source, and what is replaced is
+      exactly what the demo put there and marked.
+
+   The question this raised: a third rule was to be the moment to question
+   `?raw` at all. It was questioned and stays. The alternative is a second,
+   hand-kept copy of the shown code, which can drift from what runs - the one
+   thing the file-is-the-example rule exists to prevent. A marked part inside
+   the file keeps both in one place, in front of the author's eyes. A fourth
+   rule would reopen the question for good. */
 
 /** The path the examples take their package from. */
 export const LIBRARY_PATH = "../../../src";
@@ -83,8 +106,15 @@ export function withoutTitle(source: string): string {
   return `${lines.join("\n").replace(/\s+$/, "")}\n`;
 }
 
+const ROOT_PART = /^([ \t]*)\/\/ demo-only:start[ \t]*\n[\s\S]*?^[ \t]*\/\/ demo-only:shown[ \t]*\n([\s\S]*?)^[ \t]*\/\/ demo-only:end[ \t]*\n/gm;
+
+/** Replaces each marked demo-only part by the root it stands for. */
+export function withRoot(source: string): string {
+  return source.replace(ROOT_PART, (_part, _indent: string, shown: string) => shown.replace(/^([ \t]*)\/\/ ?/gm, "$1"));
+}
+
 /** What stands in the code block: the file, without its bookkeeping, with the
     package name. */
 export function displaySource(source: string, packageName: string): string {
-  return asPackage(withoutTitle(source), packageName);
+  return asPackage(withoutTitle(withRoot(source)), packageName);
 }

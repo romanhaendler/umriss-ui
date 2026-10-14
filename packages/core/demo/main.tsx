@@ -17,7 +17,7 @@ import "@fontsource/geist-mono/400.css";
 import "../src/styles/tokens.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ToastProvider } from "../src";
+import { PageToast } from "./pageToast";
 import { App } from "./App";
 /* The shell's styles explicitly and last, as before their move to
    @umriss-ui/demo: the order of the stylesheets is part of the appearance. */
@@ -26,8 +26,8 @@ import "@umriss-ui/demo/page.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ToastProvider>
+    <PageToast>
       <App />
-    </ToastProvider>
+    </PageToast>
   </StrictMode>,
 );
