@@ -1,6 +1,6 @@
 # 03 - Holding the toasts back
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: L
 
@@ -43,28 +43,58 @@ again they come back with the time they had left, and nothing was lost.
 
 ## Acceptance
 
-- [ ] Unit, a new group "Toast – held", fake timers, through `ToastProvider`
+- [x] Unit, a new group "Toast – held", fake timers, through `ToastProvider`
       and `useToast`:
-  - [ ] with `held` no card is in the accessibility tree and none is focusable;
-  - [ ] a 5 s toast held at 3 s for 10 s leaves 2 s after the hold ends;
-  - [ ] a toast arriving during the hold leaves its full duration after it,
+  - [x] with `held` no card is in the accessibility tree and none is focusable;
+  - [x] a 5 s toast held at 3 s for 10 s leaves 2 s after the hold ends;
+  - [x] a toast arriving during the hold leaves its full duration after it,
         and its text enters the live region only then;
-  - [ ] a toast that stood before the hold is not inserted into the live
+  - [x] a toast that stood before the hold is not inserted into the live
         region a second time (an observer on it sees no insertion);
-  - [ ] `dismiss()` during the hold calls `onClose("dismiss")` at once, and
+  - [x] `dismiss()` during the hold calls `onClose("dismiss")` at once, and
         the toast does not come back;
-  - [ ] `update()` during the hold: the new text comes back; loading turned
+  - [x] `update()` during the hold: the new text comes back; loading turned
         success counts from the end of the hold;
-  - [ ] four toasts during the hold with limit 3: the oldest goes with
+  - [x] four toasts during the hold with limit 3: the oldest goes with
         `dismiss` at once, three come back;
-  - [ ] Alt+T during the hold moves no focus; a focus in the deck goes back
+  - [x] Alt+T during the hold moves no focus; a focus in the deck goes back
         when the hold begins;
-  - [ ] holding calls no `onClose` of a standing toast.
-- [ ] Browser, on the new example: with `held` the element at the centre of
+  - [x] holding calls no `onClose` of a standing toast.
+- [x] Browser, on the new example: with `held` the element at the centre of
       where the close cross stood is the page's, and a click reaches it; after
       the hold the cross is there again and the deck stands where it stood.
-- [ ] The example's pictures in both themes.
-- [ ] Without `held` every existing unit and browser test of the toasts stays
+- [x] The example's pictures in both themes.
+- [x] Without `held` every existing unit and browser test of the toasts stays
       green.
-- [ ] The props generator, `pnpm check core`, `pnpm check:site`,
+- [x] The props generator, `pnpm check core`, `pnpm check:site`,
       `pnpm test:visual:quick core`.
+
+## Comments
+
+2026-10-14: While held each card carries `hidden` (display: none): neither
+drawn nor hit, out of the tab order and the tree, its node kept, so its
+return is no insertion and showing it restarts its entrance (the ages a move
+into a dialog hands the cards are cleared while held). A toast that arrives
+during the hold is not drawn at all until it ends (the first id of the hold
+is kept in state), so its text enters its live region then. The region loses
+its landmark and tabindex and takes no pointer events while held (its box
+would otherwise still be hit). The countdowns stand still on `open || held`
+(`useCountdowns` takes `still`). While held a leave is a removal at once,
+and leaving cards are removed when the hold begins, so no exit is ever seen
+after it. Alt+T is not listened for; a focus in the deck goes back through
+`leaveRegion`, as with Escape; hover, focus and pin are let go.
+
+Departures: the unit test cannot show "none focusable" - jsdom focuses
+elements under `hidden` and `inert` alike - so it checks that every card
+button is out of the accessibility tree (`isInaccessible`), and the browser
+test proves the tab order: Tab from just before the region does not enter it
+while held, and lands on the cross after. `ToastProviderProps` is a named
+interface for the props generator but not exported (the spec: no new export).
+The Alt+T line of the page's keys now says "and is not held back".
+
+Pictures: the new example in both themes; the page head and four pictures
+below the new about sentence were renewed (page-toast, where-they-stand,
+after-an-action, deck closed, phone) - only the page text behind them moved
+by a fraction of a pixel, every card unchanged. Checks: props, `pnpm check
+core`, `pnpm check:site`, `pnpm test:visual:quick core` (67), all of
+`features-basics.spec.ts` (64) and the toast pictures (34) green.

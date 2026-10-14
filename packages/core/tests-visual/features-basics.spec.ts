@@ -608,6 +608,73 @@ test("In a right-to-left page the start token is the distance from the right", a
   expect(fromTheRight).toBeCloseTo(88, 0);
 });
 
+/* Held back, the toasts are no invisible wall: what lies under the cross is
+   the page's and takes the click, and Tab passes the deck by. After the hold
+   the cross is there again, where it stood. */
+test("Held toasts leave the page under them to be hit, and come back where they stood", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "hold-the-toasts");
+  const example = page.locator('[data-example="hold-the-toasts"]');
+  const hold = async (on: boolean) => {
+    await example.locator("label", { hasText: "Hold the toasts" }).click();
+    await expect(example.getByRole("switch", { name: "Hold the toasts" })).toBeChecked({ checked: on });
+  };
+  await example.getByRole("button", { name: "Send a toast" }).click();
+  const cross = page.getByRole("button", { name: "Close message" });
+  await expect(cross).toBeVisible();
+  await page.waitForTimeout(400);
+  const stood = (await cross.boundingBox())!;
+  const point = { x: stood.x + stood.width / 2, y: stood.y + stood.height / 2 };
+  const atThePoint = () =>
+    page.evaluate(({ x, y }) => {
+      const element = document.elementFromPoint(x, y);
+      return element?.closest("[data-edge]") ? (element.closest("button")?.getAttribute("aria-label") ?? "toasts") : "page";
+    }, point);
+  /* Tab from just before the region, which stands last in the body. */
+  const tabIntoTheToasts = async () => {
+    await page.evaluate(() => {
+      const before = document.createElement("button");
+      before.id = "before-the-toasts";
+      document.querySelector("[data-edge]")!.before(before);
+      before.focus();
+    });
+    await page.keyboard.press("Tab");
+    return page.evaluate(() => {
+      document.getElementById("before-the-toasts")?.remove();
+      const active = document.activeElement;
+      return active?.closest("[data-edge]") ? (active.getAttribute("aria-label") ?? "toasts") : "page";
+    });
+  };
+
+  await hold(true);
+  expect(await atThePoint()).toBe("page");
+  const clicked = page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) =>
+        document.addEventListener(
+          "click",
+          (event) => {
+            event.preventDefault();
+            resolve(!(event.target as Element).closest("[data-edge]"));
+          },
+          { capture: true, once: true },
+        ),
+      ),
+  );
+  await page.mouse.click(point.x, point.y);
+  expect(await clicked).toBe(true);
+  expect(await tabIntoTheToasts()).toBe("page");
+
+  await hold(false);
+  await expect(cross).toBeVisible();
+  await expect.poll(async () => {
+    const box = (await cross.boundingBox())!;
+    return [box.x, box.y].map(Math.round);
+  }).toEqual([stood.x, stood.y].map(Math.round));
+  expect(await atThePoint()).toBe("Close message");
+  expect(await tabIntoTheToasts()).toBe("Close message");
+});
+
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");
   const example = page.locator('[data-example="loading-and-empty-panels"]');

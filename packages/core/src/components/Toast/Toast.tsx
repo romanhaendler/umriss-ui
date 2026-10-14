@@ -123,10 +123,21 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
   );
 }
 
+/** The props of `ToastProvider`. */
+export interface ToastProviderProps {
+  children: ReactNode;
+  /** While true, the toasts are held back: none is seen or heard, no time runs
+      out, and a new one waits. When false again they come back with the time
+      they had left. For a surface the toasts must not cover for a while, where
+      there is no room beside it: nothing is lost, as it would be by dismissing.
+      @default false */
+  held?: boolean;
+}
+
 /** Holds the toasts and draws them; `useToast` works only below it. Put it
     once at the root of the application. Duration, position and limit come from
     `UmrissProvider`'s `toast` where one stands around it. */
-export function ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children, held = false }: ToastProviderProps) {
   /* The defaults come from the root provider where there is one. The
      individual message beats it where it says a duration. */
   const config = useToastConfig();
@@ -146,6 +157,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const nextId = useRef(1);
+  /* The first id of the hold (ids only grow): a toast that arrives while the
+     toasts are held back is not drawn, so that its text enters its live region
+     when the hold ends and is heard then. */
+  const [heldFrom, setHeldFrom] = useState<number | null>(null);
+  if (held && heldFrom === null) setHeldFrom((items.at(-1)?.id ?? 0) + 1);
+  else if (!held && heldFrom !== null) setHeldFrom(null);
+  const drawn = (item: ToastItem) => heldFrom === null || item.id < heldFrom;
   /* When each standing toast arrived (`performance.now()`): a region that
      moves hands its cards their age, so that an entrance goes on. */
   const arrivedRef = useRef(new Map<number, number>());
@@ -156,7 +174,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const { heights, measureRef, forget } = useCardMeasure();
   const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights);
   const anyStanding = items.some((item) => !item.leaving);
-  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding);
+  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding && !held);
 
   const remove = useCallback(
     (id: number) => {
@@ -174,6 +192,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [commit, forget, lastPlaceRef, setHovered, setPinned],
   );
+
+  /* Read by the callbacks: while held, nothing is seen to leave. */
+  const heldRef = useRef(held);
 
   /** Starts the leaving: first the choreography, then the teardown. */
   const beginLeave = useCallback(
@@ -195,7 +216,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
          compete with the entrance animation. Its length is the token the
          stylesheet reads; without one there is nothing to wait for. */
       const duration = region === null ? 0 : durationFrom(getComputedStyle(region), "--u-duration-exit-collapse");
-      if (prefersReducedMotion() || duration <= 0) {
+      if (prefersReducedMotion() || duration <= 0 || heldRef.current) {
         remove(id);
         return;
       }
@@ -210,7 +231,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [clearTimer, commit, remove, leaveRegion, lastPlaceRef, leavesRef, regionRef],
   );
 
-  const startTimer = useCountdowns({ timersRef, clearTimer, itemsRef, open, defaultDuration, beginLeave });
+  const startTimer = useCountdowns({ timersRef, clearTimer, itemsRef, still: open || held, defaultDuration, beginLeave });
 
   const toast = useCallback(
     (options: ToastOptions) => {
@@ -298,6 +319,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setTarget(next);
   }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus]);
 
+  /* Held back at once: no exit, no `onClose`, and a card already leaving
+     finishes unseen. A focus in the deck goes back where it came from, as
+     with Escape, and what held the deck open lets go, so that it comes back
+     closed. */
+  useLayoutEffect(() => {
+    heldRef.current = held;
+    if (!held) return;
+    itemsRef.current.filter((item) => item.leaving).forEach((item) => remove(item.id));
+    if (regionRef.current?.contains(document.activeElement)) leaveRegion();
+    setHovered(false);
+    letGoOfFocus();
+  }, [held, remove, leaveRegion, setHovered, letGoOfFocus]);
+  /* Every card plays its entrance from the start when the hold ends. */
+  if (held && ages.size > 0) setAges(new Map());
+
   useShownInTopLayer(regionRef);
 
   const pinOpen = () => {
@@ -319,6 +355,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return (
       <div
         key={item.id}
+        /* Held back: neither drawn nor hit, out of the tab order and the
+           accessibility tree. The node stays, so that its return is no
+           insertion into its live region, and showing it again restarts its
+           entrance. */
+        hidden={held}
         className={cx(
           styles.card,
           place?.behind && styles.behind,
@@ -389,6 +430,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const regionStyle = {
     "--_origin": motionOrigin(edge === "bottom" ? "top" : "bottom", along),
     height: regionHeight,
+    /* Held back, its box is no wall over what lies beneath. */
+    pointerEvents: held ? "none" : undefined,
   } as CSSProperties;
 
   return (
@@ -408,7 +451,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           data-along={along}
           data-keys={byKeys ? "" : undefined}
           style={regionStyle}
-          {...(anyStanding ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
+          {...(anyStanding && !held ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
           onKeyDown={onKeyDown}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -416,10 +459,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           onPointerLeave={onPointerLeave}
         >
           <div role="status" aria-live="polite" className={styles.live}>
-            {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
+            {items.filter((item) => drawn(item) && roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
           </div>
           <div role="alert" className={styles.live}>
-            {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
+            {items.filter((item) => drawn(item) && roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
           </div>
         </div>,
         target,

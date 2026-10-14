@@ -1,5 +1,6 @@
 /* The countdowns of the toasts: the store of running timers, and the
-   start/pause/resume of them while the deck is open or closed. */
+   start/pause/resume of them while the deck is open or the toasts are held
+   back. */
 import { useCallback, useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { ToastCloseReason, ToastItem } from "./Toast";
@@ -38,23 +39,24 @@ export function useTimerStore() {
   return { timersRef, leavesRef, clearTimer };
 }
 
-/** Counts each toast's duration, held while the deck is open. */
+/** Counts each toast's duration, standing still while `still` is true (the
+    deck is open, or the toasts are held back). */
 export function useCountdowns({
   timersRef,
   clearTimer,
   itemsRef,
-  open,
+  still,
   defaultDuration,
   beginLeave,
 }: {
   timersRef: MutableRefObject<Map<number, TimerInfo>>;
   clearTimer: (id: number) => void;
   itemsRef: MutableRefObject<ToastItem[]>;
-  open: boolean;
+  still: boolean;
   defaultDuration: number;
   beginLeave: (id: number, reason: ToastCloseReason) => void;
 }) {
-  const openRef = useRef(open);
+  const stillRef = useRef(still);
 
   const run = useCallback(
     (id: number, info: TimerInfo) => {
@@ -64,7 +66,8 @@ export function useCountdowns({
     [beginLeave],
   );
 
-  /** Counts a toast's duration from now - held while the deck is open. */
+  /** Counts a toast's duration from now - or from when the countdowns run
+      again, with all of it. */
   const startTimer = useCallback(
     (id: number) => {
       clearTimer(id);
@@ -74,24 +77,24 @@ export function useCountdowns({
       if (ms <= 0) return;
       const info: TimerInfo = { timeout: null, remaining: ms, startedAt: 0 };
       timersRef.current.set(id, info);
-      if (!openRef.current) run(id, info);
+      if (!stillRef.current) run(id, info);
     },
     [clearTimer, defaultDuration, itemsRef, run, timersRef],
   );
 
   useEffect(() => {
-    openRef.current = open;
+    stillRef.current = still;
     timersRef.current.forEach((info, id) => {
-      if (open && info.timeout) {
+      if (still && info.timeout) {
         clearTimeout(info.timeout);
         info.timeout = null;
         info.remaining = Math.max(0, info.remaining - (Date.now() - info.startedAt));
-      } else if (!open && !info.timeout) {
+      } else if (!still && !info.timeout) {
         if (info.remaining <= 0) beginLeave(id, "timeout");
         else run(id, info);
       }
     });
-  }, [open, beginLeave, run, timersRef]);
+  }, [still, beginLeave, run, timersRef]);
 
   return startTimer;
 }
