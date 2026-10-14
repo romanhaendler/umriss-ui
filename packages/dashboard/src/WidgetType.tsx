@@ -45,3 +45,27 @@ export function WidgetType<Options>(props: WidgetTypeProps<Options>): null {
   void props;
   return null;
 }
+
+/** The options of the heading widget type. */
+export interface HeadingOptions {
+  /** The title across the full width. */
+  text: string;
+}
+
+/** The built-in heading widget type, to put inside `Dashboard` when the
+    application wants readers to divide their dashboard: one size, `full`, one
+    row, its text as its options, drawn as a title without a card. */
+export function HeadingType(): null {
+  return null;
+}
+
+/** What the dashboard reads the heading type as. */
+export const HEADING: WidgetTypeProps<HeadingOptions> = {
+  name: "heading",
+  label: "Heading",
+  sentence: "A title across the full width.",
+  sizes: { full: { columns: 12, rows: 1 } },
+  start: "full",
+  defaultOptions: { text: "" },
+  children: () => null,
+};
