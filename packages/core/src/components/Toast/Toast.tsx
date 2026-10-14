@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -121,6 +121,14 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
       )}
     </svg>
   );
+}
+
+/** The region's four distances as it stands, as the stylesheet's `--_from-*`. */
+type Insets = Record<`--_from-${"top" | "bottom" | "start" | "end"}`, string>;
+function insetsOf(region: Element): Insets {
+  const style = getComputedStyle(region);
+  const read = (side: string) => style.getPropertyValue(`--_toast-${side}`);
+  return { "--_from-top": read("top"), "--_from-bottom": read("bottom"), "--_from-start": read("start"), "--_from-end": read("end") };
 }
 
 /** The props of `ToastProvider`. */
@@ -305,6 +313,26 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
      goes on from where it was (a negative `animation-delay`); one that is over
      stays over. */
   const [ages, setAges] = useState<ReadonlyMap<number, number>>(new Map());
+  /* Where the deck was last seen in a dialog, read in every frame while a
+     toast is seen there: a dialog that closes takes its region out of
+     rendering before it can be read. */
+  const seenInDialogRef = useRef<Insets | null>(null);
+  const inDialog = target instanceof HTMLDialogElement;
+  const seen = anyStanding && !held;
+  useEffect(() => {
+    seenInDialogRef.current = null;
+    if (!inDialog || !seen) return;
+    let frame = requestAnimationFrame(function read() {
+      if (regionRef.current) seenInDialogRef.current = insetsOf(regionRef.current);
+      frame = requestAnimationFrame(read);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [inDialog, seen]);
+  /* Where the new region starts when the region changes its place: the old
+     region's distances as last seen, as `--_from-*`, which the stylesheet's
+     starting style reads. A new place glides from there, the same place
+     stands still. */
+  const [from, setFrom] = useState<Insets | null>(null);
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;
@@ -315,6 +343,9 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
       letGoOfFocus();
       const now = performance.now();
       setAges(new Map(itemsRef.current.map((item) => [item.id, Math.round(now - (arrivedRef.current.get(item.id) ?? now))])));
+      const old = regionRef.current;
+      const drawn = target.isConnected && !(target instanceof HTMLDialogElement && !target.open);
+      setFrom(old?.getAttribute("role") === "region" && !heldRef.current ? (drawn ? insetsOf(old) : seenInDialogRef.current) : null);
     }
     setTarget(next);
   }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus]);
@@ -429,6 +460,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
 
   const regionStyle = {
     "--_origin": motionOrigin(edge === "bottom" ? "top" : "bottom", along),
+    ...from,
     height: regionHeight,
     /* Held back, its box is no wall over what lies beneath. */
     pointerEvents: held ? "none" : undefined,

@@ -50,7 +50,8 @@
   /* The deck glides to a new distance only while a toast stands (the region
      is a landmark then): a distance changed while none stands is taken at
      once, so that the first toast does not glide in from the old place. A
-     region drawn anew has no old place and stands at once too. */
+     region drawn anew stands at once unless it is given the old place (the
+     starting style below). */
   .region[role="region"] {
     transition:
       height var(--u-duration-medium) var(--u-ease-out),
@@ -58,6 +59,18 @@
       --_toast-bottom var(--u-duration-medium) var(--u-ease-out),
       --_toast-start var(--u-duration-medium) var(--u-ease-out),
       --_toast-end var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  /* A region drawn anew when it moves into or out of a dialog starts where
+     the old one was seen (`--_from-*`, set by the component) and glides from
+     there; where they are the same, or without them, nothing moves. */
+  @starting-style {
+    .region[role="region"] {
+      --_toast-top: var(--_from-top, var(--u-toast-inset-top));
+      --_toast-bottom: var(--_from-bottom, var(--u-toast-inset-bottom));
+      --_toast-start: var(--_from-start, var(--u-toast-inset-start));
+      --_toast-end: var(--_from-end, var(--u-toast-inset-end));
+    }
   }
 
   /* In the top layer (inside a dialog) the region is a manual popover, and the

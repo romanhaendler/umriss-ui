@@ -596,6 +596,48 @@ test("Setting a token again to the value it has moves nothing", async ({ page })
   expect([...new Set((await stop()).map((frame) => frame.top))]).toEqual([20]);
 });
 
+/* A modal that opens or closes in the moment the application changes the
+   distance: the region is built anew inside or outside the dialog and starts
+   where the old one was seen. Both happen in one task, so in one frame. */
+async function modalWithTheTop(page: Page, open: boolean, top: number) {
+  await page.evaluate(
+    ({ open, top }) => {
+      let dialog = document.getElementById("moving-modal") as HTMLDialogElement | null;
+      if (!dialog) {
+        dialog = document.createElement("dialog");
+        dialog.id = "moving-modal";
+        dialog.textContent = "A modal";
+        document.body.append(dialog);
+      }
+      if (open) dialog.showModal();
+      else dialog.close();
+      document.documentElement.style.setProperty("--u-toast-inset-top", `${top}px`);
+    },
+    { open, top },
+  );
+}
+
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+  test(`A modal opening and closing as the top token changes ${reducedMotion === "reduce" ? "moves the deck at once with reduced motion" : "glides the deck between the two places"}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await standingTopEnd(page);
+    for (const [open, from, to] of [[true, 20, 96], [false, 96, 20]] as const) {
+      const stop = await sampleTheDeck(page);
+      await modalWithTheTop(page, open, to);
+      await page.waitForTimeout(600);
+      await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(open ? 1 : 0);
+      const values = [...new Set((await stop()).map((frame) => frame.top))];
+      const move = open ? "opening" : "closing";
+      if (reducedMotion === "reduce") expect(values, move).toEqual([from, to]);
+      else {
+        expect(values[0], move).toBe(from);
+        expect(values.at(-1), move).toBe(to);
+        expect(values.some((value) => value > Math.min(from, to) && value < Math.max(from, to)), `${move}, between: ${values.join(", ")}`).toBe(true);
+      }
+    }
+  });
+}
+
 test("In a right-to-left page the start token is the distance from the right", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await openExample(page, "toast", "where-they-stand");
