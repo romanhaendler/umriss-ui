@@ -83,7 +83,7 @@ describe("the editing mode", () => {
     expect((screen.getByRole("menuitem", { name: "Move earlier" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("menuitem", { name: "Move later" }) as HTMLButtonElement).disabled).toBe(false);
     const sizes = screen.getAllByRole("menuitem").map((el) => el.textContent ?? "").filter((t) => /wide/i.test(t));
-    expect(sizes).toEqual(["✓ Small, 1/4 wide", "Wide, 1/2 wide"]);
+    expect(sizes).toEqual(["✓ Small, ¼ wide", "Wide, ½ wide"]);
     expect(screen.getByRole("menuitem", { name: /Small/ }).getAttribute("aria-current")).toBe("true");
   });
 

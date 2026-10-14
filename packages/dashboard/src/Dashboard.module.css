@@ -31,7 +31,6 @@
 
   .mode {
     margin-inline-end: auto;
-    font-weight: 600;
     color: var(--u-color-accent, currentColor);
   }
 
@@ -50,7 +49,7 @@
     position: relative;
     z-index: 5;
     cursor: grabbing;
-    box-shadow: var(--u-shadow-lg, 0 8px 24px rgb(0 0 0 / 0.25));
+    box-shadow: var(--u-shadow-overlay);
   }
 
   .placeholder {
@@ -77,6 +76,14 @@
   .headingRow {
     display: flex;
     align-items: end;
+  }
+
+  .headingHead {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--u-space-2, 8px);
   }
 
   .heading {
@@ -120,8 +127,8 @@
 
   .footprint {
     aspect-ratio: 3 / 1;
-    border: 1px solid var(--u-color-border, currentColor);
     border-radius: 2px;
+    box-shadow: var(--u-edge);
   }
 
   .footprint > span {
