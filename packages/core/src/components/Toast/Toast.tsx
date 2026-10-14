@@ -19,7 +19,7 @@ import { useDeckPlaces } from "./useDeckPlaces";
 import { useGlideAcross } from "./useGlideAcross";
 import { useHold } from "./useHold";
 import { useRegionFocus } from "./useRegionFocus";
-import { useCountdowns, useTimerStore } from "./useToastTimers";
+import { leavesByItself, useCountdowns, useTimerStore } from "./useToastTimers";
 
 /** How the message turns out; `loading` is a toast still at work. */
 export type ToastTone = "neutral" | "success" | "warning" | "danger" | "loading";
@@ -259,9 +259,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
       commit([...itemsRef.current, { ...options, id }]);
       /* Only a toast that leaves by itself counts: one that stays (no time,
          or still at work) is never pushed out. */
-      const standing = itemsRef.current.filter(
-        (item) => !item.leaving && (item.duration ?? defaultDuration) > 0 && item.tone !== "loading",
-      );
+      const standing = itemsRef.current.filter((item) => !item.leaving && leavesByItself(item, defaultDuration));
       /* Over the limit the oldest of them gives way - as if closed. A queue
          would bring old news late. */
       standing.slice(0, Math.max(0, standing.length - limit)).forEach((item) => beginLeave(item.id, "dismiss"));

@@ -38,10 +38,9 @@
       reformatted: the file stays the one source, and what is replaced is
       exactly what the demo put there and marked.
 
-   The question this raised: a third rule was to be the moment to question
-   `?raw` at all. It was questioned and stays. The alternative is a second,
-   hand-kept copy of the shown code, which can drift from what runs - the one
-   thing the file-is-the-example rule exists to prevent. A marked part inside
+   The file is the example, and stays the one source: the alternative to
+   `?raw` is a second, hand-kept copy of the shown code, which can drift from
+   what runs - the one thing this rule exists to prevent. A marked part inside
    the file keeps both in one place, in front of the author's eyes. A fourth
    rule would reopen the question for good. */
 
@@ -106,11 +105,11 @@ export function withoutTitle(source: string): string {
   return `${lines.join("\n").replace(/\s+$/, "")}\n`;
 }
 
-const ROOT_PART = /^([ \t]*)\/\/ demo-only:start[ \t]*\n[\s\S]*?^[ \t]*\/\/ demo-only:shown[ \t]*\n([\s\S]*?)^[ \t]*\/\/ demo-only:end[ \t]*\n/gm;
+const ROOT_PART = /^[ \t]*\/\/ demo-only:start[ \t]*\n[\s\S]*?^[ \t]*\/\/ demo-only:shown[ \t]*\n([\s\S]*?)^[ \t]*\/\/ demo-only:end[ \t]*\n/gm;
 
 /** Replaces each marked demo-only part by the root it stands for. */
 export function withRoot(source: string): string {
-  return source.replace(ROOT_PART, (_part, _indent: string, shown: string) => shown.replace(/^([ \t]*)\/\/ ?/gm, "$1"));
+  return source.replace(ROOT_PART, (_part, shown: string) => shown.replace(/^([ \t]*)\/\/ ?/gm, "$1"));
 }
 
 /** What stands in the code block: the file, without its bookkeeping, with the

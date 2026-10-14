@@ -7,8 +7,8 @@
    their own, so they hand the setting to this root through `usePageToast` when
    the reader acts (not on mount: several of them stand on one page at once).
 
-   The setting stays until another example changes it, and goes with the
-   example that wrote it: when the page is left its examples unmount, and the
+   The setting stays until another example changes it (each example changes
+   only the keys it writes), and goes with the example that wrote it: when the page is left its examples unmount, and the
    deck is back at the defaults. The example's displayed code never shows this
    file: it shows the root an application writes (`demo-only` parts, see
    `tooling/source.ts` in `@umriss-ui/demo`). */
@@ -28,14 +28,24 @@ const PageToastContext = createContext<Write>(() => {});
 
 /** The root of every page: the application's one `UmrissProvider` and `ToastProvider`. */
 export function PageToast({ children }: { children: ReactNode }) {
-  const [current, setCurrent] = useState<{ writer: object; setting: PageToastSetting } | null>(null);
+  /* One setting per example, in the order they were written: the later one wins
+     per key, and the `toast` is merged per field. */
+  const [written, setWritten] = useState<Map<object, PageToastSetting>>(new Map());
   const write = useCallback<Write>((writer, setting) => {
-    /* Taking a setting back only counts for the one that wrote it. */
-    setCurrent((now) => (setting ? { writer, setting } : now?.writer === writer ? null : now));
+    setWritten((now) => {
+      const next = new Map(now);
+      next.delete(writer);
+      if (setting) next.set(writer, setting);
+      return next;
+    });
   }, []);
+  const merged = [...written.values()].reduce<PageToastSetting>(
+    (all, one) => ({ ...all, ...one, toast: one.toast ? { ...all.toast, ...one.toast } : all.toast }),
+    {},
+  );
   return (
-    <UmrissProvider toast={current?.setting.toast}>
-      <ToastProvider held={current?.setting.held ?? false}>
+    <UmrissProvider toast={merged.toast}>
+      <ToastProvider held={merged.held ?? false}>
         <PageToastContext value={write}>{children}</PageToastContext>
       </ToastProvider>
     </UmrissProvider>
