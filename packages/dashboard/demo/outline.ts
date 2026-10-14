@@ -36,7 +36,12 @@ export const OUTLINE: readonly Rubric[] = [
           "The dashboard is a group named by its `aria-label`; every widget is a region named by its title. In the editing mode a widget's head is a tab stop named \"<title>, place n of m\", and its menu button \"Actions for <title>\".",
           "Every move, size, removal, addition, undo, redo, reset, \"Done\" and \"Cancel\" is announced through core's live region: \"Orders: moved from place 1 to place 3 of 5\". The words are core's wording, German under `@umriss-ui/core/wording/de`.",
         ],
-        limits: ["A widget's height follows its size, never its content: what does not fit is cut, not grown."],
+        limits: [
+          "A widget's height follows its size, never its content: what does not fit is cut, not grown.",
+          "Not yet: sections that wrap as a whole, dragging from the catalogue to a chosen place, a height that follows the content in the list form, hiding a widget that has nothing to show, locking one widget (ADR-0064).",
+          "Never: stacks of widgets that share one place, coordinates and free placement, a layout per breakpoint, dense packing (ADR-0064).",
+          "Where an arrangement is stored, which default a role gets, several dashboards and what stands in a widget are the application's.",
+        ],
         types: ["DashboardOptions", "DashboardParts", "DashboardProps", "DashboardView", "DashboardWidget", "WidgetSize", "SizeSpan", "WidgetTypeProps", "WidgetContent", "WidgetFormProps", "HeadingOptions"],
         exports: ["useDashboard", "WidgetType", "HeadingType"],
         installs: true,

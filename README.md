@@ -1,6 +1,6 @@
 # umriss-ui
 
-React components, canvas charts, a data table and a Gantt-style schedule for
+React components, canvas charts, a data table, a Gantt-style schedule, a calculation view and a dashboard readers arrange for
 data-dense applications — dashboards, monitoring, planning, and the tools in
 which people read a lot of data and act on it (ADR-0035). One pnpm workspace. The demos show them in five invented worlds: a SaaS
 platform's operations, a parcel carrier, a company's controlling, a studio's
@@ -17,7 +17,8 @@ hard outlines or effects.
 | [`@umriss-ui/table`](packages/table/README.md) | 0.36.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
 | [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.36.0 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
 | [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.36.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
-| `@umriss-ui/demo` | — | The private shell all five demos are built from. Never published |
+| [`@umriss-ui/dashboard`](packages/dashboard/README.md) | unreleased | Widgets a developer declares and a reader arranges: a sequence at named sizes, packed on twelve columns, edited as a draft with undo, the arrangement the application's to keep. Takes `@umriss-ui/core` as a peer |
+| `@umriss-ui/demo` | — | The private shell all six demos are built from. Never published |
 
 All five published packages are released under the npm tag `latest`, so a plain
 `pnpm add` installs them.
@@ -26,7 +27,7 @@ All five published packages are released under the npm tag `latest`, so a plain
 `@umriss-ui/charts` depends on nothing and will keep depending on nothing,
 `@umriss-ui/table` enters `core` by its public entry only (ADR-0016), and
 `@umriss-ui/schedule` enters `core` and `charts` the same way (ADR-0022), and
-`@umriss-ui/calculation` enters `core` alone.
+`@umriss-ui/calculation` and `@umriss-ui/dashboard` enter `core` alone.
 
 ## Quick start
 
@@ -66,7 +67,8 @@ Online at **<https://romanhaendler.github.io/umriss-ui/>** —
 [charts](https://romanhaendler.github.io/umriss-ui/charts/),
 [table](https://romanhaendler.github.io/umriss-ui/table/),
 [schedule](https://romanhaendler.github.io/umriss-ui/schedule/),
-[calculation](https://romanhaendler.github.io/umriss-ui/calculation/). Rebuilt on every push
+[calculation](https://romanhaendler.github.io/umriss-ui/calculation/),
+[dashboard](https://romanhaendler.github.io/umriss-ui/dashboard/). Rebuilt on every push
 to `main` (`.github/workflows/pages.yml`); `pnpm build:pages` assembles the same
 site locally into `site/`. After a package's first scenario changes, `pnpm previews`
 renews the front page's pictures of it from that built site (`scripts/previews/`,
@@ -81,6 +83,7 @@ pnpm dev:charts    # port 4174
 pnpm dev:table     # port 4175
 pnpm dev:schedule  # port 4176
 pnpm dev:calculation  # port 4177
+pnpm dev:dashboard    # port 4178
 ```
 
 The demo **is** the documentation for the components. Every page shows running
@@ -90,7 +93,7 @@ from the component. Every row of a props table links the examples that show it,
 and the build stops at a prop no example shows, unless its package names it
 as an exception with the reason. 27 core pages open with a configurator. Each
 package has an API index of every export; one search (⌘K) finds pages, props,
-exports, tokens and wording keys across all five packages;
+exports, tokens and wording keys across all six packages;
 the header switches the examples between English and German (the charts take
 German per chart, so their demo has no switch); and every page has a Markdown
 twin, listed in each package's `llms.txt`. The design language, the standards,

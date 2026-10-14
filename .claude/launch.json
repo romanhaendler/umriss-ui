@@ -12,6 +12,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@umriss-ui/schedule", "dev", "--port", "5177", "--strictPort"],
       "port": 5177
+    },
+    {
+      "name": "dashboard-demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@umriss-ui/dashboard", "dev", "--port", "4178", "--strictPort"],
+      "port": 4178
     }
   ]
 }

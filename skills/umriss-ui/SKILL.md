@@ -1,11 +1,11 @@
 ---
 name: umriss-ui
-description: Build applications with umriss-ui, the React components for data-dense applications. Use when the user imports or mentions @umriss-ui/core, @umriss-ui/charts, @umriss-ui/table, @umriss-ui/schedule or @umriss-ui/calculation, or writes UmrissProvider, useTable, useChart, useSchedule, Calculation, a Gantt-style schedule, a canvas chart or a data table with these.
+description: Build applications with umriss-ui, the React components for data-dense applications. Use when the user imports or mentions @umriss-ui/core, @umriss-ui/charts, @umriss-ui/table, @umriss-ui/schedule, @umriss-ui/calculation or @umriss-ui/dashboard, or writes UmrissProvider, useTable, useChart, useSchedule, useDashboard, Calculation, a Gantt-style schedule, a canvas chart or a data table with these.
 ---
 
 # umriss-ui
 
-Five packages, all `0.x`: `@umriss-ui/core` (components), `charts` (canvas charts), `table`, `schedule`, `calculation`. Do not write umriss-ui code from memory. Read the documentation first; names and props change between versions.
+Six packages, all `0.x`: `@umriss-ui/core` (components), `charts` (canvas charts), `table`, `schedule`, `calculation`, `dashboard`. Do not write umriss-ui code from memory. Read the documentation first; names and props change between versions.
 
 ## Where to read
 
@@ -16,12 +16,13 @@ Five packages, all `0.x`: `@umriss-ui/core` (components), `charts` (canvas chart
    - <https://romanhaendler.github.io/umriss-ui/table/llms.txt>
    - <https://romanhaendler.github.io/umriss-ui/schedule/llms.txt>
    - <https://romanhaendler.github.io/umriss-ui/calculation/llms.txt>
+   - <https://romanhaendler.github.io/umriss-ui/dashboard/llms.txt>
 
 What changes for a caller stands in the package's `CHANGELOG.md`.
 
 ## How each package is entered
 
-Install what you use. `table` and `calculation` take `core` as a peer; `schedule` takes `core` and `charts`; `charts` takes nothing but React 19 or newer.
+Install what you use. `table`, `calculation` and `dashboard` take `core` as a peer; `schedule` takes `core` and `charts`; `charts` takes nothing but React 19 or newer.
 
 ```bash
 pnpm add @umriss-ui/core
@@ -34,6 +35,7 @@ pnpm add @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts
 - **charts.** `import { Tooltip, useChart } from "@umriss-ui/charts"`. `const { Chart, XAxis, YAxis, Line } = useChart(rows)`; `initialView` is read once, `setView(view)` goes to another view later and is not reported through `onViewChange`. A series is an element; its order in the JSX decides what lies over what and its palette colour.
 - **schedule.** `import { useSchedule } from "@umriss-ui/schedule"`. `const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView })` (`initialView` is read once; `setView(view)` goes to another view later and is not reported through `onViewChange`); the data are `Task`, `Subtask` and `Dependency` objects, with times in milliseconds.
 - **calculation.** `import { Calculation, Given, Product, Sum } from "@umriss-ui/calculation"`. A derivation is written as it is shown: operators are elements, their children are the operands, `Given` is a leaf, `Ref` reuses a quantity defined once. A chain (`Chain`, `Plus`, `Times`, `Interim`) suits a sheet read top to bottom. The library evaluates it.
+- **dashboard.** `import { HeadingType, useDashboard } from "@umriss-ui/dashboard"`. `const { Dashboard, WidgetType } = useDashboard({ defaultView })`, then `<Dashboard aria-label="…">` with a `WidgetType` per kind of widget: its `name`, `label`, `sentence`, the `sizes` it offers (columns of twelve and rows), the `start` size, `defaultOptions` and its content as a function of `size` and `options`. The view is an object of widgets in order; `initialView` is read once, `onViewChange` is called once per "Done", `setView(view)` is not reported. Readers edit it in a mode as a draft; the library draws the bar, menus and catalogue.
 
 ## Rules that surprise
 
