@@ -81,6 +81,9 @@ export function DashboardOf({ view, editor, className, children, catalogue, ...r
             <>
               <span className={styles.mode}>{wording.dashboardEditing}</span>
               <Button size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
+              <Button size="sm" disabled={!editor.canUndo} onClick={() => { editor.undo(); announce(wording.dashboardUndone); }}>{wording.dashboardUndo}</Button>
+              <Button size="sm" disabled={!editor.canRedo} onClick={() => { editor.redo(); announce(wording.dashboardRedone); }}>{wording.dashboardRedo}</Button>
+              <Button size="sm" disabled={!editor.canReset} onClick={() => { editor.reset(); announce(wording.dashboardResetDone); }}>{wording.dashboardReset}</Button>
               <Button size="sm" onClick={() => { editor.cancel(); announce(wording.dashboardCancelled); }}>{wording.dashboardCancel}</Button>
               <Button size="sm" variant="primary" onClick={() => { editor.done(); announce(wording.dashboardKept); }}>{wording.dashboardDone}</Button>
             </>
