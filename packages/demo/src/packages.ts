@@ -1,4 +1,4 @@
-/* The five packages, in their fixed order: what the header lists, what the
+/* The six packages, in their fixed order: what the header lists, what the
    front page shows and what the pages build walks. Written once, so that a
    sixth package is added in one place.
 

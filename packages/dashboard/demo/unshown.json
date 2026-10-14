@@ -1,13 +1,5 @@
 {
   "DashboardOptions.initialView": "not shown yet: the reader's kept arrangement comes with the ticket that lets a reader edit",
   "DashboardParts.view": "not shown yet: the view in hand is told to the application when a reader edits",
-  "DashboardParts.setView": "not shown yet: loading an arrangement comes with the ticket that lets a reader edit",
-  "DashboardParts.editing": "not shown yet: the actions come into an example of an own page header with the undo ticket",
-  "DashboardParts.edit": "not shown yet: the actions come into an example of an own page header with the undo ticket",
-  "DashboardParts.done": "not shown yet: the actions come into an example of an own page header with the undo ticket",
-  "DashboardParts.cancel": "not shown yet: the actions come into an example of an own page header with the undo ticket",
-  "DashboardParts.catalogue": "not shown yet: the actions come into an example of an own page header with the undo ticket",
-  "DashboardParts.undo": "not shown yet: the actions come into an example of an own page header",
-  "DashboardParts.redo": "not shown yet: the actions come into an example of an own page header",
-  "DashboardParts.reset": "not shown yet: the actions come into an example of an own page header"
+  "DashboardParts.redo": "not shown yet: the actions come into an example of an own page header"
 }
