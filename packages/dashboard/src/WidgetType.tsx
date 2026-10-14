@@ -9,6 +9,14 @@ export interface WidgetContent<Options> {
   options: Options;
 }
 
+/** What a type's form is given. */
+export interface WidgetFormProps<Options> {
+  /** The widget's current options. */
+  options: Options;
+  /** Replaces the options; one step of the draft. */
+  change: (options: Options) => void;
+}
+
 /** The props of `WidgetType`. */
 export interface WidgetTypeProps<Options> {
   /** The name a view refers to this type by. Unique within the dashboard. */
@@ -25,6 +33,8 @@ export interface WidgetTypeProps<Options> {
   defaultOptions: Options;
   /** The title of a frame as a function of its options; the `label` without it. */
   title?: (options: NoInfer<Options>) => string;
+  /** The form for the options, opened from the widget's menu. Without it the menu has no options entry. */
+  form?: (props: WidgetFormProps<NoInfer<Options>>) => ReactNode;
   /** The content, as a function of the size and the options. */
   children: (content: WidgetContent<NoInfer<Options>>) => ReactNode;
 }

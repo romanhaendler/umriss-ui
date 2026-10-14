@@ -48,6 +48,8 @@ export interface DashboardParts {
   edit: () => void;
   /** Leaves the mode, keeps the changes and reports them once if there are any. */
   done: () => void;
+  /** Opens the catalogue. Does nothing outside the editing mode. */
+  catalogue: () => void;
   /** Leaves the mode and puts the arrangement back as it was before `edit`. */
   cancel: () => void;
 }
@@ -59,6 +61,9 @@ export interface Editor {
   edit: () => void;
   done: () => void;
   cancel: () => void;
+  /** Whether the catalogue stands, and the means to open and close it. */
+  catalogue: boolean;
+  setCatalogue: (open: boolean) => void;
   /** Applies one change to the draft. */
   step: (edit: Edit) => void;
 }
@@ -66,6 +71,8 @@ export interface Editor {
 interface State {
   view: DashboardView;
   draft: DashboardView | null;
+  /** Whether the catalogue stands. */
+  catalogue?: boolean;
 }
 
 /** Declares a dashboard: hands back `Dashboard`, `WidgetType`, the view in
@@ -100,16 +107,21 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       const { view, draft } = own.state;
       if (!draft) return;
       const changed = keep && JSON.stringify(draft) !== JSON.stringify(view);
-      put({ view: changed ? draft : view, draft: null });
+      put({ view: changed ? draft : view, draft: null, catalogue: false });
       latest.current.onDraftChange?.(false);
       if (changed) latest.current.onViewChange?.(draft);
     };
-    const editor = (allowed: boolean, editing: boolean): Editor => ({
+    const setCatalogue = (open: boolean) => {
+      if (own.state.draft) put({ ...own.state, catalogue: open });
+    };
+    const editor = (allowed: boolean, editing: boolean, catalogue: boolean): Editor => ({
       allowed,
       editing,
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
+      catalogue,
+      setCatalogue,
       step: (change) => {
         const { draft } = own.state;
         if (draft) put({ ...own.state, draft: change(draft) });
@@ -122,10 +134,11 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
+      catalogue: () => setCatalogue(true),
       setView: (view: DashboardView) => put({ ...own.state, view, draft: own.state.draft ? view : null }),
       Dashboard: (props: DashboardProps) => {
-        const { view, draft } = useSyncExternalStore(subscribe, get, get);
-        return createElement(DashboardOf, { ...props, view: draft ?? view, editor: editor(latest.current.allowEdit, draft !== null) });
+        const { view, draft, catalogue } = useSyncExternalStore(subscribe, get, get);
+        return createElement(DashboardOf, { ...props, view: draft ?? view, editor: editor(latest.current.allowEdit, draft !== null, !!catalogue) });
       },
     };
   }, [own]);
@@ -140,5 +153,6 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     edit: parts.edit,
     done: parts.done,
     cancel: parts.cancel,
+    catalogue: parts.catalogue,
   };
 }

@@ -516,6 +516,18 @@ export interface Wording {
   dashboardRemoved: (title: string) => string;
   dashboardKept: string;
   dashboardCancelled: string;
+  /** The catalogue and the options. */
+  dashboardAddWidget: string;
+  dashboardCatalogue: string;
+  dashboardCatalogueSentence: string;
+  dashboardAdd: string;
+  dashboardAddType: (label: string) => string;
+  dashboardFootprint: (columns: number, rows: number) => string;
+  dashboardAdded: (title: string, place: number, of: number) => string;
+  dashboardOptions: string;
+  dashboardOptionsChanged: (title: string) => string;
+  dashboardEmpty: string;
+  dashboardEmptyEditing: string;
 
   /* -------- @umriss-ui/calculation --------------------------------- */
   /* The calculation's entries stand here for the table's reason: one provider
@@ -850,6 +862,17 @@ export const DEFAULT_WORDING: Wording = {
   dashboardRemoved: (title) => `${title} removed`,
   dashboardKept: "Changes kept",
   dashboardCancelled: "Changes discarded",
+  dashboardAddWidget: "Add widget",
+  dashboardCatalogue: "Add a widget",
+  dashboardCatalogueSentence: "Each widget is added at the end.",
+  dashboardAdd: "Add",
+  dashboardAddType: (label) => `Add ${label}`,
+  dashboardFootprint: (columns, rows) => `${columns} of 12 columns, ${rows} rows`,
+  dashboardAdded: (title, place, of) => `${title} added, place ${place} of ${of}`,
+  dashboardOptions: "Options",
+  dashboardOptionsChanged: (title) => `${title}: options changed`,
+  dashboardEmpty: "This dashboard is empty.",
+  dashboardEmptyEditing: "This dashboard is empty. Choose Add widget to begin.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",
