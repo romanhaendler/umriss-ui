@@ -161,14 +161,19 @@
        application, and one drawer that needs another sets it in its `style`. */
     --u-drawer-width: 400px;
 
-    /* ---- Toast (toast-inset-tokens) ----
+    /* ---- Toast ----
 
-       How far the toasts stand from the window's top and bottom edge - set it
-       to keep them clear of a fixed header or a toolbar at the bottom. The
-       region hangs in `body`, so set them on `:root`; a media query of your
-       own may set another value per width. */
+       How far the toasts stand from the window's top and bottom edge and from
+       its sides - set it to keep them clear of a fixed header, a toolbar at
+       the bottom or a navigation rail at the side - and how wide a toast is.
+       The region hangs in `body`, so set them on `:root`; a media query of
+       your own may set another value per width. The center positions stand in
+       the middle of the window whatever the side tokens are. */
     --u-toast-inset-top: var(--u-space-5);    /* for the three `top-*` positions; `var(--u-space-4)` up to 600 px wide */
     --u-toast-inset-bottom: var(--u-space-5); /* for the three `bottom-*` positions; `var(--u-space-4)` up to 600 px wide */
+    --u-toast-inset-start: var(--u-space-5);  /* for the `*-start` positions, and on a phone the room at the start side; `var(--u-space-4)` up to 600 px wide */
+    --u-toast-inset-end: var(--u-space-5);    /* for the `*-end` positions, and on a phone the room at the end side; `var(--u-space-4)` up to 600 px wide */
+    --u-toast-width: 360px;                   /* a plain length, read it to know whether the deck has room beside a surface; up to 600 px wide the toast takes the window's width less the side tokens instead */
 
     /* ---- Shadow stacks: every step has one job ----
        Card: edge, contact with the ground, soft depth.
@@ -298,6 +303,8 @@
     :root {
       --u-toast-inset-top: var(--u-space-4);
       --u-toast-inset-bottom: var(--u-space-4);
+      --u-toast-inset-start: var(--u-space-4);
+      --u-toast-inset-end: var(--u-space-4);
     }
   }
 

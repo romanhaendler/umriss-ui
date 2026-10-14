@@ -1,4 +1,4 @@
-import { Button, Stack, ToastProvider, useToast } from "../../../src";
+import { Button, Stack, useToast } from "../../../src";
 
 export const title = "Tones";
 export const lead = "The `tone` says how it turned out; a symbol and the words say the same, so the colour is never alone.";
@@ -24,9 +24,5 @@ function Content() {
 /* `useToast` needs a `ToastProvider` above it; at the root of an application
    one provider serves every screen. */
 export default function Tones() {
-  return (
-    <ToastProvider>
-      <Content />
-    </ToastProvider>
-  );
+  return <Content />;
 }

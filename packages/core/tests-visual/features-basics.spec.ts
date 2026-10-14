@@ -64,6 +64,82 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
   await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
 });
 
+/* A page of the demo is one application: one deck for the toasts of every
+   example on it. */
+test("Scan four parcels, then Save in the modal: one deck, nothing lies on another, Retry is pressable", async ({ page }) => {
+  await openExample(page, "toast", "how-many-stand");
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+
+  /* Every frame for 500 ms from the press: how many decks stand, i.e. how
+     many places hold toast cards. Cards of one deck stack as it draws them;
+     two decks would be two places. */
+  await page.evaluate(() => {
+    const state = { decks: new Set<number>(), running: true };
+    (window as unknown as { __decks: typeof state }).__decks = state;
+    const frame = () => {
+      const places = new Set([...document.querySelectorAll("[data-toast]")].map((card) => card.closest("[data-edge]")));
+      state.decks.add(places.size);
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  await dialog.getByRole("button", { name: "Save" }).click();
+  const region = page.getByRole("region", { name: "Messages (Alt+T)" });
+  await expect(region.getByText("Profile not saved")).toBeVisible();
+  await page.waitForTimeout(500);
+  const decks = await page.evaluate(() => {
+    const state = (window as unknown as { __decks: { decks: Set<number>; running: boolean } }).__decks;
+    state.running = false;
+    return Math.max(...state.decks);
+  });
+  expect(decks).toBe(1);
+  await expect(region).toHaveCount(1);
+  const standing = await page.locator("[data-toast]").count();
+  await expect(page.getByRole("button", { name: `${standing} messages, show all` })).toBeVisible();
+
+  const retry = region.getByRole("button", { name: "Retry" });
+  const box = (await retry.boundingBox())!;
+  const hit = await page.evaluate(
+    ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.textContent,
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
+  expect(hit).toBe("Retry");
+});
+
+test("Go offline, then Scan four parcels: one deck, and Working offline still stands", async ({ page }) => {
+  await openExample(page, "toast", "until-closed");
+  await page.getByRole("button", { name: "Go offline" }).click();
+  await expect(page.getByText("Working offline")).toBeVisible();
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole("region", { name: "Messages (Alt+T)" })).toHaveCount(1);
+  await expect(page.getByText("Working offline")).toBeVisible();
+  const places = await page.locator("[data-toast]").evaluateAll((cards) =>
+    cards.map((card) => {
+      const box = card.getBoundingClientRect();
+      return `${Math.round(box.x)},${Math.round(box.y)}`;
+    }),
+  );
+  expect(new Set(places).size, places.join(" ")).toBe(places.length);
+});
+
+/* The setting of one example stays when another writes its own key. */
+test("Hold the toasts on and off leaves the limit of How many stand at once", async ({ page }) => {
+  await openExample(page, "toast", "hold-the-toasts");
+  const hold = page.locator('[data-example="hold-the-toasts"]').locator("label", { hasText: "Hold the toasts" });
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await expect(page.locator("[data-toast]")).toHaveCount(2);
+  await hold.click();
+  await hold.click();
+  await page.getByRole("button", { name: "Send a toast" }).click();
+  await page.getByRole("button", { name: "Send a toast" }).click();
+  await page.waitForTimeout(500);
+  await expect(page.locator("[data-toast]")).toHaveCount(2);
+});
+
 /* The toasts above an open modal dialog: the unit setup's dialog makes nothing
    inert, so only a browser shows that a toast in the dialog can be pressed. */
 test("A toast above a modal is pressable and closes without closing the modal", async ({ page }) => {
@@ -128,7 +204,9 @@ test("A dialog opened with show() leaves the toasts where they were", async ({ p
 
 test("The inset tokens move the toasts above a modal as they do without one", async ({ page }) => {
   const { region } = await failToSave(page);
-  await page.addStyleTag({ content: ":root { --u-toast-inset-top: 72px; --u-toast-inset-bottom: 64px; }" });
+  await page.addStyleTag({
+    content: ":root { --u-toast-inset-top: 72px; --u-toast-inset-bottom: 64px; --u-toast-inset-start: 88px; --u-toast-inset-end: 96px; }",
+  });
   const place = region.locator("xpath=ancestor-or-self::*[@data-edge][1]");
   await expect
     .poll(() =>
@@ -138,6 +216,10 @@ test("The inset tokens move the toasts above a modal as they do without one", as
       }),
     )
     .toBeCloseTo(await place.evaluate((element) => (element.getAttribute("data-edge") === "top" ? 72 : 64)), 0);
+  /* The example's toasts stand at the end side. */
+  await expect
+    .poll(() => place.evaluate((element) => document.documentElement.clientWidth - element.getBoundingClientRect().right))
+    .toBeCloseTo(96, 0);
 });
 
 /* Inside a dialog the region stands in the top layer: a dialog that moves,
@@ -415,24 +497,30 @@ test("A tooltip outside a dialog carries no popover attribute", async ({ page })
   await expect(page.getByRole("tooltip")).not.toHaveAttribute("popover", /.*/);
 });
 
-/* toast-inset-tokens 01: the distance from the window's edge is a token per
-   edge. Unset, the region stands where it always stood - 20 px, 16 px on a
-   phone; set on `:root`, it moves every position of its edge at every width
-   and leaves the other edge alone. */
+/* The distance from the window's top and bottom edge is a token per edge, the
+   distance from its sides a token per side. Unset, the region stands 20 px
+   away, 16 px on a phone; set on `:root`, a token moves every position of its
+   edge or side at every width and leaves the others alone. On a phone the
+   region takes the window's width, so each side token is the room at its side
+   at all six positions. */
 const TOAST_POSITIONS = ["Top start", "Top center", "Top end", "Bottom start", "Bottom center", "Bottom end"];
 
 async function toastInsets(page: import("@playwright/test").Page, width: number, tokens = "") {
   await page.setViewportSize({ width, height: 800 });
   await openExample(page, "toast", "where-they-stand");
   if (tokens !== "") await page.addStyleTag({ content: `:root { ${tokens} }` });
-  const insets: Record<string, number> = {};
+  const insets: Record<string, { edge: number; start: number; end: number }> = {};
   for (const name of TOAST_POSITIONS) {
     await page.getByRole("button", { name, exact: true }).click();
     const region = page.locator("[data-edge]").filter({ has: page.getByText(`Standing ${name.toLowerCase()}.`) });
     await expect(region).toBeVisible();
     insets[name] = await region.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      return element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom;
+      return {
+        edge: element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom,
+        start: rect.left,
+        end: document.documentElement.clientWidth - rect.right,
+      };
     });
   }
   return insets;
@@ -440,21 +528,497 @@ async function toastInsets(page: import("@playwright/test").Page, width: number,
 
 for (const width of [1280, 320]) {
   const unset = width === 320 ? 16 : 20;
+  const phone = width === 320;
+  /* A position stands at its own side, on a phone at both; a center one above
+     600 px at neither, in the middle of the window. */
+  const expectSides = (name: string, inset: { start: number; end: number }, start: number, end: number) => {
+    if (phone || name.endsWith("start")) expect(inset.start, name).toBeCloseTo(start, 0);
+    if (phone || name.endsWith("end")) expect(inset.end, name).toBeCloseTo(end, 0);
+    if (!phone && name.endsWith("center")) expect(inset.start, name).toBeCloseTo(inset.end, 0);
+  };
 
   test(`Toasts stand where they always stood without the tokens (${width} px)`, async ({ page }) => {
-    for (const [name, inset] of Object.entries(await toastInsets(page, width))) expect(inset, name).toBeCloseTo(unset, 0);
+    for (const [name, inset] of Object.entries(await toastInsets(page, width))) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
   });
 
   test(`The top token moves the top toasts only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-top: 72px;");
-    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Top") ? 72 : unset, 0);
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(name.startsWith("Top") ? 72 : unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
   });
 
   test(`The bottom token moves the bottom toasts only (${width} px)`, async ({ page }) => {
     const insets = await toastInsets(page, width, "--u-toast-inset-bottom: 64px;");
-    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Bottom") ? 64 : unset, 0);
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(name.startsWith("Bottom") ? 64 : unset, 0);
+      expectSides(name, inset, unset, unset);
+    }
+  });
+
+  test(`The start token moves the toasts' start side only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-start: 88px;");
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, 88, unset);
+    }
+  });
+
+  test(`The end token moves the toasts' end side only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-end: 88px;");
+    for (const [name, inset] of Object.entries(insets)) {
+      expect(inset.edge, name).toBeCloseTo(unset, 0);
+      expectSides(name, inset, unset, 88);
+    }
   });
 }
+
+/* The toast's width is a token an application reads to decide whether the
+   deck has room beside a surface, and may set. On a phone the toast keeps the
+   window's width minus the side tokens. */
+for (const width of [1280, 320]) {
+  test(`The width token sets the toast's width above a phone's width only (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await openExample(page, "toast", "where-they-stand");
+    await page.addStyleTag({ content: ":root { --u-toast-width: 420px; }" });
+    await page.getByRole("button", { name: "Top end", exact: true }).click();
+    const card = page.locator("[data-toast]").filter({ hasText: "Standing top end." });
+    await expect(card).toBeVisible();
+    /* Polled: the entrance scales the card up to its width. */
+    await expect.poll(async () => (await card.boundingBox())!.width).toBeCloseTo(width === 1280 ? 420 : 320 - 2 * 16, 0);
+  });
+}
+
+/** Waits until the deck's entrance and transitions have run. */
+async function deckAtRest(page: Page) {
+  const region = page.locator("[data-edge]:has([data-toast])");
+  await expect.poll(() => region.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(0);
+}
+
+/* The deck glides when the application changes its distance from the window,
+   in the time and easing of its height. The region's box is read in every
+   animation frame in which a card is seen (a held card is not). */
+type DeckFrame = { top: number; bottom: number; end: number };
+async function sampleTheDeck(page: Page): Promise<() => Promise<DeckFrame[]>> {
+  await page.evaluate(() => {
+    const state = { running: true, frames: [] as { top: number; bottom: number; end: number }[] };
+    (window as unknown as { __deck: typeof state }).__deck = state;
+    const frame = () => {
+      const card = document.querySelector("[data-toast]");
+      const region = card?.closest("[hidden]") ? null : card?.closest("[data-edge]");
+      if (region) {
+        const box = region.getBoundingClientRect();
+        const { clientWidth, clientHeight } = document.documentElement;
+        state.frames.push({ top: Math.round(box.top), bottom: Math.round(clientHeight - box.bottom), end: Math.round(clientWidth - box.right) });
+      }
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  return () =>
+    page.evaluate(() => {
+      const state = (window as unknown as { __deck: { running: boolean; frames: DeckFrame[] } }).__deck;
+      state.running = false;
+      return state.frames;
+    });
+}
+
+async function standingTopEnd(page: Page) {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  await page.getByRole("button", { name: "Top end", exact: true }).click();
+  await expect(page.getByText("Standing top end.")).toBeVisible();
+  await deckAtRest(page);
+}
+
+for (const [token, side] of [["--u-toast-inset-top", "top"], ["--u-toast-inset-end", "end"]] as const) {
+  test(`A change of ${token} while toasts are seen glides the deck to its new place`, async ({ page }) => {
+    await standingTopEnd(page);
+    const stop = await sampleTheDeck(page);
+    await page.addStyleTag({ content: `:root { ${token}: 96px; }` });
+    await page.waitForTimeout(600);
+    const values = [...new Set((await stop()).map((frame) => frame[side]))];
+    expect(values[0]).toBe(20);
+    expect(values.at(-1)).toBe(96);
+    expect(values.some((value) => value > 20 && value < 96), `between: ${values.join(", ")}`).toBe(true);
+  });
+
+  test(`With reduced motion a change of ${token} moves the deck at once`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await standingTopEnd(page);
+    const stop = await sampleTheDeck(page);
+    await page.addStyleTag({ content: `:root { ${token}: 96px; }` });
+    await page.waitForTimeout(600);
+    expect([...new Set((await stop()).map((frame) => frame[side]))]).toEqual([20, 96]);
+  });
+}
+
+test("The first toast stands at its place in its first frame, though the token changed just before", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  const stop = await sampleTheDeck(page);
+  await page.addStyleTag({ content: ":root { --u-toast-inset-top: 96px; --u-toast-inset-end: 96px; }" });
+  await page.getByRole("button", { name: "Top end", exact: true }).click();
+  await page.waitForTimeout(600);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.top))]).toEqual([96]);
+  expect([...new Set(frames.map((frame) => frame.end))]).toEqual([96]);
+});
+
+test("Setting a token again to the value it has moves nothing", async ({ page }) => {
+  await standingTopEnd(page);
+  const stop = await sampleTheDeck(page);
+  for (let i = 0; i < 10; i++) {
+    await page.evaluate(() => document.documentElement.style.setProperty("--u-toast-inset-top", "20px"));
+    await page.waitForTimeout(30);
+  }
+  expect([...new Set((await stop()).map((frame) => frame.top))]).toEqual([20]);
+});
+
+/* A modal that opens or closes in the moment the application changes the
+   distance: the region is built anew inside or outside the dialog and starts
+   where the old one was seen. Both happen in one task, so in one frame. */
+async function modalWithTheTop(page: Page, open: boolean, top: number) {
+  await page.evaluate(
+    ({ open, top }) => {
+      let dialog = document.getElementById("moving-modal") as HTMLDialogElement | null;
+      if (!dialog) {
+        dialog = document.createElement("dialog");
+        dialog.id = "moving-modal";
+        dialog.textContent = "A modal";
+        document.body.append(dialog);
+      }
+      if (open) dialog.showModal();
+      else dialog.close();
+      document.documentElement.style.setProperty("--u-toast-inset-top", `${top}px`);
+    },
+    { open, top },
+  );
+}
+
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+  test(`A modal opening and closing as the top token changes ${reducedMotion === "reduce" ? "moves the deck at once with reduced motion" : "glides the deck between the two places"}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await standingTopEnd(page);
+    for (const [open, from, to] of [[true, 20, 96], [false, 96, 20]] as const) {
+      const stop = await sampleTheDeck(page);
+      await modalWithTheTop(page, open, to);
+      await page.waitForTimeout(600);
+      await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(open ? 1 : 0);
+      const values = [...new Set((await stop()).map((frame) => frame.top))];
+      const move = open ? "opening" : "closing";
+      if (reducedMotion === "reduce") expect(values, move).toEqual([from, to]);
+      else {
+        expect(values[0], move).toBe(from);
+        expect(values.at(-1), move).toBe(to);
+        expect(values.some((value) => value > Math.min(from, to) && value < Math.max(from, to)), `${move}, between: ${values.join(", ")}`).toBe(true);
+      }
+    }
+  });
+}
+
+test("In a right-to-left page the start token is the distance from the right", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  await page.addStyleTag({ content: ":root { --u-toast-inset-start: 88px; }" });
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  await page.getByRole("button", { name: "Top start", exact: true }).click();
+  const region = page.locator("[data-edge]").filter({ has: page.getByText("Standing top start.") });
+  await expect(region).toBeVisible();
+  const fromTheRight = await region.evaluate((element) => document.documentElement.clientWidth - element.getBoundingClientRect().right);
+  expect(fromTheRight).toBeCloseTo(88, 0);
+});
+
+/* Held back, the toasts are no invisible wall: what lies under the cross is
+   the page's and takes the click, and Tab passes the deck by. After the hold
+   the cross is there again, where it stood. */
+test("Held toasts leave the page under them to be hit, and come back where they stood", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "hold-the-toasts");
+  const example = page.locator('[data-example="hold-the-toasts"]');
+  const hold = async (on: boolean) => {
+    await example.locator("label", { hasText: "Hold the toasts" }).click();
+    await expect(example.getByRole("switch", { name: "Hold the toasts" })).toBeChecked({ checked: on });
+  };
+  await example.getByRole("button", { name: "Send a toast" }).click();
+  const cross = page.getByRole("button", { name: "Close message" });
+  await expect(cross).toBeVisible();
+  await deckAtRest(page);
+  const stood = (await cross.boundingBox())!;
+  const point = { x: stood.x + stood.width / 2, y: stood.y + stood.height / 2 };
+  const atThePoint = () =>
+    page.evaluate(({ x, y }) => {
+      const element = document.elementFromPoint(x, y);
+      return element?.closest("[data-edge]") ? (element.closest("button")?.getAttribute("aria-label") ?? "toasts") : "page";
+    }, point);
+  /* Tab from just before the region, which stands last in the body. */
+  const tabIntoTheToasts = async () => {
+    await page.evaluate(() => {
+      const before = document.createElement("button");
+      before.id = "before-the-toasts";
+      document.querySelector("[data-edge]")!.before(before);
+      before.focus();
+    });
+    await page.keyboard.press("Tab");
+    return page.evaluate(() => {
+      document.getElementById("before-the-toasts")?.remove();
+      const active = document.activeElement;
+      return active?.closest("[data-edge]") ? (active.getAttribute("aria-label") ?? "toasts") : "page";
+    });
+  };
+
+  await hold(true);
+  expect(await atThePoint()).toBe("page");
+  const clicked = page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) =>
+        document.addEventListener(
+          "click",
+          (event) => {
+            event.preventDefault();
+            resolve(!(event.target as Element).closest("[data-edge]"));
+          },
+          { capture: true, once: true },
+        ),
+      ),
+  );
+  await page.mouse.click(point.x, point.y);
+  expect(await clicked).toBe(true);
+  expect(await tabIntoTheToasts()).toBe("page");
+
+  await hold(false);
+  await expect(cross).toBeVisible();
+  await expect.poll(async () => {
+    const box = (await cross.boundingBox())!;
+    return [box.x, box.y].map(Math.round);
+  }).toEqual([stood.x, stood.y].map(Math.round));
+  expect(await atThePoint()).toBe("Close message");
+  expect(await tabIntoTheToasts()).toBe("Close message");
+});
+
+/* Nothing glides while nothing is seen: a distance changed during a hold is
+   taken at once, and when the hold ends the deck appears at its new place -
+   also when the hold ends in the frame the distance changes, and when a modal
+   closes in that frame too. The example's toasts stand at the bottom, so the
+   bottom token moves them. */
+async function holdingOneToast(page: Page) {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "hold-the-toasts");
+  const example = page.locator('[data-example="hold-the-toasts"]');
+  await example.getByRole("button", { name: "Send a toast" }).click();
+  await expect(page.getByRole("button", { name: "Close message" })).toBeVisible();
+  await deckAtRest(page);
+  await example.locator("label", { hasText: "Hold the toasts" }).click();
+  await expect(example.getByRole("switch", { name: "Hold the toasts" })).toBeChecked();
+}
+
+/* In one task: the modal closes, the hold ends, the bottom token changes
+   (or the token first, or in an animation frame callback queued after the
+   hold ended, as an application writes a token in every frame). */
+type TokenAt = "after" | "first" | "frame";
+async function endTheHold(page: Page, { bottom, closeTheModal = false, token = "after" }: { bottom?: number; closeTheModal?: boolean; token?: TokenAt }) {
+  await page.evaluate(
+    ({ bottom, closeTheModal, token }) => {
+      const setToken = () => bottom !== undefined && document.documentElement.style.setProperty("--u-toast-inset-bottom", `${bottom}px`);
+      if (closeTheModal) (document.getElementById("moving-modal") as HTMLDialogElement).close();
+      if (token === "first") setToken();
+      const label = [...document.querySelectorAll('[data-example="hold-the-toasts"] label')].find((element) => element.textContent?.includes("Hold the toasts"));
+      (label as HTMLElement).click();
+      if (token === "after") setToken();
+      if (token === "frame") requestAnimationFrame(setToken);
+    },
+    { bottom, closeTheModal, token },
+  );
+}
+
+test("A change of the distance during a hold is taken at once: after the hold the deck is first seen at the new place", async ({ page }) => {
+  await holdingOneToast(page);
+  await page.evaluate(() => document.documentElement.style.setProperty("--u-toast-inset-bottom", "96px"));
+  await page.waitForTimeout(300);
+  const stop = await sampleTheDeck(page);
+  await endTheHold(page, {});
+  await page.waitForTimeout(600);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
+});
+
+for (const token of ["after", "first", "frame"] as const) {
+  const order = { after: "hold first", first: "token first", frame: "token in a later frame callback" }[token];
+  test(`The hold ending in the frame the distance changes (${order}) shows the deck at the new place, nothing in between`, async ({ page }) => {
+    await holdingOneToast(page);
+    const stop = await sampleTheDeck(page);
+    await endTheHold(page, { bottom: 96, token });
+    await page.waitForTimeout(600);
+    const frames = await stop();
+    expect(frames.length).toBeGreaterThan(0);
+    /* A token written in a later callback of the first frame comes after the
+       sampler's reading in that frame, which still finds the old place. */
+    expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual(token === "frame" ? [20, 96] : [96]);
+  });
+}
+
+test("A modal closing as the hold ends and the distance changes shows the deck at the new place, nothing in between", async ({ page }) => {
+  await holdingOneToast(page);
+  await page.evaluate(() => {
+    const dialog = document.createElement("dialog");
+    dialog.id = "moving-modal";
+    dialog.textContent = "A modal";
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+  await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(1);
+  const stop = await sampleTheDeck(page);
+  await endTheHold(page, { bottom: 96, closeTheModal: true });
+  await page.waitForTimeout(600);
+  await expect(page.getByRole("switch", { name: "Hold the toasts" })).not.toBeChecked();
+  await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(0);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
+});
+
+/* An open deck casts no shadow on its cards: the card lower on the screen
+   lies above the one above it, wherever the deck stands, so each shadow falls
+   under the next card. Read from the picture: the face of the middle card is
+   as light just below its top edge as near its bottom. */
+async function deckOfThree(page: Page, position: "Top end" | "Bottom end") {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: position, exact: true }).click();
+  const cards = page.locator("[data-toast]");
+  await expect(cards).toHaveCount(3);
+  await deckAtRest(page);
+  return cards;
+}
+
+/** The mean grey of a line across the card's face, `y` px below its top (negative: above its bottom). */
+async function faceGrey(page: Page, card: Locator, ys: number[]) {
+  const box = (await card.boundingBox())!;
+  const png = await page.screenshot({ clip: box, scale: "css", animations: "disabled" });
+  return page.evaluate(
+    async ({ data, ys }) => {
+      const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+      const image = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
+      const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d")!;
+      ctx.drawImage(image, 0, 0);
+      return ys.map((y) => {
+        const row = ctx.getImageData(40, y < 0 ? image.height + y : y, image.width - 80, 1).data;
+        let sum = 0;
+        for (let i = 0; i < row.length; i += 4) sum += (row[i]! + row[i + 1]! + row[i + 2]!) / 3;
+        return sum / (row.length / 4);
+      });
+    },
+    { data: png.toString("base64"), ys },
+  );
+}
+
+for (const colorScheme of ["light", "dark"] as const)
+  for (const position of ["Top end", "Bottom end"] as const)
+    test(`An open deck at ${position.toLowerCase()} casts no shadow on its middle card (${colorScheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      const cards = await deckOfThree(page, position);
+      await cards.last().hover();
+      await deckAtRest(page);
+      const [top, bottom] = await faceGrey(page, cards.nth(1), [3, -4]);
+      expect(Math.abs(top! - bottom!), `top ${top}, bottom ${bottom}`).toBeLessThan(1.5);
+    });
+
+/* While a top deck opens and closes the cards overlap: the front card must lie
+   in front in every frame, or an older card would cover it for a moment. */
+async function sampleTheFront(page: Page): Promise<() => Promise<boolean[]>> {
+  await page.evaluate(() => {
+    const state = { running: true, frames: [] as boolean[] };
+    (window as unknown as { __front: typeof state }).__front = state;
+    const frame = () => {
+      const front = [...document.querySelectorAll("[data-toast]")].at(-1)!;
+      const box = front.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.bottom - 6);
+      state.frames.push((hit?.closest("[data-toast]") ?? hit?.querySelector(":scope > [data-toast]")) === front);
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  return () =>
+    page.evaluate(() => {
+      const state = (window as unknown as { __front: { running: boolean; frames: boolean[] } }).__front;
+      state.running = false;
+      return state.frames;
+    });
+}
+
+test("While a deck at the top opens, its front card lies in front in every frame", async ({ page }) => {
+  const cards = await deckOfThree(page, "Top end");
+  await page.mouse.move(0, 0);
+  const stop = await sampleTheFront(page);
+  await cards.last().hover();
+  await page.waitForTimeout(700);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(10);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
+
+test("While a deck at the top closes, its front card lies in front in every frame", async ({ page }) => {
+  const cards = await deckOfThree(page, "Top end");
+  await cards.last().hover();
+  await deckAtRest(page);
+  const stop = await sampleTheFront(page);
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(700);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(10);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
+
+/* A card closed in an open deck drops behind the others at once: the cards
+   closing up over its place lie above it in every frame in which they
+   overlap. A leaving card takes no pointer, so for the reading only, every
+   card is made hittable: the element at a point is then the one painted on
+   top. */
+test("In an open deck at the bottom, the cards closing up lie above the card that leaves", async ({ page }) => {
+  const cards = await deckOfThree(page, "Bottom end");
+  await cards.last().hover();
+  await deckAtRest(page);
+  await page.addStyleTag({ content: "[data-edge] * { pointer-events: auto !important; }" });
+  const leaving = await cards.last().getAttribute("data-toast");
+  await page.evaluate((leaving) => {
+    const state = { running: true, frames: [] as boolean[] };
+    (window as unknown as { __over: typeof state }).__over = state;
+    const frame = () => {
+      const card = document.querySelector(`[data-toast="${leaving}"]`);
+      if (card) {
+        const box = card.getBoundingClientRect();
+        for (const other of document.querySelectorAll("[data-toast]")) {
+          if (other === card) continue;
+          const near = other.getBoundingClientRect();
+          const top = Math.max(box.top, near.top);
+          const bottom = Math.min(box.bottom, near.bottom);
+          const left = Math.max(box.left, near.left);
+          const right = Math.min(box.right, near.right);
+          if (bottom - top < 4 || right - left < 4) continue;
+          const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+          state.frames.push(hit?.closest("[data-toast]") === other);
+        }
+      }
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  }, leaving);
+  await cards.last().getByRole("button", { name: "Close message" }).click();
+  await expect(page.locator(`[data-toast="${leaving}"]`)).toHaveCount(0);
+  const frames = await page.evaluate(() => {
+    const state = (window as unknown as { __over: { running: boolean; frames: boolean[] } }).__over;
+    state.running = false;
+    return state.frames;
+  });
+  expect(frames.length).toBeGreaterThan(0);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
 
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");

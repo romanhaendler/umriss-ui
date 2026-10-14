@@ -15,7 +15,6 @@ import {
   Stack,
   Switch,
   Text,
-  ToastProvider,
   TreeView,
   useToast,
   useTree,
@@ -384,9 +383,5 @@ function Content() {
 /* `useToast` needs a `ToastProvider` above it; at the root of an application
    one provider serves every screen. */
 export default function DispatchATour() {
-  return (
-    <ToastProvider>
-      <Content />
-    </ToastProvider>
-  );
+  return <Content />;
 }

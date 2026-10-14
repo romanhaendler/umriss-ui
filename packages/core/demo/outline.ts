@@ -98,7 +98,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",
           "A token that names another resolves where it is declared: set `--u-color-accent` on a region, and `--u-focus-ring`, which names it on `:root`, still draws the application's accent there. Set the naming token in the region too.",
-          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from; inside a dialog the toasts take the tokens of the dialog's place. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root` - as for the toasts' distance from the window's edge, `--u-toast-inset-top` and `--u-toast-inset-bottom`.",
+          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from; inside a dialog the toasts take the tokens of the dialog's place. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root` - as for the toasts' distance from the window's edge and its sides, `--u-toast-inset-top`, `--u-toast-inset-bottom`, `--u-toast-inset-start` and `--u-toast-inset-end`.",
         ],
         types: [],
         exports: [],
@@ -823,18 +823,19 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "`useToast` needs a `ToastProvider` around the application, once, at the root.",
           "Toasts stand above an open modal dialog and can be used there: they are seen, pressed and heard, and stay where they were while a dialog opens or closes.",
+          "`held` on the `ToastProvider` holds them back while a surface they must not cover is open: none is seen or heard, their time stands still, and they come back with the time they had left, so nothing is lost.",
           "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
           "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
           "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
           "Several toasts stand as a deck: the newest in front, a count on it, two edges behind it. It opens under the pointer, on the count, with the focus inside it, or with Alt+T; Escape gives the focus back.",
-          "At most three stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest gives way to a new one, as if closed.",
+          "At most three that leave by themselves stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest of them gives way to a new one, as if closed. A toast with `duration: 0` and a `loading` toast never give way and do not count.",
         ],
         alternatives: [
           { when: "The reader must see it, or it stays true until something is done", use: "alert" },
           { when: "The reader must decide before going on", use: "confirmdialog" },
         ],
         keys: [
-          { key: "Alt + T", action: "While a toast stands, moves the focus into the messages and opens the deck." },
+          { key: "Alt + T", action: "While a toast stands and is not held back, moves the focus into the messages and opens the deck." },
           { key: "Tab / Shift + Tab", action: "Moves through the toasts' actions and close crosses; a keyboard focus inside opens the deck and holds every toast's clock." },
           { key: "Enter / Space", action: "On an action, runs it and closes its toast; on a cross, closes the toast." },
           { key: "Escape", action: "Closes the deck; after Alt + T, the focus goes back to where it was." },
@@ -849,7 +850,8 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
           "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
-          "No queue: a toast over the limit pushes the oldest out rather than waiting.",
+          "One `ToastProvider` per application, at its root. A second one in the same document draws a second deck at the same place and the two lie on each other; in development it is reported on the console.",
+          "No queue: a toast over the limit pushes the oldest timed one out rather than waiting. Lasting and `loading` toasts are not capped: the deck holds every one of them beside the timed ones.",
           "Without the Popover API the deck moves with a dialog that transforms itself: inside a dialog the toasts stand in the top layer only where the browser has it, and elsewhere they are a fixed box in the dialog.",
         ],
         types: ["ToastOptions", "ToastAction"],

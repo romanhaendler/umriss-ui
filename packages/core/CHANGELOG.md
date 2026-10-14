@@ -26,6 +26,38 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.39.0 – Toasts that stay, and one provider (Oct. 2026)
+
+### Changed
+
+- **A toast that stays never gives way to the limit.** A toast with `duration: 0` and a `loading` toast are no longer pushed out by newer ones, and they do not count toward `limit`: the limit caps only the toasts that leave by themselves, the oldest of them giving way as before. A failure that stays until it is read is no longer lost to a burst of confirmations, and a `loading` toast stays until `update` gives its outcome. The limit is applied when a toast arrives; `update` pushes nothing out, and a `loading` toast turned into its outcome counts from the next arrival on. So the deck may hold more than `limit` toasts: every lasting one beside up to `limit` timed ones. Check pages that sent many lasting toasts and relied on the limit to clear them.
+
+### Added
+
+- **A second `ToastProvider` is reported in development.** An application has one `ToastProvider`, at its root; two draw two decks at the same place, one over the other. A provider that mounts while another stands in the same document now writes one `console.warn` in development. Nothing changes in production.
+
+## 0.38.0 – Holding the toasts back, and a deck that glides (Oct. 2026)
+
+### Added
+
+- **`held` on `ToastProvider`** holds the toasts back for a while: for a surface the toasts must not cover, where there is no room beside it. While it is true no toast is seen, heard, pressed or reached by the keyboard, Alt + T goes to the page, and what lies under the deck's place can be seen and used as if no toast stood; a focus in the deck goes back where it came from, as with Escape. Nothing is lost, as it would be by dismissing: no countdown runs, a toast that arrives waits, and `toast()`, `update()` and `dismiss()` work as always (`dismiss()` and the limit close a toast at once, with its `onClose`; holding calls none). When it is false again every toast comes back at the deck's current place with its entrance and the time it had left; the ones that arrived meanwhile are heard then, the others not a second time. Default `false`; the example "Hold the toasts" on the Toast page shows it.
+
+- **`type ToastProviderProps`** is exported, like the props of the other components.
+
+- **`--u-toast-width`**, the toast's width, `360px` by default, in the Toast token group beside the four distance tokens. A plain length: read from the computed style it tells whether the deck has room beside a surface, and set on `:root` it makes the toasts wider or narrower. Up to 600 px wide the toast keeps the window's width less the side tokens.
+
+### Changed
+
+- **The deck glides when its distance changes.** A change of `--u-toast-inset-top`, `-bottom`, `-start` or `-end` while a toast is seen moves the deck to its new place in `--u-duration-medium` with `--u-ease-out`, as its height moves; it jumped. It glides also when the change comes in the moment a modal dialog opens or closes, so the region moves into or out of it: the deck starts where it was seen. It moves at once under reduced motion, while no toast stands (a first toast stands at its place), while held and when a hold ends; a token set again to its value, in every frame if need be, moves nothing, and a deck whose distance stays the same stands still when a dialog opens or closes, as before. A change of `position` does not glide.
+
+- **An open deck at the top edge lays the lower card above.** Open, the card lower on the screen now lies above the one over it wherever the deck stands, so no card's shadow falls on the face of the next; at the top it was the other way round. The order turns once the cards stand apart, after `--u-duration-medium`, and at once on closing and under reduced motion. A closed deck is ordered as before.
+
+## 0.37.0 – The toasts' distance from the window's sides (Oct. 2026)
+
+### Added
+
+- **`--u-toast-inset-start` and `--u-toast-inset-end`**, the toasts' distance from the window's sides. The default is the distance they had: `--u-space-5`, `--u-space-4` up to 600 px wide. Set on `:root`, the start one moves the `*-start` positions - beside a navigation rail, at the page's gutter - and the end one the `*-end` positions; on a phone, where the toast takes the window's width, each is the room at its side at every position. The center positions stay in the middle of the window, and in a right-to-left page start is the right side. With `--u-toast-inset-top` and `--u-toast-inset-bottom` every edge of the window has its token. A rule on the region's `data-along` is no longer needed, and was never safe (ADR-0045).
+
 ## 0.36.0 – Toasts stand above a modal dialog (Oct. 2026)
 
 ### Changed

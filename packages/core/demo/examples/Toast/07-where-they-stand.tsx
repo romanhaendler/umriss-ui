@@ -1,9 +1,15 @@
-import { useMemo, useState } from "react";
-import { Button, Stack, ToastProvider, UmrissProvider, useToast } from "../../../src";
-import type { ToastConfig, ToastPosition } from "../../../src";
+// demo-only:start
+import { Button, Stack, useToast } from "../../../src";
+import type { ToastPosition } from "../../../src";
+import { usePageToast } from "../../pageToast";
+// demo-only:shown
+// import { useMemo, useState } from "react";
+// import { Button, Stack, ToastProvider, UmrissProvider, useToast } from "../../../src";
+// import type { ToastConfig, ToastPosition } from "../../../src";
+// demo-only:end
 
 export const title = "Where they stand";
-export const lead = "`toast.position` in the `UmrissProvider` puts every toast of the application at one edge and one place along it; the deck grows away from that edge. On a phone they take the window's width, and only the edge counts. How far they stand from the edge is `--u-toast-inset-top` and `--u-toast-inset-bottom` on `:root` - below a fixed header, above a toolbar at the bottom.";
+export const lead = "`toast.position` in the `UmrissProvider` puts every toast of the application at one edge and one place along it; the deck grows away from that edge. On a phone they take the window's width, and only the edge counts. How far they stand from the edge is `--u-toast-inset-top` and `--u-toast-inset-bottom` on `:root` - below a fixed header, above a toolbar at the bottom; how far from the window's sides, `--u-toast-inset-start` and `--u-toast-inset-end` - beside a navigation rail, at the page's gutter.";
 
 const POSITIONS: { position: ToastPosition; label: string }[] = [
   { position: "top-start", label: "Top start" },
@@ -36,14 +42,19 @@ function Buttons({ onPick }: { onPick: (position: ToastPosition) => void }) {
 }
 
 export default function WhereTheyStand() {
-  const [position, setPosition] = useState<ToastPosition>("top-center");
-  /* A new object is a new setting: kept until the position changes. */
-  const config = useMemo<ToastConfig>(() => ({ position }), [position]);
-  return (
-    <UmrissProvider toast={config}>
-      <ToastProvider>
-        <Buttons onPick={setPosition} />
-      </ToastProvider>
-    </UmrissProvider>
-  );
+  // demo-only:start
+  const pageToast = usePageToast();
+  return <Buttons onPick={(position) => pageToast({ toast: { position } })} />;
+  // demo-only:shown
+  // const [position, setPosition] = useState<ToastPosition>("top-center");
+  // /* A new object is a new setting: kept until the position changes. */
+  // const config = useMemo<ToastConfig>(() => ({ position }), [position]);
+  // return (
+  //   <UmrissProvider toast={config}>
+  //     <ToastProvider>
+  //       <Buttons onPick={setPosition} />
+  //     </ToastProvider>
+  //   </UmrissProvider>
+  // );
+  // demo-only:end
 }

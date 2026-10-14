@@ -16,6 +16,21 @@ moves from here under the rule above.
 
 ---
 
+## 0.39.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
+## 0.38.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
+## 0.37.0 – No change of its own (Oct. 2026)
+
+Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.37; the peer ranges are
+`^0.37.0`. No change of its own.
+
 ## 0.36.0 – No change of its own (Oct. 2026)
 
 Needs `@umriss-ui/core` and `@umriss-ui/charts` 0.36; the peer ranges are

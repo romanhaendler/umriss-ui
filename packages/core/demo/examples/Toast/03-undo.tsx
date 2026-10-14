@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Stack, Text, ToastProvider, useToast } from "../../../src";
+import { Button, Stack, Text, useToast } from "../../../src";
 import type { ToastCloseReason } from "../../../src";
 
 export const title = "Undo";
@@ -53,9 +53,5 @@ function Content() {
 /* `useToast` needs a `ToastProvider` above it; at the root of an application
    one provider serves every screen. */
 export default function Undo() {
-  return (
-    <ToastProvider>
-      <Content />
-    </ToastProvider>
-  );
+  return <Content />;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Stack, Switch, ToastProvider, useToast } from "../../../src";
+import { Button, Stack, Switch, useToast } from "../../../src";
 
 export const title = "Save, and say how it went";
 export const lead = "A `loading` toast shows a spinner, has no close button and does not leave by itself; `update` turns it into its outcome in place, and only then does its time begin.";
@@ -44,9 +44,5 @@ function Content() {
 /* `useToast` needs a `ToastProvider` above it; at the root of an application
    one provider serves every screen. */
 export default function SaveWithLoading() {
-  return (
-    <ToastProvider>
-      <Content />
-    </ToastProvider>
-  );
+  return <Content />;
 }
