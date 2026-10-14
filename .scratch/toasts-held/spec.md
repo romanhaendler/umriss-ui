@@ -1,6 +1,6 @@
 # Holding the toasts back, and a deck that glides
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-14
 Origin: a guide written by an application against core 0.37.0, checked
 against the toast's source on 2026-10-14. What the check added stands under "Further
@@ -355,3 +355,63 @@ What the check against the source added:
 - `CHANGELOG.md` under 0.38.0: **Added** `held`, `--u-toast-width`;
   **Changed** the deck glides when its distance changes, also when that
   change comes with a modal dialog opening or closing.
+
+## Comments
+
+### Delivery report (2026-10-14, core 0.38.0)
+
+Released as 0.38.0 with all five packages, **without the screen reader check**
+(ticket 06 stays `ready-for-human`): whether a reader announces a toast that
+stood before the hold a second time when it is shown again, and whether a
+toast that arrived during the hold is heard once when it ends, also as a modal
+dialog closes, is held by unit tests of the live regions but has not been
+heard. Should a reader announce a standing toast again, that is a question of
+its own for a later version. Every other ticket is done; the folder stays for
+06.
+
+Where what was built departs from the spec, or adds to it:
+
+- **A type is exported.** `type ToastProviderProps` is exported from the
+  Toast index like the props of every other component; the spec said no new
+  export. No runtime export was added.
+- **The glide runs on registered properties.** The region copies the four
+  distance tokens into `@property` custom properties and transitions those;
+  each position reads the one of its edge and side. A plain transition on the
+  insets would also have glided on a change of `position`; this way only a
+  change of token glides.
+- **"While a toast is seen" is the region's own `data-seen`,** set while a
+  toast stands and is not held, and only once two animation frames have passed
+  since the hold began or ended. So a token written in any callback of the
+  frame in which the hold ends - also by an application that writes it in
+  every frame - is taken at once. The glide, its starting style and the
+  reduced-motion rule read it, not the landmark's role.
+- **The glide across a dialog reads the region's place in every frame** while
+  a toast is seen in an open modal dialog, because a closing dialog takes its
+  region out of rendering before the move is seen. It runs as long as a toast
+  stands there, a `duration: 0` one too.
+- **Waiting toasts enter a region that already stood.** The toasts that
+  arrived during a hold are drawn only once the region they go into is drawn
+  and has stood for two animation frames, so a hold that ends as a modal
+  dialog closes inserts their text into a live region outside the dialog
+  rather than building one with it. A toast sent in the same handler that
+  begins the hold counts as arriving during it.
+- **Leaving cards and the pointer.** The region takes no pointer while held
+  (its empty box was still hit), a card that is leaving when the hold begins is
+  removed at once instead of finishing unseen, and a leave during the hold is
+  a removal at once.
+- **An open deck casts no shadow on its cards** (ticket 08, added to the spec
+  after it was written): open, the lower card lies above, at the top edge
+  after the cards stand apart. A toast that arrives while a deck at the top
+  stands open lies under the cards gliding down past it for
+  `--u-duration-medium`; left as it is.
+- **Tests.** jsdom focuses hidden elements, so the unit test proves the held
+  cards out of the accessibility tree and a browser test proves the tab order.
+  The glide across a dialog is tested with the "Where they stand" example and
+  a plain `<dialog>`; the hold together with a change of place uses the bottom
+  token, since the "Hold the toasts" example stands at the bottom.
+- **Pages and pictures.** The Theming page lists `--u-toast-width` through its
+  token table, its prose unchanged. The Toast page's keys say Alt+T works when
+  the toasts are not held back. The new example and the open deck at the top
+  have pictures in both themes; five pictures below the Toast page's new
+  sentence were renewed with their cards unchanged.
+- **Not done:** ticket 06, the check with real screen readers.

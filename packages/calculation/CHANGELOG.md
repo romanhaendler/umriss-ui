@@ -12,6 +12,11 @@ From 0.34.0 all five packages share one number: they are released together, and 
 
 ---
 
+## 0.38.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
 ## 0.37.0 – No change of its own (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.37; the peer range is `^0.37.0`. No change of its
