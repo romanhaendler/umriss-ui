@@ -1,5 +1,13 @@
 {
+  /* The demo's trends are charts, reached by their source as core's demo does. */
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@umriss-ui/core": ["../core/src/index.ts"],
+      "@umriss-ui/core/wording/de": ["../core/src/lib/language/de.ts"],
+      "@umriss-ui/charts": ["../charts/src/index.ts"]
+    }
+  },
   "include": ["demo", "tests-unit/demo-smoke*"],
   "exclude": []
 }

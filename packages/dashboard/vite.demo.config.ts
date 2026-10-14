@@ -21,6 +21,10 @@ export default defineConfig({
          it. */
       { find: /^@umriss-ui\/core\/wording\/de$/, replacement: fileURLToPath(new URL("../core/src/lib/language/de.ts", import.meta.url)) },
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("../core/src/index.ts", import.meta.url)) },
+      /* The trends of the examples are charts: the charts' source, by alias
+         and not by a dependency, as core's demo reaches the other packages
+         (the library imports none of them). */
+      { find: /^@umriss-ui\/charts$/, replacement: fileURLToPath(new URL("../charts/src/index.ts", import.meta.url)) },
       /* The package's stylesheet exists only once it has been built. In its
          place the token and base layer; the components' styles come with
          their modules. */

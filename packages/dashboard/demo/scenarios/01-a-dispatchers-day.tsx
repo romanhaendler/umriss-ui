@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { Alert, Button, SegmentedControl, Sparkline, Stack, Text } from "@umriss-ui/core";
+import { useChart } from "@umriss-ui/charts";
+import { Alert, Button, SegmentedControl, Stack, Text } from "@umriss-ui/core";
 import { HeadingType, useDashboard } from "../../src";
 import type { DashboardView, HeadingOptions } from "../../src";
 
@@ -21,7 +22,7 @@ export const callouts = [
 
 export const builtFrom = [
   "dashboard",
-  { name: "Sparkline", page: "@umriss-ui/core#sparkline" },
+  { name: "Chart", page: "@umriss-ui/charts#chart" },
   { name: "SegmentedControl", page: "@umriss-ui/core#segmented-control" },
   { name: "Alert", page: "@umriss-ui/core#alert" },
   { name: "Text", page: "@umriss-ui/core#text" },
@@ -58,20 +59,26 @@ function Kz({ value, unit, verdict, note }: { value: string; unit?: string; verd
   );
 }
 
-/** A line over the frame it is in; with `previous` a second line and the legend. */
+/** The trend: this week as a line with a faint area, last week dashed and muted, on one scale; with `previous` the legend too. */
 function TrendChart({ data, previous, labels = ["this week", "last week"] }: { data: readonly number[]; previous?: readonly number[]; labels?: readonly [string, string] }) {
-  const swatch = (color: string): CSSProperties => ({ display: "inline-block", width: 14, borderTop: `2px solid ${color}`, verticalAlign: "middle", marginInlineEnd: 5 });
+  const rows = data.map((now, i) => ({ i, now, before: previous?.[i] ?? now }));
+  const { Chart, XAxis, YAxis, Line, Area } = useChart(rows);
+  const swatch = (color: string, dashed = false): CSSProperties => ({ display: "inline-block", width: 14, borderTop: `2px ${dashed ? "dashed" : "solid"} ${color}`, verticalAlign: "middle", marginInlineEnd: 5 });
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--u-space-2)", height: "100%", minWidth: 0 }}>
       {previous && (
         <Text as="div" size="xs" tone="secondary" style={{ display: "flex", gap: 14 }}>
           <span><i style={swatch("var(--u-color-accent)")} />{labels[0]}</span>
-          <span><i style={swatch("var(--u-color-text-muted)")} />{labels[1]}</span>
+          <span><i style={swatch("var(--u-color-text-muted)", true)} />{labels[1]}</span>
         </Text>
       )}
-      <div style={{ position: "relative", flex: "1 1 0", minHeight: 0 }}>
-        {previous && <Sparkline data={previous} width="fill" style={{ position: "absolute", inset: 0, height: "100%", opacity: 0.5 }} />}
-        <Sparkline data={data} width="fill" tone="accent" style={{ position: "absolute", inset: 0, height: "100%" }} />
+      <div style={{ flex: "1 1 0", minHeight: 0 }}>
+        <Chart ariaLabel={previous ? `${labels[0]} and ${labels[1]}` : labels[0]} padding={4} style={{ minHeight: 0, height: "100%" }}>
+          <XAxis value="i" domain="data" grid={false} tickFormat={() => ""} />
+          <YAxis grid tickFormat={() => ""} />
+          {previous && <Line value="before" name={labels[1]} color="var(--u-color-text-muted)" strokeWidth={1.25} dash={[3, 3]} markers="never" />}
+          <Area value="now" name={labels[0]} color="var(--u-color-accent)" fillOpacity={0.09} strokeWidth={1.75} />
+        </Chart>
       </div>
     </div>
   );
