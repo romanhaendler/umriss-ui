@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The draft is a history of whole arrangements: every action is a step; "Undo" and "Redo" move through it; a new step forgets the steps ahead.
 - [ ] The bar shows "Undo", "Redo" and "Reset" as permanent buttons in the mode (not in a passing message), disabled where there is nothing to undo, redo or reset.

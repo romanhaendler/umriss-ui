@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] `initialView` and `setView` drop widgets of types the dashboard does not declare, and every widget after the first with an id already seen.
 - [ ] A size the widget's type does not offer becomes the type's starting size.

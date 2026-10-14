@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] A drag is taken only by a widget's head, outside its menu button, and starts only after the pointer has moved a few pixels; a press without movement stays a click.
 - [ ] Only the head prevents touch scrolling; a body in the mode scrolls the page.

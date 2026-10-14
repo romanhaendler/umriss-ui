@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The package is wired into the workspace like the other five: `pnpm check dashboard`, lint, `pnpm typecheck`, the visual configuration with its own demo port (the next free one after 4177), `pnpm test:visual:quick dashboard`, the changelog's package list and the site build. Peers are `@umriss-ui/core` and React `>=19`; there is no other dependency; it reaches core only by its public entry.
 - [ ] `useDashboard` takes the default view and `initialView` (read once, ADR-0047) and hands back `Dashboard`, `WidgetType`, the current view and `setView` (not reported). Without `initialView` the default is shown.

@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The column count is twelve at every width at which a column is at least the minimum width (about 52 px at a 12 px gap); below it the dashboard is a list: one widget per row, full width, in the stored order, each at its size's height.
 - [ ] The form is decided on the dashboard's own width, not the window's, without measuring in script, so the server's markup and the first frame are right.
