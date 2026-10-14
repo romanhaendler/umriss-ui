@@ -7,7 +7,7 @@
 
 import TOKENS from "../src/styles/tokens.css?raw";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { StrictMode, act, useEffect } from "react";
+import { StrictMode, act, useEffect, useState } from "react";
 import { cleanup, fireEvent, isInaccessible, render, screen } from "@testing-library/react";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import type { ToastTone } from "../src/components/Toast";
@@ -408,6 +408,47 @@ describe("Toast – held", () => {
     expect(screen.queryByText("Exported")).not.toBeNull();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.queryByText("Exported")).toBeNull();
+  });
+
+  it("counts a toast sent in the same handler that begins the hold as arriving during it: its text enters its live region when the hold ends", () => {
+    function Send({ setHeld }: { setHeld: (held: boolean) => void }) {
+      const { toast } = useToast();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              setHeld(true);
+              toast({ title: "Exported", duration: 0 });
+            }}
+          >
+            Hold and send
+          </button>
+          <button type="button" onClick={() => setHeld(false)}>
+            End the hold
+          </button>
+        </>
+      );
+    }
+    function App() {
+      const [held, setHeld] = useState(false);
+      return (
+        <ToastProvider held={held}>
+          <Send setHeld={setHeld} />
+        </ToastProvider>
+      );
+    }
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Hold and send" }));
+    const inserted: string[] = [];
+    const observer = new MutationObserver((records) =>
+      records.forEach((record) => record.addedNodes.forEach((node) => inserted.push(node.textContent ?? ""))),
+    );
+    for (const live of document.querySelectorAll("[role=status], [role=alert]")) observer.observe(live, { childList: true, subtree: true });
+    fireEvent.click(screen.getByRole("button", { name: "End the hold" }));
+    observer.takeRecords().forEach((record) => record.addedNodes.forEach((node) => inserted.push(node.textContent ?? "")));
+    observer.disconnect();
+    expect(inserted.some((text) => text.includes("Exported"))).toBe(true);
   });
 
   it("does not insert a toast that stood before the hold into its live region again", async () => {
@@ -858,6 +899,66 @@ describe("Toast – inside a modal dialog", () => {
       });
       await settle();
       expect(screen.getByText("Saved").closest<HTMLElement>("[data-toast]")!.parentElement!.parentElement!.style.getPropertyValue("--_delay")).toBe("-0ms");
+    });
+
+    it("lets a toast that arrived during a hold in the dialog enter a live region that stood for a frame, when the dialog closes as the hold ends", async () => {
+      for (const together of [true, false]) {
+        const apiRef: { current: Api | null } = { current: null };
+        function Grab() {
+          const api = useToast();
+          useEffect(() => {
+            apiRef.current = api;
+          });
+          return null;
+        }
+        const tree = (held: boolean) => (
+          <ToastProvider held={held}>
+            <Grab />
+          </ToastProvider>
+        );
+        const view = render(tree(false));
+        const first = dialog();
+        await open(first);
+        view.rerender(tree(true));
+        act(() => void apiRef.current!.toast({ title: "Exported", duration: 0 }));
+        /* The live regions that stood in an animation frame. */
+        const stood = new Set<Element>();
+        let watching = true;
+        requestAnimationFrame(function watch() {
+          document.querySelectorAll("[role=status], [role=alert]").forEach((live) => stood.add(live));
+          if (watching) requestAnimationFrame(watch);
+        });
+        /* Each insertion of the text: whether it went into a live region that
+           had stood in a frame before, outside the closed dialog. */
+        const insertions: boolean[] = [];
+        const observer = new MutationObserver((records) =>
+          records.forEach((record) =>
+            record.addedNodes.forEach((node) => {
+              if (!node.textContent?.includes("Exported")) return;
+              const live = (record.target as Element).closest("[role=status], [role=alert]");
+              insertions.push(live !== null && stood.has(live) && !first.contains(live));
+            }),
+          ),
+        );
+        observer.observe(document.body, { childList: true, subtree: true });
+        if (together) {
+          act(() => {
+            first.close();
+            view.rerender(tree(false));
+          });
+        } else {
+          await close(first);
+          view.rerender(tree(false));
+        }
+        await act(() => new Promise((resolve) => setTimeout(resolve, 100)));
+        watching = false;
+        observer.disconnect();
+        expect(region().parentElement, `together: ${together}`).toBe(document.body);
+        expect(screen.getByText("Exported")).toBeTruthy();
+        expect(insertions.length, `together: ${together}`).toBeGreaterThan(0);
+        expect(insertions.every(Boolean), `together: ${together}`).toBe(true);
+        cleanup();
+      }
     });
 
     it("keeps the same toasts in the same two regions", async () => {
