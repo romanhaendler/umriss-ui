@@ -515,6 +515,7 @@ export interface Wording {
   dashboardShare: (fraction: string) => string;
   /** What is spoken after a change. */
   dashboardMoved: (title: string, from: number, to: number, of: number) => string;
+  dashboardDragCancelled: (title: string) => string;
   dashboardResized: (title: string, size: string) => string;
   dashboardRemoved: (title: string) => string;
   dashboardKept: string;
@@ -868,6 +869,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardSizes: { small: "Small", medium: "Medium", wide: "Wide", tall: "Tall", large: "Large", full: "Full width" },
   dashboardShare: (fraction) => `${fraction} wide`,
   dashboardMoved: (title, from, to, of) => `${title}: moved from place ${from} to place ${to} of ${of}`,
+  dashboardDragCancelled: (title) => `${title}: move cancelled`,
   dashboardResized: (title, size) => `${title}: size ${size}`,
   dashboardRemoved: (title) => `${title} removed. Undo brings it back.`,
   dashboardKept: "Changes kept",

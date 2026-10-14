@@ -322,6 +322,7 @@ export const GERMAN_WORDING: Wording = {
   dashboardSizes: { small: "Klein", medium: "Mittel", wide: "Breit", tall: "Hoch", large: "Groß", full: "Volle Breite" },
   dashboardShare: (fraction) => `${fraction} breit`,
   dashboardMoved: (title, from, to, of) => `${title}: von Platz ${from} auf Platz ${to} von ${of} verschoben`,
+  dashboardDragCancelled: (title) => `${title}: Verschieben abgebrochen`,
   dashboardResized: (title, size) => `${title}: Größe ${size}`,
   dashboardRemoved: (title) => `${title} entfernt. „Rückgängig“ holt es zurück.`,
   dashboardKept: "Änderungen übernommen",

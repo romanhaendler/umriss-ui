@@ -1,5 +1,5 @@
-import { Children, isValidElement, useEffect, useRef, useState } from "react";
-import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
+import { Children, isValidElement, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { announce, Button, Card, CardBody, CardHeader, Drawer, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
@@ -7,7 +7,7 @@ import styles from "./Dashboard.module.css";
 import { Failed } from "./Failed";
 import { readView } from "./model";
 import type { DashboardView, WidgetSize } from "./model";
-import { pack } from "./pack";
+import { nearestPlace, pack } from "./pack";
 import { WidgetType } from "./WidgetType";
 import type { WidgetContent, WidgetTypeProps } from "./WidgetType";
 
@@ -47,7 +47,49 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
     const span = type?.sizes[widget.size];
     return type && span ? [{ widget, type, span }] : [];
   });
-  const places = pack(shown.map((one) => one.span), COLUMNS);
+
+  /* A drag shows the candidate order; the elements stay in the document in the
+     stored order (a move in the DOM would end the pointer's capture), so the
+     order the list form draws is the CSS `order`. */
+  const [drag, setDrag] = useState<{ id: string; target: number } | null>(null);
+  const gesture = useRef<{ id: string; from: number; x0: number; y0: number; x: number; y: number; dx: number; dy: number; started: boolean; target: number } | null>(null);
+  const running = useRef<{ timer?: number; escape?: (event: globalThis.KeyboardEvent) => void }>({});
+  const positions = useRef(new Map<string, [number, number]>());
+  const latest = useRef<{ update: () => void; finish: (keep: boolean) => void }>({ update: () => {}, finish: () => {} });
+
+  const held = drag ? shown.findIndex((one) => one.widget.id === drag.id) : -1;
+  const sequence = shown.map((_, i) => i);
+  if (held >= 0) sequence.splice(drag!.target, 0, ...sequence.splice(held, 1));
+  const packed = pack(sequence.map((i) => shown[i]!.span), COLUMNS);
+  const places = shown.map((_, i) => packed[sequence.indexOf(i)]!);
+
+  /* The dragged card stays in its landing place and is moved from there by a
+     transform to where it is held; the placeholder marks that place. */
+  const follow = () => {
+    const g = gesture.current;
+    const host = grid.current;
+    const holder = host?.querySelector("[data-placeholder]");
+    const card = host?.querySelector<HTMLElement>(`[data-widget="${g?.id}"]`);
+    if (!g || !holder || !card) return;
+    const box = holder.getBoundingClientRect();
+    card.style.transform = `translate(${g.x - g.dx - box.left}px, ${g.y - g.dy - box.top}px)`;
+  };
+  useLayoutEffect(() => {
+    const host = grid.current;
+    if (!host) return;
+    const next = new Map<string, [number, number]>();
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const el of host.querySelectorAll<HTMLElement>("[data-widget]")) {
+      const id = el.dataset.widget!;
+      const before = positions.current.get(id);
+      next.set(id, [el.offsetLeft, el.offsetTop]);
+      if (drag && !calm && before && id !== drag.id && (before[0] !== el.offsetLeft || before[1] !== el.offsetTop)) {
+        el.animate([{ transform: `translate(${before[0] - el.offsetLeft}px, ${before[1] - el.offsetTop}px)` }, { transform: "none" }], { duration: 150, easing: "ease-out" });
+      }
+    }
+    positions.current = next;
+    if (drag) follow();
+  });
 
   const [optionsFor, setOptionsFor] = useState<string | null>(null);
   const anchor = useRef<HTMLElement | null>(null);
@@ -83,6 +125,70 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
     announce(wording.dashboardMoved(title, from + 1, target + 1, total));
   };
 
+  /* Where the held corner is now, as the place it is nearest to. */
+  const update = () => {
+    const g = gesture.current;
+    const host = grid.current;
+    const card = host?.querySelector<HTMLElement>(`[data-widget="${g?.id}"]`);
+    if (!g || !host || !card) return;
+    const style = getComputedStyle(host);
+    const gap = parseFloat(style.columnGap);
+    const tracks = style.gridTemplateColumns.split(" ").length;
+    const rect = host.getBoundingClientRect();
+    const span = shown[g.from]!.span;
+    const geometry = { cell: (rect.width - (tracks - 1) * gap) / tracks, gap, unit: (card.offsetHeight - (span.rows - 1) * gap) / span.rows };
+    const target = nearestPlace(shown.map((one) => one.span), tracks, g.from, g.x - g.dx - rect.left, g.y - g.dy - rect.top, geometry);
+    if (target === g.target) return follow();
+    g.target = target;
+    setDrag({ id: g.id, target });
+  };
+  const finish = (keep: boolean) => {
+    const g = gesture.current;
+    gesture.current = null;
+    window.clearInterval(running.current.timer);
+    if (running.current.escape) document.removeEventListener("keydown", running.current.escape);
+    grid.current?.querySelector<HTMLElement>(`[data-widget="${g?.id}"]`)?.style.removeProperty("transform");
+    setDrag(null);
+    if (!g?.started) return;
+    const one = shown[g.from]!;
+    const title = one.type.title?.(one.widget.options) ?? one.type.label;
+    if (!keep) return announce(wording.dashboardDragCancelled(title));
+    moveTo(g.id, title, view.widgets.findIndex((widget) => widget.id === shown[g.target]!.widget.id));
+  };
+  useLayoutEffect(() => {
+    latest.current = { update, finish };
+  });
+  const take = (id: string, from: number) => (event: PointerEvent<HTMLDivElement>) => {
+    const target = event.target as Element;
+    if (event.button > 0 || target.closest("button") || !event.currentTarget.contains(target)) return;
+    const card = event.currentTarget.closest("section")!.getBoundingClientRect();
+    gesture.current = { id, from, x0: event.clientX, y0: event.clientY, x: event.clientX, y: event.clientY, dx: event.clientX - card.left, dy: event.clientY - card.top, started: false, target: from };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const carry = (event: PointerEvent<HTMLDivElement>) => {
+    const g = gesture.current;
+    if (!g) return;
+    g.x = event.clientX;
+    g.y = event.clientY;
+    if (!g.started) {
+      if (Math.hypot(g.x - g.x0, g.y - g.y0) <= 4) return;
+      g.started = true;
+      setDrag({ id: g.id, target: g.from });
+      running.current.escape = (e) => e.key === "Escape" && latest.current.finish(false);
+      document.addEventListener("keydown", running.current.escape);
+      /* Near the window's top or bottom edge the page scrolls, faster the closer. */
+      running.current.timer = window.setInterval(() => {
+        const edge = 64;
+        const y = gesture.current?.y ?? window.innerHeight / 2;
+        const speed = Math.ceil((edge - Math.min(y, window.innerHeight - y)) / 4);
+        if (speed <= 0) return;
+        window.scrollBy(0, y < window.innerHeight / 2 ? -speed : speed);
+        latest.current.update();
+      }, 16);
+    }
+    latest.current.update();
+  };
+
   return (
     <div role="group" className={cx(styles.root, className)} {...rest}>
       {editor.allowed && (
@@ -112,12 +218,18 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             "--row": place.row + 1,
             "--columns": place.columns,
             "--rows": place.rows,
+            "--order": sequence.indexOf(i),
           } as CSSProperties;
           const title = type.title?.(widget.options) ?? type.label;
           const at = view.widgets.findIndex((one) => one.id === widget.id);
           const sizes = Object.entries(type.sizes).sort(([, a], [, b]) => area(a) - area(b));
           const head = editing
             ? {
+                className: styles.head,
+                onPointerDown: take(widget.id, i),
+                onPointerMove: carry,
+                onPointerUp: () => latest.current.finish(true),
+                onPointerCancel: () => latest.current.finish(false),
                 role: "group",
                 tabIndex: 0,
                 "aria-label": wording.dashboardHead(title, at + 1, total),
@@ -131,7 +243,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
               }
             : {};
           return (
-            <Card key={widget.id} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} aria-label={title}>
+            <Card key={widget.id} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={title}>
               <CardHeader
                 title={title}
                 {...head}
@@ -203,6 +315,14 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             </Card>
           );
         })}
+        {held >= 0 && (
+          <div
+            aria-hidden="true"
+            data-placeholder
+            className={cx(styles.item, styles.placeholder)}
+            style={{ "--column": places[held]!.column + 1, "--row": places[held]!.row + 1, "--columns": places[held]!.columns, "--rows": places[held]!.rows, "--order": drag!.target } as CSSProperties}
+          />
+        )}
       </div>
       <Drawer open={editor.catalogue} onClose={() => editor.setCatalogue(false)}>
         <ModalHeader title={wording.dashboardCatalogue} description={wording.dashboardCatalogueSentence} />
