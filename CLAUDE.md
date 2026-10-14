@@ -1,6 +1,6 @@
 # umriss
 
-A pnpm workspace with six packages: `packages/core`, `packages/charts`, `packages/table`, `packages/schedule`, `packages/calculation` and `packages/demo`. `@umriss-ui/table` depends on `@umriss-ui/core` (ADR-0016); `@umriss-ui/schedule` depends on `@umriss-ui/core` and `@umriss-ui/charts` (ADR-0022); `@umriss-ui/calculation` depends on `@umriss-ui/core` only; nothing depends on the table, the schedule or the calculation, and `@umriss-ui/charts` itself depends on nothing. `@umriss-ui/demo` is the private shell all five demos are built from (ADR-0020); it is never published. Core's demo alone reaches the other four packages' sources by alias, for its control room page; that is a demo's import, not a package dependency.
+A pnpm workspace with seven packages: `packages/core`, `packages/charts`, `packages/table`, `packages/schedule`, `packages/calculation`, `packages/dashboard` and `packages/demo`. `@umriss-ui/table` depends on `@umriss-ui/core` (ADR-0016); `@umriss-ui/schedule` depends on `@umriss-ui/core` and `@umriss-ui/charts` (ADR-0022); `@umriss-ui/calculation` and `@umriss-ui/dashboard` depend on `@umriss-ui/core` only; nothing depends on the table, the schedule, the calculation or the dashboard, and `@umriss-ui/charts` itself depends on nothing. `@umriss-ui/demo` is the private shell all six demos are built from (ADR-0020); it is never published. Core's demo alone reaches the other four packages' sources by alias, for its control room page; that is a demo's import, not a package dependency.
 
 Which document answers which question stands in `docs/README.md` — the map over
 everything that is not source.
@@ -28,7 +28,7 @@ Generated and checked in; do not edit it, and do not infer absence from `types.t
 
 ## Checking a change
 
-- `pnpm check <package>`: shrink guard, eslint, `typecheck` and `test:unit` of one package (`core`, `charts`, `table`, `schedule`, `calculation`, `demo`); without a name, all of them. Stops at the first failure.
+- `pnpm check <package>`: shrink guard, eslint, `typecheck` and `test:unit` of one package (`core`, `charts`, `table`, `schedule`, `calculation`, `dashboard`, `demo`); without a name, all of them. Stops at the first failure.
 - `pnpm check:site`: the demo gates (props, core's README table, and that each `packages/<pkg>/API.md` is current; `pnpm --filter @umriss-ui/<pkg> props` rewrites it).
 - `pnpm typecheck`: `typecheck` and `typecheck:demo` of every package.
 - `pnpm test:visual:quick <package>`: the cheap layout checks (tests tagged `@quick`) of one demo, light only, about a minute after the build.

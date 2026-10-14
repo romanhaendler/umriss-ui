@@ -37,8 +37,8 @@ which `pnpm test:visual:update` creates and which are then checked in.
 * `pnpm test:unit` – vitest across all packages, the shell included
 * `pnpm test:visual` – Playwright; builds the five demos and starts
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
-  4176 schedule, 4177 calculation)
-* `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation` – the demos in the dev server
+  4176 schedule, 4177 calculation, 4178 dashboard)
+* `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard` – the demos in the dev server
 * `pnpm test:visual:update` – create or update baselines
 * `pnpm lint` – among other things the rule "@umriss-ui/charts is standalone: no
   import from @umriss-ui/core (R-1.2)", and the directions of ADR-0016 and
@@ -59,7 +59,7 @@ npx playwright test --project=charts-light --project=charts-dark
 ```
 
 The dev servers run on fixed ports: **4173** core, **4174** charts, **4175**
-table, **4176** schedule, **4177** calculation. The screenshot suites address exactly those, so a port taken by something
+table, **4176** schedule, **4177** calculation, **4178** dashboard. The screenshot suites address exactly those, so a port taken by something
 else is a failing suite rather than a mystery.
 
 ## How work is organised here
