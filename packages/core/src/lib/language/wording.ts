@@ -488,6 +488,35 @@ export interface Wording {
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
 
+  /* -------- @umriss-ui/dashboard ----------------------------------- */
+  /* The dashboard's entries stand here for the table's reason: one provider
+     switches every package with one value. */
+  /** The editing bar's buttons and the label that says the mode is on. */
+  dashboardEdit: string;
+  dashboardEditing: string;
+  dashboardCancel: string;
+  dashboardDone: string;
+  /** The name of a widget's menu button: the widget's title is the thing. */
+  dashboardMenu: (title: string) => string;
+  /** At the top of the menu, and in the name of a head the arrow keys move. */
+  dashboardPlace: (place: number, of: number) => string;
+  dashboardHead: (title: string, place: number, of: number) => string;
+  dashboardMoveStart: string;
+  dashboardMoveEarlier: string;
+  dashboardMoveLater: string;
+  dashboardMoveEnd: string;
+  dashboardRemove: string;
+  /** The closed set of size names, worded once for every widget type. */
+  dashboardSizes: { small: string; medium: string; wide: string; tall: string; large: string; full: string };
+  /** The share of the width beside a size's name; `fraction` is "1/4". */
+  dashboardShare: (fraction: string) => string;
+  /** What is spoken after a change. */
+  dashboardMoved: (title: string, from: number, to: number, of: number) => string;
+  dashboardResized: (title: string, size: string) => string;
+  dashboardRemoved: (title: string) => string;
+  dashboardKept: string;
+  dashboardCancelled: string;
+
   /* -------- @umriss-ui/calculation --------------------------------- */
   /* The calculation's entries stand here for the table's reason: one provider
      switches every package with one value. */
@@ -802,6 +831,25 @@ export const DEFAULT_WORDING: Wording = {
     (milestones === 0 ? "" : ` ${milestones === 1 ? "1 milestone" : `${milestones} milestones`}.`),
   scheduleKeyHelp:
     "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+  dashboardEdit: "Edit",
+  dashboardEditing: "Editing the dashboard",
+  dashboardCancel: "Cancel",
+  dashboardDone: "Done",
+  dashboardMenu: (title) => `Actions for ${title}`,
+  dashboardPlace: (place, of) => `Place ${place} of ${of}`,
+  dashboardHead: (title, place, of) => `${title}, place ${place} of ${of}`,
+  dashboardMoveStart: "Move to start",
+  dashboardMoveEarlier: "Move earlier",
+  dashboardMoveLater: "Move later",
+  dashboardMoveEnd: "Move to end",
+  dashboardRemove: "Remove",
+  dashboardSizes: { small: "Small", medium: "Medium", wide: "Wide", tall: "Tall", large: "Large", full: "Full width" },
+  dashboardShare: (fraction) => `${fraction} wide`,
+  dashboardMoved: (title, from, to, of) => `${title}: moved from place ${from} to place ${to} of ${of}`,
+  dashboardResized: (title, size) => `${title}: size ${size}`,
+  dashboardRemoved: (title) => `${title} removed`,
+  dashboardKept: "Changes kept",
+  dashboardCancelled: "Changes discarded",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",
