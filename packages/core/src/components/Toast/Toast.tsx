@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -127,6 +127,9 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
   );
 }
 
+/** How many providers stand in the document now (development message only). */
+let mountedProviders = 0;
+
 /** The props of `ToastProvider`. */
 export interface ToastProviderProps {
   children: ReactNode;
@@ -139,12 +142,30 @@ export interface ToastProviderProps {
 }
 
 /** Holds the toasts and draws them; `useToast` works only below it. Put it
-    once at the root of the application. Duration, position and limit come from
-    `UmrissProvider`'s `toast` where one stands around it. */
+    once at the root of the application: a second one draws a second deck at
+    the same place, and the two lie on each other. Duration, position and limit
+    come from `UmrissProvider`'s `toast` where one stands around it. */
 export function ToastProvider({ children, held = false }: ToastProviderProps) {
   /* The defaults come from the root provider where there is one. The
      individual message beats it where it says a duration. */
   const config = useToastConfig();
+
+  /* A second provider in the document gives two decks at one place. Said once
+     per provider, in development only. */
+  const warned = useRef(false);
+  useEffect(() => {
+    if (import.meta.env?.DEV && mountedProviders > 0 && !warned.current) {
+      warned.current = true;
+      console.warn(
+        "@umriss-ui/core: a second ToastProvider is mounted while another one stands. " +
+          "Use one ToastProvider per application, at its root: two decks stand at the same place.",
+      );
+    }
+    mountedProviders += 1;
+    return () => {
+      mountedProviders -= 1;
+    };
+  }, []);
   const defaultDuration = config.duration ?? 5000;
   const limit = Math.max(1, config.limit ?? 3);
   const position: ToastPosition = config.position ?? "bottom-end";
