@@ -823,6 +823,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "`useToast` needs a `ToastProvider` around the application, once, at the root.",
           "Toasts stand above an open modal dialog and can be used there: they are seen, pressed and heard, and stay where they were while a dialog opens or closes.",
+          "`held` on the `ToastProvider` holds them back while a surface they must not cover is open: none is seen or heard, their time stands still, and they come back with the time they had left, so nothing is lost.",
           "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
           "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
           "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
@@ -834,7 +835,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "The reader must decide before going on", use: "confirmdialog" },
         ],
         keys: [
-          { key: "Alt + T", action: "While a toast stands, moves the focus into the messages and opens the deck." },
+          { key: "Alt + T", action: "While a toast stands and is not held back, moves the focus into the messages and opens the deck." },
           { key: "Tab / Shift + Tab", action: "Moves through the toasts' actions and close crosses; a keyboard focus inside opens the deck and holds every toast's clock." },
           { key: "Enter / Space", action: "On an action, runs it and closes its toast; on a cross, closes the toast." },
           { key: "Escape", action: "Closes the deck; after Alt + T, the focus goes back to where it was." },

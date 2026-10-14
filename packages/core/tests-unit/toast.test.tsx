@@ -8,7 +8,7 @@
 import TOKENS from "../src/styles/tokens.css?raw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StrictMode, act, useEffect } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, isInaccessible, render, screen } from "@testing-library/react";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import type { ToastTone } from "../src/components/Toast";
 import { DEFAULT_WORDING } from "../src/lib/language";
@@ -142,13 +142,14 @@ function mount(config?: Parameters<typeof UmrissProvider>[0]["toast"]) {
     });
     return null;
   }
-  render(
+  const tree = (held: boolean) => (
     <UmrissProvider toast={config}>
-      <ToastProvider>
+      <ToastProvider held={held}>
         <Grab />
       </ToastProvider>
-    </UmrissProvider>,
+    </UmrissProvider>
   );
+  const view = render(tree(false));
   const call = <T,>(fn: (a: Api) => T): T => {
     let out!: T;
     act(() => {
@@ -156,7 +157,10 @@ function mount(config?: Parameters<typeof UmrissProvider>[0]["toast"]) {
     });
     return out;
   };
-  return call;
+  /** Holds the toasts back, or lets them come again, as an application does
+      by its prop. */
+  const hold = (held: boolean) => view.rerender(tree(held));
+  return Object.assign(call, { hold });
 }
 
 describe("Toast – action and close reason", () => {
@@ -344,6 +348,187 @@ describe("Toast – the deck", () => {
     call((t) => t.toast({ title: "Second", duration: 1000 }));
     act(() => vi.advanceTimersByTime(5000));
     expect(screen.getByText("Second")).toBeTruthy();
+  });
+});
+
+/* Held back: out of sight, hearing and reach, with every countdown standing
+   still, and nothing lost when the hold ends. */
+describe("Toast – held", () => {
+  /* The exit takes as long as in a browser, so that a toast still leaving
+     would be found. */
+  const exit = document.createElement("style");
+  exit.textContent = "* { --u-duration-exit-collapse: 200ms; }";
+  afterEach(() => {
+    exit.remove();
+    vi.useRealTimers();
+  });
+
+  it("leaves no card in the accessibility tree and none focusable", () => {
+    const call = mount();
+    call((t) => t.toast({ title: "Saved", duration: 0, action: { label: "Undo", onClick: () => {} } }));
+    call.hold(true);
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.queryByRole("region")).toBeNull();
+    /* jsdom focuses what a browser would not; what is out of the tree is
+       out of the tab order there (the browser test presses Tab). */
+    expect(screen.getAllByRole("button", { hidden: true }).every((button) => isInaccessible(button))).toBe(true);
+    call.hold(false);
+    expect(screen.getByRole("button", { name: "Undo" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: DEFAULT_WORDING.toastRegion })).toBeTruthy();
+  });
+
+  it("stands a countdown still: a 5 s toast held at 3 s for 10 s has 2 s left", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Saved", duration: 5000, onClose }));
+    act(() => vi.advanceTimersByTime(3000));
+    call.hold(true);
+    act(() => vi.advanceTimersByTime(10_000));
+    call.hold(false);
+    act(() => vi.advanceTimersByTime(1999));
+    expect(screen.queryByText("Saved")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText("Saved")).toBeNull();
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledWith("timeout");
+  });
+
+  it("keeps a toast that arrives during the hold out of its live region, with its full duration, until the hold ends", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    call.hold(true);
+    const id = call((t) => t.toast({ title: "Exported", duration: 5000 }));
+    expect(typeof id).toBe("number");
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(screen.queryByText("Exported")).toBeNull();
+    call.hold(false);
+    expect(screen.getByText("Exported").closest("[role]")?.getAttribute("role")).toBe("status");
+    act(() => vi.advanceTimersByTime(4999));
+    expect(screen.queryByText("Exported")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText("Exported")).toBeNull();
+  });
+
+  it("does not insert a toast that stood before the hold into its live region again", async () => {
+    const call = mount();
+    call((t) => t.toast({ title: "Saved", duration: 0 }));
+    call((t) => t.toast({ title: "Not sent", tone: "danger", duration: 0 }));
+    const inserted: string[] = [];
+    const observer = new MutationObserver((records) =>
+      records.forEach((record) => record.addedNodes.forEach((node) => inserted.push(node.textContent ?? ""))),
+    );
+    for (const live of document.querySelectorAll("[role=status], [role=alert]")) observer.observe(live, { childList: true, subtree: true });
+    call.hold(true);
+    call.hold(false);
+    await act(async () => {});
+    observer.disconnect();
+    expect(inserted.filter((text) => text.includes("Saved") || text.includes("Not sent"))).toEqual([]);
+    expect(screen.getByText("Saved")).toBeTruthy();
+    expect(screen.getByText("Not sent")).toBeTruthy();
+  });
+
+  it("closes a toast dismissed during the hold at once, and it does not come back", () => {
+    document.head.append(exit);
+    const call = mount();
+    const onClose = vi.fn();
+    const before = call((t) => t.toast({ title: "Saved", duration: 0, onClose }));
+    call.hold(true);
+    const during = call((t) => t.toast({ title: "Exported", duration: 0, onClose }));
+    call((t) => t.dismiss(before));
+    call((t) => t.dismiss(during));
+    expect(onClose.mock.calls).toEqual([["dismiss"], ["dismiss"]]);
+    call.hold(false);
+    expect(screen.queryByText("Saved")).toBeNull();
+    expect(screen.queryByText("Exported")).toBeNull();
+  });
+
+  it("lets a toast already leaving when the hold begins go unseen", () => {
+    document.head.append(exit);
+    const call = mount();
+    const id = call((t) => t.toast({ title: "Saved", duration: 0 }));
+    call((t) => t.dismiss(id));
+    call.hold(true);
+    call.hold(false);
+    expect(screen.queryByText("Saved")).toBeNull();
+  });
+
+  it("lets Alt+T through to the page while held", () => {
+    const call = mount();
+    const before = document.createElement("button");
+    document.body.append(before);
+    before.focus();
+    call((t) => t.toast({ title: "Saved", duration: 0 }));
+    call.hold(true);
+    const passed = fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
+    expect(passed).toBe(true);
+    expect(document.activeElement).toBe(before);
+    before.remove();
+  });
+
+  it("gives a focus in the deck back where it came from when the hold begins, and the deck comes back closed", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    const before = document.createElement("button");
+    document.body.append(before);
+    before.focus();
+    call((t) => t.toast({ title: "First", duration: 1000 }));
+    call((t) => t.toast({ title: "Second", duration: 1000 }));
+    fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
+    expect(document.activeElement).toBe(screen.getByRole("region", { name: DEFAULT_WORDING.toastRegion }));
+    call.hold(true);
+    expect(document.activeElement).toBe(before);
+    call.hold(false);
+    expect(screen.getByRole("button", { name: DEFAULT_WORDING.toastDeckCount(2) })).toBeTruthy();
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.queryByText("First")).toBeNull();
+    before.remove();
+  });
+
+  it("brings back what update() changed during the hold, a success counting from its end", () => {
+    vi.useFakeTimers();
+    const call = mount({ duration: 1000 });
+    const saving = call((t) => t.toast({ title: "Saving report…", tone: "loading" }));
+    const renamed = call((t) => t.toast({ title: "Draft", duration: 0 }));
+    call.hold(true);
+    call((t) => t.update(saving, { title: "Report saved", tone: "success" }));
+    call((t) => t.update(renamed, { title: "Draft renamed" }));
+    act(() => vi.advanceTimersByTime(10_000));
+    call.hold(false);
+    expect(screen.getByText("Report saved")).toBeTruthy();
+    expect(screen.getByText("Draft renamed")).toBeTruthy();
+    expect(screen.queryByText("Saving report…")).toBeNull();
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.queryByText("Report saved")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText("Report saved")).toBeNull();
+  });
+
+  it("keeps the limit: of four arriving during the hold the oldest goes with dismiss at once, three come back", () => {
+    document.head.append(exit);
+    const call = mount();
+    const onClose = vi.fn();
+    call.hold(true);
+    call((t) => t.toast({ title: "First", duration: 0, onClose }));
+    for (const title of ["Second", "Third", "Fourth"]) call((t) => t.toast({ title, duration: 0 }));
+    expect(onClose).toHaveBeenCalledWith("dismiss");
+    call.hold(false);
+    expect(screen.queryByText("First")).toBeNull();
+    for (const title of ["Second", "Third", "Fourth"]) expect(screen.getByText(title)).toBeTruthy();
+  });
+
+  it("calls no onClose of a standing toast by holding", () => {
+    vi.useFakeTimers();
+    document.head.append(exit);
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Saved", duration: 5000, onClose }));
+    call((t) => t.toast({ title: "Undo it", duration: 0, onClose, action: { label: "Undo", onClick: () => {} } }));
+    call.hold(true);
+    act(() => vi.advanceTimersByTime(60_000));
+    call.hold(false);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Undo" })).toBeTruthy();
   });
 });
 
