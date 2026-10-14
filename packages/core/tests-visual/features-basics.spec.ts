@@ -887,6 +887,51 @@ test("While a deck at the top closes, its front card lies in front in every fram
   expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
 });
 
+/* A card closed in an open deck drops behind the others at once: the cards
+   closing up over its place lie above it in every frame in which they
+   overlap. A leaving card takes no pointer, so for the reading only, every
+   card is made hittable: the element at a point is then the one painted on
+   top. */
+test("In an open deck at the bottom, the cards closing up lie above the card that leaves", async ({ page }) => {
+  const cards = await deckOfThree(page, "Bottom end");
+  await cards.last().hover();
+  await page.locator("[data-edge]:has([data-toast])").evaluate((region) => Promise.all(region.getAnimations({ subtree: true }).map((a) => a.finished)));
+  await page.addStyleTag({ content: "[data-edge] * { pointer-events: auto !important; }" });
+  const leaving = await cards.last().getAttribute("data-toast");
+  await page.evaluate((leaving) => {
+    const state = { running: true, frames: [] as boolean[] };
+    (window as unknown as { __over: typeof state }).__over = state;
+    const frame = () => {
+      const card = document.querySelector(`[data-toast="${leaving}"]`);
+      if (card) {
+        const box = card.getBoundingClientRect();
+        for (const other of document.querySelectorAll("[data-toast]")) {
+          if (other === card) continue;
+          const near = other.getBoundingClientRect();
+          const top = Math.max(box.top, near.top);
+          const bottom = Math.min(box.bottom, near.bottom);
+          const left = Math.max(box.left, near.left);
+          const right = Math.min(box.right, near.right);
+          if (bottom - top < 4 || right - left < 4) continue;
+          const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+          state.frames.push(hit?.closest("[data-toast]") === other);
+        }
+      }
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  }, leaving);
+  await cards.last().getByRole("button", { name: "Close message" }).click();
+  await expect(page.locator(`[data-toast="${leaving}"]`)).toHaveCount(0);
+  const frames = await page.evaluate(() => {
+    const state = (window as unknown as { __over: { running: boolean; frames: boolean[] } }).__over;
+    state.running = false;
+    return state.frames;
+  });
+  expect(frames.length).toBeGreaterThan(0);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
+
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");
   const example = page.locator('[data-example="loading-and-empty-panels"]');
