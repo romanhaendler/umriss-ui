@@ -1,0 +1,35 @@
+/** The room a widget takes, in grid cells. */
+export interface Span {
+  columns: number;
+  rows: number;
+}
+
+/** Where a widget stands: zero-based column and row, and the room it takes
+    (its width clamped to the grid). */
+export interface Place extends Span {
+  column: number;
+  row: number;
+}
+
+/** Strict row-major packing, the rule of CSS grid's sparse auto-placement: each
+    widget takes the first place at or after the one before it where it fits.
+    Free room left behind stays free. */
+export function pack(spans: readonly Span[], columns: number): Place[] {
+  const taken = new Set<number>();
+  const free = (row: number, column: number, w: number, h: number) => {
+    for (let r = row; r < row + h; r++) for (let c = column; c < column + w; c++) if (taken.has(r * columns + c)) return false;
+    return true;
+  };
+  let cursor = 0;
+  return spans.map((span) => {
+    const w = Math.min(span.columns, columns);
+    for (let i = cursor; ; i++) {
+      const row = Math.floor(i / columns);
+      const column = i % columns;
+      if (column + w > columns || !free(row, column, w, span.rows)) continue;
+      for (let r = row; r < row + span.rows; r++) for (let c = column; c < column + w; c++) taken.add(r * columns + c);
+      cursor = i;
+      return { column, row, columns: w, rows: span.rows };
+    }
+  });
+}

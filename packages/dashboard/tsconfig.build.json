@@ -1,0 +1,7 @@
+{
+  /* For the build's type declarations: without the paths onto the source of
+     @umriss-ui/core. Otherwise the build would write its types into ours; this
+     way they point at the package, the way a caller installs it. */
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"]
+}
