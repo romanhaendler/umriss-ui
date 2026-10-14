@@ -10,7 +10,7 @@
     composes: ring from "#own-styles";
     position: fixed;
     z-index: var(--u-z-toast);
-    width: 360px;
+    width: var(--u-toast-width);
     border-radius: var(--u-radius-lg);
     transition: height var(--u-duration-medium) var(--u-ease-out);
   }
@@ -57,9 +57,10 @@
     margin-inline: auto;
   }
 
-  /* On a phone the toast takes the window's width; only the edge counts. The
-     distances from the edges change at the same 600 px in the toast tokens
-     (tokens.css): a new breakpoint here is a new one there. */
+  /* On a phone the toast takes the window's width, whatever the width token
+     says; only the edge counts. The distances from the edges change at the
+     same 600 px in the toast tokens (tokens.css): a new breakpoint here is a
+     new one there. */
   @media (max-width: 600px) {
     .region.region {
       width: auto;

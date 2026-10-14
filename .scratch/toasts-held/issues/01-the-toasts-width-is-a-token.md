@@ -1,6 +1,6 @@
 # 01 - The toast's width is a token
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -18,10 +18,20 @@ toast keeps the window's width minus the side tokens.
 
 ## Acceptance
 
-- [ ] `--u-toast-width` with the default `360px` in the toasts' token group;
+- [x] `--u-toast-width` with the default `360px` in the toasts' token group;
       the region's width reads it; no literal width is left for the toast.
-- [ ] The Theming page names it beside the four distance tokens.
-- [ ] Browser test: the token set to another length, the card takes it at
+- [x] The Theming page names it beside the four distance tokens.
+- [x] Browser test: the token set to another length, the card takes it at
       1280 px and ignores it at a phone's width.
-- [ ] Without the token set, every existing toast picture is unchanged.
-- [ ] `pnpm check core`, `pnpm check:site`, `pnpm test:visual:quick core`.
+- [x] Without the token set, every existing toast picture is unchanged.
+- [x] `pnpm check core`, `pnpm check:site`, `pnpm test:visual:quick core`.
+
+## Comments
+
+2026-10-14: Built as written. The Theming page names the token through its
+token table, which is derived from `tokens.css` (the row stands right below
+the four distance tokens); the prose of the "customising" section in
+`demo/outline.ts` was left as it is, so no page picture moved. The browser
+test polls the card's width, since the entrance scales the card up to it.
+Checks: `pnpm check core`, `pnpm check:site`, `pnpm test:visual:quick core`
+green; the toast and Theming pictures in both themes unchanged (40 passed).

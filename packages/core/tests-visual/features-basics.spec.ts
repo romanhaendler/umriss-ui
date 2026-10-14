@@ -501,6 +501,22 @@ for (const width of [1280, 320]) {
   });
 }
 
+/* The toast's width is a token an application reads to decide whether the
+   deck has room beside a surface, and may set. On a phone the toast keeps the
+   window's width minus the side tokens. */
+for (const width of [1280, 320]) {
+  test(`The width token sets the toast's width above a phone's width only (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await openExample(page, "toast", "where-they-stand");
+    await page.addStyleTag({ content: ":root { --u-toast-width: 420px; }" });
+    await page.getByRole("button", { name: "Top end", exact: true }).click();
+    const card = page.locator("[data-toast]").filter({ hasText: "Standing top end." });
+    await expect(card).toBeVisible();
+    /* Polled: the entrance scales the card up to its width. */
+    await expect.poll(async () => (await card.boundingBox())!.width).toBeCloseTo(width === 1280 ? 420 : 320 - 2 * 16, 0);
+  });
+}
+
 test("In a right-to-left page the start token is the distance from the right", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await openExample(page, "toast", "where-they-stand");
