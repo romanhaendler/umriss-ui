@@ -62,6 +62,14 @@ describe("undo, redo and reset", () => {
     expect(button("Reset").disabled).toBe(false);
   });
 
+  it("makes no step of a change that changes nothing", () => {
+    render(<Harness />);
+    press("Edit");
+    menuOf("Orders");
+    item(/Small/);
+    expect(button("Undo").disabled).toBe(true);
+  });
+
   it("undoes and redoes moves, sizes and removals, one step each, and says so", async () => {
     render(<Harness />);
     press("Edit");
