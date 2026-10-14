@@ -50,6 +50,12 @@ export interface DashboardParts {
   done: () => void;
   /** Leaves the mode and puts the arrangement back as it was before `edit`. */
   cancel: () => void;
+  /** Goes one step back in the draft. Does nothing at the first. */
+  undo: () => void;
+  /** Goes one step forward again. Does nothing at the last. */
+  redo: () => void;
+  /** Steps to the `defaultView`; `undo` brings the arrangement back. */
+  reset: () => void;
 }
 
 /** The part of the hook `Dashboard` draws the mode from. */
@@ -61,12 +67,26 @@ export interface Editor {
   cancel: () => void;
   /** Applies one change to the draft. */
   step: (edit: Edit) => void;
+  undo: () => void;
+  redo: () => void;
+  reset: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  canReset: boolean;
+}
+
+/** The draft: whole arrangements, the first the one "Edit" began with, and the one in view. */
+interface Draft {
+  steps: DashboardView[];
+  at: number;
 }
 
 interface State {
   view: DashboardView;
-  draft: DashboardView | null;
+  draft: Draft | null;
 }
+
+const same = (a: DashboardView, b: DashboardView) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Declares a dashboard: hands back `Dashboard`, `WidgetType`, the view in
     view, `setView` and the editing actions. */
@@ -76,9 +96,9 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
   const own = store.current;
 
   /* The latest of the caller's values, read by the actions, which stand still. */
-  const latest = useRef({ allowEdit, onViewChange, onDraftChange });
+  const latest = useRef({ defaultView, allowEdit, onViewChange, onDraftChange });
   // eslint-disable-next-line react-hooks/refs
-  latest.current = { allowEdit, onViewChange, onDraftChange };
+  latest.current = { defaultView, allowEdit, onViewChange, onDraftChange };
 
   const parts = useMemo(() => {
     const subscribe = (listener: () => void) => {
@@ -93,27 +113,44 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
 
     const edit = () => {
       if (!latest.current.allowEdit || own.state.draft) return;
-      put({ ...own.state, draft: own.state.view });
+      put({ ...own.state, draft: { steps: [own.state.view], at: 0 } });
       latest.current.onDraftChange?.(true);
     };
     const leave = (keep: boolean) => {
       const { view, draft } = own.state;
       if (!draft) return;
-      const changed = keep && JSON.stringify(draft) !== JSON.stringify(view);
-      put({ view: changed ? draft : view, draft: null });
+      const current = draft.steps[draft.at]!;
+      const changed = keep && !same(current, view);
+      put({ view: changed ? current : view, draft: null });
       latest.current.onDraftChange?.(false);
-      if (changed) latest.current.onViewChange?.(draft);
+      if (changed) latest.current.onViewChange?.(current);
     };
-    const editor = (allowed: boolean, editing: boolean): Editor => ({
+    const step = (change: Edit) => {
+      const { draft } = own.state;
+      if (draft) put({ ...own.state, draft: { steps: [...draft.steps.slice(0, draft.at + 1), change(draft.steps[draft.at]!)], at: draft.at + 1 } });
+    };
+    const go = (by: number) => {
+      const { draft } = own.state;
+      if (draft && draft.steps[draft.at + by]) put({ ...own.state, draft: { ...draft, at: draft.at + by } });
+    };
+    const undo = () => go(-1);
+    const redo = () => go(1);
+    const reset = () => {
+      if (own.state.draft) step(() => latest.current.defaultView);
+    };
+    const editor = (allowed: boolean, draft: Draft | null): Editor => ({
       allowed,
-      editing,
+      editing: draft !== null,
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
-      step: (change) => {
-        const { draft } = own.state;
-        if (draft) put({ ...own.state, draft: change(draft) });
-      },
+      step,
+      undo,
+      redo,
+      reset,
+      canUndo: !!draft && draft.at > 0,
+      canRedo: !!draft && draft.at < draft.steps.length - 1,
+      canReset: !!draft && !same(draft.steps[draft.at]!, latest.current.defaultView),
     });
 
     return {
@@ -122,10 +159,13 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
-      setView: (view: DashboardView) => put({ ...own.state, view, draft: own.state.draft ? view : null }),
+      undo,
+      redo,
+      reset,
+      setView: (view: DashboardView) => put({ ...own.state, view, draft: own.state.draft ? { steps: [view], at: 0 } : null }),
       Dashboard: (props: DashboardProps) => {
         const { view, draft } = useSyncExternalStore(subscribe, get, get);
-        return createElement(DashboardOf, { ...props, view: draft ?? view, editor: editor(latest.current.allowEdit, draft !== null) });
+        return createElement(DashboardOf, { ...props, view: draft ? draft.steps[draft.at]! : view, editor: editor(latest.current.allowEdit, draft) });
       },
     };
   }, [own]);
@@ -134,11 +174,14 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
   return {
     Dashboard: parts.Dashboard,
     WidgetType,
-    view: draft ?? view,
+    view: draft ? draft.steps[draft.at]! : view,
     setView: parts.setView,
     editing: draft !== null,
     edit: parts.edit,
     done: parts.done,
     cancel: parts.cancel,
+    undo: parts.undo,
+    redo: parts.redo,
+    reset: parts.reset,
   };
 }
