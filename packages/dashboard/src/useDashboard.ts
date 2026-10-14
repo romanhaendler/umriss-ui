@@ -48,6 +48,8 @@ export interface DashboardParts {
   edit: () => void;
   /** Leaves the mode, keeps the changes and reports them once if there are any. */
   done: () => void;
+  /** Opens the catalogue. Does nothing outside the editing mode. */
+  catalogue: () => void;
   /** Leaves the mode and puts the arrangement back as it was before `edit`. */
   cancel: () => void;
   /** Goes one step back in the draft. Does nothing at the first. */
@@ -65,6 +67,9 @@ export interface Editor {
   edit: () => void;
   done: () => void;
   cancel: () => void;
+  /** Whether the catalogue stands, and the means to open and close it. */
+  catalogue: boolean;
+  setCatalogue: (open: boolean) => void;
   /** Applies one change to the draft. */
   step: (edit: Edit) => void;
   undo: () => void;
@@ -84,6 +89,8 @@ interface Draft {
 interface State {
   view: DashboardView;
   draft: Draft | null;
+  /** Whether the catalogue stands. */
+  catalogue?: boolean;
 }
 
 const same = (a: DashboardView, b: DashboardView) => JSON.stringify(a) === JSON.stringify(b);
@@ -121,9 +128,12 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       if (!draft) return;
       const current = draft.steps[draft.at]!;
       const changed = keep && !same(current, view);
-      put({ view: changed ? current : view, draft: null });
+      put({ view: changed ? current : view, draft: null, catalogue: false });
       latest.current.onDraftChange?.(false);
       if (changed) latest.current.onViewChange?.(current);
+    };
+    const setCatalogue = (open: boolean) => {
+      if (own.state.draft) put({ ...own.state, catalogue: open });
     };
     const step = (change: Edit) => {
       const { draft } = own.state;
@@ -142,12 +152,14 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     const reset = () => {
       if (own.state.draft) step(() => latest.current.defaultView);
     };
-    const editor = (allowed: boolean, draft: Draft | null): Editor => ({
+    const editor = (allowed: boolean, draft: Draft | null, catalogue: boolean): Editor => ({
       allowed,
       editing: draft !== null,
       edit,
       done: () => leave(true),
       cancel: () => leave(false),
+      catalogue,
+      setCatalogue,
       step,
       undo,
       redo,
@@ -166,10 +178,11 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       undo,
       redo,
       reset,
+      catalogue: () => setCatalogue(true),
       setView: (view: DashboardView) => put({ ...own.state, view, draft: own.state.draft ? { steps: [view], at: 0 } : null }),
       Dashboard: (props: DashboardProps) => {
-        const { view, draft } = useSyncExternalStore(subscribe, get, get);
-        return createElement(DashboardOf, { ...props, view: draft ? draft.steps[draft.at]! : view, editor: editor(latest.current.allowEdit, draft) });
+        const { view, draft, catalogue } = useSyncExternalStore(subscribe, get, get);
+        return createElement(DashboardOf, { ...props, view: draft ? draft.steps[draft.at]! : view, editor: editor(latest.current.allowEdit, draft, !!catalogue) });
       },
     };
   }, [own]);
@@ -184,6 +197,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     edit: parts.edit,
     done: parts.done,
     cancel: parts.cancel,
+    catalogue: parts.catalogue,
     undo: parts.undo,
     redo: parts.redo,
     reset: parts.reset,

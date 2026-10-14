@@ -61,7 +61,7 @@ export default function Dispatcher() {
     onViewChange: () => setKept((count) => count + 1),
   });
   return (
-    <Dashboard aria-label="Dispatch, today" data-draft={open || undefined} data-kept={kept}>
+    <Dashboard aria-label="Dispatch, today" catalogue={["figure", "trend", "alerts"]} data-draft={open || undefined} data-kept={kept}>
       <WidgetType
         name="figure"
         label="Figure"
@@ -70,6 +70,13 @@ export default function Dispatcher() {
         start="small"
         defaultOptions={{ name: "Orders" as keyof typeof FIGURES }}
         title={(options) => options.name}
+        form={({ options, change }) => (
+          <select aria-label="Figure" value={options.name} onChange={(event) => change({ name: event.target.value as keyof typeof FIGURES })}>
+            {Object.keys(FIGURES).map((name) => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        )}
       >
         {({ options, size }) => (
           <Stack gap={1}>
