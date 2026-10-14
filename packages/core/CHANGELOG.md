@@ -26,6 +26,22 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.38.0 – Holding the toasts back, and a deck that glides (Oct. 2026)
+
+### Added
+
+- **`held` on `ToastProvider`** holds the toasts back for a while: for a surface the toasts must not cover, where there is no room beside it. While it is true no toast is seen, heard, pressed or reached by the keyboard, Alt + T goes to the page, and what lies under the deck's place can be seen and used as if no toast stood; a focus in the deck goes back where it came from, as with Escape. Nothing is lost, as it would be by dismissing: no countdown runs, a toast that arrives waits, and `toast()`, `update()` and `dismiss()` work as always (`dismiss()` and the limit close a toast at once, with its `onClose`; holding calls none). When it is false again every toast comes back at the deck's current place with its entrance and the time it had left; the ones that arrived meanwhile are heard then, the others not a second time. Default `false`; the example "Hold the toasts" on the Toast page shows it.
+
+- **`type ToastProviderProps`** is exported, like the props of the other components.
+
+- **`--u-toast-width`**, the toast's width, `360px` by default, in the Toast token group beside the four distance tokens. A plain length: read from the computed style it tells whether the deck has room beside a surface, and set on `:root` it makes the toasts wider or narrower. Up to 600 px wide the toast keeps the window's width less the side tokens.
+
+### Changed
+
+- **The deck glides when its distance changes.** A change of `--u-toast-inset-top`, `-bottom`, `-start` or `-end` while a toast is seen moves the deck to its new place in `--u-duration-medium` with `--u-ease-out`, as its height moves; it jumped. It glides also when the change comes in the moment a modal dialog opens or closes, so the region moves into or out of it: the deck starts where it was seen. It moves at once under reduced motion, while no toast stands (a first toast stands at its place), while held and when a hold ends; a token set again to its value, in every frame if need be, moves nothing, and a deck whose distance stays the same stands still when a dialog opens or closes, as before. A change of `position` does not glide.
+
+- **An open deck at the top edge lays the lower card above.** Open, the card lower on the screen now lies above the one over it wherever the deck stands, so no card's shadow falls on the face of the next; at the top it was the other way round. The order turns once the cards stand apart, after `--u-duration-medium`, and at once on closing and under reduced motion. A closed deck is ordered as before.
+
 ## 0.37.0 – The toasts' distance from the window's sides (Oct. 2026)
 
 ### Added
