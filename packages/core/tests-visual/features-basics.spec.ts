@@ -64,6 +64,68 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
   await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
 });
 
+/* A page of the demo is one application: one deck for the toasts of every
+   example on it. */
+test("Scan four parcels, then Save in the modal: one deck, nothing lies on another, Retry is pressable", async ({ page }) => {
+  await openExample(page, "toast", "how-many-stand");
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await page.getByRole("button", { name: "Edit the profile" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit the profile" });
+  await expect(dialog).toBeVisible();
+
+  /* Every frame for 500 ms from the press: how many decks stand, i.e. how
+     many places hold toast cards. Cards of one deck stack as it draws them;
+     two decks would be two places. */
+  await page.evaluate(() => {
+    const state = { decks: new Set<number>(), running: true };
+    (window as unknown as { __decks: typeof state }).__decks = state;
+    const frame = () => {
+      const places = new Set([...document.querySelectorAll("[data-toast]")].map((card) => card.closest("[data-edge]")));
+      state.decks.add(places.size);
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  await dialog.getByRole("button", { name: "Save" }).click();
+  const region = page.getByRole("region", { name: "Messages (Alt+T)" });
+  await expect(region.getByText("Profile not saved")).toBeVisible();
+  await page.waitForTimeout(500);
+  const decks = await page.evaluate(() => {
+    const state = (window as unknown as { __decks: { decks: Set<number>; running: boolean } }).__decks;
+    state.running = false;
+    return Math.max(...state.decks);
+  });
+  expect(decks).toBe(1);
+  await expect(region).toHaveCount(1);
+  const standing = await page.locator("[data-toast]").count();
+  await expect(page.getByRole("button", { name: `${standing} messages, show all` })).toBeVisible();
+
+  const retry = region.getByRole("button", { name: "Retry" });
+  const box = (await retry.boundingBox())!;
+  const hit = await page.evaluate(
+    ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.textContent,
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
+  expect(hit).toBe("Retry");
+});
+
+test("Go offline, then Scan four parcels: one deck, and Working offline still stands", async ({ page }) => {
+  await openExample(page, "toast", "until-closed");
+  await page.getByRole("button", { name: "Go offline" }).click();
+  await expect(page.getByText("Working offline")).toBeVisible();
+  await page.getByRole("button", { name: "Scan four parcels" }).click();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole("region", { name: "Messages (Alt+T)" })).toHaveCount(1);
+  await expect(page.getByText("Working offline")).toBeVisible();
+  const places = await page.locator("[data-toast]").evaluateAll((cards) =>
+    cards.map((card) => {
+      const box = card.getBoundingClientRect();
+      return `${Math.round(box.x)},${Math.round(box.y)}`;
+    }),
+  );
+  expect(new Set(places).size, places.join(" ")).toBe(places.length);
+});
+
 /* The toasts above an open modal dialog: the unit setup's dialog makes nothing
    inert, so only a browser shows that a toast in the dialog can be pressed. */
 test("A toast above a modal is pressable and closes without closing the modal", async ({ page }) => {
