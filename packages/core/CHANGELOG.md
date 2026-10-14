@@ -26,6 +26,16 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.39.0 – Toasts that stay, and one provider (Oct. 2026)
+
+### Changed
+
+- **A toast that stays never gives way to the limit.** A toast with `duration: 0` and a `loading` toast are no longer pushed out by newer ones, and they do not count toward `limit`: the limit caps only the toasts that leave by themselves, the oldest of them giving way as before. A failure that stays until it is read is no longer lost to a burst of confirmations, and a `loading` toast stays until `update` gives its outcome. The limit is applied when a toast arrives; `update` pushes nothing out, and a `loading` toast turned into its outcome counts from the next arrival on. So the deck may hold more than `limit` toasts: every lasting one beside up to `limit` timed ones. Check pages that sent many lasting toasts and relied on the limit to clear them.
+
+### Added
+
+- **A second `ToastProvider` is reported in development.** An application has one `ToastProvider`, at its root; two draw two decks at the same place, one over the other. A provider that mounts while another stands in the same document now writes one `console.warn` in development. Nothing changes in production.
+
 ## 0.38.0 – Holding the toasts back, and a deck that glides (Oct. 2026)
 
 ### Added

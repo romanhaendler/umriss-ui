@@ -12,6 +12,11 @@ From 0.34.0 all five packages share one number: they are released together, and 
 
 ---
 
+## 0.39.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
 ## 0.38.0 – No change of its own (Oct. 2026)
 
 Released with the other four packages under their one number. No change of its
