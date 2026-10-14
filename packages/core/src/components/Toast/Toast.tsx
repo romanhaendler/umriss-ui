@@ -362,6 +362,24 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
     setHovered(false);
     letGoOfFocus();
   }, [held, remove, leaveRegion, setHovered, letGoOfFocus]);
+  /* Nothing glides from where the deck stood while held: until the first
+     frame after the hold the region has no transition, and its distances are
+     taken there before it gets it back, so that a token changed in the same
+     frame as the hold ends, before or after it, puts the deck at its new
+     place at once. */
+  useLayoutEffect(() => {
+    const region = regionRef.current;
+    if (held || !region) return;
+    region.style.transition = "none";
+    const frame = requestAnimationFrame(() => {
+      getComputedStyle(region).getPropertyValue("--_toast-top");
+      region.style.transition = "";
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      region.style.transition = "";
+    };
+  }, [held]);
   /* Every card plays its entrance from the start when the hold ends. */
   if (held && ages.size > 0) setAges(new Map());
 
