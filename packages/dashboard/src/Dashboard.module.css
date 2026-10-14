@@ -185,6 +185,12 @@
     }
   }
 
+  /* The popover is a bare surface: the room around a type's form is the dashboard's. */
+  .options {
+    min-width: 16rem;
+    padding: var(--u-space-3);
+  }
+
   .catalogue {
     list-style: none;
     margin: 0;
