@@ -14,7 +14,7 @@ comes out differently on another screen and does not come back when the window
 widens; they cannot move a widget by keyboard in October 2026; and they know
 nothing of density, tokens or wording. The research behind this decision is
 `docs/research/user-dashboards-2026-10/`, its synthesis `report.md`; two
-throwaway prototypes are in `.scratch/dashboard/`.
+throwaway prototypes are on the branch `prototype/dashboard`.
 
 **`@umriss-ui/dashboard` shows widgets that the reader arranges. The arrangement
 is a sequence, each widget at one of the sizes its type declares, packed in

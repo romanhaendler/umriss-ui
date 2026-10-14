@@ -5,7 +5,7 @@ Date:   2026-10-14
 Origin: grilling session of 13 and 14 Oct 2026; ADR-0064, which supersedes
 ADR-0060's "never" for a dashboard a user arranges; research in
 `docs/research/user-dashboards-2026-10/` (synthesis `report.md`); two throwaway
-prototypes beside this file.
+prototypes in `.scratch/dashboard/` on the local branch `prototype/dashboard`.
 
 ## Problem Statement
 
@@ -198,5 +198,5 @@ frames, the empty and failed states - with its wording in English and German.
 
 - The size names were the recommendation of the grilling (`small`, `medium`, `wide`, `tall`, `large`, `full`); for a chart "wide" (half) is narrower than "large" (two thirds), which the menu's order by area and the share beside each name are meant to absorb. If the first readers stumble on it, the names are the thing to change before 1.0 - they are stored, so after 1.0 they are not.
 - Three behaviours were chosen by the prototypes, not by evidence, and are the first things to watch with real readers: making room while dragging rather than only marking the place; all four arrow keys meaning earlier or later; free room left free rather than filled.
-- Prototype 2 (`PROTOTYPE-2-dashboard.html`) is the behaviour to match; its four guided cases are the acceptance walk. Prototype 1 shows why the columns are fixed (neighbours kept at other widths). Both stay out of `main`.
+- Prototype 2 (`PROTOTYPE-2-dashboard.html` on the branch `prototype/dashboard`) is the behaviour to match; its four guided cases are the acceptance walk. Prototype 1 (`PROTOTYPE-arrangement.html`, same branch) shows why the columns are fixed (neighbours kept at other widths). Both stay out of `main`.
 - The research found that most readers keep the default and the rest change little: the default arrangement per role, the lenient reading and "Reset" are the parts most readers will meet; the editing mode is the exception above them.
