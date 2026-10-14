@@ -4,16 +4,20 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
 Spec: `.scratch/toasts-one-deck/spec.md` (Implementation Decisions "The limit", User Stories 12–18, 21)
 
-- [ ] A toast *may give way* when its effective duration (its own, else the provider's) is above 0 and its tone is not `loading`; only such standing toasts are counted against the limit and pushed out, oldest first, with `dismiss`
-- [ ] The limit is applied on arrival only; `update` pushes nothing out, a `loading` toast turned into its outcome counts from the next arrival on
-- [ ] The same rule during a hold: a lasting toast among the arrivals comes back
-- [ ] Unit tests in the limit tests of the toast: `duration: 0` plus four timed (stays, oldest timed goes); `loading` plus four timed (stays, `update` then shows the outcome); `loading` turned `success` gives way at the next arrival beyond the limit; provider default `duration: 0` (none gives way); hold with a lasting toast among four arrivals
-- [ ] The existing limit tests stay green
-- [ ] The texts of `update` and of `ToastConfig.limit` say the new rule; `CONTEXT.md` **Toast**: the oldest that leaves by itself gives way
-- [ ] `CHANGELOG.md` of core, under **Changed**: lasting and `loading` toasts no longer give way to the limit
-- [ ] `pnpm check core` green
-- [ ] One commit, no push
+- [x] A toast *may give way* when its effective duration (its own, else the provider's) is above 0 and its tone is not `loading`; only such standing toasts are counted against the limit and pushed out, oldest first, with `dismiss`
+- [x] The limit is applied on arrival only; `update` pushes nothing out, a `loading` toast turned into its outcome counts from the next arrival on
+- [x] The same rule during a hold: a lasting toast among the arrivals comes back
+- [x] Unit tests in the limit tests of the toast: `duration: 0` plus four timed (stays, oldest timed goes); `loading` plus four timed (stays, `update` then shows the outcome); `loading` turned `success` gives way at the next arrival beyond the limit; provider default `duration: 0` (none gives way); hold with a lasting toast among four arrivals
+- [x] The existing limit tests stay green
+- [x] The texts of `update` and of `ToastConfig.limit` say the new rule; `CONTEXT.md` **Toast**: the oldest that leaves by itself gives way
+- [x] `CHANGELOG.md` of core, under **Changed**: lasting and `loading` toasts no longer give way to the limit
+- [x] `pnpm check core` green
+- [x] One commit, no push
+
+## Comments
+
+Built in `ToastProvider.toast` (only toasts with effective duration above 0 and tone other than `loading` are counted and pushed out); texts of `update`, `ToastConfig.limit`, API.md, CONTEXT.md and the changelog (new "Unreleased" heading) say the rule. Deviation: the existing hold test "keeps the limit" used `duration: 0` toasts as its timed ones; they are timed now, as the rule requires.

@@ -26,6 +26,12 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **Lasting and `loading` toasts no longer give way to the limit.** A toast with `duration: 0` and a `loading` toast are never pushed out by newer toasts and do not count toward `limit`: with the default of 3, up to three timed toasts stand, plus every lasting and every loading one. A failure with "Retry" stays until it is closed, and a `loading` toast stays until `update` turns it into its outcome, which counts toward the limit from the next arrival on. Check pages that sent many toasts with `duration: 0` or `loading`: they no longer thin out by themselves.
+
 ## 0.38.0 – Holding the toasts back, and a deck that glides (Oct. 2026)
 
 ### Added

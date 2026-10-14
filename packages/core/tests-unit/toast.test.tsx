@@ -279,6 +279,56 @@ describe("Toast – limit", () => {
     expect(screen.queryByText("First")).toBeNull();
     expect(screen.getByText("Second")).toBeTruthy();
   });
+
+  const timed = (call: ReturnType<typeof mount>, titles: string[]) =>
+    titles.forEach((title) => call((t) => t.toast({ title })));
+
+  it("never pushes out a toast that stays, and does not count it", () => {
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Not saved", duration: 0, onClose }));
+    timed(call, ["A", "B", "C", "D"]);
+    expect(screen.getByText("Not saved")).toBeTruthy();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByText("A")).toBeNull();
+    for (const title of ["B", "C", "D"]) expect(screen.getByText(title)).toBeTruthy();
+  });
+
+  it("keeps a loading toast until update shows its outcome", () => {
+    const call = mount();
+    const id = call((t) => t.toast({ title: "Working", tone: "loading" }));
+    timed(call, ["A", "B", "C", "D"]);
+    expect(screen.getByText("Working")).toBeTruthy();
+    call((t) => t.update(id, { title: "Done", tone: "success" }));
+    expect(screen.getByText("Done")).toBeTruthy();
+  });
+
+  it("counts a loading toast turned into its outcome from the next arrival on", () => {
+    const call = mount();
+    const id = call((t) => t.toast({ title: "Working", tone: "loading" }));
+    timed(call, ["A", "B", "C"]);
+    call((t) => t.update(id, { title: "Done", tone: "success" }));
+    expect(screen.getByText("Done")).toBeTruthy();
+    timed(call, ["D"]);
+    expect(screen.queryByText("Done")).toBeNull();
+  });
+
+  it("lets none give way when the provider's duration is 0", () => {
+    const call = mount({ duration: 0 });
+    timed(call, ["A", "B", "C", "D"]);
+    for (const title of ["A", "B", "C", "D"]) expect(screen.getByText(title)).toBeTruthy();
+  });
+
+  it("brings a lasting toast among four arrivals back when the hold ends", () => {
+    const call = mount();
+    call.hold(true);
+    call((t) => t.toast({ title: "Not saved", duration: 0 }));
+    timed(call, ["A", "B", "C", "D"]);
+    call.hold(false);
+    expect(screen.getByText("Not saved")).toBeTruthy();
+    expect(screen.queryByText("A")).toBeNull();
+    expect(screen.getByText("D")).toBeTruthy();
+  });
 });
 
 /* toast-refinement 01: the deck. What is observable without layout: the
@@ -550,8 +600,8 @@ describe("Toast – held", () => {
     const call = mount();
     const onClose = vi.fn();
     call.hold(true);
-    call((t) => t.toast({ title: "First", duration: 0, onClose }));
-    for (const title of ["Second", "Third", "Fourth"]) call((t) => t.toast({ title, duration: 0 }));
+    call((t) => t.toast({ title: "First", onClose }));
+    for (const title of ["Second", "Third", "Fourth"]) call((t) => t.toast({ title }));
     expect(onClose).toHaveBeenCalledWith("dismiss");
     call.hold(false);
     expect(screen.queryByText("First")).toBeNull();

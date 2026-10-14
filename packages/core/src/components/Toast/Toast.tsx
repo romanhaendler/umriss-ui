@@ -75,8 +75,10 @@ interface ToastContextValue {
   toast: (options: ToastOptions) => number;
   /** Changes a standing toast. A new tone or a new `duration` starts its time
       afresh - so a `loading` toast turned into `success` begins to count then.
-      An id that no longer stands is ignored: a toast that gave way to newer
-      ones - a `loading` one too - has said so through `onClose`. */
+      An id that no longer stands is ignored: a timed toast that gave way
+      to newer ones has said so through `onClose`. A `loading` toast turned into
+      its outcome counts toward the limit from the next arrival on; `update`
+      itself pushes nothing out. */
   update: (id: number, options: Partial<ToastOptions>) => void;
   /** Closes a toast, with the reason `dismiss`. */
   dismiss: (id: number) => void;
@@ -234,14 +236,18 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
       const id = nextId.current++;
       arrivedRef.current.set(id, performance.now());
       commit([...itemsRef.current, { ...options, id }]);
-      const standing = itemsRef.current.filter((item) => !item.leaving);
-      /* Over the limit the oldest gives way - as if closed. A queue would
-         bring old news late. */
+      /* Only a toast that leaves by itself counts: one that stays (no time,
+         or still at work) is never pushed out. */
+      const standing = itemsRef.current.filter(
+        (item) => !item.leaving && (item.duration ?? defaultDuration) > 0 && item.tone !== "loading",
+      );
+      /* Over the limit the oldest of them gives way - as if closed. A queue
+         would bring old news late. */
       standing.slice(0, Math.max(0, standing.length - limit)).forEach((item) => beginLeave(item.id, "dismiss"));
       startTimer(id);
       return id;
     },
-    [beginLeave, commit, limit, startTimer],
+    [beginLeave, commit, defaultDuration, limit, startTimer],
   );
 
   const update = useCallback(
