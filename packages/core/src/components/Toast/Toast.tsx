@@ -172,7 +172,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
 
   const { open, setHovered, setFocused, setPinned } = useDeckOpen(regionRef, items);
   const { heights, measureRef, forget } = useCardMeasure();
-  const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights);
+  const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights, edge);
   const anyStanding = items.some((item) => !item.leaving);
   const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding && !held);
 
@@ -449,6 +449,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
           popover={topLayerPopover(target)}
           data-edge={edge}
           data-along={along}
+          data-open={open ? "" : undefined}
           data-keys={byKeys ? "" : undefined}
           style={regionStyle}
           {...(anyStanding && !held ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}

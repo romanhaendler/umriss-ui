@@ -133,6 +133,17 @@
       opacity var(--u-duration-medium) var(--u-ease-out);
   }
 
+  /* In an open deck a new order waits until the cards stand apart: turned at
+     once, an older card would lie over the front one while they still
+     overlap. Closing turns it back at once, since the order is taken from the
+     style after the change. */
+  .region[data-open] .card {
+    transition:
+      transform var(--u-duration-medium) var(--u-ease-out),
+      opacity var(--u-duration-medium) var(--u-ease-out),
+      z-index 0s var(--u-duration-medium);
+  }
+
   .region[data-edge="bottom"] .card {
     bottom: 0;
     transform-origin: top center;
@@ -399,6 +410,7 @@
     .region,
     .region[role="region"],
     .card,
+    .region[data-open] .card,
     .toast,
     .content {
       animation: none;

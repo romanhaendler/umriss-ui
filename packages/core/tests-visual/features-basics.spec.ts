@@ -675,6 +675,98 @@ test("Held toasts leave the page under them to be hit, and come back where they 
   expect(await tabIntoTheToasts()).toBe("Close message");
 });
 
+/* An open deck casts no shadow on its cards: the card lower on the screen
+   lies above the one above it, wherever the deck stands, so each shadow falls
+   under the next card. Read from the picture: the face of the middle card is
+   as light just below its top edge as near its bottom. */
+async function deckOfThree(page: Page, position: "Top end" | "Bottom end") {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: position, exact: true }).click();
+  const cards = page.locator("[data-toast]");
+  await expect(cards).toHaveCount(3);
+  await page.waitForTimeout(400);
+  return cards;
+}
+
+/** The mean grey of a line across the card's face, `y` px below its top (negative: above its bottom). */
+async function faceGrey(page: Page, card: Locator, ys: number[]) {
+  const box = (await card.boundingBox())!;
+  const png = await page.screenshot({ clip: box, scale: "css", animations: "disabled" });
+  return page.evaluate(
+    async ({ data, ys }) => {
+      const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+      const image = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
+      const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d")!;
+      ctx.drawImage(image, 0, 0);
+      return ys.map((y) => {
+        const row = ctx.getImageData(40, y < 0 ? image.height + y : y, image.width - 80, 1).data;
+        let sum = 0;
+        for (let i = 0; i < row.length; i += 4) sum += (row[i]! + row[i + 1]! + row[i + 2]!) / 3;
+        return sum / (row.length / 4);
+      });
+    },
+    { data: png.toString("base64"), ys },
+  );
+}
+
+for (const colorScheme of ["light", "dark"] as const)
+  for (const position of ["Top end", "Bottom end"] as const)
+    test(`An open deck at ${position.toLowerCase()} casts no shadow on its middle card (${colorScheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      const cards = await deckOfThree(page, position);
+      await cards.last().hover();
+      await page.waitForTimeout(700);
+      const [top, bottom] = await faceGrey(page, cards.nth(1), [3, -4]);
+      expect(Math.abs(top! - bottom!), `top ${top}, bottom ${bottom}`).toBeLessThan(1.5);
+    });
+
+/* While a top deck opens and closes the cards overlap: the front card must lie
+   in front in every frame, or an older card would cover it for a moment. */
+async function sampleTheFront(page: Page): Promise<() => Promise<boolean[]>> {
+  await page.evaluate(() => {
+    const state = { running: true, frames: [] as boolean[] };
+    (window as unknown as { __front: typeof state }).__front = state;
+    const frame = () => {
+      const front = [...document.querySelectorAll("[data-toast]")].at(-1)!;
+      const box = front.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.bottom - 6);
+      state.frames.push((hit?.closest("[data-toast]") ?? hit?.querySelector(":scope > [data-toast]")) === front);
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  return () =>
+    page.evaluate(() => {
+      const state = (window as unknown as { __front: { running: boolean; frames: boolean[] } }).__front;
+      state.running = false;
+      return state.frames;
+    });
+}
+
+test("While a deck at the top opens, its front card lies in front in every frame", async ({ page }) => {
+  const cards = await deckOfThree(page, "Top end");
+  await page.mouse.move(0, 0);
+  const stop = await sampleTheFront(page);
+  await cards.last().hover();
+  await page.waitForTimeout(700);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(10);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
+
+test("While a deck at the top closes, its front card lies in front in every frame", async ({ page }) => {
+  const cards = await deckOfThree(page, "Top end");
+  await cards.last().hover();
+  await page.waitForTimeout(700);
+  const stop = await sampleTheFront(page);
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(700);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(10);
+  expect(frames.indexOf(false), `${frames.length} frames`).toBe(-1);
+});
+
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");
   const example = page.locator('[data-example="loading-and-empty-panels"]');
