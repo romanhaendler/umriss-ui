@@ -24,6 +24,11 @@ export default defineConfig({
         find: /^@umriss-ui\/core$/,
         replacement: fileURLToPath(new URL("../core/src/index.ts", import.meta.url)),
       },
+      /* The demo, which the smoke test renders, draws its trends with charts. */
+      {
+        find: /^@umriss-ui\/charts$/,
+        replacement: fileURLToPath(new URL("../charts/src/index.ts", import.meta.url)),
+      },
     ],
     dedupe: ["react", "react-dom"],
   },

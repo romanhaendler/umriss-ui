@@ -1,6 +1,6 @@
 import { Children, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
-import { announce, Button, Card, CardBody, CardHeader, Drawer, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Text, useWording } from "@umriss-ui/core";
+import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
@@ -129,7 +129,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
     editing
       ? {
           ref: track(heads, widget.id),
-          className: styles.head,
+          className: cx(styles.head, styles.editingHead),
           ...handlers(widget.id, i),
           role: "group",
           tabIndex: 0,
@@ -142,7 +142,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             moveTo(widget.id, title, to);
           },
         }
-      : {};
+      : { className: styles.head };
 
   /* The menu of a widget's head: the moves, the sizes, the options, remove. */
   const menuOf = (widget: DashboardWidget, type: AnyType, title: string, i: number, at: number) => {
@@ -209,16 +209,16 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   };
 
   return (
-    <div role="group" className={cx(styles.root, className)} {...rest}>
+    <div role="group" className={cx(styles.root, className)} data-editing={editing || undefined} {...rest}>
       {editor.allowed && (
         <div className={styles.bar}>
           {editing ? (
             <>
-              <Text as="span" weight="semibold" className={styles.mode}>{wording.dashboardEditing}</Text>
-              <Button ref={addButton} size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
+              <span className={styles.mode}>{wording.dashboardEditing}</span>
               <Button size="sm" disabled={!editor.canUndo} onClick={editor.undo}>{wording.dashboardUndo}</Button>
               <Button size="sm" disabled={!editor.canRedo} onClick={editor.redo}>{wording.dashboardRedo}</Button>
               <Button size="sm" disabled={!editor.canReset} onClick={editor.reset}>{wording.dashboardReset}</Button>
+              <Button ref={addButton} size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
               <Button size="sm" onClick={editor.cancel}>{wording.dashboardCancel}</Button>
               <Button size="sm" variant="primary" onClick={editor.done}>{wording.dashboardDone}</Button>
             </>
@@ -240,6 +240,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             return (
               <div key={widget.id} ref={track(cards, widget.id)} className={cx(styles.item, styles.headingRow)} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined}>
                 <div {...head} className={cx(head.className, styles.headingHead)}>
+                  {editing && <GripGlyph className={styles.grip} />}
                   <Heading level={2} size="lg" className={styles.heading}>{(widget.options as HeadingOptions).text}</Heading>
                   {menu}
                 </div>
@@ -248,8 +249,13 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           }
           return (
             <Card key={widget.id} ref={track(cards, widget.id)} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={title}>
-              <CardHeader title={title} {...head} actions={menu} />
-              <CardBody className={styles.body} inert={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></CardBody>
+              <div {...head}>
+                {editing && <GripGlyph className={styles.grip} />}
+                <h2 className={styles.title}>{title}</h2>
+                {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
+                {menu}
+              </div>
+              <div className={styles.body} inert={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></div>
             </Card>
           );
         })}
