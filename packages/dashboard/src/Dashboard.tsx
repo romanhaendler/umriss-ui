@@ -284,14 +284,16 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
         </ModalBody>
       </Drawer>
       {optionsType?.form && optionsWidget && (
-        <Popover open anchorRef={anchor} onOpenChange={() => setOptionsFor(null)} role="dialog" ariaLabel={wording.dashboardOptions}>
-          {optionsType.form({
-            options: optionsWidget.options,
-            change: (options) => {
-              editor.step(setOptions(optionsWidget.id, options));
-              announce(wording.dashboardOptionsChanged(titleOf(optionsType, options)));
-            },
-          })}
+        <Popover open anchorRef={anchor} align="end" onOpenChange={() => setOptionsFor(null)} role="dialog" ariaLabel={wording.dashboardOptions}>
+          <div className={styles.options}>
+            {optionsType.form({
+              options: optionsWidget.options,
+              change: (options) => {
+                editor.step(setOptions(optionsWidget.id, options));
+                announce(wording.dashboardOptionsChanged(titleOf(optionsType, options)));
+              },
+            })}
+          </div>
         </Popover>
       )}
     </div>

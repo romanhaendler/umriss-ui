@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useChart } from "@umriss-ui/charts";
-import { Text } from "@umriss-ui/core";
+import { FormField, Select, Text } from "@umriss-ui/core";
 import { HeadingType, useDashboard } from "../../../src";
 import type { DashboardView, HeadingOptions } from "../../../src";
 
@@ -169,11 +169,13 @@ export default function Dispatcher() {
         defaultOptions={{ name: "Orders" as keyof typeof FIGURES }}
         title={(options) => options.name}
         form={({ options, change }) => (
-          <select aria-label="Figure" value={options.name} onChange={(event) => change({ name: event.target.value as keyof typeof FIGURES })}>
-            {Object.keys(FIGURES).map((name) => (
-              <option key={name}>{name}</option>
-            ))}
-          </select>
+          <FormField label="Figure">
+            <Select value={options.name} onChange={(event) => change({ name: event.target.value as keyof typeof FIGURES })}>
+              {Object.keys(FIGURES).map((name) => (
+                <option key={name}>{name}</option>
+              ))}
+            </Select>
+          </FormField>
         )}
       >
         {({ options }) => <Kz {...FIGURES[options.name]} />}
