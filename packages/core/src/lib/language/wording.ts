@@ -512,7 +512,7 @@ export interface Wording {
   /** The closed set of size names, worded once for every widget type. */
   dashboardSizes: { small: string; medium: string; wide: string; tall: string; large: string; full: string };
   /** A size's entry in a widget's menu: its name and its share of the width
-      (`share` is "¼" or "5/12"); `current` marks the size the widget stands at. */
+      (`share` is "¼" or "5/12", empty for the whole width); `current` marks the size the widget stands at. */
   dashboardSizeEntry: (size: string, share: string, current: boolean) => string;
   /** The built-in heading type: its name, its sentence in the catalogue, the
       text a new heading starts with and the label of its text field. */
@@ -876,7 +876,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardMoveEnd: "Move to end",
   dashboardRemove: "Remove",
   dashboardSizes: { small: "Small", medium: "Medium", wide: "Wide", tall: "Tall", large: "Large", full: "Full width" },
-  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}, ${share} wide`,
+  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}${share ? `, ${share} wide` : ""}`,
   dashboardHeadingLabel: "Heading",
   dashboardHeadingSentence: "A title across the full width.",
   dashboardHeadingText: "New section",
