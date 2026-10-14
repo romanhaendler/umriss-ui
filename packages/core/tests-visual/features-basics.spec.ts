@@ -517,6 +517,12 @@ for (const width of [1280, 320]) {
   });
 }
 
+/** Waits until the deck's entrance and transitions have run. */
+async function deckAtRest(page: Page) {
+  const region = page.locator("[data-edge]:has([data-toast])");
+  await expect.poll(() => region.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(0);
+}
+
 /* The deck glides when the application changes its distance from the window,
    in the time and easing of its height. The region's box is read in every
    animation frame in which a card is seen (a held card is not). */
@@ -550,7 +556,7 @@ async function standingTopEnd(page: Page) {
   await openExample(page, "toast", "where-they-stand");
   await page.getByRole("button", { name: "Top end", exact: true }).click();
   await expect(page.getByText("Standing top end.")).toBeVisible();
-  await page.waitForTimeout(400);
+  await deckAtRest(page);
 }
 
 for (const [token, side] of [["--u-toast-inset-top", "top"], ["--u-toast-inset-end", "end"]] as const) {
@@ -666,7 +672,7 @@ test("Held toasts leave the page under them to be hit, and come back where they 
   await example.getByRole("button", { name: "Send a toast" }).click();
   const cross = page.getByRole("button", { name: "Close message" });
   await expect(cross).toBeVisible();
-  await page.waitForTimeout(400);
+  await deckAtRest(page);
   const stood = (await cross.boundingBox())!;
   const point = { x: stood.x + stood.width / 2, y: stood.y + stood.height / 2 };
   const atThePoint = () =>
@@ -730,7 +736,7 @@ async function holdingOneToast(page: Page) {
   const example = page.locator('[data-example="hold-the-toasts"]');
   await example.getByRole("button", { name: "Send a toast" }).click();
   await expect(page.getByRole("button", { name: "Close message" })).toBeVisible();
-  await page.waitForTimeout(400);
+  await deckAtRest(page);
   await example.locator("label", { hasText: "Hold the toasts" }).click();
   await expect(example.getByRole("switch", { name: "Hold the toasts" })).toBeChecked();
 }
@@ -811,7 +817,7 @@ async function deckOfThree(page: Page, position: "Top end" | "Bottom end") {
   for (let i = 0; i < 3; i++) await page.getByRole("button", { name: position, exact: true }).click();
   const cards = page.locator("[data-toast]");
   await expect(cards).toHaveCount(3);
-  await page.waitForTimeout(400);
+  await deckAtRest(page);
   return cards;
 }
 
@@ -842,7 +848,7 @@ for (const colorScheme of ["light", "dark"] as const)
       await page.emulateMedia({ colorScheme });
       const cards = await deckOfThree(page, position);
       await cards.last().hover();
-      await page.waitForTimeout(700);
+      await deckAtRest(page);
       const [top, bottom] = await faceGrey(page, cards.nth(1), [3, -4]);
       expect(Math.abs(top! - bottom!), `top ${top}, bottom ${bottom}`).toBeLessThan(1.5);
     });
@@ -884,7 +890,7 @@ test("While a deck at the top opens, its front card lies in front in every frame
 test("While a deck at the top closes, its front card lies in front in every frame", async ({ page }) => {
   const cards = await deckOfThree(page, "Top end");
   await cards.last().hover();
-  await page.waitForTimeout(700);
+  await deckAtRest(page);
   const stop = await sampleTheFront(page);
   await page.mouse.move(0, 0);
   await page.waitForTimeout(700);
@@ -901,7 +907,7 @@ test("While a deck at the top closes, its front card lies in front in every fram
 test("In an open deck at the bottom, the cards closing up lie above the card that leaves", async ({ page }) => {
   const cards = await deckOfThree(page, "Bottom end");
   await cards.last().hover();
-  await page.locator("[data-edge]:has([data-toast])").evaluate((region) => Promise.all(region.getAnimations({ subtree: true }).map((a) => a.finished)));
+  await deckAtRest(page);
   await page.addStyleTag({ content: "[data-edge] * { pointer-events: auto !important; }" });
   const leaving = await cards.last().getAttribute("data-toast");
   await page.evaluate((leaving) => {
