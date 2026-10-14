@@ -19,13 +19,18 @@ export interface Place {
    one's height. Open, they stand one after the other, GAP apart. Every card
    lies absolutely in the region and is moved by a transform, so that opening
    and closing are one transition - the heights that takes are measured once
-   per card, on its content, which is never cut. */
+   per card, on its content, which is never cut.
+   Closed, the front card lies above the ones behind it, its shadow on what
+   peeks out. Open, the card lower on the screen lies above the one above it,
+   so that every shadow falls under the next card - at the top edge the newest
+   stands at the top, so the order turns there (the stylesheet holds the turn
+   back until the cards stand apart). */
 const PEEK = 14;
 const GAP = 8;
 const SHRINK = 0.04;
 const BEHIND = 2;
 
-export function useDeckPlaces(items: ToastItem[], open: boolean, heights: Record<number, number>) {
+export function useDeckPlaces(items: ToastItem[], open: boolean, heights: Record<number, number>, edge: "top" | "bottom") {
   /* Where each card stood at the last picture, for the one that leaves. */
   const lastPlaceRef = useRef(new Map<number, Place>());
 
@@ -42,7 +47,7 @@ export function useDeckPlaces(items: ToastItem[], open: boolean, heights: Record
       behind,
       scale: behind ? 1 - rank * SHRINK : 1,
       hidden: !open && rank > BEHIND,
-      zIndex: count - rank,
+      zIndex: open && edge === "top" ? rank + 1 : count - rank,
     });
     reach += (heights[item.id] ?? 0) + GAP;
   });

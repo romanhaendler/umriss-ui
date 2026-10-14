@@ -187,6 +187,8 @@ const EXCEPTIONS: Readonly<Record<string, string>> = {
     "A whole-pixel line for the 11 px type in a 22 px tag: 1 cuts the descenders off where the text clips for its ellipsis, 1.5 is 16.5 px and sets the text on a half pixel (row-pitch 09).",
   "core/Stat/Stat.module.css: line-height: 1.1":
     "The stat's large figure is one number at --u-text-2xl, not a line of text; the one site that needs a leading this tight.",
+  "core/Toast/Toast.module.css: transition: transform var(--u-duration-medium) var(--u-ease-out), opacity var(--u-duration-medium) var(--u-ease-out), z-index 0s var(--u-duration-medium)":
+    "No duration but a delay: the open deck's order jumps once its cards stand apart, after --u-duration-medium. A z-index that took time would pass the front card under an older one while they still overlap; the shorthand needs a duration before the delay.",
 };
 
 describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {

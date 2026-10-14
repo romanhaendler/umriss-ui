@@ -203,6 +203,15 @@ test("The toast deck open", async ({ page }, testInfo) => {
   await toastRegion(page, "deck-open", testInfo.project.name);
 });
 
+/* At the top the newest card stands at the top: open, each card lies above
+   the one above it, so that no shadow falls on a card. */
+test("The toast deck open at the top", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "where-they-stand");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Top end", exact: true }).click();
+  await page.locator("[data-toast]").last().hover();
+  await toastRegion(page, "deck-open-top", testInfo.project.name);
+});
+
 test("A toast with an action", async ({ page }, testInfo) => {
   await openExample(page, "toast", "undo");
   await page.getByRole("button", { name: "Cancel" }).first().click();

@@ -1,6 +1,6 @@
 # 08 - An open deck casts no shadow on its cards
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -35,14 +35,39 @@ Decided by the maintainer on 2026-10-14 from a prototype (variant B):
 
 ## Acceptance
 
-- [ ] Browser test: an open deck of three at `top-end`, light and dark: the
+- [x] Browser test: an open deck of three at `top-end`, light and dark: the
       face of card 2 just below its top edge is as light as near its bottom
       (read from the picture, not from `z-index`).
-- [ ] Browser test: the same at `bottom-end` (it stays as it is).
-- [ ] Browser test: while a top deck opens, sampled per frame, the element at
+- [x] Browser test: the same at `bottom-end` (it stays as it is).
+- [x] Browser test: while a top deck opens, sampled per frame, the element at
       a point in the front card's lower part is always the front card.
-- [ ] Browser test: while it closes, the same.
-- [ ] A new picture: the open deck at the top, both themes. The existing deck
+- [x] Browser test: while it closes, the same.
+- [x] A new picture: the open deck at the top, both themes. The existing deck
       pictures are unchanged or renewed with the reason in the commit.
-- [ ] Unit tests of the deck stay green.
-- [ ] `pnpm check core`, `pnpm check:site`, `pnpm test:visual:quick core`.
+- [x] Unit tests of the deck stay green.
+- [x] `pnpm check core`, `pnpm check:site`, `pnpm test:visual:quick core`.
+
+## Comments
+
+2026-10-14 - Built. An open deck at the top turns its order (`zIndex` rank + 1
+in `useDeckPlaces`, which now takes the edge); at the bottom the order already
+was the lower card above. The wait is the stylesheet's, not a timer: the
+region carries `data-open`, and only there the card's transition holds
+`z-index 0s var(--u-duration-medium)`. A transition takes its timing from the
+style after the change, so opening jumps after `--u-duration-medium`, closing at
+once, and under reduced motion (the token is 0 and the block switches the
+transition off) at once. The picture helper waits for it like for any other
+transition. The stylesheet guard counts `0s` as a duration by hand; it is a
+delay's companion, taken on as a listed exception with its reason in
+`tests-unit/stylesheets.test.ts`.
+
+Not covered by the ticket and left as it is: a toast that arrives while a top
+deck stands open lies under the cards that glide down past it for
+`--u-duration-medium`, as the newest takes the lowest place at once.
+
+Checks: the six new browser tests (shadow at top-end and bottom-end in light
+and dark, the front card per frame while opening and closing; both frame tests
+were seen to fail with the turn at once and with the wait on closing too), the
+new picture `toast-deck-open-top` in both themes, every toast test and picture
+in both themes (existing deck pictures unchanged), `pnpm check core`,
+`pnpm check:site`, `pnpm test:visual:quick core`.
