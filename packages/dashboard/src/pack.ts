@@ -33,3 +33,30 @@ export function pack(spans: readonly Span[], columns: number): Place[] {
     }
   });
 }
+
+/** What a drawn grid measures: a column's width, a row's height and the gap. */
+export interface Geometry {
+  cell: number;
+  unit: number;
+  gap: number;
+}
+
+/** The place (counted from 0) to which moving the widget at `index` puts its
+    corner nearest to the point (x, y) it is held at. Every candidate is worked
+    out from the order the drag began with, so the answer is a function of the
+    point alone and cannot oscillate; a tie goes to the earlier place. */
+export function nearestPlace(spans: readonly Span[], columns: number, index: number, x: number, y: number, { cell, unit, gap }: Geometry): number {
+  let best = index;
+  let least = Infinity;
+  for (let i = 0; i < spans.length; i++) {
+    const order = [...spans];
+    order.splice(i, 0, ...order.splice(index, 1));
+    const place = pack(order, columns)[i]!;
+    const d = (place.column * (cell + gap) - x) ** 2 + (place.row * (unit + gap) - y) ** 2;
+    if (d < least) {
+      least = d;
+      best = i;
+    }
+  }
+  return best;
+}
