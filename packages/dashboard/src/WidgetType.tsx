@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { FormField, Input, useWording } from "@umriss-ui/core";
+import type { Wording } from "@umriss-ui/core";
 import type { SizeSpan, WidgetSize } from "./model";
 
 /** What a widget's content is told. */
@@ -59,13 +61,32 @@ export function HeadingType(): null {
   return null;
 }
 
-/** What the dashboard reads the heading type as. */
-export const HEADING: WidgetTypeProps<HeadingOptions> = {
-  name: "heading",
-  label: "Heading",
-  sentence: "A title across the full width.",
-  sizes: { full: { columns: 12, rows: 1 } },
-  start: "full",
-  defaultOptions: { text: "" },
-  children: () => null,
-};
+/** The name the heading type goes by in a view. */
+export const HEADING_NAME = "heading";
+
+/** The title of a widget's frame: its type's `title` of the options, else the label. */
+export const titleOf = (type: Pick<WidgetTypeProps<unknown>, "title" | "label">, options: unknown): string => type.title?.(options) ?? type.label;
+
+function HeadingForm({ options, change }: WidgetFormProps<HeadingOptions>) {
+  const wording = useWording();
+  return (
+    <FormField label={wording.dashboardHeadingField}>
+      <Input value={options.text} onChange={(event) => change({ text: event.target.value })} />
+    </FormField>
+  );
+}
+
+/** What the dashboard reads the heading type as, worded as the reader reads. */
+export function headingTypeOf(wording: Wording): WidgetTypeProps<HeadingOptions> {
+  return {
+    name: HEADING_NAME,
+    label: wording.dashboardHeadingLabel,
+    sentence: wording.dashboardHeadingSentence,
+    sizes: { full: { columns: 12, rows: 1 } },
+    start: "full",
+    defaultOptions: { text: wording.dashboardHeadingText },
+    title: (options) => options.text || wording.dashboardHeadingLabel,
+    form: HeadingForm,
+    children: () => null,
+  };
+}

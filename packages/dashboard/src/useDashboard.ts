@@ -8,6 +8,7 @@
 
 import { createElement, useMemo, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
+import { announce, useWording } from "@umriss-ui/core";
 import { DashboardOf } from "./Dashboard";
 import type { DashboardProps } from "./Dashboard";
 import type { Edit } from "./edit";
@@ -93,6 +94,8 @@ interface Draft {
 interface State {
   view: DashboardView;
   draft: Draft | null;
+  /** Counts the changes of what a view is read by. */
+  known: number;
   /** Whether the catalogue stands. */
   catalogue?: boolean;
 }
@@ -102,14 +105,15 @@ const same = (a: DashboardView, b: DashboardView) => JSON.stringify(a) === JSON.
 /** Declares a dashboard: hands back `Dashboard`, `WidgetType`, the view in
     view, `setView` and the editing actions. */
 export function useDashboard({ defaultView, initialView, allowEdit = true, onViewChange, onDraftChange }: DashboardOptions): DashboardParts {
-  const store = useRef<{ state: State; listeners: Set<() => void>; types: Map<string, WidgetTypeProps<unknown>> } | null>(null);
-  store.current ??= { state: { view: initialView ?? defaultView, draft: null }, listeners: new Set(), types: new Map() };
+  const store = useRef<{ state: State; listeners: Set<() => void>; types: Map<string, WidgetTypeProps<unknown>>; signature: string } | null>(null);
+  store.current ??= { state: { view: initialView ?? defaultView, draft: null, known: 0 }, listeners: new Set(), types: new Map(), signature: "" };
   const own = store.current;
+  const wording = useWording();
 
   /* The latest of the caller's values, read by the actions, which stand still. */
-  const latest = useRef({ defaultView, allowEdit, onViewChange, onDraftChange });
+  const latest = useRef({ defaultView, allowEdit, onViewChange, onDraftChange, wording });
   // eslint-disable-next-line react-hooks/refs
-  latest.current = { defaultView, allowEdit, onViewChange, onDraftChange };
+  latest.current = { defaultView, allowEdit, onViewChange, onDraftChange, wording };
 
   const parts = useMemo(() => {
     const subscribe = (listener: () => void) => {
@@ -122,18 +126,24 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       own.listeners.forEach((listener) => listener());
     };
 
+    /* A view read against the declared types; before a dashboard has told which
+       they are, it stands as it is. */
+    const read = (view: DashboardView) => (own.types.size ? readView(view, own.types) : view);
+
     const edit = () => {
       if (!latest.current.allowEdit || own.state.draft) return;
-      put({ ...own.state, draft: { steps: [readView(own.state.view, own.types)], at: 0 } });
+      put({ ...own.state, draft: { steps: [read(own.state.view)], at: 0 } });
       latest.current.onDraftChange?.(true);
     };
     const leave = (keep: boolean) => {
       const { view, draft } = own.state;
       if (!draft) return;
       const current = draft.steps[draft.at]!;
-      const changed = keep && !same(current, readView(view, own.types));
-      put({ view: changed ? current : view, draft: null, catalogue: false });
+      const changed = keep && !same(current, read(view));
+      put({ ...own.state, view: changed ? current : view, draft: null, catalogue: false });
       latest.current.onDraftChange?.(false);
+      const { wording } = latest.current;
+      announce(!keep ? wording.dashboardCancelled : changed ? wording.dashboardKept : wording.dashboardLeft);
       if (changed) latest.current.onViewChange?.(current);
     };
     const setCatalogue = (open: boolean) => {
@@ -147,14 +157,18 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       /* A change that changes nothing is no step: it would leave an undo that does nothing. */
       if (next !== current) put({ ...own.state, draft: { steps: [...draft.steps.slice(0, draft.at + 1), next], at: draft.at + 1 } });
     };
-    const go = (by: number) => {
+    const go = (by: number, said: string) => {
       const { draft } = own.state;
-      if (draft && draft.steps[draft.at + by]) put({ ...own.state, draft: { ...draft, at: draft.at + by } });
+      if (!draft?.steps[draft.at + by]) return;
+      put({ ...own.state, draft: { ...draft, at: draft.at + by } });
+      announce(said);
     };
-    const undo = () => go(-1);
-    const redo = () => go(1);
+    const undo = () => go(-1, latest.current.wording.dashboardUndone);
+    const redo = () => go(1, latest.current.wording.dashboardRedone);
     const reset = () => {
-      if (own.state.draft) step(() => latest.current.defaultView);
+      if (!own.state.draft) return;
+      step(() => read(latest.current.defaultView));
+      announce(latest.current.wording.dashboardResetDone);
     };
     const editor = (allowed: boolean, draft: Draft | null, catalogue: boolean): Editor => ({
       allowed,
@@ -166,6 +180,11 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       setCatalogue,
       register: (types: Map<string, WidgetTypeProps<unknown>>) => {
         own.types = types;
+        /* What a view is read by changed: whoever draws it draws it again. */
+        const signature = [...types].map(([name, type]) => `${name}:${type.start}:${JSON.stringify(type.sizes)}`).join("|");
+        if (signature === own.signature) return;
+        own.signature = signature;
+        put({ ...own.state, known: own.state.known + 1 });
       },
       step,
       undo,
@@ -173,7 +192,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       reset,
       canUndo: !!draft && draft.at > 0,
       canRedo: !!draft && draft.at < draft.steps.length - 1,
-      canReset: !!draft && !same(draft.steps[draft.at]!, latest.current.defaultView),
+      canReset: !!draft && !same(draft.steps[draft.at]!, read(latest.current.defaultView)),
     });
 
     return {
@@ -186,7 +205,11 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       redo,
       reset,
       catalogue: () => setCatalogue(true),
-      setView: (view: DashboardView) => put({ ...own.state, view, draft: own.state.draft ? { steps: [view], at: 0 } : null }),
+      read,
+      setView: (given: DashboardView) => {
+        const view = read(given);
+        put({ ...own.state, view, draft: own.state.draft ? { steps: [view], at: 0 } : null });
+      },
       Dashboard: (props: DashboardProps) => {
         const { view, draft, catalogue } = useSyncExternalStore(subscribe, get, get);
         return createElement(DashboardOf, { ...props, view: draft ? draft.steps[draft.at]! : view, editor: editor(latest.current.allowEdit, draft, !!catalogue) });
@@ -194,11 +217,14 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     };
   }, [own]);
 
-  const { view, draft } = useSyncExternalStore(parts.subscribe, parts.get, parts.get);
+  const { view, draft, known } = useSyncExternalStore(parts.subscribe, parts.get, parts.get);
+  const current = draft ? draft.steps[draft.at]! : view;
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/refs -- `known` says that what `read` reads by changed
+  const read = useMemo(() => parts.read(current), [parts, current, known]);
   return {
     Dashboard: parts.Dashboard,
     WidgetType,
-    view: draft ? draft.steps[draft.at]! : view,
+    view: read,
     setView: parts.setView,
     editing: draft !== null,
     edit: parts.edit,
