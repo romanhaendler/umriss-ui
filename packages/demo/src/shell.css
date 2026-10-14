@@ -64,7 +64,7 @@ body {
   box-shadow: var(--u-focus-ring);
 }
 
-/* The five packages: plain words, the current one in the text colour with its
+/* The packages: plain words, the current one in the text colour with its
    version beside it. No pills, no underline bar - the header is to stay quiet. */
 .shellPackages {
   display: flex;
@@ -438,6 +438,11 @@ body {
     height: 40px;
     overflow-x: auto;
     scrollbar-width: none;
+    /* A name scrolled into view - by focus or to the end - keeps room beside
+       it: flush with the edge, a rounded scroll position cuts a fraction of a
+       pixel off it. */
+    padding-inline-end: var(--u-space-2);
+    scroll-padding-inline-end: var(--u-space-2);
   }
   .shellOut {
     display: none;
