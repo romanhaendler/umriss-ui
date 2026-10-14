@@ -519,17 +519,19 @@ for (const width of [1280, 320]) {
 
 /* The deck glides when the application changes its distance from the window,
    in the time and easing of its height. The region's box is read in every
-   animation frame in which a card stands. */
-async function sampleTheDeck(page: Page): Promise<() => Promise<{ top: number; end: number }[]>> {
+   animation frame in which a card is seen (a held card is not). */
+type DeckFrame = { top: number; bottom: number; end: number };
+async function sampleTheDeck(page: Page): Promise<() => Promise<DeckFrame[]>> {
   await page.evaluate(() => {
-    const state = { running: true, frames: [] as { top: number; end: number }[] };
+    const state = { running: true, frames: [] as { top: number; bottom: number; end: number }[] };
     (window as unknown as { __deck: typeof state }).__deck = state;
     const frame = () => {
       const card = document.querySelector("[data-toast]");
-      const region = card?.closest("[data-edge]");
+      const region = card?.closest("[hidden]") ? null : card?.closest("[data-edge]");
       if (region) {
         const box = region.getBoundingClientRect();
-        state.frames.push({ top: Math.round(box.top), end: Math.round(document.documentElement.clientWidth - box.right) });
+        const { clientWidth, clientHeight } = document.documentElement;
+        state.frames.push({ top: Math.round(box.top), bottom: Math.round(clientHeight - box.bottom), end: Math.round(clientWidth - box.right) });
       }
       if (state.running) requestAnimationFrame(frame);
     };
@@ -537,7 +539,7 @@ async function sampleTheDeck(page: Page): Promise<() => Promise<{ top: number; e
   });
   return () =>
     page.evaluate(() => {
-      const state = (window as unknown as { __deck: { running: boolean; frames: { top: number; end: number }[] } }).__deck;
+      const state = (window as unknown as { __deck: { running: boolean; frames: DeckFrame[] } }).__deck;
       state.running = false;
       return state.frames;
     });
@@ -715,6 +717,82 @@ test("Held toasts leave the page under them to be hit, and come back where they 
   }).toEqual([stood.x, stood.y].map(Math.round));
   expect(await atThePoint()).toBe("Close message");
   expect(await tabIntoTheToasts()).toBe("Close message");
+});
+
+/* Nothing glides while nothing is seen: a distance changed during a hold is
+   taken at once, and when the hold ends the deck appears at its new place -
+   also when the hold ends in the frame the distance changes, and when a modal
+   closes in that frame too. The example's toasts stand at the bottom, so the
+   bottom token moves them. */
+async function holdingOneToast(page: Page) {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "hold-the-toasts");
+  const example = page.locator('[data-example="hold-the-toasts"]');
+  await example.getByRole("button", { name: "Send a toast" }).click();
+  await expect(page.getByRole("button", { name: "Close message" })).toBeVisible();
+  await page.waitForTimeout(400);
+  await example.locator("label", { hasText: "Hold the toasts" }).click();
+  await expect(example.getByRole("switch", { name: "Hold the toasts" })).toBeChecked();
+}
+
+/* In one task: the modal closes, the hold ends, the bottom token changes
+   (or the token first). */
+async function endTheHold(page: Page, { bottom, closeTheModal = false, tokenFirst = false }: { bottom?: number; closeTheModal?: boolean; tokenFirst?: boolean }) {
+  await page.evaluate(
+    ({ bottom, closeTheModal, tokenFirst }) => {
+      const setToken = () => bottom !== undefined && document.documentElement.style.setProperty("--u-toast-inset-bottom", `${bottom}px`);
+      if (closeTheModal) (document.getElementById("moving-modal") as HTMLDialogElement).close();
+      if (tokenFirst) setToken();
+      const label = [...document.querySelectorAll('[data-example="hold-the-toasts"] label')].find((element) => element.textContent?.includes("Hold the toasts"));
+      (label as HTMLElement).click();
+      if (!tokenFirst) setToken();
+    },
+    { bottom, closeTheModal, tokenFirst },
+  );
+}
+
+test("A change of the distance during a hold is taken at once: after the hold the deck is first seen at the new place", async ({ page }) => {
+  await holdingOneToast(page);
+  await page.evaluate(() => document.documentElement.style.setProperty("--u-toast-inset-bottom", "96px"));
+  await page.waitForTimeout(300);
+  const stop = await sampleTheDeck(page);
+  await endTheHold(page, {});
+  await page.waitForTimeout(600);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
+});
+
+for (const tokenFirst of [false, true]) {
+  test(`The hold ending in the frame the distance changes (${tokenFirst ? "token first" : "hold first"}) shows the deck at the new place, nothing in between`, async ({ page }) => {
+    await holdingOneToast(page);
+    const stop = await sampleTheDeck(page);
+    await endTheHold(page, { bottom: 96, tokenFirst });
+    await page.waitForTimeout(600);
+    const frames = await stop();
+    expect(frames.length).toBeGreaterThan(0);
+    expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
+  });
+}
+
+test("A modal closing as the hold ends and the distance changes shows the deck at the new place, nothing in between", async ({ page }) => {
+  await holdingOneToast(page);
+  await page.evaluate(() => {
+    const dialog = document.createElement("dialog");
+    dialog.id = "moving-modal";
+    dialog.textContent = "A modal";
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+  await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(1);
+  const stop = await sampleTheDeck(page);
+  await endTheHold(page, { bottom: 96, closeTheModal: true });
+  await page.waitForTimeout(600);
+  await expect(page.getByRole("switch", { name: "Hold the toasts" })).not.toBeChecked();
+  await expect(page.locator("#moving-modal [data-edge]:has([data-toast])")).toHaveCount(0);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
 });
 
 /* An open deck casts no shadow on its cards: the card lower on the screen
