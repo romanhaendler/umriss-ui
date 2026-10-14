@@ -241,15 +241,22 @@ export default [
               group: ["**/core/src/**", "**/packages/core/**", "../../core/**", "../core/**"],
               message: "@umriss-ui/dashboard does not reach into @umriss-ui/core by path.",
             },
-            {
-              group: ["@umriss-ui/charts", "@umriss-ui/charts/*"],
-              message: "@umriss-ui/dashboard depends on @umriss-ui/core only.",
-            },
             NO_TABLE,
             NO_SCHEDULE,
             NO_CALCULATION,
           ],
         },
+      ],
+    },
+  },
+  {
+    /* The dashboard's demo draws its trends with the charts' source, by alias;
+       the library takes no other package than core. */
+    files: ["packages/dashboard/src/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        { patterns: [{ group: ["@umriss-ui/charts", "@umriss-ui/charts/*"], message: "@umriss-ui/dashboard depends on @umriss-ui/core only." }] },
       ],
     },
   },

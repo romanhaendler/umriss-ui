@@ -38,8 +38,8 @@ test("@quick dragging a head over another widget and letting go moves it there, 
   await expect(example(page).locator("[data-placeholder]")).toHaveCount(1);
   await page.mouse.up();
   await expect(example(page).locator("[data-placeholder]")).toHaveCount(0);
-  expect((await order(page)).slice(0, 4)).toEqual(["f2", "f3", "f4", "f1"]);
-  await expect(announcement(page)).toHaveText("Orders: moved from place 1 to place 4 of 8");
+  expect((await order(page)).slice(1, 5)).toEqual(["f2", "f3", "f4", "f1"]);
+  await expect(announcement(page)).toHaveText("Orders: moved from place 2 to place 5 of 11");
   await example(page).getByRole("button", { name: "Done" }).click();
 });
 

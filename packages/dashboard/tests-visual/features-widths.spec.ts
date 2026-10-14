@@ -41,7 +41,8 @@ test("@quick at 1280, 1920 and 2560 px every widget has the same neighbours; the
   const at2560 = await places(page, 2560);
   expect(at1920.places).toEqual(at1280.places);
   expect(at2560.places).toEqual(at1280.places);
-  expect(at1280.grid.width).toBeCloseTo(1280, 0);
+  /* The dashboard keeps one space-4 of padding at each side, for its frame. */
+  expect(at1280.grid.width).toBeCloseTo(1280 - 32, 0);
   expect(at1920.grid.width).toBeCloseTo(1560, 0);
   expect(at2560.grid.width).toBeCloseTo(1560, 0);
   /* It stands at the start of its container, not in the middle. */
@@ -50,12 +51,12 @@ test("@quick at 1280, 1920 and 2560 px every widget has the same neighbours; the
 
 test("@quick at 820 px the dashboard is still the grid", async ({ page }) => {
   const { places: at820 } = await places(page, 820);
-  expect(at820.slice(0, 2)).toEqual(["f1:0,0", "f2:3,0"]);
+  expect(at820.slice(0, 3)).toEqual(["h1:0,0", "f1:0,1", "f2:3,1"]);
 });
 
 test("@quick at 390 px the dashboard is a list in the stored order", async ({ page }) => {
   const { grid, list } = await openAt(page, 390);
-  expect(list.map((one) => one.id)).toEqual(["f1", "f2", "f3", "f4", "t1", "a1", "t2", "o1"]);
+  expect(list.map((one) => one.id)).toEqual(["h1", "f1", "f2", "f3", "f4", "h2", "t1", "t2", "h3", "o1", "a1"]);
   for (const one of list) {
     expect(one.x, one.id).toBeCloseTo(grid.x, 0);
     expect(one.width, one.id).toBeCloseTo(grid.width, 0);
