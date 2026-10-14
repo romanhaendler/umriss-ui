@@ -23,6 +23,21 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.39.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
+## 0.38.0 – No change of its own (Oct. 2026)
+
+Released with the other four packages under their one number. No change of its
+own.
+
+## 0.37.0 – No change of its own (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.37; the peer range is `^0.37.0`. No change of its
+own.
+
 ## 0.36.0 – The tip for a cut value lies above the toasts in a dialog (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.36; the peer range is `^0.36.0`.

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -16,8 +16,10 @@ import { useCardMeasure } from "./useCardMeasure";
 import { keyboardFocus, useDeckOpen } from "./useDeckOpen";
 import type { Place } from "./useDeckPlaces";
 import { useDeckPlaces } from "./useDeckPlaces";
+import { useGlideAcross } from "./useGlideAcross";
+import { useHold } from "./useHold";
 import { useRegionFocus } from "./useRegionFocus";
-import { useCountdowns, useTimerStore } from "./useToastTimers";
+import { leavesByItself, useCountdowns, useTimerStore } from "./useToastTimers";
 
 /** How the message turns out; `loading` is a toast still at work. */
 export type ToastTone = "neutral" | "success" | "warning" | "danger" | "loading";
@@ -73,8 +75,10 @@ interface ToastContextValue {
   toast: (options: ToastOptions) => number;
   /** Changes a standing toast. A new tone or a new `duration` starts its time
       afresh - so a `loading` toast turned into `success` begins to count then.
-      An id that no longer stands is ignored: a toast that gave way to newer
-      ones - a `loading` one too - has said so through `onClose`. */
+      An id that no longer stands is ignored: a timed toast that gave way
+      to newer ones has said so through `onClose`. A `loading` toast turned into
+      its outcome counts toward the limit from the next arrival on; `update`
+      itself pushes nothing out. */
   update: (id: number, options: Partial<ToastOptions>) => void;
   /** Closes a toast, with the reason `dismiss`. */
   dismiss: (id: number) => void;
@@ -123,13 +127,45 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
   );
 }
 
+/** How many providers stand in the document now (development message only). */
+let mountedProviders = 0;
+
+/** The props of `ToastProvider`. */
+export interface ToastProviderProps {
+  children: ReactNode;
+  /** While true, the toasts are held back: none is seen or heard, no time runs
+      out, and a new one waits. When false again they come back with the time
+      they had left. For a surface the toasts must not cover for a while, where
+      there is no room beside it: nothing is lost, as it would be by dismissing.
+      @default false */
+  held?: boolean;
+}
+
 /** Holds the toasts and draws them; `useToast` works only below it. Put it
-    once at the root of the application. Duration, position and limit come from
-    `UmrissProvider`'s `toast` where one stands around it. */
-export function ToastProvider({ children }: { children: ReactNode }) {
+    once at the root of the application: a second one draws a second deck at
+    the same place, and the two lie on each other. Duration, position and limit
+    come from `UmrissProvider`'s `toast` where one stands around it. */
+export function ToastProvider({ children, held = false }: ToastProviderProps) {
   /* The defaults come from the root provider where there is one. The
      individual message beats it where it says a duration. */
   const config = useToastConfig();
+
+  /* A second provider in the document gives two decks at one place. Said once
+     per provider, in development only. */
+  const warned = useRef(false);
+  useEffect(() => {
+    if (import.meta.env?.DEV && mountedProviders > 0 && !warned.current) {
+      warned.current = true;
+      console.warn(
+        "@umriss-ui/core: a second ToastProvider is mounted while another one stands. " +
+          "Use one ToastProvider per application, at its root: two decks stand at the same place.",
+      );
+    }
+    mountedProviders += 1;
+    return () => {
+      mountedProviders -= 1;
+    };
+  }, []);
   const defaultDuration = config.duration ?? 5000;
   const limit = Math.max(1, config.limit ?? 3);
   const position: ToastPosition = config.position ?? "bottom-end";
@@ -154,9 +190,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const { open, setHovered, setFocused, setPinned } = useDeckOpen(regionRef, items);
   const { heights, measureRef, forget } = useCardMeasure();
-  const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights);
-  const anyStanding = items.some((item) => !item.leaving);
-  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding);
+  const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights, edge);
+  /* A toast can be seen: one stands, and the toasts are not held back. */
+  const seen = items.some((item) => !item.leaving) && !held;
+  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, seen);
 
   const remove = useCallback(
     (id: number) => {
@@ -174,6 +211,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [commit, forget, lastPlaceRef, setHovered, setPinned],
   );
+
+  /* Read by the callbacks: while held, nothing is seen to leave. */
+  const heldRef = useRef(held);
 
   /** Starts the leaving: first the choreography, then the teardown. */
   const beginLeave = useCallback(
@@ -195,7 +235,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
          compete with the entrance animation. Its length is the token the
          stylesheet reads; without one there is nothing to wait for. */
       const duration = region === null ? 0 : durationFrom(getComputedStyle(region), "--u-duration-exit-collapse");
-      if (prefersReducedMotion() || duration <= 0) {
+      if (prefersReducedMotion() || duration <= 0 || heldRef.current) {
         remove(id);
         return;
       }
@@ -210,21 +250,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [clearTimer, commit, remove, leaveRegion, lastPlaceRef, leavesRef, regionRef],
   );
 
-  const startTimer = useCountdowns({ timersRef, clearTimer, itemsRef, open, defaultDuration, beginLeave });
+  const startTimer = useCountdowns({ timersRef, clearTimer, itemsRef, still: open || held, defaultDuration, beginLeave });
 
   const toast = useCallback(
     (options: ToastOptions) => {
       const id = nextId.current++;
       arrivedRef.current.set(id, performance.now());
       commit([...itemsRef.current, { ...options, id }]);
-      const standing = itemsRef.current.filter((item) => !item.leaving);
-      /* Over the limit the oldest gives way - as if closed. A queue would
-         bring old news late. */
+      /* Only a toast that leaves by itself counts: one that stays (no time,
+         or still at work) is never pushed out. */
+      const standing = itemsRef.current.filter((item) => !item.leaving && leavesByItself(item, defaultDuration));
+      /* Over the limit the oldest of them gives way - as if closed. A queue
+         would bring old news late. */
       standing.slice(0, Math.max(0, standing.length - limit)).forEach((item) => beginLeave(item.id, "dismiss"));
       startTimer(id);
       return id;
     },
-    [beginLeave, commit, limit, startTimer],
+    [beginLeave, commit, defaultDuration, limit, startTimer],
   );
 
   const update = useCallback(
@@ -279,11 +321,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
      target may enter the document later, and the next toast has to find it. */
   const dialog = useTopmostModalDialog();
   const [target, setTarget] = useState<Element | null>(null);
+  const { entered, settled } = useHold(held, items, target);
   /* The age in ms of each card that stood when the region last changed its
      place. The cards are built anew there, and an entrance that is running
      goes on from where it was (a negative `animation-delay`); one that is over
      stays over. */
   const [ages, setAges] = useState<ReadonlyMap<number, number>>(new Map());
+  /* The deck glides only from a place it was seen at: not until it has been
+     drawn since the hold began or ended. */
+  const seenAtItsPlace = seen && settled;
+  const { from, handOn } = useGlideAcross(regionRef, target instanceof HTMLDialogElement && seenAtItsPlace);
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;
@@ -294,9 +341,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       letGoOfFocus();
       const now = performance.now();
       setAges(new Map(itemsRef.current.map((item) => [item.id, Math.round(now - (arrivedRef.current.get(item.id) ?? now))])));
+      handOn(target, seenAtItsPlace);
     }
     setTarget(next);
-  }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus]);
+  }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus, handOn, seenAtItsPlace]);
+
+  /* Held back at once: no exit, no `onClose`, and a card already leaving
+     finishes unseen. A focus in the deck goes back where it came from, as
+     with Escape, and what held the deck open lets go, so that it comes back
+     closed. */
+  useLayoutEffect(() => {
+    heldRef.current = held;
+    if (!held) return;
+    itemsRef.current.filter((item) => item.leaving).forEach((item) => remove(item.id));
+    if (regionRef.current?.contains(document.activeElement)) leaveRegion();
+    setHovered(false);
+    letGoOfFocus();
+  }, [held, remove, leaveRegion, setHovered, letGoOfFocus]);
+  /* Every card plays its entrance from the start when the hold ends. */
+  if (held && ages.size > 0) setAges(new Map());
 
   useShownInTopLayer(regionRef);
 
@@ -319,6 +382,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return (
       <div
         key={item.id}
+        /* Held back: neither drawn nor hit, out of the tab order and the
+           accessibility tree. The node stays, so that its return is no
+           insertion into its live region, and showing it again restarts its
+           entrance. */
+        hidden={held}
         className={cx(
           styles.card,
           place?.behind && styles.behind,
@@ -388,7 +456,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const regionStyle = {
     "--_origin": motionOrigin(edge === "bottom" ? "top" : "bottom", along),
+    ...from,
     height: regionHeight,
+    /* Held back, its box is no wall over what lies beneath. */
+    pointerEvents: held ? "none" : undefined,
   } as CSSProperties;
 
   return (
@@ -406,9 +477,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           popover={topLayerPopover(target)}
           data-edge={edge}
           data-along={along}
+          data-open={open ? "" : undefined}
+          data-seen={seenAtItsPlace ? "" : undefined}
           data-keys={byKeys ? "" : undefined}
           style={regionStyle}
-          {...(anyStanding ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
+          {...(seen ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
           onKeyDown={onKeyDown}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -416,10 +489,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           onPointerLeave={onPointerLeave}
         >
           <div role="status" aria-live="polite" className={styles.live}>
-            {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
+            {items.filter((item) => entered(item) && roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
           </div>
           <div role="alert" className={styles.live}>
-            {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
+            {items.filter((item) => entered(item) && roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
           </div>
         </div>,
         target,

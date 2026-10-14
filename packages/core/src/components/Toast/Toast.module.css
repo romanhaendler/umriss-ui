@@ -1,6 +1,34 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The four distances, registered so that they can glide: the region copies
+     the tokens into them and transitions them, and each position reads the one
+     its edge and side use. A change of position changes none of them and so
+     never glides; a change of a token glides wherever it is read. */
+  @property --_toast-top {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-bottom {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-start {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-end {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
   /* The region stands at the edge and along it where the provider says; its
      height is the deck's, set by the component, so that the pointer opens the
      deck over it and nowhere else. The ring shows where Alt+T has put the
@@ -10,9 +38,40 @@
     composes: ring from "#own-styles";
     position: fixed;
     z-index: var(--u-z-toast);
-    width: 360px;
+    width: var(--u-toast-width);
     border-radius: var(--u-radius-lg);
+    --_toast-top: var(--u-toast-inset-top);
+    --_toast-bottom: var(--u-toast-inset-bottom);
+    --_toast-start: var(--u-toast-inset-start);
+    --_toast-end: var(--u-toast-inset-end);
     transition: height var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  /* The deck glides to a new distance only from a place it was seen at
+     (`data-seen`, set by the component): while a toast stands, not held back,
+     and drawn since the hold began or ended. A distance changed while none is
+     seen is taken at once, so that the first toast, or a deck coming back from
+     a hold, does not glide in from the old place. A region drawn anew stands
+     at once unless it is given the old place (the starting style below). */
+  .region[data-seen] {
+    transition:
+      height var(--u-duration-medium) var(--u-ease-out),
+      --_toast-top var(--u-duration-medium) var(--u-ease-out),
+      --_toast-bottom var(--u-duration-medium) var(--u-ease-out),
+      --_toast-start var(--u-duration-medium) var(--u-ease-out),
+      --_toast-end var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  /* A region drawn anew when it moves into or out of a dialog starts where
+     the old one was seen (`--_from-*`, set by the component) and glides from
+     there; where they are the same, or without them, nothing moves. */
+  @starting-style {
+    .region[data-seen] {
+      --_toast-top: var(--_from-top, var(--u-toast-inset-top));
+      --_toast-bottom: var(--_from-bottom, var(--u-toast-inset-bottom));
+      --_toast-start: var(--_from-start, var(--u-toast-inset-start));
+      --_toast-end: var(--_from-end, var(--u-toast-inset-end));
+    }
   }
 
   /* In the top layer (inside a dialog) the region is a manual popover, and the
@@ -37,19 +96,19 @@
   /* The distance from the edge is the application's to set; the tokens hold
      the phone's own. */
   .region[data-edge="bottom"] {
-    bottom: var(--u-toast-inset-bottom);
+    bottom: var(--_toast-bottom);
   }
 
   .region[data-edge="top"] {
-    top: var(--u-toast-inset-top);
+    top: var(--_toast-top);
   }
 
   .region[data-along="start"] {
-    inset-inline-start: var(--u-space-5);
+    inset-inline-start: var(--_toast-start);
   }
 
   .region[data-along="end"] {
-    inset-inline-end: var(--u-space-5);
+    inset-inline-end: var(--_toast-end);
   }
 
   .region[data-along="center"] {
@@ -57,13 +116,14 @@
     margin-inline: auto;
   }
 
-  /* On a phone the toast takes the window's width; only the edge counts. The
-     distance from the edge changes at the same 600 px in the toast tokens
-     (tokens.css): a new breakpoint here is a new one there. */
+  /* On a phone the toast takes the window's width, whatever the width token
+     says; only the edge counts. The distances from the edges change at the
+     same 600 px in the toast tokens (tokens.css): a new breakpoint here is a
+     new one there. */
   @media (max-width: 600px) {
     .region.region {
       width: auto;
-      inset-inline: var(--u-space-4);
+      inset-inline: var(--_toast-start) var(--_toast-end);
       margin-inline: 0;
     }
   }
@@ -82,6 +142,26 @@
     position: absolute;
     inset-inline: 0;
     transform: translateY(var(--_y)) scale(var(--_scale));
+    transition:
+      transform var(--u-duration-medium) var(--u-ease-out),
+      opacity var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  /* In an open deck a new order waits until the cards stand apart: turned at
+     once, an older card would lie over the front one while they still
+     overlap. Closing turns it back at once, since the order is taken from the
+     style after the change. */
+  .region[data-open] .card {
+    transition:
+      transform var(--u-duration-medium) var(--u-ease-out),
+      opacity var(--u-duration-medium) var(--u-ease-out),
+      z-index 0s var(--u-duration-medium);
+  }
+
+  /* A card that leaves drops behind the others at once, so that the cards
+     closing up over its place lie above it: the card's own transition,
+     without the wait of the order. */
+  .region[data-open] .card.leaving {
     transition:
       transform var(--u-duration-medium) var(--u-ease-out),
       opacity var(--u-duration-medium) var(--u-ease-out);
@@ -351,7 +431,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     .region,
+    .region[data-seen],
     .card,
+    .region[data-open] .card,
+    .region[data-open] .card.leaving,
     .toast,
     .content {
       animation: none;

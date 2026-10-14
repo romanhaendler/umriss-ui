@@ -47,8 +47,10 @@ export interface ToastConfig {
       stand in different places are not read as one.
       @default "bottom-end" */
   position?: ToastPosition;
-  /** How many toasts stand at once; the oldest gives way to a new one, as if
-      it had been closed.
+  /** How many toasts that leave by themselves stand at once; the oldest of
+      them gives way to a new one, as if it had been closed. A toast that
+      stays (`duration: 0`) or is still at work (`loading`) neither counts nor
+      gives way.
       @default 3 */
   limit?: number;
 }

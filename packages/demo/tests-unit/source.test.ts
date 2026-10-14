@@ -2,7 +2,7 @@
    only permitted difference between the file and the display. */
 
 import { describe, expect, it } from "vitest";
-import { asPackage, displaySource, withoutTitle } from "../src/tooling/source";
+import { asPackage, displaySource, withRoot, withoutTitle } from "../src/tooling/source";
 
 describe("asPackage", () => {
   it("replaces the library path in an import", () => {
@@ -92,5 +92,51 @@ describe("displaySource", () => {
     /* No reformatting: the three spaces stay where they are. */
     expect(shown).toContain('<Button   variant="primary" />');
     expect(shown).toContain("/* A comment stays. */");
+  });
+});
+
+describe("withRoot", () => {
+  const file = [
+    "function A() {",
+    "  // demo-only:start",
+    "  const pageToast = usePageToast();",
+    "  return <Scan onBefore={() => pageToast({ toast: TOAST })} />;",
+    "  // demo-only:shown",
+    "  // return (",
+    "  //   <UmrissProvider toast={TOAST}>",
+    "  //     <Scan />",
+    "  //   </UmrissProvider>",
+    "  // );",
+    "  // demo-only:end",
+    "}",
+    "",
+  ].join("\n");
+
+  it("replaces the demo's part by the root it stands for, at the marker's indent", () => {
+    expect(withRoot(file)).toBe(
+      [
+        "function A() {",
+        "  return (",
+        "    <UmrissProvider toast={TOAST}>",
+        "      <Scan />",
+        "    </UmrissProvider>",
+        "  );",
+        "}",
+        "",
+      ].join("\n"),
+    );
+  });
+
+  it("lets a part without a shown text simply fall away", () => {
+    const source = 'a\n// demo-only:start\nimport { usePageToast } from "../pageToast";\n// demo-only:shown\n// demo-only:end\nb\n';
+    expect(withRoot(source)).toBe("a\nb\n");
+  });
+
+  it("leaves a file without a marker as it is", () => {
+    expect(withRoot("const a = 1;\n")).toBe("const a = 1;\n");
+  });
+
+  it("is part of what the reader sees", () => {
+    expect(displaySource(`export const title = "X";\n\n${file}`, "@umriss-ui/core")).not.toContain("usePageToast");
   });
 });
