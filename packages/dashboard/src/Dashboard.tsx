@@ -1,6 +1,6 @@
 import { Children, isValidElement, useEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
-import { announce, Button, Card, CardBody, CardHeader, Drawer, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, useWording } from "@umriss-ui/core";
+import { announce, Button, Card, CardBody, CardHeader, Drawer, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
@@ -90,7 +90,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
         <div className={styles.bar}>
           {editing ? (
             <>
-              <span className={styles.mode}>{wording.dashboardEditing}</span>
+              <Text as="span" weight="semibold" className={styles.mode}>{wording.dashboardEditing}</Text>
               <Button size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
               <Button size="sm" disabled={!editor.canUndo} onClick={() => { editor.undo(); announce(wording.dashboardUndone); }}>{wording.dashboardUndo}</Button>
               <Button size="sm" disabled={!editor.canRedo} onClick={() => { editor.redo(); announce(wording.dashboardRedone); }}>{wording.dashboardRedo}</Button>
@@ -103,8 +103,8 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           )}
         </div>
       )}
-      {editing && total === 0 && <p>{wording.dashboardEmptyEditing}</p>}
-      {!editing && total === 0 && <p>{wording.dashboardEmpty}</p>}
+      {editing && total === 0 && <Text>{wording.dashboardEmptyEditing}</Text>}
+      {!editing && total === 0 && <Text>{wording.dashboardEmpty}</Text>}
       <div className={styles.grid} ref={grid}>
         {shown.map(({ widget, type }, i) => {
           const place = places[i]!;
@@ -207,7 +207,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                   )
                 }
               />
-              <CardBody className={styles.body} inert={editing}><Failed fallback={<p>{wording.dashboardFailed}</p>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></CardBody>
+              <CardBody className={styles.body} inert={editing}><Failed fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></CardBody>
             </Card>
           );
         })}
@@ -224,8 +224,8 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                     <span style={{ width: `${(span.columns / COLUMNS) * 100}%`, height: `${Math.min(1, span.rows / 4) * 100}%` }} />
                   </div>
                   <div className={styles.entryText}>
-                    <strong>{type.label}</strong>
-                    <span>{type.sentence}</span>
+                    <Text as="strong" weight="semibold">{type.label}</Text>
+                    <Text as="span" size="sm" tone="secondary">{type.sentence}</Text>
                   </div>
                   <Button size="sm" aria-label={wording.dashboardAddType(type.label)} onClick={() => addType(type)}>{wording.dashboardAdd}</Button>
                 </li>

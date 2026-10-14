@@ -27,7 +27,16 @@ export const OUTLINE: readonly Rubric[] = [
           "The widgets are packed in the stored order, each at the first place at or after the one before it where it fits; room left behind stays free. The columns never change in number, under a maximum width. Below the width at which a column would be too narrow to read, the dashboard is a list in the same order. The height follows the size and never the content.",
         ],
         alternatives: [{ when: "A layout the developer fixes, which the reader does not arrange", use: "`Grid`, `Stack` and `Splitter` from @umriss-ui/core" }],
-        limits: ["Nothing can be edited yet: the view is the one the application passes or `setView` applies."],
+        keys: [
+          { key: "Tab", action: "In the editing mode, moves to the next widget's head and its menu button." },
+          { key: "Arrow keys", action: "On a focused head, move the widget one place earlier or later." },
+          { key: "Home or End", action: "On a focused head, move the widget to the start or the end." },
+        ],
+        accessibility: [
+          "The dashboard is a group named by its `aria-label`; every widget is a region named by its title. In the editing mode a widget's head is a tab stop named \"<title>, place n of m\", and its menu button \"Actions for <title>\".",
+          "Every move, size, removal, addition, undo, redo, reset, \"Done\" and \"Cancel\" is announced through core's live region: \"Orders: moved from place 1 to place 3 of 5\". The words are core's wording, German under `@umriss-ui/core/wording/de`.",
+        ],
+        limits: ["A widget's height follows its size, never its content: what does not fit is cut, not grown."],
         types: ["DashboardOptions", "DashboardParts", "DashboardProps", "DashboardView", "DashboardWidget", "WidgetSize", "SizeSpan", "WidgetTypeProps", "WidgetContent", "WidgetFormProps", "HeadingOptions"],
         exports: ["useDashboard", "WidgetType", "HeadingType"],
         installs: true,
