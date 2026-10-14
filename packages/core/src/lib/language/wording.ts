@@ -496,6 +496,9 @@ export interface Wording {
   dashboardEditing: string;
   dashboardCancel: string;
   dashboardDone: string;
+  dashboardUndo: string;
+  dashboardRedo: string;
+  dashboardReset: string;
   /** The name of a widget's menu button: the widget's title is the thing. */
   dashboardMenu: (title: string) => string;
   /** At the top of the menu, and in the name of a head the arrow keys move. */
@@ -516,6 +519,9 @@ export interface Wording {
   dashboardRemoved: (title: string) => string;
   dashboardKept: string;
   dashboardCancelled: string;
+  dashboardUndone: string;
+  dashboardRedone: string;
+  dashboardResetDone: string;
 
   /* -------- @umriss-ui/calculation --------------------------------- */
   /* The calculation's entries stand here for the table's reason: one provider
@@ -835,6 +841,9 @@ export const DEFAULT_WORDING: Wording = {
   dashboardEditing: "Editing the dashboard",
   dashboardCancel: "Cancel",
   dashboardDone: "Done",
+  dashboardUndo: "Undo",
+  dashboardRedo: "Redo",
+  dashboardReset: "Reset",
   dashboardMenu: (title) => `Actions for ${title}`,
   dashboardPlace: (place, of) => `Place ${place} of ${of}`,
   dashboardHead: (title, place, of) => `${title}, place ${place} of ${of}`,
@@ -850,6 +859,9 @@ export const DEFAULT_WORDING: Wording = {
   dashboardRemoved: (title) => `${title} removed`,
   dashboardKept: "Changes kept",
   dashboardCancelled: "Changes discarded",
+  dashboardUndone: "Undone",
+  dashboardRedone: "Redone",
+  dashboardResetDone: "Reset to the default",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",
