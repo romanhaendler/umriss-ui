@@ -1098,3 +1098,25 @@ describe("Toast – the top layer", () => {
     expect(region().hasAttribute("popover")).toBe(false);
   });
 });
+
+describe("Toast – one provider", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("warns once when a second provider mounts while another stands", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <ToastProvider>
+        <ToastProvider>x</ToastProvider>
+      </ToastProvider>,
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0]?.[0])).toMatch(/^@umriss-ui\/core: .*ToastProvider/);
+  });
+
+  it("does not warn for one provider, or for two after each other", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(<ToastProvider>x</ToastProvider>).unmount();
+    render(<ToastProvider>x</ToastProvider>);
+    expect(warn).not.toHaveBeenCalled();
+  });
+});
