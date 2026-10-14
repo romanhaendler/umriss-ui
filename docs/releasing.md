@@ -1,7 +1,7 @@
 # Releasing
 
 How a version of `@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
-`@umriss-ui/schedule` or `@umriss-ui/calculation`
+`@umriss-ui/schedule`, `@umriss-ui/calculation` or `@umriss-ui/dashboard`
 reaches npm, and how the demos reach GitHub Pages. What a version *means* for a
 caller stands in the package's own `CHANGELOG.md`; this page is only the
 mechanics.
@@ -45,7 +45,7 @@ and `check:dist`. A version with a hyphen
 version publishes nothing, and the same version is never published twice.
 
 After each package the workflow sets its tag, `<dir>-v<version>` — one per
-package, though from `0.34.0` all five carry the same number. The tag only
+package, though from `0.34.0` all carry the same number. The tag only
 marks the commit; it triggers nothing, and none is set by hand.
 
 No token is involved: each package on npm trusts that workflow through Trusted
@@ -58,9 +58,9 @@ that bypass it. The workflow packs with pnpm — only pnpm rewrites the
 `workspace:^`) — and uploads the tarball with npm, because pnpm 9.14.4 cannot
 do Trusted Publishing.
 
-1. **One number for all five packages.** From `0.34.0` on, `core`, `charts`,
-   `table`, `schedule` and `calculation` are released together under one
-   number, even where a package has no change of its own. The peer ranges
+1. **One number for all packages.** From `0.34.0` on, `core`, `charts`,
+   `table`, `schedule` and `calculation` - and from `0.40.0` `dashboard` - are
+   released together under one number, even where a package has no change of its own. The peer ranges
    between them are that same number - `workspace:^` in the manifests, which
    pnpm writes out as `^<version>` when it packs - so there is no table of
    which version needs which. At the release, in one commit: the `version` of

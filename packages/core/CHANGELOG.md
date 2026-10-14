@@ -10,7 +10,7 @@ well: **whatever changes existing behaviour stands under a heading "Changed" of
 its own**, no matter which digit rose. Whoever reads only one section before an
 upgrade reads that one.
 
-From 0.34.0 all five packages share one number: they are released together, and a package without a change of its own still gets a heading for it.
+From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
 
 **Names read forwards.** Where an entry below describes a name that has since
 been renamed, it is named here as it is called today; string literals, and
@@ -25,6 +25,12 @@ Of those, `internal 0.1.0` to `internal 0.3.0` were reconstructed afterwards —
 package stood at `0.1.0` the whole time, because it had exactly one caller and that
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
+
+## 0.40.0 – Words for the dashboard (Oct. 2026)
+
+### Added
+
+- **Wording for `@umriss-ui/dashboard`:** the `dashboard…` entries - the editing bar, a widget's menu and head, the size names, the catalogue, the built-in heading, a failed widget and every announcement - in English and German. An application that passes a complete `Wording` of its own adds them as well.
 
 ## 0.39.0 – Toasts that stay, and one provider (Oct. 2026)
 

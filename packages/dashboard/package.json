@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/dashboard",
-  "version": "0.36.0",
+  "version": "0.40.0",
   "description": "React dashboard for data-dense applications - widgets a reader arranges, packed in order on twelve columns.",
   "license": "MIT",
   "author": "Roman Händler",

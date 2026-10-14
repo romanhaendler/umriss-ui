@@ -8,9 +8,14 @@ when something is repaired. As long as the first digit is `0`, no number
 promises compatibility — which is why whatever changes existing behaviour stands
 under a heading "Changed" of its own, no matter which digit rose.
 
-From 0.34.0 all five packages share one number: they are released together, and a package without a change of its own still gets a heading for it.
+From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
 
 ---
+
+## 0.40.0 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
 
 ## 0.39.0 – No change of its own (Oct. 2026)
 
