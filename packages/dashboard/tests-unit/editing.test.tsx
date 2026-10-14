@@ -121,7 +121,7 @@ describe("the editing mode", () => {
     menuOf("Backlog");
     item("Remove");
     expect(order()).toEqual(["a", "c"]);
-    await said("Backlog removed");
+    await said("Backlog removed. Undo brings it back.");
   });
 
   it("moves a focused head with the arrow keys, Home and End", async () => {
