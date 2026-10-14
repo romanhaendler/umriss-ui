@@ -519,6 +519,18 @@ export interface Wording {
   dashboardRemoved: (title: string) => string;
   dashboardKept: string;
   dashboardCancelled: string;
+  /** The catalogue and the options. */
+  dashboardAddWidget: string;
+  dashboardCatalogue: string;
+  dashboardCatalogueSentence: string;
+  dashboardAdd: string;
+  dashboardAddType: (label: string) => string;
+  dashboardFootprint: (columns: number, rows: number) => string;
+  dashboardAdded: (title: string, place: number, of: number) => string;
+  dashboardOptions: string;
+  dashboardOptionsChanged: (title: string) => string;
+  dashboardEmpty: string;
+  dashboardEmptyEditing: string;
   dashboardUndone: string;
   dashboardRedone: string;
   dashboardResetDone: string;
@@ -859,6 +871,17 @@ export const DEFAULT_WORDING: Wording = {
   dashboardRemoved: (title) => `${title} removed. Undo brings it back.`,
   dashboardKept: "Changes kept",
   dashboardCancelled: "Changes discarded",
+  dashboardAddWidget: "Add widget",
+  dashboardCatalogue: "Add a widget",
+  dashboardCatalogueSentence: "Each widget is added at the end.",
+  dashboardAdd: "Add",
+  dashboardAddType: (label) => `Add ${label}`,
+  dashboardFootprint: (columns, rows) => `${columns} of 12 columns, ${rows} rows`,
+  dashboardAdded: (title, place, of) => `${title} added, place ${place} of ${of}`,
+  dashboardOptions: "Options",
+  dashboardOptionsChanged: (title) => `${title}: options changed`,
+  dashboardEmpty: "This dashboard is empty.",
+  dashboardEmptyEditing: "This dashboard is empty. Choose Add widget to begin.",
   dashboardUndone: "Undone",
   dashboardRedone: "Redone",
   dashboardResetDone: "Reset to the default",
