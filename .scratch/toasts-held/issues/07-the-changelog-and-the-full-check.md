@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Size: S
 
-Blocked by: 01, 02, 03, 04, 05, 06
+Blocked by: 01, 02, 03, 04, 05, 06, 08
 Spec: `.scratch/toasts-held/spec.md`, Testing Decisions ("The visual suite",
 "Checks"), Further Notes (changelog); user story 46
 
