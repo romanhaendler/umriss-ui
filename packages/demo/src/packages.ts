@@ -25,4 +25,5 @@ export const PACKAGES: readonly Package[] = [
   { id: "table", name: "Table", npm: "@umriss-ui/table", role: "A typed data table for many rows", start: "first-table" },
   { id: "schedule", name: "Schedule", npm: "@umriss-ui/schedule", role: "Work on lanes over time", start: "schedule" },
   { id: "calculation", name: "Calculation", npm: "@umriss-ui/calculation", role: "A figure shown with how it came about", start: "installation" },
+  { id: "dashboard", name: "Dashboard", npm: "@umriss-ui/dashboard", role: "Widgets a reader arranges on twelve columns", start: "dashboard" },
 ];
