@@ -1,4 +1,4 @@
-/* The site on GitHub Pages: the five demos under one address, each in a
+/* The site on GitHub Pages: the six demos under one address, each in a
    directory of its own, and a page in front that points at every page of them.
 
      site/index.html            the front page - the hub (scripts/front-page.html)
@@ -239,9 +239,9 @@ const front = {
   themeScript,
   favicon: FAVICON_LINK,
   head: headOf({
-    title: "umriss-ui – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
+    title: "umriss-ui – React component library, canvas charts, data table, Gantt schedule and arrangeable dashboard for data-dense applications",
     description:
-      "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule and a calculation view. TypeScript, MIT, light and dark.",
+      "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule, a calculation view and a dashboard readers arrange. TypeScript, MIT, light and dark.",
     url: HOME,
   }),
   jsonLd: jsonLd({ "@context": "https://schema.org", "@graph": rows.map(structuredData) }),
@@ -360,7 +360,7 @@ writeFileSync(
   join(SITE, "llms.txt"),
   `# umriss-ui
 
-> React components for data-dense applications - dashboards, monitoring, planning: a component library, canvas charts, a table, a schedule and calculations, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
+> React components for data-dense applications - dashboards, monitoring, planning: a component library, canvas charts, a table, a schedule, calculations and a dashboard readers arrange, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
 
 Every package carries the full text of its installed version as \`node_modules/<package>/docs/llms-full.md\`.
 

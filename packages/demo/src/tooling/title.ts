@@ -17,6 +17,7 @@ const NOUN: Readonly<Record<string, string>> = {
   "@umriss-ui/table": "table",
   "@umriss-ui/schedule": "schedule",
   "@umriss-ui/calculation": "calculation",
+  "@umriss-ui/dashboard": "dashboard",
 };
 
 /** `<Page> – React <noun> · <package>` for a page; `<package> – <description>`

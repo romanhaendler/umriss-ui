@@ -172,7 +172,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "A gap is a step of the 4 px scale from 1 to 8, the same steps every component spaces itself by, so a screen keeps its proportions. `align` and `justify` pass `alignItems` and `justifyContent` through unchanged; for the rest of flexbox and grid, set `style`.",
         ],
-        limits: ["No breakpoints and no responsive props: a grid follows the width through `minItemWidth`, anything else is your stylesheet's.", "Tiles are not arranged by the user: no dragging, no resizing, no stored layout (ADR-0060)."],
+        limits: ["No breakpoints and no responsive props: a grid follows the width through `minItemWidth`, anything else is your stylesheet's.", "Tiles are not arranged by the user: for a dashboard the reader arranges, see `@umriss-ui/dashboard` (ADR-0064)."],
         keysOf: ["button"],
         types: ["StackProps", "GridProps"],
         exports: ["Stack", "Grid"],
@@ -222,7 +222,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Enter", action: "Folds the first pane to its smallest share; again, brings it back." },
         ],
         limits: [
-          "Two panes per splitter, no more. Tiles are not arranged by the user (ADR-0060).",
+          "Two panes per splitter, no more. Tiles are not arranged by the user: for a dashboard the reader arranges, see `@umriss-ui/dashboard` (ADR-0064).",
           "It does not remember the share beyond its own life; keep it in the user's settings through `value` and `onChange`.",
         ],
         types: ["SplitterProps"],

@@ -226,7 +226,7 @@ re-sorts them should expect baselines to wander.
 ## Three ways to run the visual suite
 
 * **Quick:** `pnpm test:visual:quick <package>` (`core`, `charts`, `table`,
-  `schedule`, `calculation`) builds only that demo and runs the light project's
+  `schedule`, `calculation`, `dashboard`) builds only that demo and runs the light project's
   tests tagged `{ tag: "@quick" }`: the page-head and scenario screenshots, the
   phone and narrow-width layout checks, and the shell's sideways-scroll checks.
   A test that should belong takes the tag in its `test(...)` or `describe(...)`

@@ -1,6 +1,6 @@
 /* A demo, as the shell receives it.
 
-   The shell is the same for all five packages (ADR-0020); what makes a demo a
+   The shell is the same for all six packages (ADR-0020); what makes a demo a
    particular one comes in here: the outline, the scenarios, the examples, the
    generated tables and the manifest: the package name a reader takes the
    package under, and the peers its install command names.
