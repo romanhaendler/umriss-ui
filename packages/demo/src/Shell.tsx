@@ -1,6 +1,6 @@
 /* The shell of a demo: header bar, sidebar, scenarios page, jump palette.
 
-   It is the same one for all five demos (ADR-0020); what makes a demo a particular one arrives as `demo`.
+   It is the same one for all six demos (ADR-0020); what makes a demo a particular one arrives as `demo`.
 
    Why no tabs. The pages of a demo fit into no tab bar, and tabs assert ONE
    level while two exist here: rubric and page. What component libraries
