@@ -828,7 +828,7 @@ export const OUTLINE: readonly Rubric[] = [
           "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
           "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
           "Several toasts stand as a deck: the newest in front, a count on it, two edges behind it. It opens under the pointer, on the count, with the focus inside it, or with Alt+T; Escape gives the focus back.",
-          "At most three stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest gives way to a new one, as if closed.",
+          "At most three that leave by themselves stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest of them gives way to a new one, as if closed. A toast with `duration: 0` and a `loading` toast never give way and do not count.",
         ],
         alternatives: [
           { when: "The reader must see it, or it stays true until something is done", use: "alert" },
@@ -851,7 +851,7 @@ export const OUTLINE: readonly Rubric[] = [
           "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
           "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
           "One `ToastProvider` per application, at its root. A second one in the same document draws a second deck at the same place and the two lie on each other; in development it is reported on the console.",
-          "No queue: a toast over the limit pushes the oldest out rather than waiting.",
+          "No queue: a toast over the limit pushes the oldest timed one out rather than waiting. Lasting and `loading` toasts are not capped: the deck holds every one of them beside the timed ones.",
           "Without the Popover API the deck moves with a dialog that transforms itself: inside a dialog the toasts stand in the top layer only where the browser has it, and elsewhere they are a fixed box in the dialog.",
         ],
         types: ["ToastOptions", "ToastAction"],

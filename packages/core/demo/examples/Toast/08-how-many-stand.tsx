@@ -8,7 +8,7 @@ import { usePageToast } from "../../pageToast";
 type ToastFn = ReturnType<typeof useToast>["toast"];
 
 export const title = "How many stand at once";
-export const lead = "`toast.limit` in the `UmrissProvider` caps the deck: here two stand, and each new toast pushes out the oldest as if it had been closed. Scan four parcels in a row and only the last two remain.";
+export const lead = "`toast.limit` in the `UmrissProvider` caps the toasts that leave by themselves: here two stand, and each new one pushes out the oldest of them as if it had been closed. Scan four parcels in a row and only the last two remain.";
 
 const PARCELS = ["FP-2081", "FP-2082", "FP-2083", "FP-2084"];
 
