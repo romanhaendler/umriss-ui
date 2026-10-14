@@ -16,6 +16,7 @@ import { useCardMeasure } from "./useCardMeasure";
 import { keyboardFocus, useDeckOpen } from "./useDeckOpen";
 import type { Place } from "./useDeckPlaces";
 import { useDeckPlaces } from "./useDeckPlaces";
+import { useHold } from "./useHold";
 import { useRegionFocus } from "./useRegionFocus";
 import { useCountdowns, useTimerStore } from "./useToastTimers";
 
@@ -165,13 +166,6 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   }, []);
 
   const nextId = useRef(1);
-  /* The first id of the hold (ids only grow): a toast that arrives while the
-     toasts are held back is not drawn, so that its text enters its live region
-     when the hold ends and is heard then. */
-  const [heldFrom, setHeldFrom] = useState<number | null>(null);
-  if (held && heldFrom === null) setHeldFrom((items.at(-1)?.id ?? 0) + 1);
-  else if (!held && heldFrom !== null) setHeldFrom(null);
-  const drawn = (item: ToastItem) => heldFrom === null || item.id < heldFrom;
   /* When each standing toast arrived (`performance.now()`): a region that
      moves hands its cards their age, so that an entrance goes on. */
   const arrivedRef = useRef(new Map<number, number>());
@@ -308,6 +302,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
      target may enter the document later, and the next toast has to find it. */
   const dialog = useTopmostModalDialog();
   const [target, setTarget] = useState<Element | null>(null);
+  const { entered } = useHold(held, items, target);
   /* The age in ms of each card that stood when the region last changed its
      place. The cards are built anew there, and an entrance that is running
      goes on from where it was (a negative `animation-delay`); one that is over
@@ -510,10 +505,10 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
           onPointerLeave={onPointerLeave}
         >
           <div role="status" aria-live="polite" className={styles.live}>
-            {items.filter((item) => drawn(item) && roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
+            {items.filter((item) => entered(item) && roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
           </div>
           <div role="alert" className={styles.live}>
-            {items.filter((item) => drawn(item) && roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
+            {items.filter((item) => entered(item) && roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
           </div>
         </div>,
         target,
