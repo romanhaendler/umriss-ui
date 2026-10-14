@@ -294,6 +294,17 @@ describe("Toast – limit", () => {
     for (const title of ["B", "C", "D"]) expect(screen.getByText(title)).toBeTruthy();
   });
 
+  it("stands a timed toast in front of three that stay, and pushes none out", () => {
+    const call = mount();
+    const titles = ["Stays 1", "Stays 2", "Stays 3"];
+    for (const title of titles) call((t) => t.toast({ title, duration: 0 }));
+    call((t) => t.toast({ title: "Timed", duration: 30_000 }));
+    for (const title of [...titles, "Timed"]) expect(screen.getByText(title)).toBeTruthy();
+    const count = screen.getByRole("button", { name: DEFAULT_WORDING.toastDeckCount(4) });
+    expect(count.textContent).toBe("1 / 4");
+    expect(count.closest("[role=status] > *")?.textContent).toContain("Timed");
+  });
+
   it("keeps a loading toast until update shows its outcome", () => {
     const call = mount();
     const id = call((t) => t.toast({ title: "Working", tone: "loading" }));

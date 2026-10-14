@@ -29,6 +29,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { EXAMPLE_PATTERN } from "../src/tooling/fileName";
+import { withRoot } from "../src/tooling/source";
 
 export interface OwnDataProbes {
   /** The demo's `examples/` directory. */
@@ -87,7 +88,8 @@ export function checkOwnData({ examplesDir }: OwnDataProbes): void {
 
     const offenders: string[] = [];
     for (const { name, path } of files) {
-      const source = readFileSync(path, "utf8");
+      /* What a reader copies: the demo-only seam is already taken out. */
+      const source = withRoot(readFileSync(path, "utf8"));
       for (const specifier of specifiersOf(source)) {
         if (allowed(specifier)) continue;
         offenders.push(`${name} › ${specifier}`);
