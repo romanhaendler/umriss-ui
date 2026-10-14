@@ -1,6 +1,6 @@
 import { Children, isValidElement, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
-import { announce, Button, Card, CardBody, CardHeader, Drawer, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, useWording } from "@umriss-ui/core";
+import { announce, Button, Card, CardBody, CardHeader, Drawer, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
@@ -8,8 +8,8 @@ import { Failed } from "./Failed";
 import { readView } from "./model";
 import type { DashboardView, WidgetSize } from "./model";
 import { nearestPlace, pack } from "./pack";
-import { WidgetType } from "./WidgetType";
-import type { WidgetContent, WidgetTypeProps } from "./WidgetType";
+import { HEADING, HeadingType, WidgetType } from "./WidgetType";
+import type { HeadingOptions, WidgetContent, WidgetTypeProps } from "./WidgetType";
 
 const cx = (...parts: Array<string | false | undefined>) => parts.filter(Boolean).join(" ");
 
@@ -38,6 +38,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   const types = new Map<string, AnyType>();
   for (const child of Children.toArray(children)) {
     if (isValidElement<AnyType>(child) && child.type === WidgetType) types.set(child.props.name, child.props);
+    else if (isValidElement(child) && child.type === HeadingType) types.set(HEADING.name, HEADING as AnyType);
   }
   const { register } = editor;
   useEffect(() => register(types));
@@ -242,6 +243,13 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 },
               }
             : {};
+          if (type === HEADING) {
+            return (
+              <div key={widget.id} className={cx(styles.item, styles.headingRow)} style={style} data-widget={widget.id}>
+                <Heading level={2} size="lg" className={styles.heading}>{(widget.options as HeadingOptions).text}</Heading>
+              </div>
+            );
+          }
           return (
             <Card key={widget.id} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={title}>
               <CardHeader
