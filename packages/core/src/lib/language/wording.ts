@@ -511,8 +511,17 @@ export interface Wording {
   dashboardRemove: string;
   /** The closed set of size names, worded once for every widget type. */
   dashboardSizes: { small: string; medium: string; wide: string; tall: string; large: string; full: string };
-  /** The share of the width beside a size's name; `fraction` is "1/4". */
-  dashboardShare: (fraction: string) => string;
+  /** A size's entry in a widget's menu: its name and its share of the width
+      (`share` is "¼" or "5/12"); `current` marks the size the widget stands at. */
+  dashboardSizeEntry: (size: string, share: string, current: boolean) => string;
+  /** The built-in heading type: its name, its sentence in the catalogue, the
+      text a new heading starts with and the label of its text field. */
+  dashboardHeadingLabel: string;
+  dashboardHeadingSentence: string;
+  dashboardHeadingText: string;
+  dashboardHeadingField: string;
+  /** Said when "Done" leaves the mode and nothing was changed. */
+  dashboardLeft: string;
   /** What is spoken after a change. */
   dashboardMoved: (title: string, from: number, to: number, of: number) => string;
   dashboardDragCancelled: (title: string) => string;
@@ -867,7 +876,12 @@ export const DEFAULT_WORDING: Wording = {
   dashboardMoveEnd: "Move to end",
   dashboardRemove: "Remove",
   dashboardSizes: { small: "Small", medium: "Medium", wide: "Wide", tall: "Tall", large: "Large", full: "Full width" },
-  dashboardShare: (fraction) => `${fraction} wide`,
+  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}, ${share} wide`,
+  dashboardHeadingLabel: "Heading",
+  dashboardHeadingSentence: "A title across the full width.",
+  dashboardHeadingText: "New section",
+  dashboardHeadingField: "Text",
+  dashboardLeft: "Editing ended",
   dashboardMoved: (title, from, to, of) => `${title}: moved from place ${from} to place ${to} of ${of}`,
   dashboardDragCancelled: (title) => `${title}: move cancelled`,
   dashboardResized: (title, size) => `${title}: size ${size}`,
