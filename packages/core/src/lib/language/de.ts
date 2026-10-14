@@ -337,6 +337,7 @@ export const GERMAN_WORDING: Wording = {
   dashboardOptionsChanged: (title) => `${title}: Optionen geändert`,
   dashboardEmpty: "Dieses Dashboard ist leer.",
   dashboardEmptyEditing: "Dieses Dashboard ist leer. Wählen Sie „Widget hinzufügen“, um zu beginnen.",
+  dashboardFailed: "Dieses Widget kann nichts anzeigen.",
   dashboardUndone: "Rückgängig gemacht",
   dashboardRedone: "Wiederholt",
   dashboardResetDone: "Auf die Vorgabe zurückgesetzt",

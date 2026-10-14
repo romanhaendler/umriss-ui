@@ -531,6 +531,7 @@ export interface Wording {
   dashboardOptionsChanged: (title: string) => string;
   dashboardEmpty: string;
   dashboardEmptyEditing: string;
+  dashboardFailed: string;
   dashboardUndone: string;
   dashboardRedone: string;
   dashboardResetDone: string;
@@ -882,6 +883,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardOptionsChanged: (title) => `${title}: options changed`,
   dashboardEmpty: "This dashboard is empty.",
   dashboardEmptyEditing: "This dashboard is empty. Choose Add widget to begin.",
+  dashboardFailed: "This widget cannot show anything.",
   dashboardUndone: "Undone",
   dashboardRedone: "Redone",
   dashboardResetDone: "Reset to the default",

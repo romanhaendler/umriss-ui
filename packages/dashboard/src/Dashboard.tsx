@@ -4,10 +4,12 @@ import { announce, Button, Card, CardBody, CardHeader, Drawer, Menu, MenuItem, M
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
+import { Failed } from "./Failed";
+import { readView } from "./model";
 import type { DashboardView, WidgetSize } from "./model";
 import { pack } from "./pack";
 import { WidgetType } from "./WidgetType";
-import type { WidgetTypeProps } from "./WidgetType";
+import type { WidgetContent, WidgetTypeProps } from "./WidgetType";
 
 const cx = (...parts: Array<string | false | undefined>) => parts.filter(Boolean).join(" ");
 
@@ -23,15 +25,23 @@ export interface DashboardProps extends HTMLAttributes<HTMLDivElement> {
   catalogue?: ReadonlyArray<string>;
 }
 
+/* The content is called inside its own component, so that a throw lands in its boundary. */
+function Content({ render, ...content }: { render: AnyType["children"] } & WidgetContent<unknown>) {
+  return render(content);
+}
+
 type AnyType = WidgetTypeProps<unknown>;
 
 /** The Dashboard of `useDashboard`, drawing a view. */
-export function DashboardOf({ view, editor, className, children, catalogue, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
+export function DashboardOf({ view: given, editor, className, children, catalogue, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
   const wording = useWording();
   const types = new Map<string, AnyType>();
   for (const child of Children.toArray(children)) {
     if (isValidElement<AnyType>(child) && child.type === WidgetType) types.set(child.props.name, child.props);
   }
+  const { register } = editor;
+  useEffect(() => register(types));
+  const view = readView(given, types);
   const shown = view.widgets.flatMap((widget) => {
     const type = types.get(widget.type);
     const span = type?.sizes[widget.size];
@@ -189,7 +199,7 @@ export function DashboardOf({ view, editor, className, children, catalogue, ...r
                   )
                 }
               />
-              <CardBody className={styles.body} inert={editing}>{type.children({ size: widget.size, options: widget.options })}</CardBody>
+              <CardBody className={styles.body} inert={editing}><Failed fallback={<p>{wording.dashboardFailed}</p>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></CardBody>
             </Card>
           );
         })}
