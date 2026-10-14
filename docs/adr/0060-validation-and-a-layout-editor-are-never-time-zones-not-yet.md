@@ -1,6 +1,6 @@
 # Form validation and a dashboard a user arranges are never built, and time zones are not yet
 
-Status: accepted, extends ADR-0032
+Status: accepted, extends ADR-0032; superseded in one point by ADR-0064 (a dashboard a user arranges is built)
 Date:   2026-10
 
 Three questions had no document. `FormField` says in one comment that

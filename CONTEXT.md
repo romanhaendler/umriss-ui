@@ -1363,6 +1363,15 @@ What a developer declares and a reader chooses from when adding to a
 **Dashboard**: what a **Widget** of this kind shows and which sizes it allows.
 _Avoid_: widget (for the kind rather than the placed one), template, component
 
+**Widget size**:
+How much room a **Widget** takes, said by a name from one closed set that the
+library defines and words. A **Widget type** offers some of the names, each
+with the room it takes for that type, and one to start from; a larger one
+shows more of the same thing. The reader chooses among them; a size that is
+not a name does not exist. The height follows the size, never what the widget
+shows.
+_Avoid_: size on its own (a **Control size**'s word), span, dimensions, scale
+
 **Options**:
 What one **Widget** was told to show - which figure, which period - as distinct
 from another widget of the same **Widget type**. Every type brings options to
