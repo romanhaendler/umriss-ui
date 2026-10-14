@@ -517,6 +517,85 @@ for (const width of [1280, 320]) {
   });
 }
 
+/* The deck glides when the application changes its distance from the window,
+   in the time and easing of its height. The region's box is read in every
+   animation frame in which a card stands. */
+async function sampleTheDeck(page: Page): Promise<() => Promise<{ top: number; end: number }[]>> {
+  await page.evaluate(() => {
+    const state = { running: true, frames: [] as { top: number; end: number }[] };
+    (window as unknown as { __deck: typeof state }).__deck = state;
+    const frame = () => {
+      const card = document.querySelector("[data-toast]");
+      const region = card?.closest("[data-edge]");
+      if (region) {
+        const box = region.getBoundingClientRect();
+        state.frames.push({ top: Math.round(box.top), end: Math.round(document.documentElement.clientWidth - box.right) });
+      }
+      if (state.running) requestAnimationFrame(frame);
+    };
+    frame();
+  });
+  return () =>
+    page.evaluate(() => {
+      const state = (window as unknown as { __deck: { running: boolean; frames: { top: number; end: number }[] } }).__deck;
+      state.running = false;
+      return state.frames;
+    });
+}
+
+async function standingTopEnd(page: Page) {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  await page.getByRole("button", { name: "Top end", exact: true }).click();
+  await expect(page.getByText("Standing top end.")).toBeVisible();
+  await page.waitForTimeout(400);
+}
+
+for (const [token, side] of [["--u-toast-inset-top", "top"], ["--u-toast-inset-end", "end"]] as const) {
+  test(`A change of ${token} while toasts are seen glides the deck to its new place`, async ({ page }) => {
+    await standingTopEnd(page);
+    const stop = await sampleTheDeck(page);
+    await page.addStyleTag({ content: `:root { ${token}: 96px; }` });
+    await page.waitForTimeout(600);
+    const values = [...new Set((await stop()).map((frame) => frame[side]))];
+    expect(values[0]).toBe(20);
+    expect(values.at(-1)).toBe(96);
+    expect(values.some((value) => value > 20 && value < 96), `between: ${values.join(", ")}`).toBe(true);
+  });
+
+  test(`With reduced motion a change of ${token} moves the deck at once`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await standingTopEnd(page);
+    const stop = await sampleTheDeck(page);
+    await page.addStyleTag({ content: `:root { ${token}: 96px; }` });
+    await page.waitForTimeout(600);
+    expect([...new Set((await stop()).map((frame) => frame[side]))]).toEqual([20, 96]);
+  });
+}
+
+test("The first toast stands at its place in its first frame, though the token changed just before", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  const stop = await sampleTheDeck(page);
+  await page.addStyleTag({ content: ":root { --u-toast-inset-top: 96px; --u-toast-inset-end: 96px; }" });
+  await page.getByRole("button", { name: "Top end", exact: true }).click();
+  await page.waitForTimeout(600);
+  const frames = await stop();
+  expect(frames.length).toBeGreaterThan(0);
+  expect([...new Set(frames.map((frame) => frame.top))]).toEqual([96]);
+  expect([...new Set(frames.map((frame) => frame.end))]).toEqual([96]);
+});
+
+test("Setting a token again to the value it has moves nothing", async ({ page }) => {
+  await standingTopEnd(page);
+  const stop = await sampleTheDeck(page);
+  for (let i = 0; i < 10; i++) {
+    await page.evaluate(() => document.documentElement.style.setProperty("--u-toast-inset-top", "20px"));
+    await page.waitForTimeout(30);
+  }
+  expect([...new Set((await stop()).map((frame) => frame.top))]).toEqual([20]);
+});
+
 test("In a right-to-left page the start token is the distance from the right", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await openExample(page, "toast", "where-they-stand");

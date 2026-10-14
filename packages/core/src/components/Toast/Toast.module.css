@@ -1,6 +1,34 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The four distances, registered so that they can glide: the region copies
+     the tokens into them and transitions them, and each position reads the one
+     its edge and side use. A change of position changes none of them and so
+     never glides; a change of a token glides wherever it is read. */
+  @property --_toast-top {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-bottom {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-start {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  @property --_toast-end {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
   /* The region stands at the edge and along it where the provider says; its
      height is the deck's, set by the component, so that the pointer opens the
      deck over it and nowhere else. The ring shows where Alt+T has put the
@@ -12,7 +40,24 @@
     z-index: var(--u-z-toast);
     width: var(--u-toast-width);
     border-radius: var(--u-radius-lg);
+    --_toast-top: var(--u-toast-inset-top);
+    --_toast-bottom: var(--u-toast-inset-bottom);
+    --_toast-start: var(--u-toast-inset-start);
+    --_toast-end: var(--u-toast-inset-end);
     transition: height var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  /* The deck glides to a new distance only while a toast stands (the region
+     is a landmark then): a distance changed while none stands is taken at
+     once, so that the first toast does not glide in from the old place. A
+     region drawn anew has no old place and stands at once too. */
+  .region[role="region"] {
+    transition:
+      height var(--u-duration-medium) var(--u-ease-out),
+      --_toast-top var(--u-duration-medium) var(--u-ease-out),
+      --_toast-bottom var(--u-duration-medium) var(--u-ease-out),
+      --_toast-start var(--u-duration-medium) var(--u-ease-out),
+      --_toast-end var(--u-duration-medium) var(--u-ease-out);
   }
 
   /* In the top layer (inside a dialog) the region is a manual popover, and the
@@ -37,19 +82,19 @@
   /* The distance from the edge is the application's to set; the tokens hold
      the phone's own. */
   .region[data-edge="bottom"] {
-    bottom: var(--u-toast-inset-bottom);
+    bottom: var(--_toast-bottom);
   }
 
   .region[data-edge="top"] {
-    top: var(--u-toast-inset-top);
+    top: var(--_toast-top);
   }
 
   .region[data-along="start"] {
-    inset-inline-start: var(--u-toast-inset-start);
+    inset-inline-start: var(--_toast-start);
   }
 
   .region[data-along="end"] {
-    inset-inline-end: var(--u-toast-inset-end);
+    inset-inline-end: var(--_toast-end);
   }
 
   .region[data-along="center"] {
@@ -64,7 +109,7 @@
   @media (max-width: 600px) {
     .region.region {
       width: auto;
-      inset-inline: var(--u-toast-inset-start) var(--u-toast-inset-end);
+      inset-inline: var(--_toast-start) var(--_toast-end);
       margin-inline: 0;
     }
   }
@@ -352,6 +397,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .region,
+    .region[role="region"],
     .card,
     .toast,
     .content {
