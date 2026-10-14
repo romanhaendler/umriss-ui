@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
-export function useRegionFocus(regionRef: RefObject<HTMLDivElement | null>, anyStanding: boolean) {
+export function useRegionFocus(regionRef: RefObject<HTMLDivElement | null>, seen: boolean) {
   /* Alt+T puts the focus on the region by a key, but Chrome shows no
      `:focus-visible` for a scripted focus after a click: the ring is drawn
      for this focus by hand. */
@@ -19,7 +19,7 @@ export function useRegionFocus(regionRef: RefObject<HTMLDivElement | null>, anyS
   }, []);
 
   useEffect(() => {
-    if (!anyStanding) return;
+    if (!seen) return;
     const onKey = (event: globalThis.KeyboardEvent) => {
       /* `code`, not `key`: on a Mac, Alt+T types "†". */
       if (!event.altKey || event.ctrlKey || event.metaKey || event.code !== "KeyT") return;
@@ -33,7 +33,7 @@ export function useRegionFocus(regionRef: RefObject<HTMLDivElement | null>, anyS
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [anyStanding, regionRef]);
+  }, [seen, regionRef]);
 
   return { byKeys, setByKeys, returnFocusRef, leaveRegion };
 }

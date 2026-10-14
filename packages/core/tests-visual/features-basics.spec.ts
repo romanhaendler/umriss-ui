@@ -736,18 +736,21 @@ async function holdingOneToast(page: Page) {
 }
 
 /* In one task: the modal closes, the hold ends, the bottom token changes
-   (or the token first). */
-async function endTheHold(page: Page, { bottom, closeTheModal = false, tokenFirst = false }: { bottom?: number; closeTheModal?: boolean; tokenFirst?: boolean }) {
+   (or the token first, or in an animation frame callback queued after the
+   hold ended, as an application writes a token in every frame). */
+type TokenAt = "after" | "first" | "frame";
+async function endTheHold(page: Page, { bottom, closeTheModal = false, token = "after" }: { bottom?: number; closeTheModal?: boolean; token?: TokenAt }) {
   await page.evaluate(
-    ({ bottom, closeTheModal, tokenFirst }) => {
+    ({ bottom, closeTheModal, token }) => {
       const setToken = () => bottom !== undefined && document.documentElement.style.setProperty("--u-toast-inset-bottom", `${bottom}px`);
       if (closeTheModal) (document.getElementById("moving-modal") as HTMLDialogElement).close();
-      if (tokenFirst) setToken();
+      if (token === "first") setToken();
       const label = [...document.querySelectorAll('[data-example="hold-the-toasts"] label')].find((element) => element.textContent?.includes("Hold the toasts"));
       (label as HTMLElement).click();
-      if (!tokenFirst) setToken();
+      if (token === "after") setToken();
+      if (token === "frame") requestAnimationFrame(setToken);
     },
-    { bottom, closeTheModal, tokenFirst },
+    { bottom, closeTheModal, token },
   );
 }
 
@@ -763,15 +766,18 @@ test("A change of the distance during a hold is taken at once: after the hold th
   expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
 });
 
-for (const tokenFirst of [false, true]) {
-  test(`The hold ending in the frame the distance changes (${tokenFirst ? "token first" : "hold first"}) shows the deck at the new place, nothing in between`, async ({ page }) => {
+for (const token of ["after", "first", "frame"] as const) {
+  const order = { after: "hold first", first: "token first", frame: "token in a later frame callback" }[token];
+  test(`The hold ending in the frame the distance changes (${order}) shows the deck at the new place, nothing in between`, async ({ page }) => {
     await holdingOneToast(page);
     const stop = await sampleTheDeck(page);
-    await endTheHold(page, { bottom: 96, tokenFirst });
+    await endTheHold(page, { bottom: 96, token });
     await page.waitForTimeout(600);
     const frames = await stop();
     expect(frames.length).toBeGreaterThan(0);
-    expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual([96]);
+    /* A token written in a later callback of the first frame comes after the
+       sampler's reading in that frame, which still finds the old place. */
+    expect([...new Set(frames.map((frame) => frame.bottom))]).toEqual(token === "frame" ? [20, 96] : [96]);
   });
 }
 

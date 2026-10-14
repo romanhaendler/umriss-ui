@@ -53,5 +53,8 @@ export function useHold(held: boolean, items: ToastItem[], target: Element | nul
 
   /** Whether a toast is in its live region: every one, but those that wait. */
   const entered = (item: ToastItem) => waitingFrom === null || item.id < waitingFrom;
-  return { entered };
+  /* Whether the deck has been drawn since the hold last began or ended: until
+     then it has no place it was seen at, to glide from. */
+  const settled = useFramesSince(held);
+  return { entered, settled };
 }

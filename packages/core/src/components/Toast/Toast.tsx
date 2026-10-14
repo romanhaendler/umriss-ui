@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -16,6 +16,7 @@ import { useCardMeasure } from "./useCardMeasure";
 import { keyboardFocus, useDeckOpen } from "./useDeckOpen";
 import type { Place } from "./useDeckPlaces";
 import { useDeckPlaces } from "./useDeckPlaces";
+import { useGlideAcross } from "./useGlideAcross";
 import { useHold } from "./useHold";
 import { useRegionFocus } from "./useRegionFocus";
 import { useCountdowns, useTimerStore } from "./useToastTimers";
@@ -124,14 +125,6 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
   );
 }
 
-/** The region's four distances as it stands, as the stylesheet's `--_from-*`. */
-type Insets = Record<`--_from-${"top" | "bottom" | "start" | "end"}`, string>;
-function insetsOf(region: Element): Insets {
-  const style = getComputedStyle(region);
-  const read = (side: string) => style.getPropertyValue(`--_toast-${side}`);
-  return { "--_from-top": read("top"), "--_from-bottom": read("bottom"), "--_from-start": read("start"), "--_from-end": read("end") };
-}
-
 /** The props of `ToastProvider`. */
 export interface ToastProviderProps {
   children: ReactNode;
@@ -175,8 +168,9 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   const { open, setHovered, setFocused, setPinned } = useDeckOpen(regionRef, items);
   const { heights, measureRef, forget } = useCardMeasure();
   const { lastPlaceRef, places, count, byRank, frontHeight, regionHeight } = useDeckPlaces(items, open, heights, edge);
-  const anyStanding = items.some((item) => !item.leaving);
-  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, anyStanding && !held);
+  /* A toast can be seen: one stands, and the toasts are not held back. */
+  const seen = items.some((item) => !item.leaving) && !held;
+  const { byKeys, setByKeys, returnFocusRef, leaveRegion } = useRegionFocus(regionRef, seen);
 
   const remove = useCallback(
     (id: number) => {
@@ -302,32 +296,16 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
      target may enter the document later, and the next toast has to find it. */
   const dialog = useTopmostModalDialog();
   const [target, setTarget] = useState<Element | null>(null);
-  const { entered } = useHold(held, items, target);
+  const { entered, settled } = useHold(held, items, target);
   /* The age in ms of each card that stood when the region last changed its
      place. The cards are built anew there, and an entrance that is running
      goes on from where it was (a negative `animation-delay`); one that is over
      stays over. */
   const [ages, setAges] = useState<ReadonlyMap<number, number>>(new Map());
-  /* Where the deck was last seen in a dialog, read in every frame while a
-     toast is seen there: a dialog that closes takes its region out of
-     rendering before it can be read. */
-  const seenInDialogRef = useRef<Insets | null>(null);
-  const inDialog = target instanceof HTMLDialogElement;
-  const seen = anyStanding && !held;
-  useEffect(() => {
-    seenInDialogRef.current = null;
-    if (!inDialog || !seen) return;
-    let frame = requestAnimationFrame(function read() {
-      if (regionRef.current) seenInDialogRef.current = insetsOf(regionRef.current);
-      frame = requestAnimationFrame(read);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [inDialog, seen]);
-  /* Where the new region starts when the region changes its place: the old
-     region's distances as last seen, as `--_from-*`, which the stylesheet's
-     starting style reads. A new place glides from there, the same place
-     stands still. */
-  const [from, setFrom] = useState<Insets | null>(null);
+  /* The deck glides only from a place it was seen at: not until it has been
+     drawn since the hold began or ended. */
+  const seenAtItsPlace = seen && settled;
+  const { from, handOn } = useGlideAcross(regionRef, target instanceof HTMLDialogElement && seenAtItsPlace);
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;
@@ -338,12 +316,10 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
       letGoOfFocus();
       const now = performance.now();
       setAges(new Map(itemsRef.current.map((item) => [item.id, Math.round(now - (arrivedRef.current.get(item.id) ?? now))])));
-      const old = regionRef.current;
-      const drawn = target.isConnected && !(target instanceof HTMLDialogElement && !target.open);
-      setFrom(old?.getAttribute("role") === "region" && !heldRef.current ? (drawn ? insetsOf(old) : seenInDialogRef.current) : null);
+      handOn(target, seenAtItsPlace);
     }
     setTarget(next);
-  }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus]);
+  }, [dialog, portalTarget, items, target, setHovered, letGoOfFocus, handOn, seenAtItsPlace]);
 
   /* Held back at once: no exit, no `onClose`, and a card already leaving
      finishes unseen. A focus in the deck goes back where it came from, as
@@ -357,24 +333,6 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
     setHovered(false);
     letGoOfFocus();
   }, [held, remove, leaveRegion, setHovered, letGoOfFocus]);
-  /* Nothing glides from where the deck stood while held: until the first
-     frame after the hold the region has no transition, and its distances are
-     taken there before it gets it back, so that a token changed in the same
-     frame as the hold ends, before or after it, puts the deck at its new
-     place at once. */
-  useLayoutEffect(() => {
-    const region = regionRef.current;
-    if (held || !region) return;
-    region.style.transition = "none";
-    const frame = requestAnimationFrame(() => {
-      getComputedStyle(region).getPropertyValue("--_toast-top");
-      region.style.transition = "";
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-      region.style.transition = "";
-    };
-  }, [held]);
   /* Every card plays its entrance from the start when the hold ends. */
   if (held && ages.size > 0) setAges(new Map());
 
@@ -495,9 +453,10 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
           data-edge={edge}
           data-along={along}
           data-open={open ? "" : undefined}
+          data-seen={seenAtItsPlace ? "" : undefined}
           data-keys={byKeys ? "" : undefined}
           style={regionStyle}
-          {...(anyStanding && !held ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
+          {...(seen ? { role: "region", "aria-label": wording.toastRegion, tabIndex: -1 } : {})}
           onKeyDown={onKeyDown}
           onFocus={onFocus}
           onBlur={onBlur}
