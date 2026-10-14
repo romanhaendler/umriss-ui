@@ -320,7 +320,7 @@ export const GERMAN_WORDING: Wording = {
   dashboardMoveEnd: "Ans Ende",
   dashboardRemove: "Entfernen",
   dashboardSizes: { small: "Klein", medium: "Mittel", wide: "Breit", tall: "Hoch", large: "Groß", full: "Volle Breite" },
-  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}, ${share} breit`,
+  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}${share ? `, ${share} breit` : ""}`,
   dashboardHeadingLabel: "Überschrift",
   dashboardHeadingSentence: "Ein Titel über die volle Breite.",
   dashboardHeadingText: "Neuer Abschnitt",
