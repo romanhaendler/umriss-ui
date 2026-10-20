@@ -57,6 +57,29 @@ test("the row header sticks while scrolling sideways, behind selection and expan
   expect(onTop).toBe("row");
 });
 
+test("a sticky header row looks the same scrolled down as at rest", async ({ page }) => {
+  await openExample(page, "width-and-pinning", "sticky-parts");
+  const table = example(page, "sticky-parts");
+  const area = table.locator("table").locator("..");
+  const head = (await table.locator("thead").boundingBox())!;
+  // The header row and the pixel row of its line beneath the cell.
+  // Whole pixel rows: a fractional clip would take in a row of the scrolled rows below.
+  const y0 = Math.floor(head.y);
+  const clip = { x: head.x, y: y0, width: head.width, height: Math.floor(head.y + head.height) + 1 - y0 };
+  const shot = () => page.screenshot({ clip });
+
+  const rowHeight = await table.locator("tbody tr").first().evaluate((el) => el.getBoundingClientRect().height);
+  expect(await area.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeGreaterThan(rowHeight * 2);
+  const atRest = await shot();
+
+  for (const by of [rowHeight / 2, rowHeight * 1.5]) {
+    await area.evaluate((el, top) => {
+      el.scrollTop = top;
+    }, by);
+    expect(await shot()).toEqual(atRest);
+  }
+});
+
 /* ---------------- Pinned to both sides (table-column-pinning 01) ---------------- */
 
 test("both blocks stay while the hours scroll, each against its edge, and the shadow shows only over content", async ({ page }) => {
