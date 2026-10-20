@@ -100,10 +100,25 @@
     white-space: nowrap;
   }
 
+  /* A collapsed table's borders belong to its grid, not to a cell: the head's
+     line would scroll away with the rows and leave them running out under the
+     head with nothing between. The sticky head draws its line on the cell. */
   .sticky .th {
     position: sticky;
     top: 0;
     z-index: 1;
+    border-bottom-color: transparent;
+  }
+
+  .sticky .th::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -1px;
+    border-bottom: 1px solid var(--u-hairline-strong);
+    /* The token is translucent: without a surface under it the rows would
+       show through the line they scroll beneath. */
+    background: var(--u-color-surface);
+    pointer-events: none;
   }
 
   /* ---- Cells ----------------------------------------------------------- */
