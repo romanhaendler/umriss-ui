@@ -16,6 +16,11 @@ moves from here under the rule above.
 
 ---
 
+## 0.40.1 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
+
 ## 0.40.0 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its
