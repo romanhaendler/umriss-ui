@@ -26,6 +26,11 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.40.1 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
+
 ## 0.40.0 – Words for the dashboard (Oct. 2026)
 
 ### Added
