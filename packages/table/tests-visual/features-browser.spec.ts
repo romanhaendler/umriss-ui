@@ -72,7 +72,7 @@ test("a sticky header row looks the same scrolled down as at rest", async ({ pag
   expect(await area.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeGreaterThan(rowHeight * 2);
   const atRest = await shot();
 
-  for (const by of [rowHeight / 2, rowHeight * 1.5]) {
+  for (const by of [Math.round(rowHeight / 2), Math.round(rowHeight * 1.5)]) {
     await area.evaluate((el, top) => {
       el.scrollTop = top;
     }, by);
