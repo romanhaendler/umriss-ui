@@ -110,7 +110,11 @@
     border-radius: var(--u-radius-xs);
     background: none;
     color: inherit;
-    opacity: 0.4;
+    /* 0.5 and no lower: the glyph is a user-interface component and holds 3:1
+       (WCAG 1.4.11) at rest. It inherits the body text colour; the tightest pair
+       is the danger surface in the light theme, at 3.26:1 (at 0.4 it was 2.47:1).
+       The contrast test reads this value. */
+    opacity: 0.5;
     cursor: pointer;
     transition:
       opacity var(--u-transition),

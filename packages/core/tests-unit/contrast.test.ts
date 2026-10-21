@@ -16,6 +16,8 @@
    @types/node nor any path arithmetic relative to import.meta.url. If
    tokens.css changes, this import changes with it. */
 import STYLESHEET from "../src/styles/tokens.css?raw";
+import ALERT_CSS from "../src/components/Alert/Alert.module.css?raw";
+import TAG_CSS from "../src/components/Tag/Tag.module.css?raw";
 import { describe, expect, it } from "vitest";
 
 /* ---------------------------------------------------------------
@@ -86,6 +88,19 @@ function contrast(fg: string, bg: string): number {
   const a = luminance(fg);
   const b = luminance(bg);
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+/* A colour at an opacity over an opaque ground, as the browser mixes it:
+   channel by channel in sRGB, ground + (colour - ground) * opacity. */
+function mix(fg: string, bg: string, opacity: number): string {
+  const f = channels(fg);
+  const b = channels(bg);
+  return (
+    "#" +
+    f
+      .map((c, i) => Math.round((b[i]! + (c - b[i]!) * opacity) * 255).toString(16).padStart(2, "0"))
+      .join("")
+  );
 }
 
 /* ---------------------------------------------------------------
@@ -266,6 +281,82 @@ const PAIRS: readonly Pair[] = [
     bg: "--u-color-surface",
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
+
+  /* The words of the labels (badge, tag, alert, the MultiSelect chip and
+     counter) on the surface of their tone, at the full bound. The tones with a
+     text token of their own are listed above; these are the neutral, the accent
+     at rest and the alert's body text on every toned surface. */
+  ...([
+    ["--u-color-text-secondary", "--u-color-surface-sunken"],
+    ["--u-color-accent-text", "--u-color-accent-subtle"],
+    ["--u-color-text-secondary", "--u-color-accent-subtle"],
+    ["--u-color-text-secondary", "--u-color-success-subtle"],
+    ["--u-color-text-secondary", "--u-color-warning-subtle"],
+    ["--u-color-text-secondary", "--u-color-danger-subtle"],
+    ["--u-color-text", "--u-color-surface-sunken"],
+  ] as const).map(([fg, bg]) => ({
+    name: `${fg} as label text on ${bg}`,
+    fg,
+    bg,
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+  })),
+];
+
+/* ---------------------------------------------------------------
+   The resting keys of the labels (1.4.11, 3:1)
+
+   A key is a user-interface component and its glyph is what shows that it is
+   there, so the glyph holds 3:1 against the surface it rests on in its resting
+   state - the opacity it has before hover or focus. The opacity is read out of
+   the component's stylesheet, so the test falls the moment somebody lowers it.
+
+   Outside the bound, on purpose: the badge's dot is decorative (the word beside
+   it carries the tone; measured 3.00 to 4.52), and a disabled tag is an
+   inactive component, exempt from 1.4.3 and 1.4.11.
+   --------------------------------------------------------------- */
+
+/* The opacity a rule gives its key at rest: the first `opacity` declaration in
+   the rule of that selector. Throws when it is not there rather than checking a
+   default. */
+function restingOpacity(css: string, selector: string): number {
+  const rule = new RegExp(`\\n\\s*${selector.replace(".", "\\.")}\\s*\\{([^}]*)\\}`).exec(css);
+  const value = rule && /opacity:\s*([0-9.]+)\s*;/.exec(rule[1]!);
+  if (!value) throw new Error(`No resting opacity found for ${selector}`);
+  return Number(value[1]);
+}
+
+type Key = {
+  readonly name: string;
+  readonly opacity: number;
+  /* The glyph colour token and the surface it rests on, per tone. */
+  readonly tones: readonly (readonly [fg: string, bg: string])[];
+};
+
+const KEYS: readonly Key[] = [
+  {
+    name: "Tag remove key",
+    opacity: restingOpacity(TAG_CSS, ".remove"),
+    tones: [
+      ["--u-color-text-secondary", "--u-color-surface-sunken"],
+      ["--u-color-accent-text", "--u-color-accent-subtle"],
+      ["--u-color-success", "--u-color-success-subtle"],
+      ["--u-color-warning", "--u-color-warning-subtle"],
+      ["--u-color-danger-text", "--u-color-danger-subtle"],
+    ],
+  },
+  {
+    /* The close key is a child of the alert itself, not of its title or text,
+       so it inherits the body text colour of the library's text context. */
+    name: "Alert close key",
+    opacity: restingOpacity(ALERT_CSS, ".close"),
+    tones: [
+      "--u-color-surface-sunken",
+      "--u-color-accent-subtle",
+      "--u-color-success-subtle",
+      "--u-color-warning-subtle",
+      "--u-color-danger-subtle",
+    ].map((bg) => ["--u-color-text", bg] as const),
+  },
 ];
 
 /* ---------------------------------------------------------------
@@ -293,6 +384,20 @@ describe("contrast – the arithmetic", () => {
 
   it("rejects a value that is not an opaque colour", () => {
     expect(() => luminance("rgba(23, 23, 23, 0.08)")).toThrow();
+  });
+});
+
+describe("contrast – mixing a colour over its ground", () => {
+  it("gives the colour itself at full opacity", () => {
+    expect(mix("#0e7d72", "#ffffff", 1)).toBe("#0e7d72");
+  });
+
+  it("gives the ground at zero opacity", () => {
+    expect(mix("#0e7d72", "#ffffff", 0)).toBe("#ffffff");
+  });
+
+  it("gives the middle at half opacity", () => {
+    expect(mix("#000000", "#ffffff", 0.5)).toBe("#808080");
   });
 });
 
@@ -330,6 +435,20 @@ for (const [themeName, theme] of THEMES) {
         const ratio = contrast(colour(theme, pair.fg), colour(theme, pair.bg));
         expect(ratio).toBeGreaterThanOrEqual(minimum);
       });
+    }
+  });
+}
+
+for (const [themeName, theme] of THEMES) {
+  describe(`Resting keys in the "${themeName}" theme`, () => {
+    for (const key of KEYS) {
+      for (const [fg, bg] of key.tones) {
+        it(`${key.name}: ${fg} on ${bg} reaches ${LARGE_TEXT}:1`, () => {
+          const ground = colour(theme, bg);
+          const glyph = mix(colour(theme, fg), ground, key.opacity);
+          expect(contrast(glyph, ground)).toBeGreaterThanOrEqual(LARGE_TEXT);
+        });
+      }
     }
   });
 }
