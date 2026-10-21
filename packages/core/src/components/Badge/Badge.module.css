@@ -27,6 +27,9 @@
     width: 5px;
     height: 5px;
     border-radius: var(--u-radius-full);
+    /* A circle and not the library's squircle, which the build adds to every
+       radius: this small a squircle is a rounded square. */
+    corner-shape: round;
     background: currentColor;
     opacity: 0.75;
   }
