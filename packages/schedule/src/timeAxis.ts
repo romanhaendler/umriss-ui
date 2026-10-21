@@ -29,6 +29,12 @@ const WALL_CLOCK: CalendarInput = [];
 /** Smallest distance between two labels of the fine band, in pixels. */
 export const TICK_SPACING = 56;
 
+/** How much larger than the default 16 px the root font size is, never below 1:
+    lanes and label spacing grow by it, and shrink never. */
+export function fontScaleOf(rootPx: number): number {
+  return rootPx > 16 ? rootPx / 16 : 1;
+}
+
 /** The fine step at a zoom: the smallest readable step whose labels stand at
     least `spacing` pixels apart - never finer than the quarter hour, which is
     the finest a planner plans in, and never coarser than the day, which is the

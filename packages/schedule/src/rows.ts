@@ -42,6 +42,8 @@ export interface RowsInput {
       view that was there. */
   readonly collapsed: ReadonlySet<string>;
   readonly laneHeight: number;
+  /** The height of an open group's head; `GROUP_HEAD_HEIGHT` where none is given. */
+  readonly headHeight?: number;
 }
 
 /** What a row is: a lane's own row, the slim head of an open group, or the one
@@ -105,7 +107,7 @@ export const MIN_STRIP = 3;
 const MINIATURE_INSET = 4;
 
 export function layOutRows(input: RowsInput): Rows {
-  const { lanes, groups, collapsed, laneHeight } = input;
+  const { lanes, groups, collapsed, laneHeight, headHeight = GROUP_HEAD_HEIGHT } = input;
 
   /* A group exists only where it was declared; a `parent` naming nothing is a
      caller's slip and leaves its lane at the top level rather than vanishing. */
@@ -207,7 +209,7 @@ export function layOutRows(input: RowsInput): Rows {
         depth: open.length - 1,
         within: [...open],
         lanes: (held.get(g) ?? []).length,
-        height: GROUP_HEAD_HEIGHT,
+        height: headHeight,
       });
     }
 

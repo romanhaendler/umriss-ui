@@ -148,10 +148,25 @@
     background: var(--u-color-surface-pressed);
   }
 
+  /* A button narrower than its label (the caller gave it a width) ends a text
+     label in an ellipsis inside its padding. Only the sides clip, so that the
+     descenders stay. A label with an element beside the text (an icon, a
+     badge) stays the flex row it is: an ellipsis needs one run of text. */
   .label {
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-2);
+  }
+
+  .label:not(:has(> *)) {
+    display: block;
+    min-width: 0;
+    /* The clip edge lies 2px outside the text, so that a glyph's overhang at
+       the end is not cut; the margin keeps the label's place. */
+    margin-inline: -2px;
+    padding-inline: 2px;
+    overflow-x: clip;
+    text-overflow: ellipsis;
   }
 
   /* An icon among the children, and the spinner that stands in for it while
