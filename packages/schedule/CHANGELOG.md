@@ -16,6 +16,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.40.4 – A larger font keeps its lanes (Oct. 2026)
+
+### Fixed
+
+- **Lanes, group heads and the time axis grow with the reader's font size.** `laneHeight` (and its default 44) is now the height at the default 16 px root; above it the schedule multiplies it by the root font size over 16, rounded to whole pixels. At a browser font size of 200 %, lane names and their badges were cut and the axis labels ran into each other. At the default size nothing changes.
+
 ## 0.40.3 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its

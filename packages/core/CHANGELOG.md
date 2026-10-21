@@ -26,6 +26,13 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.40.4 – A larger font keeps its labels (Oct. 2026)
+
+### Fixed
+
+- **Badge, Tag and the MultiSelect chips grow with the reader's font size.** Their height was fixed in pixels while their type is in `rem`: with the browser's font size at 200 %, a badge's descenders hung below it and a tag's or a chip's were cut. The heights are now floors - at the default size every label looks exactly as before. The MultiSelect counter and scope buttons follow the same rule.
+- **A Button narrower than its text label ends it in an ellipsis** instead of spilling over its edges; the full label stays its accessible name. A label with an icon beside the text keeps its row.
+
 ## 0.40.3 – The keys of Tag and Alert are visible at rest (Oct. 2026)
 
 ### Fixed

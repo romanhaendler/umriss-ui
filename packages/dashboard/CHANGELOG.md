@@ -12,6 +12,12 @@ upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.40.4 – A larger font keeps its rows (Oct. 2026)
+
+### Fixed
+
+- **The row unit's default grows with the reader's font size**: 50 px at the default size, more above it, rounded to whole pixels. At a browser font size of 200 %, widgets cut their content. `--u-dashboard-row` keeps its name; a theme that sets it keeps its value.
+
 ## 0.40.3 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its
