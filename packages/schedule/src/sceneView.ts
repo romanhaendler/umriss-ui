@@ -26,11 +26,11 @@ import {
   type DependencyPath,
   type Viewport,
 } from "./geometry";
-import { effectiveCollapsed, layOutRows, rowAt, slotOf, type Rows } from "./rows";
+import { effectiveCollapsed, GROUP_HEAD_HEIGHT, layOutRows, rowAt, slotOf, type Rows } from "./rows";
 import type { IntentKind, Milestone, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
-import { days, fineStep, wallClockWithin, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
+import { days, fineStep, TICK_SPACING, wallClockWithin, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
 /** What a pointer is on. */
 export type ScheduleHit =
@@ -71,6 +71,8 @@ export class SceneView {
     attach: "centre",
     ends: "dot",
   };
+  /** The root font size over 16 px, 1 at the default size and below (`fontScaleOf`). */
+  fontScale = 1;
   domain: [number, number] = [0, DAY];
   scrollY = 0;
   width = 0;
@@ -117,6 +119,11 @@ export class SceneView {
 
   constructor(private readonly data: SceneData) {}
 
+  /** Takes the reader's font scale; the next `layout` uses it. */
+  setFontScale(scale: number): void {
+    this.fontScale = scale;
+  }
+
   /** Takes new options; a new calendar keeps the wall-clock span in view. */
   setOptions(options: SceneOptions): void {
     const calendarChanged = options.calendar !== this.options.calendar;
@@ -161,7 +168,7 @@ export class SceneView {
   /** The fine band's step at the current zoom. */
   step(): number {
     const span = this.domain[1] - this.domain[0];
-    return fineStep(this.width > 0 ? span / this.width : span);
+    return fineStep(this.width > 0 ? span / this.width : span, TICK_SPACING * this.fontScale);
   }
 
   /** Lays the rows out, clamps the scroll, and lays the data out anew. */
@@ -171,7 +178,8 @@ export class SceneView {
       lanes: this.data.lanes,
       groups: this.data.groups,
       collapsed: effectiveCollapsed(this.collapsed, this.openForGesture),
-      laneHeight: this.options.laneHeight,
+      laneHeight: Math.round(this.options.laneHeight * this.fontScale),
+      headHeight: Math.round(GROUP_HEAD_HEIGHT * this.fontScale),
     });
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY));
     const view = this.viewport();

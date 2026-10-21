@@ -19,7 +19,7 @@
     width: 100%;
     padding: 0 var(--u-space-4) var(--u-space-4);
     border-radius: var(--u-radius-lg);
-    --row-unit: var(--u-dashboard-row, 50px);
+    --row-unit: var(--u-dashboard-row, round(max(50px, 3.125rem), 1px));
     --gap: var(--u-dashboard-gap, 12px);
   }
 

@@ -183,8 +183,8 @@ const EXCEPTIONS: Readonly<Record<string, string>> = {
   "table/VerdictColumn.module.css: font-size: 0.7em":
     "A proportion, not a size: the verdict glyph stands at 70 % of whatever size its cell has, and follows the cell when the table is set smaller.",
   "table/VerdictColumn.module.css: font-size: 0.9em": "The excess beside the value, likewise a proportion of the cell's size.",
-  "core/Tag/Tag.module.css: line-height: 16px":
-    "A whole-pixel line for the 11 px type in a 22 px tag: 1 cuts the descenders off where the text clips for its ellipsis, 1.5 is 16.5 px and sets the text on a half pixel (row-pitch 09).",
+  "core/Tag/Tag.module.css: line-height: calc(16 / 11)":
+    "A whole-pixel line for the 11 px type in a 22 px tag: 1 cuts the descenders off where the text clips for its ellipsis, 1.5 is 16.5 px and sets the text on a half pixel (row-pitch 09). A ratio and not 16px, so that a reader's larger font keeps the descenders too.",
   "core/Stat/Stat.module.css: line-height: 1.1":
     "The stat's large figure is one number at --u-text-2xl, not a line of text; the one site that needs a leading this tight.",
   "core/Toast/Toast.module.css: transition: transform var(--u-duration-medium) var(--u-ease-out), opacity var(--u-duration-medium) var(--u-ease-out), z-index 0s var(--u-duration-medium)":

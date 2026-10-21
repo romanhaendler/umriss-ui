@@ -27,9 +27,10 @@ function Dot({ verdict }: { verdict: Verdict }) {
 function Kz({ value, unit, verdict, note }: { value: string; unit?: string; verdict: Verdict; note: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: "var(--u-space-1)", height: "100%", minWidth: 0 }}>
-      <Text as="div" size="2xl" weight="semibold" leading="tight" style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+      <Text as="div" size="2xl" weight="semibold" leading="tight" style={{ fontVariantNumeric: "tabular-nums" }}>
         {value}
-        {unit && <Text as="span" size="sm" tone="muted" style={{ marginInlineStart: "var(--u-space-1)", fontWeight: "var(--u-weight-regular)" }}>{unit}</Text>}
+        {/* The unit keeps its words together and goes under the value where the tile is too narrow for both. */}
+        {unit && <Text as="span" size="sm" tone="muted" style={{ marginInlineStart: "var(--u-space-1)", fontWeight: "var(--u-weight-regular)", whiteSpace: "nowrap" }}>{unit}</Text>}
       </Text>
       <Text as="div" size="xs" tone="secondary" style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
         <Dot verdict={verdict} />

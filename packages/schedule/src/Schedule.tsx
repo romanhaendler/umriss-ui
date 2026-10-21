@@ -48,7 +48,7 @@ import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTa
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind, Subtask, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
-import { dayRun, opensRun, type ZoomLimits } from "./timeAxis";
+import { dayRun, fontScaleOf, opensRun, type ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
@@ -61,7 +61,9 @@ export interface ScheduleProps {
   /** Height in CSS pixels, both bands included. The width is the host's.
       @default 400 */
   height?: number;
-  /** Height of one lane in pixels.
+  /** Height of one lane in pixels at the default font size of 16 px; the
+      schedule multiplies it by the root font size over 16 px when that ratio
+      is above 1, so lane names keep their room in a reader's larger font.
       @default 44 */
   laneHeight?: number;
   /** Width of the lane headers in pixels - at most 40 % of the schedule, so
@@ -169,6 +171,9 @@ const WALL_CLOCK: CalendarInput = [];
 const LABEL_MARGIN = 20;
 /** The room the shortest date of the day band needs. */
 const DATE_ROOM = 44;
+/** The widths from which a day's date is written in its medium and long forms. */
+const DATE_ROOM_MEDIUM = 84;
+const DATE_ROOM_LONG = 200;
 
 /** What a schedule offers a caller imperatively: the arithmetic between a
     point on the screen and a time on a lane. Everything else is props. */
@@ -288,6 +293,16 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
       if (box !== undefined) scene.resize(box.width, box.height);
     });
     observer.observe(plot);
+    /* The reader's root font size: a probe of 1rem resizes exactly when it
+       changes, which the document element's own box does not. */
+    const probe = document.createElement("div");
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;width:1rem;height:0";
+    root.appendChild(probe);
+    const readFont = () => scene.setFontScale(fontScaleOf(parseFloat(getComputedStyle(probe).width)));
+    readFont();
+    const fontWatch = new ResizeObserver(readFont);
+    fontWatch.observe(probe);
     /* The wheel zooms, pans and scrolls the lanes, and the page must not scroll
        with it while it does: a listener that can prevent the default has to be
        registered as not passive, which React does not do. On the root and not
@@ -302,17 +317,24 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
       window.removeEventListener("keydown", onKey);
       root.removeEventListener("wheel", onWheel);
       observer.disconnect();
+      fontWatch.disconnect();
+      probe.remove();
       scene.unbind();
     };
   }, [scene]);
 
   const snapshot = useSyncExternalStore(scene.subscribe, scene.getSnapshot, scene.getServerSnapshot);
 
+  /* A date is as wide as the reader's font makes it. */
+  const { fontScale } = snapshot;
+  const dateRoom = DATE_ROOM * fontScale;
+  const dateRoomMedium = DATE_ROOM_MEDIUM * fontScale;
+  const dateRoomLong = DATE_ROOM_LONG * fontScale;
   const dayLabel = (start: number, width: number): string => {
     const date = new Date(start);
-    if (width >= 200) return formats.dateLong(date);
-    if (width >= 84) return formats.date(date);
-    if (width >= DATE_ROOM) return formats.dateShort(date);
+    if (width >= dateRoomLong) return formats.dateLong(date);
+    if (width >= dateRoomMedium) return formats.date(date);
+    if (width >= dateRoom) return formats.dateShort(date);
     return "";
   };
 
@@ -321,7 +343,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
      different days above and below the plot. The widest day is the measure:
      a calendar collapses the days it removes to nothing. */
   const widestDay = snapshot.days.reduce((widest, day) => Math.max(widest, day.width), 0);
-  const daysPerDate = dayRun(widestDay, DATE_ROOM);
+  const daysPerDate = dayRun(widestDay, dateRoom);
   const daysPerTick = snapshot.step >= DAY ? daysPerDate : 1;
 
   const ghost = snapshot.ghost;
@@ -465,7 +487,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                 <span className={styles.dayLabel} data-schedule-overlay="day label" style={{ marginLeft: `${hidden}px` }}>
                   {/* A run's dates all in the short form: a long one where a run
                       happens to be wider read as a different kind of mark. */}
-                  {labelled ? dayLabel(day.start, daysPerDate === 1 ? visible : Math.min(visible, DATE_ROOM)) : ""}
+                  {labelled ? dayLabel(day.start, daysPerDate === 1 ? visible : Math.min(visible, dateRoom)) : ""}
                 </span>
               </span>
             );

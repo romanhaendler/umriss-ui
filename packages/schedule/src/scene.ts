@@ -73,6 +73,8 @@ export interface ScheduleSnapshot {
   /** The ticks of the fine band, and the step they stand on. */
   readonly ticks: readonly { readonly wallClock: number; readonly x: number }[];
   readonly step: number;
+  /** The root font size over 16 px, 1 at the default size and below. */
+  readonly fontScale: number;
   /** The ghost's label while a drag is in flight. */
   readonly ghost: GhostSummary | null;
   /** The lead-in and lead-out grips of the selected subtask. */
@@ -120,6 +122,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   days: [],
   ticks: [],
   step: HOUR,
+  fontScale: 1,
   ghost: null,
   grips: [],
   cursor: "default",
@@ -225,6 +228,12 @@ export class ScheduleScene {
 
   setOptions(options: SceneOptions): void {
     this.view.setOptions(options);
+    this.viewChanged();
+  }
+
+  setFontScale(scale: number): void {
+    if (scale === this.view.fontScale) return;
+    this.view.setFontScale(scale);
     this.viewChanged();
   }
 
@@ -473,6 +482,7 @@ export class ScheduleScene {
       scrollY: view.scrollY,
       headers: this.headers(),
       ...view.bands(),
+      fontScale: view.fontScale,
       ghost: this.gestures.ghostSummary(),
       grips,
       cursor: this.gestures.cursor,

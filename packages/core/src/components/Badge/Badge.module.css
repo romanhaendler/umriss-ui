@@ -6,8 +6,11 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 20px;
-    padding: 0 var(--u-space-2);
+    /* The height is a floor: the line (an em at this leading) and the room
+       above and below it grow with the type, so a larger font keeps its
+       descenders on the surface. At the default size the floor is the height. */
+    min-height: 20px;
+    padding: 0.2em var(--u-space-2);
     border-radius: var(--u-radius-sm);
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
@@ -18,7 +21,7 @@
 
   .pill {
     border-radius: var(--u-radius-full);
-    padding: 0 var(--u-space-3);
+    padding-inline: var(--u-space-3);
   }
 
   /* A small status dot - it gives the label a quiet anchor point. */

@@ -18,7 +18,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);
-    height: 22px;
+    /* A floor, not a size: the text line below grows with the type. */
+    min-height: 22px;
     padding: 0 var(--u-space-2);
     border-radius: var(--u-radius-sm);
     font-size: var(--u-text-xs);
@@ -43,12 +44,13 @@
   }
 
   /* The text clips for its ellipsis, so its line must hold the descenders.
-     16 px for the 11 px type, a whole pixel (1.5 would be 16.5), and 3 px from
-     either edge of the 22 px tag. */
+     16/11 of the type: 16 px for the 11 px type, a whole pixel (1.5 would be
+     16.5), and 3 px from either edge of the 22 px tag; larger type keeps the
+     proportion. */
   .text {
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 16px;
+    line-height: calc(16 / 11);
   }
 
   /* ---- Tones: the same surfaces as with the badge ---- */
