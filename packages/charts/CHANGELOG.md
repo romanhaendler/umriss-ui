@@ -29,6 +29,11 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.40.2 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
+
 ## 0.40.1 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its

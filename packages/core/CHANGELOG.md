@@ -26,6 +26,12 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.40.2 – The badge's dot is round (Oct. 2026)
+
+### Fixed
+
+- **The badge's dot is a circle.** Where the browser draws `corner-shape`, the build gave the dot before a badge's word a squircle, and a squircle this small is a rounded square. The dot is now round, as the sparkline's end point and the stepper's markers are; the badge itself keeps its squircle corners.
+
 ## 0.40.1 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its
