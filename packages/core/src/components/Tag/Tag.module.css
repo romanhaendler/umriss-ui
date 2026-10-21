@@ -91,7 +91,10 @@
     border-radius: var(--u-radius-xs);
     background: none;
     color: inherit;
-    opacity: 0.45;
+    /* 0.75 and no lower: the glyph is a user-interface component and holds 3:1
+       (WCAG 1.4.11) at rest. The tightest pair is success on its subtle surface
+       in the light theme, at exactly 3.00:1; the contrast test reads this value. */
+    opacity: 0.75;
     cursor: pointer;
     transition:
       opacity var(--u-transition),
