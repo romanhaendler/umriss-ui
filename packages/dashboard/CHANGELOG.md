@@ -12,6 +12,11 @@ upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.40.2 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
+
 ## 0.40.1 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its

@@ -23,6 +23,11 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.40.2 – No change of its own (Oct. 2026)
+
+Released with the other five packages under their one number. No change of its
+own.
+
 ## 0.40.1 – A sticky header row keeps its line (Oct. 2026)
 
 ### Fixed
