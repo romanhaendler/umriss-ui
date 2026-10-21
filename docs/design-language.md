@@ -118,7 +118,8 @@ application's own rounded elements stay as the application drew them. One
 exception, by rule: **a mark that shows a state is round, a key is not.** The
 stepper's markers are circles (`corner-shape: round`): they say where a
 procedure stands and are pressed by nobody, and a squircle that small is a
-rounded square - ticked, it would read as a checkbox to press. Whatever can be
+rounded square - ticked, it would read as a checkbox to press. The badge's dot
+is a circle for the same reason. Whatever can be
 pressed keeps the squircle (core-layout-extras 04).
 
 **Details for the connoisseur.** The text cursor in the library's input fields is
