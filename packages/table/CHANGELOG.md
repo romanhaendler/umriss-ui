@@ -23,6 +23,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.40.4 – A larger font keeps its rows (Oct. 2026)
+
+### Fixed
+
+- **Rows, heads and group headers grow with the reader's font size.** Their line was a fixed 19 px while the type is in `rem`: at a browser font size of 200 %, a group header's text left its row. The line is now 19 px at the default size and grows above it, rounded to whole pixels; virtualised rows follow, since their pitch is measured from the head.
+
 ## 0.40.3 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its
