@@ -26,6 +26,12 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.40.3 – The keys of Tag and Alert are visible at rest (Oct. 2026)
+
+### Fixed
+
+- **The remove key of a Tag and the close key of an Alert hold 3:1 at rest** (WCAG 1.4.11). They rested so faint - 0.45 and 0.4 - that their glyph measured under 2.6:1 on the tone surfaces; a keyboard or touch user met a key they could barely see. The tag's key now rests at 0.75, the alert's at 0.5, the smallest values at which every tone holds 3:1 in both themes; hover and focus still bring them to full.
+
 ## 0.40.2 – The badge's dot is round (Oct. 2026)
 
 ### Fixed
