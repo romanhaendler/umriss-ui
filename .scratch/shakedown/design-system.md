@@ -9,8 +9,8 @@ rendering, two umriss copies, TS 7.
 
 ## Findings
 
-1. **[Break] The wrapper's declaration emit silently loses its `useToast` and `useFormField` wrappers - and
-   the build exits 0:** TS4058/TS4023 on `ToastContextValue`/`FormFieldContextValue` (not exported),
+1. ~~**[Break] The wrapper's declaration emit silently loses its `useToast` and `useFormField` wrappers - and
+   the build exits 0:**~~ **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`). TS4058/TS4023 on `ToastContextValue`/`FormFieldContextValue` (not exported),
    `dist/Toast.d.ts` missing while `dist/index.d.ts` still re-exports it; the app then fails with TS2305.
    Workaround: annotate `(): ReturnType<typeof useToast>`. Same cause as `core.md` B11; this is the silent
    part.
