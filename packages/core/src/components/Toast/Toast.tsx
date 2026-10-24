@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
+import { isDev } from "../../lib/dev";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
 import { toastTargetFor, topLayerPopover, useShownInTopLayer, useTopmostModalDialog } from "../../lib/portalTarget";
 import { roleFromTone } from "../../lib/roleFromTone";
@@ -154,7 +155,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
      per provider, in development only. */
   const warned = useRef(false);
   useEffect(() => {
-    if (import.meta.env?.DEV && mountedProviders > 0 && !warned.current) {
+    if (isDev() && mountedProviders > 0 && !warned.current) {
       warned.current = true;
       console.warn(
         "@umriss-ui/core: a second ToastProvider is mounted while another one stands. " +
