@@ -123,7 +123,7 @@ describe("a page holds its height", () => {
     expect(filler(container)).toBeNull();
     act(() => snapshot!.setPage(3));
     expect(lines(container)).toBe(3);
-    expect(filler(container)!.style.height).toBe("calc(var(--_pitch) * 7)");
+    expect(filler(container)!.style.height).toBe("calc(var(--_table-pitch) * 7)");
     unmount();
     const one = render(<Shipments rows={SHIPMENTS.slice(0, 4)} />);
     expect(filler(one.container)).toBeNull();
@@ -135,7 +135,7 @@ describe("a page holds its height", () => {
     act(() => snapshot!.setPage(snapshot!.pageCount));
     const last = lines(container);
     expect(last).toBeLessThan(10);
-    expect(filler(container)!.style.height).toBe(`calc(var(--_pitch) * ${10 - last})`);
+    expect(filler(container)!.style.height).toBe(`calc(var(--_table-pitch) * ${10 - last})`);
   });
 
   it("keeps the height of a page while a search or a condition leaves few rows on one page", () => {
@@ -143,7 +143,7 @@ describe("a page holds its height", () => {
     act(() => snapshot!.setSearch("FP-102"));
     expect(snapshot!.pageCount).toBe(1);
     expect(lines(container)).toBe(3);
-    expect(filler(container)!.style.height).toBe("calc(var(--_pitch) * 7)");
+    expect(filler(container)!.style.height).toBe("calc(var(--_table-pitch) * 7)");
     act(() => snapshot!.setSearch(""));
     expect(filler(container)).toBeNull();
   });
@@ -152,7 +152,7 @@ describe("a page holds its height", () => {
     const { container, unmount } = render(<Shipments />);
     act(() => snapshot!.setSearch("nothing like it"));
     const cell = container.querySelector<HTMLElement>("tbody td")!;
-    expect(cell.style.height).toBe("calc(var(--_pitch) * 10)");
+    expect(cell.style.height).toBe("calc(var(--_table-pitch) * 10)");
     unmount();
     const bare = render(<Shipments paged={false} />);
     act(() => snapshot!.setSearch("nothing like it"));

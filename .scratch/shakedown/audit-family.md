@@ -10,10 +10,10 @@ five-year commitment yet on two months of releases without a deprecation policy.
 
 ## Findings
 
-1. ✓ **[Break, a11y] Opening the table's ColumnMenu by keyboard leaves focus on the trigger:** the panel is
+1. ✓ ~~**[Break, a11y] Opening the table's ColumnMenu by keyboard leaves focus on the trigger:**~~ the panel is
    portalled to the end of `<body>`, and core's `Popover` returns focus on close (`Popover.tsx:107`) but
    never moves it in on open; "Move Id backward" is the sixth Tab after Export, the grid, the pager. Likely
-   every `Popover` with a dialog role. Idea: move focus into a dialog-role panel on open.
+   every `Popover` with a dialog role. Idea: move focus into a dialog-role panel on open. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Break, a11y] A virtualised grid under live rows drops focus to `<body>`** when the active row is
    re-sorted out of the window (rows re-sorted every 250 ms); paged keeps focus. Partly documented ("real
    scroll and focus under the row motion are not proved"). Idea: when the active row unmounts, focus the

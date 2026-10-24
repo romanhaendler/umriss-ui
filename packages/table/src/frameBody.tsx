@@ -135,7 +135,7 @@ function emptyBody(ctx: BodyContext) {
           className={styles.emptyCell}
           /* The height the page last had; the message at its top, where the
              rows began. */
-          style={ctx.pageSize && ctx.heldLines ? { height: `calc(var(--_pitch) * ${ctx.heldLines})`, verticalAlign: "top" } : undefined}
+          style={ctx.pageSize && ctx.heldLines ? { height: `calc(var(--_table-pitch) * ${ctx.heldLines})`, verticalAlign: "top" } : undefined}
         >
           <div className={styles.empty}>
             {(snapshot.server || hook.admitted.length > 0) && layout.restricted ? (
@@ -222,7 +222,7 @@ function groupedBody(ctx: BodyContext, lines: readonly Line<unknown>[]) {
 /** The page's pitch filler, for a page shorter than the height it holds. */
 export function pageFiller(heldLines: number, shownLines: number, pageSize: number, columnCount: number) {
   return pageSize && shownLines > 0 && shownLines < heldLines ? (
-    <FillerRow height={`calc(var(--_pitch) * ${heldLines - shownLines})`} colSpan={columnCount} />
+    <FillerRow height={`calc(var(--_table-pitch) * ${heldLines - shownLines})`} colSpan={columnCount} />
   ) : null;
 }
 

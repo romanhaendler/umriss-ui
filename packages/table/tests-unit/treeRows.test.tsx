@@ -186,7 +186,7 @@ describe("tree rows - the column that carries the tree", () => {
     const { container } = render(<CodeFirst />);
     const [sales, north] = bodyRows(container);
     expect(sales!.cells[0]!.querySelector("button")?.getAttribute("aria-label")).toBe("Fold rows under Sales");
-    expect(north!.cells[0]!.querySelector("[style]")?.getAttribute("style")).toContain("--tree-level: 1");
+    expect(north!.cells[0]!.querySelector("[style]")?.getAttribute("style")).toContain("--_table-tree-level: 1");
   });
 });
 
