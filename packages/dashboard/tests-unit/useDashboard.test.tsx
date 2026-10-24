@@ -54,11 +54,11 @@ describe("useDashboard", () => {
   it("puts each widget on the lines the packing gives", () => {
     render(<Harness />);
     const style = (id: string) => screen.getAllByRole("region").find((el) => el.getAttribute("data-widget") === id)!.getAttribute("style");
-    expect(style("a")).toContain("--column: 1");
-    expect(style("b")).toContain("--column: 4");
-    expect(style("c")).toContain("--column: 1");
-    expect(style("c")).toContain("--row: 3");
-    expect(style("c")).toContain("--columns: 12");
+    expect(style("a")).toContain("--_dashboard-column: 1");
+    expect(style("b")).toContain("--_dashboard-column: 4");
+    expect(style("c")).toContain("--_dashboard-column: 1");
+    expect(style("c")).toContain("--_dashboard-row: 3");
+    expect(style("c")).toContain("--_dashboard-columns: 12");
   });
 
   it("titles each frame", () => {
