@@ -71,9 +71,9 @@ browse mode, iOS, Firefox. The list at the end says what only a manual pass can 
 8. **[Misfit] Calculation disclosure buttons announce no figure:** "Herleitung von Positionen zeigen" has no
    description; the values are a sibling only browse mode reads; the root total sits last.
 9. **[Misfit] The dashboard's size choice is a "✓" in a plain `menuitem`** (see `audit-family.md` 7).
-10. **[Misfit] Form errors are silent by default:** after a failed submit nothing is announced and focus stays
+10. ~~**[Misfit] Form errors are silent by default:**~~ after a failed submit nothing is announced and focus stays
     on Submit. never: ADR-0060 - the Instead (announce plus focus the first invalid field) holds in about 3
-    lines, but no helper or recipe is offered.
+    lines, but no helper or recipe is offered. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 11. **[Misfit] The schedule announces the same "Abhängigkeit verletzt, 1 Std zu knapp" twice** for one
     incoming and one outgoing violation; "Abhängigkeit 0 Min" reads oddly for no lag.
 12. **[Look] The chart summary names no day for its extremes** ("Besucher von 9 bis 31"); a daily axis
@@ -109,9 +109,9 @@ switch user's Tab and Enter alone; focus rings measured per stop in light, dark 
 and WebKit. Not covered: Safari's real full keyboard access, Shift+F10, macOS Option+T, the schedule's
 Alt+arrow moves, "focus not obscured" by the toast deck.
 
-1. **[Misfit] A Popover or ColumnMenu panel is 49–80 Tabs away from its trigger** - the third independent
+1. ~~**[Misfit] A Popover or ColumnMenu panel is 49–80 Tabs away from its trigger**~~ - the third independent
    hit (`audit-family.md` 1, P10 2): focus stays on the trigger, ArrowDown does nothing, the panel is
-   portalled to the end of `<body>`. A switch user is fully blocked. Documented only as "does not trap focus".
+   portalled to the end of `<body>`. A switch user is fully blocked. Documented only as "does not trap focus". **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Misfit] Tab out of an open DatePicker panel lands on `<body>` with the panel still open;** the next Tab
    restarts at the skip link. With Tab and Enter alone only the focused day or "Today" can be chosen (no
    typed entry).

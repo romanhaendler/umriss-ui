@@ -12,10 +12,10 @@ its own reason, and where the shown operands do not add up to the shown result t
 
 ## Findings
 
-1. ✓ **[Break] Rounding is wrong for money.** `evaluate.ts:47` claims "half away from zero on the exact
+1. ✓ ~~**[Break] Rounding is wrong for money.**~~ `evaluate.ts:47` claims "half away from zero on the exact
    decimal value", but `Number(abs.toFixed(n))` rounds the binary value: 1.005 → 1.00, 2.675 → 2.67,
    0.285 → 0.28, where `Intl.NumberFormat` and core's formats give 1.01, 2.68, 0.29. An invoice shows
-   1.00 + 2.67 + 0.28 = "≈3.96".
+   1.00 + 2.67 + 0.28 = "≈3.96". **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Look] Long labels overlap the figure.** An unbreakable label lies over "12,345.67 €" at 320 px; at
    375 px "Total" collides with the double-ruled result, "EUR" touches the number, a long unit is cut.
    `LABEL_MIN_REM` (`Calculation.tsx:60`) only chooses one or two lines. Idea: `overflow-wrap:anywhere`,

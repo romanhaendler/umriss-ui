@@ -14,7 +14,7 @@ issue (`table.md` 1) closed.
    click - although React 19 blocks the same URL in the inline `<a>` links. Hits apps that build
    breadcrumb hrefs from CMS, query or user data and show the trail at narrow widths. Idea: render real
    `<a>` elements in the menu (React's guard, middle-click and "open in new tab" come with it), or allow only
-   http(s), mailto, tel, relative and fragment hrefs.
+   http(s), mailto, tel, relative and fragment hrefs. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Trap, info] `Link` and `Breadcrumb` do not sanitise hrefs themselves**; they rely on React 19's guard
    (safe by the peer floor, not by design). `data:` and `vbscript:` pass. Idea: document "hrefs must be
    trusted", or an opt-in allow-list.

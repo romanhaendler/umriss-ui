@@ -10,10 +10,10 @@ over sensor data; stay in Plotly for analysis.
 
 ## Findings
 
-1. **[Break] A calculation shows a tiny `Given` as `0` and prints a false sentence without "≈":** "N_A times e
+1. ~~**[Break] A calculation shows a tiny `Given` as `0` and prints a false sentence without "≈":**~~ "N_A times e
    equals 602,214,076,000,000,000,000,000 times 0, equals 96,485.33 C/mol" - shown and spoken. Not the known
    "tiny total rounds to 0" (`calculation.md` 4): here a given itself is mis-shown. Idea: exponential notation,
-   or enough digits, once a non-zero value would round to 0.
+   or enough digits, once a non-zero value would round to 0. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Look] The table shows tiny numbers as 0 and percent without decimals:** 1.6e-19 → "0" (1e-9 →
    "0.000000001"), 0.256 → "26%", 0.0004 → "0%", `{decimals: 1}` on -0.0004 → "-0.0". Idea: percent with
    decimals, exponential below a threshold, no negative zero.
