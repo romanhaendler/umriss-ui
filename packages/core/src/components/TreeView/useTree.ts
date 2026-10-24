@@ -8,6 +8,7 @@
    be restored from a link or from a stored view. */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isDev } from "../../lib/dev";
 import { useVirtual } from "../../lib/useVirtual";
 import type { VirtualRows, VirtualOptions } from "../../lib/useVirtual";
 import {
@@ -215,7 +216,7 @@ export function useTree<K, S extends Key = string>(
      goes over the whole tree: development only, in an effect, when the roots
      change. */
   useEffect(() => {
-    if (!import.meta.env?.DEV) return;
+    if (!isDev()) return;
     const duplicate = duplicateKey(roots, reader);
     if (duplicate !== null) {
       console.warn(
