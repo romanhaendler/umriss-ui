@@ -44,7 +44,7 @@ export function PinPlacement({
     scroller.style.removeProperty("scroll-padding-left");
     scroller.style.removeProperty("scroll-padding-right");
     if (!start && !end) return;
-    const cells = Array.from(table.tHead?.rows[0]?.cells ?? []);
+    const cells = Array.from(table.tHead?.rows?.[0]?.cells ?? []);
     let startWidth = 0;
     for (let i = 0; i < start; i++) {
       table.style.setProperty(`--u-table-pin-start-${i}`, `${startWidth}px`);
@@ -77,7 +77,7 @@ export function PinPlacement({
     const table = tableRef.current;
     if (!table || (!start && !end) || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(place);
-    const cells = Array.from(table.tHead?.rows[0]?.cells ?? []);
+    const cells = Array.from(table.tHead?.rows?.[0]?.cells ?? []);
     for (const cell of [...cells.slice(0, start), ...cells.slice(cells.length - end)]) observer.observe(cell);
     /* The scroll area too: whether content lies under a block changes with its width. */
     if (table.parentElement) observer.observe(table.parentElement);
