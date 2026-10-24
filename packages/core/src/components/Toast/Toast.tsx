@@ -331,7 +331,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   /* The deck glides only from a place it was seen at: not until it has been
      drawn since the hold began or ended. */
   const seenAtItsPlace = seen && settled;
-  const { from, handOn } = useGlideAcross(regionRef, target instanceof HTMLDialogElement && seenAtItsPlace);
+  const { from, handOn } = useGlideAcross(regionRef, target?.nodeName === "DIALOG" && seenAtItsPlace);
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;
