@@ -12,6 +12,14 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.41.0 – Money rounds as written, and no name clash in a dashboard (Oct. 2026)
+
+### Fixed
+
+- **A figure rounds its shortest decimal value half away from zero:** 1.005 shows 1.01 and 2.675 shows 2.68. It rounded the binary value before, so an invoice could show 1.00 + 2.67 + 0.28 and a total marked "≈" where every format beside it said 1.01 and 2.68.
+- **A tiny given is never shown as 0:** without `decimals` a non-zero value so small that ten places would round it to zero is written in scientific notation (through core's formats) - 1.602E-19 C, shown and spoken - so a derivation no longer reads "… times 0 equals 96,485".
+- **A calculation inside a dashboard widget is laid out right.** The dashboard set an unprefixed `--column` on each widget and the calculation read the same name, so labels, figures and units piled into the first column. Every private custom property now carries its package's name (`--_calculation-…`).
+
 ## 0.40.4 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its

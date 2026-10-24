@@ -26,6 +26,27 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.41.0 – Colours survive a modern build (Oct. 2026)
+
+### Fixed
+
+- **A production build with Vite 8 or Next 16 keeps its colours.** Both lower `light-dark()` for their default targets, and Lightning CSS then needs two switches it sets only where the same stylesheet declares `color-scheme` - which core never did, so every token collapsed and the components lost their colours, borders and surfaces in production while the dev server looked right. Core now declares the two switches on `:root` with the light values. A mode set in CSS (an own rule, Bootstrap, DaisyUI) works in every build; a mode set only from JavaScript or a variable (next-themes, MUI, Mantine, an inline `style`) needs one rule such as `[data-theme="dark"] { color-scheme: dark; }` where a build lowers `light-dark()`, or a CSS target at the browser floor - the README says how (ADR-0021, amended).
+- **A press inside a Popover, Menu or DatePicker panel in a Modal or Drawer no longer closes the dialog.** The panels stand in the dialog's top layer beside its surface, and a press on them counted as the backdrop; now only the dialog and its spacers are backdrop.
+- **`ToastProvider` renders on a server.** It told a dialog by the `HTMLDialogElement` global, which a server does not have, so `next build` failed with the provider in the root layout; it now reads the node's name.
+- **A click inside a Popover holds in a shadow root.** The outside click read the event's target, which a shadow root retargets to its host; it now reads the composed path.
+- **Breadcrumb's folded menu follows an `href` only to http, https, mailto and tel.** It followed the address by script and so ran a `javascript:` address that React blocks on an ordinary link; relative addresses resolve against the document and still work.
+- **The built declarations compile for strict consumers.** `RefProp`'s `ref` accepts `undefined`, so a consumer with `exactOptionalPropertyTypes` and `skipLibCheck: false` compiles; `@umriss-ui/core/wording/de` and `@umriss-ui/core/styles.css` resolve their types under `moduleResolution: node10`.
+
+### Added
+
+- **`ToastContextValue`, `FormFieldContextValue` and `FreshnessInstant` are exported**, so a library that wraps `useToast`, `useFormField` or the freshness helpers can emit its own declarations.
+
+### Changed
+
+- **A dialog-role `Popover` takes the focus when it opens** - its first focusable element, or the panel itself - unless its content placed the focus already. Before, the focus stayed on the trigger and the panel, portalled to the end of the page, was dozens of Tabs away; a switch user could not reach it at all. Escape still returns the focus to the trigger.
+- **A non-zero number without a digit count never reads as 0.** What ten places would round to zero - 1.6e-19, say - is written in scientific notation by the formats' default number; a given `decimals` is kept as it is.
+- **Development warnings fire in a Vite dev server.** The development flag is `process.env.NODE_ENV`, which every bundler replaces; it read `import.meta` before, which no consumer's build replaced, so the documented warnings never showed.
+
 ## 0.40.4 – A larger font keeps its labels (Oct. 2026)
 
 ### Fixed
