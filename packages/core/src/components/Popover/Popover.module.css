@@ -27,6 +27,12 @@
     animation: panelIn var(--u-duration-fast) var(--u-ease-out);
   }
 
+  /* A dialog without a control takes the focus itself: the ring in place of its shadow. */
+  .panel:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
   /* Exit: faster, and it fades where it stands rather than folding back. */
   .panel[data-closing] {
     animation: panelOut var(--u-duration-exit-fast) var(--u-ease-exit) forwards;
