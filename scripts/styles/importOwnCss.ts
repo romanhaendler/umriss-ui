@@ -26,6 +26,10 @@ export function importOwnCss(entry: string, stylesheet: string): Plugin {
       const code = readFileSync(js, "utf8");
       const line = `import "./${stylesheet}";\n`;
       if (!code.startsWith(line)) writeFileSync(js, line + code);
+      /* The declaration the manifest's `styles.css` export names: under
+         `noUncheckedSideEffectImports` (the default of TypeScript 6) a bare
+         `import "<package>/styles.css"` must resolve to a type file. */
+      writeFileSync(join(dir, "styles.d.ts"), "export {};\n");
     },
   };
 }

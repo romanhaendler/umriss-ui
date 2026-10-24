@@ -1,2 +1,2 @@
 export { FormField, useFormField, FormFieldBoundary } from "./FormField";
-export type { FormFieldProps } from "./FormField";
+export type { FormFieldContextValue, FormFieldProps } from "./FormField";

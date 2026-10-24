@@ -10,5 +10,5 @@ import type { Ref } from "react";
 /** The `ref` of a component: the element it renders at its root. */
 export interface RefProp<E extends Element> {
   /** Receives the component's root element. */
-  ref?: Ref<E>;
+  ref?: Ref<E> | undefined;
 }
