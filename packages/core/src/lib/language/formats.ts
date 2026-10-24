@@ -33,8 +33,9 @@ export interface Formats {
   offset: (d: Date) => string;
   /**
    * A number in the set's notation. Without a digit count the value stands to
-   * the tenth decimal place; with one it is padded and rounded to exactly that
-   * many places.
+   * the tenth decimal place, and a non-zero value that would read 0 there is
+   * written in scientific notation; with one it is padded and rounded to
+   * exactly that many places.
    */
   number: (n: number, decimals?: number) => string;
   /**
@@ -51,6 +52,9 @@ export interface Formats {
       The amount comes in milliseconds, counted back from now. */
   relative: (ms: number) => string;
 }
+
+/* The decimal places `number` writes without a digit count. */
+const DEFAULT_PLACES = 10;
 
 /* From coarse to fine; the first step that works out wins. */
 const RELATIVE_STEPS: readonly (readonly [Intl.RelativeTimeFormatUnit, number])[] = [
@@ -114,14 +118,14 @@ export function formatsFor(locale: string): Formats {
     dateTime: (d, withSeconds) => (withSeconds ? dateTimeFormats.with : dateTimeFormats.without).format(d),
     offset: (d) => offsetFormat.formatToParts(d).find((part) => part.type === "timeZoneName")?.value ?? "",
     number: (n, decimals) => {
-      // Without a digit count a non-zero value never reads as 0: what ten places
-      // would round to zero is written in scientific notation instead.
-      if (decimals === undefined && n !== 0 && Math.abs(n) < 5e-11) return scientificFormat.format(n);
+      // Without a digit count a non-zero value never reads as 0: what the default
+      // places would round to zero is written in scientific notation instead.
+      if (decimals === undefined && n !== 0 && Math.abs(n) < 0.5 * 10 ** -DEFAULT_PLACES) return scientificFormat.format(n);
       let f = numberFormats.get(decimals);
       if (!f) {
         f = new Intl.NumberFormat(locale, {
           minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals ?? 10,
+          maximumFractionDigits: decimals ?? DEFAULT_PLACES,
         });
         numberFormats.set(decimals, f);
       }

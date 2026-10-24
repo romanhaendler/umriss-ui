@@ -43,16 +43,18 @@ export function placesOf(quantity: Quantity): number | undefined {
   return quantity.given ? undefined : 2;
 }
 
+/* The number times ten to the `by`, by moving the exponent of its string form. */
+function shift(x: number, by: number): number {
+  const [mantissa, exponent = "0"] = String(x).split("e");
+  return Number(`${mantissa}e${Number(exponent) + by}`);
+}
+
 /* Rounds half away from zero on the number's shortest decimal representation,
    as the formats do: 1.005 is 1.005, not the binary 1.00499…, so it rounds to
-   1.01. The decimal point moves by the exponent in the string, which stays
-   exact. */
+   1.01. The decimal point moves by the exponent in the string (`shift`), which
+   stays exact. */
 function round(value: number, places: number | undefined): number {
   if (places === undefined) return value;
-  const shift = (x: number, by: number) => {
-    const [mantissa, exponent = "0"] = String(x).split("e");
-    return Number(`${mantissa}e${Number(exponent) + by}`);
-  };
   /* `|| 0`: a number that rounds to zero is zero, never "-0". */
   return Math.sign(value) * shift(Math.round(shift(Math.abs(value), places)), -places) || 0;
 }

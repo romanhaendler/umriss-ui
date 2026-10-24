@@ -4,7 +4,7 @@ import { useDashboard } from "../src";
 import type { DashboardView } from "../src";
 
 const DEFAULT: DashboardView = { widgets: [{ id: "x", type: "figure", size: "small", options: { name: "X" } }] };
-const figure = (id: string) => ({ id, type: "figure", size: "small", options: { name: `Figure ${id}` } });
+const figure = (id: string) => ({ id, type: "figure", size: "small" as const, options: { name: `Figure ${id}` } });
 const ghost = (id: string) => ({ id, type: "ghost", size: "small", options: { keep: id } });
 
 function Harness({ initialView, onViewChange }: { initialView?: unknown; onViewChange?: (v: DashboardView) => void }) {
@@ -76,5 +76,25 @@ describe("widgets of a type not declared now", () => {
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onViewChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("editing through the hook before any widget type is declared", () => {
+  function Bare({ onViewChange }: { onViewChange: (v: DashboardView) => void }) {
+    const { edit, reset, done } = useDashboard({ defaultView: DEFAULT, initialView: { widgets: [figure("x"), figure("a")] }, onViewChange });
+    return (
+      <>
+        <button onClick={edit}>edit</button>
+        <button onClick={reset}>reset</button>
+        <button onClick={done}>done</button>
+      </>
+    );
+  }
+
+  it("writes each widget once on Done", () => {
+    const onViewChange = vi.fn();
+    render(<Bare onViewChange={onViewChange} />);
+    for (const name of ["edit", "reset", "done"]) fireEvent.click(screen.getByText(name));
+    expect(onViewChange).toHaveBeenCalledWith(DEFAULT);
   });
 });

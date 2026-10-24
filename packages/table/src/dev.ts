@@ -1,11 +1,8 @@
 /* Warnings in development, silent in a production build.
 
-   Development mode: `process.env.NODE_ENV` is not "production". The expression
-   is written literally so that a bundler replaces it (Vite does in a dev
-   server, webpack and Next in a build) and Node and Jest read it as it is. Where
-   neither happens there is no `process`, the read throws, and the answer is
-   production. A warning appears once per reason - a table renders often, and
-   nobody reads a console full of repetitions. */
+   Development mode by the rule in `@umriss-ui/core`'s `lib/dev.ts`. A warning
+   appears once per reason - a table renders often, and nobody reads a console
+   full of repetitions. */
 
 declare const process: { env: Record<string, string | undefined> };
 

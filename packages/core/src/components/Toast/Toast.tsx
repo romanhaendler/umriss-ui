@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { isDev } from "../../lib/dev";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
-import { toastTargetFor, topLayerPopover, useShownInTopLayer, useTopmostModalDialog } from "../../lib/portalTarget";
+import { isDialog, toastTargetFor, topLayerPopover, useShownInTopLayer, useTopmostModalDialog } from "../../lib/portalTarget";
 import { roleFromTone } from "../../lib/roleFromTone";
 import { motionOrigin } from "../Popover/position";
 import { Spinner } from "../Spinner";
@@ -332,7 +332,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   /* The deck glides only from a place it was seen at: not until it has been
      drawn since the hold began or ended. */
   const seenAtItsPlace = seen && settled;
-  const { from, handOn } = useGlideAcross(regionRef, target?.nodeName === "DIALOG" && seenAtItsPlace);
+  const { from, handOn } = useGlideAcross(regionRef, isDialog(target) && seenAtItsPlace);
   useLayoutEffect(() => {
     const next = toastTargetFor(dialog, portalTarget);
     if (next === target) return;

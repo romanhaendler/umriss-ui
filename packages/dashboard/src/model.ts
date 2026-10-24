@@ -43,9 +43,14 @@ const shaped = (view: DashboardView): DashboardWidget[] =>
 /** A view with only the entries that are widgets; before the types are known nothing else can be told. */
 export const shapedView = (view: DashboardView): DashboardView => ({ ...view, widgets: shaped(view) });
 
-/** The widgets of a view whose type is not declared: what `readView` drops that
-    the application may declare later, in their stored order. */
-export const unreadWidgets = (view: DashboardView, types: Types): DashboardWidget[] => shaped(view).filter((widget) => !types.has(widget.type));
+/** The widgets of a stored view whose id a reading of it does not hold: those of
+    a type not declared when it was read, which the application may declare later,
+    in their stored order. Told by id, not by the types declared now, which may
+    have changed since the reading. */
+export const unreadWidgets = (view: DashboardView, read: DashboardView): DashboardWidget[] => {
+  const held = new Set(read.widgets.map((widget) => widget.id));
+  return shaped(view).filter((widget) => !held.has(widget.id));
+};
 
 /** A view as the declared widget types read it: entries that are no widgets,
     widgets of unknown types and every id after its first fall out; a size the
