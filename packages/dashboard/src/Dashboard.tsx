@@ -37,7 +37,7 @@ type AnyType = WidgetTypeProps<unknown>;
 
 /* The custom properties that put a card, a heading or a placeholder at its place. */
 const placeStyle = (place: Place, order: number) =>
-  ({ "--column": place.column + 1, "--row": place.row + 1, "--columns": place.columns, "--rows": place.rows, "--order": order }) as CSSProperties;
+  ({ "--_dashboard-column": place.column + 1, "--_dashboard-row": place.row + 1, "--_dashboard-columns": place.columns, "--_dashboard-rows": place.rows, "--_dashboard-order": order }) as CSSProperties;
 
 const area = (span: { columns: number; rows: number }) => span.columns * span.rows;
 

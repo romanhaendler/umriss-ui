@@ -202,7 +202,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
         aria-hidden="true"
         data-verdict={own.verdict}
         data-later={i > 0 ? "" : undefined}
-        style={metrics ? ({ "--column": amountLine(i) } as CSSProperties) : undefined}
+        style={metrics ? ({ "--_calculation-column": amountLine(i) } as CSSProperties) : undefined}
       >
         {own.approximate && (
           <Tooltip content={wording.calculationApproximateNote}>
@@ -215,7 +215,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
         key={`unit-${i}`}
         className={styles.unit}
         aria-hidden="true"
-        style={metrics ? ({ "--column": unitLine(i) } as CSSProperties) : undefined}
+        style={metrics ? ({ "--_calculation-column": unitLine(i) } as CSSProperties) : undefined}
         data-last={metrics && i === readings.length - 1 ? "" : undefined}
       >
         {metrics && !closes ? undefined : text.unit}
@@ -289,7 +289,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
     const line = (
       <div
         className={styles.line}
-        style={{ "--depth": place.depth } as CSSProperties}
+        style={{ "--_calculation-depth": place.depth } as CSSProperties}
         data-inner={place.depth > 0 ? "" : undefined}
         data-kind={kind}
         data-foldable={foldable ? "" : undefined}
@@ -390,7 +390,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
 
     return [
       ...beside,
-      <li key={slot} className={styles.item} data-open={isOpen ? "" : undefined} style={{ "--depth": place.depth } as CSSProperties}>
+      <li key={slot} className={styles.item} data-open={isOpen ? "" : undefined} style={{ "--_calculation-depth": place.depth } as CSSProperties}>
         {line}
         {foldable && (
           <ul id={listId} className={styles.derivation} hidden={!isOpen}>
@@ -401,7 +401,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
             <li className={styles.item} aria-hidden="true">
               <div
                 className={styles.line}
-                style={{ "--depth": inner.depth } as CSSProperties}
+                style={{ "--_calculation-depth": inner.depth } as CSSProperties}
                 data-inner=""
                 data-closing=""
                 /* Only where its own quantity is meant: as an operand's, the
@@ -434,9 +434,9 @@ export function Calculation({ children, className, style, metrics, density, ...r
       style={
         metrics
           ? ({
-              "--figure-tracks": Array(count * 2).fill("auto").join(" "),
-              "--figures-end": amountLine(count),
-              "--assessment-column": amountLine(count),
+              "--_calculation-figure-tracks": Array(count * 2).fill("auto").join(" "),
+              "--_calculation-figures-end": amountLine(count),
+              "--_calculation-assessment-column": amountLine(count),
               ...style,
             } as CSSProperties)
           : style
@@ -457,7 +457,7 @@ export function Calculation({ children, className, style, metrics, density, ...r
                   key={metric.id}
                   className={styles.headCell}
                   data-unit={metric.unit === undefined ? undefined : ""}
-                  style={{ "--column": amountLine(i) } as CSSProperties}
+                  style={{ "--_calculation-column": amountLine(i) } as CSSProperties}
                 >
                   <span className={styles.headLabel}>{metric.label}</span>
                   {metric.unit !== undefined && <span className={styles.headUnit}>{metric.unit}</span>}
