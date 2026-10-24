@@ -12,6 +12,15 @@ upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.41.0 – Stored views that never crash, and widgets that wait alone (Oct. 2026)
+
+### Fixed
+
+- **Any stored value is read without throwing.** A view of another shape - `{}`, `null`, an older format, widgets without an id - fell over in the reading; it now falls back to the default view where it cannot be read.
+- **Done keeps the stored widgets of types not declared now.** A widget behind a feature flag or a role, or of a plugin not loaded, was dropped from the stored view on the reader's next Done - permanently. It now stays where it stood.
+- **A widget that suspends shows a Skeleton in its own body** while the other widgets stay; before, one lazy widget replaced the whole dashboard with the application's fallback.
+- **A calculation inside a widget is laid out right:** the dashboard's private custom properties carry its name (`--_dashboard-…`) and no longer reach into what a widget holds.
+
 ## 0.40.4 – A larger font keeps its rows (Oct. 2026)
 
 ### Fixed

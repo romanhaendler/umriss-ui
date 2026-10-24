@@ -29,6 +29,17 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.41.0 – Limits read as values, and Jest loads the charts (Oct. 2026)
+
+### Fixed
+
+- **A y limit in the tooltip, the readout and the summary is written as a value of its axis**, not rounded to the tick step: a limit of 0.5 on an axis ticking in whole numbers read "1".
+- **Jest loads the package.** The development flag read `import.meta`, which a CommonJS test runner cannot parse; it is `process.env.NODE_ENV` now. `@umriss-ui/charts/wording/de` resolves its types under `moduleResolution: node10`.
+
+### Changed
+
+- **Development warnings fire in a Vite dev server** - a chart without `ariaLabel`, for one. They never showed before, because the flag read `import.meta`.
+
 ## 0.40.4 – No change of its own (Oct. 2026)
 
 Released with the other five packages under their one number. No change of its

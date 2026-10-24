@@ -23,6 +23,18 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.41.0 – A safe CSV, and the table under happy-dom and Jest (Oct. 2026)
+
+### Fixed
+
+- **A `Table` renders under happy-dom.** Every read of the head's first row tolerates a head without rows.
+- **Jest loads the package.** The development flag read `import.meta`, which a CommonJS test runner cannot parse; it is `process.env.NODE_ENV` now, and development warnings fire in a Vite dev server as documented.
+
+### Changed
+
+- **The CSV writes text that starts like a formula with a leading apostrophe.** A cell beginning with `=`, `+`, `-` or `@` - a name, a comment someone typed - was written raw and ran as a formula when the file was opened in a spreadsheet. Numbers, booleans and the clipboard text (`selectionAsText`, Ctrl+C) stay as they were.
+- **The table's private custom properties carry its name** (`--_table-…`). They were unprefixed and could collide with another package's on the same element; CSS that set one of them by hand, though they were never public, sets the new name.
+
 ## 0.40.4 – A larger font keeps its rows (Oct. 2026)
 
 ### Fixed

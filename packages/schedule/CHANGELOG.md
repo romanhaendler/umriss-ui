@@ -16,6 +16,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.41.0 – Strict consumers compile (Oct. 2026)
+
+### Fixed
+
+- **The declarations compile for strict consumers** with `exactOptionalPropertyTypes` and `skipLibCheck: false`, through core's `RefProp`.
+
 ## 0.40.4 – A larger font keeps its lanes (Oct. 2026)
 
 ### Fixed

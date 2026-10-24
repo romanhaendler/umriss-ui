@@ -253,5 +253,7 @@ announcements, and the fields' widths and sizes (ADR-0041).
 
 What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
-caller's, and a dashboard a user arranges is never built; umriss shows the
-reader's time ([ADR-0060](../../docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md)).
+caller's, and umriss shows the reader's time
+([ADR-0060](../../docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md)); a dashboard
+a user arranges is its own package, `@umriss-ui/dashboard`
+([ADR-0064](../../docs/adr/0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md)).
