@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Date:   2026-10-24
 
 # The shakedown's confirmed defects are fixed
@@ -452,3 +452,39 @@ that fails today (its red), so the defect cannot come back unseen:
   axis's step format, and core's number format stops at ten places.
 - Suggested ticket order: the dev flag and the built-package check first (it
   gives several reds at once), then core, then the packages.
+
+## Comments
+
+Delivered 2026-10-24, all fifteen tickets; the findings are struck in
+`.scratch/shakedown/`.
+
+- core: a press counts as backdrop only on the dialog or its spacers;
+  `ToastProvider` renders on the server (dialogs told by node name, one
+  `isDialog`); a dialog-role Popover takes focus on open unless its content
+  placed it, and the outside click reads the composed path; Breadcrumb's folded
+  menu follows only http, https, mailto and tel; the number format writes a
+  value below ten places in scientific notation; `RefProp.ref` takes
+  `undefined`; `ToastContextValue`, `FormFieldContextValue` and
+  `FreshnessInstant` are exported.
+- Development mode is `process.env.NODE_ENV` in core, charts and table; core's
+  two warnings ship again. `check:dist` rejects `import.meta` in source and
+  build, keeps the expression where the source asks it, and compiles a strict
+  consumer (`exactOptionalPropertyTypes`, `skipLibCheck: false`, declarations,
+  `bundler` and `node10`). Every package's `styles.css` has a declaration;
+  `wording/de` resolves under `node10`. Confirmed by hand from packed tarballs
+  in a Vite 8 dev server and build and a Jest 30 project.
+- table: the CSV neutralises formula text (ADR-0061 amended), the clipboard
+  copy does not; renders under happy-dom.
+- calculation: rounds the shortest decimal representation.
+- dashboard: any stored value reads without a crash; widgets the reading left
+  out survive Done - also after Reset, and told by id, so a change of the
+  declared types during an edit writes no widget twice; each widget has its
+  own `Suspense` with a `Skeleton`.
+- Private custom properties are `--_<package>-…` outside core; the shared style
+  guard enforces it.
+- charts: a tooltip limit reads as a value of its axis.
+- Freshness after a clock step: not a defect - the hook re-reads the clock on
+  every tick; a unit test with running timers guards it.
+- Not done: a screenshot of a Calculation inside a dashboard widget - no demo
+  page shows the pair; the guard rules the shared names out. The guard accepts
+  any `--u-` and `--uc-` name, not only declared tokens.

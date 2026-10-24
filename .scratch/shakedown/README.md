@@ -6,8 +6,8 @@ coordinating session confirmed in the source. The hosts themselves were throwawa
 
 ## Order of work
 
-2. **The confirmed defects with small fixes**, each from its red as the first test (spec:
-   `.scratch/shakedown-defects/spec.md`):
+2. ~~**The confirmed defects with small fixes**~~ - **delivered 2026-10-24** (spec, done:
+   `.scratch/shakedown-defects/spec.md`; the kiosk clock step was a measurement artefact):
    - Modal/Drawer closes on a click inside a Popover, Menu or DatePicker (`core.md` A2)
    - `ToastProvider` throws under SSR (`core.md` A4)
    - d.ts under `exactOptionalPropertyTypes` (`core.md` A5) and the unexported types (B11, `design-system.md` 1)
