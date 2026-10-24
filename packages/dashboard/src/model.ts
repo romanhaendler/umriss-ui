@@ -29,14 +29,32 @@ export interface DashboardView {
   widgets: ReadonlyArray<DashboardWidget>;
 }
 
-/** A view as the declared widget types read it: widgets of unknown types and
-    every id after its first fall out; a size the type does not offer becomes
-    the type's starting size. Options stay as they are. */
-export function readView(view: DashboardView, types: ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize }>): DashboardView {
+type Types = ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize }>;
+
+const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** Whether a stored value has the shape of a view: an object with a widgets array. */
+export const isView = (value: unknown): value is DashboardView => isObject(value) && Array.isArray(value.widgets);
+
+/** The entries of a view that have the shape of a widget: an object with a string `id` and `type`. */
+const shaped = (view: DashboardView): DashboardWidget[] =>
+  view.widgets.filter((widget): widget is DashboardWidget => isObject(widget) && typeof widget.id === "string" && typeof widget.type === "string");
+
+/** A view with only the entries that are widgets; before the types are known nothing else can be told. */
+export const shapedView = (view: DashboardView): DashboardView => ({ ...view, widgets: shaped(view) });
+
+/** The widgets of a view whose type is not declared: what `readView` drops that
+    the application may declare later, in their stored order. */
+export const unreadWidgets = (view: DashboardView, types: Types): DashboardWidget[] => shaped(view).filter((widget) => !types.has(widget.type));
+
+/** A view as the declared widget types read it: entries that are no widgets,
+    widgets of unknown types and every id after its first fall out; a size the
+    type does not offer becomes the type's starting size. Options stay as they are. */
+export function readView(view: DashboardView, types: Types): DashboardView {
   const seen = new Set<string>();
   return {
     ...view,
-    widgets: view.widgets.flatMap((widget) => {
+    widgets: shaped(view).flatMap((widget) => {
       const type = types.get(widget.type);
       if (!type || seen.has(widget.id)) return [];
       seen.add(widget.id);
