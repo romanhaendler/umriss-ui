@@ -113,7 +113,8 @@ function DialogFrame({
   onMouseDown,
   ...rest
 }: DialogFrameProps) {
-  const sheetRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
      The name belongs to the Modal; the palette uses the same routine without
@@ -124,9 +125,12 @@ function DialogFrame({
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
     onMouseDown?.(event);
     if (event.defaultPrevented) return;
-    // The dialog is an invisible full-screen container (including the
-    // spacers); everything outside the modal surface counts as backdrop.
-    if (closeOnBackdrop && sheetRef.current && !sheetRef.current.contains(event.target as Node)) {
+    // The dialog is an invisible full-screen container; only a press that
+    // lands on it or on one of its two spacers is backdrop. Panels portal
+    // into the dialog beside the sheet, so "outside the sheet" would count
+    // a press inside them.
+    const target = event.target as Node;
+    if (closeOnBackdrop && (target === event.currentTarget || target === topRef.current || target === bottomRef.current)) {
       onClose();
     }
   };
@@ -154,15 +158,15 @@ function DialogFrame({
       {/* Free space distributes itself in the golden ratio (38 : 62) above and
           below the surface: small modals sit in the upper third, long ones use
           the full height – above as well as below. */}
-      {spacers && <div className={styles.spacerTop} aria-hidden="true" />}
-      <div ref={sheetRef} className={sheetClassName}>
+      {spacers && <div ref={topRef} className={styles.spacerTop}aria-hidden="true" />}
+      <div className={sheetClassName}>
         {/* A dialog keeps a dialog's controls, whatever size the place it
             was opened from has (ADR-0041). */}
         <SurfaceSizeReset>
           <ModalContext value={{ onClose, titleId }}>{children}</ModalContext>
         </SurfaceSizeReset>
       </div>
-      {spacers && <div className={styles.spacerBottom} aria-hidden="true" />}
+      {spacers && <div ref={bottomRef} className={styles.spacerBottom}aria-hidden="true" />}
     </dialog>
   );
 }
