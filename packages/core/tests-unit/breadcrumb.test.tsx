@@ -112,4 +112,28 @@ describe("Breadcrumb", () => {
     fireEvent.click(entries[1]!);
     expect(selected).toHaveBeenCalledTimes(1);
   });
+  it("follows a folded entry's href only to http, https, mailto and tel", () => {
+    measured();
+    const assign = vi.fn();
+    vi.stubGlobal("location", { assign });
+    const followed = (href: string, onSelect?: () => void) => {
+      assign.mockClear();
+      const trail = TRAIL.map((item, i) => (i === 1 ? { ...item, href, onSelect } : item));
+      const { unmount } = render(<Breadcrumb items={trail} />);
+      fireEvent.click(screen.getByRole("button", { name: "Show the levels in between" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Hall B" }));
+      unmount();
+      return assign.mock.calls.length > 0;
+    };
+    for (const href of ["javascript:alert(1)", " JavaScript:alert(1)", "data:text/html,x", "vbscript:x"]) {
+      expect(followed(href), href).toBe(false);
+    }
+    for (const href of ["#/x", "/x", "x/y", "https://a.example/", "http://a.example/", "mailto:a@b.c", "tel:+491"]) {
+      expect(followed(href), href).toBe(true);
+    }
+    const selected = vi.fn();
+    expect(followed("javascript:alert(1)", selected)).toBe(false);
+    expect(selected).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
 });
