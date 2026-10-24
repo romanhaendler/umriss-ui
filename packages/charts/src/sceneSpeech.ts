@@ -68,7 +68,13 @@ export function limitTexts(s: ChartScene, yAxisId?: string): LimitText[] {
     if (yAxisId !== undefined && (config.orientation !== "y" || id !== yAxisId)) continue;
     const axis = s.findAxis(config.orientation, id);
     if (axis === null) continue;
-    const at = (v: number) => axis.format(s.limitAt(config, v));
+    // A y limit is a value of its axis: written as a series is, not by the
+    // tick step, which would round 0.5 to 1 on an axis stepping by one.
+    const write =
+      config.orientation === "y"
+        ? (yTickFormat(s, id) ?? ((v: number) => formatValue(v, s.wording.locale)))
+        : axis.format;
+    const at = (v: number) => write(s.limitAt(config, v));
     out.push({ name: config.label, value: config.kind === "line" ? at(config.value) : `${at(config.from)} – ${at(config.to)}` });
   }
   return out;
