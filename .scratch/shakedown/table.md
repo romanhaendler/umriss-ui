@@ -9,12 +9,12 @@ Jest and `import.meta`, happy-dom crash) are in `cross-package.md`.
 
 ## Findings
 
-1. ✓ **[Break, security] CSV export does not neutralise formula injection.** `field()` in
+1. ✓ ~~**[Break, security] CSV export does not neutralise formula injection.**~~ `field()` in
    `src/model/csv.ts:50` quotes only for separators, quotes and line breaks; cells starting with `=`, `+`,
    `-`, `@` are written raw (`=1+1`, `+SUM(A1)`, `@SUM(1)`, `"=HYPERLINK(""http://evil"")"`). Any app that
    exports user-entered text and has it opened in Excel is exposed. ADR-0061 does not mention it. Idea:
    prefix `'` (or a tab) for text cells that start with those characters, leave numbers alone; check the
-   XLSX export (`.scratch/table-xlsx/`) the same way.
+   XLSX export (`.scratch/table-xlsx/`) the same way. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Misfit] `virtual` without `maxHeight` silently renders every row:** 20,000 rows give 20,002 `tr`
    and 371k nodes in 9.5 s; 100,000 crash the tab. A fixed-height flex parent does not count as a scroll
    area. Documented ("a virtualised table needs it"), but no dev warning and no recipe for a flexible parent.

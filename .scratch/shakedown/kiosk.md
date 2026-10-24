@@ -23,12 +23,12 @@ errors anywhere.
 
 ## Findings
 
-1. **[Misfit] A wall-clock jump leaves a Stat's freshness wrong until its next armed timer:** after
+1. ~~**[Misfit] A wall-clock jump leaves a Stat's freshness wrong until its next armed timer:**~~ after
    +1 hour, `Stat` with `ages={{ stale: 60 s, lost: 1 h }}` still read "Fresh now" at an age of 3,604 s; after
    an NTP step back of 5 minutes the old "Stale, 1 minute ago" stayed. A sleep with timer catch-up was right
    at once. Hits every 24/7 display with NTP steps, DST changes or hypervisor clock syncs - a safety-relevant
    lie on an operator screen. Idea: re-evaluate on `visibilitychange`, `focus` and a coarse heartbeat that
-   compares `Date.now()` with the armed deadline (`useFreshness`).
+   compares `Date.now()` with the armed deadline (`useFreshness`). **Closed 2026-10-24 as a measurement artefact:** `useFreshness` re-reads the clock on every tick, so a step shows within one cadence; Playwright's fake clock moved the time without running timers. A unit test with running timers guards it.
 2. **[Misfit] `Export` gives no result, and in Electron it opens a native Save dialog** a touch-only kiosk
    cannot work (the download stays "progressing"). `onExport` exists; the docs do not point shells to it.
 3. **[Look] Below the floor (Chromium 120) the page is unstyled and silent** - documented ("an older browser

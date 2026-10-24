@@ -9,10 +9,10 @@ build alarms on top. "In an afternoon a better level 1 than some vendors ship."
 
 ## Findings
 
-1. **[Misfit] The tooltip prints limits in the y axis's `tickFormat`, so a limit reads rounded:** LL 0.5
+1. ~~**[Misfit] The tooltip prints limits in the y axis's `tickFormat`, so a limit reads rounded:**~~ LL 0.5
    shows "1", HH 4.8 shows "5". A one-decimal `tickFormat` fixes the limits but rounds every series value
    with it (4.021 → 4.0). `LimitLine`/`LimitBand` have no `format`. A wrong limit on an operator screen is
-   a safety matter. Documented as "in that axis' format"; the trap is not.
+   a safety matter. Documented as "in that axis' format"; the trap is not. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 2. **[Look] At a raised root font size (a 4K wall) small controls stay 26 px high while their text grows**
    (19.25 px text in a 26 px button at root 28 px); table rows grow less than their text; cells default to
    12 px. See also `design-family.md` 9.

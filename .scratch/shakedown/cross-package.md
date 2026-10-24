@@ -32,28 +32,28 @@ are in `core.md`.
 
 ### Packages together
 
-15. ✓ **[Break] The DEV warnings of charts and table never fire in a Vite app.** `detectDev()`
+15. ✓ ~~**[Break] The DEV warnings of charts and table never fire in a Vite app.**~~ `detectDev()`
     (`charts/src/dev.ts:13`, same in `table/src/dev.ts`) reads `import.meta` through a variable; Vite
     replaces only the literal `import.meta.env.DEV`, and `process` does not exist in the browser, so DEV is
     false. Every documented "warns in DEV" (a chart without `ariaLabel`, …) is silent for the most common
     dev server. Red: a chart without `ariaLabel` logs nothing; with `define: { process: … }` it warns.
-    Idea: write `import.meta.env?.DEV` literally.
-16. ✓ **[Break] A Calculation inside a dashboard widget is laid out wrongly:** labels, figures and units
+    Idea: write `import.meta.env?.DEV` literally. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
+16. ✓ ~~**[Break] A Calculation inside a dashboard widget is laid out wrongly:**~~ labels, figures and units
     pile into the first column, operators land at the far right. The dashboard sets unprefixed custom
     properties on each widget (`dashboard/src/Dashboard.tsx:40`: `--column`, `--row`, `--columns`,
     `--rows`), the calculation reads `grid-column: var(--column, 4)` (`calculation/src/Calculation.module.css:334`,
     `:353`, `:506`) and inherits the widget's 1. Idea: prefix every package's custom properties
-    (`--ud-column`, `--uc-column`) and add a guard that no two packages share an unprefixed name.
+    (`--ud-column`, `--uc-column`) and add a guard that no two packages share an unprefixed name. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 
 ### Consumer tests and types (Vitest 5 jsdom/happy-dom, Jest 30 + babel-jest, TS 5.0–7.0)
 
-8. ✓ **[Break] Jest cannot load charts or table, so not schedule or dashboard either**, and the error is
+8. ✓ ~~**[Break] Jest cannot load charts or table, so not schedule or dashboard either**~~, and the error is
    misleading ("Must use import to load ES Module"). Cause: `import.meta` in `charts/src/dev.ts:13` and
-   `table/src/dev.ts:14` (the dev flag); core, calculation and dashboard's own file have none. Core's Jest
+   `table/src/dev.ts:14` (the dev flag); core, calculation and dashboard's own file have none. (Core read `import.meta.env?.DEV` too, which its library build replaced with `false`; all three now read `process.env.NODE_ENV`.) Core's Jest
    recipe is not enough; a 10-line Babel plugin replacing `import.meta` fixes it. Idea: read
-   `process.env.NODE_ENV` only, or ship a CJS/`default` condition; document the recipe.
-9. ✓ **[Break] `<Table>` crashes under happy-dom:** `tHead?.rows[0]` (`table/src/scrollArea.tsx:47`, `:80`,
-   `frameEffects.ts:102`) stops one step too early; happy-dom has `tHead` without `rows`. `tHead?.rows?.[0]`.
+   `process.env.NODE_ENV` only, or ship a CJS/`default` condition; document the recipe. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
+9. ✓ ~~**[Break] `<Table>` crashes under happy-dom:**~~ `tHead?.rows[0]` (`table/src/scrollArea.tsx:47`, `:80`,
+   `frameEffects.ts:102`) stops one step too early; happy-dom has `tHead` without `rows`. `tHead?.rows?.[0]`. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 10. **[Misfit] Charts do nothing in jsdom without a size and canvas mock, and nothing says so:** "Show data"
     opens no table, the description is empty, a legend click changes nothing, jsdom logs "getContext() not
     implemented" per mount. With a ResizeObserver mock reporting 600×280 and a stubbed `getContext` it all
