@@ -99,7 +99,7 @@ export function useCutValueWarnings(tableRef: TableRef) {
       if (box.scrollHeight <= box.clientHeight + 1) continue;
       const cell = box.closest("td, th");
       const at = cell?.parentElement ? Array.from(cell.parentElement.children).indexOf(cell) : -1;
-      const label = table.tHead?.rows[0]?.cells[at]?.textContent?.trim() || `column ${at + 1}`;
+      const label = table.tHead?.rows?.[0]?.cells[at]?.textContent?.trim() || `column ${at + 1}`;
       warnOnce(
         `taller-than-a-row:${label}`,
         `a value in "${label}" is taller than a row and is cut at its edge. A row's height never follows what it shows (ADR-0042): draw it with a small control, or show it whole in the row's detail.`,
@@ -125,7 +125,7 @@ export function useCutValueWarnings(tableRef: TableRef) {
    application's may each change it. */
 export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   useLayoutEffect(() => {
-    const head = tableRef.current?.tHead?.rows[0]?.getBoundingClientRect().height;
+    const head = tableRef.current?.tHead?.rows?.[0]?.getBoundingClientRect().height;
     if (head && registry.hook?.tableState.virtual) registry.hook.tableState.setPitch(head);
   });
 }
