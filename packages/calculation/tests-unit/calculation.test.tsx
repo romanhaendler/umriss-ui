@@ -154,10 +154,10 @@ describe("The statement", () => {
   it("indents only an inner derivation, and keeps the fold on its quantity when data changes", () => {
     const { rerender } = render(<OeeCalculation />);
     fireEvent.click(toggle("Availability"));
-    expect(rowOf("Run time").style.getPropertyValue("--depth")).toBe("1");
+    expect(rowOf("Run time").style.getPropertyValue("--_calculation-depth")).toBe("1");
     expect(rowOf("Run time").hasAttribute("data-inner")).toBe(true);
-    expect(rowOf("Downtime").style.getPropertyValue("--depth")).toBe("2");
-    expect(rowOf("Availability").style.getPropertyValue("--depth")).toBe("0");
+    expect(rowOf("Downtime").style.getPropertyValue("--_calculation-depth")).toBe("2");
+    expect(rowOf("Availability").style.getPropertyValue("--_calculation-depth")).toBe("0");
 
     rerender(<OeeCalculation downtime={50} />);
     expect(toggle("Availability").getAttribute("aria-expanded")).toBe("true");
