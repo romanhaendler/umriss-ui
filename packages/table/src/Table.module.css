@@ -74,10 +74,10 @@
      19 px at the default font size and a floor above it: it grows with the
      reader's root font size, and the pitch with it. */
   .table {
-    --_line: round(up, max(19px, 1.1875rem), 1px);
-    --_pad: var(--u-space-2);
-    --_pitch: calc(max(var(--_line) + 2 * var(--_pad), var(--u-control-height-sm) + 2 * var(--u-space-1)) + 1px);
-    --_padY: calc((var(--_pitch) - 1px - var(--_line)) / 2);
+    --_table-line: round(up, max(19px, 1.1875rem), 1px);
+    --_table-pad: var(--u-space-2);
+    --_table-pitch: calc(max(var(--_table-line) + 2 * var(--_table-pad), var(--u-control-height-sm) + 2 * var(--u-space-1)) + 1px);
+    --_table-padY: calc((var(--_table-pitch) - 1px - var(--_table-line)) / 2);
     width: 100%;
     border-collapse: collapse;
     font-size: var(--u-text-sm);
@@ -88,9 +88,9 @@
   .th {
     composes: ring from "#own-styles";
     position: relative;
-    height: var(--_pitch);
+    height: var(--_table-pitch);
     padding: 0 var(--u-space-2);
-    line-height: var(--_line);
+    line-height: var(--_table-line);
     background: var(--u-color-surface);
     border-bottom: 1px solid var(--u-hairline-strong);
     text-align: left;
@@ -126,9 +126,9 @@
   /* ---- Cells ----------------------------------------------------------- */
 
   .td {
-    height: var(--_pitch);
+    height: var(--_table-pitch);
     padding: 0 var(--u-space-2);
-    line-height: var(--_line);
+    line-height: var(--_table-line);
     border-bottom: 1px solid var(--u-hairline);
     color: var(--u-color-text);
     vertical-align: middle;
@@ -162,8 +162,8 @@
      than one without. */
   .compact {
     composes: dense from "#own-styles";
-    --_line: 18px;
-    --_pad: var(--u-space-1);
+    --_table-line: 18px;
+    --_table-pad: var(--u-space-1);
   }
 
   .compact .td {
@@ -213,7 +213,7 @@
      do for a field (ADR-0041; parts.tsx, `Cell`). */
   .value {
     max-width: min(20rem, 60vw);
-    max-height: calc(var(--_pitch) - 1px);
+    max-height: calc(var(--_table-pitch) - 1px);
     overflow: clip;
     overflow-clip-margin: 3px;
     white-space: nowrap;
@@ -228,12 +228,12 @@
   .value.sized {
     max-width: none;
     contain: inline-size;
-    contain-intrinsic-inline-size: calc(var(--_width) - 2 * var(--u-space-2));
+    contain-intrinsic-inline-size: calc(var(--_table-width) - 2 * var(--u-space-2));
   }
 
   .td:first-child > .value.sized,
   .td:last-child > .value.sized {
-    contain-intrinsic-inline-size: calc(var(--_width) - var(--u-space-2) - var(--u-space-3));
+    contain-intrinsic-inline-size: calc(var(--_table-width) - var(--u-space-2) - var(--u-space-3));
   }
 
   .numeric > .value {
@@ -366,8 +366,8 @@
     vertical-align: top;
     align-items: center;
     gap: var(--u-space-1);
-    margin: calc(-1 * var(--_padY)) calc(-1 * var(--u-space-3));
-    padding: var(--_padY) var(--u-space-3);
+    margin: calc(-1 * var(--_table-padY)) calc(-1 * var(--u-space-3));
+    padding: var(--_table-padY) var(--u-space-3);
     border: none;
     background: none;
     font: inherit;
@@ -1199,10 +1199,10 @@
      the fold slot - a leaf keeps it empty, so that the labels of one level
      start on one vertical. */
   .treeCell {
-    --tree-indent: var(--u-space-4);
+    --_table-tree-indent: var(--u-space-4);
     display: flex;
     align-items: center;
-    padding-left: calc(var(--tree-level, 0) * var(--tree-indent));
+    padding-left: calc(var(--_table-tree-level, 0) * var(--_table-tree-indent));
   }
 
   /* The text beside the fold may shrink, so that its value can cut. */
@@ -1375,7 +1375,7 @@
 
   .treeDetailRail {
     /* Under the fold's centre: the cell's padding, the indent, half the fold. */
-    margin-left: calc(var(--u-space-2) + var(--tree-level, 0) * var(--u-space-4) + 7.5px);
+    margin-left: calc(var(--u-space-2) + var(--_table-tree-level, 0) * var(--u-space-4) + 7.5px);
     padding-left: calc(var(--u-space-4) + 4px);
     border-left: 1px solid var(--u-hairline-strong);
   }

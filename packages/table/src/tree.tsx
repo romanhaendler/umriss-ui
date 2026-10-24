@@ -108,7 +108,7 @@ export function TreeCellContent({
     }
   };
   return (
-    <span className={styles.treeCell} style={{ "--tree-level": entry.level } as CSSProperties}>
+    <span className={styles.treeCell} style={{ "--_table-tree-level": entry.level } as CSSProperties}>
       {opens ? (
         <button
           type="button"
