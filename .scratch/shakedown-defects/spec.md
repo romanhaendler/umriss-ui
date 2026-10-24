@@ -326,8 +326,9 @@ that fails today (its red), so the defect cannot come back unseen:
   object with a string `id` and `type` falls out, as an unknown type does.
 - **Unknown widgets survive.** The stored view keeps the entries the declared
   types cannot read. Done writes the edited arrangement followed by those
-  entries in their stored order. Cancel writes nothing; Reset writes the
-  default view.
+  entries in their stored order. Cancel writes nothing; Reset puts the
+  default view in the draft, and Done after it keeps those entries as after
+  any other edit.
 - **Suspense.** Each widget's content stands in its own `Suspense` inside the
   existing error boundary, with core's `Skeleton` filling the widget body as
   the fallback. No new wording.

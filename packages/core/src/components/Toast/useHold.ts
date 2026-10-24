@@ -6,7 +6,7 @@ import type { ToastItem } from "./Toast";
 /** Whether the region's target is drawn: in the document, and no dialog that
     closed (the region's move out of it follows in a microtask). */
 export function drawnTarget(target: Element): boolean {
-  return target.isConnected && !(target instanceof HTMLDialogElement && !target.open);
+  return target.isConnected && !(target.nodeName === "DIALOG" && !(target as HTMLDialogElement).open);
 }
 
 /** Whether two animation frames have passed since `key` last changed: in the

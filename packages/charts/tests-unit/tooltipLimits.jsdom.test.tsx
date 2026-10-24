@@ -83,3 +83,30 @@ describe("Labelled limits for a reader without colour or pointer", () => {
     expect(readout(r.host)).toMatch(/Target 13 u\. Zone 11 u – 12 u\.$/);
   });
 });
+
+function Steps() {
+  const { Chart, XAxis, YAxis, Line } = useChart(data.map((d) => ({ ...d, a: d.a - 10 })));
+  return (
+    <Chart ariaLabel="A course on an axis stepping by one">
+      <XAxis value="t" />
+      <YAxis tickCount={5} />
+      <LimitLine value={0.5} label="LL" />
+      <LimitLine value={4.8} label="HH" />
+      <Line value="a" name="A" />
+      <Tooltip limits />
+    </Chart>
+  );
+}
+
+describe("A limit is written as a value of its y axis", () => {
+  it("keeps its decimals on an axis whose ticks step by one, in the tooltip and the readout", async () => {
+    const r = await renderChart(<Steps />);
+    unmount = r.unmount;
+    await focusPlot(r.host);
+    await press(r.host, "ArrowRight");
+    await rest(200);
+    expect(tooltipOf(r.host)).toContain("LL0.5");
+    expect(tooltipOf(r.host)).toContain("HH4.8");
+    expect(readout(r.host)).toMatch(/LL 0\.5\. HH 4\.8\.$/);
+  });
+});
