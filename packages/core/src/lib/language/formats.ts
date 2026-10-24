@@ -99,6 +99,7 @@ export function formatsFor(locale: string): Formats {
      daylight-saving logic hangs on it (DatePicker/time.ts). */
   const offsetFormat = new Intl.DateTimeFormat(locale, { timeZoneName: "shortOffset" });
   const numberFormats = new Map<number | undefined, Intl.NumberFormat>();
+  const scientificFormat = new Intl.NumberFormat(locale, { notation: "scientific", maximumSignificantDigits: 10 });
   const countFormat = new Intl.NumberFormat(locale);
   const percentFormat = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
   const collator = new Intl.Collator(locale);
@@ -113,6 +114,9 @@ export function formatsFor(locale: string): Formats {
     dateTime: (d, withSeconds) => (withSeconds ? dateTimeFormats.with : dateTimeFormats.without).format(d),
     offset: (d) => offsetFormat.formatToParts(d).find((part) => part.type === "timeZoneName")?.value ?? "",
     number: (n, decimals) => {
+      // Without a digit count a non-zero value never reads as 0: what ten places
+      // would round to zero is written in scientific notation instead.
+      if (decimals === undefined && n !== 0 && Math.abs(n) < 5e-11) return scientificFormat.format(n);
       let f = numberFormats.get(decimals);
       if (!f) {
         f = new Intl.NumberFormat(locale, {

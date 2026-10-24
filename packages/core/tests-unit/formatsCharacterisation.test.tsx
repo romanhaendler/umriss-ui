@@ -130,6 +130,14 @@ describe("The default notation: numbers", () => {
     expect(formatNumber(1.23456789)).toBe("1.23456789");
   });
 
+  it("writes a tiny non-zero value in scientific notation, never as 0", () => {
+    expect(formatNumber(1.6e-19)).toBe("1.6E-19");
+    expect(GERMAN_FORMATS.number(1.602e-19)).toBe("1,602E-19");
+    expect(formatNumber(1e-9)).toBe("0.000000001");
+    expect(formatNumber(0)).toBe("0");
+    expect(formatNumber(1.6e-19, 2)).toBe("0.00");
+  });
+
   it("writes zero decimal places as a whole number", () => {
     expect(formatNumber(1234.56, 0)).toBe("1,235");
   });
