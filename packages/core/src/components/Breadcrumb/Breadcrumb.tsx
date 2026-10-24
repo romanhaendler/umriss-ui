@@ -18,7 +18,7 @@ export interface BreadcrumbEntry {
   /** Routing is the caller's: given, it runs instead of the browser's
       navigation - on the link and in the menu of folded levels. A level with
       `onSelect` and no `href` is a button. In the menu a level is a menu
-      entry, not a link: an `href` alone is followed there by
+      entry, not a link: an `href` alone (http, https, mailto or tel) is followed there by
       `location.assign`, without a new tab or a middle click - whoever needs
       those routes through `onSelect`. */
   onSelect?: () => void;
@@ -31,6 +31,18 @@ export interface BreadcrumbProps extends HTMLAttributes<HTMLElement>, RefProp<HT
 }
 
 const separator = <AngleGlyph size={8} className={styles.separator} />;
+
+/* The menu follows an address by script, so it resolves it against the
+   document first and lets only these schemes through: `javascript:`, `data:`
+   and the like do nothing. */
+const SAFE_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"];
+function isSafeTarget(href: string): boolean {
+  try {
+    return SAFE_PROTOCOLS.includes(new URL(href, document.baseURI).protocol);
+  } catch {
+    return false;
+  }
+}
 
 /* Where a page stands: region, cluster, service. A navigation landmark with an
    ordered list, and the last level says `aria-current="page"`. When the trail
@@ -71,7 +83,7 @@ export function Breadcrumb({ ref, items, className, ...rest }: BreadcrumbProps) 
   const hidden = items.slice(1, 1 + folded);
   const follow = (item: BreadcrumbEntry) => {
     if (item.onSelect) item.onSelect();
-    else if (item.href) window.location.assign(item.href);
+    else if (item.href && isSafeTarget(item.href)) window.location.assign(item.href);
   };
 
   const level = (item: BreadcrumbEntry, index: number) => {
