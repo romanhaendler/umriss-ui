@@ -38,6 +38,17 @@ export function styleGuard(pkg: string, styles: Record<string, string>, moreThan
       expect(found).toEqual([]);
     });
 
+    it("declare and read only tokens and their own package's private custom properties", () => {
+      const short = pkg.replace("@umriss-ui/", "");
+      const found = entries().flatMap(([file, css]) =>
+        [...withoutComments(css).matchAll(/(?:^|[;{\s(])(--[\w-]+)/g)]
+          .map((t) => t[1]!)
+          .filter((name) => !/^--uc?-/.test(name) && !name.startsWith(`--_${short}-`))
+          .map((name) => `${file}: ${name}`),
+      );
+      expect([...new Set(found)]).toEqual([]);
+    });
+
     it("do not copy out the hover edge", () => {
       const found = entries()
         .filter(([, css]) => /color-mix\(in srgb, var\(--u-color-text\) 30%, transparent\)/.test(css))

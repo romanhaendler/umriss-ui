@@ -291,7 +291,7 @@ function DetailRow({
       <td
         colSpan={colSpan}
         className={cx(styles.detailCell, entry && styles.treeDetail)}
-        style={entry ? ({ "--tree-level": entry.level } as CSSProperties) : undefined}
+        style={entry ? ({ "--_table-tree-level": entry.level } as CSSProperties) : undefined}
       >
         {entry ? <div className={styles.treeDetailRail}>{children}</div> : children}
       </td>
@@ -356,7 +356,7 @@ function Cell({
       /* Contained, the box answers the layout with the column's width less its
          cell's padding (Table.module.css, `.sized`): the value neither widens
          the column nor lets a narrow page squeeze it. */
-      style={width !== undefined ? ({ "--_width": `${width}px` } as CSSProperties) : undefined}
+      style={width !== undefined ? ({ "--_table-width": `${width}px` } as CSSProperties) : undefined}
       aria-hidden={editor ? true : undefined}
     >
       {content}
