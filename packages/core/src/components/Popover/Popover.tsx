@@ -11,6 +11,9 @@ import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 /** The props of `Popover`. */
 export interface PopoverProps {
   /** Whether the surface stands. Controlled: the popover never opens itself. */
@@ -169,7 +172,9 @@ export function Popover({
 
     // An outside click does not take the focus back – the pointer is elsewhere already.
     const handlePointerDown = (event: MouseEvent) => {
-      if (!isInside(event.target as Node)) close(false);
+      /* The first node of the composed path: inside a shadow root `target` is
+         retargeted to the host, which no ref contains. */
+      if (!isInside(event.composedPath()[0] as Node)) close(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -219,13 +224,28 @@ export function Popover({
     // so that a fresh array per render does not rebind the listeners.
   }, [open, anchorRef, close, measure, hideOnScroll]);
 
-  if (!present || !target) return null;
+  /* A dialog takes the focus in: the first focusable element, else the panel
+     itself - unless its content placed the focus already. Children's effects
+     run before this one, so their own focusing has happened. */
+  const standing = present && !!target;
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!standing || !open || role !== "dialog" || !panel) return;
+    const root = panel.getRootNode();
+    const active = root instanceof ShadowRoot ? root.activeElement : document.activeElement;
+    if (active && panel.contains(active)) return;
+    (panel.querySelector<HTMLElement>(FOCUSABLE) ?? panel).focus({ preventScroll: true });
+  }, [standing, open, role]);
+
+  if (!standing) return null;
 
   return createPortal(
     <div
       ref={panelRef}
       id={id}
       role={role}
+      /* Focusable by script, so a dialog without a control can take the focus. */
+      tabIndex={role === "dialog" ? -1 : undefined}
       aria-label={ariaLabel}
       className={cx(styles.panel, className)}
       data-closing={closing || undefined}
