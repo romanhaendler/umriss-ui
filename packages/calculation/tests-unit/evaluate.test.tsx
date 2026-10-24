@@ -100,3 +100,36 @@ describe("Evaluation", () => {
     expect(result.assessment).toEqual({ verdict: "ok", deviation: -3 });
   });
 });
+
+describe("Rounding the decimal value", () => {
+  const shown = (value: number, decimals = 2) =>
+    run(
+      <Sum label="R" decimals={decimals}>
+        <Given label="a" value={value} />
+      </Sum>,
+    ).result.shown;
+
+  it("rounds the shortest decimal representation half away from zero", () => {
+    expect(shown(1.005)).toBe(1.01);
+    expect(shown(2.675)).toBe(2.68);
+    expect(shown(0.285)).toBe(0.29);
+    expect(shown(-1.005)).toBe(-1.01);
+    expect(shown(1e-7, 8)).toBe(1e-7);
+  });
+
+  it("shows zero, never minus zero, for a value that rounds to zero", () => {
+    expect(Object.is(shown(-0.001), 0)).toBe(true);
+  });
+
+  it("shows the invoice with its approximation mark", () => {
+    const { result } = run(
+      <Sum label="R">
+        <Given label="a" value={1.005} decimals={2} />
+        <Given label="b" value={2.675} decimals={2} />
+        <Given label="c" value={0.285} decimals={2} />
+      </Sum>,
+    );
+    expect(result.shown).toBe(3.97);
+    expect(result.approximate).toBe(true);
+  });
+});

@@ -12,7 +12,7 @@ import { announce, useWording } from "@umriss-ui/core";
 import { DashboardOf } from "./Dashboard";
 import type { DashboardProps } from "./Dashboard";
 import type { Edit } from "./edit";
-import { readView } from "./model";
+import { isView, readView, shapedView, unreadWidgets } from "./model";
 import type { DashboardView } from "./model";
 import { WidgetType } from "./WidgetType";
 import type { WidgetTypeProps } from "./WidgetType";
@@ -106,7 +106,7 @@ const same = (a: DashboardView, b: DashboardView) => JSON.stringify(a) === JSON.
     view, `setView` and the editing actions. */
 export function useDashboard({ defaultView, initialView, allowEdit = true, onViewChange, onDraftChange }: DashboardOptions): DashboardParts {
   const store = useRef<{ state: State; listeners: Set<() => void>; types: Map<string, WidgetTypeProps<unknown>>; signature: string } | null>(null);
-  store.current ??= { state: { view: initialView ?? defaultView, draft: null, known: 0 }, listeners: new Set(), types: new Map(), signature: "" };
+  store.current ??= { state: { view: isView(initialView) ? initialView : defaultView, draft: null, known: 0 }, listeners: new Set(), types: new Map(), signature: "" };
   const own = store.current;
   const wording = useWording();
 
@@ -128,7 +128,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
 
     /* A view read against the declared types; before a dashboard has told which
        they are, it stands as it is. */
-    const read = (view: DashboardView) => (own.types.size ? readView(view, own.types) : view);
+    const read = (view: DashboardView) => (own.types.size ? readView(view, own.types) : shapedView(view));
 
     const edit = () => {
       if (!latest.current.allowEdit || own.state.draft) return;
@@ -140,11 +140,13 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       if (!draft) return;
       const current = draft.steps[draft.at]!;
       const changed = keep && !same(current, read(view));
-      put({ ...own.state, view: changed ? current : view, draft: null, catalogue: false });
+      /* The draft shows only the declared types; the stored widgets of any other type stay, after it. */
+      const written = { ...current, widgets: [...current.widgets, ...unreadWidgets(view, own.types)] };
+      put({ ...own.state, view: changed ? written : view, draft: null, catalogue: false });
       latest.current.onDraftChange?.(false);
       const { wording } = latest.current;
       announce(!keep ? wording.dashboardCancelled : changed ? wording.dashboardKept : wording.dashboardLeft);
-      if (changed) latest.current.onViewChange?.(current);
+      if (changed) latest.current.onViewChange?.(written);
     };
     const setCatalogue = (open: boolean) => {
       if (own.state.draft) put({ ...own.state, catalogue: open });
@@ -207,8 +209,8 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       catalogue: () => setCatalogue(true),
       read,
       setView: (given: DashboardView) => {
-        const view = read(given);
-        put({ ...own.state, view, draft: own.state.draft ? { steps: [view], at: 0 } : null });
+        const view = isView(given) ? given : latest.current.defaultView;
+        put({ ...own.state, view, draft: own.state.draft ? { steps: [read(view)], at: 0 } : null });
       },
       Dashboard: (props: DashboardProps) => {
         const { view, draft, catalogue } = useSyncExternalStore(subscribe, get, get);

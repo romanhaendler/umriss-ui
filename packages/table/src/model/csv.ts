@@ -50,15 +50,25 @@ export const plain = (value: string | number | boolean, c: Pick<CsvConventions, 
 const field = (raw: string, separator: string): string =>
   raw.includes(separator) || /["\r\n]/.test(raw) ? `"${raw.replace(/"/g, '""')}"` : raw;
 
-const cell = <Z,>(row: Z, column: CsvColumn<Z>, c: CsvConventions): string => {
+/* A spreadsheet runs text that starts with one of these as a formula. A leading
+   apostrophe makes it text again; the file no longer reads back exactly. Only
+   text is touched - a number or boolean is written by `plain`, so -3 stays. */
+const neutral = (raw: string, guard: boolean): string => (guard && /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw);
+
+const cell = <Z,>(row: Z, column: CsvColumn<Z>, c: CsvConventions, guard: boolean): string => {
   const value = column.value?.(row);
   if (value === undefined || value === null) return "";
-  return field(plain(value, c), c.separator);
+  return field(typeof value === "string" ? neutral(value, guard) : plain(value, c), c.separator);
 };
 
-const lines = <Z, K extends string>(rows: readonly Z[], columns: readonly CsvColumn<Z, K>[], c: CsvConventions): string[] => [
-  columns.map((s) => field(s.label ?? s.id, c.separator)).join(c.separator),
-  ...rows.map((row) => columns.map((s) => cell(row, s, c)).join(c.separator)),
+const lines = <Z, K extends string>(
+  rows: readonly Z[],
+  columns: readonly CsvColumn<Z, K>[],
+  c: CsvConventions,
+  guard: boolean,
+): string[] => [
+  columns.map((s) => field(neutral(s.label ?? s.id, guard), c.separator)).join(c.separator),
+  ...rows.map((row) => columns.map((s) => cell(row, s, c, guard)).join(c.separator)),
 ];
 
 /**
@@ -77,7 +87,7 @@ export function asCsv<Z, K extends string = string>(
   columns: readonly CsvColumn<Z, K>[],
   conventions: CsvConventions = ENGLISH,
 ): string {
-  return BOM + lines(rows, columns, conventions).join(LINE_BREAK);
+  return BOM + lines(rows, columns, conventions, true).join(LINE_BREAK);
 }
 
 /** The same rows as text for the clipboard: tabs between fields, a line break
@@ -88,5 +98,5 @@ export function asTabbed<Z, K extends string = string>(
   columns: readonly CsvColumn<Z, K>[],
   conventions: Omit<CsvConventions, "separator"> = ENGLISH,
 ): string {
-  return lines(rows, columns, { ...conventions, separator: "\t" }).join("\n");
+  return lines(rows, columns, { ...conventions, separator: "\t" }, false).join("\n");
 }

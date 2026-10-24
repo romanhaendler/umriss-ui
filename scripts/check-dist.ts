@@ -10,6 +10,8 @@
      of Vite 8 and Next 16, whose default targets lack it): the lowered tokens
      read only the switches `--lightningcss-light` and `--lightningcss-dark`,
      and `:root` in the tokens layer declares them to resolve to light,
+   - and the entry holds the development-mode expression while no shipped
+     JavaScript file holds `import.meta`,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`).
 
@@ -17,7 +19,7 @@
    ../../scripts/check-dist.ts <entry.js> <stylesheet.css>` - the packages call
    it in `prepublishOnly`, after the build. */
 
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { transform } from "lightningcss";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
@@ -42,6 +44,24 @@ for (const file of entries) {
 
 const js = readFileSync(join("dist", entry), "utf8");
 if (!js.startsWith(`"use client";\nimport "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} right after the directive`);
+
+/* Development mode is one literal expression every toolchain reads (Vite's dev
+   server, Node, Jest): a package whose source asks it must still ask it in the
+   build, or its warnings were compiled out. `import.meta` in a shipped file
+   stops Jest from loading it at all. */
+const DEV_EXPRESSION = `process.env.NODE_ENV !== "production"`;
+const sources = readdirSync("src", { recursive: true, encoding: "utf8" })
+  .filter((file) => /\.tsx?$/.test(file))
+  .map((file) => [file, readFileSync(join("src", file), "utf8")] as const);
+/* The library build replaces `import.meta.env.*` and would compile a warning
+   out without a trace in the build, so the source must not ask it either. */
+for (const [file, text] of sources) if (text.includes("import.meta")) problems.push(`src/${file} reads import.meta; ask ${DEV_EXPRESSION} instead`);
+if (sources.some(([, text]) => text.includes(DEV_EXPRESSION)) && !js.includes(DEV_EXPRESSION)) {
+  problems.push(`dist/${entry} does not contain the development-mode expression ${DEV_EXPRESSION}`);
+}
+for (const file of readdirSync("dist", { recursive: true, encoding: "utf8" })) {
+  if (file.endsWith(".js") && readFileSync(join("dist", file), "utf8").includes("import.meta")) problems.push(`dist/${file} contains import.meta`);
+}
 
 const css = readFileSync(join("dist", stylesheet), "utf8");
 if (!beginsWithLayerOrder(css)) {

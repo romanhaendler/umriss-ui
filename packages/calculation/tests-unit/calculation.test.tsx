@@ -217,6 +217,18 @@ describe("The statement", () => {
 });
 
 describe("The accessible sentence", () => {
+  it("shows and speaks a tiny given, not 0", () => {
+    render(
+      <Calculation>
+        <Sum label="Charge" unit="C">
+          <Given label="Electron" value={1.602e-19} unit="C" />
+        </Sum>
+      </Calculation>,
+    );
+    expect(rows()[0]).toBe("Electron 1.602E-19 C");
+    expect(screen.getByText(/^Electron equals/).textContent).toBe("Electron equals 1.602E-19 C");
+  });
+
   it("reads a derived line with its target", () => {
     render(
       <Calculation>
