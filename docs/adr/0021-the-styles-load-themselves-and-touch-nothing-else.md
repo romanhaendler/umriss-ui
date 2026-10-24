@@ -117,3 +117,11 @@ the operating system did. `UmrissProvider` loses `theme`, and it stops writing
 - **`@umriss-ui/charts` loses its last unprefixed-looking global names.** Its
   classes were `.kc-*`, a leftover of the library's former name; they become
   `.uc-*`, in the same layer as everything else.
+- *Amended 2026-10-24:* a build that lowers `light-dark()` (Lightning CSS in
+  Vite 8 and Next 16 by default) needs Lightning's two switches
+  `--lightningcss-light` and `--lightningcss-dark`, which it defines only on a
+  rule that declares `color-scheme`. Core declares them on `:root` with the
+  light values - custom properties only, so no rule above changes. A mode the
+  application sets in CSS still flips; a mode set only from JavaScript or
+  through a variable stays light in such a build, and the application then
+  writes one CSS rule or raises its build target to the browser floor.

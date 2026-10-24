@@ -180,11 +180,13 @@ html.dark { color-scheme: dark; }        /* a switch of the application's own */
 :root { color-scheme: light dark; }      /* or: follow the system */
 ```
 
-Theme libraries (`next-themes`, Bootstrap's `data-bs-theme`, Mantine, MUI,
-DaisyUI) set `color-scheme` themselves, so the components follow them with no
-line at all. An application that sets nothing stays light, and a part of a page
-can be dark on its own (`style="color-scheme: dark"`). The library sets
-`color-scheme` nowhere (ADR-0021).
+Theme libraries that set `color-scheme` in CSS (Bootstrap's `data-bs-theme`,
+DaisyUI) are followed with no line at all; one that sets it only from JavaScript
+or through a variable (`next-themes`, MUI, Mantine) is not followed in a build
+that lowers `light-dark()`, and needs one rule - see core's README. An
+application that sets nothing stays light, and a part of a page can be dark on
+its own (a class with `color-scheme: dark`). The library sets `color-scheme`
+nowhere (ADR-0021).
 
 The decision whether to follow the system setting or to store a user's wish lies
 deliberately with the application – the library only provides the token values.

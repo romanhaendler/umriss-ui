@@ -10,14 +10,22 @@
    Theming: a token with two values is written once,
    light-dark(<light>, <dark>), and follows the `color-scheme` the
    element inherits from the application - the library sets it nowhere
-   (ADR-0021). The primary button reverses its polarity in the dark
-   theme (light on dark).
+   (ADR-0021). Where a build lowers light-dark() (Lightning CSS), a mode
+   the application sets only from JavaScript stays light (core's README).
+   The primary button reverses its polarity in the dark theme (light on
+   dark).
    ============================================================ */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.tokens {
   :root {
+    /* Lightning CSS's switches for a lowered light-dark(). They make a lowered
+       token resolve to its light value where the application declares no
+       color-scheme in its CSS; where light-dark() is not lowered they do nothing. */
+    --lightningcss-light: initial;
+    --lightningcss-dark: ;
+
     /* ---- Neutral: Ink & Paper ---- */
     --u-color-bg: light-dark(#fafafa, #0f0f10);
     --u-color-surface: light-dark(#ffffff, #161618);

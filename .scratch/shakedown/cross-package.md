@@ -8,12 +8,6 @@ are in `core.md`.
 
 ## Findings
 
-1. **[Break] Core's `light-dark()` collapse (core.md A1) takes the other packages down with it.** Only
-   core's stylesheet holds `light-dark()`; the other five use `var(--u-x, light-fallback)`, but core's tokens
-   exist and are invalid, so the fallbacks never apply. Charts read the tokens at draw time: with them
-   collapsed the canvas text, axes and grid fall back to the previous `fillStyle`, solid black, in light and
-   dark alike. Idea, besides the A1 decision: `resolveColours` detects an invalid colour and uses its own
-   literal.
 2. **[Break] table, chart, schedule and dashboard cannot be used from a Server Component.** Each is reached
    only through a hook (`useTable`, `useChart`, `useSchedule`, `useDashboard`): "Attempted to call useChart()
    from the server". A read-only report page needs a hand-written `"use client"` wrapper (about 35 lines for

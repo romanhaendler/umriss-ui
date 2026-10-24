@@ -16,7 +16,6 @@ session reproduced or confirmed in the source itself.
 
 | # | Finding | Where / cause | Repro |
 |---|---|---|---|
-| A1 ✓ | **A production build with Vite 8 or Next 16 (Turbopack) renders everything without colour, border or surface.** Dev looks normal. | Lightning CSS lowers the 40 `light-dark()` tokens to `var(--lightningcss-light,…)var(--lightningcss-dark,…)`; it defines the toggles only where the same stylesheet declares `color-scheme`, and `core.css` never does. umriss builds itself with Vite 6 (esbuild), so its own checks never see it. Host fixes: `build.cssTarget: "chrome123"` or a `browserslist`; or `:root{color-scheme: light dark}` in the app's CSS (but then an inline `colorScheme` set by a theme library no longer flips). | minimal Vite 8 app, `npx vite build`, count `lightningcss-light` in the CSS; Next host `next build` |
 | A2 ✓ | **A click inside a Popover, Menu, MenuItem or DatePicker panel within a Modal or Drawer closes the Modal.** | `Modal.tsx:129` tests `sheetRef.contains(target)`; the panels portal into the `<dialog>` (`lib/portalTarget.ts:28`), beside the sheet. | busy-app `t9.mjs` |
 | A3 ✓ | **Vitest with its default config fails on the first import** (`Unknown file extension ".css"`). Jest 29/30 cannot resolve the package at all (`exports` has only an `import` condition). | `dist/core.js` imports `core.css`; `exports` has no `default`. Workarounds: `server.deps.inline: [/@umriss-ui/]`; for Jest a moduleNameMapper per entry, a CSS stub and `transformIgnorePatterns`. Documented nowhere. | minimal Vitest 5 app, `npx vitest run` |
 | A4 ✓ | **`ToastProvider` throws when server-rendered** (`HTMLDialogElement is not defined`); `next build` fails when it stands in the root layout, as the docs show. | `Toast.tsx:333` evaluates `instanceof HTMLDialogElement` during render; `useHold.ts:9` likewise. | Next host with ToastProvider in `app/layout.tsx`; `react-dom/server` render in Node |
@@ -80,6 +79,5 @@ No leaks after 50–100 mount cycles (listeners, timers, body nodes, `inert`, bo
 
 ## What umriss can do
 
-1. **Decision first, A1:** declaring `color-scheme` in core would break ADR-0021 ("touches nothing but the tokens") and the promise that an app that sets nothing stays light. The alternatives: ship tokens that survive the lowering, or give consumers a required build-config line. Costly to reverse.
 2. **Small fixes, each a few lines with a red test first:** A2, A4, A5, the shadow-DOM click (B3), the missing type exports and `typesVersions` (B11).
 3. **Keep it from coming back:** a smoke check that builds the packed tarball in a fresh Vite 8, Next and Vitest app. umriss's own checks cannot see the consumers' toolchains today.
