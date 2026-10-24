@@ -165,7 +165,7 @@ that fails today (its red), so the defect cannot come back unseen:
 ### Calculation rounding (calculation 1)
 
 51. As a bookkeeper, I want 1.005 € to show as 1.01 €, so that the figure matches what every other number on the page shows.
-52. As a bookkeeper, I want 2.675 and 0.285 to show as 2.68 and 0.29, so that an invoice's lines add up as written.
+52. As a bookkeeper, I want 2.675 and 0.285 to show as 2.68 and 0.29, so that each line of an invoice reads as the rest of the page writes it.
 53. As a bookkeeper, I want the "≈" mark to appear only where the shown numbers really do not add up, so that it keeps its meaning.
 54. As a developer, I want negative values to round half away from zero on the decimal value too, so that −1.005 shows −1.01.
 55. As a developer, I want a value that rounds to zero to show 0, never −0, as before.
