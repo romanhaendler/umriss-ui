@@ -4,7 +4,8 @@ import { cx } from "../../lib/cx";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./FormField.module.css";
 
-interface FormFieldContextValue {
+/** What `useFormField` returns: the wiring a field inside a FormField reads. */
+export interface FormFieldContextValue {
   id: string;
   /** The label's own id. `label htmlFor` names only what HTML can label -
       an input, a select, a button; a group (`role="radiogroup"`) is named

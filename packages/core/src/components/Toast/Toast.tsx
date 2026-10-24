@@ -71,7 +71,8 @@ export interface ToastItem extends ToastOptions {
   leaving?: Place;
 }
 
-interface ToastContextValue {
+/** What `useToast` returns: the functions that show, change and close toasts. */
+export interface ToastContextValue {
   /** Shows a toast and returns its id. */
   toast: (options: ToastOptions) => number;
   /** Changes a standing toast. A new tone or a new `duration` starts its time
