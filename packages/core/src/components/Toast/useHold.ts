@@ -1,12 +1,13 @@
 /* The hold: which toasts wait outside their live region while the toasts are
    held back, so that their text is an insertion, and heard, when it ends. */
 import { useEffect, useLayoutEffect, useState } from "react";
+import { isDialog } from "../../lib/portalTarget";
 import type { ToastItem } from "./Toast";
 
 /** Whether the region's target is drawn: in the document, and no dialog that
     closed (the region's move out of it follows in a microtask). */
 export function drawnTarget(target: Element): boolean {
-  return target.isConnected && !(target.nodeName === "DIALOG" && !(target as HTMLDialogElement).open);
+  return target.isConnected && !(isDialog(target) && !target.open);
 }
 
 /** Whether two animation frames have passed since `key` last changed: in the

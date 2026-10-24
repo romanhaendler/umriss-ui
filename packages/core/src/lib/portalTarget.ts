@@ -45,6 +45,10 @@ export function toastTargetFor(
   return dialog ?? configured() ?? document.body;
 }
 
+/** Whether a node is a `<dialog>`, told by its name and not by `instanceof`, so
+    that no render path needs the global `HTMLDialogElement`: a server has none. */
+export const isDialog = (node: Node | null | undefined): node is HTMLDialogElement => node?.nodeName === "DIALOG";
+
 /* Where `:modal` is not understood (jsdom, old browsers) "has `open`" stands
    in for it. The one use of the selector: the unit test environment throws on
    it. */
@@ -67,7 +71,7 @@ function isModal(dialog: HTMLDialogElement): boolean {
  */
 export function topLayerPopover(target: Element | null): "manual" | undefined {
   /* Nothing is read from the DOM for no target: on a server there is none. */
-  return target !== null && target instanceof HTMLDialogElement && "showPopover" in HTMLElement.prototype
+  return isDialog(target) && "showPopover" in HTMLElement.prototype
     ? "manual"
     : undefined;
 }
@@ -114,7 +118,7 @@ export function useTopmostModalDialog(): HTMLDialogElement | null {
     const observer = new MutationObserver((records) => {
       for (const record of records) {
         const node = record.target;
-        if (node instanceof HTMLDialogElement && isModal(node) && !order.includes(node)) order.push(node);
+        if (isDialog(node) && isModal(node) && !order.includes(node)) order.push(node);
       }
       /* A closed dialog is not drawn, and what stands inside it goes with it:
          the move has to land before the next frame, not in a task of its own. */

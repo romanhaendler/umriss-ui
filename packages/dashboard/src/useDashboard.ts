@@ -127,7 +127,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     };
 
     /* A view read against the declared types; before a dashboard has told which
-       they are, it stands as it is. */
+       they are, only the entries that are no widgets fall out. */
     const read = (view: DashboardView) => (own.types.size ? readView(view, own.types) : shapedView(view));
 
     const edit = () => {
@@ -140,8 +140,8 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       if (!draft) return;
       const current = draft.steps[draft.at]!;
       const changed = keep && !same(current, read(view));
-      /* The draft shows only the declared types; the stored widgets of any other type stay, after it. */
-      const written = { ...current, widgets: [...current.widgets, ...unreadWidgets(view, own.types)] };
+      /* The draft started from a reading of the stored view; the stored widgets that reading left out stay, after it. */
+      const written = { ...current, widgets: [...current.widgets, ...unreadWidgets(view, draft.steps[0]!)] };
       put({ ...own.state, view: changed ? written : view, draft: null, catalogue: false });
       latest.current.onDraftChange?.(false);
       const { wording } = latest.current;
