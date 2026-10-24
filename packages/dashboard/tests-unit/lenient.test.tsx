@@ -65,6 +65,7 @@ describe("a kept view read leniently", () => {
       widgets: [
         { id: "b", type: "figure", size: "small", options: { name: "Backlog" } },
         { id: "d", type: "figure", size: "wide", options: { name: "Late" } },
+        { id: "a", type: "gone", size: "small", options: {} },
       ],
     });
   });
