@@ -34,7 +34,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0018](0018-everything-is-english.md) | Everything is English | Code and default text are English | accepted — supersedes ADR-0015 | language |
 | [0019](0019-two-wordings-ship-english-is-the-default.md) | Two wordings ship, and English is the default | English and German wording both ship | accepted | language |
 | [0020](0020-the-demo-shell-is-shared.md) | The demo shell is shared by all three demos, and R-1.2 binds the package source | One shared shell for all demos | accepted | architecture |
-| [0021](0021-the-styles-load-themselves-and-touch-nothing-else.md) | The styles load themselves, and they touch nothing else | Stylesheets load themselves, no global effects | accepted | architecture |
+| [0021](0021-the-styles-load-themselves-and-touch-nothing-else.md) | The styles load themselves, and they touch nothing else | Stylesheets load themselves, no global effects | accepted, amended on 2026-10-24 (a build that lowers light-dark() gets light by default) | architecture |
 | [0022](0022-the-schedule-is-a-package-that-depends-on-core-and-charts.md) | The schedule is a package, and it depends on `@umriss-ui/core` and `@umriss-ui/charts` | Schedule package depends on core and charts | accepted | architecture |
 | [0023](0023-editing-is-controlled-the-schedule-reports-intents.md) | Editing is controlled: the schedule reports intents | Schedule reports edits, caller applies them | accepted | schedule |
 | [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | Default formats English, German formats shipped | accepted, extended by ADR-0061 (the CSV follows the language in use) | language |

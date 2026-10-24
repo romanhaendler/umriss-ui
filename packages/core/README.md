@@ -86,7 +86,16 @@ html.dark { color-scheme: dark; }
 ```
 
 An application that sets nothing stays light. A part of a page can be dark on
-its own (`<aside style="color-scheme: dark">`).
+its own (`.panel-dark { color-scheme: dark; }`).
+
+A mode set in CSS - an own rule, Bootstrap, DaisyUI - works in every build.
+Where a build lowers `light-dark()` (Vite 8 and Next 16 by default), a mode set
+only from JavaScript or through a variable - next-themes, MUI, Mantine, an
+inline `style` - stays light. Then write one rule such as
+`[data-theme="dark"] { color-scheme: dark; }`, or raise the CSS target to the
+browser floor: Vite `build: { cssTarget: ["chrome123", "firefox120", "safari17.5"] }`,
+Next a `browserslist` in `package.json`
+(`"chrome >= 123", "firefox >= 120", "safari >= 17.5"`).
 
 **Fonts are the application's.** The tokens name Geist first and end in the
 system fonts; nothing is loaded. Geist is recommended — `@fontsource/geist-sans`

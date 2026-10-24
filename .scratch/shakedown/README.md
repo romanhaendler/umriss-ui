@@ -6,11 +6,6 @@ coordinating session confirmed in the source. The hosts themselves were throwawa
 
 ## Order of work
 
-1. **Decide A1** (`core.md` A1, `cross-package.md` 1): a production build with Vite 8 or Next 16 renders every
-   package without colour, because Lightning CSS lowers `light-dark()` and `core.css` declares no
-   `color-scheme`. It hits nearly every new consumer. A decision (ADR-0021 says core touches nothing but
-   tokens): declare `color-scheme`, ship tokens that survive the lowering, or require a build setting - plus a
-   consumer smoke check (a fresh Vite 8 and Next app built from the tarball) so it cannot come back.
 2. **The confirmed defects with small fixes**, each from its red as the first test:
    - Modal/Drawer closes on a click inside a Popover, Menu or DatePicker (`core.md` A2)
    - `ToastProvider` throws under SSR (`core.md` A4)

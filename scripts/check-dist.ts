@@ -6,6 +6,10 @@
    - the stylesheet begins with the layer order,
    - and holds no rule outside the layers, no selector beyond the library's
      own elements,
+   - and a stylesheet with `light-dark()` survives Lightning CSS (the minifier
+     of Vite 8 and Next 16, whose default targets lack it): the lowered tokens
+     read only the switches `--lightningcss-light` and `--lightningcss-dark`,
+     and `:root` in the tokens layer declares them to resolve to light,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`).
 
@@ -15,6 +19,7 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { transform } from "lightningcss";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
 import { beginsWithLayerOrder, offendersIn } from "./styles/rules.ts";
 
@@ -43,6 +48,21 @@ if (!beginsWithLayerOrder(css)) {
   problems.push(`dist/${stylesheet} does not begin with the layer order`);
 }
 for (const offender of offendersIn(css)) problems.push(`dist/${stylesheet}: ${offender}`);
+
+/* The targets are Vite's default (chrome 107, edge 107, firefox 104, safari 16), as `major << 16`. */
+if (css.includes("light-dark(")) {
+  const lowered = transform({
+    filename: stylesheet,
+    code: Buffer.from(css),
+    targets: { chrome: 107 << 16, edge: 107 << 16, firefox: 104 << 16, safari: 16 << 16 },
+  }).code.toString();
+  const names = new Set([...lowered.matchAll(/--lightningcss-([\w-]+)/g)].map((match) => match[1]));
+  for (const name of names) if (name !== "light" && name !== "dark") problems.push(`dist/${stylesheet}: lowered, it reads --lightningcss-${name}, which nothing declares`);
+  const root = /@layer umriss\.tokens\s*\{\s*:root\s*\{([^}]*)\}/.exec(lowered)?.[1] ?? "";
+  if (!/--lightningcss-light:\s*initial\s*;/.test(root) || !/--lightningcss-dark:\s*;/.test(root)) {
+    problems.push(`dist/${stylesheet}: lowered for Lightning CSS, :root in @layer umriss.tokens does not declare --lightningcss-light: initial and --lightningcss-dark: (empty)`);
+  }
+}
 
 /* An import that uses nothing must cost next to nothing. */
 for (const file of entries) {
