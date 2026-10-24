@@ -1,6 +1,6 @@
-import { Children, isValidElement, useEffect, useMemo, useRef, useState } from "react";
+import { Children, isValidElement, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
-import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Text, useWording } from "@umriss-ui/core";
+import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Skeleton, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
@@ -255,7 +255,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
                 {menu}
               </div>
-              <div className={styles.body} inert={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Content render={type.children} size={widget.size} options={widget.options} /></Failed></div>
+              <div className={styles.body} inert={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></div>
             </Card>
           );
         })}

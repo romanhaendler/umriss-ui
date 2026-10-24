@@ -50,6 +50,16 @@ reaches the writer as a boolean, which maps it. `asCsv()` on a table without a
 provider returns the English text, because the hook already reads the two from
 context.
 
+## Text that would run
+
+A spreadsheet runs a field whose text begins with `=`, `+`, `-`, `@`, a tab or
+a carriage return as a formula, and a table shows what its users typed. The
+writer therefore puts an apostrophe before such text - a cell or a column
+label - before quoting. Numbers, booleans and dates are not text here and stay
+as they were, so `-3` is still a number. The cost is that such text no longer
+reads back exactly; the clipboard copy is not changed, because a paste is
+the user's own act and the apostrophe would show up in the cell.
+
 ## Consequences
 
 - An English application gets commas, a decimal point and yes/no: a change,
