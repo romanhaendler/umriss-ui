@@ -158,7 +158,7 @@ function DialogFrame({
       {/* Free space distributes itself in the golden ratio (38 : 62) above and
           below the surface: small modals sit in the upper third, long ones use
           the full height – above as well as below. */}
-      {spacers && <div ref={topRef} className={styles.spacerTop}aria-hidden="true" />}
+      {spacers && <div ref={topRef} className={styles.spacerTop} aria-hidden="true" />}
       <div className={sheetClassName}>
         {/* A dialog keeps a dialog's controls, whatever size the place it
             was opened from has (ADR-0041). */}
@@ -166,7 +166,7 @@ function DialogFrame({
           <ModalContext value={{ onClose, titleId }}>{children}</ModalContext>
         </SurfaceSizeReset>
       </div>
-      {spacers && <div ref={bottomRef} className={styles.spacerBottom}aria-hidden="true" />}
+      {spacers && <div ref={bottomRef} className={styles.spacerBottom} aria-hidden="true" />}
     </dialog>
   );
 }
