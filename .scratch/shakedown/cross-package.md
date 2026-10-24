@@ -64,7 +64,7 @@ are in `core.md`.
     function form. Documented for table (`llms-full.md:2824`), not for charts.
 12. **[Misfit] The d.ts needs TS 5.4+** (`NoInfer` in charts, table, dashboard), stated nowhere; TS 5.0 gives
     about 21 errors. Schedule and calculation are clean.
-13. **[Misfit] Charts' `wording/de` does not resolve under `node10`** (core B11 again; no `typesVersions`).
+13. ~~**[Misfit] Charts' `wording/de` does not resolve under `node10`**~~ (core B11 again; no `typesVersions`). **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 14. **[Leak, minor] Charts leave one `document` listener after 60 mount cycles** - constant, not growing.
 
 ## Weight (Vite, chrome123, gzipped)
