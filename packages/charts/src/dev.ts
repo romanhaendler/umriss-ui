@@ -1,21 +1,17 @@
-/* DEV detection, robust for Vite consumers, Node/SSR and tests.
-   In PROD builds the invariants are silent. */
+/* Development mode: `process.env.NODE_ENV` is not "production". The expression
+   is written literally so that a bundler replaces it (Vite does in a dev
+   server, webpack and Next in a build) and Node and Jest read it as it is. Where
+   neither happens there is no `process`, the read throws, and the answer is
+   production. In production the invariants are silent. */
 
-interface MetaEnv {
-  env?: { DEV?: boolean };
-}
-
-declare const process:
-  | { env?: Record<string, string | undefined> }
-  | undefined;
+declare const process: { env: Record<string, string | undefined> };
 
 function detectDev(): boolean {
-  const meta = import.meta as unknown as MetaEnv;
-  if (typeof meta.env?.DEV === "boolean") return meta.env.DEV;
-  if (typeof process !== "undefined" && process?.env) {
+  try {
     return process.env.NODE_ENV !== "production";
+  } catch {
+    return false;
   }
-  return false;
 }
 
 export const DEV: boolean = detectDev();
