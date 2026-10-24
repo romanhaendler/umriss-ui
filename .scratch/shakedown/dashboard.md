@@ -9,18 +9,18 @@ session.
 
 ## Findings
 
-1. **[Break] A suspending widget blanks the whole dashboard.** The `Failed` boundary around each widget
+1. ~~**[Break] A suspending widget blanks the whole dashboard.**~~ The `Failed` boundary around each widget
    catches throws only; there is no per-widget `<Suspense>` (none in the package). A widget with
    `React.lazy`, `use(fetch)` or a Suspense data library replaces every widget with the app's fallback,
-   or suspends the root.
-2. ✓ **[Break] A malformed stored view crashes the page.** `readView` (`model.ts:33`) calls
+   or suspends the root. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
+2. ✓ ~~**[Break] A malformed stored view crashes the page.**~~ `readView` (`model.ts:33`) calls
    `view.widgets.flatMap` unguarded: `{}`, `{widgets:null}`, `{widgets:"x"}`, `[]`, `5`, `{widgets:[null]}`
    and an older shape such as `{version:1,items:[…]}` all throw. A widget without `id` breaks moving. There
-   is no version field and no migration hook.
-3. ✓ **[Break] Done deletes widgets the app does not know right now, permanently.** `leave()` in
+   is no version field and no migration hook. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
+3. ✓ ~~**[Break] Done deletes widgets the app does not know right now, permanently.**~~ `leave()` in
    `useDashboard.ts` saves the draft, which started from `read(view)` with unknown types already dropped.
    One move and Done, and a widget behind a feature flag or a role, a plugin not loaded, or another user's
-   widget is gone from storage. Idea: keep unreadable widgets in the stored view, or report them.
+   widget is gone from storage. Idea: keep unreadable widgets in the stored view, or report them. **Fixed 2026-10-24** (spec `.scratch/shakedown-defects/`).
 4. **[Break] `onDraftChange(false)` never fires on unmount:** after a route change mid-edit the app's
    "unsaved" flag stays true; the draft itself is lost silently.
 5. **[Misfit] A throwing widget shows a fixed sentence**, with no retry and no `onError` for Sentry and the

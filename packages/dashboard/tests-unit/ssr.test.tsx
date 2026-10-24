@@ -23,7 +23,7 @@ describe("a dashboard on a server", () => {
   it("renders the frames with their title, content and place", () => {
     const html = renderToString(<Start />);
     expect(html).toContain("Orders small");
-    expect(html).toContain("--column:1");
+    expect(html).toContain("--_dashboard-column:1");
     expect(html).toContain('aria-label="Orders"');
   });
 
