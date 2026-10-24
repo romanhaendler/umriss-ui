@@ -41,6 +41,12 @@
   ],
   "main": "./dist/core.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "wording/de": ["dist/de.d.ts"],
+      "styles.css": ["dist/styles.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -50,7 +56,10 @@
       "types": "./dist/de.d.ts",
       "import": "./dist/wording/de.js"
     },
-    "./styles.css": "./dist/core.css"
+    "./styles.css": {
+      "types": "./dist/styles.d.ts",
+      "default": "./dist/core.css"
+    }
   },
   "scripts": {
     "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",

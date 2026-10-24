@@ -31,10 +31,10 @@ export interface FreshnessAges {
 }
 
 /** What may come in as an as-of time or a reference time. */
-type Instant = Date | number | null | undefined;
+export type FreshnessInstant = Date | number | null | undefined;
 
 /** Milliseconds since the epoch, or `null` where none can be made of it. */
-function asMilliseconds(instant: Instant): number | null {
+function asMilliseconds(instant: FreshnessInstant): number | null {
   if (instant === null || instant === undefined) return null;
   const ms = instant instanceof Date ? instant.getTime() : instant;
   return Number.isFinite(ms) ? ms : null;
@@ -56,7 +56,7 @@ const CADENCE_DIVISOR = 10;
  * `null` where there is no computable age: without an as-of time there is
  * none.
  */
-export function age(asOf: Instant, now: Instant): number | null {
+export function age(asOf: FreshnessInstant, now: FreshnessInstant): number | null {
   const asOfMs = asMilliseconds(asOf);
   const nowMs = asMilliseconds(now);
   if (asOfMs === null || nowMs === null) return null;
@@ -77,8 +77,8 @@ export function age(asOf: Instant, now: Instant): number | null {
  * is not touched by this function.
  */
 export function freshness(
-  asOf: Instant,
-  now: Instant,
+  asOf: FreshnessInstant,
+  now: FreshnessInstant,
   ages: FreshnessAges,
 ): Freshness {
   const since = age(asOf, now);
