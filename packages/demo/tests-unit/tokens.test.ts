@@ -18,6 +18,8 @@ const SHEET = `${LAYERS}
 @layer umriss.base { :root { --u-other-layer: 1px; } }
 @layer umriss.tokens {
   :root {
+    /* A build tool's switch, not a token. */
+    --lightningcss-light: initial;
     --u-loose: 2px;
 
     /* ---- Neutral: ink and paper ---- */
@@ -57,7 +59,7 @@ const groups = readTokens(SHEET);
 const token = (name: string) => groups.flatMap((group) => group.tokens).find((one) => one.name === name);
 
 describe("readTokens", () => {
-  it("reads only what is declared on :root inside the tokens layer", () => {
+  it("reads only the tokens (--u-) declared on :root inside the tokens layer", () => {
     const names = groups.flatMap((group) => group.tokens.map((one) => one.name));
     expect(names).toEqual(["--u-loose", "--u-color-bg", "--u-hairline", "--u-edge", "--u-ground", "--u-transition", "--u-shadow", "--u-z-popover"]);
   });

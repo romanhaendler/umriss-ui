@@ -105,7 +105,9 @@ export function readTokens(css: string, scope: TokenScope = { layer: "umriss.tok
       groups.push({ name: name!, note: body!.split(/\n\s*\n/).map(oneLine).filter((text) => text !== ""), tokens: [] });
       return;
     }
-    if (node.type !== "decl" || !node.prop.startsWith("--") || node.parent?.type !== "rule" || (node.parent as Rule).selector !== scope.selector) return;
+    /* A token is `--u-` (core) or `--uc-` (charts): a build tool's switch
+       declared beside them, such as Lightning CSS's, is no row of the table. */
+    if (node.type !== "decl" || !/^--uc?-/.test(node.prop) || node.parent?.type !== "rule" || (node.parent as Rule).selector !== scope.selector) return;
     const value = oneLine(node.value);
     const media = node.parent.parent;
     if (media?.type === "atrule" && (media as AtRule).name === "media") {
