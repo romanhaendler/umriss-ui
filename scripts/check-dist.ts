@@ -12,6 +12,8 @@
      and `:root` in the tokens layer declares them to resolve to light,
    - and the entry holds the development-mode expression while no shipped
      JavaScript file holds `import.meta`,
+   - and a strict consumer compiles against the declarations of every entry,
+     under `bundler` and `node10` resolution,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`).
 
@@ -19,8 +21,10 @@
    ../../scripts/check-dist.ts <entry.js> <stylesheet.css>` - the packages call
    it in `prepublishOnly`, after the build. */
 
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { transform } from "lightningcss";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
 import { beginsWithLayerOrder, offendersIn } from "./styles/rules.ts";
@@ -82,6 +86,48 @@ if (css.includes("light-dark(")) {
   if (!/--lightningcss-light:\s*initial\s*;/.test(root) || !/--lightningcss-dark:\s*;/.test(root)) {
     problems.push(`dist/${stylesheet}: lowered for Lightning CSS, :root in @layer umriss.tokens does not declare --lightningcss-light: initial and --lightningcss-dark: (empty)`);
   }
+}
+
+/* A strict consumer - the strictest settings a library's callers use, and
+   `declaration: true` as a wrapper library has it - imports every entry,
+   the stylesheet included, and re-exports what a hook returns. A type the
+   declarations leave unexported (TS4058), an optional property that rejects
+   `undefined`, or a subpath without a declaration shows here. `node10` finds
+   the subpaths only through `typesVersions`, and ignores `exports`. */
+const name = (JSON.parse(readFileSync("package.json", "utf8")) as { name: string }).name;
+const subpaths = Object.keys(manifest.exports).map((key) => name + key.slice(1));
+const CONSUMER_HOOKS: Record<string, string[]> = {
+  "@umriss-ui/core": ["export const toast = () => e0.useToast();", "export const field = () => e0.useFormField();"],
+};
+const consumerRoot = mkdtempSync(join(tmpdir(), "check-dist-"));
+try {
+  mkdirSync(join(consumerRoot, "node_modules", "@umriss-ui"), { recursive: true });
+  symlinkSync(resolve("."), join(consumerRoot, "node_modules", name));
+  symlinkSync(resolve("node_modules", "@types"), join(consumerRoot, "node_modules", "@types"));
+  symlinkSync(resolve("node_modules", "react"), join(consumerRoot, "node_modules", "react"));
+  const code = [
+    ...subpaths.map((path, index) => (path.endsWith(".css") ? `import "${path}";` : `import * as e${index} from "${path}";`)),
+    ...(CONSUMER_HOOKS[name] ?? []),
+    `export const entries = { ${subpaths.flatMap((path, index) => (path.endsWith(".css") ? [] : [`e${index}`])).join(", ")} };`,
+  ].join("\n");
+  writeFileSync(join(consumerRoot, "consumer.ts"), code);
+  for (const [moduleName, resolution] of [["ESNext", "bundler"], ["CommonJS", "node10"]]) {
+    writeFileSync(
+      join(consumerRoot, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: {
+          strict: true, exactOptionalPropertyTypes: true, skipLibCheck: false, declaration: true, noEmit: false, emitDeclarationOnly: true,
+          outDir: "out", noUncheckedSideEffectImports: true, module: moduleName, moduleResolution: resolution, target: "ES2022", jsx: "react-jsx",
+          lib: ["ES2022", "DOM", "DOM.Iterable"], types: [],
+        },
+        files: ["consumer.ts"],
+      }),
+    );
+    const compiled = spawnSync(process.execPath, [resolve("node_modules", "typescript", "bin", "tsc"), "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
+    if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
+  }
+} finally {
+  rmSync(consumerRoot, { recursive: true, force: true });
 }
 
 /* An import that uses nothing must cost next to nothing. */

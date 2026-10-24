@@ -37,12 +37,20 @@
   ],
   "main": "./dist/calculation.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "styles.css": ["dist/styles.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/calculation.js"
     },
-    "./styles.css": "./dist/calculation.css"
+    "./styles.css": {
+      "types": "./dist/styles.d.ts",
+      "default": "./dist/calculation.css"
+    }
   },
   "scripts": {
     "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
