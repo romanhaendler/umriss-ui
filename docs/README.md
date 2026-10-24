@@ -27,6 +27,7 @@ what a reader has — the filename is what they are looking for.
 | how dashboards that users arrange themselves are built elsewhere, what their users ask for, and what follows for a dashboard package | [`research/user-dashboards-2026-10/`](research/user-dashboards-2026-10/) (`report.md` is the synthesis, in German) |
 | how a coding agent reads a package's documentation | `llms.txt` beside each demo online, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once, or `docs/llms-full.md` inside the installed package — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
+| how the packed packages are put into real applications and customers' hands to find what the own checks cannot see, and who those customers are | [`agents/shakedown/`](agents/shakedown/) - the findings of the last run stand in [`../.scratch/shakedown/`](../.scratch/shakedown/) |
 | what a document used to be called | **What moved**, below |
 
 ## What moved, September 2026
