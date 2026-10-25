@@ -162,6 +162,8 @@ export class SceneKeys {
     const hover = this.host.gestures.hover;
     const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     if (direction === 0) return false;
+    /* A plan on its way is moved by nobody; the key stays the plot's. */
+    if (this.host.gestures.loading) return true;
     /* From here on the key is the plot's even where it proposes nothing:
        Alt+Left/Right is the browser's Back and Forward, and a planner at the
        end of a lane must not be taken off the page. */
