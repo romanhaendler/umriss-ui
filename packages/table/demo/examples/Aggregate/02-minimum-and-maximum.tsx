@@ -22,7 +22,7 @@ const INCIDENTS: Incident[] = [
 export default function MinimumAndMaximum() {
   const { Table, Column } = useTable(INCIDENTS, { rowKey: (i) => i.id });
   return (
-    <Table ariaLabel="Time to acknowledge">
+    <Table aria-label="Time to acknowledge">
       <Column value="id" label="Incident" rowHeader />
       <Column value="toAcknowledge" label="Minutes to acknowledge" aggregate="max" />
       <Column value="opened" label="Opened" format="dateTime" aggregate="min" />

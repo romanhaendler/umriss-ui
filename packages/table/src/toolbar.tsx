@@ -13,8 +13,9 @@
    the document even when empty: a screen reader announces changes only to a
    region it already knows. */
 
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { Button, ControlSizeProvider, useFormats, useWording } from "@umriss-ui/core";
+import type { RefProp } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
@@ -42,6 +43,7 @@ export function TableToolbar({
   children,
   own = false,
   size = "sm",
+  frame,
 }: {
   registry: Registry | null;
   className?: string;
@@ -53,6 +55,8 @@ export function TableToolbar({
   own?: boolean;
   /** The size of the controls in it (toolbarSize.ts). */
   size?: ToolbarSize;
+  /** The rest and the ref of a `Toolbar`, for its element. */
+  frame?: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>;
 }) {
   const wording = useWording();
   const formats = useFormats();
@@ -124,7 +128,7 @@ export function TableToolbar({
           select or a multiselect of one's own stands level with the search
           without a word (ADR-0041). */}
       <ControlSizeProvider size={size}>
-        <div className={cx(styles.toolbar, size === "md" && styles.toolbarMd, className)}>
+        <div {...frame} className={cx(styles.toolbar, size === "md" && styles.toolbarMd, className)}>
           <div className={styles.toolbarGroup}>
             {children}
             {conditions}

@@ -34,7 +34,7 @@ interface Props {
 function Loops({ rows = LOOPS, ...props }: Props) {
   const { Table, Column } = useTable(rows, { rowKey: (l) => l.id });
   return (
-    <Table grid ariaLabel="Loops" newRow={() => ({ mode: "Auto" })} {...props}>
+    <Table grid aria-label="Loops" newRow={() => ({ mode: "Auto" })} {...props}>
       <Column value="name" label="Loop" rowHeader />
       <Column
         value="setpoint"

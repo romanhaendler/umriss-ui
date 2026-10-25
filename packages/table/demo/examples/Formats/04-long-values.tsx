@@ -33,7 +33,7 @@ export default function LongValues() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Shipments with delivery instructions">
+    <Table aria-label="Shipments with delivery instructions">
       <Column value="id" label="Shipment" rowHeader width={120} />
       <Column value="customer" label="Customer" width={200} />
       <Column value="address" label="Address" width={200} />

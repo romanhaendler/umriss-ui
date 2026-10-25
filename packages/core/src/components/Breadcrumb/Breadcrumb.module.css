@@ -115,4 +115,17 @@
     visibility: hidden;
     pointer-events: none;
   }
+
+  /* Under a finger a link is hit 2 px taller above and below, the 24 px square of WCAG 2.5.8. */
+  @media (pointer: coarse) {
+    .link {
+      position: relative;
+    }
+
+    .link::after {
+      content: "";
+      position: absolute;
+      inset: -2px 0;
+    }
+  }
 }

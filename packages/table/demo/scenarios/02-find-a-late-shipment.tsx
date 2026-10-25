@@ -298,7 +298,7 @@ export default function FindALateShipment() {
         </Button>
       </Stack>
 
-      <Table selectable ariaLabel="Shipments">
+      <Table selectable aria-label="Shipments">
         <Toolbar>
           <span data-callout="2">
             <Search placeholder="Shipment or customer" />

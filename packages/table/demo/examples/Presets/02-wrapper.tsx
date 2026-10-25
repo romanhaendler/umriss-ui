@@ -35,7 +35,7 @@ export default function Wrapper() {
   const { Table, Column } = t;
 
   return (
-    <Table ariaLabel="Incidents">
+    <Table aria-label="Incidents">
       <Column value="id" label="Incident" rowHeader />
       <SeverityColumn of={t} />
     </Table>

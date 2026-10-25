@@ -61,7 +61,7 @@ function Units({
   capture(t);
   const { Table: Frame, Column, RowDetail } = t;
   return (
-    <Frame ariaLabel="Organisation" grid={grid}>
+    <Frame aria-label="Organisation" grid={grid}>
       {paged && <Pagination />}
       {menu && <ColumnMenu />}
       <Column value="name" label="Unit" rowHeader searchable />

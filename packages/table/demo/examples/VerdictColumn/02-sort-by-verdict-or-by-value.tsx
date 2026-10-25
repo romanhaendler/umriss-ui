@@ -35,7 +35,7 @@ function Tours({ sortBy }: { sortBy: "verdict" | "value" }) {
     defaultSort: { column: "load", direction: "desc" },
   });
   return (
-    <Table ariaLabel={sortBy === "verdict" ? "Tours by verdict" : "Tours by load"}>
+    <Table aria-label={sortBy === "verdict" ? "Tours by verdict" : "Tours by load"}>
       <Column value="tour" label="Tour" rowHeader />
       <VerdictColumn value="load" label="Load (%)" limits={LOAD} sortBy={sortBy} />
     </Table>

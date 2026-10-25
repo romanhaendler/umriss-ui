@@ -24,7 +24,7 @@ export default function TakeTheText() {
 
   return (
     <Stack gap={3}>
-      <Table ariaLabel="Shipments to export">
+      <Table aria-label="Shipments to export">
         <Toolbar>
           <Export onExport={setText} />
         </Toolbar>

@@ -27,7 +27,7 @@ import { ClockGlyph } from "../../lib/glyphs";
  * with "Apply", "Now" or "Clear", not already on the click on a day.
  */
 export interface DateTimePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The instant; `null` means none. */
   value: Date | null;
   /** Runs only on completion - "Apply", "Now" or "Clear" - and not already on
@@ -180,7 +180,7 @@ export function DateTimePicker(
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        ariaLabel={wording.dateTimePanel}
+        aria-label={wording.dateTimePanel}
         id={panelId}
         className={styles.panel}
       >

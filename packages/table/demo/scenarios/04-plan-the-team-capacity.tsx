@@ -146,7 +146,7 @@ export default function PlanTheTeamCapacity() {
       <div data-callout="2">
         <Table
           grid
-          ariaLabel="Booked hours per person and week"
+          aria-label="Booked hours per person and week"
           onCellEdit={({ rowKey, columnId, value, row }) => {
             setRows((all) => all.map((r) => (r.id === rowKey ? { ...r, [columnId]: value } : r)));
             setLast(`${row.name}, ${columnId === "capacity" ? "capacity" : `week of ${columnId.slice(4)} March`}: ${String(value)} h`);

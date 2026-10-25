@@ -88,7 +88,7 @@ export default function Overview() {
   const { Table, Column } = t;
   return (
     <Stack gap={3}>
-      <Table ariaLabel="Budget by cost centre" maxHeight="480px" stickyHeader>
+      <Table aria-label="Budget by cost centre" maxHeight="480px" stickyHeader>
         <Column value="centre" label="Cost centre" />
         <Column value="month" label="Month" rowHeader />
         <Column value="budget" label="Budget (€)" aggregate="sum" />
