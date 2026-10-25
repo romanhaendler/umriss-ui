@@ -287,12 +287,8 @@ export type Computed<Z, W> = ColumnBase &
     value. */
 export interface ColumnComponent<Z> {
   <W extends number | Absent>(
-    props: Computed<Z, W> & { footer: "sum" | "avg"; aggregate?: never; format?: NumberFormat; children?: Presentation<W, Z>; share?: boolean },
-  ): ReactNode;
-  <W extends number | Absent>(
     props: Computed<Z, W> & {
       aggregate: "sum" | "avg" | "min" | "max" | "count" | "distinct";
-      footer?: never;
       share?: boolean;
       format?: NumberFormat;
       children?: Presentation<W, Z>;
@@ -301,7 +297,6 @@ export interface ColumnComponent<Z> {
   <W extends Date | Absent>(
     props: Computed<Z, W> & {
       aggregate: "min" | "max" | "range" | "count" | "distinct";
-      footer?: never;
       format?: DateFormat;
       group?: DatePeriod;
       children?: Presentation<W, Z>;
@@ -311,7 +306,6 @@ export interface ColumnComponent<Z> {
     props: Computed<Z, W> & {
       group: DatePeriod;
       aggregate?: "min" | "max" | "range" | "count" | "distinct";
-      footer?: never;
       format?: DateFormat;
       children?: Presentation<W, Z>;
     },
@@ -324,14 +318,13 @@ export interface ColumnComponent<Z> {
   ): ReactNode;
   <W>(
     props: Computed<Z, W> & {
-      footer?: never;
       format?: never;
       aggregate?: AggregateFunction<W, Z>;
       children: Presentation<W, Z>;
     },
   ): ReactNode;
   <W extends Displayable | Absent>(
-    props: Computed<Z, W> & { footer?: never; format?: never; aggregate?: "count" | "distinct" | AggregateFunction<W, Z>; children?: never },
+    props: Computed<Z, W> & { format?: never; aggregate?: "count" | "distinct" | AggregateFunction<W, Z>; children?: never },
   ): ReactNode;
   <K extends Field<Z>>(props: FieldColumn<Z, K>): ReactNode;
 }

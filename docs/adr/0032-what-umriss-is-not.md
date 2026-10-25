@@ -97,3 +97,12 @@ is only "not yet" stands in each package's record and waits for a caller who nee
 - The capability record's "Out" (`packages/charts/docs/capabilities.md`) and the
   "Out of scope" sections of the specs keep their detail and point here; this
   file carries the reasons, they carry the case.
+
+## Amendment, 2026-10-25: the pivot's *Instead*
+
+"Declare their columns" means one computed `Column` per key, mapped from the
+data with `key` by that value, and the totals from `aggregate="sum"`: the
+footer gives each column's total, a row-total field column gives the grand
+total, a grouping gives subtotals. The Aggregate page shows it as "A matrix
+with row and column totals". The decision is unchanged: no pivot engine, no
+pivot mode, no column descriptors as data.
