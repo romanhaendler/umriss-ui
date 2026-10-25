@@ -13,3 +13,16 @@ export function isDev(): boolean {
     return false;
   }
 }
+
+const warned = new Set<string>();
+
+/** One development console warning per reason; silent in production. */
+export function warnOnce(reason: string, message: string): void {
+  if (!isDev() || warned.has(reason)) return;
+  warned.add(reason);
+  console.warn(`@umriss-ui/core: ${message}`);
+}
+
+/** The one wording of a renamed name that still works. */
+export const warnDeprecated = (old: string, replacement: string): void =>
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
