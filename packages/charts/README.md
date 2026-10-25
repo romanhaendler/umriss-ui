@@ -16,7 +16,7 @@ lint rule over `packages/charts/src/**` holds that fast.
 pnpm add @umriss-ui/charts
 ```
 
-React 19 or newer as a peer, and nothing else. `@umriss-ui/core` is **not** a
+React 19 or newer as a peer, and nothing else. TypeScript 5.4 or newer (the declarations use `NoInfer`). `@umriss-ui/core` is **not** a
 dependency and not a peer dependency — if an application uses both packages, it
 does so because it chose to, not because this one required it (ADR-0020).
 
