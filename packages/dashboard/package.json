@@ -43,7 +43,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/dashboard.js"
+      "import": "./dist/dashboard.js",
+      "default": "./dist/dashboard.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",

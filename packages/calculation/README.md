@@ -152,6 +152,12 @@ Each metric is worked on its own, and a calculation with metrics only adds and
 subtracts. Unit and places belong to the metric; a missing number is `null`
 and makes absent only its own metric.
 
+## Testing
+
+Tested under Vitest 5 and Jest 30 on jsdom. The runner lines and the setup file are in
+[`@umriss-ui/core`'s Testing section](../core/README.md#testing); `check:dist` runs a test of the
+installed calculation (an input changed, the result read) with exactly those files.
+
 ## Documentation
 
 The demo is the documentation; in a checkout, `pnpm dev:calculation` (port 4177)

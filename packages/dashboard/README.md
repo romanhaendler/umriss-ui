@@ -84,6 +84,12 @@ const { Dashboard, WidgetType } = useDashboard({
   which default a role gets, several dashboards, sharing, and what stands in a
   widget.
 
+## Testing
+
+Tested under Vitest 5 and Jest 30 on jsdom. The runner lines and the setup file are in
+[`@umriss-ui/core`'s Testing section](../core/README.md#testing); `check:dist` runs a test of the
+installed dashboard (a widget and its title) with exactly those files.
+
 ## Documentation
 
 The demo is the documentation; in a checkout, `pnpm dev:dashboard` (port 4178)

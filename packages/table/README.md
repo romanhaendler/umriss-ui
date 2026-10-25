@@ -184,6 +184,12 @@ stylesheets by hand.
   language all five packages share.
 * [`../core/README.md`](../core/README.md) — the component library underneath.
 
+## Testing
+
+Tested under Vitest 5 and Jest 30 on jsdom. The runner lines and the setup file are in
+[`@umriss-ui/core`'s Testing section](../core/README.md#testing); `check:dist` runs a test of the
+installed table (a column sorted) with exactly those files.
+
 ## Licence
 
 MIT — see [`LICENSE`](LICENSE).
