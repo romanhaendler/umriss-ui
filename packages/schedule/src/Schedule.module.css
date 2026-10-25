@@ -184,6 +184,29 @@
     transform: rotate(90deg);
   }
 
+  /* Under a finger no target is smaller than 24 x 24 px (WCAG 2.5.8): the
+     16 px chevron is hit in a square of 24, by an invisible pad that lies on
+     the header's own padding. */
+  @media (pointer: coarse) {
+    .chevron {
+      position: relative;
+    }
+
+    .chevron::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+
+    /* An open group's head is 24 px with its hairline, so the pad would be cut
+       at the hairline: the head clips with a margin of its own, and its label
+       still cuts by its own ellipsis. */
+    .header[data-row="groupHead"] {
+      overflow: clip;
+      overflow-clip-margin: 2px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .chevron svg {
       transition: none;

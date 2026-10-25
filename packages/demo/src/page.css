@@ -1226,3 +1226,11 @@ ul.apiProse {
 .page li code {
   overflow-wrap: anywhere;
 }
+
+/* The examples' own buttons are targets too: 24 px under a finger. */
+@media (pointer: coarse) {
+  button.demo-button {
+    min-width: 24px;
+    min-height: 24px;
+  }
+}
