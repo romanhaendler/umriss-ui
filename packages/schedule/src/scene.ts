@@ -629,6 +629,42 @@ export class ScheduleScene {
     return { x: rect.left + xOf(viewport, time), y: rect.top + y };
   }
 
+  /** Whether a lane has a row of its own on a mounted plot: not unknown, not
+      in a folded group, whose lanes are strips and no rows. */
+  private hasRow(lane: string): boolean {
+    const slot = this.plot === null ? undefined : this.view.rows.slots.get(lane);
+    return slot !== undefined && !slot.miniature;
+  }
+
+  /** Scrolls the lanes until the lane's row is in view; false, and nothing
+      moved, for a lane without a row. */
+  scrollToLane(lane: string): boolean {
+    if (!this.hasRow(lane)) return false;
+    const slot = this.view.rows.slots.get(lane)!;
+    const top = slot.top - this.view.scrollY;
+    const dy = top < 0 ? top : top + slot.height > this.view.height ? Math.min(top + slot.height - this.view.height, top) : 0;
+    const panned = this.view.pan(0, dy);
+    if (panned.moved) this.viewMoved(false);
+    return true;
+  }
+
+  /** Brings a subtask's lane and time into view, the span keeping its width;
+      false, and nothing moved, for one without a row. */
+  scrollToSubtask(id: string): boolean {
+    const subtask = this.data.subtaskById.get(id);
+    if (subtask === undefined || !this.hasRow(subtask.lane)) return false;
+    this.keys.reveal({ kind: "subtask", id });
+    return true;
+  }
+
+  /** `scrollToSubtask`, then the subtask is the active one and the plot has the focus. */
+  focusSubtask(id: string): boolean {
+    if (!this.scrollToSubtask(id)) return false;
+    this.plot!.focus();
+    this.keys.show({ kind: "subtask", id });
+    return true;
+  }
+
   private requestDraw(): void {
     if (this.frame !== 0 || this.dataCanvas === null || typeof requestAnimationFrame !== "function") return;
     this.frame = requestAnimationFrame(() => {

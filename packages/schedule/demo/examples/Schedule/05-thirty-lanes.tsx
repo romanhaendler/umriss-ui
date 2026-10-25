@@ -22,7 +22,7 @@ const STEPS: Subtask[] = STATIONS.map((station, index) => ({
 export default function ThirtyLanes() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(5), at(14)] } });
   return (
-    <Schedule ariaLabel="Round of thirty stations">
+    <Schedule aria-label="Round of thirty stations">
       {STATIONS.map((station) => (
         <Lane key={station.id} id={station.id} label={station.label} />
       ))}

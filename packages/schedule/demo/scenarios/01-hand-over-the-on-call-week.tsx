@@ -133,7 +133,7 @@ export default function HandOver() {
       </Stack>
       <div data-callout="2">
         <Schedule
-          ariaLabel="On-call rota, 16 to 23 March"
+          aria-label="On-call rota, 16 to 23 March"
           height={420}
           now={NOW}
           intents={["lane"]}

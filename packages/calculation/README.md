@@ -59,6 +59,8 @@ import { Calculation, Difference, Given, Product, Ref, Sum } from "@umriss-ui/ca
 </Calculation>
 ```
 
+`Calculation` is a composite: `ref`, `className`, `style`, `id` and `data-*` reach its surface; `aria-label`, `aria-labelledby` and `aria-describedby` reach the list inside it.
+
 A **chain** suits a sheet read top to bottom (ADR-0028). A first quantity,
 then `Plus`, `Minus`, `Times` or `DividedBy`, each working its operand into the
 value before it, strictly in order, and `Interim`s naming the value where they

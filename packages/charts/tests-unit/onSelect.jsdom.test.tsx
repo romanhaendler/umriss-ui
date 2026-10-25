@@ -27,7 +27,7 @@ afterEach(() => {
 function Course({ onSelect, tooltip = true, zoomable = false }: { onSelect?: (hit: TooltipHit) => void; tooltip?: boolean; zoomable?: boolean }) {
   const { Chart, XAxis, YAxis, Line } = useChart(ROWS, { onSelect });
   return (
-    <Chart ariaLabel="One course">
+    <Chart aria-label="One course">
       <XAxis value="t" zoomable={zoomable} />
       <YAxis />
       <Line value="a" name="A" />

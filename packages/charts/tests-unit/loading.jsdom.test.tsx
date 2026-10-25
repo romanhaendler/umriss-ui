@@ -36,7 +36,7 @@ function Loading({ data, extra }: { data: Row[]; extra: Extra }) {
   const { Chart, XAxis, YAxis, Line, Bar } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["A", "B"] } : undefined });
   const Series = extra.bars === true ? Bar : Line;
   return (
-    <Chart ariaLabel="Loading" loading={extra.loading} empty={extra.empty}>
+    <Chart aria-label="Loading" loading={extra.loading} empty={extra.empty}>
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
       <YAxis />
       <Series value="a" name="A" />

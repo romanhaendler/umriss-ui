@@ -21,7 +21,7 @@ const SIGN_INS = [
 export default function FirstChart() {
   const { Chart, XAxis, YAxis, Line } = useChart(SIGN_INS);
   return (
-    <Chart height={240} ariaLabel="Sign-ins per hour today">
+    <Chart height={240} aria-label="Sign-ins per hour today">
       <XAxis value="t" time />
       <YAxis label="Sign-ins per hour" />
       <Line value="signIns" name="Sign-ins" />

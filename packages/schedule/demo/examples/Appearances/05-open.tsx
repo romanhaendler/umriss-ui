@@ -21,7 +21,7 @@ const WORK: Subtask[] = [
 export default function Open() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
-    <Schedule ariaLabel="Work running past the view at either edge" height={188}>
+    <Schedule aria-label="Work running past the view at either edge" height={188}>
       <Lane id="runs-on" label="Runs on" />
       <Lane id="whole" label="Wholly in view" />
       <Lane id="began" label="Began before" />

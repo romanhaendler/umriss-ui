@@ -45,7 +45,7 @@ const ticks = (host: HTMLElement) => [...host.querySelectorAll(".uc-axis-x .uc-t
 function Bars({ rows = SPEND }: { rows?: readonly Spend[] }) {
   const { Chart, XAxis, YAxis, Bar } = useChart(rows);
   return (
-    <Chart ariaLabel="Spend per cost centre">
+    <Chart aria-label="Spend per cost centre">
       <XAxis value="centre" />
       <YAxis />
       <Bar value="actual" name="Actual" />
@@ -109,7 +109,7 @@ const BUDGET = [
 function TwoSources({ seen, hidden }: { seen?: (hit: TooltipHit) => void; hidden?: readonly string[] }) {
   const { Chart, XAxis, YAxis, Bar, Line } = useChart(SPEND, { initialView: { hidden } });
   return (
-    <Chart ariaLabel="Spend and budget per cost centre">
+    <Chart aria-label="Spend and budget per cost centre">
       <XAxis value="centre" />
       <YAxis />
       <Bar value="actual" name="Actual" />
@@ -164,7 +164,7 @@ describe("Bars on a category axis", () => {
   function Grouped({ stack }: { stack?: string }) {
     const { Chart, XAxis, YAxis, Bar } = useChart(SPEND);
     return (
-      <Chart ariaLabel="Budget and actual per cost centre">
+      <Chart aria-label="Budget and actual per cost centre">
         <XAxis value="centre" />
         <YAxis />
         <Bar value="budget" name="Budget" stack={stack} />
@@ -197,7 +197,7 @@ describe("What DEV says about a category axis", () => {
     function Twice() {
       const { Chart, XAxis, YAxis, Bar } = useChart([SPEND[0]!, SPEND[1]!, SPEND[0]!]);
       return (
-        <Chart ariaLabel="Twice">
+        <Chart aria-label="Twice">
           <XAxis value="centre" />
           <YAxis />
           <Bar value="actual" name="Twice over" />
@@ -213,7 +213,7 @@ describe("What DEV says about a category axis", () => {
     function Mixed() {
       const { Chart, XAxis, YAxis, Bar, Line } = useChart(SPEND);
       return (
-        <Chart ariaLabel="Mixed">
+        <Chart aria-label="Mixed">
           <XAxis<{ centre: string | number | null }> value="centre" />
           <YAxis />
           <Bar value="actual" name="By name" />
@@ -235,7 +235,7 @@ describe("What DEV says about a category axis", () => {
     function MixedTheOtherWay() {
       const { Chart, XAxis, YAxis, Line } = useChart([{ at: 1, v: 5 }]);
       return (
-        <Chart ariaLabel="Mixed">
+        <Chart aria-label="Mixed">
           <XAxis<{ at: string | number }> value="at" />
           <YAxis />
           <Line value="v" name="At a number" />
@@ -252,7 +252,7 @@ describe("What DEV says about a category axis", () => {
     function Formatted() {
       const { Chart, XAxis, YAxis, Bar } = useChart(SPEND);
       return (
-        <Chart ariaLabel="Formatted">
+        <Chart aria-label="Formatted">
           <XAxis id="named" value="centre" tickFormat={(v) => `#${v}`} />
           <YAxis />
           <Bar value="actual" name="Actual" xAxisId="named" />
@@ -274,7 +274,7 @@ describe("Zoom on a category axis", () => {
     function Zoomable() {
       const { Chart, XAxis, YAxis, Bar } = useChart(SHIFTS, { onViewChange: (view) => views.push(view) });
       return (
-        <Chart ariaLabel="Zoomable">
+        <Chart aria-label="Zoomable">
           <XAxis value="shift" zoomable />
           <YAxis />
           <Bar value="pieces" name="Pieces" />
@@ -308,7 +308,7 @@ const LATE = [
 function Week({ rows = LATE, name = "Late" }: { rows?: readonly { day: string | number; minutes: number }[]; name?: string }) {
   const { Chart, XAxis, YAxis, Bar } = useChart(rows);
   return (
-    <Chart ariaLabel="Minutes late per working day" empty="Nothing yet">
+    <Chart aria-label="Minutes late per working day" empty="Nothing yet">
       <XAxis value="day" categories={WEEK} />
       <YAxis />
       <Bar value="minutes" name={name} />
@@ -359,7 +359,7 @@ describe("An axis whose list of categories is empty", () => {
     function Empty() {
       const { Chart, XAxis, YAxis, Bar } = useChart(LATE);
       return (
-        <Chart ariaLabel="Nothing listed" empty="Nothing yet">
+        <Chart aria-label="Nothing listed" empty="Nothing yet">
           <XAxis id="unlisted" value="day" categories={[]} />
           <YAxis />
           <Bar value="minutes" name="Nowhere" xAxisId="unlisted" />
@@ -380,7 +380,7 @@ describe("Other kinds on a category axis", () => {
         { year: 2026, pieces: 6 },
       ]);
       return (
-        <Chart ariaLabel="Pieces per year">
+        <Chart aria-label="Pieces per year">
           <XAxis value={(d) => String(d.year)} />
           <YAxis />
           <Bar value="pieces" name="Pieces" />
@@ -397,7 +397,7 @@ describe("Other kinds on a category axis", () => {
         { service: "Billing", low: 85, q1: 121, median: 140, q3: 173, high: 238 },
       ]);
       return (
-        <Chart ariaLabel="Response time per service">
+        <Chart aria-label="Response time per service">
           <XAxis value="service" />
           <YAxis />
           <BoxPlot name="Response time" median="median" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="low" upperWhisker="high" />
@@ -426,7 +426,7 @@ describe("Other kinds on a category axis", () => {
     function Causes() {
       const { Chart, XAxis, YAxis, Bar } = useChart(entries);
       return (
-        <Chart ariaLabel="Failed deliveries by cause">
+        <Chart aria-label="Failed deliveries by cause">
           <XAxis value="name" />
           <YAxis />
           <Bar value="value" name="Failed" />
@@ -445,7 +445,7 @@ describe("A category's label", () => {
       { id: "CC-9100", actual: 12 },
     ]);
     return (
-      <Chart ariaLabel="Spend per cost centre">
+      <Chart aria-label="Spend per cost centre">
         <XAxis value="id" categoryLabel={(id) => CENTRES[id] ?? id} />
         <YAxis />
         <Bar value="actual" name="Actual" />

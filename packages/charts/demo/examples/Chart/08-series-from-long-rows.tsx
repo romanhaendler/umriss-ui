@@ -35,7 +35,7 @@ const BY_SERVICE = [...new Set(ERRORS.map((row) => row.service))].map((service) 
 export default function SeriesFromLongRows() {
   const { Chart, XAxis, YAxis, Line } = useChart(ERRORS);
   return (
-    <Chart height={260} ariaLabel="Failed requests per service and hour this morning">
+    <Chart height={260} aria-label="Failed requests per service and hour this morning">
       <XAxis value="t" time />
       <YAxis label="Errors %" />
       {BY_SERVICE.map(({ service, rows }) => (

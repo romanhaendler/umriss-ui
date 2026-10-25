@@ -81,7 +81,7 @@ const monthName = (month: string) => MONTH_NAMES[Number(month.slice(5)) - 1] ?? 
 function Forecasts({ encoding }: { encoding?: "marks" }) {
   const { Chart, XAxis, YAxis, Line } = useChart(LEDGER);
   return (
-    <Chart height={240} ariaLabel="Forecast of four cost centres per month" encoding={encoding}>
+    <Chart height={240} aria-label="Forecast of four cost centres per month" encoding={encoding}>
       <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="€" />
       {CENTRES.map((c) => (

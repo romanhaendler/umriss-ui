@@ -17,7 +17,7 @@ export default function SnapToTheTicks() {
   const [tours, setTours] = useState(START);
   return (
     <Schedule
-      ariaLabel="A tour on the default raster"
+      aria-label="A tour on the default raster"
       height={100}
       intents={["move"]}
       onIntent={(intent) => setTours((current) => current.map((tour) => applyIntent(tour, intent)))}

@@ -60,6 +60,16 @@ for (const scenarioId of SCENARIO_IDS) {
   });
 }
 
+/* "Trace a batch" with a batch chosen: the table's mark, the plan's selection and the trend's band. */
+test("Scenario trace-a-batch with a current batch", async ({ page }, testInfo) => {
+  await openScenario(page, "trace-a-batch");
+  const target = await aloneStage(page, "trace-a-batch");
+  await target.getByRole("button", { name: "B-4123" }).click();
+  await expect(target.getByRole("row", { name: /B-4123/ })).toHaveAttribute("aria-current", "true");
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`scenario-trace-a-batch-chosen-${testInfo.project.name}.png`);
+});
+
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);

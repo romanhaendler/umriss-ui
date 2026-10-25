@@ -114,7 +114,7 @@ export default function TeamLeave() {
   const clashes = findings(WORK, [], BLOCKED).inBlockedTime;
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Sprint 14 with the team's leave" height={500}>
+      <Schedule aria-label="Sprint 14 with the team's leave" height={500}>
         {PEOPLE.map((person) => (
           <Lane key={person.id} id={person.id} label={person.name} />
         ))}

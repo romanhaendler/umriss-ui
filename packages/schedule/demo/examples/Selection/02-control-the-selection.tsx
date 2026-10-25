@@ -51,7 +51,7 @@ export default function ControlTheSelection() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Legs at North depot on Tuesday, 17 March"
+        aria-label="Legs at North depot on Tuesday, 17 March"
         height={284}
         selectedTask={selected}
         onSelectedTaskChange={(task, subtask) => {

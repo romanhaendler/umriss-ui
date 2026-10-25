@@ -147,7 +147,7 @@ const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
 export default function ControlChartExample() {
   const { Chart, XAxis, YAxis } = useChart(SAMPLES);
   return (
-    <Chart height={300} ariaLabel="Control chart of the tile length after firing">
+    <Chart height={300} aria-label="Control chart of the tile length after firing">
       <XAxis value="minute" label="Minute of the shift" />
       <YAxis label="mm" />
       {/* Specification limits are chosen, control limits are computed. */}

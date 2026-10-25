@@ -151,7 +151,7 @@ export default function ReplanTheDay() {
       </div>
       <div data-callout="2">
         <Schedule
-          ariaLabel="Plan of Tuesday, 17 March, in the planner's hands"
+          aria-label="Plan of Tuesday, 17 March, in the planner's hands"
           height={380}
           intents={["move", "lane", "stretch", "leadIn", "leadOut"]}
           onIntent={apply}
@@ -170,7 +170,7 @@ export default function ReplanTheDay() {
         onOpenChange={(open) => {
           if (!open) setMenu(null);
         }}
-        ariaLabel={target !== null ? `Actions for ${target.id}` : "Actions for the plan"}
+        aria-label={target !== null ? `Actions for ${target.id}` : "Actions for the plan"}
       >
         {target !== null ? (
           <>

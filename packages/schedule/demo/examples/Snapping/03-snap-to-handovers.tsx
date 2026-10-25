@@ -21,7 +21,7 @@ export default function SnapToHandovers() {
   const [watches, setWatches] = useState(START);
   return (
     <Schedule
-      ariaLabel="An on-call watch on the handover raster"
+      aria-label="An on-call watch on the handover raster"
       height={110}
       snap={HANDOVERS}
       intents={["move"]}

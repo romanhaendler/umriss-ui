@@ -32,7 +32,7 @@ function Variant({ ends }: { ends: DependencyEnds }) {
       <Text size="xs" tone="muted" mono>
         ends=&quot;{ends}&quot;
       </Text>
-      <Schedule ariaLabel={`Design, build and test, ends ${ends}`} height={188} attach="nearest" ends={ends}>
+      <Schedule aria-label={`Design, build and test, ends ${ends}`} height={188} attach="nearest" ends={ends}>
         <Lane id="noah" label="Noah Fischer" />
         <Lane id="arjun" label="Arjun Mehta" />
         <Lane id="eva" label="Eva Novak" />

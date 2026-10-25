@@ -48,7 +48,7 @@ export default function StackedAreas() {
   const { Chart, XAxis, YAxis, Area } = useChart(PARCELS_PER_HOUR);
 
   return (
-    <Chart height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
+    <Chart height={280} aria-label="Parcels loaded per hour at three depots, stacked">
       <XAxis value="t" time domain="data" />
       <YAxis label="Parcels per hour" />
       <Area value="north" name="North" stack="depots" fillOpacity={0.5} strokeWidth={1} />

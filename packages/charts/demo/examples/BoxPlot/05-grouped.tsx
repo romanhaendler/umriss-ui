@@ -29,7 +29,7 @@ const AFTER: Spread[] = [
 export default function Grouped() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(BEFORE);
   return (
-    <Chart height={280} ariaLabel="Response time per service before and after the release">
+    <Chart height={280} aria-label="Response time per service before and after the release">
       <XAxis value="service" />
       <YAxis tickFormat={(v) => `${v} ms`} />
       {[

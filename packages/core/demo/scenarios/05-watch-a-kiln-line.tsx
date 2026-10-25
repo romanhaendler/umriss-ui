@@ -631,7 +631,7 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-trend" title="Kiln trend" callout="3">
-        <kilnTrend.Chart height={240} ariaLabel="Kiln K1, zone 3, over the shift">
+        <kilnTrend.Chart height={240} aria-label="Kiln K1, zone 3, over the shift">
           <kilnTrend.XAxis value="t" domain={[at(0), at(LAST)]} time />
           <kilnTrend.YAxis domain={[1170, 1250]} label="°C" />
           <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
@@ -683,7 +683,7 @@ export default function ControlRoom() {
         }
       >
         <Schedule
-          ariaLabel="Plan of the early shift: press, dryer and kiln"
+          aria-label="Plan of the early shift: press, dryer and kiln"
           height={196}
           now={now}
           selectedTask={batch}
@@ -699,7 +699,7 @@ export default function ControlRoom() {
 
       <Grid columns={2} gap={4}>
         <Region id="room-quality" title="Tile length">
-          <tileLength.Chart ariaLabel="Tile length after firing, individuals chart">
+          <tileLength.Chart aria-label="Tile length after firing, individuals chart">
             <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
             <tileLength.YAxis domain={[597, 602]} label="mm" />
             <LimitLine value={601.5} severity="alarm" label="USL" />

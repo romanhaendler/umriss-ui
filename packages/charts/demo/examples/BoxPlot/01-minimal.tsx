@@ -22,7 +22,7 @@ const RESPONSE_TIMES: ResponseTime[] = [
 export default function Minimal() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(RESPONSE_TIMES);
   return (
-    <Chart height={260} ariaLabel="Response time per service over the last hour">
+    <Chart height={260} aria-label="Response time per service over the last hour">
       <XAxis value="service" />
       <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot

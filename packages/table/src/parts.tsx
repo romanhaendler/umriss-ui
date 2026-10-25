@@ -9,7 +9,7 @@
    left standing on screen) can no longer be written that way. */
 
 import { useContext, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "./cx";
 import { DEV, warnDeprecated, warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
@@ -27,6 +27,12 @@ const OWN = [
   "selectable", "stickyHeader", "stickyRowHeader", "striped", "density", "maxHeight", "empty", "loading",
   "rowProps", "groupable", "grid", "onCellEdit", "editMode", "onRowSave", "onRowAdd", "newRow", "onRowDelete", "currentRow", "onCurrentRowChange",
 ] as const satisfies readonly (keyof TableProps<unknown>)[];
+
+/* A prop that is neither listed above nor a div attribute, the ref, the
+   children or a name taken out in `Table` would reach the frame's <div>; the
+   compiler refuses it here. */
+type Unlisted = Exclude<keyof TableProps<unknown>, keyof HTMLAttributes<HTMLDivElement> | "ref" | "children" | "ariaLabel" | (typeof OWN)[number]>;
+true satisfies [Unlisted] extends [never] ? true : Unlisted;
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
    stricter; here only what is there counts. */

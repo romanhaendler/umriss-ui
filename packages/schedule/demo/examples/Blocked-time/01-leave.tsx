@@ -52,7 +52,7 @@ export default function Leave() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Team plan, week of 16 March" height={240}>
+      <Schedule aria-label="Team plan, week of 16 March" height={240}>
         {PEOPLE.map((person) => (
           <Lane key={person.id} id={person.id} label={person.label} />
         ))}

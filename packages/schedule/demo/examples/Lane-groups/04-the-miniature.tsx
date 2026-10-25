@@ -50,7 +50,7 @@ export default function TheMiniature() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="A depot that folds into one row"
+        aria-label="A depot that folds into one row"
         height={240}
         intents={["move", "lane"]}
         onIntent={(intent) => {

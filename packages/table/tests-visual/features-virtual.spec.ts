@@ -75,6 +75,19 @@ test("the way back leads to the beginning again", async ({ page }) => {
   await expect(example(page)).toContainText("REQ-00001");
 });
 
+/* ---------------- From outside ---------------- */
+
+test("scrollToRow brings a row of ten thousand into view", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "virtualisation", "scroll-to-a-row");
+  const tags = page.locator('[data-example="scroll-to-a-row"]');
+  await tags.getByRole("button", { name: "Show TAG-07500" }).click();
+  const target = tags.getByRole("rowheader", { name: "TAG-07500" });
+  await expect(target).toBeVisible();
+  const [row, area] = await Promise.all([target.boundingBox(), tags.locator("table").locator("..").boundingBox()]);
+  expect(row!.y).toBeGreaterThanOrEqual(area!.y);
+  expect(row!.y + row!.height).toBeLessThanOrEqual(area!.y + area!.height + 1);
+});
+
 /* ---------------- Header and row header stick ---------------- */
 
 test("the header stays put while scrolling", async ({ page }) => {
@@ -240,4 +253,18 @@ test.describe("in a pane of fixed height", () => {
       expect(rendered).toBeLessThan(60);
     });
   }
+});
+
+/* ---------------- Another view chooses a row ---------------- */
+
+test("a current row set from outside is rendered, in view and marked", async ({ page }) => {
+  await openExample(page, "virtualisation", "another-view-chooses");
+  const demo = page.locator('[data-example="another-view-chooses"]');
+  await demo.getByRole("button", { name: "Choose parcel 1,500" }).click();
+  const current = demo.locator("tr[aria-current='true']");
+  await expect(current).toHaveText(/P-1500/);
+  const area = (await demo.locator("table").locator("..").boundingBox())!;
+  const box = (await current.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(area.y);
+  expect(box.y + box.height).toBeLessThanOrEqual(area.y + area.height + 1);
 });

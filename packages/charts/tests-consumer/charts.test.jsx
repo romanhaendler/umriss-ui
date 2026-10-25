@@ -16,7 +16,7 @@ const ROWS = [
 function Course() {
   const { Chart, XAxis, YAxis, Line } = useChart(ROWS);
   return (
-    <Chart height={280} ariaLabel="Course">
+    <Chart height={280} aria-label="Course">
       <XAxis value="t" label="Index" />
       <YAxis />
       <Line value="a" name="Series A" />

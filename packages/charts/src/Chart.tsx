@@ -10,10 +10,11 @@
        <Legend/>   optional, placed above or below the plot area through CSS order
 
    Canvas access happens exclusively inside effects (SSR-safe).
-   Accessibility baseline: role="img" + aria-label on the container,
+   Accessibility baseline: role="img" + aria-label on the plot,
    canvas elements aria-hidden. */
 
 import {
+  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -21,8 +22,10 @@ import {
   useRef,
   useSyncExternalStore,
   type CSSProperties,
+  type HTMLAttributes,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type Ref,
   type RefObject,
 } from "react";
 import { ChartContext } from "./context";
@@ -30,14 +33,17 @@ import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
 import { useSilhouette } from "./Silhouette";
 import { TooltipHtml } from "./TooltipHtml";
-import { warnOnce } from "./dev";
+import { warnDeprecated, warnOnce } from "./dev";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
 
 /** The props of `Chart`. Its rows are not among them: `useChart(rows)` binds
     them (ADR-0048). */
-export interface ChartProps {
+export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+  /** The root element, the `<div>` that `className`, `style`, `id` and the
+      `data-*` attributes reach. */
+  ref?: Ref<HTMLDivElement>;
   /** Width in CSS pixels, or `"100%"` for the host's: the chart measures its
       host and follows it through a ResizeObserver.
       @default "100%" */
@@ -51,7 +57,9 @@ export interface ChartProps {
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
-  /** Required in DEV through a warning. */
+  /** Accessible name of the plot. Without a name, `aria-label` or
+      `aria-labelledby`, the chart warns in development.
+      @deprecated since 0.43 - use `aria-label`. */
   ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
@@ -112,6 +120,10 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     height,
     padding = 8,
     ariaLabel,
+    "aria-label": label = ariaLabel,
+    "aria-labelledby": labelledBy,
+    "aria-describedby": describedBy,
+    ref,
     className,
     style,
     onPerf,
@@ -121,12 +133,22 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     wording: wordingProp,
     encoding = "color",
     children,
+    ...rest
   } = props;
 
   const wording = useMemo<ChartsWording>(() => ({ ...DEFAULT_CHARTS_WORDING, ...wordingProp }), [wordingProp]);
   const empty = emptyProp ?? wording.empty;
 
   const rootRef = useRef<HTMLDivElement | null>(null);
+  /* The chart's effects and the caller's ref bind the same root. */
+  const setRoot = useCallback(
+    (element: HTMLDivElement | null): void => {
+      rootRef.current = element;
+      if (typeof ref === "function") ref(element);
+      else if (ref) ref.current = element;
+    },
+    [ref],
+  );
   const plotRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLCanvasElement | null>(null);
@@ -150,10 +172,11 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     [padTop, padRight, padBottom, padLeft],
   );
 
-  if (ariaLabel === undefined) {
+  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
+  if (label === undefined && labelledBy === undefined) {
     warnOnce(
       "chart-arialabel",
-      "Chart without ariaLabel - please set a meaningful description (R-7.6).",
+      "Chart without aria-label - please set a meaningful description (R-7.6).",
     );
   }
 
@@ -285,7 +308,8 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   return (
     <ChartContext value={scene}>
       <div
-        ref={rootRef}
+        {...rest}
+        ref={setRoot}
         className={className ? `uc-root ${className}` : "uc-root"}
         style={containerStyle}
       >
@@ -297,8 +321,9 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           className="uc-plot"
           role={keyed ? "application" : "img"}
           aria-roledescription={keyed ? wording.roleDescription : undefined}
-          aria-label={ariaLabel}
-          aria-describedby={summaryId}
+          aria-label={label}
+          aria-labelledby={labelledBy}
+          aria-describedby={describedBy === undefined ? summaryId : `${summaryId} ${describedBy}`}
           aria-busy={loading || undefined}
           data-stale={stale || undefined}
           data-arriving={arriving || undefined}

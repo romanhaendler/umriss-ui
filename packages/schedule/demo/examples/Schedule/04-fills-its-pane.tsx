@@ -19,7 +19,7 @@ export default function FillsItsPane() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(5), at(13)] } });
   return (
     <div data-pane="" style={{ height: 480, resize: "vertical", overflow: "hidden" }}>
-      <Schedule ariaLabel="Plan of Tuesday in a pane">
+      <Schedule aria-label="Plan of Tuesday in a pane">
         <Lane id="saw" label="Saw" />
         <Lane id="mill" label="Mill" />
         <Lane id="qa" label="Inspection" />

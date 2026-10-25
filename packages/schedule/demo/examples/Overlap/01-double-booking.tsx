@@ -21,7 +21,7 @@ const WORK: Subtask[] = [
 export default function DoubleBooking() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(8), at(16)] } });
   return (
-    <Schedule ariaLabel="Kofi booked on two projects at once" height={150}>
+    <Schedule aria-label="Kofi booked on two projects at once" height={150}>
       <Lane id="kofi" label="Kofi Mensah" />
       <Lane id="hana" label="Hana Sato" />
       <Subtasks data={WORK} tasks={PROJECTS} />

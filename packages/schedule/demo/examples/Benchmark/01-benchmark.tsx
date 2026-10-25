@@ -193,7 +193,7 @@ const RUNS = [
 function Plot({ data, onInteraction }: { data: Plan; onInteraction: (e: ScheduleInteraction) => void }) {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: VIEW } });
   return (
-    <Schedule ariaLabel="Benchmark plan" height={HEIGHT} laneHeight={LANE_HEIGHT} onInteraction={onInteraction}>
+    <Schedule aria-label="Benchmark plan" height={HEIGHT} laneHeight={LANE_HEIGHT} onInteraction={onInteraction}>
         {data.lanes.map((id) => (
           <Lane key={id} id={id} />
         ))}

@@ -149,7 +149,7 @@ const HOLDERS: readonly Holder[] = PEOPLE.map((person) => ({
 function SprintBurnDown() {
   const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
-    <Chart height={280} ariaLabel={`${SPRINT.name}: hours left per working day against an even pace`}>
+    <Chart height={280} aria-label={`${SPRINT.name}: hours left per working day against an even pace`}>
       <XAxis value={dayOf} label="Working day" />
       <YAxis label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
       <Line value="ideal" name="Even pace" color="var(--uc-color-text)" dash={[4, 4]} strokeWidth={1} />
@@ -163,7 +163,7 @@ function SprintBurnDown() {
 function OpenPerPerson() {
   const { Chart, XAxis, YAxis, Bar } = useChart(HOLDERS);
   return (
-    <Chart height={200} ariaLabel="Estimated hours of unfinished items per person">
+    <Chart height={200} aria-label="Estimated hours of unfinished items per person">
       <XAxis value="name" />
       <YAxis label="h" tickCount={4} />
       <Bar value="open" name="Estimate" barWidth={0.6} />

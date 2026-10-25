@@ -29,7 +29,7 @@ function Toned({ series }: { series: Series }) {
   const parts = useChart(data);
   const { Chart, XAxis, YAxis } = parts;
   return (
-    <Chart ariaLabel="Tone" height={200}>
+    <Chart aria-label="Tone" height={200}>
       <XAxis value="t" />
       <YAxis />
       {series(parts)}

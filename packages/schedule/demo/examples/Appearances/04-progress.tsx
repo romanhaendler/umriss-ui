@@ -18,7 +18,7 @@ const WORK: Subtask[] = [
 export default function Progress() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
-    <Schedule ariaLabel="Work claiming nothing above, work at 65 per cent below" height={144}>
+    <Schedule aria-label="Work claiming nothing above, work at 65 per cent below" height={144}>
       <Lane id="unclaimed" label="Says nothing" />
       <Lane id="started" label="65 per cent done" />
       <Subtasks data={WORK} tasks={PROJECTS} />

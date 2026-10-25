@@ -92,7 +92,17 @@ interface Place {
   position?: Position;
 }
 
-export function CalculationView({ model, className, style, density, ...rest }: CalculationViewProps) {
+export function CalculationView({
+  model,
+  ref,
+  className,
+  style,
+  density,
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  "aria-describedby": describedBy,
+  ...rest
+}: CalculationViewProps) {
   const metrics = model.metrics;
   const compact = useDensityFor(density, "regular") === "compact";
   const formats = useFormats();
@@ -106,7 +116,16 @@ export function CalculationView({ model, className, style, density, ...rest }: C
   const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set());
   const [marked, setMarked] = useState<string | null>(null);
 
-  const frameRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  /* The surface is measured here and handed to the caller's ref as well. */
+  const setFrame = useCallback(
+    (node: HTMLDivElement | null) => {
+      frameRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
   const [twoLines, setTwoLines] = useState(false);
   const count = metrics?.length ?? 0;
   /* Two lines where the room the figures leave is less than the labels need -
@@ -409,7 +428,8 @@ export function CalculationView({ model, className, style, density, ...rest }: C
     /* The frame is the surface and the container the layout measures itself
        against; the list inside it is the statement. */
     <div
-      ref={frameRef}
+      {...rest}
+      ref={setFrame}
       className={cx(styles.frame, className)}
       style={
         metrics
@@ -426,7 +446,7 @@ export function CalculationView({ model, className, style, density, ...rest }: C
       data-two-lines={twoLines ? "" : undefined}
       data-compact={compact ? "" : undefined}
     >
-      <ul className={styles.calculation} {...rest}>
+      <ul className={styles.calculation} aria-label={label} aria-labelledby={labelledBy} aria-describedby={describedBy}>
         {metrics && (
           /* The head names each metric and its unit above its column. Every
              row's sentence names them too, so the head is for the eye. */
