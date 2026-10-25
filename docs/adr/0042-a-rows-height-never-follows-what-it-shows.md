@@ -103,7 +103,8 @@ is nothing to keep, a silhouette of the coming chart, shaped by its first
 series' kind, stands in place of the table's placeholder rows. A chart has a
 fixed height, so it has nothing of its own to hold. Its band sweeps a
 placeholder and its course fades in once, when the answer arrives; neither
-animates the data, which ADR-0032 rules out.
+animates the data, which ADR-0032 rules out. The schedule's `loading` follows
+the same rule; over nothing, placeholder lines stand in its lane column.
 
 Measured, not argued: the table's browser suite holds every row of every demo
 table at one pitch in Chromium, Firefox and WebKit, and "Next" on one pixel
