@@ -142,6 +142,7 @@ const subpaths = Object.keys(manifest.exports).map((key) => name + key.slice(1))
 const CONSUMER_HOOKS: Record<string, string[]> = {
   "@umriss-ui/core": ["export const toast = () => e0.useToast();", "export const field = () => e0.useFormField();"],
 };
+const versionOf = (dir: string) => (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { version: string }).version;
 const consumerRoot = mkdtempSync(join(tmpdir(), "check-dist-"));
 try {
   mkdirSync(join(consumerRoot, "node_modules", "@umriss-ui"), { recursive: true });
@@ -154,20 +155,28 @@ try {
     `export const entries = { ${subpaths.flatMap((path, index) => (path.endsWith(".css") ? [] : [`e${index}`])).join(", ")} };`,
   ].join("\n");
   writeFileSync(join(consumerRoot, "consumer.ts"), code);
-  for (const [moduleName, resolution] of [["ESNext", "bundler"], ["CommonJS", "node10"]]) {
+  /* The floor's compiler (TypeScript 5.4, the root's `typescript-floor`) compiles the same files: a
+     declaration that needs a newer one fails there. It lacks `noUncheckedSideEffectImports` (from 5.6)
+     and keeps every other option; `skipLibCheck` stays off, or an unknown `NoInfer` would pass. */
+  const compilers = [
+    ["TypeScript " + versionOf(resolve("node_modules", "typescript")), resolve("node_modules", "typescript", "bin", "tsc"), true],
+    ["TypeScript " + versionOf(resolve("../../node_modules", "typescript-floor")), resolve("../../node_modules", "typescript-floor", "bin", "tsc"), false],
+  ] as const;
+  for (const [compiler, tsc, sideEffectImports] of compilers) for (const [moduleName, resolution] of [["ESNext", "bundler"], ["CommonJS", "node10"]]) {
     writeFileSync(
       join(consumerRoot, "tsconfig.json"),
       JSON.stringify({
         compilerOptions: {
           strict: true, exactOptionalPropertyTypes: true, skipLibCheck: false, declaration: true, noEmit: false, emitDeclarationOnly: true,
-          outDir: "out", noUncheckedSideEffectImports: true, module: moduleName, moduleResolution: resolution, target: "ES2022", jsx: "react-jsx",
+          outDir: "out", ...(sideEffectImports ? { noUncheckedSideEffectImports: true } : {}), module: moduleName, moduleResolution: resolution, target: "ES2022", jsx: "react-jsx",
           lib: ["ES2022", "DOM", "DOM.Iterable"], types: [],
         },
         files: ["consumer.ts"],
       }),
     );
-    const compiled = spawnSync(process.execPath, [resolve("node_modules", "typescript", "bin", "tsc"), "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
-    if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
+    const compiled = spawnSync(process.execPath, [tsc, "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
+    if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${compiler} with ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
+    else console.log(`a strict consumer compiles under ${compiler} with ${resolution} resolution`);
   }
   if (clientFile) flightCheck(consumerRoot);
 } finally {
