@@ -74,7 +74,7 @@ function TrendChart({ data, previous, labels = ["this week", "last week"] }: { d
         </Text>
       )}
       <div style={{ flex: "1 1 0", minHeight: 0 }}>
-        <Chart ariaLabel={previous ? `${labels[0]} and ${labels[1]}` : labels[0]} padding={4} style={{ minHeight: 0, height: "100%" }}>
+        <Chart aria-label={previous ? `${labels[0]} and ${labels[1]}` : labels[0]} padding={4} style={{ minHeight: 0, height: "100%" }}>
           <XAxis value="i" domain="data" grid={false} tickFormat={() => ""} />
           <YAxis grid tickFormat={() => ""} />
           {previous && <Line value="before" name={labels[1]} color="var(--u-color-text-muted)" strokeWidth={1.25} dash={[3, 3]} markers="never" />}

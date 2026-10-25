@@ -17,7 +17,7 @@ const data = [
 function Demo({ german }: { german: boolean }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="Locale" height={300} wording={german ? GERMAN_CHARTS_WORDING : undefined}>
+    <Chart aria-label="Locale" height={300} wording={german ? GERMAN_CHARTS_WORDING : undefined}>
       <XAxis value="t" time />
       <YAxis />
       <Line value="a" name="A" />

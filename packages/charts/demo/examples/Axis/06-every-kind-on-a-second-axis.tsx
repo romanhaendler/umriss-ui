@@ -166,7 +166,7 @@ const HOURS = hourly(SHIFT);
 export default function EveryKind() {
   const { Chart, XAxis, YAxis, Line, Area, Bar, Scatter } = useChart(SHIFT.readings);
   return (
-    <Chart height={340} ariaLabel="The kiln's temperature by the minute above the tiles it fired by the hour">
+    <Chart height={340} aria-label="The kiln's temperature by the minute above the tiles it fired by the hour">
       <XAxis value="minute" domain={[0, SHIFT_MINUTES]} label="Minute of the shift" />
       {/* This axis reads the hourly rows its series bring, so it names their type. */}
       <XAxis<HourCount>

@@ -37,7 +37,7 @@ function Empty({ data, extra }: { data: Row[]; extra: Extra }) {
   // A view handed in is taken as given: it may hide the only series.
   const { Chart, XAxis, YAxis, Line } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["A"] } : undefined });
   return (
-    <Chart ariaLabel="Empty state" height={300} empty={extra.empty}>
+    <Chart aria-label="Empty state" height={300} empty={extra.empty}>
       <XAxis value="t" />
       <YAxis />
       <Line value="a" name="A" />

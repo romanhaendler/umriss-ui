@@ -92,7 +92,7 @@ const SIGN_IN = metrics("sign-in");
 function Requests({ width, height }: { width?: number; height: number }) {
   const { Chart, XAxis, YAxis, Line } = useChart(SIGN_IN);
   return (
-    <Chart width={width} height={height} ariaLabel="Sign-in requests per minute today">
+    <Chart width={width} height={height} aria-label="Sign-in requests per minute today">
       <XAxis value="t" time />
       <YAxis />
       <Line value="requests" name="Requests per minute" />

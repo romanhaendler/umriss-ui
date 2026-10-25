@@ -48,7 +48,7 @@ const weekdayAndTime = (v: number) =>
 export default function WorkingTime() {
   const { Chart, XAxis, YAxis, Line } = useChart(SORTED);
   return (
-    <Chart height={280} ariaLabel="Parcels sorted per hour across last week's sorting hours">
+    <Chart height={280} aria-label="Parcels sorted per hour across last week's sorting hours">
       <XAxis
         value="t"
         calendar={SORTING_HOURS}

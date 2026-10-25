@@ -66,7 +66,7 @@ export const lead = "Without `coloring` the cells run along `DEFAULT_GRADIENT` f
 export default function Gradient() {
   const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
   return (
-    <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, as a gradient">
+    <Chart height={280} aria-label="Successful requests per service and hour yesterday, as a gradient">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
       <Matrix value="service" level="success" name="Success rate" />

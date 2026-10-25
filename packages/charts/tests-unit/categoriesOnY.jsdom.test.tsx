@@ -74,7 +74,7 @@ const CELLS: Cell[] = [
 function Cells({ categories, label }: { categories?: readonly string[]; label?: (category: string) => string }) {
   const { Chart, XAxis, YAxis, Matrix } = useChart(CELLS);
   return (
-    <Chart ariaLabel="Successful requests per service and hour">
+    <Chart aria-label="Successful requests per service and hour">
       <XAxis value="hour" ticks={[0, 1]} tickFormat={(v) => `${v}:00`} />
       <YAxis categories={categories} categoryLabel={label} />
       <Matrix value="service" level="success" name="Success" />
@@ -139,7 +139,7 @@ const CHARGE = [
 function Fleet({ categories, withCharge }: { categories?: readonly string[]; withCharge?: boolean }) {
   const { Chart, XAxis, YAxis, StateBand, Line } = useChart(CHARGE);
   return (
-    <Chart ariaLabel="The states of two vans">
+    <Chart aria-label="The states of two vans">
       <XAxis value="t" ticks={[0, 5, 10, 15, 20]} domain={[0, 20]} tickFormat={(v) => `t${v}`} />
       <YAxis categories={categories} />
       {withCharge === true && <YAxis id="charge" position="right" domain={[0, 100]} />}
@@ -213,7 +213,7 @@ describe("A matrix with categories along both axes", () => {
     function Grid() {
       const { Chart, XAxis, YAxis, Matrix } = useChart(GRID);
       return (
-        <Chart ariaLabel="Pieces per day and shift">
+        <Chart aria-label="Pieces per day and shift">
           <XAxis value="day" />
           <YAxis />
           <Matrix value="shift" level="pieces" name="Pieces per cell" />
@@ -240,7 +240,7 @@ describe("A series moved to another axis", () => {
   function Moved({ yAxisId, xAxisId }: { yAxisId: string; xAxisId: string }) {
     const { Chart, XAxis, YAxis, StateBand, Bar } = useChart(BY_NUMBER_AND_NAME);
     return (
-      <Chart ariaLabel="Moved">
+      <Chart aria-label="Moved">
         <XAxis id="byNumber" value="n" tickFormat={(v) => `n${v}`} />
         <XAxis id="byName" value="centre" position="top" />
         <YAxis id="left" />
@@ -274,7 +274,7 @@ describe("A series of numbers on a y axis that has categories", () => {
     function Mixed() {
       const { Chart, XAxis, YAxis, Line } = useChart(CHARGE);
       return (
-        <Chart ariaLabel="Mixed">
+        <Chart aria-label="Mixed">
           <XAxis value="t" />
           <YAxis categories={["Van A", "Van B"]} />
           <Line value="percent" name="A line among lanes" />

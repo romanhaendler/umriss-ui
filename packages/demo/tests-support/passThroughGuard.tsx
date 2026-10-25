@@ -112,11 +112,12 @@ export function passThroughGuard(
       // Nothing else in the rendered tree carries the probe: it went to one place.
       expect(container.ownerDocument.querySelectorAll(`[data-probe="${name}"]`)).toHaveLength(1);
       if (shape !== "composite") return;
-      // The names stand on the named element, and on no other.
+      // The names stand on the named element, and on no other. A description
+      // is a list of ids: the component's own may stand before the caller's.
       const target = element && named ? named(element) : null;
       expect(target).not.toBeNull();
       for (const [attribute, value] of Object.entries(NAMES)) {
-        const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}="${value}"]`));
+        const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}${attribute === "aria-describedby" ? "~" : ""}="${value}"]`));
         expect({ attribute, onNamed: carriers.length === 1 && carriers[0] === target }).toEqual({ attribute, onNamed: true });
       }
     });

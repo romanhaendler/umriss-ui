@@ -18,7 +18,7 @@ const NAMES: Record<string, string> = { mon: "Monday", tue: "Tuesday", wed: "Wed
 export default function Categories() {
   const { Chart, XAxis, YAxis, Bar } = useChart(LATE);
   return (
-    <Chart height={260} ariaLabel="Minutes late per working day">
+    <Chart height={260} aria-label="Minutes late per working day">
       <XAxis value="day" categories={WEEK} categoryLabel={(day) => NAMES[day] ?? day} />
       <YAxis label="Minutes late" />
       <Bar value="minutes" name="Late" />

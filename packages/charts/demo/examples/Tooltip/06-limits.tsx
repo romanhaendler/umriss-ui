@@ -14,7 +14,7 @@ const LATENCY = [
 export default function Limits() {
   const { Chart, XAxis, YAxis, Line } = useChart(LATENCY);
   return (
-    <Chart height={260} ariaLabel="Checkout's latency against its objective and its warning band">
+    <Chart height={260} aria-label="Checkout's latency against its objective and its warning band">
       <XAxis value="x" tickFormat={(v) => LATENCY[Math.round(v)]?.time ?? ""} />
       <YAxis label="ms" tickFormat={(v) => `${v} ms`} />
       <LimitBand from={250} to={300} severity="warning" label="Warning band" />

@@ -223,7 +223,7 @@ export default function Benchmark() {
       >
         <Chart
           height={320}
-          ariaLabel="Benchmark with three series"
+          aria-label="Benchmark with three series"
           onPerf={onPerf}
         >
           <XAxis value={matrix ? "c" : "t"} label="Index" domain="data" zoomable />
