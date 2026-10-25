@@ -75,6 +75,19 @@ test("the way back leads to the beginning again", async ({ page }) => {
   await expect(example(page)).toContainText("REQ-00001");
 });
 
+/* ---------------- From outside ---------------- */
+
+test("scrollToRow brings a row of ten thousand into view", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "virtualisation", "scroll-to-a-row");
+  const tags = page.locator('[data-example="scroll-to-a-row"]');
+  await tags.getByRole("button", { name: "Show TAG-07500" }).click();
+  const target = tags.getByRole("rowheader", { name: "TAG-07500" });
+  await expect(target).toBeVisible();
+  const [row, area] = await Promise.all([target.boundingBox(), tags.locator("table").locator("..").boundingBox()]);
+  expect(row!.y).toBeGreaterThanOrEqual(area!.y);
+  expect(row!.y + row!.height).toBeLessThanOrEqual(area!.y + area!.height + 1);
+});
+
 /* ---------------- Header and row header stick ---------------- */
 
 test("the header stays put while scrolling", async ({ page }) => {
