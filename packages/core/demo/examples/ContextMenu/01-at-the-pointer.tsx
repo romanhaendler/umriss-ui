@@ -1,24 +1,21 @@
 import { useState } from "react";
-import type { MouseEvent } from "react";
-import { ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "../../../src";
+import { ContextMenu, MenuItem, MenuSeparator, Stack, Text, useContextMenuTrigger } from "../../../src";
 
 export const title = "Open it at the pointer";
-export const lead = "On `contextmenu`, keep the event's point and pass it as `position`; `ariaLabel` names what the menu acts on.";
+export const lead = "Spread `useContextMenuTrigger` on the target and keep the point it gives you as `position`: it opens on a right-click, the context-menu key and a long press with a finger, which is the only way on iOS. `ariaLabel` names what the menu acts on.";
 
 export default function AtThePointer() {
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
   const [last, setLast] = useState("-");
 
-  const openHere = (event: MouseEvent) => {
-    event.preventDefault();
-    setAt({ x: event.clientX, y: event.clientY });
-  };
+  const trigger = useContextMenuTrigger(setAt);
 
   return (
     <Stack gap={3} align="flex-start">
       <div
-        onContextMenu={openHere}
+        {...trigger}
         style={{
+          ...trigger.style,
           width: "100%",
           maxWidth: 320,
           height: 120,
@@ -29,7 +26,7 @@ export default function AtThePointer() {
         }}
       >
         <Text size="sm" tone="muted">
-          Right-click anywhere in here
+          Right-click or hold anywhere in here
         </Text>
       </div>
       <ContextMenu
