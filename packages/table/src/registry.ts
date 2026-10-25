@@ -111,6 +111,8 @@ export function fnEqual(a: unknown, b: unknown): boolean {
     them: the identity the aggregate caches and the model's columns key on stays
     as it was through a re-render with inline accessors. */
 function holdEqual(old: ColumnSpec, next: ColumnSpec): ColumnSpec {
+  // Another id is another column under the same React key: its accessors are its own.
+  if (old.id !== next.id) return next;
   const value = fnEqual(old.value, next.value) ? old.value : next.value;
   const ownSortValue = fnEqual(old.ownSortValue, next.ownSortValue) ? old.ownSortValue : next.ownSortValue;
   const ownGroupValue = fnEqual(old.ownGroupValue, next.ownGroupValue) ? old.ownGroupValue : next.ownGroupValue;
@@ -189,6 +191,7 @@ export class Registry {
 
   /** After the commit: check the order against the DOM. */
   checkOrder() {
+    this.checkUniqueness();
     if (!this.children) return;
     if (this.columns.check(this.children)) this.structure++;
     if (this.actions.check(this.children)) this.structure++;
@@ -224,7 +227,6 @@ export class Registry {
     }
     this.signatures.set(key, signature);
     this.columns.note(key);
-    this.checkUniqueness();
   }
 
   /** After mounting - including after the Strict Mode's second mount, whose
@@ -240,6 +242,8 @@ export class Registry {
     this.structure++;
   }
 
+  /** Once the render's columns have all registered: an id seen mid-render may
+      still belong to a column whose own id is about to change. */
   private checkUniqueness() {
     const ids = new Set<string>();
     let rowHeaders = 0;

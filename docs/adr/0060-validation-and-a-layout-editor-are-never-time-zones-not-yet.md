@@ -54,6 +54,13 @@ yet.
 Not: shifting timestamps by an offset to fake a zone, which gets the
 clock-change hour wrong.
 
+*Amended 2026-10-25:* on a server, umriss shows no instant. The reader's zone is known only in the
+browser, so a time written on the server is a guess. Under a server in another zone that guess differs
+from the browser's and raises React's hydration error #418. Core's formats therefore write an instant
+once the page has hydrated, and an empty text before; an app that renders only in the browser sees no
+difference. A zone the application names would let the server write instants again. That is the "not
+yet" above.
+
 ## Considered Options
 
 - **A `validate` prop on every field.** The same rule twice.
