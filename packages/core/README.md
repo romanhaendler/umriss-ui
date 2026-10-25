@@ -108,12 +108,38 @@ elements, a focus ring on what it makes focusable. A caller's content inside
 layers, `umriss.tokens`, `umriss.base` and `umriss.components`, and CSS written
 outside a layer wins over all of them, whatever the order of loading:
 
-```css
+A brand is one file to copy and edit. It sets the font, the whole accent and
+the charts' palette, each colour with a light and a dark value, so that no part
+of the interface stays petrol; the values are an example (indigo), not the
+defaults:
+
+```css brand.css
 :root {
   --u-font-sans: "Inter", system-ui, sans-serif;
-  --u-color-accent: #0f766e;
+
+  --u-color-accent: light-dark(#4338ca, #818cf8);
+  --u-color-accent-hover: light-dark(#3730a3, #a5b4fc);
+  --u-color-accent-subtle: light-dark(#eef0fb, #1e1f3d);
+  --u-color-accent-subtle-pressed: light-dark(#dfe2f7, #282a52);
+  --u-color-accent-text: light-dark(#4338ca, #a5b4fc);
+  --u-color-on-accent: light-dark(#ffffff, #1e1b4b);
+
+  --u-chart-1: light-dark(#4338ca, #818cf8);
+  --u-chart-2: light-dark(#db2777, #f472b6);
+  --u-chart-3: light-dark(#059669, #34d399);
+  --u-chart-4: light-dark(#d97706, #fbbf24);
+  --u-chart-5: light-dark(#0891b2, #22d3ee);
+  --u-chart-6: light-dark(#7c3aed, #a78bfa);
 }
 ```
+
+A brand may also change the neutrals, the radius, `--u-transform-caps` with
+`--u-tracking-caps`, `--u-button-press-scale` and the modal widths; the Theming
+page's table lists every token.
+
+**Denser or roomier.** An application sets the type steps, the spaces and the
+small control heights. A table and a calculation follow them, and the
+provider's `density` chooses regular or compact on top.
 
 **Layered CSS of your own.** The order of the layers decides who wins, so
 declare it before anything else is read.
