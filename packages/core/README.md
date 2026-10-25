@@ -34,9 +34,48 @@ The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
 Every entry, `./wording/de` included, begins with `"use client"`, the directive a framework
-with Server Components reads to treat a module as client code. No test runs
-inside such a framework: the package is rendered to a string in a test,
-and the fields' widths a server writes into the markup are checked there.
+with Server Components reads to treat a module as client code. Core's components render from a
+Server Component with props React can serialise; a function prop (a handler, a render prop) is
+callable only in a client file. No test runs inside such a framework: the package is rendered to a
+string in a test, and the fields' widths a server writes into the markup are checked there.
+
+### Server Components
+
+A Server Component fetches the data and hands it to a Client Component. The views - table, chart,
+schedule, dashboard - are declared by their hook, so the declaration stays in a client file next to
+them, with its `rowKey`, columns and formatters. Only the rows cross the boundary:
+
+```tsx
+// app/orders/page.tsx - a Server Component
+import { OrdersTable } from "./orders-table";
+import { loadOrders } from "@/lib/orders";
+
+export default async function Page() {
+  return <OrdersTable rows={await loadOrders()} />;
+}
+```
+
+```tsx
+// app/orders/orders-table.tsx
+"use client";
+import { useTable } from "@umriss-ui/table";
+import type { Order } from "@/lib/orders";
+
+export function OrdersTable({ rows }: { rows: Order[] }) {
+  const { Table, Column } = useTable(rows, { rowKey: (o) => o.number });
+
+  return (
+    <Table ariaLabel="Orders">
+      <Column value="number" label="Order" rowHeader />
+      <Column value="customer" label="Customer" />
+      <Column value="quantity" label="Quantity" />
+    </Table>
+  );
+}
+```
+
+The reasons, and what a calculation may do differently, are in
+[ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
 
 ### What an import costs
 
