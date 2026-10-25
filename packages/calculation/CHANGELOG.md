@@ -14,6 +14,23 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.43.0 – Places that carry down, and a calculation's root (Oct. 2026)
+
+### Added
+
+- **`Calculation` takes a `ref`**, which receives its surface `<div>` (ADR-0068).
+
+### Changed
+
+- **A quantity without its own `decimals` takes those of the quantity it is an operand of**, where both have the same `unit` and `format`: down the tree, through a chain's interims, and for a `Ref` where its quantity is defined (ADR-0069).
+  - Migration: nothing to change; an operand that showed the default places beside a parent with its own now shows the parent's - give it `decimals` of its own to keep the old figure.
+- **A non-zero derived value no longer reads 0 at the default places;** it is shown without fixed places, in scientific notation where tiny. A caller's own or carried places are kept as given.
+  - Migration: nothing to change; a tiny result that read "0.00" now reads its value.
+- **The rest and the `ref` reach the surface**, and the name (`aria-label`, `aria-labelledby`, `aria-describedby`) still reaches the list (ADR-0068). No old form is kept, since an attribute stands on one element.
+  - Migration: a selector or a test id that found the list now finds the surface.
+- **The peer range on core moves to `^0.43.0`.**
+  - Migration: install the 0.43 version of `@umriss-ui/core` beside it.
+
 ## 0.42.0 – A calculation written in a Server Component (Oct. 2026)
 
 ### Added

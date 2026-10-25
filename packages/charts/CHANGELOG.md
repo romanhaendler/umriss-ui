@@ -30,6 +30,24 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.43.0 – A chart's root, and Intl's options for its numbers (Oct. 2026)
+
+### Added
+
+- **A series' `format` and an axis' `tickFormat` also take `NumberOptions`** - the options of `Intl.NumberFormat` plus `decimals` - written in the wording's locale and compared by value, so an equal inline object does not relabel the axis (ADR-0069). On an axis the step's places stay unless the options set digits, so a currency axis reads "€0", "€500", "€1,000". The tooltip, the data table, the limit rows, the readout and the spoken text follow.
+- **An example drills down from years to months to days over `onSelect`**, the stack of levels in the application's state: the chart keeps no level (ADR-0056).
+
+### Changed
+
+- **`Chart` takes the attributes of a `<div>` and a `ref`** (ADR-0068): `ref`, `id` and `data-*` reach the root element - `data-*` was dropped silently before - and `aria-label` and `aria-labelledby` name the plot. A caller's `aria-describedby` now comes after the plot's own summary.
+  - Migration: nothing to change for a ref or a class; a test that looked for the caller's description first finds the summary's id first.
+- **`ariaLabel` on `Chart` is renamed `aria-label`.** `ariaLabel` stays as a deprecated alias and warns once in development; 0.44.0 removes it. `aria-labelledby` pointing at a heading satisfies the name too.
+  - Migration: write `aria-label`, or point `aria-labelledby` at a heading.
+- **The built-in number formats no longer write a negative zero:** -0.0004 on a one-place axis reads "0.0".
+  - Migration: nothing to change; a test that expected "-0" reads "0".
+- **Under a finger the legend entries and the show-all key are hit in a square of 24 px**, and the legend's row gap becomes 10 px so one line's pads do not cover the next line's entries (ADR-0070).
+  - Migration: nothing to change; under touch a wrapped legend stands 2 px taller per line.
+
 ## 0.42.0 – A chart under test in jsdom (Oct. 2026)
 
 ### Added

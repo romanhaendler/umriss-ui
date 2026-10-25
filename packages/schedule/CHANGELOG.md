@@ -18,6 +18,30 @@ moves from here under the rule above.
 
 ---
 
+## 0.43.0 – A schedule that fills its frame, and takes a finger (Oct. 2026)
+
+### Added
+
+- **`loading`**, as the chart has it: a plan stays, dims after `--u-delay-stale` and starts no drag, tooltip, context menu or key intent until the answer is in; a drag begun before it finishes. With no lanes, placeholder lines stand in the lane column. The plot is `aria-busy`, also in a server's markup.
+- **Touch editing:** a long press on a bar grabs it, and the finger then moves it in time and across lanes as a mouse does, with `canMoveTo`, blocked time and auto-pan; stretching and lead-in/out stay with the mouse, pen and keyboard. A second finger cancels the grab, and the page does not scroll under a grabbed bar (ADR-0070).
+- **`scrollToLane(lane)`, `scrollToSubtask(id)` and `focusSubtask(id)` on `useSchedule`'s return** show a lane or a subtask picked from a list of your own. `scrollToSubtask` brings the subtask's lane and time into view - the span moves to it and keeps its width - and leaves the focus; `focusSubtask` also makes it the Active subtask and focuses the plot. All three return `false` and change nothing for an unknown lane or subtask, a lane inside a folded group (none is unfolded) and a schedule that is not mounted.
+- **`positionAt`, `clientPointOf` and `visibleDomain` on `useSchedule`'s return**, the functions the handle ref carried; the first two return `null` before mount.
+
+### Changed
+
+- **Without `height` a schedule fills its frame and never goes below 400 px** (ADR-0050, amended). Alone in a block it is 400 px as before, whatever its lanes; in a frame taller than that it now takes that height.
+  - Migration: a schedule that relied on the 400 px default in a taller frame sets `height={400}` or `style={{ height: 400 }}`.
+- **The schedule's `ref` is its root `<div>`** (ADR-0068): `className`, `style`, `id` and `data-*` reach it, `aria-label` and `aria-labelledby` name it, and a caller's `aria-describedby` follows the plot's own summary.
+  - Migration: nothing to change for an element ref.
+- **`ScheduleHandle` is deprecated; 0.44.0 removes it.** A handle ref keeps working for this minor and warns once in development on its first call.
+  - Migration: replace `ref.current.positionAt(x, y)` with `positionAt(x, y)` from `const { positionAt } = useSchedule()`, and the same for `clientPointOf` and `visibleDomain`.
+- **`ariaLabel` on `Schedule` is renamed `aria-label`.** `ariaLabel` stays as a deprecated alias and warns once in development; 0.44.0 removes it.
+  - Migration: write `aria-label`.
+- **A vertical swipe over the plot scrolls the page while every lane fits.** While the lanes overflow, the plot keeps the swipe and scrolls its lanes; the lane names scroll the page.
+  - Migration: nothing to change; on a touch device a short plan no longer traps the page's scroll.
+- **The peer ranges on core and charts move to `^0.43.0`.**
+  - Migration: install the 0.43 versions of `@umriss-ui/core` and `@umriss-ui/charts` beside it.
+
 ## 0.42.0 – A schedule under test, and quiet on a server (Oct. 2026)
 
 ### Added

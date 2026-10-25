@@ -27,6 +27,32 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.43.0 – One root contract, and a finger as a pointer (Oct. 2026)
+
+### Added
+
+- **`useContextMenuTrigger(open)`** opens a `ContextMenu` the same way on every device: on a right-click at the pointer, on the context-menu key or Shift+F10 at the target's box, and on a long press with a finger at the finger - the only way on iOS. Spread its result on the target; the click and the `contextmenu` that end a long press do not reach it.
+- **A held finger shows a Tooltip.** A touch held 500 ms within 10 px shows an icon button's name, which hides 1.5 s after the lift; mouse and pen keep the hover delay (ADR-0070).
+- **`createLongPress(onPress, onEnd?)`** - the long-press detector the Tooltip and `useContextMenuTrigger` use, a plain function over pointer events: it fires once, with the finger's point, when a touch pointer is held 500 ms within 10 px, and it swallows the click that ends the press.
+- **A number format is Intl's options** (ADR-0069): `NumberFormat` is `"percent" | "count" | NumberOptions`, where `NumberOptions` are `Intl.NumberFormat`'s options plus `decimals`. `writeNumber(formats, n, format?)` writes a number by it, and `Formats.numberWith(options)` is cached by the options' content. `NumberInput` takes `grouping` (default `true`), so a year reads 2024.
+- **A tab list with more tabs than room scrolls sideways** within its width, with no bar, and keeps the selected and the focused tab in view by its own scroll position, never the page's.
+- **Clear of the safe area:** under `viewport-fit=cover` the toasts, a full-window Modal, the Drawer and the CommandPalette add each edge's hardware inset to their room. Without that viewport setting the insets are zero and nothing moves.
+- **The CommandPalette shows a close cross under a finger**, and the on-screen keyboard is told what Enter does (`enterkeyhint`) in the palette, Combobox, MultiSelect's search and TreeSearch, with `autocomplete="off"`; a caller's own value wins where the field passes attributes through.
+- **More contrast on request:** under `prefers-contrast: more` the secondary and muted text reach 7:1 and the edges and hairlines 3:1, in both themes.
+
+### Changed
+
+- **`md` controls are 44 px under a coarse pointer** - a phone, a tablet, a touch kiosk (ADR-0070). A touch laptop with a trackpad stays at 32; `sm` and `xs` are unchanged.
+  - Migration: nothing to change; to keep 32 px under a finger, set `--u-control-height: 32px` in your own `@media (pointer: coarse)` block.
+- **Under a finger nothing core draws is a target smaller than 24 px.** A box grows where a pad cannot reach: the free Checkbox and Switch, a radio option, the TreeView fold key, the Splitter strip, the Slider range and the NumberInput steps; a button is at least 24 px wide. The Tag remove, Alert close, FileInput remove, MultiSelect chips, Breadcrumb link, Card fold key, a SegmentedControl segment and the clear crosses take an invisible pad that changes no layout.
+  - Migration: nothing to change; under touch emulation or on a touch device, look at a layout that counted on those controls' size.
+- **Combobox, MultiSelect, DatePicker, DateTimePicker, DateRangePicker and DateTimeRangePicker are fields** (ADR-0068): class and style stay on the wrapper, and the ref and the rest land on the control that takes the focus - an `HTMLInputElement` for Combobox, an `HTMLButtonElement` for the others. The clause that sent `aria-label`, `aria-labelledby` and `aria-describedby` there separately is gone. No old form is kept, since an attribute stands on one element.
+  - Migration: a ref typed `HTMLDivElement` or `HTMLSpanElement` is a type error - type it for the input or the button; a selector or test that found `data-*` or `id` on the wrapper finds it on the control.
+- **`ariaLabel` on TreeView, Popover and ContextMenu is renamed `aria-label`** (ADR-0068). `ariaLabel` stays as a deprecated alias and warns once in development; 0.44.0 removes it.
+  - Migration: write `aria-label`.
+- **The built-in number formats no longer write a negative zero:** -0.0004 at one place reads "0.0", not "-0.0".
+  - Migration: nothing to change; a test that expected "-0" reads "0".
+
 ## 0.42.0 – Tested in Vitest and Jest, themed from one file (Oct. 2026)
 
 ### Added
