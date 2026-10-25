@@ -361,6 +361,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "`useSchedule` hands back three functions for what is on the screen: `clientPointOf(time, lane?)`, `positionAt(clientX, clientY)` and `visibleDomain()`. Before a schedule is mounted the first two answer `null`. The `ref` of `Schedule` is its root element.",
           "Place your marks again whenever `view.domain` changes.",
+          "`scrollToLane(lane)`, `scrollToSubtask(id)` and `focusSubtask(id)` show a lane or a subtask picked from a list of your own, a findings list or a search. `scrollToSubtask` brings the lane and the time into view and leaves the focus where it is; `focusSubtask` also makes the subtask the active one and focuses the plot. All three answer `false`, and change nothing, for an unknown lane or subtask, a lane inside a folded group (none is unfolded) and a schedule that is not mounted.",
         ],
         alternatives: [{ when: "You need the time under the pointer during a hover or a click", use: "interactions" }],
         keysOf: ["schedule"],
