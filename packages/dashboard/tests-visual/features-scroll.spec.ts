@@ -63,8 +63,13 @@ for (const width of [1280, 390]) {
     }
     expect(reached.at(-1)).toBe(ALERTS);
     expect(reached.filter((id) => id && id !== ALERTS && id !== "t1")).toEqual([]);
-    for (let i = 0; i < 30 && !(await last()); i++) await page.keyboard.press("ArrowDown");
-    expect(await last()).toBe(true);
+    /* The browser animates a key's scroll, so the end is polled while the key is pressed. */
+    await expect
+      .poll(async () => {
+        await page.keyboard.press("ArrowDown");
+        return last();
+      })
+      .toBe(true);
     await body.evaluate((el) => (el.scrollTop = 40));
 
     // In the mode neither the wheel nor the keys scroll it, and it stands where it stood.
