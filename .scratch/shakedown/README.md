@@ -6,6 +6,8 @@ coordinating session confirmed in the source. The hosts themselves were throwawa
 
 ## Order of work
 
+Steps 3 to 5 are charted as decisions on one map: `.scratch/after-shakedown/map.md`.
+
 2. ~~**The confirmed defects with small fixes**~~ - **delivered 2026-10-24** (spec, done:
    `.scratch/shakedown-defects/spec.md`; the kiosk clock step was a measurement artefact):
    - Modal/Drawer closes on a click inside a Popover, Menu or DatePicker (`core.md` A2)
