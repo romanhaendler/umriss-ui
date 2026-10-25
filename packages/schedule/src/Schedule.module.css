@@ -76,7 +76,10 @@
     white-space: nowrap;
   }
 
+  /* Size containment: neither the lane headers nor the plot size the root,
+     which is its frame's height or its floor. */
   .headers {
+    contain: size;
     position: relative;
     overflow: hidden;
     border-right: 1px solid var(--u-hairline-strong);
@@ -195,6 +198,7 @@
   }
 
   .plot {
+    contain: size;
     position: relative;
     overflow: hidden;
     touch-action: none;
