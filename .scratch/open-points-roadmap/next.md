@@ -57,10 +57,6 @@ Each is recorded where it belongs; here they stand together.
   (`packages/table/tests-visual/rows-that-keep-arriving.spec.ts`, marked
   `fixme`; `.scratch/table-rows-that-keep-arriving/`). No demo page ticks, and
   the spec allowed no new API.
-- **A decision still to be confirmed by the maintainer**: on a server the
-  schedule renders its labelled frame and no lane label, and the library was
-  not rebuilt for it (`.scratch/platform-claims-proved/spec.md`, "Decided
-  while writing").
 - **Nobody has pasted a copy into Excel, Numbers or LibreOffice**, nor heard
   it with VoiceOver or NVDA. The clipboard's text was read in a browser test.
 
