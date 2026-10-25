@@ -91,7 +91,7 @@ const CHECKOUT = metrics("checkout");
 export default function Filled() {
   const { Chart, XAxis, YAxis, Area } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's requests per minute today">
+    <Chart height={260} aria-label="Checkout's requests per minute today">
       <XAxis value="t" time />
       <YAxis label="Requests/min" />
       <Area value="requests" name="Requests" fillOpacity={0.35} strokeWidth={2} />

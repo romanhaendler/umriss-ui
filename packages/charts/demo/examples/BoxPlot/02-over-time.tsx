@@ -125,7 +125,7 @@ const BOXES = hourBoxes();
 export default function OverTime() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(BOXES);
   return (
-    <Chart height={280} ariaLabel="Checkout median latency per hour today">
+    <Chart height={280} aria-label="Checkout median latency per hour today">
       <XAxis value="hour" time />
       <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot

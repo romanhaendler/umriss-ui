@@ -110,14 +110,14 @@ export default function KeyboardAndScreenReader() {
   const { Chart: Diagramm } = german;
   return (
     <div>
-      <Chart height={200} ariaLabel="Search latency over last week">
+      <Chart height={200} aria-label="Search latency over last week">
         <XAxis value="t" time domain="data" zoomable />
         <YAxis label="ms" />
         <Line value="p95" name="p95" />
         <Line value="p50" name="p50" />
         <Tooltip mode="x" />
       </Chart>
-      <Diagramm height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
+      <Diagramm height={200} aria-label="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
         <XAxis value="t" time domain="data" zoomable />
         <YAxis label="ms" />
         <Line value="p95" name="p95" />

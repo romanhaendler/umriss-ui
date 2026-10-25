@@ -31,7 +31,7 @@ afterEach(() => {
 function Limited({ limit }: { limit: React.ReactNode }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="Limit labels" height={300}>
+    <Chart aria-label="Limit labels" height={300}>
       <XAxis value="t" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} />
       <YAxis domain={[0, 50]} />
       <Line value="a" />

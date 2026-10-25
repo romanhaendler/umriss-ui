@@ -23,7 +23,7 @@ type Props = { wording?: Partial<ChartsWording>; empty?: string };
 function Nothing(props: Props) {
   const { Chart, XAxis, YAxis, Line } = useChart<{ t: number; a: number }>([]);
   return (
-    <Chart ariaLabel="Nothing" {...props}>
+    <Chart aria-label="Nothing" {...props}>
       <XAxis value="t" />
       <YAxis />
       <Line value="a" name="A" />

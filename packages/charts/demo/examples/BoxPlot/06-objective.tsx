@@ -27,7 +27,7 @@ const THIS_WEEK: Spread[] = [
 export default function AgainstTheObjective() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(LAST_WEEK);
   return (
-    <Chart height={280} ariaLabel="Checkout 95th percentile per region and week against its objective">
+    <Chart height={280} aria-label="Checkout 95th percentile per region and week against its objective">
       <XAxis value="region" />
       <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot

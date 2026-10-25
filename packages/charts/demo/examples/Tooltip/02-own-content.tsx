@@ -111,7 +111,7 @@ function AgainstObjective({ hit }: { hit: TooltipHit<MetricPoint> }) {
 export default function OwnContent() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={280} ariaLabel="Checkout and billing latency, the tooltip against their objectives">
+    <Chart height={280} aria-label="Checkout and billing latency, the tooltip against their objectives">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <Line value="p95" name="Checkout" />

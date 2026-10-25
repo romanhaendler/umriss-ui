@@ -73,7 +73,7 @@ const hours = (v: number) => `${v.toFixed(0)} h`;
 export default function ValuesAsTable() {
   const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
-    <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
+    <Chart height={260} aria-label="Sprint 14: hours left against the ideal">
       <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
       <YAxis label="Hours left" />
       <Line value="ideal" name="Ideal" format={hours} />

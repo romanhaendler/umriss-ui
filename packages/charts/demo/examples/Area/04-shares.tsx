@@ -47,7 +47,7 @@ const tonnes = (v: number) => `${v.toFixed(1)} t`;
 export default function Shares() {
   const { Chart, XAxis, YAxis, Area } = useChart(TONNES_PER_HOUR);
   return (
-    <Chart height={280} ariaLabel="Each depot's share of the freight loaded per hour">
+    <Chart height={280} aria-label="Each depot's share of the freight loaded per hour">
       <XAxis value="t" time domain="data" />
       <YAxis label="Share of the hour" />
       <Area value="north" name="North" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />

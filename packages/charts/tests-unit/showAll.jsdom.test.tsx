@@ -40,7 +40,7 @@ function Zoomable({ zoomable = true, german = false, initialView, onViewChange, 
   seen?.(parts);
   const { Chart, XAxis, YAxis, Line } = parts;
   return (
-    <Chart ariaLabel="Zoomable" wording={german ? GERMAN_CHARTS_WORDING : undefined}>
+    <Chart aria-label="Zoomable" wording={german ? GERMAN_CHARTS_WORDING : undefined}>
       <XAxis value="t" domain={[0, 100]} zoomable={zoomable} />
       <XAxis id="late" value="t" domain={[0, 100]} position="top" zoomable={zoomable} />
       <YAxis />
@@ -159,7 +159,7 @@ describe("Show all", () => {
       seen(p);
       const { Chart, XAxis, YAxis, Line } = p;
       return (
-        <Chart ariaLabel="Nice">
+        <Chart aria-label="Nice">
           <XAxis value="t" zoomable />
           <YAxis />
           <Line value="a" name="A" />

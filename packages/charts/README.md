@@ -50,7 +50,7 @@ const DATA: Point[] = [
 export function Course() {
   const { Chart, XAxis, YAxis, Line } = useChart(DATA);
   return (
-    <Chart height={280} ariaLabel="Course of one series">
+    <Chart height={280} aria-label="Course of one series">
       <XAxis value="t" label="Index" />
       <YAxis />
       <Line value="a" name="Series A" />
@@ -67,6 +67,8 @@ not suffice. A series with its own `data` is typed by that data instead, and
 an x axis that reads such rows names their type: `<XAxis<Row> value="t" />`.
 A y axis reads no value: its series place the rows along y. `Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
 are imported as they are (ADR-0048).
+
+The chart is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its root `<div>`; `aria-label` and `aria-labelledby` name the plot, and your `aria-describedby` is added after the plot's own summary. `ariaLabel` still works for one further minor and warns once in development.
 
 A series is an element, not an entry in a configuration object: the order in the
 JSX decides what lies over what, and at the same time the palette colour.
@@ -88,7 +90,7 @@ wording is the one input - the browser's language is not read:
 ```tsx
 import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
 
-<Chart ariaLabel="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
+<Chart aria-label="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
 ```
 
 ## Styles

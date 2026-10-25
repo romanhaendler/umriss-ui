@@ -66,7 +66,7 @@ export const lead = "With `coloring` of kind `assessment` a cell takes the tone 
 export default function ByLimits() {
   const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
   return (
-    <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, by limits">
+    <Chart height={280} aria-label="Successful requests per service and hour yesterday, by limits">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
       <Matrix

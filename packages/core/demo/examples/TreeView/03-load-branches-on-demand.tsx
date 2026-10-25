@@ -48,7 +48,7 @@ export default function LoadBranchesOnDemand() {
   const tree = useTree(depots, { reader: READER, onLoadChildren: load });
 
   return (
-    <TreeView tree={tree} ariaLabel="Today's tours by depot">
+    <TreeView tree={tree} aria-label="Today's tours by depot">
       {(entry) => entry.node.name}
     </TreeView>
   );

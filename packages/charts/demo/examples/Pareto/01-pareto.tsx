@@ -22,7 +22,7 @@ export default function ParetoExample() {
   const { entries } = useMemo(() => pareto(FAILED_DELIVERIES, { collectRank: 6, remainderName: "Other" }), []);
   const { Chart, XAxis, YAxis, Bar, Line } = useChart(entries);
   return (
-    <Chart height={300} ariaLabel="Failed deliveries by cause, sorted, with the cumulative share">
+    <Chart height={300} aria-label="Failed deliveries by cause, sorted, with the cumulative share">
       <XAxis value="name" />
       <YAxis label="Failed deliveries" />
       <YAxis

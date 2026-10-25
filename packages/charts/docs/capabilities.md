@@ -35,7 +35,7 @@ Screenshot pages carry their name in brackets.
 | `+`/`−`, Shift+←/→ and `0` zoom, pan and go back to the axis' own `domain` - only where the x axis is `zoomable`; the Active point keeps its place across `setView` | charts-a11y Q6, ADR-0047 | Unit (jsdom zoom keys) |
 | The charts' own wording, English by default, German from `@umriss-ui/charts/wording/de`; `empty` wins over it | ADR-0031 | Unit (jsdom wording) |
 | `encoding="marks"`: each series a dash and a marker shape (line, area outline, scatter) or a hatch (bar, area fill) by its palette place - the first plain -, a caller's `dash` winning; a state hatched by its name, alike in every band that lists it, a matrix step by index, a limit band hatched in its colour; the legend's chips show the same, an area's its dash over its hatched fill; default off | charts-alternatives C3, 04 | Unit (marks, draw, jsdom encoding), Screenshot (`told-apart-without-colour`, `marks-on-every-kind`, `bands-limits-and-cells`) |
-| DEV warning without `ariaLabel` | R-7.6 | Manual |
+| DEV warning without `aria-label` | R-7.6 | Manual |
 | Series kinds can be mixed in one chart | ADR-0002 | Screenshot (`mixed`), Interaction |
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
 | SSR: `renderToString` does not throw | R-7.4 | Unit (SSR) |

@@ -65,7 +65,7 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  * DateTimePicker, separately per end of the range.
  */
 export interface DateTimeRangePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The time span with times at both ends; `null` means none. */
   value: DateRange | null;
   /** Runs only on "Apply" and on clearing (`null`), never between the two
@@ -426,7 +426,7 @@ export function DateTimeRangePicker(
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        ariaLabel={wording.dateTimeRangePanel}
+        aria-label={wording.dateTimeRangePanel}
         id={panelId}
         className={cx(styles.panel, styles.rangePanel)}
       >

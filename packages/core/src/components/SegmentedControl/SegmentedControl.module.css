@@ -257,4 +257,17 @@
     padding-inline: var(--u-space-2);
     font-size: var(--u-text-xs);
   }
+
+  /* Under a finger a segment of a small control is hit 2 px taller above and below, the 24 px square of WCAG 2.5.8; side by side the segments keep their widths. */
+  @media (pointer: coarse) {
+    .segment {
+      position: relative;
+    }
+
+    .segment::after {
+      content: "";
+      position: absolute;
+      inset: -2px 0;
+    }
+  }
 }

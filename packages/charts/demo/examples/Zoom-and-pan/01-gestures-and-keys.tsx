@@ -104,7 +104,7 @@ const SEARCH_WEEK = week("search", 60_000);
 export default function GesturesAndKeys() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
-    <Chart height={260} ariaLabel="Search latency over last week, a reading a minute, zoomable">
+    <Chart height={260} aria-label="Search latency over last week, a reading a minute, zoomable">
       {/* The span shown is the chart's own: `domain` is where it starts. */}
       <XAxis value="t" time domain="data" zoomable />
       <YAxis label="ms" />

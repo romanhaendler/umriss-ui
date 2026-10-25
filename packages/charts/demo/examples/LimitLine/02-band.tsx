@@ -89,7 +89,7 @@ const CHECKOUT = metrics("checkout");
 export default function Band() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's error rate against its warning band and alarm limit">
+    <Chart height={260} aria-label="Checkout's error rate against its warning band and alarm limit">
       <XAxis value="t" time />
       <YAxis label="Errors %" />
       <LimitBand from={1} to={2} severity="warning" label="Watch" />

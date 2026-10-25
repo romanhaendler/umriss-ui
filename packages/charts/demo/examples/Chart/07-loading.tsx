@@ -25,7 +25,7 @@ const NOTHING: Reading[] = [];
 function Latency({ rows, loading, label }: { rows: Reading[]; loading: boolean; label: string }) {
   const { Chart, XAxis, YAxis, Line } = useChart(rows);
   return (
-    <Chart height={220} ariaLabel={label} loading={loading}>
+    <Chart height={220} aria-label={label} loading={loading}>
       <XAxis value="t" time />
       <YAxis label="ms" />
       <Line value="p95" name="Refunds" />

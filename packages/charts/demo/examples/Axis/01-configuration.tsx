@@ -45,7 +45,7 @@ function WeekTooltip({ hit }: { hit: TooltipHit<Week> }) {
 export default function Configuration() {
   const { Chart, XAxis, YAxis, Line } = useChart(BOOKED);
   return (
-    <Chart height={280} padding={{ top: 12, right: 16, bottom: 8, left: 8 }} ariaLabel="Share of capacity booked per team and week">
+    <Chart height={280} padding={{ top: 12, right: 16, bottom: 8, left: 8 }} aria-label="Share of capacity booked per team and week">
       <XAxis value="week" label="Week" tickCount={6} />
       <YAxis domain={[0, 100]} tickFormat={percent} label="Booked" />
       <Line value="web" name="Web" markers="always" strokeWidth={2} />
