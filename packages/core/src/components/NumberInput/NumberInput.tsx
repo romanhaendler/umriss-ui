@@ -41,6 +41,10 @@ export interface NumberInputProps
   step?: number;
   /** Fixed decimal places; 0 = whole numbers, undefined = free. */
   decimals?: number;
+  /** Group separators in the text: `false` writes none ("2024"), and the
+      field still reads what it writes.
+      @default true */
+  grouping?: boolean;
   /** Adornment before the number, e.g. "±". */
   prefix?: ReactNode;
   /** Adornment after the number, e.g. "€" or "%". */
@@ -84,6 +88,7 @@ export function NumberInput(
     max,
     step = 1,
     decimals,
+    grouping = true,
     prefix,
     suffix,
     size: ownSize,
@@ -105,10 +110,13 @@ export function NumberInput(
   /* Through the seam and not through `formatNumber`, so that an override of
      the notation by the application is followed. */
   const formats = useFormats();
-  const write = (value: number) => formats.number(value, decimals);
   /* The field reads the notation it writes: an application that replaced the
      number format changed both halves at once (ADR-0024). */
   const separators = useMemo(() => separatorsOf(formats), [formats]);
+  const write = (value: number) => {
+    const text = formats.number(value, decimals);
+    return grouping || separators.group === "" ? text : text.replaceAll(separators.group, "");
+  };
   const read = (raw: string) => parseNumber(raw, separators);
   const isInvalid = invalid ?? field?.invalid ?? false;
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
@@ -122,10 +130,10 @@ export function NumberInput(
     if (focused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setText(value === null ? "" : write(value));
-    // `write` is created anew on every render and reads only `decimals` and
-    // `formats` - both are in the list.
+    // `write` is created anew on every render and reads only `decimals`,
+    // `grouping` and `formats` - all are in the list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, focused, decimals, formats]);
+  }, [value, focused, decimals, grouping, formats]);
 
   const commit = (next: number | null) => {
     if (next === null) {

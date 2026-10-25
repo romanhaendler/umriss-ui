@@ -39,6 +39,13 @@ export interface Formats {
    */
   number: (n: number, decimals?: number) => string;
   /**
+   * A number written with Intl's own options in the set's locale: a currency,
+   * a year without grouping, scientific notation. Pure Intl options - the
+   * `decimals` shorthand is expanded by `writeNumber` before it. Like the
+   * others it writes no negative zero unless the options set `signDisplay`.
+   */
+  numberWith: (n: number, options: Intl.NumberFormatOptions) => string;
+  /**
    * A count. Kept apart from `number` because it makes a different promise: a
    * count is whole, and Intl's own rounding (at most three decimal places) is
    * right for it and wrong for a measurement.
@@ -53,18 +60,29 @@ export interface Formats {
   relative: (ms: number) => string;
 }
 
-/** How a number is written: a share, a count, or a measurement to a number of places. */
-export type NumberFormat = "percent" | "count" | { decimals: number };
+/** Intl's number options, plus `decimals`: the shorthand for the minimum and the
+    maximum fraction digits. An Intl digit option given beside it wins. */
+export type NumberOptions = Intl.NumberFormatOptions & { decimals?: number };
+
+/** How a number is written: a share, a count, or Intl's options. */
+export type NumberFormat = "percent" | "count" | NumberOptions;
 
 /**
  * A number as its format says, through the set's own functions - so an
  * application's replaced `number`, `percent` or `count` is the one called.
- * No format is `number` without places.
+ * No format, or an object with only `decimals`, is `number`; every other
+ * object is `numberWith`.
  */
 export function writeNumber(formats: Formats, n: number, format?: NumberFormat): string {
   if (format === "percent") return formats.percent(n);
   if (format === "count") return formats.count(n);
-  return formats.number(n, typeof format === "object" ? format.decimals : undefined);
+  if (format === undefined) return formats.number(n);
+  const { decimals, ...intl } = format;
+  if (Object.keys(intl).length === 0) return formats.number(n, decimals);
+  return formats.numberWith(
+    n,
+    decimals === undefined ? intl : { minimumFractionDigits: decimals, maximumFractionDigits: decimals, ...intl },
+  );
 }
 
 /* The decimal places `number` writes without a digit count. */
@@ -117,9 +135,13 @@ export function formatsFor(locale: string): Formats {
      daylight-saving logic hangs on it (DatePicker/time.ts). */
   const offsetFormat = new Intl.DateTimeFormat(locale, { timeZoneName: "shortOffset" });
   const numberFormats = new Map<number | undefined, Intl.NumberFormat>();
-  const scientificFormat = new Intl.NumberFormat(locale, { notation: "scientific", maximumSignificantDigits: 10 });
-  const countFormat = new Intl.NumberFormat(locale);
-  const percentFormat = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
+  /* A negative that rounds to zero reads "0", never "-0". The compiler's Intl
+     typings do not list "negative" yet; every engine since 2023 has it. */
+  const noNegativeZero = { signDisplay: "negative" } as unknown as Intl.NumberFormatOptions;
+  const optionFormats = new Map<string, Intl.NumberFormat>();
+  const scientificFormat = new Intl.NumberFormat(locale, { ...noNegativeZero, notation: "scientific", maximumSignificantDigits: 10 });
+  const countFormat = new Intl.NumberFormat(locale, noNegativeZero);
+  const percentFormat = new Intl.NumberFormat(locale, { ...noNegativeZero, style: "percent", maximumFractionDigits: 0 });
   const collator = new Intl.Collator(locale);
   const relativeFormat = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
@@ -138,10 +160,20 @@ export function formatsFor(locale: string): Formats {
       let f = numberFormats.get(decimals);
       if (!f) {
         f = new Intl.NumberFormat(locale, {
+          ...noNegativeZero,
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals ?? DEFAULT_PLACES,
         });
         numberFormats.set(decimals, f);
+      }
+      return f.format(n);
+    },
+    numberWith: (n, options) => {
+      const key = JSON.stringify(options);
+      let f = optionFormats.get(key);
+      if (!f) {
+        f = new Intl.NumberFormat(locale, { ...noNegativeZero, ...options });
+        optionFormats.set(key, f);
       }
       return f.format(n);
     },
