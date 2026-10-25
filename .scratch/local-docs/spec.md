@@ -107,12 +107,14 @@ Pages site itself is switched off in the repository settings, by the user.
   root is derived from each package's `homepage`, and so is every absolute URL
   the site and the Markdown outputs write. The site's base path is kept as it
   is (`/umriss-ui/<package>/`, so the demos' builds, the forwarders and the
-  document links do not move) and is stated once in the demo shell's package
-  list, read by the build, the llms generator and the built-site probes alike.
-  Nothing that is generated names a host: links inside the site are
-  path-absolute; links the outlines spell out to the old address (the
-  ADR-0032 page constant, the charts' link to core's Language page) become
-  site addresses.
+  document links do not move). The site's address becomes one constant in the
+  demo shell's package list, `http://localhost:4170/umriss-ui/`: the address
+  `pnpm docs` serves, read by the build, the llms generator and the built-site
+  probes alike, where they read the manifests' `homepage` today. The site
+  itself may name that local address (canonical links, `llms.txt`, the
+  prerendered text); it never names the old hosted one. Links the outlines
+  spell out to the old address (the ADR-0032 page constant, the charts' links
+  to core's Language page) are built from the constant.
 - **The packaged `llms-full.md` resolves on its own.** It travels inside each
   npm package and is read without any site: a link from one page to another
   inside it points into the same file, and a link to anything else points at
