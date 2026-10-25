@@ -2,7 +2,7 @@
    every render, works out the layout (frameLayout.ts), wires the grid, and
    hands the body, the head and the foot their parts. */
 
-import { useId, useRef, useState, useSyncExternalStore } from "react";
+import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { CSSProperties } from "react";
 import { ControlSizeProvider, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
@@ -11,6 +11,7 @@ import type { Registry } from "./registry";
 import type { TableProps } from "./types";
 import { useLineMotion } from "./motion";
 import { GridContext, GridFocus, useGridState } from "./grid";
+import { rowLine } from "./model/gridWalk";
 import { frameGrid } from "./frameGrid";
 import { copyKeyHandler } from "./copyKey";
 import { CurrentRowContext, chooseRow } from "./currentRow";
@@ -18,6 +19,7 @@ import { warnOnce } from "./dev";
 import { CutValueTip } from "./cutValueTip";
 import {
   useCurrentRowInView,
+  useRevealedRow,
   useCutValueWarnings,
   useDraftOfVanishedRow,
   useFocusAfterFold,
@@ -72,6 +74,13 @@ export function Frame({
      (`PinPlacement`, `blocksThatStick`). */
   const [sticking, setSticking] = useState({ start: true, end: true });
 
+  useLayoutEffect(() => {
+    registry.setFrameTable(tableRef.current);
+    return () => {
+      registry.setFrameTable(null);
+    };
+  }, [registry]);
+
   useDraftOfVanishedRow(registry, grid);
   useStickyHeaderHeights(tableRef, stickyHeader);
   useFocusAfterFold(registry, tableRef);
@@ -79,6 +88,7 @@ export function Frame({
   useCutValueWarnings(tableRef);
   useVirtualPitch(registry, tableRef);
   useCurrentRowInView(registry, tableRef, currentRow);
+  useRevealedRow(registry, tableRef);
 
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
@@ -99,6 +109,18 @@ export function Frame({
   /* The toolbar's "New row" reaches the grid through the registry: this
      render's handler, over this render's lines. */
   registry.setAddRow(gridEvents?.addRow ?? null);
+
+  registry.setCellFocus(gridMode
+    ? {
+        columns: dataColumns.map((e) => e.spec.id),
+        put: (key, column) => {
+          const columnIndex = gridIds.indexOf(column);
+          const lineIndex = Math.max(1, gridLinesNow.findIndex((l) => l.key === rowLine(key)));
+          grid.setState((s) => ({ ...s, widget: false, active: { line: rowLine(key), column, lineIndex, columnIndex } }));
+          grid.focus.want("cell");
+        },
+      }
+    : null);
 
   if (onCurrentRowChange && !registry.rowHeader()) {
     warnOnce("currentRowHeader", "The keyboard cannot choose a row without a row header; mark a column `rowHeader` for `onCurrentRowChange`. The pointer still can.");

@@ -130,6 +130,20 @@ export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   });
 }
 
+/* A row `scrollToRow` asked for in a virtual window is shown at the nearest
+   edge once it stands in the document, the sticky head kept clear by the
+   scroll padding; the window renders it a render after the scroll. */
+export function useRevealedRow(registry: Registry, tableRef: TableRef) {
+  useLayoutEffect(() => {
+    const at = registry.reveal;
+    if (at === null) return;
+    const row = tableRef.current?.querySelector(`[data-row="${at}"]`);
+    if (!row) return;
+    registry.setReveal(null);
+    row.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  });
+}
+
 /* A current row that changes is brought into view (ADR-0071): its page
    opens, a virtual window renders it, the scroll area shows it at the
    nearest edge. A row already in view stays where it is, so a click in the
