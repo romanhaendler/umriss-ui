@@ -21,7 +21,7 @@ export default function LeaveAColumnOut() {
   const { Table, Column } = useTable(PEOPLE, { rowKey: (p) => p.name });
 
   return (
-    <Table ariaLabel="People by role">
+    <Table aria-label="People by role">
       <Toolbar>
         <Search placeholder="Search name or role" />
       </Toolbar>

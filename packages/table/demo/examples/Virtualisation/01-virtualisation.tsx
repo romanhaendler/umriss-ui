@@ -69,7 +69,7 @@ export default function Virtualisation() {
   return (
     <Stack gap={2}>
       <style>{STYLE}</style>
-      <Table className="request-log" selectable stickyHeader stickyRowHeader maxHeight="340px" ariaLabel="Requests">
+      <Table className="request-log" selectable stickyHeader stickyRowHeader maxHeight="340px" aria-label="Requests">
         <Toolbar>
           <Search placeholder="Request or service" />
         </Toolbar>

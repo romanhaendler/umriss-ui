@@ -27,7 +27,7 @@ export default function TheCurrentRow() {
 
   return (
     <Stack direction="row" gap={4} align="start" wrap>
-      <Table selectable ariaLabel="Machines" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
+      <Table selectable aria-label="Machines" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
         <Column value="name" label="Machine" rowHeader />
         <Column value="line" label="Line" />
         <Column value="state" label="State" />

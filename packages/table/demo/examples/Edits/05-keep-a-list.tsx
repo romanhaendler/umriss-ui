@@ -31,7 +31,7 @@ export default function KeepAList() {
     <Table
       grid
       editMode="row"
-      ariaLabel="Stores"
+      aria-label="Stores"
       newRow={() => ({ kind: "Spare part", stock: 0 })}
       onRowSave={({ rowKey, changes }) => setItems((all) => all.map((i) => (i.id === rowKey ? { ...i, ...changes } : i)))}
       onRowAdd={({ values }) => setItems((all) => [...all, { id: `i${++next}`, ...(values as Omit<Item, "id">) }])}

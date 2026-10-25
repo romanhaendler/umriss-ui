@@ -644,7 +644,7 @@ export default function ControlRoom() {
 
       <Region id="room-alarms" title="Alarms" quiet callout="4">
         <Stack gap={2}>
-          <Table selectable ariaLabel="Alarms">
+          <Table selectable aria-label="Alarms">
             <Column value="raised" label="Raised">
               {(raised) => clock(raised)}
             </Column>

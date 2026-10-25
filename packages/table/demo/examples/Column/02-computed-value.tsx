@@ -19,7 +19,7 @@ export default function ComputedValue() {
   const { Table, Column } = useTable(LINES, { rowKey: (l) => l.description });
 
   return (
-    <Table ariaLabel="Invoice lines">
+    <Table aria-label="Invoice lines">
       <Column value="description" label="Description" rowHeader />
       <Column value="quantity" label="Quantity" />
       <Column value="unitPrice" label="Unit price (€)" format={{ decimals: 2 }} />

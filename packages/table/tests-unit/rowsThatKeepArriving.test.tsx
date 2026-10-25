@@ -51,7 +51,7 @@ function Plant({
   capture(t);
   const { Table: Frame, Column } = t;
   return (
-    <Frame ariaLabel="Loops" grid={grid} editMode={editMode} onRowSave={() => undefined} selectable={selectable} maxHeight={virtual ? "100px" : undefined}>
+    <Frame aria-label="Loops" grid={grid} editMode={editMode} onRowSave={() => undefined} selectable={selectable} maxHeight={virtual ? "100px" : undefined}>
       {selectable && <Toolbar />}
       <Column value="name" label="Loop" rowHeader />
       <Column value="level" label="Level" edit="number" />

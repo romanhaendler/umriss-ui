@@ -160,7 +160,7 @@ export default function PageThroughShipments() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id, pageSize: 10 });
 
   return (
-    <Table ariaLabel="Today's shipments">
+    <Table aria-label="Today's shipments">
       <Toolbar>
         <Search placeholder="Search customer" />
       </Toolbar>

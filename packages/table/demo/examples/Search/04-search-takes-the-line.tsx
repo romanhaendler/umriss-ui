@@ -20,7 +20,7 @@ export default function SearchTakesTheLine() {
   const { Table, Column } = useTable(PEOPLE, { rowKey: (p) => p.name });
 
   return (
-    <Table ariaLabel="Apps team">
+    <Table aria-label="Apps team">
       <Toolbar>
         <Search grow placeholder="Search people" />
         <ColumnMenu />

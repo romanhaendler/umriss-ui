@@ -28,7 +28,7 @@ const dayOf = (d: Date) => `${d.getDate()} March, ${d.toLocaleDateString("en-GB"
 export default function KeyThatIsNoColumn() {
   const { Table, Column, GroupBy } = useTable(INCIDENTS, { rowKey: (i) => i.id, defaultGrouping: "day" });
   return (
-    <Table ariaLabel="Incidents by day">
+    <Table aria-label="Incidents by day">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>

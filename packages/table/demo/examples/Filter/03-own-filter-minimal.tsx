@@ -34,7 +34,7 @@ export default function OwnFilterMinimal() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id });
 
   return (
-    <Table ariaLabel="Invoices">
+    <Table aria-label="Invoices">
       <Column value="id" label="Invoice" rowHeader />
       <Column value="supplier" label="Supplier" />
       <Column value="due" label="Due" format="date" filter={overdue} />

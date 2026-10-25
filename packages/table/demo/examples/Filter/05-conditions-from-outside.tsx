@@ -60,7 +60,7 @@ export default function ConditionsFromOutside() {
         </Button>
       </Stack>
 
-      <Table ariaLabel="Shipments">
+      <Table aria-label="Shipments">
         <Toolbar>
           <Search placeholder="Shipment or customer" />
         </Toolbar>

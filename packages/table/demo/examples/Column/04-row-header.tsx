@@ -22,7 +22,7 @@ export default function RowHeader() {
 
   return (
     <Stack gap={3}>
-      <Table selectable ariaLabel="Incidents">
+      <Table selectable aria-label="Incidents">
         <Toolbar>
           <ColumnMenu />
         </Toolbar>
