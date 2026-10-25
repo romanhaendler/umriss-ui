@@ -53,6 +53,14 @@
     border-radius: var(--u-radius-sm);
   }
 
+  /* Under a finger no button is narrower than the 24 px floor (ADR-0070); a
+     one-glyph label at `sm` would be. */
+  @media (pointer: coarse) {
+    .button {
+      min-width: 24px;
+    }
+  }
+
   /* IconButton: a square of the control height, the icon at its centre. It
      does not give in a crowded row - a squeezed square is no longer one. An
      icon font's glyph takes the icon size through the type size. */
