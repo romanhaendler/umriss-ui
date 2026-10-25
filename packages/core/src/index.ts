@@ -54,6 +54,8 @@ export * from "./lib/limit";
 export * from "./lib/freshness";
 export * from "./lib/useFreshness";
 export * from "./lib/useContextMenuTrigger";
+export { createLongPress } from "./lib/longPress";
+export type { LongPress, PressPoint, PressPointer } from "./lib/longPress";
 
 /* The context menu stands at the end for the same rule. It
    brings no stylesheet of its own - it wears the menu's - so no baseline can

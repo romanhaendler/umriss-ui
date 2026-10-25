@@ -1,11 +1,12 @@
-/* The long press under a finger, one detector for the Tooltip and
-   `useContextMenuTrigger`: a touch pointer held 500 ms within 10 px.
+/* The long press under a finger, one detector for the Tooltip,
+   `useContextMenuTrigger` and the schedule: a touch pointer held 500 ms within
+   10 px.
 
    The click that ends such a press is swallowed, and so is the `contextmenu`
    that Android fires for it (iOS fires none). Both belong to the press, so the
    target never sees them. A mouse and a pen are never a press. */
 
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 
 const HOLD = 500;
@@ -17,6 +18,91 @@ const CLICK_WINDOW = 500;
 export interface PressPoint {
   x: number;
   y: number;
+}
+
+/** What the detector reads of a pointer event - a DOM or a React one fits. */
+export interface PressPointer {
+  readonly pointerType: string;
+  readonly clientX: number;
+  readonly clientY: number;
+}
+
+/** A press detector over pointer events; see `createLongPress`. */
+export interface LongPress {
+  /** Arms the press when the pointer is a finger; a mouse and a pen never press. */
+  pointerDown(event: PressPointer): void;
+  /** Cancels a press that is not yet held once the finger has left its 10 px. */
+  pointerMove(event: PressPointer): void;
+  /** Ends a press: a held one calls `onEnd`, and its click is then swallowed. */
+  pointerUp(): void;
+  /** As `pointerUp`, for `pointercancel`. */
+  pointerCancel(): void;
+  /** Whether this click belongs to a press and must not reach the target: true
+      once for the click that ends a held press. Call `preventDefault` and
+      `stopPropagation` on the event when it is. */
+  swallows(): boolean;
+  /** Whether the last pointer was a finger - the `contextmenu` of such a
+      pointer is the press's, not a right-click. */
+  touching(): boolean;
+  /** Drops the timer. Call it when the target goes away. */
+  dispose(): void;
+}
+
+/**
+ * The one long-press detector, a plain function over pointer events so that
+ * code outside React can use it. `onPress` fires once, with the finger's point
+ * in client coordinates, when a touch pointer has been held 500 ms within 10 px;
+ * `onEnd` fires when a press that has fired is lifted or cancelled. A move
+ * beyond 10 px, a lift and `pointercancel` before the hold cancel it silently.
+ */
+export function createLongPress(onPress: (at: PressPoint) => void, onEnd?: () => void): LongPress {
+  const s = {
+    timer: null as ReturnType<typeof setTimeout> | null,
+    at: { x: 0, y: 0 },
+    touch: false,
+    fired: false,
+    swallowUntil: 0,
+  };
+  const clear = () => {
+    if (s.timer) clearTimeout(s.timer);
+    s.timer = null;
+  };
+  const end = () => {
+    clear();
+    if (!s.fired) return;
+    s.fired = false;
+    s.swallowUntil = Date.now() + CLICK_WINDOW;
+    onEnd?.();
+  };
+  return {
+    pointerDown(event) {
+      clear();
+      s.fired = false;
+      s.swallowUntil = 0;
+      s.touch = event.pointerType === "touch";
+      if (!s.touch) return;
+      s.at = { x: event.clientX, y: event.clientY };
+      s.timer = setTimeout(() => {
+        s.timer = null;
+        s.fired = true;
+        s.swallowUntil = Infinity;
+        onPress(s.at);
+      }, HOLD);
+    },
+    pointerMove(event) {
+      if (!s.timer) return;
+      if (Math.hypot(event.clientX - s.at.x, event.clientY - s.at.y) > SLOP) clear();
+    },
+    pointerUp: end,
+    pointerCancel: end,
+    swallows() {
+      if (Date.now() >= s.swallowUntil) return false;
+      s.swallowUntil = 0;
+      return true;
+    },
+    touching: () => s.touch,
+    dispose: clear,
+  };
 }
 
 /** The handlers of a press, to spread on the pressed element. */
@@ -39,65 +125,30 @@ export function useLongPress(onPress: (at: PressPoint) => void, onEnd?: () => vo
   useLayoutEffect(() => {
     callbacks.current = { onPress, onEnd };
   });
-  const state = useRef({
-    timer: null as ReturnType<typeof setTimeout> | null,
-    at: { x: 0, y: 0 },
-    touch: false,
-    fired: false,
-    swallowUntil: 0,
-  });
-
-  const clear = useCallback(() => {
-    const s = state.current;
-    if (s.timer) clearTimeout(s.timer);
-    s.timer = null;
-  }, []);
-
-  const end = useCallback(() => {
-    const s = state.current;
-    clear();
-    if (!s.fired) return;
-    s.fired = false;
-    s.swallowUntil = Date.now() + CLICK_WINDOW;
-    callbacks.current.onEnd?.();
-  }, [clear]);
+  /* The detector outlives the renders and reads the ref only when it fires. */
+  /* eslint-disable react-hooks/refs */
+  const press = useMemo(
+    () => createLongPress((at) => callbacks.current.onPress(at), () => callbacks.current.onEnd?.()),
+    [],
+  );
+  /* eslint-enable react-hooks/refs */
 
   const handlers: LongPressHandlers = useMemo(
     () => ({
-      onPointerDown: (event) => {
-        const s = state.current;
-        clear();
-        s.fired = false;
-        s.swallowUntil = 0;
-        s.touch = event.pointerType === "touch";
-        if (!s.touch) return;
-        s.at = { x: event.clientX, y: event.clientY };
-        s.timer = setTimeout(() => {
-          s.timer = null;
-          s.fired = true;
-          s.swallowUntil = Infinity;
-          callbacks.current.onPress(s.at);
-        }, HOLD);
-      },
-      onPointerMove: (event) => {
-        const s = state.current;
-        if (!s.timer) return;
-        if (Math.hypot(event.clientX - s.at.x, event.clientY - s.at.y) > SLOP) clear();
-      },
-      onPointerUp: end,
-      onPointerCancel: end,
+      onPointerDown: press.pointerDown,
+      onPointerMove: press.pointerMove,
+      onPointerUp: press.pointerUp,
+      onPointerCancel: press.pointerCancel,
       onClickCapture: (event) => {
-        const s = state.current;
-        if (Date.now() >= s.swallowUntil) return;
-        s.swallowUntil = 0;
+        if (!press.swallows()) return;
         event.preventDefault();
         event.stopPropagation();
       },
     }),
-    [clear, end],
+    [press],
   );
 
-  useLayoutEffect(() => clear, [clear]);
+  useLayoutEffect(() => press.dispose, [press]);
 
-  return { handlers, touching: () => state.current.touch };
+  return { handlers, touching: press.touching };
 }
