@@ -156,7 +156,7 @@ export default function SearchCheckAndReveal() {
               With checks and a search
             </Text>
             <TreeSearch tree={withChecks} aria-label="Search the filing" size="sm" />
-            <TreeView tree={withChecks} ariaLabel="Filing with a selection" checkable>
+            <TreeView tree={withChecks} aria-label="Filing with a selection" checkable>
               {(e) => e.node.name}
             </TreeView>
             <Text size="xs" tone="muted">
@@ -169,7 +169,7 @@ export default function SearchCheckAndReveal() {
               A search with the path
             </Text>
             <TreeSearch tree={searched} aria-label="Search the filing" size="sm" />
-            <TreeView tree={searched} ariaLabel="Filing, searched">
+            <TreeView tree={searched} aria-label="Filing, searched">
               {(e) => e.node.name}
             </TreeView>
           </Stack>
@@ -194,7 +194,7 @@ export default function SearchCheckAndReveal() {
                 Reveal sheet 33.2
               </Button>
             </Stack>
-            <TreeView tree={large} ariaLabel="Large body" style={{ height: 240 }}>
+            <TreeView tree={large} aria-label="Large body" style={{ height: 240 }}>
               {(e) => e.node.name}
             </TreeView>
             <Text size="xs" tone="muted">
@@ -206,7 +206,7 @@ export default function SearchCheckAndReveal() {
             <Text size="xs" tone="muted">
               Active node only
             </Text>
-            <TreeView tree={activeOnly} ariaLabel="Filing for navigation">
+            <TreeView tree={activeOnly} aria-label="Filing for navigation">
               {(e) => e.node.name}
             </TreeView>
             <Text size="xs" tone="muted">
