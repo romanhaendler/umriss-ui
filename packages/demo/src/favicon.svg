@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <!-- The site's favicon: a "u" in an outlined rounded square, in the ink of
        the tokens; a dark tab gets the dark theme's ink. Linked from every
-       demo's index.html and from the front page (scripts/build-pages.mjs). -->
+       demo's index.html and from the front page (scripts/build-site.mjs). -->
   <style>
     g { stroke: #171717; }
     @media (prefers-color-scheme: dark) { g { stroke: #ededed; } }

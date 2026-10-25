@@ -3,7 +3,7 @@
   A forwarder has no
    Markdown twin; every page does.
 
-   `scripts/build-pages.mjs` writes the forwarders and runs the guard over
+   `scripts/build-site.mjs` writes the forwarders and runs the guard over
    what it wrote; both stand here and not there so that a unit test reaches
    them. It runs in Node and imports nothing but `escape.ts`. */
 
@@ -72,6 +72,16 @@ export function siteFaults(urls: readonly string[], forwarders: readonly Forward
       return html.includes(`<link rel="canonical" href="${to}"`) && html.includes('<meta name="robots" content="noindex"') ? [] : [`${url}: no canonical to ${to} or no noindex`];
     }),
   ];
+}
+
+/** The host the site once ran on. No file the build writes may name it: the
+    documentation is read where it is built, and a link to the old host would
+    lead nowhere. */
+export const HOSTED_HOST = ["romanhaendler", "github", "io"].join("."); // spelled in parts: no live file names the address whole
+
+/** Every file of the built site that names the old host, by its address. */
+export function hostedFaults(texts: ReadonlyMap<string, string>): string[] {
+  return [...texts].filter(([, text]) => text.includes(HOSTED_HOST)).map(([url]) => `${url}: names ${HOSTED_HOST}`);
 }
 
 /* The front page's fixed words that the guard holds it to:

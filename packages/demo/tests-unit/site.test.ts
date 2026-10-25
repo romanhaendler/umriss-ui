@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { SEARCH_BUDGET, apiIndexFaults, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
+import { SEARCH_BUDGET, apiIndexFaults, documentFaults, forwarderHtml, frontFaults, HOSTED_HOST, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -357,5 +357,15 @@ describe("the API index's guard (ADR-0044)", () => {
       `${api}: no element with the id type-Series`,
     ]);
     expect(apiIndexFaults(`${HOME}gone/`, ["Chart"], index)).toEqual([`${HOME}gone/: no API index`]);
+  });
+});
+
+describe("the old hosted address", () => {
+  it("is a fault in any file the build wrote, and nowhere else", () => {
+    const written = new Map([
+      [`${HOME}`, "<a href=\"http://localhost:4170/umriss-ui/\">here</a>"],
+      [`${HOME}llms.txt`, `see https://${HOSTED_HOST}/umriss-ui/charts/`],
+    ]);
+    expect(hostedFaults(written)).toEqual([`${HOME}llms.txt: names ${HOSTED_HOST}`]);
   });
 });

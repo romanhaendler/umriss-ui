@@ -1,4 +1,4 @@
-/* The site on GitHub Pages: the six demos under one address, each in a
+/* The site `pnpm docs` serves: the six demos under one address, each in a
    directory of its own, and a page in front that points at every page of them.
 
      site/index.html            the front page - the hub (scripts/front-page.html)
@@ -14,7 +14,6 @@
      site/<package>/search.json the package's search fragment
      site/search.json           the five fragments in one: the palette's index of the
                                 whole site
-     site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
      site/fonts/                the front page's Geist (each demo bundles its own copy)
      site/previews/             the front page's tiles: each package's first scenario,
@@ -30,23 +29,20 @@
    build carries in `dist-demo` as its public files -
    the dev server serves them from there too.
 
-   The demos are built with the absolute base their homepage names
+   The demos are built with the absolute base the site's address gives them
    (`/umriss-ui/core/`): a page two directories deep must find the same assets.
-   The site therefore runs under that path only - `npx serve` on a directory
-   named `umriss-ui` above `site/`, not on `site/` itself.
+   The site therefore runs under that path only, as `pnpm docs` serves it
+   (`scripts/docs.mjs`).
 
    The vite configs of the demos stay untouched: the screenshot suites build
    them with the default base, and nothing here should move a baseline.
-
-   Search Console and Bing prove the site is ours by a file at its root; those
-   files stand in `scripts/site-verification/` and are copied as they are.
 
    The documents are the workspace's own markdown - the design language, the
    standards, what umriss-ui is not, each package's changelog - read and rendered here, never copied
    (ADR-0046). Their list stands in
    `packages/demo/src/tooling/documents.ts`.
 
-   Run: `pnpm build:pages`. The forwarders and the guard come from the demo's
+   Run: `pnpm build:site`; `pnpm docs` builds and serves. The forwarders and the guard come from the demo's
    tooling (`packages/demo/src/tooling/site.ts`). */
 
 import { execFileSync } from "node:child_process";
@@ -55,10 +51,11 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
-   imports nothing (and why `build:pages` strips types). */
+   imports nothing (and why `build:site` strips types). */
+import { SITE as HOME } from "../packages/demo/src/address.ts";
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
+import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, HOSTED_HOST, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
@@ -68,16 +65,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
 const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
 const PACKAGES = LIST.map((p) => p.id);
-/* The site's address is the one above every package's homepage - read from
-   the manifests, which already carry it, rather than written a second time. */
-const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0], "package.json"), "utf8")).homepage).href;
-
-/* The picture a link to any page shows where it is shared, 1200 x 630: core's
-   controls opened - a date range picker, a multi-select, the command palette,
-   a tree - above parts of the kiln scenario for the other packages. One for
-   every page - it is taken by hand, so it is renewed by hand when they change. */
-const PREVIEW = "og-image.png";
-const PREVIEW_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, a table of alerts, a production plan and an OEE calculation.";
 
 /* The front page's tiles: each package's first scenario, light and dark,
    1200 x 750 - photographed by `pnpm previews` (scripts/previews.mjs) and
@@ -95,16 +82,6 @@ function headOf({ title, description, url }) {
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}" />`,
     `<link rel="canonical" href="${escape(url)}" />`,
-    `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="umriss-ui" />`,
-    `<meta property="og:title" content="${escape(title)}" />`,
-    `<meta property="og:description" content="${escape(description)}" />`,
-    `<meta property="og:url" content="${escape(url)}" />`,
-    `<meta property="og:image" content="${HOME}${PREVIEW}" />`,
-    `<meta property="og:image:width" content="1200" />`,
-    `<meta property="og:image:height" content="630" />`,
-    `<meta property="og:image:alt" content="${escape(PREVIEW_ALT)}" />`,
-    `<meta name="twitter:card" content="summary_large_image" />`,
   ].join("\n    ");
 }
 
@@ -159,7 +136,7 @@ const leaks = [];
 for (const dir of PACKAGES) {
   const packageDir = join(ROOT, "packages", dir);
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
-  const base = new URL(manifest.homepage).pathname;
+  const base = new URL(`${dir}/`, HOME).pathname;
   execFileSync("pnpm", ["--filter", manifest.name, "run", "build:demo", "--base", base], { cwd: ROOT, stdio: "inherit" });
   const out = join(SITE, dir);
   cpSync(join(packageDir, "dist-demo"), out, { recursive: true });
@@ -200,7 +177,9 @@ for (const dir of PACKAGES) {
    not its manifest's version - a release without its entry. */
 const adrs = adrLinksOf(readdirSync(join(ROOT, "docs", "adr")));
 const documents = DOCUMENTS.map((document) => {
-  const markdown = readFileSync(join(ROOT, document.source), "utf8");
+  /* A changelog's old entries link the address the site once had; the
+     entries stay as written, the page leads to the same page here. */
+  const markdown = readFileSync(join(ROOT, document.source), "utf8").replaceAll(`https://${HOSTED_HOST}/umriss-ui/`, HOME);
   return {
     ...document,
     url: HOME + document.path,
@@ -249,7 +228,6 @@ const front = {
   tokens: readFileSync(join(ROOT, "packages", "core", "src", "styles", "tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\n\s*\n/g, "\n"),
   packages: LIST.map((p) => `<a href="./${p.id}/">${escape(p.name)}</a>`).join(""),
   install: escape(installCommand(rows[0])),
-  collageAlt: escape(PREVIEW_ALT),
   /* One tile a package, in the list's order: its first scenario in either
      theme (the CSS shows one), what it is and what it needs. The first of
      the list, core, is where to start. */
@@ -330,7 +308,7 @@ ${urls.map((url) => `  <url><loc>${escape(url)}</loc><lastmod>${today}</lastmod>
 const search = siteSearch(PACKAGES.map((dir) => readFileSync(join(SITE, dir, "search.json"), "utf8")));
 writeFileSync(join(SITE, "search.json"), search);
 
-/* An address that is no page. GitHub Pages serves this file for it; there is
+/* An address that is no page. `pnpm docs` serves this file for it; there is
    no fallback to a demo's index.html as in the dev server. */
 writeFileSync(
   join(SITE, "404.html"),
@@ -393,7 +371,7 @@ ${documents
    version on each changelog (concepts-and-changelog-pages); every find of
    the search lands on a sitemap page and an anchor it carries, and the index
    keeps its budget (one-search). A build that breaks
-   it fails here, before it is deployed. */
+   it fails here, before the site is served. */
 const files = new Map();
 const texts = new Map();
 const images = new Map();
@@ -408,6 +386,11 @@ const walk = (dir) => {
   }
 };
 walk(SITE);
+/* Everything the build wrote that is text - the demos' bundles included. */
+const written = new Map();
+for (const file of readdirSync(SITE, { recursive: true, encoding: "utf8" })) {
+  if (/\.(html|md|txt|json|xml|js|css|svg)$/.test(file)) written.set(HOME + file.split(sep).join("/"), readFileSync(join(SITE, file), "utf8"));
+}
 const sitePath = new URL(HOME).pathname;
 const linksFavicon = (html, url) => {
   const href = /<link rel="icon"[^>]* href="([^"]+)"/.exec(html)?.[1];
@@ -461,17 +444,11 @@ const faults = [
      entries export has an element with its anchor on its API index. */
   ...rows.flatMap((row) => {
     const index = join(ROOT, "packages", row.dir, "demo", ".generated", "api-index.json");
-    return existsSync(index) ? apiIndexFaults(`${row.homepage}api/`, JSON.parse(readFileSync(index, "utf8")).anchors, files) : [];
+    return existsSync(index) ? apiIndexFaults(`${HOME}${row.dir}/api/`, JSON.parse(readFileSync(index, "utf8")).anchors, files) : [];
   }),
+  ...hostedFaults(written),
   ...leaks,
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);
-
-/* The consoles' proof of ownership, where there is one. */
-const VERIFICATION = join(ROOT, "scripts", "site-verification");
-if (existsSync(VERIFICATION)) {
-  for (const file of readdirSync(VERIFICATION)) cpSync(join(VERIFICATION, file), join(SITE, file));
-}
-cpSync(join(ROOT, "scripts", PREVIEW), join(SITE, PREVIEW));
 
 console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, ${documents.length} documents, index.html, sitemap.xml and llms.txt - ${urls.length} addresses, ${forwarders.length} forwarded.`);

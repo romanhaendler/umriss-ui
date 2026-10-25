@@ -18,6 +18,7 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
 import { ADR_0032, SCENARIOS, addressOfPlace, addresses, keyboardAnchor, keysOfText, twinOfPlace } from "../outline.ts";
@@ -29,6 +30,7 @@ import { pageTitle } from "./title.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
+import { SITE } from "../address.ts";
 import { PACKAGES } from "../packages.ts";
 import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fencedCode as fenced, markdownCell as cell, markdownCode as code } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
@@ -36,7 +38,7 @@ import { adrLinks } from "./props.ts";
 import { exportedDeclarations } from "./exportDocs.ts";
 import { apiMd } from "./apiMd.ts";
 import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, linkedNames, type ApiIndexModel, type Mention } from "./apiIndex.ts";
-import { linkAdrs, linkApiNames, linkReferences, outlineTexts } from "./references.ts";
+import { ADR_HOME, linkAdrs, linkApiNames, linkReferences, outlineTexts } from "./references.ts";
 import { exportEntries, plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
 
 export interface LlmsJob {
@@ -367,7 +369,7 @@ function fullHead({ manifest, install }: Run): string[] {
     "",
     `> ${manifest.description}`,
     "",
-    `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do. The pages index stands in ${manifest.homepage}llms.txt.`,
+    `Install with \`${install}\`. This text is generated from the package's demo: every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do.`,
   ];
 }
 
@@ -589,10 +591,44 @@ function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): 
   return { sitePages, twins };
 }
 
+/** The full text as it travels in the npm package, read without any site: a
+    link to another page of the package points at that page's heading in the
+    same file, the one document it names (ADR-0032) at its file on GitHub, and
+    a link to anything else keeps only its text. The "Demo page" lines name
+    the site and go. Applied to the text after it is made, so that the site's
+    pages and twins, cut from the unchanged text, keep their addresses. */
+function packagedText({ manifest, pages, scenarios }: Run, full: string): string {
+  const slug = (title: string) => title.toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/ /g, "-");
+  const own = manifest.homepage;
+  const root = own.replace(/[^/]+\/$/, "");
+  const adr = readdirSync(fileURLToPath(new URL("../../../../docs/adr/", import.meta.url))).find((name) => name.startsWith("0032-"));
+  /* A place below this package's address, as the heading it names. */
+  const heading = (place: string): string | undefined => {
+    const [first, second] = place.split("/").filter((segment) => segment !== "");
+    if (first === undefined || (first === SCENARIOS && second === undefined)) return slug("Scenarios");
+    if (first === SCENARIOS) return scenarios.some((one) => one.id === second) ? slug(scenarios.find((one) => one.id === second)!.title) : undefined;
+    const page = pages.find((one) => one.id === first);
+    return page === undefined ? undefined : slug(page.name);
+  };
+  return full
+    .replace(/\n\nDemo page: [^\n]*\n/g, "\n")
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (link, text: string, href: string) => {
+      const place = href.startsWith("#/") ? href.slice(2) : href.startsWith(own) ? href.slice(own.length) : undefined;
+      if (place !== undefined) {
+        const target = heading(place.split("#")[0]!);
+        return target === undefined ? text : `[${text}](#${target})`;
+      }
+      if (!href.startsWith(root)) return link;
+      return href.slice(root.length).split("#")[0] === "what-umriss-ui-is-not/" && adr !== undefined ? `[${text}](${ADR_HOME}${adr})` : text;
+    });
+}
+
 /** Both texts of one package, from its directory. Pure apart from reading. */
 export function renderLlms({ packageDir, outline: written, tables, moved = {}, references = {} }: LlmsJob): {
   index: string;
   full: string;
+  /** The full text as the npm package carries it: no address of the site. */
+  packaged: string;
   pages: SitePage[];
   forwarders: Forwarder[];
   twins: Twin[];
@@ -601,7 +637,11 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   /** The API index the app mounts, where the outline has one. */
   apiIndex?: ApiIndexModel;
 } {
-  const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
+  const read = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
+  /* A package's `homepage` is its README; its place on the site is below the
+     site's address. A homepage that is itself a directory address names its
+     own place - the fixture of the generator's tests does. */
+  const manifest: Manifest = { ...read, homepage: read.homepage.endsWith("/") ? read.homepage : `${SITE}${read.name.split("/")[1]}/` };
   const demoDir = join(packageDir, "demo");
   /* Every ADR number a text names, as a link to its file - as the shell
      shows the same texts (`references.ts`) - and every hook and function
@@ -685,12 +725,13 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     ...(apiIndex === undefined ? [] : exportEntries(packageId, apiIndex)),
   ];
 
-  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search, ...(apiIndex === undefined ? {} : { apiIndex }) };
+  const full = `${parts.join("\n")}\n`;
+  return { index, full, packaged: packagedText(run, full), pages: sitePages, forwarders, twins, search, ...(apiIndex === undefined ? {} : { apiIndex }) };
 }
 
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
     `forwarders.json` (the site's pages and the forwarders at old addresses,
-    which `scripts/build-pages.mjs` writes out), `search.json` (the
+    which `scripts/build-site.mjs` writes out), `search.json` (the
     package's search fragment, which the palette loads), every page's Markdown twin
     under `demo/.generated/twins/` (the demo's public files, so that the dev
     server serves them and the build carries them beside the pages),
@@ -702,7 +743,7 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   /* The reference tables' ADR numbers as links, for the text, the pages and
      the `references.json` the app mounts alike. */
   const job = given.references === undefined ? given : { ...given, references: linkReferences(given.references, adrLinks()) };
-  const { index, full, pages, forwarders, twins, search, apiIndex } = renderLlms(job);
+  const { index, packaged, pages, forwarders, twins, search, apiIndex } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
@@ -711,7 +752,7 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   writeFileSync(join(dirname(indexPath), "pages.json"), JSON.stringify(pages), "utf8");
   writeFileSync(join(dirname(indexPath), "forwarders.json"), JSON.stringify(forwarders), "utf8");
   writeFileSync(join(dirname(indexPath), "search.json"), JSON.stringify(search), "utf8");
-  writeFileSync(fullPath, full, "utf8");
+  writeFileSync(fullPath, packaged, "utf8");
   /* Anew every time: a page that is gone must not leave its twin behind. */
   const twinsDir = join(dirname(indexPath), "twins");
   rmSync(twinsDir, { recursive: true, force: true });
@@ -730,6 +771,6 @@ export function generateLlms(given: LlmsJob): SitePage[] {
     throw new Error(`\`${apiFile}\` is out of date. Rewrite it with \`pnpm --filter ${JSON.parse(readFileSync(join(job.packageDir, "package.json"), "utf8")).name} props\` and commit it.`);
   }
   process.stdout.write(`API.md: ${Math.round(Buffer.byteLength(apiText) / 1024)} kB.\n`);
-  process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
+  process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(packaged) / 1024)} kB.\n`);
   return pages;
 }

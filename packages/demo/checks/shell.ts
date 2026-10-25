@@ -26,6 +26,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { STANDARDS, findings } from "./accessibility";
 import { pageTitle, type TitleManifest } from "../src/tooling/title";
+import { SITE } from "../src/address";
 import { PACKAGES } from "../src/packages";
 
 interface NamedPage {
@@ -102,17 +103,15 @@ export interface ShellProbes {
 
 /* ON THE BUILT SITE. A demo of the test build stands
    alone at `/`, with no site above it, and searches its own package only. The
-   other four come from the site's index, which only `pnpm build:pages`
+   other four come from the site's index, which only `pnpm build:site`
    writes. These probes hand that build (`site/`) to the browser at the site's
    own address - by route, without a server or a port - and are skipped where
    it has not been built. */
 const SITE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "site");
 
-/** Serves `site/` at the site's address - the one above the package's
-    homepage - and hands that address back. */
+/** Serves `site/` at the site's address and hands that address back. */
 async function serveSite(page: Page): Promise<string> {
-  const manifest = JSON.parse(readFileSync(join(test.info().project.testDir, "..", "package.json"), "utf8")) as { homepage: string };
-  const home = new URL("../", manifest.homepage);
+  const home = new URL(SITE);
   await page.route(`${home.href}**`, (route) => {
     const rest = decodeURIComponent(new URL(route.request().url()).pathname.slice(home.pathname.length));
     const file = join(SITE_DIR, rest === "" || rest.endsWith("/") ? `${rest}index.html` : rest);
@@ -673,7 +672,7 @@ test(`an export's name finds its entry in the API index: ${p.exported.label}`, a
 
 for (const elsewhere of p.elsewhere ?? []) {
   test(`on the built site, the palette finds another package's ${elsewhere.label} and opens it at its address`, async ({ page }) => {
-    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:site`)");
     const home = await serveSite(page);
     await page.goto(`${home}${p.packageId}/`);
     const index = page.waitForResponse(`${home}search.json`);
@@ -698,7 +697,7 @@ for (const elsewhere of p.elsewhere ?? []) {
 
 if (p.elsewhere !== undefined) {
   test("on the built site, without its index the palette still searches the own package, silently", async ({ page }) => {
-    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:site`)");
     const home = await serveSite(page);
     await page.route(`${home}search.json`, (route) => route.abort());
     await page.goto(`${home}${p.packageId}/`);
@@ -1168,7 +1167,7 @@ test("on the built site, German chosen in core is still on in this demo", async 
   /* The demos share the site's origin and so the one stored choice. A demo of
      the test build stands at its own port, so only the built site shows it. */
   test.skip(p.language === undefined || p.packageId === "core", "core chooses, the other demos with the switch follow");
-  test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+  test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:site`)");
   const home = await serveSite(page);
   await page.goto(`${home}core/`);
   await languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true }).click();

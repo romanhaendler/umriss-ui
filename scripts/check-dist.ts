@@ -15,7 +15,8 @@
    - and a strict consumer compiles against the declarations of every entry,
      under `bundler` and `node10` resolution,
    - and an import of any entry that uses nothing leaves a residue under the
-     budget (`residue.ts`).
+     budget (`residue.ts`),
+   - and the packed `docs/llms-full.md`, read without any site, names none.
 
    Run from a package directory: `node --experimental-strip-types
    ../../scripts/check-dist.ts <entry.js> <stylesheet.css>` - the packages call
@@ -45,6 +46,11 @@ const entries = new Set(
 for (const file of entries) {
   if (!readFileSync(file, "utf8").startsWith(`"use client";\n`)) problems.push(`${file} does not begin with "use client"`);
 }
+
+/* The documentation travels inside the package and is read without the site:
+   an address of the site in it would lead nowhere. */
+const documentation = readFileSync(join("docs", "llms-full.md"), "utf8");
+if (/localhost:4170|github\.io/.test(documentation)) problems.push("docs/llms-full.md names a site address");
 
 const js = readFileSync(join("dist", entry), "utf8");
 if (!js.startsWith(`"use client";\nimport "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} right after the directive`);

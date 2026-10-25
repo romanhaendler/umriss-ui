@@ -27,7 +27,13 @@
    bar, and on the site, where a forwarder stands at the old path.
 
    This file runs without a bundler too: the props generator loads a demo's
-   outline in Node. That is why it imports nothing. */
+   outline in Node. That is why it imports nothing but the site's address,
+   which imports nothing itself. */
+
+import { SITE } from "./address.ts";
+
+/** The address of the site, for the texts of an outline that link its pages. */
+export { SITE };
 
 /** A page this demo does not have: a component of a neighbouring package,
     linked into that package's demo. */
@@ -162,7 +168,7 @@ export function placeOfLocation(path: string, hash: string): string {
 /** The record of what umriss is not - every page's known limits point there,
     and every mention of ADR-0032: its page on the site, rendered from the ADR
     (ADR-0046), not its file on GitHub. */
-export const ADR_0032 = "https://romanhaendler.github.io/umriss-ui/what-umriss-ui-is-not/";
+export const ADR_0032 = `${SITE}what-umriss-ui-is-not/`;
 
 /** Is it a neighbour's page as `{ name, page }`? */
 export function isForeign(value: unknown): value is ForeignPage {

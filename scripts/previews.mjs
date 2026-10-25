@@ -1,11 +1,11 @@
 /* The front page's tile previews: each package's
    first scenario, light and dark, 1200 x 750 - ten PNGs in
-   `scripts/previews/`, checked in, which `build-pages.mjs` copies into the
+   `scripts/previews/`, checked in, which `build-site.mjs` copies into the
    site and its guard holds to being there and under 300 kB.
 
    Run by hand when a first scenario changes, on a built site:
 
-     pnpm build:pages && pnpm previews
+     pnpm build:site && pnpm previews
 
    It serves `site/` under the path the site runs at (`/umriss-ui/`) from a
    server of its own on a free port - not the demos' preview ports - opens
@@ -18,12 +18,13 @@ import { mkdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { SITE as SITE_ADDRESS } from "../packages/demo/src/address.ts";
 import { PACKAGES } from "../packages/demo/src/packages.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
 const OUT = join(ROOT, "scripts", "previews");
-const BASE = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0].id, "package.json"), "utf8")).homepage).pathname;
+const BASE = new URL(SITE_ADDRESS).pathname;
 /* The device scales a preview is taken at: those at which 1200 x 750 is a
    whole number of CSS pixels and the product exact - Chromium cuts a
    fractional clip down, and the picture came out at 1199 x 749. */
@@ -38,7 +39,7 @@ const TYPES = {
   ".json": "application/json",
 };
 
-if (!statSync(join(SITE, PACKAGES[0].id, "index.html"), { throwIfNoEntry: false })) throw new Error("No built site: run `pnpm build:pages` first.");
+if (!statSync(join(SITE, PACKAGES[0].id, "index.html"), { throwIfNoEntry: false })) throw new Error("No built site: run `pnpm build:site` first.");
 
 const server = createServer((request, response) => {
   const path = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
