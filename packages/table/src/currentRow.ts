@@ -5,11 +5,12 @@ import { createContext } from "react";
 import type { MouseEvent } from "react";
 import { FOCUSABLE } from "./gridKeys";
 
-/** What a row reads: the key to mark, and whether the table reports clicks. */
-export const CurrentRowContext = /* @__PURE__ */ createContext<{ key: string | null | undefined; reports: boolean }>({
-  key: undefined,
-  reports: false,
-});
+/** What a row reads: the key to mark, and how a choice of a row is reported -
+    absent when the table does not report. */
+export const CurrentRowContext = /* @__PURE__ */ createContext<{
+  key: string | null | undefined;
+  report: ((row: unknown) => void) | undefined;
+}>({ key: undefined, report: undefined });
 
 /** The row object of each body row's element, set while the table reports.
     A group header, a detail, the footer and a new-row draft are never in it. */
