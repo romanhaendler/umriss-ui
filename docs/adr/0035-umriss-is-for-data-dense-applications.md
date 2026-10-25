@@ -1,6 +1,6 @@
 # umriss is for data-dense applications, not for plants alone
 
-Status: accepted
+Status: accepted. Superseded in part by ADR-0066 (the consequence "no deprecated aliases")
 Date:   2026-09
 
 umriss grew out of plant screens, and until now it said so: ADR-0032 opened
@@ -24,6 +24,8 @@ application does not need it", not "a plant screen does not need it".
   exclusions stands, with its reasons stated for data-dense applications.
 - Public names that only make sense inside a plant are renamed, in one hard cut
   before 1.0 with a migration table in each changelog — no deprecated aliases.
+  Superseded in part by ADR-0066: from then on a rename keeps its old name for
+  one minor, and the hard cut stands as history.
   The cut is deliberately wide:
   - table, alarms: `shelve`/`unshelve` → `snooze`/`unsnooze`,
     `"out-of-service"` → `"disabled"`, `"suppressed-by-design"` →
