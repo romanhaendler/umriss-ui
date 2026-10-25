@@ -74,11 +74,32 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
 - [A theme object](issues/20-a-theme-object.md): none; a complete token file to copy and the layer order in
   core's README, row height follows density. Spec `.scratch/theming-recipe/`.
 
+- [Scroll in a dashboard widget](issues/14-scroll-in-a-dashboard-widget.md): the widget body scrolls what
+  exceeds its size instead of cutting it, a tab stop while it overflows; inert in the editing mode; ADR-0064
+  amended. Spec `.scratch/scroll-in-a-widget/`.
+
+- [Pivot with columns unknown at compile time](issues/13-pivot-with-columns-unknown-at-compile-time.md): pivot
+  stays "never"; a tested recipe (computed columns keyed by value, footer and row-total sums) plus the fix of
+  a column that keeps a stale accessor under a reused key; ADR-0032 amended. Spec
+  `.scratch/table-columns-from-the-data/`.
+
+- [Linked views](issues/16-linked-views.md): no coordinator - the application holds the key, each view takes
+  and reports it through props it has; the table's one gap becomes a **Current row** (`currentRow`,
+  `onCurrentRowChange`); drill-down an example; cross-filter is the range spec's; an ADR. Spec
+  `.scratch/linked-views/`.
+
+- [What umriss promises a Server Component](issues/04-what-umriss-promises-a-server-component.md): a Server
+  Component hands umriss its data, every view stays a Client Component; a calculation may be written in a
+  Server Component; the server's HTML shows no instant and no schedule summary it cannot know; an ADR, and
+  ADR-0060 amended. Spec `.scratch/server-components/`.
+
+- [Chart export, now that toDataURL fails](issues/12-chart-export-now-that-todataurl-fails.md): export is
+  taken - `useChart` returns `toPng()`, the **Picture** of what the reader sees, drawn by the chart itself; a
+  new ADR supersedes ADR-0032 on export; print redraws on `matchMedia("print")` (Chromium promised). Spec
+  `.scratch/chart-picture-and-print/`.
+
 ## Not yet specified
 
-- **Time zones.** ADR-0060 says "not yet; umriss shows the reader's time". Server rendering (hydration
-  error #418 under a UTC server, `cross-package.md` 5) and the plant-time-zone wishes of charts and schedule
-  press on it. Sharp once "What umriss promises a Server Component" is answered.
 - **What the four triage tickets take on.** A wish taken there may need a decision of its own (an API shape,
   an ADR); each graduates into a ticket of this map, or goes straight to `/to-spec` if nothing is left to
   decide.

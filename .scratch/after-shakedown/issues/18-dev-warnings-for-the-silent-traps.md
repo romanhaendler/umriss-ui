@@ -1,7 +1,7 @@
 # DEV warnings for the silent traps
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

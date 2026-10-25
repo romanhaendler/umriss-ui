@@ -1,7 +1,7 @@
 # Loading, empty and filling the parent, for every view
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

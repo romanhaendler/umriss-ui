@@ -334,6 +334,12 @@ emphasised one, read first. It is never a selection and carries no choice (the
 chart's counterpart to core's active node, ADR-0003). See ADR-0030.
 _Avoid_: selected point, focus point, keyboard hit
 
+**Picture** (of a chart):
+The one PNG a chart hands over on request: what the reader sees, on the
+chart's ground - plot, axes, limits and legend - never the tooltip, the
+crosshair, a control or a title.
+_Avoid_: export image, screenshot, snapshot
+
 **Range**:
 A stretch of an x axis a reader marked, from one value to another, that a
 chart reports and does not keep: what the reader did with it - filtered a
@@ -913,6 +919,15 @@ The cell is a table's, where a column meets a line; a chart matrix's **Cell**
 is another thing, and the table's word stands only in this compound.
 _Avoid_: focused cell, selected cell, current cell, cursor
 
+**Current row**:
+The one row of a table the reader chose for the rest of the screen to follow
+— the master of a master-detail screen. The application holds it; the table
+marks it (`aria-current`) and reports every choice. It is never the
+**Selection** and never the **Active cell**: walking makes no row current. The
+word is "current" because `aria-current` means exactly this; a tree's active
+node, which avoids the word, is a different thing.
+_Avoid_: active row, selected row, focused row, highlighted row
+
 **Row draft**:
 The values a person has typed into the one row being edited when a grid edits
 by rows: every editable cell of that row open at once, nothing reported until
@@ -1369,7 +1384,7 @@ library defines and words. A **Widget type** offers some of the names, each
 with the room it takes for that type, and one to start from; a larger one
 shows more of the same thing. The reader chooses among them; a size that is
 not a name does not exist. The height follows the size, never what the widget
-shows.
+shows; what it shows beyond that scrolls inside the widget.
 _Avoid_: size on its own (a **Control size**'s word), span, dimensions, scale
 
 **Options**:
