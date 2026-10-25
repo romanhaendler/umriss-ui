@@ -34,7 +34,7 @@ export type {
   RowAttributes,
 } from "./types";
 export type { DateFormat } from "./values";
-export type { NumberFormat } from "@umriss-ui/core";
+export type { NumberFormat } from "./types";
 
 /* The view as an object: `initialView` in, `t.view` out. Where it is kept the
    application decides. */
