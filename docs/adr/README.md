@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy decisions, each one written where it was made and kept afterwards. An
+Seventy-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -84,5 +84,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0068](0068-every-component-has-one-of-four-shapes-its-ref-is-an-element-and-its-name-is-aria-label.md) | Every component has one of four shapes, its ref is an element, and its name is `aria-label` | Four shapes; ref is an element; `aria-label` everywhere | accepted, supersedes ADR-0018 in part (its section "What stands from ADR-0015") | components, packages |
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 | [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | accepted | components, core |
+| [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
