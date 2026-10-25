@@ -34,7 +34,7 @@ afterEach(() => {
 function Courses({ mode }: { mode: "x" | "nearest" | null }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="Two courses">
+    <Chart aria-label="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
       <YAxis />
       <Line value="a" name="A" />
@@ -157,7 +157,7 @@ describe("The walk over a matrix", () => {
   function Oee() {
     const { Chart, XAxis, YAxis, Matrix } = useChart(cells);
     return (
-      <Chart ariaLabel="OEE">
+      <Chart aria-label="OEE">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
         <YAxis />
         <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
@@ -200,7 +200,7 @@ describe("A matrix among other series", () => {
   function MixedChart() {
     const { Chart, XAxis, YAxis, Matrix, Scatter } = useChart(cells);
     return (
-      <Chart ariaLabel="Mixed">
+      <Chart aria-label="Mixed">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
         <YAxis />
         <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />

@@ -22,7 +22,7 @@ const signed = (v: number) => (v > 0 ? `+${(v / 1000).toFixed(0)}k` : `${(v / 10
 export default function Deviation() {
   const { Chart, XAxis, YAxis, Bar } = useChart(DEVIATION);
   return (
-    <Chart height={280} ariaLabel="Forecast against budget for the year, per cost centre">
+    <Chart height={280} aria-label="Forecast against budget for the year, per cost centre">
       <XAxis value="costCentre" />
       <YAxis tickFormat={signed} label="€" />
       <Bar value="euros" name="Over budget" />

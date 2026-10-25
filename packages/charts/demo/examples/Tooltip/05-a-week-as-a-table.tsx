@@ -103,7 +103,7 @@ const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
 export default function WeekAsTable() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
-    <Chart height={240} ariaLabel="Search latency over last week, a reading a minute">
+    <Chart height={240} aria-label="Search latency over last week, a reading a minute">
       <XAxis value="t" time domain="data" zoomable label="Time" />
       <YAxis label="ms" />
       <Line value="p95" name="p95" format={milliseconds} />

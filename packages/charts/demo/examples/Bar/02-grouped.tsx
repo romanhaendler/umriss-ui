@@ -19,7 +19,7 @@ const FEBRUARY = [
 export default function Grouped() {
   const { Chart, XAxis, YAxis, Bar } = useChart(FEBRUARY);
   return (
-    <Chart height={280} ariaLabel="Budget and actual per cost centre in February">
+    <Chart height={280} aria-label="Budget and actual per cost centre in February">
       <XAxis value="costCentre" />
       <YAxis label="€" />
       {/* A token, so that it follows the colour scheme. */}

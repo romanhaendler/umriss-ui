@@ -90,7 +90,7 @@ const OBJECTIVE = SERVICES.find((one) => one.id === "checkout")!.latencySlo;
 export default function Objective() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's latency against its objective">
+    <Chart height={260} aria-label="Checkout's latency against its objective">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <LimitLine value={OBJECTIVE} severity="alarm" label="Objective" />

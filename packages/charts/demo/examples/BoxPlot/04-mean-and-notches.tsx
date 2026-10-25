@@ -26,7 +26,7 @@ const notch = (d: Batch) => (1.57 * (d.q3 - d.q1)) / Math.sqrt(d.n);
 export default function MeanAndNotches() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(BATCHES);
   return (
-    <Chart height={300} ariaLabel="Breaking strength per clay supplier, with mean and notches">
+    <Chart height={300} aria-label="Breaking strength per clay supplier, with mean and notches">
       <XAxis value="supplier" />
       <YAxis tickFormat={(v) => `${v} N`} />
       <BoxPlot

@@ -119,7 +119,7 @@ export default function KeepAndRestore() {
   const { Chart, XAxis, YAxis, Line, view, setView } = useChart(SERIES[0]!.data);
   return (
     <>
-      <Chart height={260} ariaLabel="Latency of three services today">
+      <Chart height={260} aria-label="Latency of three services today">
         <XAxis value="t" time zoomable />
         <YAxis label="ms" domain="visible" />
         {SERIES.map((one) => (

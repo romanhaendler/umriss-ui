@@ -20,7 +20,7 @@ const mm = (v: number) => `${v.toFixed(2)} mm`;
 export default function Detailed() {
   const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(BOXES);
   return (
-    <Chart height={320} ariaLabel="Tile length per shift, with the medians as a line">
+    <Chart height={320} aria-label="Tile length per shift, with the medians as a line">
       <XAxis value="shift" label="Shift" />
       <YAxis tickFormat={mm} />
       <BoxPlot

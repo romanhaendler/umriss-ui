@@ -1,4 +1,6 @@
 {
+  "ChartProps.ref": "(a) pass-through: the root element",
+  "ChartProps.ariaLabel": "(g) deprecated alias of `aria-label`, which every example uses",
   "ChartProps.className": "(a) pass-through: goes to the root element",
   "ChartProps.style": "(a) pass-through: goes to the root element",
   "AreaProps.color": "(f) twin of LineProps.color and BarProps.color: any CSS colour",

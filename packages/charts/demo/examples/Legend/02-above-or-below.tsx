@@ -74,7 +74,7 @@ const monthName = (month: string) => MONTH_NAMES[Number(month.slice(5)) - 1] ?? 
 function Marketing({ placement }: { placement?: "bottom" }) {
   const { Chart, XAxis, YAxis, Line } = useChart(MARKETING);
   return (
-    <Chart height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
+    <Chart height={220} aria-label={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
       <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="€" />
       <Line value="budget" name="Budget" />
