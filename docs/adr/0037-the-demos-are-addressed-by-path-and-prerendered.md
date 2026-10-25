@@ -1,6 +1,6 @@
 # The demos are addressed by path and prerendered, so that a search engine can read them
 
-Status: accepted
+Status: accepted. Superseded in part by ADR-0065 (the hosting and the search premise; the path addresses and the prerendering stay)
 Date:   2026-09
 
 Until now a demo addressed its pages by the hash (`/core/#/card`), so that the

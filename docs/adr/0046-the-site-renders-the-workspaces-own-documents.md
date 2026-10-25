@@ -1,6 +1,6 @@
 # The site renders the workspace's own documents
 
-Status: accepted
+Status: accepted. Superseded in part by ADR-0065 (the documents are pages of the local site)
 Date:   2026-10
 
 The site documented components and nothing around them. What a developer needs
