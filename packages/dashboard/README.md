@@ -23,8 +23,10 @@ The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
 Every entry begins with `"use client"`, the directive a framework with Server
-Components reads to treat a module as client code. The dashboard renders to a
-string on the server and in a test, without a layout engine.
+Components reads to treat a module as client code. A dashboard is declared by its hook,
+`useDashboard`, so the declaration lives in a Client Component file: a Server Component renders that
+file and hands it the data its widgets show. The dashboard renders to a string on the server and in
+a test, without a layout engine.
 
 ## Declared like a table
 
