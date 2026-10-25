@@ -26,6 +26,8 @@
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`),
    - and the packed `docs/llms-full.md`, read without any site, names none,
+   - and the changelog has a heading of the package's version, and every
+     "Changed" entry under it a `Migration:` item,
    - and no `@deprecated` marker in `src/` is older than the package's own
      minor (ADR-0066).
 
@@ -193,6 +195,23 @@ try {
   const expected = `workspace:^0.${own.version.split(".")[1]}.0`;
   for (const [peer, range] of Object.entries(own.peerDependencies ?? {})) {
     if (peer.startsWith("@umriss-ui/") && range !== expected) problems.push(`peer ${peer} reads ${range}, expected ${expected}`);
+  }
+}
+
+/* The changelog's section of this version has its heading, and every top-level
+   entry under its `### Changed` carries a nested `Migration:` item with text
+   after it. Earlier sections predate the rule. */
+{
+  const version = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
+  const changelog = readFileSync("CHANGELOG.md", "utf8");
+  const start = changelog.indexOf(`\n## ${version} \u2013 `);
+  if (start < 0) problems.push(`CHANGELOG.md: no heading for ${version}`);
+  else {
+    const section = changelog.slice(start + 1).split(/\n## /)[0];
+    const changed = /\n### Changed\n([\s\S]*?)(?=\n### |$)/.exec(section)?.[1] ?? "";
+    for (const entry of changed.split(/\n(?=- )/).filter((text) => text.startsWith("- "))) {
+      if (!/^ {2}- Migration: *\S/m.test(entry)) problems.push(`CHANGELOG.md ${version}: the entry ${/\*\*[^*]+\*\*/.exec(entry)?.[0] ?? entry.slice(0, 60)} has no "Migration:" item`);
+    }
   }
 }
 
