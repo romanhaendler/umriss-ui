@@ -163,9 +163,6 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
 
 ## Not yet specified
 
-- **What the four triage tickets take on.** A wish taken there may need a decision of its own (an API shape,
-  an ADR); each graduates into a ticket of this map, or goes straight to `/to-spec` if nothing is left to
-  decide.
 - **The order of the work.** Once the decisions stand, one page that orders the resulting specs into
   releasable packages, as `.scratch/open-points-roadmap/spec.md` did for October - after that roadmap's
   packages B and C, or interleaved with them.
