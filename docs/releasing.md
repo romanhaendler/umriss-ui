@@ -42,6 +42,8 @@ lint, types (`typecheck` and `typecheck:demo`), `check:site`, unit tests, build
 and `check:dist`. A version with a hyphen
 (`0.3.0-rc.1`) goes to `next`, every other to `latest`. A push that raises no
 version publishes nothing, and the same version is never published twice.
+The six packages move together under one number, and what a version promises
+callers is in [ADR-0066](adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md).
 
 After each package the workflow sets its tag, `<dir>-v<version>` — one per
 package, though from `0.34.0` all carry the same number. The tag only

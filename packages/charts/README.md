@@ -24,8 +24,11 @@ The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
 Every entry, `./wording/de` included, begins with `"use client"`, the directive a framework
-with Server Components reads to treat a module as client code. No test runs
-inside such a framework: the charts are rendered to a string in a test.
+with Server Components reads to treat a module as client code. A chart is declared by its hook,
+`useChart`, so the declaration lives in a Client Component file: a Server Component renders that
+file and hands it the rows. On a server a chart gives its labelled frame and an empty canvas; the
+drawing arrives after mount. No test runs inside such a framework: the charts are rendered to a
+string in a test.
 
 ## The smallest chart that runs
 
