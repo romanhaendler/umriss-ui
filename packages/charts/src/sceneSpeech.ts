@@ -2,7 +2,7 @@
    summary the plot is described by, and the value formats they share with the
    tooltip and the data table. Functions over the scene they speak for. */
 
-import { formatValue } from "./format";
+import { formatFn, formatValue } from "./format";
 import { lowerBound } from "./hit";
 import type { ChartScene } from "./scene";
 import { stackOf, normalizes } from "./sceneConfig";
@@ -97,7 +97,7 @@ export function totalsOf(s: ChartScene, chosen: readonly Candidate[]): StackTota
 
 /** A stack's total as text, shared by the tooltip and the data table. */
 export function totalText(s: ChartScene, entry: SeriesEntry, total: number): string {
-  return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format ?? ((v: number) => formatValue(v, s.wording.locale)))(total) : formatY(s, entry, total);
+  return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format === undefined ? formatValue(total, s.wording.locale) : formatFn(entry.config.format, s.wording.locale)(total)) : formatY(s, entry, total);
 }
 
 /** The total of the stack `last` closes at the row's x, found in the
@@ -182,7 +182,7 @@ export function formatY(s: ChartScene, entry: SeriesEntry, v: number): string {
   const config = entry.config;
   // A share is no reading: it reads as its axis does, in percent. The
   // series' `format` writes readings - the stack's total among them.
-  if (config.format !== undefined && entry.stacked?.normalize !== true) return config.format(v);
+  if (config.format !== undefined && entry.stacked?.normalize !== true) return formatFn(config.format, s.wording.locale)(v);
   if (config.kind === "matrix") return formatValue(v, s.wording.locale);
   // Only a share takes the percent an axis gives a normalised stack: a line
   // on the same axis still reads its own values.
@@ -190,14 +190,14 @@ export function formatY(s: ChartScene, entry: SeriesEntry, v: number): string {
     entry.stacked?.normalize === true
       ? yTickFormat(s, config.yAxisId)
       : s.findAxisConfig("y", config.yAxisId)?.tickFormat;
-  return own === undefined ? formatValue(v, s.wording.locale) : own(v);
+  return own === undefined ? formatValue(v, s.wording.locale) : formatFn(own, s.wording.locale)(v);
 }
 
 /** A y axis' `tickFormat`; without one, an axis that carries a normalised
     stack reads in percent. */
 export function yTickFormat(s: ChartScene, axisId: string): ((v: number) => string) | undefined {
   const own = s.findAxisConfig("y", axisId)?.tickFormat;
-  if (own !== undefined) return own;
+  if (own !== undefined) return formatFn(own, s.wording.locale);
   for (const e of s.series.values()) {
     if (e.config.yAxisId === axisId && normalizes(e.config)) return s.percent;
   }
