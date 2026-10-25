@@ -204,6 +204,10 @@
     /* The scene sets `pan-y` while the lanes fit (see `viewChanged`); the
        browser decides at touch start, so the rule below is the rest state. */
     touch-action: none;
+    /* A long press grabs a bar: iOS shows no callout and selects no text
+       during the hold. */
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   /* The plot as a tab stop (ADR-0030): the focus is the ring alone, drawn by

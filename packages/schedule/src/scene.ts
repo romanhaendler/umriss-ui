@@ -678,6 +678,7 @@ export class ScheduleScene {
   pointerLeave = (): void => this.gestures.pointerLeave();
   contextMenu = (event: MouseEvent): void => this.gestures.contextMenu(event);
   wheel = (event: WheelEvent): void => this.gestures.wheel(event);
+  touchMove = (event: Event): void => this.gestures.touchMove(event);
   dragOver = (event: DragEvent): void => this.gestures.dragOver(event, this.placing);
   drop = (event: DragEvent): void => this.gestures.drop(event);
   dragLeave = (): void => this.gestures.clearPlacing();

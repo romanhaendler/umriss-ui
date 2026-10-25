@@ -11,10 +11,9 @@
    answered at the call site, asked once more, there where it decides alignment
    and sorting. */
 
-import type { Formats, Wording } from "@umriss-ui/core";
+import { writeNumber } from "@umriss-ui/core";
+import type { Formats, NumberFormat, Wording } from "@umriss-ui/core";
 
-/** The names of the standard presentations of a number. */
-export type NumberFormat = "percent" | "count" | { decimals: number };
 /** The names of the standard presentations of a point in time. */
 export type DateFormat = "date" | "time" | "dateTime";
 export type Format = NumberFormat | DateFormat;
@@ -66,10 +65,8 @@ export function asText(
       return value as string;
     case "number": {
       const number = value as number;
-      if (format === "percent") return formats.percent(number);
-      if (format === "count") return formats.count(number);
-      if (typeof format === "object") return formats.number(number, format.decimals);
-      return formats.number(number);
+      // A date name on a number writes as no format does.
+      return writeNumber(formats, number, format as NumberFormat | undefined);
     }
     case "date": {
       const date = value as Date;

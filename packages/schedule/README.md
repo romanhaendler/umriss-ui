@@ -136,8 +136,8 @@ A tooltip on a hovered subtask or dependency names the order, the times, lead-in
 and lead-out and the findings; `tooltip` replaces its content or switches it
 off. `now` draws the present across the lanes. The wheel over the schedule,
 lane headers included, scrolls the lanes and releases the page at their end,
-Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans and a
-tap selects, and a vertical swipe scrolls the page while all lanes fit (when they
+Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans, a
+tap selects and a long press on a bar grabs it (with `"move"` or `"lane"` in `intents`), and a vertical swipe scrolls the page while all lanes fit (when they
 overflow, the lane names scroll the page). The lane headers take at most 40 % of the width, so that on a
 phone the plot keeps the larger part; a ref handle turns a client point into a
 time and a lane and back.

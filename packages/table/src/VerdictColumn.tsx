@@ -14,8 +14,8 @@
      the column's value is never absent - it is the pair of measured value and
      assessment - and `children` is called for `null` and `NaN` as well. */
 
-import { VisuallyHidden, assess, verdictWeight, useFormats, useWording } from "@umriss-ui/core";
-import type { Assessment, Formats, LimitSet, Verdict, Wording } from "@umriss-ui/core";
+import { VisuallyHidden, assess, verdictWeight, useFormats, useWording, writeNumber } from "@umriss-ui/core";
+import type { Assessment, LimitSet, NumberFormat, Verdict, Wording } from "@umriss-ui/core";
 import { useCallback, useMemo } from "react";
 import type { ReactNode } from "react";
 import styles from "./VerdictColumn.module.css";
@@ -24,8 +24,6 @@ interface Reading {
   measured: number | null;
   assessment: Assessment;
 }
-
-type NumberFormat = "percent" | "count" | { decimals: number };
 
 export interface VerdictColumnProps {
   id?: string;
@@ -39,13 +37,6 @@ export interface VerdictColumnProps {
   pin?: "start" | "end";
   aggregate?: "worst";
 }
-
-const write = (number: number, format: NumberFormat | undefined, formats: Formats): string =>
-  format === "percent"
-    ? formats.percent(number)
-    : format === "count"
-      ? formats.count(number)
-      : formats.number(number, typeof format === "object" ? format.decimals : undefined);
 
 const verdictWord = (verdict: Verdict, wording: Wording): string =>
   verdict === "alarm"
@@ -75,9 +66,9 @@ function VerdictCell({ reading, format }: { reading: Reading; format: NumberForm
       <span aria-hidden="true" className={styles.glyph}>
         {GLYPHS[assessment.verdict]}
       </span>
-      <span className={styles.value}>{measured === null ? wording.statAbsentValue : write(measured, format, formats)}</span>
+      <span className={styles.value}>{measured === null ? wording.statAbsentValue : writeNumber(formats, measured, format)}</span>
       {assessment.excess !== undefined && (
-        <span className={styles.excess}>+{write(assessment.excess, format, formats)}</span>
+        <span className={styles.excess}>+{writeNumber(formats, assessment.excess, format)}</span>
       )}
       <VisuallyHidden>{word}</VisuallyHidden>
     </span>

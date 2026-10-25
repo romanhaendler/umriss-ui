@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
 import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
+import type { ValueFormat } from "./format";
 
 /** A **value** computed from the row - the function form of `Value`.
     Compared by its source text, not its identity - an inline function is new
@@ -81,8 +82,9 @@ export interface SeriesBase<T = unknown> {
   yAxisId: string;
   name?: string;
   /** The value in the tooltip; before the y axis' `tickFormat`. Compared by its
-      source text, as an accessor is. */
-  format?: (value: number) => string;
+      source text, as an accessor is. Or `NumberOptions`: Intl's options in the
+      wording's locale, compared by value. */
+  format?: ValueFormat;
   color?: string;
   /** A role instead of a colour value: the theme resolves it, in both themes.
       For series that mean something rather than just being the next one - the
@@ -242,7 +244,7 @@ export interface AxisConfig<T = unknown> {
   accessor?: (d: T, index: number) => AxisValue;
   label?: string;
   tickCount?: number;
-  tickFormat?: (v: number) => string;
+  tickFormat?: ValueFormat;
   /** "visible" is a y axis' only: the extent of what its series show inside
       their x axis' domain. */
   domain: "nice" | "data" | "visible" | readonly [number, number];

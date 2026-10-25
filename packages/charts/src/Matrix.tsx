@@ -16,6 +16,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
 import type { AxisField, ValueFunction, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
+import type { ValueFormat } from "./format";
 
 /** Default gradient: a sequential set, light to dark, so that it stays readable
     as an order of lightness even without colour. It is a default, not a
@@ -55,10 +56,10 @@ export interface MatrixProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** The level as the tooltip writes it. The y axis' `tickFormat` writes the
+  /** The level as the tooltip writes it, as a function or `NumberOptions`. The y axis' `tickFormat` writes the
       row, not the level.
       @default the built-in number format */
-  format?: (value: number) => string;
+  format?: ValueFormat;
 }
 
 /** A series drawn as a grid of coloured cells: `value` gives the row,
