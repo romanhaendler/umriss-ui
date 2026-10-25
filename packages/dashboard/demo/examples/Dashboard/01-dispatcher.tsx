@@ -121,14 +121,19 @@ const ALERTS = [
   { verdict: "bad", text: "Tour 14 is 25 min late", meta: "12 min ago" },
   { verdict: "warn", text: "Dock 3 is out of service", meta: "34 min ago" },
   { verdict: "warn", text: "Call: Oakridge Pharmacy", meta: "1 h ago" },
+  { verdict: "warn", text: "Tour 9 left without a sign-off", meta: "1 h ago" },
+  { verdict: "bad", text: "Cold chain: bay 2 above 8 degrees", meta: "2 h ago" },
+  { verdict: "warn", text: "Pallet A-2043 has no label", meta: "2 h ago" },
   { verdict: "ok", text: "Maintenance on line 3 finished", meta: "2 h ago" },
+  { verdict: "ok", text: "Tour 6 is back, 10 min early", meta: "3 h ago" },
+  { verdict: "warn", text: "Call: Elmstead Surgery", meta: "3 h ago" },
 ] as const satisfies ReadonlyArray<{ verdict: Verdict; text: string; meta: string }>;
 
 const ORDERS = [
-  ["A-2041", "Holloway Garden Supplies", "120", "Oct 14", "Packed"],
-  ["A-2042", "Marlow & Finch Books", "490", "Oct 15", "Picking"],
-  ["A-2043", "Brixley Cycles", "860", "Oct 16", "Late"],
-  ["A-2044", "Ferrow Bakery", "75", "Oct 16", "Planned"],
+  ["A-2041", "Holloway Co", "120", "Packed"],
+  ["A-2042", "Marlow Books", "490", "Picking"],
+  ["A-2043", "Brixley Bikes", "860", "Late"],
+  ["A-2044", "Ferrow Bakery", "75", "Planned"],
 ];
 
 const heading = (id: string, text: string) => ({ id, type: "heading", size: "full" as const, options: { text } satisfies HeadingOptions });
@@ -196,7 +201,7 @@ export default function Dispatcher() {
         {() => <Rows rows={ALERTS} />}
       </WidgetType>
       <WidgetType name="orders" label="Orders" sentence="The work in hand." sizes={{ wide: { columns: 8, rows: 4 }, full: { columns: 12, rows: 4 } }} start="wide" defaultOptions={{}}>
-        {() => <DataTable head={["No.", "Customer", "Quantity", "Due", "Status"]} numeric={[2]} rows={ORDERS} />}
+        {() => <DataTable head={["No.", "Customer", "Qty", "Status"]} numeric={[2]} rows={ORDERS} />}
       </WidgetType>
     </Dashboard>
   );
