@@ -65,11 +65,17 @@
     border-radius: var(--u-radius-lg) var(--u-radius-lg) 0 0;
   }
 
-  /* The band's room below the controls comes out of the room above them: the
-     head is as tall in the mode as at rest, so the body below it keeps its
-     height, whatever the spacing tokens. */
+  /* A card's head has one height, at rest and in the mode, whatever the
+     tokens: the taller of a control with its border and the title below its
+     room. The band's controls are centred in it rather than growing it, so
+     the body below keeps its height on "Edit". A heading has no card and
+     grows with its row. */
+  .head:not(.headingHead) {
+    height: max(calc(var(--u-control-height) + 2px), calc(var(--u-space-2) + var(--u-text-sm) * var(--u-leading-normal)));
+  }
+
   .editingHead {
-    padding-block: calc(var(--u-space-2) - var(--u-space-1)) var(--u-space-1);
+    padding-block: 0;
     background: var(--u-color-surface-pressed);
     touch-action: none;
     user-select: none;
@@ -88,6 +94,7 @@
     overflow: hidden;
     font-size: var(--u-text-sm);
     font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-normal);
     white-space: nowrap;
     text-overflow: ellipsis;
   }
