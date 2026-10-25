@@ -1,6 +1,6 @@
 # A skill points a coding agent at the documentation, and there is no MCP server
 
-Status: accepted
+Status: accepted. Superseded in part by ADR-0065 (the skill points at the packaged file, not at online `llms.txt` files)
 Date:   2026-10
 
 The documentation is already published for coding agents: `llms.txt`, a

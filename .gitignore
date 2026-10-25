@@ -5,7 +5,7 @@ node_modules/
 dist/
 dist-demo/
 
-# The assembled GitHub Pages site (pnpm build:pages); the workflow builds it anew.
+# The assembled documentation site (pnpm build:site); pnpm docs builds it anew.
 site/
 
 # Generated props tables of the demo. They come into being on every
