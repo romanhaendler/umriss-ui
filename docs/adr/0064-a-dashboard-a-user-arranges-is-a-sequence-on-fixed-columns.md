@@ -72,6 +72,16 @@ the one a reader starts from.**
 - **Depends on `@umriss-ui/core` only**, and on nothing foreign. What stands in
   a widget - a chart, a table, a calculation - is the application's.
 
+*Amended 2026-10-25:* the height follows the size, and what the content needs
+beyond it scrolls inside the widget's body, on both axes. It is never cut, and
+it never grows the widget. While the content overflows, the body is a tab stop
+named by the widget's title, so the keyboard reaches what the wheel reaches. In
+the editing mode the body stays inert and keeps its scroll position. The reader
+arranges by title, size and what the widget shows at rest. Scrolling in the mode
+would need a hand-built inert under a head that is a drag grip. A cut line and a
+warning for content taller than its size are not built: a scroll is an intended
+outcome, not a fault.
+
 ## Not yet, and never
 
 - *Not yet:* sections that wrap as a whole (the arrangement is an object, so
