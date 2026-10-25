@@ -101,7 +101,8 @@ wins. `@umriss-ui/charts/styles.css` stays exported for setups that link
 stylesheets by hand.
 
 **Colours** come from `--uc-*` variables that fall back to the tokens of
-`@umriss-ui/core` where they exist and to literals where they do not. **Light and
+`@umriss-ui/core` where they exist and to literals where they do not. The palette is `--u-chart-1` to
+`--u-chart-6`; core's README holds a brand file that sets them, light and dark. **Light and
 dark** follow the application's `color-scheme`: the canvas colours are resolved
 anew when the root element's attributes or the system preference change;
 `invalidateTheme()` covers a switch made on another ancestor. **Fonts** are not
