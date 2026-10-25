@@ -66,7 +66,7 @@
     "preview:demo": "vite preview --config vite.demo.config.ts --port 4177 --strictPort",
     "test:unit": "vitest run",
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
-    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts calculation.js calculation.css"
+    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts calculation.js calculation.css calculation.client.js"
   },
   "peerDependencies": {
     "@umriss-ui/core": "workspace:^",
