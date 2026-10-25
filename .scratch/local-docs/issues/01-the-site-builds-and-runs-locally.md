@@ -1,6 +1,6 @@
 # The site builds and runs locally, at one address
 
-Status: ready-for-agent
+Status: done
 Spec: `.scratch/local-docs/spec.md` (Implementation Decisions: one command, the build rename, the site's address, the packaged `llms-full.md`, `homepage`, what existed only for search engines; Testing Decisions)
 
 ## What to build
@@ -40,3 +40,7 @@ those.
 ## Blocked by
 
 None
+
+## Comments
+
+Delivered for 0.41.1. The command is `pnpm start`, not `pnpm docs`: pnpm 9 hands `docs` to npm before it looks at the scripts. The front page keeps its picture as `scripts/collage.png`; only the og:* tags went. `packagedText` makes the packaged `llms-full.md` resolve on its own (headings de-duplicated, dangling anchors reduced to text, ADR-0032 at the version tag).

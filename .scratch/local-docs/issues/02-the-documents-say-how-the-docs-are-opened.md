@@ -1,6 +1,6 @@
 # The documents say how the documentation is opened, and nothing names the old site
 
-Status: ready-for-agent
+Status: done
 Spec: `.scratch/local-docs/spec.md` (Implementation Decisions: the README of the repository, each package README, the skill, the documents map, ADR-0065, the search-visibility work, history stays; Testing Decisions: the repository test)
 
 ## What to build
@@ -41,3 +41,7 @@ manifest).
 ## Blocked by
 
 None (the repository test is expected to fail on demo sources until 01 is merged)
+
+## Comments
+
+Delivered for 0.41.1, with ADR-0065 and the repository test `packages/demo/tests-unit/hostedAddress.repo.test.ts`. The README notes that tags before 0.41.1 have no `pnpm start`.

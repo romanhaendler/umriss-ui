@@ -16,6 +16,13 @@ moves from here under the rule above.
 
 ---
 
+## 0.41.1 – The documentation runs where the code is (Oct. 2026)
+
+### Changed
+
+- **The documentation is no longer hosted.** The site on GitHub Pages is gone, and the package's `homepage` now names its README on GitHub. The running documentation of this version opens from a checkout of the tag `schedule-v0.41.1` with `pnpm install` and `pnpm start`, at `http://localhost:4170/umriss-ui/` - the repository README says how, under "See it running".
+- **`docs/llms-full.md` in the package stands on its own:** a link to another page points at that page's heading in the same file, a link to a place on the site that the file does not hold keeps only its text, and ADR-0032 is linked at this version's tag.
+
 ## 0.41.0 – Strict consumers compile (Oct. 2026)
 
 ### Fixed
