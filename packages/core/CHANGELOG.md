@@ -27,6 +27,22 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.42.0 – Tested in Vitest and Jest, themed from one file (Oct. 2026)
+
+### Added
+
+- **Core loads in Vitest and Jest with the lines its README gives.** The new "Testing" section holds `vitest.config.ts`, `jest.config.cjs` with its CSS stub and Babel config, and `umriss.setup.js` with the five polyfills jsdom lacks; `.` and `./wording/de` carry a `default` condition for Jest's resolver. The release check installs the packed package into a scratch project and runs a test from those very blocks under both runners.
+- **Six tokens where a value was written into a component:** `--u-modal-width-sm`, `--u-modal-width-md` and `--u-modal-width-lg` (400, 520 and 720 px), `--u-transform-caps` (`uppercase`, read by every text in spaced capitals - Card's eyebrow, Divider's label, the caps style, the DatePicker's weekdays, the CommandPalette, the table's head and the dashboard's mode label), `--u-button-press-scale` (0.98) and `--u-label-size` (a FormField label's size, `--u-text-sm`). Each defaults to the value it replaces.
+- **A brand file to copy** in the README's Styles section: the font, the six accent tokens and the charts' palette, each light and dark; a unit test holds it to the stylesheets and the contrast pairs. Type on the accent surface joins the contrast pairs at 4.5:1.
+- **The layer order for Tailwind v4 and for a wrapper library** stands in the Styles section, with the one declaration each needs; it holds in either load order.
+- **A "Server Components" section** says what a Server Component may do with core: render its components with props React can serialise (ADR-0067).
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
+### Changed
+
+- **`useFormats()` writes no date or time until the page has hydrated.** On a server and in the hydration render its instant formats (`date`, `dateShort`, `month`, `dateLong`, `time`, `dateTime`, `offset`) return an empty text; a client-only render never sees them empty. A server in another zone than the reader's no longer raises React's hydration error #418 (ADR-0060, amended). The pickers measure their field with the real formats, so their width does not jump.
+  - Migration: nothing to change in an application that renders in the browser; a test that renders to a string and expects a date finds an empty text - render it in the DOM instead.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed

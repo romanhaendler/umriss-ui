@@ -26,6 +26,31 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.42.0 – Columns from the data keep their numbers (Oct. 2026)
+
+### Added
+
+- **An example builds a matrix with row and column totals from the data:** one computed column per year, `key` by the year, the row total as a field of the row and every total from `aggregate`. The "pivot" line on the first page points at it (ADR-0032, amended).
+- **Loadable in Vitest and Jest** with core's lines: the `.` entry carries a `default` condition, the README's "Testing" section points at core's, and the release check runs a test of a sorted column under both runners.
+- **The head and the grouping heading read core's `--u-transform-caps`.**
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
+### Changed
+
+- **The peer range on core covers the minor: `^0.42.0`.** It named the exact patch before (`^0.41.1`), so npm refused an install beside an earlier patch of core with `ERESOLVE`; the six packages move under one number and a minor moves the range (ADR-0066).
+  - Migration: nothing to change; any `@umriss-ui/core` 0.42 patch satisfies the peer.
+- **A row's line follows the type tokens.** It is derived from `--u-text-sm` (`--u-text-xs` when compact) and rounded up to a whole pixel, where it was 19 and 18 px written out: at the default tokens the rows stay 36 and 27 px, under an application's own type the pitch moves with it, and a dense or roomy token set no longer leaves the rows behind.
+  - Migration: nothing to change at the default tokens; under an application's own type tokens the rows take a new height - look at a layout that counted on 36 px.
+- **`footer` on a computed column is a type error.** It has been ignored since `aggregate` replaced it; a leftover overload still let it compile.
+  - Migration: write `aggregate="sum"` (or `"avg"`) where a computed column has `footer`; the footer then shows the aggregate.
+- **A date or time rendered on a server is empty until the page has hydrated** (core 0.42.0, ADR-0067). Only the browser knows the reader's zone, so a server in another zone wrote a different text and React raised hydration error #418; the table now shows its dates and times right after hydration.
+  - Migration: nothing to change in an application that renders in the browser; a test that renders to a string and expects a date finds an empty text - render it in the DOM instead.
+
+### Fixed
+
+- **Columns mapped from the data with the index as `key` show their own numbers.** A column kept its accessor while its source text was unchanged, even when its id had changed, so after the years moved on the headers read the new years and the cells, sorting and footers the old ones; a column whose id changes now takes its new accessors.
+- **The duplicate-id warning waits for the render's columns.** It ran after each column registered, so a column whose id was about to change warned about a duplicate that never existed; a real duplicate still warns once.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed

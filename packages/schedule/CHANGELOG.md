@@ -18,6 +18,22 @@ moves from here under the rule above.
 
 ---
 
+## 0.42.0 – A schedule under test, and quiet on a server (Oct. 2026)
+
+### Added
+
+- **Loadable in Vitest and Jest** with core's and charts' lines one after the other: the `.` entry carries a `default` condition, the README's "Testing" section says how the two setup files combine, and the release check runs a test of a lane with a bar under both runners.
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
+### Changed
+
+- **The peer range on core and charts covers the minor: `^0.42.0`.** It named the exact patch before (`^0.41.1`), so npm refused an install beside an earlier patch of core with `ERESOLVE`; the six packages move under one number and a minor moves the range (ADR-0066).
+  - Migration: nothing to change; any 0.42 patch of `@umriss-ui/core` and `@umriss-ui/charts` satisfies the peers.
+- **On a server the schedule's description holds no summary.** A server knows no lanes, so it described "0 lanes, 0 subtasks" for a plan that had both; the summary arrives with the lanes after mount, and the key help stays.
+  - Migration: nothing to change; a server-rendered test that read the summary's counts finds the key help only.
+- **A date or time rendered on a server is empty until the page has hydrated** (core 0.42.0, ADR-0067). Only the browser knows the reader's zone, so a server in another zone wrote a different text and React raised hydration error #418; the schedule now shows its dates and times right after hydration.
+  - Migration: nothing to change in an application that renders in the browser; a test that renders to a string and expects a date finds an empty text - render it in the DOM instead.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed

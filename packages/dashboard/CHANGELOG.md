@@ -13,6 +13,23 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.42.0 – A widget scrolls what exceeds its size (Oct. 2026)
+
+### Added
+
+- **Loadable in Vitest and Jest** with core's lines: the `.` entry carries a `default` condition, the README's "Testing" section points at core's, and the release check runs a test of a widget under both runners.
+- **The mode label reads core's `--u-transform-caps`.**
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
+### Changed
+
+- **The peer range on core covers the minor: `^0.42.0`.** It named the exact patch before (`^0.41.1`), so npm refused an install beside an earlier patch of core with `ERESOLVE`; the six packages move under one number and a minor moves the range (ADR-0066).
+  - Migration: nothing to change; any `@umriss-ui/core` 0.42 patch satisfies the peer.
+- **Content beyond a widget's size scrolls inside its body**, on both axes, where it was cut. While it overflows, the body is a tab stop named by the widget's title, so the keyboard reaches what the wheel reaches; in the editing mode the body stays inert and keeps its scroll position (ADR-0064, amended).
+  - Migration: nothing to change; a widget whose content was cut now scrolls - look at a size that was chosen too small, and at a test that tabs through the dashboard.
+- **The editing mode keeps every body at its height.** The mode's band took about 4 px from each body, so content that fitted at rest was cut on "Edit"; a card's head now has one height at rest and in the mode, under any spacing tokens, and the band's controls are centred in it.
+  - Migration: nothing to change; a screenshot of the editing mode moves by a few pixels.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed

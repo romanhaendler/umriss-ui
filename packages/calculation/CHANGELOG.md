@@ -14,6 +14,23 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.42.0 – A calculation written in a Server Component (Oct. 2026)
+
+### Added
+
+- **A calculation is written in a Server Component** (ADR-0067). The entry carries no `"use client"`: `<Calculation>` reads its tree where it is written, on the server, and hands the model to the view, a client component in `calculation.client.js` that the entry imports. The release check renders a costing sheet through React's Flight server and client.
+- **Loadable in Vitest and Jest** with core's lines: the `.` entry carries a `default` condition, the README's "Testing" section points at core's, and the release check runs a test of a changed input under both runners.
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
+### Changed
+
+- **The peer range on core covers the minor: `^0.42.0`.** It named the exact patch before (`^0.41.1`), so npm refused an install beside an earlier patch of core with `ERESOLVE`; the six packages move under one number and a minor moves the range (ADR-0066).
+  - Migration: nothing to change; any `@umriss-ui/core` 0.42 patch satisfies the peer.
+- **An element rendered outside its calculation throws in development.** `Given`, the operators, `Chain`, `Ref` and the other elements are read by `<Calculation>`, never rendered; one that is rendered - passed through a client component, say - now throws a message saying to write the tree directly inside its `<Calculation>`.
+  - Migration: write the elements directly inside `<Calculation>`, in the same file; a tree written directly inside renders as before.
+- **The compact line follows the type tokens**, derived from `--u-text-xs` as the compact table's is, where it was 18 px written out; at the default tokens it is still 18 px.
+  - Migration: nothing to change at the default tokens; under an application's own type tokens a compact calculation stays as close as the compact table's rows.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed
