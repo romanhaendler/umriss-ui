@@ -134,8 +134,8 @@ defaults:
 ```
 
 A brand may also change the neutrals, the radius, `--u-transform-caps` with
-`--u-tracking-caps`, `--u-button-press-scale` and the modal widths; the Theming
-page's table lists every token.
+`--u-tracking-caps`, `--u-button-press-scale`, `--u-label-size` and the modal
+widths; the Theming page's table lists every token.
 
 **Denser or roomier.** An application sets the type steps, the spaces and the
 small control heights. A table and a calculation follow them, and the
