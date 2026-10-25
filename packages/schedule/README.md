@@ -141,6 +141,15 @@ tap selects. The lane headers take at most 40 % of the width, so that on a
 phone the plot keeps the larger part; a ref handle turns a client point into a
 time and a lane and back.
 
+## Its size
+
+The width is the host's. Without `height`, a schedule fills its frame - a stretched grid cell, a card the
+grid stretches, a container of definite height - and never goes below 400 px, which is also its height in
+a frame without one: alone in a block it is 400 px however many lanes it holds, and the lanes beyond the
+plot scroll inside it (ADR-0050). A number stays a fixed height. A different floor goes through `style`'s
+`minHeight`, and `style` wins over the schedule's own sizing. A wrapper of your own between the frame and
+the schedule passes the height on with `height: 100%`.
+
 ## The view
 
 The schedule holds its own view (ADR-0047): the span in view and the folded

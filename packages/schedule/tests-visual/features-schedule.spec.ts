@@ -1023,3 +1023,43 @@ test("a violated dependency into a folded group is marked on its row", async ({ 
   expect(await colour(example, "data", { x: Math.round(plot.x(14) - plot.box.x), y: onRow.y + 1 })).not.toBe(alarm);
   expect(await colour(example, "data", { x: Math.round(plot.x(7) - plot.box.x), y: onRow.y + 1 })).not.toBe(alarm);
 });
+
+test("without a height, a schedule is exactly its pane and follows it when the pane is resized", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "schedule", "fills-its-pane");
+  const example = page.locator('[data-example="fills-its-pane"]');
+  const pane = example.locator("[data-pane]");
+  const root = example.getByRole("figure");
+  expect((await root.boundingBox())!.height).toBe((await pane.boundingBox())!.height);
+  expect((await root.boundingBox())!.height).toBe(480);
+
+  await pane.evaluate((element) => ((element as HTMLElement).style.height = "560px"));
+  await expect.poll(async () => (await root.boundingBox())!.height).toBe(560);
+  await pane.evaluate((element) => ((element as HTMLElement).style.height = "440px"));
+  await expect.poll(async () => (await root.boundingBox())!.height).toBe(440);
+});
+
+test("in a block with no height a schedule of thirty lanes is 400 px, and its plot scrolls to the last", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "schedule", "thirty-lanes");
+  const example = page.locator('[data-example="thirty-lanes"]');
+  const root = example.getByRole("figure");
+  expect((await root.boundingBox())!.height).toBe(400);
+
+  const headers = example.locator("[data-schedule-headers]");
+  const frame = (await headers.boundingBox())!;
+  const box = (await example.locator("[data-schedule-plot]").boundingBox())!;
+  for (let i = 0; i < 40; i++) {
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(30);
+  }
+  const moved = (await headers.getByText("Station 30").boundingBox())!;
+  expect(moved.y + moved.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+  expect(moved.y).toBeGreaterThanOrEqual(frame.y - 1);
+  expect((await root.boundingBox())!.height).toBe(400);
+});
+
+test("a schedule with a numeric height keeps it", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "schedule", "no-work-yet");
+  const example = page.locator('[data-example="no-work-yet"]');
+  expect((await example.getByRole("figure").boundingBox())!.height).toBe(170);
+});

@@ -58,8 +58,12 @@ export interface ScheduleProps {
   ref?: Ref<ScheduleHandle>;
   /** What the schedule shows, for a screen reader: "Plan of week 38". */
   ariaLabel: string;
-  /** Height in CSS pixels, both bands included. The width is the host's.
-      @default 400 */
+  /** Height in CSS pixels, both bands included, fixed. Left out, the schedule
+      fills its frame - a stretched grid cell, a card the grid stretches, a
+      container of definite height - and never goes below 400 px, which is also
+      its height in a frame without one. A different floor goes through
+      `style`'s `minHeight` (ADR-0050). The width is the host's.
+      @default fills the frame, at least 400 px */
   height?: number;
   /** Height of one lane in pixels at the default font size of 16 px; the
       schedule multiplies it by the root font size over 16 px when that ratio
@@ -198,7 +202,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     ref,
     scene,
     ariaLabel,
-    height = 400,
+    height,
     laneHeight = DEFAULT_LANE_HEIGHT,
     headerWidth = 160,
     calendar = WALL_CLOCK,
@@ -465,7 +469,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         role="figure"
         aria-label={ariaLabel}
         className={className ? `${styles.root} ${className}` : styles.root}
-        style={{ height: `${height}px`, gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
+        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner} />
         <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">
