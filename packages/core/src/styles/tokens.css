@@ -359,4 +359,24 @@
       --u-duration-exit-collapse: 0ms;
     }
   }
+
+  /* A reader who asks for more contrast gets the quiet text and the edges
+     stronger, in both themes: the secondary and muted text reach 7:1 on the
+     page and on every surface they stand on (WCAG 1.4.6), the edges and the
+     hairlines 3:1 on the grounds they lie on (1.4.11). The edges are opaque
+     here, because a translucent edge is only as strong as what lies beneath.
+     The accent and the status colours stay as they are: they are hues, not
+     quiet text, and the contrast test already holds them to their own bounds. Forced
+     colours take over from this and are not changed by it. */
+  @media (prefers-contrast: more) {
+    :root {
+      --u-color-text-secondary: light-dark(#3a3a3a, #d0d0d4);
+      --u-color-text-muted: light-dark(#444444, #cacace);
+      --u-edge-color: light-dark(#808080, #8a8a90);
+      --u-edge-color-strong: light-dark(#5c5c5c, #b4b4ba);
+      --u-hairline: light-dark(#8b8b8b, #77777e);
+      --u-hairline-strong: light-dark(#6b6b6b, #9a9aa0);
+      --u-color-edge-hover: light-dark(#424242, #cacace);
+    }
+  }
 }

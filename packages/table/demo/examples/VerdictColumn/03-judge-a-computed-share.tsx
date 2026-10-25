@@ -29,7 +29,7 @@ export default function JudgeAComputedShare() {
   const { Table, Column, VerdictColumn } = useTable(CENTRES, { rowKey: (c) => c.name });
 
   return (
-    <Table ariaLabel="Budget use in March">
+    <Table aria-label="Budget use in March">
       <Column value="name" label="Cost centre" rowHeader />
       <Column value="actual" label="Actual (€)" format="count" />
       <VerdictColumn id="used" label="Budget used" value={(c) => c.actual / c.budget} limits={SPEND} format="percent" />

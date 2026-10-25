@@ -31,7 +31,7 @@ export default function CopyTheSelection() {
           {t.selection.count} selected
         </Text>
       </Stack>
-      <Table selectable ariaLabel="Shipments to copy">
+      <Table selectable aria-label="Shipments to copy">
         <Column value="id" label="Shipment" rowHeader />
         <Column value="customer" label="Customer" />
         <Column value="weight" label="Weight (kg)" />

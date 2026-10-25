@@ -50,7 +50,7 @@ export default function SearchWithThePath() {
   return (
     <Stack gap={2} style={{ maxWidth: 320 }}>
       <TreeSearch tree={tree} aria-label="Search the services" size="sm" />
-      <TreeView tree={tree} ariaLabel="Services by team">
+      <TreeView tree={tree} aria-label="Services by team">
         {(entry) => entry.node.name}
       </TreeView>
     </Stack>

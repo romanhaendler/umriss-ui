@@ -412,4 +412,28 @@
       outline: 1px solid CanvasText;
     }
   }
+
+  /* Under a finger a chip and the counter are hit 2 px taller above and below,
+     the 24 px square of WCAG 2.5.8; side by side they keep their widths. The
+     cross is hit in a larger square than it is drawn, not towards the values. */
+  @media (pointer: coarse) {
+    .chip,
+    .counter,
+    .clear {
+      position: relative;
+    }
+
+    .chip::after,
+    .counter::after {
+      content: "";
+      position: absolute;
+      inset: -2px 0;
+    }
+
+    .clear::after {
+      content: "";
+      position: absolute;
+      inset: -8px -8px -8px -3px;
+    }
+  }
 }

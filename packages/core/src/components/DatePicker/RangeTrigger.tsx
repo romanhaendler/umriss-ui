@@ -41,12 +41,11 @@ export interface RangeTriggerProps {
      ref access, and the rest of the package names them the same way (anchorRef,
      focusRef). */
   wrapRef: RefObject<HTMLSpanElement | null>;
-  /** The picker's caller's ref, class and rest: they go to the wrapper around
-      button and cross, the field's outermost element (P1 of
-      core-passthrough). The field id from `FormField` stays on the button,
-      and so do the caller's name and description, for a field without one. */
-  rootRef?: ForwardedRef<HTMLSpanElement>;
-  root?: HTMLAttributes<HTMLSpanElement>;
+  /** The picker's caller's ref and rest go to the button that takes the
+      focus; the class and the style dress the wrapper around button and
+      cross (principle 1, the field shape). */
+  rootRef?: ForwardedRef<HTMLButtonElement>;
+  root?: HTMLAttributes<HTMLButtonElement>;
   className?: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
   panel: TriggerPanel;
@@ -99,26 +98,24 @@ export function RangeTrigger({
   natural,
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
-  const { "aria-label": name, "aria-labelledby": labelledBy, "aria-describedby": describedBy, ...rest } = root ?? {};
+  const { style, id, onClick, ...rest } = root ?? {};
   return (
     <span
-      ref={mergeRefs(wrapRef, rootRef)}
+      ref={wrapRef}
       className={cx(styles.triggerWrap, clearable && styles.triggerWrapClearable, className)}
-      {...rest}
       /* The width in characters, and the caller's own style over it. */
-      style={{ ...extentStyle(chars, { natural }), ...rest.style }}
+      style={{ ...extentStyle(chars, { natural }), ...style }}
     >
       <button
-        ref={triggerRef}
+        {...rest}
+        ref={mergeRefs(triggerRef, rootRef)}
         type="button"
-        id={field?.id}
+        id={id ?? field?.id}
         disabled={disabled}
         aria-haspopup="dialog"
         aria-expanded={panel.open}
         aria-controls={panel.open ? panel.id : undefined}
-        aria-label={name}
-        aria-labelledby={labelledBy}
-        aria-describedby={describedBy ?? field?.describedBy}
+        aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
         aria-invalid={invalid || undefined}
         className={cx(
           styles.trigger,
@@ -126,7 +123,10 @@ export function RangeTrigger({
           invalid && styles.invalid,
           clearable && hasValue && !disabled && styles.clearable,
         )}
-        onClick={panel.onToggle}
+        onClick={(event) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) panel.onToggle();
+        }}
       >
         <span className={cx(styles.value, !hasValue && styles.placeholder)}>
           {hasValue ? display : placeholder}

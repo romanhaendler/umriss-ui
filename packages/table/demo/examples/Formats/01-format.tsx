@@ -23,7 +23,7 @@ export default function Format() {
   const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.name });
 
   return (
-    <Table ariaLabel="Services this month">
+    <Table aria-label="Services this month">
       <Column value="name" label="Service" rowHeader />
       <Column value="availability" label="Availability" format="percent" />
       <Column value="requests" label="Requests" format="count" />

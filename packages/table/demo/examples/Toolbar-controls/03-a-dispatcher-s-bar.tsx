@@ -206,7 +206,7 @@ export default function ADispatchersBar() {
         </Button>
       </Stack>
 
-      <Table ariaLabel="Shipments of the day">
+      <Table aria-label="Shipments of the day">
         <Toolbar size="md">
           <Search placeholder="Shipment" />
           <MultiSelect

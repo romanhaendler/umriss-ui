@@ -39,7 +39,7 @@ export default function TickASelection() {
 
   return (
     <Stack gap={2}>
-      <TreeView tree={tree} ariaLabel="People for sprint 15" checkable>
+      <TreeView tree={tree} aria-label="People for sprint 15" checkable>
         {(entry) => entry.node.name}
       </TreeView>
       <Text size="xs" tone="muted">

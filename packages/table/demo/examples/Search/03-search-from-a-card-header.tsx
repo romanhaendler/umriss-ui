@@ -24,7 +24,7 @@ export default function SearchFromACardHeader() {
     <Card>
       <CardHeader divider title="Apps team" actions={<Search of={t} placeholder="Search people" aria-label="Search the Apps team" />} />
       <CardBody>
-        <Table ariaLabel="Apps team">
+        <Table aria-label="Apps team">
           <Column value="name" label="Name" rowHeader />
           <Column value="role" label="Role" />
         </Table>

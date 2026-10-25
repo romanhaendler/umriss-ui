@@ -158,4 +158,16 @@
       outline-offset: -2px;
     }
   }
+
+  /* Under a finger the fold key is 24 px, the square of WCAG 2.5.8, and the
+     leaf's space with it, so that the labels stay in line. A pad would lie on
+     the label, which a tap selects. */
+  @media (pointer: coarse) {
+    .chevron,
+    .placeholder,
+    .emptyDot {
+      width: 24px;
+      height: 24px;
+    }
+  }
 }

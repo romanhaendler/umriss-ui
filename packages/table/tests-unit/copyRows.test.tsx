@@ -42,7 +42,7 @@ function Units({ tree = false, grid = false, editable = false, search = false }:
   capture(t);
   const { Table: Frame, Column } = t;
   return (
-    <Frame ariaLabel="Units" selectable grid={grid} onCellEdit={editable ? () => undefined : undefined}>
+    <Frame aria-label="Units" selectable grid={grid} onCellEdit={editable ? () => undefined : undefined}>
       {search && (
         <Toolbar>
           <Search />

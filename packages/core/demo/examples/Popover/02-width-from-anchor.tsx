@@ -18,7 +18,7 @@ export default function WidthFromAnchor() {
         onOpenChange={setOpen}
         anchorRef={anchor}
         role="dialog"
-        ariaLabel="Vehicles at Riverside depot"
+        aria-label="Vehicles at Riverside depot"
         width="anchor"
         minWidth={180}
         restoreFocus

@@ -41,7 +41,7 @@ export default function PreFilter() {
           </option>
         ))}
       </Select>
-      <Table ariaLabel="Shipments of the depot" empty="This depot has no shipments today.">
+      <Table aria-label="Shipments of the depot" empty="This depot has no shipments today.">
         <Toolbar>
           <Search placeholder="Shipment or customer" />
         </Toolbar>

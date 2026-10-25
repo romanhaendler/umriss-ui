@@ -30,7 +30,7 @@ const WORK: WorkItem[] = [
 export default function CompactAndLong() {
   const { Table, Column } = useTable(WORK, { rowKey: (w) => w.id, defaultGrouping: ["team", "project", "person"] });
   return (
-    <Table ariaLabel="Backlog, compact" density="compact" selectable>
+    <Table aria-label="Backlog, compact" density="compact" selectable>
       <Column value="person" label="Person" />
       <Column value="id" label="Item" rowHeader />
       <Column value="team" label="Team" />

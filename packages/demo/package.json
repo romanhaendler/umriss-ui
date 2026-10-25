@@ -30,6 +30,7 @@
     "./checks/overlays": "./checks/overlays.ts",
     "./checks/forcedColors": "./checks/forcedColors.ts",
     "./checks/largeText": "./checks/largeText.ts",
+    "./checks/floor": "./checks/floor.ts",
     "./checks/silentPages": "./checks/silentPages.ts",
     "./tests-support/setup": "./tests-support/setup.ts",
     "./tests-support/styleGuard": "./tests-support/styleGuard.ts",
