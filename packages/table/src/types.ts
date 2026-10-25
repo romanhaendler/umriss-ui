@@ -474,6 +474,15 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
   loading?: boolean;
   /** Classes and data attributes per row. */
   rowProps?: (row: Z) => RowAttributes;
+  /** The key of the row the rest of the screen follows - the table marks it
+      with `aria-current` and an accent bar, apart from the selection. The table
+      keeps no copy: pass the key you hold, `null` for none. */
+  currentRow?: string | null;
+  /** A primary click on a row, outside its controls - the checkbox, the
+      expander, the actions and any button of yours in a cell - with the row's
+      key and the row. Also called for the row already current, so that you
+      decide whether a second click clears it. */
+  onCurrentRowChange?: (key: string, row: Z) => void;
   /** Accessible name of the table.
       @deprecated Use `aria-label`; this name goes in the next minor release. */
   ariaLabel?: string;

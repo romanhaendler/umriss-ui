@@ -25,7 +25,7 @@ import styles from "./Table.module.css";
    rest (ADR-0068). */
 const OWN = [
   "selectable", "stickyHeader", "stickyRowHeader", "striped", "density", "maxHeight", "empty", "loading",
-  "rowProps", "groupable", "grid", "onCellEdit", "editMode", "onRowSave", "onRowAdd", "newRow", "onRowDelete",
+  "rowProps", "groupable", "grid", "onCellEdit", "editMode", "onRowSave", "onRowAdd", "newRow", "onRowDelete", "currentRow", "onCurrentRowChange",
 ] as const satisfies readonly (keyof TableProps<unknown>)[];
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are

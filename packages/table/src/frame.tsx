@@ -13,6 +13,7 @@ import { useLineMotion } from "./motion";
 import { GridContext, GridFocus, useGridState } from "./grid";
 import { frameGrid } from "./frameGrid";
 import { copyKeyHandler } from "./copyKey";
+import { CurrentRowContext, chooseRow } from "./currentRow";
 import { CutValueTip } from "./cutValueTip";
 import {
   useCutValueWarnings,
@@ -49,6 +50,8 @@ export function Frame({
     empty,
     loading = false,
     rowProps,
+    currentRow,
+    onCurrentRowChange,
     grid: gridMode = false,
   } = props;
 
@@ -153,7 +156,10 @@ export function Frame({
           aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
           onKeyDown={gridEvents?.onKeyDown}
           onFocus={gridEvents?.onFocus}
-          onClick={gridEvents?.onClick}
+          onClick={(event) => {
+            gridEvents?.onClick(event);
+            if (onCurrentRowChange) chooseRow(event, hook.rowKey, onCurrentRowChange);
+          }}
           onBlur={gridEvents?.onBlur}
           data-depth={lines ? grouping.length : undefined}
           style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
@@ -173,8 +179,10 @@ export function Frame({
         >
           <HeadRow registry={registry} hook={hook} layout={layout} props={props} wording={wording} />
           <GridContext value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
-            {fresh && newRowBody(body, fresh)}
-            {shown.body}
+            <CurrentRowContext value={{ key: currentRow, reports: onCurrentRowChange !== undefined }}>
+              {fresh && newRowBody(body, fresh)}
+              {shown.body}
+            </CurrentRowContext>
           </GridContext>
           {footerShown && <FootRow layout={layout} gridMode={gridMode} formats={formats} wording={wording} />}
         </table>
