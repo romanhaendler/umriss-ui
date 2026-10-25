@@ -156,6 +156,28 @@ try {
   rmSync(consumerRoot, { recursive: true, force: true });
 }
 
+/* The public packages release in step under one number, and each umriss peer is
+   written `workspace:^0.<minor>.0` of that number (pnpm packs `^0.<minor>.0`),
+   so a patch of the same minor is accepted and a minor release has to move it. */
+{
+  const own = JSON.parse(readFileSync("package.json", "utf8")) as { version: string; peerDependencies?: Record<string, string> };
+  const versions = readdirSync("..").flatMap((dir) => {
+    try {
+      const other = JSON.parse(readFileSync(join("..", dir, "package.json"), "utf8")) as { name: string; version: string; private?: boolean };
+      return other.private ? [] : [`${other.name} ${other.version}`];
+    } catch {
+      return [];
+    }
+  });
+  if (new Set(versions.map((line) => line.split(" ")[1])).size > 1) {
+    problems.push(`the public packages carry more than one version:\n${versions.map((line) => `  ${line}`).join("\n")}`);
+  }
+  const expected = `workspace:^0.${own.version.split(".")[1]}.0`;
+  for (const [peer, range] of Object.entries(own.peerDependencies ?? {})) {
+    if (peer.startsWith("@umriss-ui/") && range !== expected) problems.push(`peer ${peer} reads ${range}, expected ${expected}`);
+  }
+}
+
 /* An import that uses nothing must cost next to nothing. */
 for (const file of entries) {
   const { gzipped, kept } = await residueOf(file);
