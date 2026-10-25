@@ -205,7 +205,7 @@ const DRIVING_NOW = FLEET.filter((one) => one.driving).length;
 function FleetLanes() {
   const { Chart, XAxis, YAxis, StateBand } = useChart(FLEET[0]!.points);
   return (
-    <Chart height={320} ariaLabel="What each vehicle has done today, lane by lane">
+    <Chart height={320} aria-label="What each vehicle has done today, lane by lane">
       <XAxis value="t" time domain={DAY} />
       <YAxis grid={false} />
       {FLEET.map((one) => (
@@ -227,7 +227,7 @@ function FleetLanes() {
 function IdleMinutes() {
   const { Chart, XAxis, YAxis, Bar } = useChart(FLEET);
   return (
-    <Chart height={200} ariaLabel="Idle minutes per vehicle so far today">
+    <Chart height={200} aria-label="Idle minutes per vehicle so far today">
       <XAxis value={(d) => d.vehicle.plate} />
       <YAxis label="min" tickCount={4} />
       <Bar value="idle" name="Idle" color={VEHICLE_STATES[IDLE]!.color} barWidth={0.6} />

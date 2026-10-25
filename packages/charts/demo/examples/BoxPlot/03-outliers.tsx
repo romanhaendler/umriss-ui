@@ -25,7 +25,7 @@ const RESPONSE_TIMES: ResponseTime[] = [
 export default function WithOutliers() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(RESPONSE_TIMES);
   return (
-    <Chart height={300} ariaLabel="Response time per service over the last hour, with outliers">
+    <Chart height={300} aria-label="Response time per service over the last hour, with outliers">
       <XAxis value="service" />
       <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot

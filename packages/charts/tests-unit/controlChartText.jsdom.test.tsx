@@ -82,7 +82,7 @@ afterEach(async () => {
 function Frame({ content }: { content: ReactNode }) {
   const { Chart, XAxis, YAxis } = useChart(DATA);
   return (
-    <Chart ariaLabel="Control chart" height={240}>
+    <Chart aria-label="Control chart" height={240}>
       <XAxis value="n" />
       <YAxis />
       {content}

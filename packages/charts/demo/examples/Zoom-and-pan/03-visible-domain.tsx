@@ -108,7 +108,7 @@ export default function VisibleDomain() {
     initialView: { domains: { x: [SATURDAY + 16 * HOUR, SATURDAY + 22 * HOUR] } },
   });
   return (
-    <Chart height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
+    <Chart height={260} aria-label="Search latency on Saturday evening, the y axis fitted to it">
       <XAxis value="t" time domain="data" zoomable />
       <YAxis label="ms" domain="visible" />
       <Line value="p95" name="p95" />

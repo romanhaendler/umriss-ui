@@ -54,7 +54,7 @@ export const lead = "Bars, a range, a line and single counts share one pair of a
 export default function Mixed() {
   const { Chart, XAxis, YAxis, Bar, Area, Line, Scatter } = useChart(DEPOT_DAYS);
   return (
-    <Chart height={320} ariaLabel="North depot: pallets in, out and on hand over fourteen days">
+    <Chart height={320} aria-label="North depot: pallets in, out and on hand over fourteen days">
       <XAxis value="day" label="Day of March" tickCount={7} />
       <YAxis label="Pallets" />
       <Bar value="arrived" name="Arrived" />

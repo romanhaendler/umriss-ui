@@ -133,7 +133,7 @@ function Channel({ channel: c, peers }: { channel: (typeof CHANNELS)[number]; pe
     return () => void peers.delete(c.name);
   }, [peers, c.name, setView]);
   return (
-    <Chart height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
+    <Chart height={140} syncId="images" aria-label={`Image service ${c.name} over last week`}>
       <XAxis value="t" time domain="data" zoomable />
       <YAxis label={c.unit} domain="visible" tickCount={4} />
       <Line value={c.value} name={c.name} />

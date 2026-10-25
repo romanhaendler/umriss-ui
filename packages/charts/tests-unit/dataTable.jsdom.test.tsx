@@ -60,7 +60,7 @@ type Extra = { domain?: readonly [number, number]; hidden?: boolean; legend?: bo
 function TwoLines({ rows, extra }: { rows: Row[]; extra: Extra }) {
   const { Chart, XAxis, YAxis, Line } = useChart(rows, { initialView: extra.hidden === true ? { hidden: ["B"] } : undefined });
   return (
-    <Chart ariaLabel="Two courses">
+    <Chart aria-label="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} label="Time" domain={extra.domain ?? "data"} />
       <YAxis tickFormat={(v) => `${v} °C`} />
       <Line value="a" name="A" format={(v) => `${v.toFixed(1)} bar`} />
@@ -157,7 +157,7 @@ describe("The table", () => {
     function States() {
       const { Chart, XAxis, YAxis, StateBand } = useChart([{ t: 0, s: 0 }, { t: 1, s: 1 }]);
       return (
-        <Chart ariaLabel="States">
+        <Chart aria-label="States">
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
           <YAxis domain={[0, 1]} />
           <StateBand value="s" states={states} name="Furnace" />
@@ -175,7 +175,7 @@ describe("The table", () => {
     function Long() {
       const { Chart, XAxis, YAxis, Line } = useChart(long);
       return (
-        <Chart ariaLabel="A long course">
+        <Chart aria-label="A long course">
           <XAxis value="t" />
           <YAxis />
           <Line value="v" name="V" />
@@ -195,7 +195,7 @@ describe("The table", () => {
     function German() {
       const { Chart, XAxis, YAxis, Line } = useChart(data);
       return (
-        <Chart ariaLabel="Zwei Verläufe" wording={GERMAN_CHARTS_WORDING}>
+        <Chart aria-label="Zwei Verläufe" wording={GERMAN_CHARTS_WORDING}>
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
           <YAxis />
           <Line value="b" name="B" />

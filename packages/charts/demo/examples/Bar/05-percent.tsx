@@ -24,7 +24,7 @@ const minutes = (v: number) => `${v} min`;
 export default function Percent() {
   const { Chart, XAxis, YAxis, Bar } = useChart(DELAYS);
   return (
-    <Chart height={280} ariaLabel="Share of each cause in the minutes late per working day">
+    <Chart height={280} aria-label="Share of each cause in the minutes late per working day">
       <XAxis value="day" />
       <YAxis />
       <Bar value="traffic" name="Traffic" stack="delay" normalize format={minutes} />

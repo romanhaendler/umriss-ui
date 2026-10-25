@@ -187,7 +187,7 @@ const LANES = NORTH.map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) }))
 export default function LimitsAndState() {
   const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
   return (
-    <Chart height={340} ariaLabel="An e-van's charge against its limits, above the states of the North depot's vehicles">
+    <Chart height={340} aria-label="An e-van's charge against its limits, above the states of the North depot's vehicles">
       <XAxis value="t" time label="Time" />
       <YAxis domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
       {/* The lanes take the lower places; the domain leaves the rest as room for the course. */}

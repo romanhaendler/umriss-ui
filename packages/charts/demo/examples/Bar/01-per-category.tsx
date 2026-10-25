@@ -19,7 +19,7 @@ const SPEND = [
 export default function PerCategory() {
   const { Chart, XAxis, YAxis, Bar } = useChart(SPEND);
   return (
-    <Chart height={260} ariaLabel="Actual spend per cost centre in February">
+    <Chart height={260} aria-label="Actual spend per cost centre in February">
       <XAxis value="costCentre" />
       <YAxis label="€" />
       <Bar value="actual" name="Actual" />

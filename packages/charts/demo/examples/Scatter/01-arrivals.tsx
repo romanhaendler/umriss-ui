@@ -139,7 +139,7 @@ const ARRIVALS: Arrival[] = TOURS.flatMap((tour) =>
 export default function Arrivals() {
   const { Chart, XAxis, YAxis, Scatter } = useChart(ARRIVALS);
   return (
-    <Chart height={260} ariaLabel="Every stop of today's tours: minutes after its window closed">
+    <Chart height={260} aria-label="Every stop of today's tours: minutes after its window closed">
       <XAxis value="t" time label="Arrival" />
       <YAxis label="Minutes late" />
       <Scatter value="late" name="Stop" radius={4} />

@@ -14,7 +14,7 @@ export default function Histogram() {
   const bins = useMemo(() => bin(MINUTES_TO_ANSWER, { width: 20 }), []);
   const { Chart, XAxis, YAxis, Bar } = useChart(bins);
   return (
-    <Chart height={260} ariaLabel="Minutes to answer 40 support tickets, counted in bins of 20 minutes">
+    <Chart height={260} aria-label="Minutes to answer 40 support tickets, counted in bins of 20 minutes">
       <XAxis value="x" label="minutes to answer" />
       <YAxis label="tickets" />
       <Bar value="count" name="Tickets" barWidth={0.94} />

@@ -23,7 +23,7 @@ const data: Row[] = [
 function Full() {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="jsdom test" height={200}>
+    <Chart aria-label="jsdom test" height={200}>
       <XAxis value="t" label="Index" />
       <YAxis />
       <YAxis id="two" position="right" />

@@ -182,7 +182,7 @@ const STATES = vehicleDay("v2");
 export default function UnderACourse() {
   const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
   return (
-    <Chart height={320} ariaLabel="An e-van's charge above what it was doing">
+    <Chart height={320} aria-label="An e-van's charge above what it was doing">
       <XAxis value="t" time label="Time" />
       <YAxis domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}

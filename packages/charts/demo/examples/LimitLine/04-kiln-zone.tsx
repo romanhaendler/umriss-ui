@@ -142,7 +142,7 @@ const SHIFT_START = new Date(2026, 2, 17, 6).getTime();
 export default function KilnZone() {
   const { Chart, XAxis, YAxis, Line } = useChart(SHIFT.readings);
   return (
-    <Chart height={280} ariaLabel="Kiln K1 zone 3 against its tolerance and alarm limit over the early shift">
+    <Chart height={280} aria-label="Kiln K1 zone 3 against its tolerance and alarm limit over the early shift">
       <XAxis value={(d) => SHIFT_START + d.minute * 60_000} time />
       <YAxis label="°C" />
       <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />

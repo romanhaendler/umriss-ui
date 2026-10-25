@@ -375,7 +375,7 @@ function Content() {
       <Card data-callout="3">
         <CardHeader title="p95 latency since 08:00" />
         <CardBody>
-          <Chart height={200} ariaLabel={`${SERVICE.name}, p95 latency since 08:00`}>
+          <Chart height={200} aria-label={`${SERVICE.name}, p95 latency since 08:00`}>
             <XAxis value="t" time />
             <YAxis domain={[0, 700]} label="ms" />
             <LimitLine value={SERVICE.latencySlo} severity="alarm" label="Objective" />

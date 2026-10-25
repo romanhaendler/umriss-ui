@@ -49,7 +49,7 @@ function Stack({ kind, extra }: { kind: "bar" | "area"; extra: Extra }) {
   const { Chart, XAxis, YAxis, Bar, Area } = useChart(data);
   const Kind = kind === "bar" ? Bar : Area;
   return (
-    <Chart ariaLabel="A stack" wording={extra.wording}>
+    <Chart aria-label="A stack" wording={extra.wording}>
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
       <YAxis />
       <Kind value="a" name="A" stack="s" normalize={extra.normalize} format={extra.format} />
@@ -197,7 +197,7 @@ describe("A normalised stack", () => {
     function StackAndLine() {
       const { Chart, XAxis, YAxis, Bar, Line } = useChart(data);
       return (
-        <Chart ariaLabel="A stack and a line">
+        <Chart aria-label="A stack and a line">
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
           <YAxis />
           <Bar value="a" name="A" stack="s" normalize />

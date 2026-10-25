@@ -23,7 +23,7 @@ export default function Stacked() {
   const { Chart, XAxis, YAxis, Bar } = useChart(DELAYS);
 
   return (
-    <Chart height={280} ariaLabel="Minutes late per working day, by cause">
+    <Chart height={280} aria-label="Minutes late per working day, by cause">
       <XAxis value="day" />
       <YAxis label="Minutes late" />
       <Bar value="traffic" name="Traffic" stack="delay" />

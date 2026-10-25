@@ -72,7 +72,7 @@ const day = (v: number) => new Date(v).toLocaleDateString("en-GB", { weekday: "s
 export default function BurnDown() {
   const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
-    <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
+    <Chart height={260} aria-label="Sprint 14: hours left against the ideal">
       <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
       <YAxis label="Hours left" />
       <Line value="ideal" name="Ideal" color="var(--uc-color-text)" dash={[4, 4]} />

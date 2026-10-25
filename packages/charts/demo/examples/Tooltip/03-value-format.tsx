@@ -92,7 +92,7 @@ const percent = { decimals: 2, style: "unit", unit: "percent" } as const;
 export default function ValueFormat() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's latency and error rate with their units">
+    <Chart height={260} aria-label="Checkout's latency and error rate with their units">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <YAxis id="errors" position="right" label="Errors %" />
