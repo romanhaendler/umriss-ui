@@ -32,6 +32,7 @@ import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csvOf, selectionText } from "./export";
 import { warnOnce } from "./dev";
+import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
 import type { SetFilter, Table, TableOptions, TableSnapshot } from "./types";
@@ -593,5 +594,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     rowFilters,
   });
 
-  return { ...snapshot, ...parts } as unknown as Table<Z>;
+  const reach = {
+    scrollToRow: (key: string) => scrollToRow(registry, key),
+    focusCell: (key: string, column: string) => focusCell(registry, key, column),
+  };
+  return { ...snapshot, ...parts, ...reach } as unknown as Table<Z>;
 }
