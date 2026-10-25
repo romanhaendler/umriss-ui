@@ -50,9 +50,9 @@
     box-shadow: var(--u-shadow-overlay);
   }
 
-  .sm { --_width: 400px; }
-  .md { --_width: 520px; }
-  .lg { --_width: 720px; }
+  .sm { --_width: var(--u-modal-width-sm); }
+  .md { --_width: var(--u-modal-width-md); }
+  .lg { --_width: var(--u-modal-width-lg); }
 
   .dialog::backdrop {
     /* The theme's scrim: a value of its own would dim the dark theme with the
