@@ -67,6 +67,7 @@ export const builtFrom = [
   { name: "Schedule", page: "@umriss-ui/schedule#schedule" },
   { name: "Line", page: "@umriss-ui/charts#line" },
   { name: "LimitLine", page: "@umriss-ui/charts#limitline" },
+  { name: "LimitBand", page: "@umriss-ui/charts#limitline" },
 ];
 
 /* The key is the batch id, and only this state holds it. */

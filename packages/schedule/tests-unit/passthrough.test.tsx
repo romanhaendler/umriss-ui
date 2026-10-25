@@ -65,12 +65,12 @@ describe("the root of the schedule", () => {
     expect(ref.current!.getAttribute("data-testid")).toBe("plan");
   });
 
-  it("joins a caller's aria-describedby to the summary, its own first", () => {
+  it("joins a caller's aria-describedby to the summary, the schedule's own first", () => {
     const { container } = render(<Harness through={{ "aria-describedby": "note" }} />);
     const ids = container.querySelector('[role="application"]')!.getAttribute("aria-describedby")!.split(" ");
-    expect(ids[0]).toBe("note");
+    expect(ids[1]).toBe("note");
     expect(ids).toHaveLength(2);
-    expect(container.querySelector(`[id="${ids[1]}"]`)).not.toBeNull();
+    expect(container.querySelector(`[id="${ids[0]}"]`)).not.toBeNull();
   });
 
   it("aria-labelledby names both elements", () => {
