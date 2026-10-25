@@ -1029,6 +1029,46 @@ test("Tabs change the content", async ({ page }) => {
   await expect(example.getByText("No leave planned")).toBeHidden();
 });
 
+test.describe("a tab list with more tabs than room", () => {
+  test.use({ viewport: { width: 375, height: 700 }, hasTouch: true });
+
+  test("scrolls within its width, and a tap on the last tab selects it in view", async ({ page }) => {
+    await openExample(page, "tabs", "more-tabs-than-room");
+    const example = page.locator('[data-example="more-tabs-than-room"]');
+    const last = example.getByRole("tab", { name: "Eastern Europe" });
+    const list = example.getByRole("tablist");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+    await list.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
+    const before = await page.evaluate(() => window.scrollY);
+    await last.tap();
+    await expect(last).toHaveAttribute("aria-selected", "true");
+    const tab = (await last.boundingBox())!;
+    const box = (await list.boundingBox())!;
+    expect(tab.x).toBeGreaterThanOrEqual(box.x - 0.5);
+    expect(tab.x + tab.width).toBeLessThanOrEqual(box.x + box.width + 0.5);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  });
+
+  test("the arrow keys walk to the last tab and it stands in view", async ({ page }) => {
+    await openExample(page, "tabs", "more-tabs-than-room");
+    const example = page.locator('[data-example="more-tabs-than-room"]');
+    const list = example.getByRole("tablist");
+    await example.getByRole("tab", { name: "Nordics" }).focus();
+    await page.keyboard.press("End");
+    const last = example.getByRole("tab", { name: "Eastern Europe" });
+    await expect(last).toBeFocused();
+    const box = (await list.boundingBox())!;
+    const tab = (await last.boundingBox())!;
+    expect(tab.x + tab.width).toBeLessThanOrEqual(box.x + box.width + 0.5);
+    await page.keyboard.press("Home");
+    const first = (await example.getByRole("tab", { name: "Nordics" }).boundingBox())!;
+    expect(first.x).toBeGreaterThanOrEqual(box.x - 0.5);
+  });
+});
+
 test("Menu opens and triggers an action", async ({ page }) => {
   await openExample(page, "menu", "actions");
   await page.getByRole("button", { name: "Actions", exact: true }).click();
