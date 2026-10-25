@@ -167,6 +167,80 @@ next kind to come (ADR-0059).
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
   language all five packages share.
 
+## Testing
+
+Tested: Vitest 5 and Jest 30 (with babel-jest), both on jsdom. happy-dom and Jest 29 may work and are
+not promised. `check:dist` runs a test of the installed package in a Vitest project and a Jest project
+that hold exactly the files below. A chart-only application installs no core, so the lines are given in
+full here.
+
+**Vitest** needs one line, `server.deps.inline`: Vitest hands a dependency to Node, and Node cannot
+import the stylesheet that the package's JavaScript imports (`Unknown file extension ".css"`). Inlined,
+Vitest's own pipeline handles it.
+
+```ts vitest.config.ts
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./umriss.setup.js"],
+    server: { deps: { inline: [/@umriss-ui/] } },
+  },
+});
+```
+
+**Jest** needs two settings: `moduleNameMapper` maps every stylesheet to an empty module, and
+`transformIgnorePatterns` lets babel-jest compile the package, which ships ES modules. Babel's config
+must apply to `node_modules`, so it is a root `babel.config.*`, not a `.babelrc`.
+
+```js jest.config.cjs
+module.exports = {
+  testEnvironment: "jsdom",
+  setupFilesAfterEnv: ["<rootDir>/umriss.setup.js"],
+  moduleNameMapper: { "\\.css$": "<rootDir>/css-stub.cjs" },
+  transformIgnorePatterns: ["/node_modules/(?!(@umriss-ui)/)"],
+};
+```
+
+```js css-stub.cjs
+module.exports = {};
+```
+
+```js babel.config.cjs
+module.exports = {
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-react", { runtime: "automatic" }],
+  ],
+};
+```
+
+**Next.js** with `next/jest`: put the umriss packages in `transpilePackages`; the preset stubs the
+stylesheets and compiles the packages itself.
+
+**The setup file** gives jsdom what a chart needs to lay out. jsdom measures nothing, so the
+`ResizeObserver` reports a fixed size (600 x 280) for whatever it observes; without a size the chart
+stays empty, and neither the legend nor "Show data" appears. jsdom has no canvas, so `getContext`
+returns `null`, which a chart copes with. The file is the same for both runners:
+
+```js umriss.setup.js
+globalThis.ResizeObserver = class {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe(target) {
+    const box = { inlineSize: 600, blockSize: 280 };
+    this.callback([{ target, contentRect: { width: 600, height: 280 }, contentBoxSize: [box] }], this);
+  }
+  unobserve() {}
+  disconnect() {}
+};
+
+HTMLCanvasElement.prototype.getContext = () => null;
+```
+
 ## Licence
 
 MIT — see [`LICENSE`](LICENSE).
