@@ -243,27 +243,6 @@ export const OPEN: readonly Open[] = [
     fix: "schedule: an open group's head is 25 px under a finger (`GROUP_HEAD_HEIGHT`, which the plot's rows share)",
   },
   {
-    demo: "table",
-    page: "first-table",
-    examples: [
-      "search-and-page-from-a-header-of-your-own",
-      "sort-arrange-and-export-from-controls-of-your-own",
-    ],
-    element: "button+ring+text+secondary+sm",
-    label: /^(Next|Previous) page$/,
-    reason: "a core Button sm whose label is one glyph is 16 px wide",
-    fix: "core: a Button's minimum width under a finger, 24 px",
-  },
-  {
-    demo: "table",
-    page: "first-table",
-    examples: ["sort-arrange-and-export-from-controls-of-your-own"],
-    element: "button+ring+text+ghost+sm",
-    label: /^Move /,
-    reason: "a core Button sm whose label is one glyph is 21 px wide",
-    fix: "core: a Button's minimum width under a finger, 24 px",
-  },
-  {
     demo: "core",
     panel: true,
     page: "datetimepicker",
