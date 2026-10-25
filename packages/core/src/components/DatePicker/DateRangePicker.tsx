@@ -13,7 +13,7 @@ import { rangeFromDays } from "./contract";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { useFormats, useWording } from "../../lib/language";
+import { useFormats, useLanguage, useWording } from "../../lib/language";
 import { CalendarGlyph } from "../../lib/glyphs";
 
 /* The range parts lie in ./range, the formats in ./format. Passed on here so
@@ -98,6 +98,8 @@ export function DateRangePicker(
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
+  // The width is measured with the real formats: it is the same on a server and in the browser, even while the instants are still empty.
+  const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.dateRangePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
   const presetList = useMemo(() => presets ?? defaultPresets(wording), [presets, wording]);
@@ -210,7 +212,7 @@ export function DateRangePicker(
         }}
         ariaLabel={wording.dateRangeClear}
         chars={chars}
-        natural={naturalChars((sample) => 2 * formats.date(sample).length + 3, placeholderText)}
+        natural={naturalChars((sample) => 2 * measure.date(sample).length + 3, placeholderText)}
       />
       <Popover
         open={open}

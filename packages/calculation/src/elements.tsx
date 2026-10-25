@@ -1,9 +1,13 @@
 /* The elements a calculation is written in (ADR-0027).
 
-   None of them renders anything: `<Calculation>` reads their props before it
-   renders and draws the lines itself. They exist so that the caller writes the
-   derivation as it will be shown, and so that the props tables have a type to
-   stand on. */
+   None of them renders anything inside a calculation: `<Calculation>` reads
+   their props before it renders and draws the lines itself. They exist so that
+   the caller writes the derivation as it will be shown, and so that the props
+   tables have a type to stand on. React renders one only when it stands
+   outside a calculation, or below a client component of the caller's that
+   took the tree as children - a tree written in a Server Component reaches a
+   client component as references, which the reader cannot read - and then
+   it says so. */
 
 import type { ReactNode } from "react";
 import type { FreshnessAges, Limit } from "@umriss-ui/core";
@@ -98,24 +102,35 @@ export interface RefProps {
   to: string;
 }
 
+/** The body of an element rendered on its own. The function carries the
+    element's name: the reader names a child it cannot read by it. */
+const stray = (name: string) => {
+  const element = (): never => {
+    throw new Error(
+      `@umriss-ui/calculation: <${name}> stands only directly inside a <Calculation>. A tree written in a Server Component must be written inside the <Calculation> there, in one file, not passed through a client component.`,
+    );
+  };
+  return Object.defineProperty(element, "name", { value: name });
+};
+
 /** A number the calculation does not derive. */
-export const Given: (props: GivenProps) => null = () => null;
+export const Given: (props: GivenProps) => null = stray("Given");
 
 /** The sum of its operands, however many: rows from data, one or none
     included. The sum of none is zero, and its line says it has no entries. */
-export const Sum: (props: OperatorProps) => null = () => null;
+export const Sum: (props: OperatorProps) => null = stray("Sum");
 
 /** The first operand minus every other: a − b − c. */
-export const Difference: (props: OperatorProps) => null = () => null;
+export const Difference: (props: OperatorProps) => null = stray("Difference");
 
 /** The product of two or more operands. */
-export const Product: (props: OperatorProps) => null = () => null;
+export const Product: (props: OperatorProps) => null = stray("Product");
 
 /** Exactly two operands: the first divided by the second. */
-export const Quotient: (props: OperatorProps) => null = () => null;
+export const Quotient: (props: OperatorProps) => null = stray("Quotient");
 
 /** A quantity defined elsewhere in the calculation, standing as an operand. */
-export const Ref: (props: RefProps) => null = () => null;
+export const Ref: (props: RefProps) => null = stray("Ref");
 
 /* The chain (ADR-0028): read top to bottom, each operand worked into the value
    before it, strictly in order, ended by an interim. */
@@ -147,19 +162,19 @@ export interface ChainOperandProps extends Omit<GivenProps, "label" | "value"> {
 }
 
 /** A calculation read top to bottom, as on paper. */
-export const Chain: (props: ChainProps) => null = () => null;
+export const Chain: (props: ChainProps) => null = stray("Chain");
 
 /** Adds its operand to the value before it. */
-export const Plus: (props: ChainOperandProps) => null = () => null;
+export const Plus: (props: ChainOperandProps) => null = stray("Plus");
 
 /** Takes its operand from the value before it. */
-export const Minus: (props: ChainOperandProps) => null = () => null;
+export const Minus: (props: ChainOperandProps) => null = stray("Minus");
 
 /** Multiplies the named value before it by its operand. */
-export const Times: (props: ChainOperandProps) => null = () => null;
+export const Times: (props: ChainOperandProps) => null = stray("Times");
 
 /** Divides the named value before it by its operand. */
-export const DividedBy: (props: ChainOperandProps) => null = () => null;
+export const DividedBy: (props: ChainOperandProps) => null = stray("DividedBy");
 
 /** Names the value of a chain where it stands. */
-export const Interim: (props: QuantityProps) => null = () => null;
+export const Interim: (props: QuantityProps) => null = stray("Interim");

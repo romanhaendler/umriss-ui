@@ -669,8 +669,12 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
             />
           )}
         </VisuallyHidden>
+        {/* The server snapshot knows no lanes, so its counts would be false: the
+            sentence waits for the first snapshot the scene makes after mount. */}
         <VisuallyHidden id={summaryId}>
-          {`${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })} ${wording.scheduleKeyHelp}`}
+          {snapshot === scene.getServerSnapshot()
+            ? wording.scheduleKeyHelp
+            : `${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })} ${wording.scheduleKeyHelp}`}
         </VisuallyHidden>
       </div>
       {children}

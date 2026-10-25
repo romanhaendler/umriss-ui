@@ -26,3 +26,41 @@ export function warnOnce(reason: string, message: string): void {
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
+
+let scanned = false;
+
+/* Whether a rule sits in an `umriss.*` layer: the library's own rules, which keep reading an old token on purpose. */
+const inOwnLayer = (rule: CSSRule): boolean => /^@layer\s+umriss\b/.test(rule.cssText);
+
+/* The rules outside the umriss layers, nested ones (media, supports, other layers) included. A sheet whose
+   `cssRules` throws is cross-origin and unreadable. */
+function* leafRules(rules: CSSRuleList): Generator<CSSRule> {
+  for (const rule of Array.from(rules)) {
+    if (inOwnLayer(rule)) continue;
+    const nested = (rule as CSSGroupingRule).cssRules;
+    if (nested && nested.length > 0) yield* leafRules(nested);
+    else yield rule;
+  }
+}
+
+/** Warns, once per page and only in development, for each old token (`--u-old` -> `--u-new`) that a stylesheet
+    outside the umriss layers declares or reads in `var()`. Call it in an effect, so that the application's
+    stylesheets have loaded. */
+export function warnDeprecatedTokens(tokens: Record<string, string>): void {
+  if (!isDev() || scanned || typeof document === "undefined") return;
+  scanned = true;
+  const text: string[] = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      continue;
+    }
+    for (const rule of leafRules(rules)) text.push(rule.cssText);
+  }
+  const css = text.join("\n");
+  for (const [old, replacement] of Object.entries(tokens)) {
+    if (new RegExp(`${old}(?![\\w-])`).test(css)) warnDeprecated(old, replacement);
+  }
+}

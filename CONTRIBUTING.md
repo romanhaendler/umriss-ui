@@ -131,7 +131,19 @@ Each of these is argued somewhere; the link is the argument, not the rule.
     constant or a type is only marked.
   * **Wording key**: the wording merge copies an old key onto the new one when the
     new one is not given, and warns. The old key stays in the wording type, marked.
-  * **Token**: its own recipe, not yet written here.
+  * **Token** (core and charts declare them): the old name is declared in the same
+    tokens layer as `--u-<old>: var(--u-<new>); /* @deprecated since 0.<N> - use
+    --u-<new> */`, and the library's own rules go on reading the old name for that
+    minor, so either name can be set or read and there is no cycle. The removal
+    release moves the rules to the new name and drops the alias. The warning comes
+    from `warnDeprecatedTokens({ "--u-<old>": "--u-<new>" })` in the package's
+    `dev.ts`: once per page, development only, it names an old token that a
+    stylesheet outside the `umriss.*` layers declares or reads in `var()`. Every
+    component whose rules read a deprecated token calls it in an effect on its
+    first render; the once-flag makes many callers one scan. The migration line
+    says the edge: a new name set on an element below `:root` reaches the rules
+    only from the removal release, because the alias resolves at `:root`; set it
+    on `:root`, or keep the old name until then.
   * **Changelog**: the entry under "Changed" names the old name, the new one and
     the release that removes the old one, in its migration line; the removal's
     entry is under "Changed" too.
