@@ -67,9 +67,9 @@
 
   /* The band's room below the controls comes out of the room above them: the
      head is as tall in the mode as at rest, so the body below it keeps its
-     height. */
+     height, whatever the spacing tokens. */
   .editingHead {
-    padding-block: var(--u-space-1);
+    padding-block: calc(var(--u-space-2) - var(--u-space-1)) var(--u-space-1);
     background: var(--u-color-surface-pressed);
     touch-action: none;
     user-select: none;
