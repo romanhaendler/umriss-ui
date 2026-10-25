@@ -27,7 +27,8 @@ export interface QuantityProps {
       The quantity stays a ratio in every operation. */
   format?: "percent";
   /** Fixed number of fraction digits as shown. Rounding happens only in
-      presentation; every operation uses the full value.
+      presentation; every operation uses the full value. The places carry down
+      to operands of the same `unit` and `format` that set none of their own.
       @default one digit for a percentage, at most two for a derived number, a
       given as it was given */
   decimals?: number;
