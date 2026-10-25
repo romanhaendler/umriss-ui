@@ -42,7 +42,7 @@ import {
   type Ref,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
-import { AngleGlyph, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
@@ -58,8 +58,12 @@ export interface ScheduleProps {
   ref?: Ref<ScheduleHandle>;
   /** What the schedule shows, for a screen reader: "Plan of week 38". */
   ariaLabel: string;
-  /** Height in CSS pixels, both bands included. The width is the host's.
-      @default 400 */
+  /** Height in CSS pixels, both bands included, fixed. Left out, the schedule
+      fills its frame - a stretched grid cell, a card the grid stretches, a
+      container of definite height - and never goes below 400 px, which is also
+      its height in a frame without one. A different floor goes through
+      `style`'s `minHeight` (ADR-0050). The width is the host's.
+      @default fills the frame, at least 400 px */
   height?: number;
   /** Height of one lane in pixels at the default font size of 16 px; the
       schedule multiplies it by the root font size over 16 px when that ratio
@@ -155,6 +159,14 @@ export interface ScheduleProps {
       the minute, an instant fixes it there.
       @default false */
   now?: boolean | number;
+  /** The plan is on its way, as the chart's `loading` says (ADR-0042). A plan
+      already drawn stays: it dims after a moment and takes no pointer - no new
+      drag, no tooltip, no intent by key - until the answer is in; a drag
+      begun before finishes and reports. The keys still walk it. With no lanes,
+      placeholder lines stand in the lane column. The plot is `aria-busy`
+      meanwhile.
+      @default false */
+  loading?: boolean;
   /** Goes to the root element. */
   className?: string;
   /** Goes to the root element. */
@@ -198,7 +210,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     ref,
     scene,
     ariaLabel,
-    height = 400,
+    height,
     laneHeight = DEFAULT_LANE_HEIGHT,
     headerWidth = 160,
     calendar = WALL_CLOCK,
@@ -217,6 +229,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     label,
     tooltip,
     now,
+    loading = false,
     className,
     style,
     children,
@@ -270,6 +283,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     }),
     [scene],
   );
+
+  useEffect(() => {
+    scene.setLoading(loading);
+  }, [scene, loading]);
 
   useEffect(() => {
     scene.setControlledTask(selectedTask);
@@ -465,7 +482,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         role="figure"
         aria-label={ariaLabel}
         className={className ? `${styles.root} ${className}` : styles.root}
-        style={{ height: `${height}px`, gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
+        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner} />
         <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">
@@ -495,6 +512,14 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         </div>
         <div ref={headersRef} className={styles.headers} data-schedule-headers="">
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
+            {/* Over no lanes, as many lines as the plot holds. */}
+            {loading &&
+              snapshot.headers.length === 0 &&
+              Array.from({ length: Math.floor(snapshot.height / Math.round(laneHeight * fontScale)) }, (_, line) => (
+                <div key={line} className={styles.header} style={{ height: `${Math.round(laneHeight * fontScale)}px` }}>
+                  <Skeleton width="60%" />
+                </div>
+              ))}
             {snapshot.headers.map((header) => (
               <div
                 key={header.key}
@@ -542,6 +567,8 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
           data-schedule-plot=""
           data-schedule-clip="plot"
           style={{ cursor: snapshot.cursor }}
+          aria-busy={loading || undefined}
+          data-stale={(snapshot.loading && snapshot.headers.length > 0) || undefined}
           /* One tab stop for the whole plot, with the application role: in
              browse mode a screen reader keeps the arrow keys for itself
              (ADR-0030). */

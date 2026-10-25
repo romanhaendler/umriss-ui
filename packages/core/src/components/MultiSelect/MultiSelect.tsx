@@ -477,6 +477,8 @@ export function MultiSelect<T extends string = string>(
                 value={search}
                 placeholder={searchPlaceholderText}
                 aria-label={wording.searchOptions}
+                autoComplete="off"
+                enterKeyHint="done"
                 clearable
                 onClear={() => {
                   setSearch("");

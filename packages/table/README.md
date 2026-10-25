@@ -69,6 +69,13 @@ A table wider than its place scrolls in its own frame, never the page; in a
 narrow place - a phone, beside a sidebar - the toolbar and the paging bar wrap
 instead of running out of it.
 
+`maxHeight` bounds the scroll area, and a `virtual` table needs a bound to render
+only its window. A parent of definite height - a dashboard widget's body, a pane,
+a grid cell - is such a bound without it: the table is never taller than the
+parent, its toolbar stays in view and its rows scroll. A wrapper between the
+two passes the height on with `height: 100%`. Where the parent has no definite
+height, nothing changes, and `maxHeight="100%"` there bounds nothing.
+
 ## Grouped, in one option
 
 ```tsx
