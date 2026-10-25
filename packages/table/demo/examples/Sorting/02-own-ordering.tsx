@@ -22,7 +22,7 @@ export default function OwnOrdering() {
 
   return (
     <Stack gap={3}>
-      <Table ariaLabel="Parcels">
+      <Table aria-label="Parcels">
         <Toolbar>
           <Export onExport={setCsv} />
         </Toolbar>

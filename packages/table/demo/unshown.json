@@ -2,5 +2,6 @@
   "SearchProps.className": "(a) pass-through: a class on the field",
   "ToolbarProps.className": "(a) pass-through: a class on the toolbar",
   "PaginationProps.className": "(a) pass-through: a class on the bar",
+  "TableProps.ariaLabel": "(g) deprecated alias of `aria-label`, which every example uses",
   "VerdictBase.resizable": "(f) twin of `ColumnBase.resizable`: the same grip, shown on Width and pinning"
 }

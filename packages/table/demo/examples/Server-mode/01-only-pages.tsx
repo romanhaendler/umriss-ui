@@ -173,7 +173,7 @@ export default function OnlyPages() {
   });
 
   return (
-    <Table ariaLabel="Shipments on the server">
+    <Table aria-label="Shipments on the server">
       <Column value="id" label="Shipment" rowHeader sortable={false} />
       <Column value="customer" label="Customer" sortable={false} />
       <Column value="weight" label="Weight (kg)" sortable={false} />

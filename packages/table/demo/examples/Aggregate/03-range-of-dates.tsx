@@ -27,7 +27,7 @@ const WORK: WorkItem[] = [
 export default function RangeOfDates() {
   const { Table, Column } = useTable(WORK, { rowKey: (w) => w.id, defaultGrouping: ["project", "person"] });
   return (
-    <Table ariaLabel="Work items by project and person">
+    <Table aria-label="Work items by project and person">
       <Column value="person" label="Person" />
       <Column value="project" label="Project" />
       <Column value="id" label="Item" rowHeader />

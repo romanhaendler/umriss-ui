@@ -47,7 +47,7 @@ export default function TheWholeGrid() {
       selectable
       stickyHeader
       maxHeight="360px"
-      ariaLabel="Parcels by depot"
+      aria-label="Parcels by depot"
       onCellEdit={({ rowKey, columnId, value }) =>
         setParcels((all) => all.map((p) => (p.id === rowKey ? { ...p, [columnId]: value } : p)))
       }

@@ -165,4 +165,12 @@
       background: CanvasText;
     }
   }
+
+  /* Under a finger an option is as tall as the 24 px square of WCAG 2.5.8. */
+  @media (pointer: coarse) {
+    .option {
+      min-height: 24px;
+      min-width: 24px;
+    }
+  }
 }

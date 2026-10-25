@@ -22,7 +22,7 @@ export default function PinAColumn() {
   const { Table, Column } = useTable(CENTRES, { rowKey: (c) => c.name });
 
   return (
-    <Table ariaLabel="Cost centres by month">
+    <Table aria-label="Cost centres by month">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>

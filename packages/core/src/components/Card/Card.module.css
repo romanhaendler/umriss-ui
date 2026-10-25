@@ -126,4 +126,17 @@
     border-radius: 0;
     box-shadow: none;
   }
+
+  /* Under a finger the fold key is hit 2 px taller above and below, the 24 px square of WCAG 2.5.8. */
+  @media (pointer: coarse) {
+    .collapseButton {
+      position: relative;
+    }
+
+    .collapseButton::after {
+      content: "";
+      position: absolute;
+      inset: -2px 0;
+    }
+  }
 }

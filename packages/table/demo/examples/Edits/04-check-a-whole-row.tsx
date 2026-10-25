@@ -29,7 +29,7 @@ export default function CheckAWholeRow() {
     <Table
       grid
       editMode="row"
-      ariaLabel="Price list"
+      aria-label="Price list"
       onRowSave={({ rowKey, changes }) => setOffers((all) => all.map((o) => (o.id === rowKey ? { ...o, ...changes } : o)))}
     >
       <Column value="product" label="Product" rowHeader />

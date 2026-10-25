@@ -53,7 +53,7 @@ export default function GroupAndFoldFromControls() {
           Fold finished tours
         </Button>
       </Stack>
-      <Table ariaLabel="Shipments by tour">
+      <Table aria-label="Shipments by tour">
         <Column value="id" label="Shipment" rowHeader />
         <Column value="tour" label="Tour" />
         <Column value="customer" label="Customer" />

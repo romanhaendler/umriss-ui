@@ -23,7 +23,7 @@ export default function CommentsColumn() {
   return (
     <Table
       grid
-      ariaLabel="Today's tours"
+      aria-label="Today's tours"
       onCellEdit={({ rowKey, value }) => setTours((all) => all.map((t) => (t.id === rowKey ? { ...t, comment: String(value) } : t)))}
     >
       <Column value="id" label="Tour" rowHeader />

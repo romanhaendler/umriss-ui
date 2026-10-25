@@ -39,7 +39,7 @@ export default function OpenADetailFromOutside() {
           Close all details
         </Button>
       </Stack>
-      <Table ariaLabel="Shipments">
+      <Table aria-label="Shipments">
         <Column value="id" label="Shipment" rowHeader />
         <Column value="customer" label="Customer" />
         <Column value="window" label="Window" />

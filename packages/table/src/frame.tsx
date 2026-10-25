@@ -32,7 +32,16 @@ import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
 import { markBeyond, markStuck, markUnder } from "./scrollMarks";
 import styles from "./Table.module.css";
 
-export function Frame({ registry, props }: { registry: Registry; props: TableProps<unknown> }) {
+export function Frame({
+  registry,
+  props,
+  name,
+}: {
+  registry: Registry;
+  props: TableProps<unknown>;
+  /** The three names of the table, for the <table> (ADR-0068). */
+  name: { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string };
+}) {
   const {
     selectable = false,
     stickyHeader = false,
@@ -44,7 +53,6 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
     rowProps,
     currentRow,
     onCurrentRowChange,
-    ariaLabel,
     grid: gridMode = false,
   } = props;
 
@@ -160,7 +168,7 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
           onBlur={gridEvents?.onBlur}
           data-depth={lines ? grouping.length : undefined}
           style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
-          aria-label={ariaLabel}
+          {...name}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */
           aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
