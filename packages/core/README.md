@@ -74,7 +74,11 @@ export function OrdersTable({ rows }: { rows: Order[] }) {
 }
 ```
 
-The reasons, and what a calculation may do differently, are in
+On a server, and until the page has hydrated, a date or time is empty, because only the browser
+knows the reader's zone.
+
+The calculation is the one view a Server Component writes itself: its tree is read where it is
+written (see `@umriss-ui/calculation`). The reasons are in
 [ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
 
 ### What an import costs
@@ -110,6 +114,27 @@ outside a layer wins over all of them, whatever the order of loading:
   --u-color-accent: #0f766e;
 }
 ```
+
+**Layered CSS of your own.** The order of the layers decides who wins, so
+declare it before anything else is read.
+
+- Tailwind v4: this line as the first CSS the page reads, before
+  `@import "tailwindcss"`. Utilities then win over umriss, and Tailwind's
+  preflight stays below it.
+
+  ```css
+  @layer theme, base, umriss.tokens, umriss.base, umriss.components, components, utilities;
+  ```
+
+- A wrapper library: this line as the first statement of its stylesheet,
+  with its own layer in place of `acme`. It holds in either load order.
+
+  ```css
+  @layer umriss.tokens, umriss.base, umriss.components, acme;
+  ```
+
+Unlayered CSS always wins. A classic unlayered reset (Bootstrap and the like) is
+not fixed by layer order.
 
 **Light and dark follow the application's `color-scheme`.** Every token with
 two values is written `light-dark(<light>, <dark>)`. An application that

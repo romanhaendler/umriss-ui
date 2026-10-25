@@ -111,6 +111,9 @@
        the same size. It serves as a role: the date picker's value, days and time fields,
        the numeric field and input, the table's numeric cells. */
     --u-text-mono: 0.75rem;
+    /* The size of a FormField's label. The controls keep their own text size
+       (--u-text-sm), so a label can be set apart from the field's text. */
+    --u-label-size: var(--u-text-sm);
 
     /* A box as tall as its type: a badge, a tag, a count, a glyph. The height
        comes from the control or the padding, and the line adds no leading. */

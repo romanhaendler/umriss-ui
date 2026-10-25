@@ -8,13 +8,17 @@
 
    It runs after `importOwnCss`, which has put the stylesheet import at the head:
    the directive goes in front of it, because only the first statement of a
-   module counts. */
+   module counts.
+
+   `files` names the entry chunks that get it; without it, every entry chunk
+   does. A package whose main entry must run on a server names its client file
+   alone. */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Plugin } from "vite";
 
-export function clientDirective(): Plugin {
+export function clientDirective(files?: readonly string[]): Plugin {
   return {
     name: "umriss-use-client",
     apply: "build",
@@ -22,7 +26,7 @@ export function clientDirective(): Plugin {
     writeBundle(options, bundle) {
       const dir = options.dir ?? "dist";
       for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== "chunk" || !chunk.isEntry) continue;
+        if (chunk.type !== "chunk" || !chunk.isEntry || (files && !files.includes(chunk.fileName))) continue;
         const file = join(dir, chunk.fileName);
         const code = readFileSync(file, "utf8");
         const line = `"use client";\n`;
