@@ -122,7 +122,7 @@ export function Row({
     <>
       <tr
         {...data}
-        ref={current.reports && !fresh ? (el) => void (el && rowOfElement.set(el, row)) : undefined}
+        ref={current.report && !fresh ? (el) => void (el && rowOfElement.set(el, row)) : undefined}
         aria-current={!fresh && current.key === key ? "true" : undefined}
         data-current={!fresh && current.key === key ? "" : undefined}
         className={cx(
@@ -199,6 +199,7 @@ export function Row({
             formats={formats}
             wording={wording}
             line={gridLine}
+            isCurrent={!fresh && current.key === key}
             rowName={name}
             width={snapshot.widths[e.spec.id]}
             tree={
@@ -312,10 +313,13 @@ function Cell({
   formats,
   wording,
   line,
+  isCurrent,
   rowName,
   tree,
   width,
 }: {
+  /** The row is the application's current row. */
+  isCurrent: boolean;
   /** Tree rows: this cell carries the indent and the fold. */
   tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown>; detail?: TreeDetail };
   entry: ColumnEntry;
@@ -367,6 +371,17 @@ function Cell({
       {content}
     </div>
   );
+  /* A native table reaches the row by the keyboard through its header, which
+     is then a button; a grid walks its cells and Enter reports instead. The
+     table's own controls of the cell - a tree's fold - stand beside it. */
+  const report = useContext(CurrentRowContext).report;
+  if (spec.rowHeader && report && !gridMode) {
+    content = (
+      <button type="button" className={styles.rowButton} aria-current={isCurrent ? "true" : undefined} onClick={() => report(row)}>
+        {content}
+      </button>
+    );
+  }
   if (tree) content = <TreeCellContent {...tree} name={rowName} wording={wording}>{content}</TreeCellContent>;
 
   const Tag = spec.rowHeader ? "th" : "td";

@@ -31,6 +31,9 @@ export interface GridInput {
   /** Selects or deselects a row - in a table with selection; Space asks for
       it from any cell of the row. */
   select: ((row: unknown) => void) | undefined;
+  /** Reports the row as the current one - in a table with `onCurrentRowChange`;
+      Enter asks for it on a cell with nothing to edit or enter. */
+  report: ((row: unknown) => void) | undefined;
 }
 
 /** Does this column edit? */
