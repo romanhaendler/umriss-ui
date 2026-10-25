@@ -28,7 +28,7 @@ Every entry begins with `"use client"`, the directive a framework
 with Server Components reads to treat a module as client code. A schedule is declared by its hook,
 `useSchedule`, so the declaration lives in a Client Component file: a Server Component renders that
 file and hands it the rows and subtasks. On a server a schedule gives its labelled frame and empty
-canvases; the lanes and subtasks arrive on the client after mount. No test runs inside such a
+canvases; the lanes, the subtasks and the summary arrive on the client after mount. No test runs inside such a
 framework: the schedule is rendered to a string in a test.
 
 ## The smallest schedule that runs
