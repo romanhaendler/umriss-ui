@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Size: S
 
-Blocked by: `03-a-table-shows-the-plants-time.md`, `.scratch/table-xlsx/issues/02-the-writer.md`
+Blocked by: `03-a-table-shows-the-plants-time.md`, `.scratch/table-xlsx/issues/02-the-writer.md`, `.scratch/table-xlsx/issues/05-the-csv-writes-a-day-as-its-day.md`
 Spec: `.scratch/plant-time-zone/spec.md`
 
 ## What to build
