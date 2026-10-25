@@ -17,7 +17,8 @@ The chart follows the table.
   - `ref`, `id` and `data-*` reach the root that its class and style already reach.
   - `aria-label` and `aria-labelledby` go to the plot. A caller's `aria-describedby` is joined to the
     plot's own summary, the summary first.
-  - `ariaLabel` is removed.
+  - `ariaLabel` stays for one further minor as a deprecated alias, and it warns once in development. The
+    warning uses the mechanism that the upgrade-promise spec defines.
   - The chart's own effects still bind the same root: the caller's ref and the chart's own ref both
     receive it.
 - **The development warning** reads "Chart without aria-label" and is satisfied by `aria-labelledby` as
@@ -31,15 +32,16 @@ The chart follows the table.
 - **README.** One line on the shape. Every `ariaLabel` in the charts' README, capabilities record, demo and
   tests, in the schedule's and the dashboard's demos that draw charts, and in core's control-room page moves
   to `aria-label`. Regenerate `API.md`.
-- **Changelog** (Changed): the rename; `ref`, `id` and `data-*` now reach the root.
+- **Changelog** (Changed): the rename, deprecated, with the release that removes it; `ref`, `id` and
+  `data-*` now reach the root.
 
 ## Acceptance criteria
 
 - [ ] `<c.Chart data-testid="trend" ref={r}>` puts the test id on the root, and `r.current` is that root.
 - [ ] `<c.Chart aria-labelledby="h" aria-describedby="note">` names the plot by the heading, and its
       description lists the summary and then `note`.
-- [ ] `ariaLabel` is a type error on `Chart`. A chart without any name warns once in development, naming
-      `aria-label`.
+- [ ] `ariaLabel` on `Chart` still names the plot, warns once in development, and is marked deprecated in
+      its type. A chart without any name warns once in development, naming `aria-label`.
 - [ ] The guard fails if `data-*` is dropped again.
 - [ ] `pnpm check charts`, `pnpm typecheck` and `pnpm check:site` pass, and `pnpm test:visual:quick charts`
       passes.

@@ -1,7 +1,7 @@
 # The table's and the schedule's single wishes
 
 Type:       grilling
-Status:     open
+Status:     claimed
 Blocked by: 05, 13, 16
 
 ## Question

@@ -39,7 +39,8 @@ calls and are marked *(agent, product - for review)*.
   - `signDisplay`, and accounting negatives (`currencySign: "accounting"`).
 
   A vocabulary of umriss's own would only be a translation table to keep up to date. The options are plain
-  data: they can be compared by value, and a server page can pass them on, where it cannot pass a function.
+  data, so they can be compared by value, and an inline object costs nothing. Serialisability is not the
+  reason: "What umriss promises a Server Component" keeps every declaration in a client file.
   The locale stays where ADR-0024 and ADR-0031 put it: core's formats set, and the charts' `wording.locale`.
 - **One shape in every package that writes a number as one text** *(agent)*:
   - a table's `Column` and `VerdictColumn` (`format`);

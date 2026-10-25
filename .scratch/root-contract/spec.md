@@ -49,8 +49,14 @@ One contract for every component of the six packages, held by the same guard in 
 - the table gains `scrollToRow` and `focusCell`;
 - the schedule gains `scrollToLane`, `scrollToSubtask` and `focusSubtask`.
 
-The name is spelled `aria-label` everywhere. All of it ships as one breaking release of the six packages,
-without aliases, and each change gets a migration line in its changelog.
+The name is spelled `aria-label` everywhere.
+
+All of it ships in one minor of the six packages, under the upgrade promise:
+
+- `ariaLabel` and the schedule's handle keep working for one further minor, and each warns once in
+  development. The release after that removes them.
+- Where the rest of a field or of the Calculation lands is the one change that cannot keep its old form.
+- Every change carries a migration line in its changelog.
 
 ## User Stories
 
@@ -93,16 +99,18 @@ without aliases, and each change gets a migration line in its changelog.
     subtask is not shown (filtered out, folded away, unknown, not mounted), so that I can tell the user
     instead of guessing.
 20. As an upgrading developer, I want each changelog to give one migration line per change (`ariaLabel` to
-    `aria-label`, a `ScheduleHandle` ref to the hook's functions, a picker's ref type), so that the upgrade is
-    mechanical.
-21. As an upgrading TypeScript developer, I want the compiler to report every place that the change touches,
-    so that nothing breaks silently.
-22. As the maintainer, I want one guard per package to render every component with a ref, a class, a style
+    `aria-label`, a `ScheduleHandle` ref to the hook's functions, where a picker's or a Calculation's rest
+    now lands), so that the upgrade is mechanical.
+21. As an upgrading developer, I want `ariaLabel` and a `ScheduleHandle` ref to keep working for one minor
+    and warn once in development, so that I can upgrade first and migrate after.
+22. As an upgrading TypeScript developer, I want the deprecated names marked deprecated in my editor, and a
+    picker's changed `ref` reported by the compiler, so that I find every place to change.
+23. As the maintainer, I want one guard per package to render every component with a ref, a class, a style
     and a data attribute, and fail on a component that is neither a case nor a named exception, so that a new
     component cannot drift from the contract.
-23. As the maintainer, I want the guard to check that a composite's name reaches the element with the role
+24. As the maintainer, I want the guard to check that a composite's name reaches the element with the role
     and not the frame, so that a refactor cannot leave a table unnamed.
-24. As the maintainer, I want the contract written once - in an ADR, and in core's README as principle 1 for
+25. As the maintainer, I want the contract written once - in an ADR, and in core's README as principle 1 for
     the family - so that a sixth package does not invent a fifth shape.
 
 ## Implementation Decisions
@@ -141,14 +149,25 @@ without aliases, and each change gets a migration line in its changelog.
   omitted where they clash) and `RefProp<E>` from core. Charts depends on nothing, so it declares
   `ref?: Ref<HTMLDivElement>` itself. `TableProps`, `ChartProps` and `ScheduleProps` gain the attributes;
   `CalculationProps` and `DashboardProps` gain the ref.
-- **The name.** `ariaLabel` is removed from Table, Chart, Schedule, `TreeView`, `Popover` and `ContextMenu`,
-  and replaced by `aria-label`.
+- **The name.** On Table, Chart, Schedule, `TreeView`, `Popover` and `ContextMenu`, `aria-label` replaces
+  `ariaLabel`.
+  - For one further minor, `ariaLabel` stays as a deprecated alias: the component reads
+    `aria-label ?? ariaLabel`, and the old name warns once in development. The warning uses the mechanism
+    that the upgrade-promise spec defines, which is being written as `.scratch/upgrade-promise/`. The
+    release after that removes the alias (ticket 10).
   - Where a name is required today (TreeView, Schedule, ContextMenu), `aria-label` is required.
   - Chart's development warning names `aria-label` and is satisfied by `aria-labelledby` as well.
   - Every internal use moves too: the table's and the dashboard's popovers, core's own components, and the
     demos.
-- **`ref` is always an element.** `ScheduleHandle` is removed. Its three functions move to `ScheduleParts`
-  with the same signatures. While the schedule is not mounted, `positionAt` and `clientPointOf` return
+- **`ref` is always an element.** `ScheduleHandle` goes. Its three functions move to `ScheduleParts` with
+  the same signatures.
+  - For one further minor, a bridge keeps the old `ref` working:
+    - the element that the Schedule hands its `ref` also carries the three functions;
+    - the `ref` prop accepts a ref to either the element or the handle;
+    - `ScheduleHandle` stays exported, marked deprecated;
+    - the first call of a handle function through the element warns once in development, by the same
+      mechanism as the alias.
+  - The release after that removes the bridge and the type (ticket 10). While the schedule is not mounted, `positionAt` and `clientPointOf` return
   `null`, as `clientPointOf` does today off screen.
 - **Functions on the hook's return.** Each one acts on the mounted component and returns whether the target
   is now shown. It returns `false` and changes nothing for a target that is unknown, filtered out, inside a
@@ -189,8 +208,15 @@ without aliases, and each change gets a migration line in its changelog.
     name goes.
   - `API.md` is regenerated in every package.
   - The skill `skills/umriss-ui` loses every `ariaLabel`.
-- **Release.** One minor of each of the six packages, released together. Each changelog's Changed section
-  carries a migration line per change, and there are no aliases.
+- **Release.** One minor of each of the six packages, released together, as the upgrade promise has them
+  release in step. Each changelog's Changed section carries a migration line per change.
+  - The alias and the bridge are named as deprecated, together with the release that removes them.
+  - **The one break.** On the six pickers and combobox fields (wrapper → control) and on the Calculation
+    (list → surface), the place where the rest and `ref` land changes with no old form kept. A ref or an
+    attribute stands on one element, and copying `id` or `data-*` onto both elements would create duplicate
+    ids and two matches for one test id. The migration line names the new element.
+- **Removal.** In the minor after, ticket 10 removes the aliases and the bridge, each with a Changed entry
+  and a migration line.
 - **ADR.** A new ADR records the contract, the element `ref`, the functions on the hook's return and the
   spelling `aria-label`. It supersedes ADR-0018's section "What stands from ADR-0015", which keeps a note
   that points at it. It is the first ticket.
@@ -204,8 +230,11 @@ without aliases, and each change gets a migration line in its changelog.
   prior art is core's pass-through test, which becomes its first caller, and the shared style, wording and
   glyph guards in the demo's `tests-support`, which show the shape of a shared guard.
 - **Types**: the schedule's existing type test (`types.test-d`) asserts that a `ref` on `Schedule` is an
-  `HTMLDivElement` and that a `ScheduleHandle` ref is a type error. Core's `iconButton` test already proves
-  that a wrong element type is refused, and nothing more is added there.
+  `HTMLDivElement`. While the bridge stands, it also asserts that a `ScheduleHandle` ref is accepted and
+  marked deprecated. Once ticket 10 removes the bridge, it asserts that such a ref is a type error. Core's
+  `iconButton` test already proves that a wrong element type is refused, and nothing more is added there.
+- **Deprecated names**: a unit test per package asserts that each old name still works and warns exactly
+  once in development.
 - **The functions on the hook's return** are tested in jsdom through the hook, beside the existing tests:
   - the table's grid-mode, paging and virtual-row tests for `scrollToRow` and `focusCell`;
   - `useSchedule`'s and the schedule view's tests for the schedule's functions.
@@ -229,14 +258,19 @@ without aliases, and each change gets a migration line in its changelog.
 - `fit` and `zoomTo` as new names; zoom buttons and keyboard zoom on the schedule (map ticket 23).
 - A function on the chart's hook. No persona asked for one.
 - Development warnings for a missing name on Table, Schedule or Calculation (map ticket 18).
-- Deprecated aliases for the renamed props, and a deprecation policy (map ticket 19).
+- The deprecation mechanism itself: its development warning helper and its wording. The upgrade-promise
+  spec defines them, and this spec uses them.
+- Keeping the old landing place of a picker's or a Calculation's rest. It cannot stand beside the new one.
 - `data-testid` on core's `Tooltip`. It wraps the caller's child, and the child carries the caller's test id.
 - The schedule bars' hit targets for test tools (`qa.md` 5): a defect of its own.
 
 ## Further Notes
 
-- The six packages' peers are in lockstep, so the contract reaches every application in one upgrade. The
-  tickets land on `main` one after another; the release waits until the last of tickets 03 to 07 is in.
+- The six packages release in step, so the contract reaches every application in one upgrade. The tickets
+  land on `main` one after another; the release waits until the last of tickets 03 to 07 is in. Ticket 10
+  goes into the minor after that one.
+- If `.scratch/upgrade-promise/issues/` holds a ticket for the deprecation mechanism when tickets 03 to 06
+  start, that ticket blocks them.
 - "Root" in this spec means the element a component's `ref` reaches. For a field that is its control, while
   its class dresses the wrapper. The ADR uses the same words.
 - `CONTEXT.md` names `ScheduleHandle` under **Grip**, and states the old spelling rule under "Language".

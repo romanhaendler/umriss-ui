@@ -98,6 +98,33 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   new ADR supersedes ADR-0032 on export; print redraws on `matchMedia("print")` (Chromium promised). Spec
   `.scratch/chart-picture-and-print/`.
 
+- [A touch size for the controls](issues/06-a-touch-size-for-the-controls.md): touch is told by the pointer
+  (sizes by `pointer: coarse`, behaviour by the gesture's `pointerType`), never a setting or hook; `md` is
+  44 px **under a finger**, no target below 24 px, held by a shared check; long press for Tooltip and
+  ContextMenu; no bottom sheet, no media hook; an ADR. Spec `.scratch/under-a-finger/`.
+
+- [Number formats](issues/15-number-formats.md): a format is `"percent"`, `"count"` or Intl's options plus
+  `decimals`, taken by table columns, chart series and axes in the language's locale; a year is
+  `useGrouping: false`, no "-0"; calculation and `Stat` keep `unit` + `decimals`, per-line rounding never; an
+  ADR. Spec `.scratch/number-formats/`.
+
+- [One root contract across the packages](issues/05-one-root-contract-across-the-packages.md): four shapes -
+  element, field, composite, no element - say where `ref`, `className`, `style` and the rest land; `ref` is
+  always an element, code-driven actions (`scrollToRow`, `focusCell`, `scrollToLane`, ...) are on the hook;
+  `aria-label` everywhere, old names kept one minor per the upgrade promise; an ADR. Spec
+  `.scratch/root-contract/`.
+
+- [Loading, empty and filling the parent](issues/17-loading-empty-and-filling-the-parent.md): the chart has
+  all three already; a table stays within a parent of definite height; a schedule fills its frame (floor
+  400 px) and takes `loading`, no `empty`; no widget loading, pixel size, retry or `onError`; ADR-0050 and
+  ADR-0042 amended. Spec `.scratch/views-in-their-frame/`.
+
+- [DEV warnings for the silent traps](issues/18-dev-warnings-for-the-silent-traps.md): seven traps warn in
+  DEV (row shape, stale accessor by a DEV probe, seventh series, missing `Pagination`, unnamed Calculation, a
+  format that does not fit, a virtual table rendering every row); rows that are not an array read as none;
+  strings as numbers and the browser floor documented; each package keeps its own `dev.ts`. Spec
+  `.scratch/dev-warnings/`.
+
 ## Not yet specified
 
 - **What the four triage tickets take on.** A wish taken there may need a decision of its own (an API shape,

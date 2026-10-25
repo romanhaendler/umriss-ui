@@ -23,8 +23,11 @@ The last two packages join the contract.
   - Dashboard: the `Dashboard` that a `useDashboard` harness hands back, as an element; `WidgetType` and
     `HeadingType` as exceptions, because they declare types.
 - **README.** One line each on the shape. Regenerate both `API.md`.
-- **Changelog** (Changed): calculation, the rest and `ref` now reach the surface, and the name still
-  reaches the list; dashboard, it takes a `ref`.
+- **Changelog** (Changed):
+  - Calculation: the rest and `ref` now reach the surface, and the name still reaches the list. This is
+    named as the change that keeps no old form, since an attribute stands on one element. Its migration
+    line says that a selector or a test id now finds the surface.
+  - Dashboard: it takes a `ref`.
 
 ## Acceptance criteria
 

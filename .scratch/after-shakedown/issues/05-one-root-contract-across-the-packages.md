@@ -65,7 +65,8 @@ Decided 2026-10-25 by the agent, under the maintainer's delegation. Technical de
   Core principle 1 still stands: the rest never replaces the component's own role, the `aria-*` it computes,
   or its handlers.
 - **`ref` is always an element** *(agent)*. No component hands a handle through `ref`.
-  - The Schedule's `ref` becomes its root `<div>`, and `ScheduleHandle` is removed.
+  - The Schedule's `ref` becomes its root `<div>`, and `ScheduleHandle` is removed after one bridging minor
+    (see the shipping bullet below).
   - Charts depends on nothing, so it declares its `ref` itself. The other packages extend core's `RefProp`
     (ADR-0062).
 - **What a caller does to a component from code is a function on the hook's return** *(agent)*. It stands
@@ -98,14 +99,23 @@ Decided 2026-10-25 by the agent, under the maintainer's delegation. Technical de
     `ContextMenu`.
   - Whether a name is required does not change: TreeView, Schedule and ContextMenu still require one.
     Development warnings for a missing name belong to ticket 18.
-- **Shipped as a breaking change with no alias** *(agent)*. It goes into each package's next minor, in one
-  release for all six packages. Each change gets a Changed entry with a migration line:
-  - `ariaLabel` becomes `aria-label`;
-  - a `ScheduleHandle` ref becomes the functions of `useSchedule`;
-  - a picker's `ref` now has its control's element type.
-
-  The compiler reports all three. This follows the workspace's practice: renames have been cut without
-  aliases. Ticket 19 may set a deprecation window for later changes.
+- **Shipped under the upgrade promise** (ticket 19). Everything goes into one minor of all six packages,
+  and every Changed entry carries a migration line.
+  - **`ariaLabel` keeps working for one further minor** *(agent)*. It stays as a deprecated alias, the
+    component reads `aria-label ?? ariaLabel`, and the old name warns once in development through the
+    mechanism the upgrade-promise spec defines. The release after that removes it.
+  - **The Schedule's handle is bridged for one minor** *(agent)*. For that one minor, the element that a
+    Schedule hands its `ref` also carries `positionAt`, `clientPointOf` and `visibleDomain`. The `ref` is
+    typed so that it accepts a ref to either the element or the handle. `ScheduleHandle` is still exported,
+    marked deprecated, and the first call of a handle function through the element warns once. The release
+    after that removes the bridge and the type.
+  - **The one break, with no old form kept** *(agent, product - for review)*: where the rest and `ref` land
+    on the six pickers and combobox fields (wrapper → control) and on the Calculation (list → surface).
+    - A ref or an attribute stands on one element, so an old place and a new place cannot both hold it.
+      Copying `id` or `data-*` onto both elements would create duplicate ids and two matches for one test
+      id.
+    - The migration line names the new element. For a picker the compiler reports it, because its `ref`
+      changes element type.
 - **Held by the pass-through guard in every package, not by a type test per component** *(agent)*.
   TypeScript does not check `data-*` on a component, so only rendering proves the contract.
   - Core's guard moves into the demo's `tests-support`, beside the style and wording guards.

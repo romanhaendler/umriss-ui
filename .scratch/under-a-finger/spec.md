@@ -41,7 +41,7 @@ pointer type of the event that starts an interaction (ADR-0043). There is no set
 render-time branch, so the server's markup is one for every device. A touch laptop with a trackpad keeps
 its dense screen.
 
-- **Under a finger a `md` control is 44 px tall.** `sm` stays 26 and a dense surface's `xs` stays 26, so
+- **Under a finger a `md` control is 44 px tall.** `sm` stays 26, and a dense surface's small control stays 26 as today, so
   tables, calculations, toolbars and trees keep their pitch.
 - **Under a finger nothing the library draws is a target smaller than 24 × 24 px.** A glyph drawn smaller
   is hit in a larger square than it is drawn, never reaching into a neighbour's. A shared check measures
