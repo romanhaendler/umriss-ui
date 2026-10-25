@@ -148,4 +148,12 @@
       background: Highlight;
     }
   }
+
+  /* Under a finger the control is as large as the 24 px square of WCAG 2.5.8;
+     a track of 16 px is too low. */
+  @media (pointer: coarse) {
+    .wrapper {
+      min-height: 24px;
+    }
+  }
 }

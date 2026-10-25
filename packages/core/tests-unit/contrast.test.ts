@@ -34,9 +34,9 @@ type Theme = ReadonlyMap<string, string>;
    braces, so "up to the next closing brace" is enough. Everything that is not a
    hex value (shadows, measures, color-mix) drops out here - contrast is defined
    only over opaque colours. */
-function readTheme(which: "light" | "dark"): Map<string, string> {
+function readTheme(which: "light" | "dark", from = 0): Map<string, string> {
   const values = new Map<string, string>();
-  const start = STYLESHEET.indexOf(":root {") + ":root {".length;
+  const start = STYLESHEET.indexOf(":root {", from) + ":root {".length;
   const body = STYLESHEET.slice(start, STYLESHEET.indexOf("}", start));
   const HEX = "#[0-9a-fA-F]{3,8}";
   for (const line of body.matchAll(new RegExp(`(--[\\w-]+)\\s*:\\s*(?:(${HEX})|light-dark\\(\\s*(${HEX})\\s*,\\s*(${HEX})\\s*\\))\\s*;`, "g"))) {
@@ -48,6 +48,15 @@ function readTheme(which: "light" | "dark"): Map<string, string> {
 
 const LIGHT: Theme = readTheme("light");
 const DARK: Theme = readTheme("dark");
+
+/* The block a reader who asks for more contrast gets (prefers-contrast: more),
+   read on its own and laid over the theme it belongs to. */
+const MORE_START = STYLESHEET.indexOf("@media (prefers-contrast: more)");
+if (MORE_START < 0) throw new Error("No @media (prefers-contrast: more) block in tokens.css");
+const MORE: readonly (readonly [ThemeName, Theme])[] = [
+  ["light", new Map([...LIGHT, ...readTheme("light", MORE_START)])],
+  ["dark", new Map([...DARK, ...readTheme("dark", MORE_START)])],
+];
 
 const THEMES = [
   ["light", LIGHT],
@@ -458,6 +467,53 @@ for (const [themeName, theme] of THEMES) {
           const ground = colour(theme, bg);
           const glyph = mix(colour(theme, fg), ground, key.opacity);
           expect(contrast(glyph, ground)).toBeGreaterThanOrEqual(LARGE_TEXT);
+        });
+      }
+    }
+  });
+}
+
+/* ---------------------------------------------------------------
+   Increased contrast (prefers-contrast: more)
+
+   The quiet text pairs of the list above reach 7:1 under the block, in both
+   themes (1.4.6). The edges, the hairlines and the hover edge reach 3:1 on the
+   grounds they lie on (1.4.11).
+   --------------------------------------------------------------- */
+
+const QUIET_TEXT = ["--u-color-text-secondary", "--u-color-text-muted"] as const;
+/* The grounds the quiet text stands on: the page, the surfaces and their pressed
+   steps, the material's fallback, and the subtle tones that carry labels. */
+const QUIET_GROUNDS = [
+  "--u-color-bg",
+  "--u-color-surface",
+  "--u-color-surface-sunken",
+  "--u-color-surface-pressed",
+  "--u-color-material-fallback",
+  "--u-color-accent-subtle",
+  "--u-color-accent-subtle-pressed",
+  "--u-color-success-subtle",
+  "--u-color-warning-subtle",
+  "--u-color-danger-subtle",
+  "--u-color-danger-subtle-pressed",
+] as const;
+const EDGES = ["--u-edge-color", "--u-edge-color-strong", "--u-hairline", "--u-hairline-strong", "--u-color-edge-hover"] as const;
+const EDGE_GROUNDS = ["--u-color-bg", "--u-color-surface", "--u-color-surface-sunken"] as const;
+const MORE_TEXT = 7; // WCAG AAA, normal text (1.4.6)
+
+for (const [themeName, theme] of MORE) {
+  describe(`Increased contrast in the "${themeName}" theme`, () => {
+    for (const fg of QUIET_TEXT) {
+      for (const ground of QUIET_GROUNDS) {
+        it(`${fg} on ${ground} reaches ${MORE_TEXT}:1`, () => {
+          expect(contrast(colour(theme, fg), colour(theme, ground))).toBeGreaterThanOrEqual(MORE_TEXT);
+        });
+      }
+    }
+    for (const edge of EDGES) {
+      for (const ground of EDGE_GROUNDS) {
+        it(`${edge} on ${ground} reaches ${LARGE_TEXT}:1`, () => {
+          expect(contrast(colour(theme, edge), colour(theme, ground))).toBeGreaterThanOrEqual(LARGE_TEXT);
         });
       }
     }
