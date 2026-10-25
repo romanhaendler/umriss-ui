@@ -278,6 +278,7 @@ export function TreeView<K, S extends Key = string>({
             {expandable ? (
               <span
                 aria-hidden="true"
+                data-target=""
                 className={cx(styles.chevron, entry.expanded && styles.chevronOpen)}
                 onClick={(e) => {
                   e.stopPropagation();
