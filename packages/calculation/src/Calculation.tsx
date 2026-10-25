@@ -1,4 +1,4 @@
-/* <Calculation> - reads its children, evaluates them, and shows the
+/* The view of <Calculation> - evaluates a model and shows the
    derivation as a statement (ADR-0027, ADR-0028). Because the package performs
    every operation it shows, what stands on the screen cannot disagree with the
    number.
@@ -22,37 +22,23 @@
    each row puts its figures on a line beneath its label. */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import type { CalculationProps } from "./Reader";
 import { AngleGlyph, Badge, Tooltip, VisuallyHidden, useDensityFor, useFormats, useFreshness, useWording, verdictWeight } from "@umriss-ui/core";
 import type { BadgeTone, FreshnessAges, Verdict } from "@umriss-ui/core";
 import { evaluate } from "./evaluate";
-import type { Metric } from "./elements";
 import type { Evaluation } from "./evaluate";
-import { perMetric, readCalculation } from "./model";
-import type { Quantity } from "./model";
+import { perMetric } from "./model";
+import type { CalculationModel, Quantity } from "./model";
 import { lineText, metricsSentence, operatorText, positionOf, verdictWord } from "./present";
 import type { LineText, Position } from "./present";
 import styles from "./Calculation.module.css";
 
-/** `className` and `style` size and place the surface; every other attribute -
-    `aria-label` first of all - lands on the list the surface holds. */
-export interface CalculationProps extends Omit<HTMLAttributes<HTMLUListElement>, "children"> {
-  /** The result: exactly one quantity - a tree (`<Sum>`, `<Difference>`,
-      `<Product>`, `<Quotient>` with their operands, `<Given>` as leaves) or a
-      `<Chain>`, the two mixing freely; `<Ref>` for a quantity defined
-      elsewhere. */
-  children: ReactNode;
-  /** Several numbers per quantity, side by side - headcount and full-time
-      equivalents of the same teams (ADR-0038). Every `value` is then an
-      object with a number for each metric id; unit and places are the
-      metric's. A calculation with metrics only adds and subtracts, and
-      assesses no target or limits. */
-  metrics?: readonly Metric[];
-  /** `"compact"` sets the lines as close as a compact table's rows: smaller
-      type and less room above and below, under a finger still tall enough to
-      tap. Columns, folding and wording stay as they are.
-      @default the density of the `UmrissProvider`, else `"regular"` */
-  density?: "regular" | "compact";
+/** The view: a calculation's model, evaluated and drawn. Everything but the
+    children and the metrics, which the model already holds, arrives as the
+    reader was given it. */
+interface CalculationViewProps extends Omit<CalculationProps, "children" | "metrics"> {
+  model: CalculationModel;
 }
 
 /** What the label keeps at least beside the figures before they move to a
@@ -106,18 +92,12 @@ interface Place {
   position?: Position;
 }
 
-/** A derivation the package works out itself and shows as a statement, from
-    the givens up to the result: one quantity as its child, written with
-    `Given`, the operators, `Chain` and `Ref`. Because it performs every
-    operation it shows, the number cannot disagree with the lines above it.
-    Every tree below the outermost statement starts folded and opens beneath
-    the row that is clicked. */
-export function Calculation({ children, className, style, metrics, density, ...rest }: CalculationProps) {
+export function CalculationView({ model, className, style, density, ...rest }: CalculationViewProps) {
+  const metrics = model.metrics;
   const compact = useDensityFor(density, "regular") === "compact";
   const formats = useFormats();
   const wording = useWording();
   const uid = useId();
-  const model = readCalculation(children, metrics);
   /* One view of the model and its evaluation per metric; without metrics,
      one. */
   const byMetric = perMetric(model).map((view) => ({ view, results: evaluate(view) }));
