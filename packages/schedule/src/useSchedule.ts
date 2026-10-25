@@ -59,6 +59,18 @@ export interface ScheduleParts {
   clientPointOf: (time: number, lane?: string) => { x: number; y: number } | null;
   /** The visible span, as two wall-clock instants. */
   visibleDomain: () => readonly [number, number];
+  /** Scrolls the lanes until the lane's row is in view, and returns `true`; `false`
+      and nothing changed for an unknown lane, one inside a folded **Lane group**
+      (none is unfolded), or while no schedule is mounted. */
+  scrollToLane: (lane: string) => boolean;
+  /** Brings the subtask's lane and time into view, the span moving to it and keeping its
+      width as `setDomain` would, and leaves the focus where it is; `false` and nothing
+      changed in the cases of `scrollToLane`. */
+  scrollToSubtask: (id: string) => boolean;
+  /** Does what `scrollToSubtask` does, then makes the subtask the **Active subtask** and
+      moves the focus to the plot, where the live region reads it out as the arrow keys do;
+      `false` and nothing changed in the cases of `scrollToLane`. */
+  focusSubtask: (id: string) => boolean;
   /** Folds every group. */
   foldAll: () => void;
   /** Unfolds every group. */
@@ -68,7 +80,8 @@ export interface ScheduleParts {
 /** Declares a schedule: hands back `Schedule` and the parts declared inside it
     - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones` -, its
     `view` and the setters `setView`, `setDomain`, `toggleGroup`, `foldAll` and
-    `unfoldAll`, and `positionAt`, `clientPointOf` and `visibleDomain`. */
+    `unfoldAll`, `positionAt`, `clientPointOf` and `visibleDomain`, and `scrollToLane`, `scrollToSubtask` and
+    `focusSubtask`. */
 export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   const { initialView, onViewChange } = options;
   const [scene] = useState(() => new ScheduleScene(initialView));
@@ -94,6 +107,9 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
       positionAt: (clientX: number, clientY: number) => scene.positionAt(clientX, clientY),
       clientPointOf: (time: number, lane?: string) => scene.clientPointOf(time, lane),
       visibleDomain: () => scene.visibleDomain(),
+      scrollToLane: (lane: string) => scene.scrollToLane(lane),
+      scrollToSubtask: (id: string) => scene.scrollToSubtask(id),
+      focusSubtask: (id: string) => scene.focusSubtask(id),
       toggleGroup: scene.toggleGroup,
       foldAll: scene.foldAll,
       unfoldAll: scene.unfoldAll,
