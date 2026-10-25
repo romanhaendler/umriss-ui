@@ -82,12 +82,12 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "Write each value in its unit";
-export const lead = "`format` on a series writes its value in the tooltip; without it the y axis' `tickFormat` does, and without that a bare number.";
+export const lead = "`format` on a series writes its value in the tooltip; without it the y axis' `tickFormat` does, and without that a bare number. Either is a function or Intl's options, written in the chart's wording's locale - the same object a table column takes.";
 
 const CHECKOUT = metrics("checkout");
 
 const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
-const percent = (v: number) => `${v.toFixed(2)} %`;
+const percent = { decimals: 2, style: "unit", unit: "percent" } as const;
 
 export default function ValueFormat() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);

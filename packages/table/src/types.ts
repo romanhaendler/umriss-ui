@@ -11,7 +11,8 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { DateFormat, NumberFormat } from "./values";
+import type { NumberFormat } from "@umriss-ui/core";
+import type { DateFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
 
@@ -479,7 +480,11 @@ export interface TableProps<Z> {
   /** A primary click on a row, outside its controls - the checkbox, the
       expander, the actions and any button of yours in a cell - with the row's
       key and the row. Also called for the row already current, so that you
-      decide whether a second click clears it. */
+      decide whether a second click clears it. By the keyboard: in a native
+      table the content of the row-header cell becomes a button (Enter and
+      Space), so a control of your own in that cell would stand inside it; in
+      grid mode Enter on a cell with nothing to edit or enter. Without a
+      `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
   /** Accessible name of the table (not of the outer frame). */
   ariaLabel?: string;

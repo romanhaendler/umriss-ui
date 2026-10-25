@@ -18,7 +18,7 @@
    hysteresis. */
 
 import { LinearScale } from "./scale";
-import { formatTick } from "./format";
+import { formatTick, tickFn, type ValueFormat } from "./format";
 import { alignedTicks, niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
 import {
   breaks as calendarBreaks,
@@ -58,7 +58,7 @@ export interface AxisInput {
   /** A zoomed x axis: its own domain, where the view puts a span in its place. */
   ownDomainMode?: "nice" | "data" | "visible" | readonly [number, number];
   tickCount?: number;
-  tickFormat?: (v: number) => string;
+  tickFormat?: ValueFormat;
   /** Fixed tick values instead of the 1-2-5 algorithm. */
   tickValues?: readonly number[];
   /** The values are instants: ticks on local boundaries, labels by level. */
@@ -259,12 +259,12 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
     // caller's formatter therefore gets the point in time it expects - and the
     // same route labels the tooltip later.
     return own !== undefined
-      ? (v: number) => own(toWallClock(v, calendar))
+      ? ((f) => (v: number) => f(toWallClock(v, calendar)))(tickFn(own, locale, 1))
       : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds, locale);
   }
-  if (own !== undefined) return (v: number) => own(v);
-  if (axis.time === true) return (v: number, seconds?: boolean) => timeText(v, seconds, locale);
+  if (axis.time === true && own === undefined) return (v: number, seconds?: boolean) => timeText(v, seconds, locale);
   const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
+  if (own !== undefined) return tickFn(own, locale, step);
   return (v: number) => formatTick(v, step, locale);
 }
 
@@ -449,7 +449,7 @@ function yInterims(
     const domain = aligned?.domain ?? domainOf(axis, tickCount);
     const values = aligned?.ticks ?? tickValuesFor(axis, domain, tickCount);
     const format =
-      aligned === null ? formatterFor(axis, domain, tickCount, locale) : (axis.tickFormat ?? ((v: number) => formatTick(v, aligned.step, locale)));
+      aligned === null ? formatterFor(axis, domain, tickCount, locale) : (tickFn(axis.tickFormat ?? { useGrouping: true }, locale, aligned.step));
     const labels = labelsFor(axis, domain, tickCount, values, format, locale);
     const widths = labels.map((t) => measure(t, CLASS_TICK).width);
     let maxWidth = 0;
