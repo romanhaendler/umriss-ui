@@ -643,6 +643,13 @@ keeps its verdict (ADR-0010). The two ages at which it changes are a
 for a **Limit**, and these bound an age rather than a value.
 _Avoid_: Gültigkeit, validity, staleness as a verdict
 
+**Named time zone**:
+The time zone an application names for every instant umriss writes - a
+plant's, say; without one, the reader's own. Where the reader's zone is
+another, each view names the zone once.
+_Avoid_: plant time, local time, and a bare "zone" (a **Zone** is a control
+chart's line)
+
 **Quality**:
 How far a value's source vouches for it, in three levels, OPC UA's: good,
 uncertain, bad. It is a third axis beside the **Verdict** and the

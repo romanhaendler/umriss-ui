@@ -135,6 +135,11 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   DatePicker typed entry in its panel's foot; NumberInput with negatives asks for the text keyboard; time
   fields take their digits themselves. Spec `.scratch/date-jump-and-typed-entry/`.
 
+- [A plant time zone](issues/25-a-plant-time-zone.md): taken - an IANA `timeZone` in core's formats that
+  every package reads (charts as a `Chart` prop the app or the schedule passes); a day is the zone's day;
+  ticks on the zone's real hours across a clock change; the zone named once per view where the reader's
+  differs; a new ADR supersedes ADR-0060's time-zone point. Spec `.scratch/plant-time-zone/`.
+
 - [The charts' single wishes](issues/22-the-charts-single-wishes.md): taken - side legend, `maxGap`, month
   ticks under bars, `bin` on `ArrayLike`, `baseline` on `Bar` (waterfall, error bars), a matrix colour bar and
   cell labels; the rest are recipes in the charts demo; no new kind, no ADR. Four specs.
