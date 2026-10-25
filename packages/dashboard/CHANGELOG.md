@@ -13,6 +13,18 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.43.0 – What fills a widget (Oct. 2026)
+
+### Added
+
+- **`Dashboard` takes a `ref`**, typed at its root `role="group"` (ADR-0068); at runtime it reached that element before.
+- **The README says what fills a widget and who hears of a failure:** a chart and a schedule fill the body, a table stays within it with its toolbar and pager in view, a wrapper passes the height on with `height: 100%`; a widget whose content throws reaches React's `onCaughtError`, keeps its frame, and tries again when its size or options change.
+
+### Changed
+
+- **The peer range on core moves to `^0.43.0`.**
+  - Migration: install the 0.43 version of `@umriss-ui/core` beside it.
+
 ## 0.42.0 – A widget scrolls what exceeds its size (Oct. 2026)
 
 ### Added

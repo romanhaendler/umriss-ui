@@ -26,6 +26,30 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.43.0 – A current row, and a table that stays in its frame (Oct. 2026)
+
+### Added
+
+- **A current row** (ADR-0071): `currentRow` marks the row the application holds and `onCurrentRowChange(key, row)` reports every choice, also of the row already current. A click on a body row outside its controls chooses it; in a native table the row header's content becomes a button, one tab stop per row; in grid mode Enter on a plain cell chooses its row. The row carries `aria-current="true"` and an accent bar at its inline start, which holds in forced colours. A current row set from outside comes into view - its page, the virtual window or the scroll - without moving the focus. Without a row header the development build warns once. The selection and the Active cell are untouched by it.
+- **`useTable` returns `scrollToRow(key)` and `focusCell(key, column)`.** The first brings a row into view - its page (also in a grouped table), the window of a virtual table or the scroll; the second, in grid mode, also makes the cell the Active cell and focuses it. Both return `false` and change nothing for a key the table does not have, a row a search, condition or `preFilter` hides, a row in a folded group or branch, or a table not mounted.
+- **A column's `format` takes Intl's options** (ADR-0069): `format={{ useGrouping: false }}` writes a year as 2024 in the cell, the filters and the group line, `format={{ style: "currency", currency: "EUR" }}` writes money. `NumberFormat` is core's shape, and the range filter drops grouping where the column does.
+- **The search field tells the on-screen keyboard what Enter does** (`enterkeyhint`) and turns the browser's autocomplete off; a caller's own value wins.
+
+### Changed
+
+- **A table in a parent of definite height stays within it** (ADR-0050, amended): its frame is at most the parent's height, the toolbar and pager stay in view, and the scroll area takes what they leave - a virtual table renders a window instead of every row. In a parent without a definite height nothing changes.
+  - Migration: nothing to change; a table that used to overflow a sized pane or widget now scrolls inside it. A wrapper of your own between the two passes the height on with `height: 100%`.
+- **`Table` is a composite root** (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach the frame `<div>`; `aria-label`, `aria-labelledby` and `aria-describedby` reach the `<table>`. `Toolbar`, `Pagination`, `Export` and `ColumnMenu` take the attributes and the ref of the element they render, and `Search` takes an `Input`'s props.
+  - Migration: nothing to change for a class or a style; a ref now receives the frame `<div>`.
+- **`ariaLabel` on `Table` is renamed `aria-label`.** `ariaLabel` stays as a deprecated alias and warns once in development; 0.44.0 removes it.
+  - Migration: write `aria-label`.
+- **Under a finger no target is smaller than 24 px** (ADR-0070): the fold, the expander, the filter key and the row-header button take an invisible pad; the grouping and condition keys grow to 24 px, and their tags with them.
+  - Migration: nothing to change; under touch the grouping and condition tags stand taller. Row heights are untouched.
+- **A number that rounds to zero no longer reads "-0".**
+  - Migration: nothing to change; a test that expected "-0" reads "0".
+- **The peer range on core moves to `^0.43.0`.**
+  - Migration: install the 0.43 version of `@umriss-ui/core` beside it.
+
 ## 0.42.0 – Columns from the data keep their numbers (Oct. 2026)
 
 ### Added
