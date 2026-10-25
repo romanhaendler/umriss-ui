@@ -11,10 +11,14 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { NumberFormat } from "@umriss-ui/core";
+import type { NumberOptions } from "@umriss-ui/core";
 import type { DateFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
+
+/** How a number column is written: `"percent"`, `"count"`, or Intl's number
+    options plus `decimals`; the same shape as core's `NumberFormat`. */
+export type NumberFormat = "percent" | "count" | NumberOptions;
 
 /* --- Values --------------------------------------------------------------- */
 
