@@ -145,3 +145,91 @@ describe("a footer over 200 000 rows", () => {
     expect(footer(container, "avg")).toBe("⌀Average 49.5");
   });
 });
+
+/* A matrix whose columns come from the data: the application pivots the facts
+   into rows, the table declares one computed column per year, and the footer
+   gives each year's total, the row-total column's the grand total. */
+describe("a matrix with row and column totals", () => {
+  interface Fact {
+    plant: string;
+    region: string;
+    year: number;
+    tonnes: number;
+  }
+  interface Row {
+    plant: string;
+    region: string;
+    byYear: Record<number, number>;
+    total: number;
+  }
+  const FACTS: Fact[] = [
+    { plant: "Ulm", region: "South", year: 2025, tonnes: 10 },
+    { plant: "Ulm", region: "South", year: 2026, tonnes: 20 },
+    { plant: "Hof", region: "South", year: 2025, tonnes: 5 },
+    { plant: "Kiel", region: "North", year: 2025, tonnes: 7 },
+    { plant: "Kiel", region: "North", year: 2026, tonnes: 3 },
+  ];
+
+  function pivot(facts: Fact[]) {
+    const rows = new Map<string, Row>();
+    for (const f of facts) {
+      const row = rows.get(f.plant) ?? { plant: f.plant, region: f.region, byYear: {}, total: 0 };
+      row.byYear[f.year] = (row.byYear[f.year] ?? 0) + f.tonnes;
+      row.total += f.tonnes;
+      rows.set(f.plant, row);
+    }
+    return { rows: [...rows.values()], years: [...new Set(facts.map((f) => f.year))].sort() };
+  }
+
+  function Matrix({ facts, grouped = false }: { facts: Fact[]; grouped?: boolean }) {
+    const { rows, years } = pivot(facts);
+    const { Table, Column } = useTable(rows, { rowKey: (r) => r.plant, defaultGrouping: grouped ? "region" : undefined });
+    return (
+      <Table>
+        <Column value="region" label="Region" />
+        <Column value="plant" label="Plant" rowHeader />
+        {years.map((y) => (
+          <Column key={y} id={`y${y}`} label={String(y)} value={(r: Row) => r.byYear[y]} aggregate="sum" filter="range" format={{ decimals: 0 }} />
+        ))}
+        <Column value="total" label="Total" aggregate="sum" />
+      </Table>
+    );
+  }
+
+  const heads = (root: HTMLElement) =>
+    Array.from(root.querySelectorAll("thead th"))
+      .map((th) => th.textContent?.trim() ?? "")
+      .filter((h) => /^(20\d\d|Total)/.test(h));
+  const sums = (root: HTMLElement) =>
+    Array.from(root.querySelectorAll('tfoot td[data-footer="sum"]')).map((td) => td.textContent?.replace("ΣSum", "").trim());
+
+  it("totals each year and the grand total", () => {
+    const { container } = render(<Matrix facts={FACTS} />);
+    expect(heads(container)).toEqual(["2025", "2026", "Total"]);
+    expect(sums(container)).toEqual(["22", "23", "45"]);
+  });
+
+  it("follows the data: a year added at each end, one removed", () => {
+    const { container, rerender } = render(<Matrix facts={FACTS} />);
+    const next: Fact[] = [
+      { plant: "Ulm", region: "South", year: 2024, tonnes: 1 },
+      { plant: "Ulm", region: "South", year: 2026, tonnes: 20 },
+      { plant: "Hof", region: "South", year: 2027, tonnes: 4 },
+      { plant: "Kiel", region: "North", year: 2026, tonnes: 3 },
+    ];
+    rerender(<Matrix facts={next} />);
+    expect(heads(container)).toEqual(["2024", "2026", "2027", "Total"]);
+    expect(sums(container)).toEqual(["1", "23", "4", "28"]);
+  });
+
+  it("shows subtotals in a group header", () => {
+    const { container } = render(<Matrix facts={FACTS} grouped />);
+    const bands = Array.from(container.querySelectorAll<HTMLTableRowElement>("tbody tr[data-line='header']"));
+    const texts = bands.map((tr) => Array.from(tr.cells).map((c) => c.textContent?.trim()));
+    expect(texts).toHaveLength(2);
+    const south = texts.find((t) => t[0]?.includes("South"))!;
+    const north = texts.find((t) => t[0]?.includes("North"))!;
+    expect(south.slice(-3)).toEqual(["15", "20", "35"]);
+    expect(north.slice(-3)).toEqual(["7", "3", "10"]);
+  });
+});

@@ -41,6 +41,41 @@ const placeStyle = (place: Place, order: number) =>
 
 const area = (span: { columns: number; rows: number }) => span.columns * span.rows;
 
+/* A card's body, the scroll box of its content. While the content is taller or wider than the body
+   (measured in the browser: nothing is known on the server), the body is a tab stop named by the
+   card's title, so the keyboard reaches what the wheel reaches. The mode's `inert` takes the tab stop
+   away and leaves the scroll position as it is. */
+function Body({ title, editing, children }: { title: string; editing: boolean; children: ReactNode }) {
+  const body = useRef<HTMLDivElement>(null);
+  const [scrolls, setScrolls] = useState(false);
+  useEffect(() => {
+    const el = body.current;
+    if (!el) return;
+    const measure = () => setScrolls(el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth);
+    const resize = new ResizeObserver(measure);
+    /* The observer watches the body and the roots of its content; a replaced root is observed anew. */
+    const watch = () => {
+      resize.disconnect();
+      resize.observe(el);
+      for (const child of el.children) resize.observe(child);
+      measure();
+    };
+    const mutation = new MutationObserver(watch);
+    mutation.observe(el, { childList: true });
+    watch();
+    return () => {
+      resize.disconnect();
+      mutation.disconnect();
+    };
+  }, []);
+  const tabStop = scrolls && !editing;
+  return (
+    <div ref={body} className={styles.body} inert={editing} {...(tabStop ? { role: "group", tabIndex: 0, "aria-label": title } : {})}>
+      {children}
+    </div>
+  );
+}
+
 /* Keeps the element of an id in a map for as long as it stands. */
 const track = (map: Map<string, HTMLElement>, id: string) => (el: HTMLElement | null) => {
   if (el) map.set(id, el);
@@ -255,7 +290,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
                 {menu}
               </div>
-              <div className={styles.body} inert={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></div>
+              <Body title={title} editing={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></Body>
             </Card>
           );
         })}

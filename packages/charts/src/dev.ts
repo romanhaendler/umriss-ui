@@ -26,3 +26,7 @@ export function warnOnce(key: string, message: string): void {
   warned.add(key);
   console.warn(`@umriss-ui/charts: ${message}`);
 }
+
+/** The one wording of a renamed name that still works. */
+export const warnDeprecated = (old: string, replacement: string): void =>
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);

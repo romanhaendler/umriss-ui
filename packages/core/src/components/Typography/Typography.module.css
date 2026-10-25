@@ -84,7 +84,7 @@
   /* Letterspaced capitals - eyebrows and table headers. */
   .tracking-caps {
     letter-spacing: var(--u-tracking-caps);
-    text-transform: uppercase;
+    text-transform: var(--u-transform-caps);
   }
 
   /* ---- Line height: the two values of the token set ---- */
