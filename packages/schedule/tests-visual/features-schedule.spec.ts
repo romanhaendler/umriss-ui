@@ -374,6 +374,33 @@ test.describe("touch", () => {
     await expect.poll(async () => (await tickLabels(example)).some((label) => label.endsWith(":30") || label.endsWith(":15"))).toBe(true);
     expect((await tickLabels(example)).length).toBeLessThanOrEqual(before + 4);
   });
+
+  test("the plot leaves the vertical swipe to the page while its lanes fit", async ({ page, context }) => {
+    const touchAction = (example: Locator) =>
+      example.locator("[data-schedule-plot]").evaluate((el) => getComputedStyle(el).touchAction);
+    await openExample(page, "lane", "many-lanes");
+    expect(await touchAction(page.locator('[data-example="many-lanes"]'))).toBe("none");
+
+    await openExample(page, "pan-and-zoom", "pan-and-zoom");
+    const example = page.locator('[data-example="pan-and-zoom"]');
+    expect(await touchAction(example)).toBe("pan-y");
+
+    await example.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const box = (await example.locator("[data-schedule-plot]").boundingBox())!;
+    const x = box.x + box.width / 2;
+    const y = Math.min(box.y + box.height / 2, page.viewportSize()!.height - 10);
+    const cdp = await context.newCDPSession(page);
+    const touch = (type: "touchStart" | "touchMove" | "touchEnd", at: number) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y: at, id: 0 }] });
+    await touch("touchStart", y);
+    for (let step = 1; step <= 8; step++) {
+      await touch("touchMove", y - step * 8);
+      await page.waitForTimeout(30);
+    }
+    await touch("touchEnd", y);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  });
 });
 
 test("the working calendar holds through pan and zoom: no removed hour gets a tick", async ({ page }) => {

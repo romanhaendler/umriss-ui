@@ -188,6 +188,23 @@
     background: color-mix(in srgb, var(--u-color-accent-subtle) 70%, var(--u-color-surface-sunken));
   }
 
+  /* The current row: an accent bar at the inline start of its first cell,
+     drawn inside it so the row does not grow and a pinned or sticky first cell
+     keeps it. It stands beside the selection's ground. */
+  .table tbody tr[data-current] > .td:not(.pinned, .spanCell):first-child {
+    position: relative;
+  }
+
+  .table tbody tr[data-current] > .td:first-child::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: var(--u-color-accent);
+    pointer-events: none;
+  }
+
   .th:first-child,
   .td:first-child {
     padding-left: var(--u-space-3);
@@ -1755,6 +1772,26 @@
 
     .table tbody tr[data-selected] > .td:last-child::after,
     .table tbody tr.virtualRow:focus-visible > .td:last-child::after {
+      border-inline-end-width: 2px;
+    }
+
+    /* The current row's bar is a thicker line in the link colour, which the
+       selection's Highlight lines are not; on a row that is both it replaces
+       the selection's start line. */
+    .table tbody tr[data-current] > .td:first-child::after {
+      inset: 0;
+      width: auto;
+      height: auto;
+      background: none;
+      border: 0 solid Highlight;
+      border-inline-start: 5px solid LinkText;
+    }
+
+    .table tbody tr[data-current][data-selected] > .td:first-child::after {
+      border-block-width: 2px;
+    }
+
+    .table tbody tr[data-current][data-selected] > .td:last-child:first-child::after {
       border-inline-end-width: 2px;
     }
 
