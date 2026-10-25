@@ -18,7 +18,7 @@ async function sheetWidth(page: Page, size: keyof typeof WIDTHS) {
   await page.getByRole("button", { name: `Open ${size}`, exact: true }).click();
   const heading = page.getByRole("heading", { name: `A ${size} window` });
   await expect(heading).toBeVisible();
-  const width = await heading.evaluate((element) => element.closest("dialog > div")!.getBoundingClientRect().width);
+  const width = await heading.evaluate((element) => (element.closest("dialog > div") as HTMLElement).offsetWidth);
   await page.keyboard.press("Escape");
   await expect(heading).toBeHidden();
   return width;
@@ -57,17 +57,19 @@ test("A card's eyebrow and a divider's label follow the capitals token", { tag: 
 
 test("A pressed button is scaled by the press token", { tag: "@quick" }, async ({ page }) => {
   await openExample(page, "button", "one-action");
-  const button = page.getByRole("button").first();
+  const button = page.getByLabel("One action").getByRole("button", { name: "Acknowledge", exact: true });
+  /* Released away from the button, so no click disables it between the presses. */
   const scaleWhilePressed = async () => {
     await button.hover();
     await page.mouse.down();
     const scale = await button.evaluate((element) => new Promise<number>((done) => setTimeout(() => done(new DOMMatrix(getComputedStyle(element).transform).a), 400)));
+    await page.mouse.move(0, 0);
     await page.mouse.up();
     return scale;
   };
   expect(await scaleWhilePressed()).toBeCloseTo(0.98, 2);
-  await style(page, "--u-button-press-scale: 1");
-  expect(await scaleWhilePressed()).toBeCloseTo(1, 2);
+  await style(page, "--u-button-press-scale: 0.9");
+  expect(await scaleWhilePressed()).toBeCloseTo(0.9, 2);
 });
 
 /* A renamed token's alias (`--u-old: var(--u-new)` in the tokens layer) with a rule that reads the old name:
