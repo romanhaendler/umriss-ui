@@ -10,7 +10,9 @@ Does umriss promise that a consumer's Jest and Vitest load every package without
 by which change to what the packages ship?
 
 - How the CSS reaches the page: keep the side-effect import in `dist/*.js`, or have the caller import the
-  stylesheet once (a breaking change for every app; costly to reverse, so an ADR).
+  stylesheet once (a breaking change for every app; costly to reverse, so an ADR). The research found that
+  no shipping shape with a CSS import from JS loads unconfigured in either runner, so "out of the box" and
+  ADR-0021 ("the styles load themselves") cannot both stand.
 - An `exports` `default` condition, a CJS build, or neither.
 - A testing aid: a documented or exported setup (sized `ResizeObserver`, `getContext` stub, `matchMedia`) and
   the Jest recipe (`cross-package.md` 10, wish "A testing aid"); a test-mode switch that turns motion off

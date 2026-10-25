@@ -36,6 +36,18 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
 
 <!-- one line per resolved ticket: [title](issues/NN-slug.md): gist -->
 
+- [ISA-18.2 and EEMUA 191 in secondary sources](issues/08-isa-18-2-and-eemua-191-in-secondary-sources.md): the
+  states, shelving and acknowledgement hold; the second field is OPC UA's, the flood threshold ISA's, the
+  silent level "diagnostic"; a narrow wording without conformance is proposed.
+
+- [What a package ships so that Jest and Vitest load it unconfigured](issues/01-what-a-package-ships-for-jest-and-vitest.md):
+  only a CJS entry without a CSS import from JS loads unconfigured in both; ADR-0021's "Vitest handles CSS
+  imports" does not hold.
+
+- [Server Components in comparable libraries](issues/03-server-components-in-comparable-libraries.md): per-module
+  `"use client"`, field-name config and a data tree instead of element-type matching are what others do; dates
+  either show the server's zone or need a browser-only pass.
+
 ## Not yet specified
 
 - **Time zones.** ADR-0060 says "not yet; umriss shows the reader's time". Server rendering (hydration
