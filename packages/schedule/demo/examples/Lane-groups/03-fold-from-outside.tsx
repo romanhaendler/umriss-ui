@@ -34,7 +34,7 @@ export default function FoldFromOutside() {
           Unfold everything
         </Button>
       </Stack>
-      <Schedule ariaLabel="Two teams rolling out a release, folded from outside" height={280}>
+      <Schedule aria-label="Two teams rolling out a release, folded from outside" height={280}>
         <LaneGroup id="payments" label="Payments">
           <Lane id="priya" label="Priya Raman" />
           <Lane id="jonas" label="Jonas Keller" />

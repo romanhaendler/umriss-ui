@@ -134,7 +134,7 @@ export default function AroundLeave() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="The apps team this week, with leave"
+        aria-label="The apps team this week, with leave"
         height={236}
         intents={["move", "lane"]}
         canMoveTo={mayGo}

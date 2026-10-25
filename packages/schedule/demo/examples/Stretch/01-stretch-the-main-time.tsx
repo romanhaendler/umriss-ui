@@ -20,7 +20,7 @@ export default function StretchTheMainTime() {
   const [work, setWork] = useState(START);
   return (
     <Schedule
-      ariaLabel="Two estimates to adjust"
+      aria-label="Two estimates to adjust"
       height={140}
       intents={["stretch"]}
       onIntent={(intent) => setWork((current) => current.map((item) => applyIntent(item, intent)))}

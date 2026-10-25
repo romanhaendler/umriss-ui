@@ -18,7 +18,7 @@ export default function Fixed() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
     <Schedule
-      ariaLabel="A round that may move above, a booked slot below"
+      aria-label="A round that may move above, a booked slot below"
       height={144}
       label={(leg) => (leg.id === "nailed" ? "T-05 · booked slot" : "T-05")}
     >

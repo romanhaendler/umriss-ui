@@ -109,7 +109,7 @@ const CHECKOUT = metrics("checkout");
 export default function StepLine() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's requests and the instances serving them today">
+    <Chart height={260} aria-label="Checkout's requests and the instances serving them today">
       <XAxis value="t" time />
       <YAxis label="Requests/min" />
       <YAxis id="instances" position="right" domain={[0, 15]} label="Instances" />

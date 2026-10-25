@@ -314,8 +314,10 @@ const upperBound = (bound: number | Date | undefined): { value: number; open: bo
 const boundText = (bound: number | Date, env: FilterEnv): string =>
   isDate(bound) ? env.formats.date(bound) : (asText(bound, env.format, env.formats, env.wording) ?? String(bound));
 
-function NumberRangeInput({ condition, setCondition }: FilterInputProps<unknown, Range>) {
+function NumberRangeInput({ condition, setCondition, format }: FilterInputProps<unknown, Range> & BuiltInEnv) {
   const wording = useWording();
+  /* A column whose format writes no grouping reads "2024" in its fields too. */
+  const grouping = !(typeof format === "object" && format.useGrouping === false);
   /* The draft stands only as long as it is invalid: what holds stands in the
      condition, and that stays the last valid one. */
   const [draft, setDraft] = useState<{ from: number | null; to: number | null } | null>(null);
@@ -343,10 +345,10 @@ function NumberRangeInput({ condition, setCondition }: FilterInputProps<unknown,
   return (
     <div className={styles.rangeFields}>
       <FormField label={wording.filterFrom}>
-        <NumberInput size="sm" value={from} invalid={invalid} onChange={(value) => change("from", value)} />
+        <NumberInput size="sm" grouping={grouping} value={from} invalid={invalid} onChange={(value) => change("from", value)} />
       </FormField>
       <FormField label={wording.filterTo} error={invalid ? wording.rangeInvalid : undefined}>
-        <NumberInput size="sm" value={to} onChange={(value) => change("to", value)} />
+        <NumberInput size="sm" grouping={grouping} value={to} onChange={(value) => change("to", value)} />
       </FormField>
     </div>
   );

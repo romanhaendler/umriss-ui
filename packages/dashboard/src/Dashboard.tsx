@@ -2,6 +2,7 @@ import { Children, isValidElement, Suspense, useEffect, useMemo, useRef, useStat
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Skeleton, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
+import type { RefProp } from "@umriss-ui/core";
 import type { Editor } from "./useDashboard";
 import styles from "./Dashboard.module.css";
 import { Failed } from "./Failed";
@@ -20,7 +21,7 @@ const cx = (...parts: Array<string | false | undefined>) => parts.filter(Boolean
 const COLUMNS = 12;
 
 /** The props of `Dashboard`. */
-export interface DashboardProps extends HTMLAttributes<HTMLDivElement> {
+export interface DashboardProps extends HTMLAttributes<HTMLDivElement>, RefProp<HTMLDivElement> {
   /** The `WidgetType`s of this dashboard. */
   children?: ReactNode;
   /** The `name`s of the widget types the catalogue lists.

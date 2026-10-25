@@ -118,7 +118,7 @@ const EXPECTED = expected("checkout");
 export default function Corridor() {
   const { Chart, XAxis, YAxis, Area, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={280} ariaLabel="Checkout's requests inside the range they are expected in">
+    <Chart height={280} aria-label="Checkout's requests inside the range they are expected in">
       <XAxis value="t" time />
       <YAxis label="Requests/min" />
       {/* The outline runs along the upper edge; dashed, it reads as expected, not measured. */}

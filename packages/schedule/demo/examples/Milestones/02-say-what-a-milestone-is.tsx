@@ -37,7 +37,7 @@ function Own({ target }: { target: ScheduleTooltipTarget }) {
 export default function SayWhatAMilestoneIs() {
   const { Schedule, Lane, Subtasks, Milestones } = useSchedule({ initialView: { domain: [at(6, 30), at(15, 30)] } });
   return (
-    <Schedule ariaLabel="Build and test around the code freeze" height={150} tooltip={(target) => <Own target={target} />}>
+    <Schedule aria-label="Build and test around the code freeze" height={150} tooltip={(target) => <Own target={target} />}>
       <Lane id="arjun" label="Arjun Mehta" />
       <Lane id="eva" label="Eva Novak" />
       <Subtasks data={WORK} tasks={PROJECTS} />

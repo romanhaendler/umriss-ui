@@ -50,7 +50,7 @@ const dependencies: Dependency[] = [{ id: "move", from: "cut", to: "mill", lag: 
 export function Plan() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5), at(12)] } });
   return (
-    <Schedule ariaLabel="Plan of Tuesday">
+    <Schedule aria-label="Plan of Tuesday">
       <Lane id="saw" label="Saw" />
       <Lane id="mill" label="Mill" />
       <Dependencies data={dependencies} />
@@ -139,8 +139,8 @@ lane headers included, scrolls the lanes and releases the page at their end,
 Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans, a
 tap selects and a long press on a bar grabs it (with `"move"` or `"lane"` in `intents`), and a vertical swipe scrolls the page while all lanes fit (when they
 overflow, the lane names scroll the page). The lane headers take at most 40 % of the width, so that on a
-phone the plot keeps the larger part; a ref handle turns a client point into a
-time and a lane and back.
+phone the plot keeps the larger part; `positionAt` and `clientPointOf`, on what
+`useSchedule` hands back, turn a client point into a time and a lane and back.
 
 ## Its size
 
@@ -159,7 +159,11 @@ reports what the planner does, always the whole view; two schedules keep in
 step by sending each other what they report through `setView`, which is not
 reported in turn. Without a span the schedule shows the extent of its subtasks.
 `view`, `setView`, `setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` stand on what the
-hook hands back.
+hook hands back. `setDomain(span)` zooms to a span of two instants; `setDomain(null)` fits the work.
+
+The schedule is a composite: its `ref`, `className`, `style`, `id` and `data-*` reach the root `<div>`;
+`aria-label` (required) and `aria-labelledby` name the figure and the plot, and your `aria-describedby`
+is joined to the plot's summary.
 
 ## Blocked time
 

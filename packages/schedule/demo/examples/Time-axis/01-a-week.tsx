@@ -59,7 +59,7 @@ const WEEK: readonly [number, number] = [new Date(2026, 2, 16).getTime(), new Da
 export default function AWeek() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: WEEK } });
   return (
-    <Schedule ariaLabel="On-call rota, 16 to 23 March" height={420}>
+    <Schedule aria-label="On-call rota, 16 to 23 March" height={420}>
       {ENGINEERS.map((engineer) => (
         <Lane key={engineer.id} id={engineer.id} label={engineer.name} />
       ))}

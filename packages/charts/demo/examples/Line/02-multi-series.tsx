@@ -99,7 +99,7 @@ const IMAGES = metrics("images").map((d) => {
 export default function MultiSeries() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={300} ariaLabel="95th percentile latency of four services today">
+    <Chart height={300} aria-label="95th percentile latency of four services today">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <Line value="p95" name="Checkout" />

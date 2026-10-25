@@ -148,7 +148,7 @@ const LIMITS = controlLimits(
 export default function SpecificationAndControl() {
   const { Chart, XAxis, YAxis, Line } = useChart(SAMPLES);
   return (
-    <Chart height={300} ariaLabel="The tile length against its specification and its control limits">
+    <Chart height={300} aria-label="The tile length against its specification and its control limits">
       <XAxis value="minute" label="Minute of the shift" />
       <YAxis label="mm" />
       <LimitBand from={597.5} to={602.5} severity="warning" label="Specification" />

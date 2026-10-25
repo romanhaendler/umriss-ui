@@ -115,11 +115,11 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
   const { snapshot } = connection;
   return (
     <Input
+      autoComplete="off"
+      enterKeyHint="search"
       {...rest}
       size={size}
       type="search"
-      autoComplete="off"
-      enterKeyHint="search"
       className={cx(grow && styles.searchGrow, className)}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
@@ -391,7 +391,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
 
   const bar = (
-    <nav aria-label={wording.pagination} {...rest} className={cx(styles.pagination, className)}>
+    <nav {...rest} aria-label={wording.pagination} className={cx(styles.pagination, className)}>
       <span>{wording.entries(count, formats.count(count))}</span>
       <div className={styles.paginationControls}>
         <label className={styles.pageSize}>

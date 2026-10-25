@@ -180,7 +180,7 @@ export default function WatchLatency() {
           }
         />
         <CardBody>
-          <Chart height={260} syncId="checkout" ariaLabel="Checkout latency today against its objective">
+          <Chart height={260} syncId="checkout" aria-label="Checkout latency today against its objective">
             <XAxis value="t" time domain={TODAY} />
             {/* Tick labels as wide as the error rate's keep the two crosshairs in one column. */}
             <YAxis label="ms" />
@@ -195,7 +195,7 @@ export default function WatchLatency() {
       <Card data-callout="4">
         <CardHeader title={`${CHECKOUT.name} failed requests`} />
         <CardBody>
-          <ErrorChart height={140} syncId="checkout" ariaLabel="Checkout error rate today">
+          <ErrorChart height={140} syncId="checkout" aria-label="Checkout error rate today">
             <XAxis value="t" time domain={TODAY} />
             <YAxis label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
             <LimitLine value={ERROR_ALERT} severity="alarm" label={`Alert at ${ERROR_ALERT} %`} inExtent />

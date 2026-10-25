@@ -195,7 +195,7 @@ const clock = (minute: number) => {
 function LengthInControl() {
   const { Chart, XAxis, YAxis } = useChart(SHIFT.samples);
   return (
-    <Chart height={280} syncId="tiles" ariaLabel="Control chart of the tile length over the early shift">
+    <Chart height={280} syncId="tiles" aria-label="Control chart of the tile length over the early shift">
       <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
       <YAxis label="mm" />
       <LimitLine value={SPEC.nominal + SPEC.tolerance} severity="alarm" label="USL" inExtent />
@@ -217,7 +217,7 @@ function LengthInControl() {
 function KilnZone() {
   const { Chart, XAxis, YAxis, Line } = useChart(SHIFT.readings);
   return (
-    <Chart height={200} syncId="tiles" ariaLabel="Kiln zone 3 temperature over the early shift">
+    <Chart height={200} syncId="tiles" aria-label="Kiln zone 3 temperature over the early shift">
       <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
       <YAxis label="°C" tickCount={4} />
       <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />

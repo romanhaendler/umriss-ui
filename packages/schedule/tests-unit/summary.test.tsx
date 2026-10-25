@@ -23,7 +23,7 @@ afterEach(() => vi.restoreAllMocks());
 function Plan() {
   const { Schedule, Lane, Subtasks, Milestones } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
   return (
-    <Schedule ariaLabel="Production plan" now={at(9)}>
+    <Schedule aria-label="Production plan" now={at(9)}>
       <Lane id="press" label="Press" />
       <Lane id="paint" label="Paint shop" />
       <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }]} />

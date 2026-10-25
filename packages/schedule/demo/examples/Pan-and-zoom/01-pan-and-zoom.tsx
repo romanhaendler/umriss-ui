@@ -33,7 +33,7 @@ export default function PanAndZoom() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   return (
     <Schedule
-      ariaLabel="A plan to pan and zoom"
+      aria-label="A plan to pan and zoom"
       height={196}
       zoomLimits={{ min: 2 * HOUR, max: 48 * HOUR }}
     >

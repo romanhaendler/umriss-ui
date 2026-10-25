@@ -49,7 +49,7 @@ type Extra = { wording?: ChartsWording; format?: (v: number) => string; table?: 
 function CycleTime({ extra }: { extra: Extra }) {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(data);
   return (
-    <Chart ariaLabel="Cycle time per machine" wording={extra.wording}>
+    <Chart aria-label="Cycle time per machine" wording={extra.wording}>
       <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
       <YAxis tickFormat={(v) => `${v} s`} />
       <BoxPlot
@@ -173,7 +173,7 @@ describe("Several box series", () => {
   function Grouped({ extra }: { extra: Extra }) {
     const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["After"] } : undefined });
     return (
-      <Chart ariaLabel="Before and after" encoding={extra.encoding}>
+      <Chart aria-label="Before and after" encoding={extra.encoding}>
         <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
         <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot name="Before" median="med" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="lo" upperWhisker="hi" />
@@ -315,7 +315,7 @@ describe("A box's outliers", () => {
   function Outliers({ extra }: { extra: Extra }) {
     const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(rowsWith, { initialView: extra.hidden === true ? { hidden: ["Cycle time"] } : undefined });
     return (
-      <Chart ariaLabel="Outliers" wording={extra.wording}>
+      <Chart aria-label="Outliers" wording={extra.wording}>
         <XAxis value="at" ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
         <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot
@@ -400,7 +400,7 @@ describe("A box's mean, notch and count", () => {
     const { Chart, XAxis, YAxis, BoxPlot } = useChart(full);
     const given = extra.given !== false;
     return (
-      <Chart ariaLabel="Mean and notch" wording={extra.wording}>
+      <Chart aria-label="Mean and notch" wording={extra.wording}>
         <XAxis value="at" ticks={[0, 1]} tickFormat={(v) => MACHINES[v] ?? ""} />
         <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot
@@ -471,7 +471,7 @@ describe("A box's mean, notch and count", () => {
     function OutOfOrder() {
       const { Chart, XAxis, YAxis, BoxPlot } = useChart(full);
       return (
-        <Chart ariaLabel="Out of order">
+        <Chart aria-label="Out of order">
           <XAxis value="at" />
           <YAxis />
           <BoxPlot

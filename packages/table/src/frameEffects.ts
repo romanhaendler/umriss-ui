@@ -11,6 +11,7 @@ import { rowLine } from "./model/gridWalk";
 import { NEW_LINE } from "./grid";
 import type { GridHandle } from "./grid";
 import { markStuck } from "./scrollMarks";
+import { scrollToRow, showPending } from "./reach";
 import styles from "./Table.module.css";
 
 type TableRef = RefObject<HTMLTableElement | null>;
@@ -127,5 +128,27 @@ export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   useLayoutEffect(() => {
     const head = tableRef.current?.tHead?.rows?.[0]?.getBoundingClientRect().height;
     if (head && registry.hook?.tableState.virtual) registry.hook.tableState.setPitch(head);
+  });
+}
+
+/* A row `scrollToRow` asked for is shown once it stands in the document - a
+   page or a window renders it a render after the call (`showPending`). */
+export function useRevealedRow(registry: Registry) {
+  useLayoutEffect(() => {
+    showPending(registry);
+  });
+}
+
+/* A current row that changes is brought into view (ADR-0071) the way
+   `scrollToRow` does it: its page opens, a virtual window renders it, the
+   scroll area shows it at the nearest edge. A row already in view stays where
+   it is, so a click in the table does not scroll it; a key outside the
+   filtered set does nothing; the focus never moves. */
+export function useCurrentRowInView(registry: Registry, currentRow: string | null | undefined) {
+  const last = useRef<string | null | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (last.current === currentRow) return;
+    last.current = currentRow;
+    if (currentRow !== null && currentRow !== undefined) scrollToRow(registry, currentRow);
   });
 }

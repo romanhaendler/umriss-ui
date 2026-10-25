@@ -39,7 +39,7 @@ describe("ControlChart - onViolations", () => {
       shown = found;
       const { Chart, XAxis, YAxis } = useChart(DATA);
       return (
-        <Chart ariaLabel="Control chart" height={240}>
+        <Chart aria-label="Control chart" height={240}>
           <XAxis value="n" />
           <YAxis />
           <ControlChart
@@ -75,7 +75,7 @@ describe("ControlChart - onViolations", () => {
     function Drawn() {
       const { Chart, XAxis, YAxis } = useChart(DATA);
       return (
-        <Chart ariaLabel="Control chart" height={240}>
+        <Chart aria-label="Control chart" height={240}>
           <XAxis value="n" />
           <YAxis />
           <ControlChart

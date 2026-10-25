@@ -24,8 +24,9 @@ branches rename the same concept without talking to each other.
 ## Language
 
 A prop and the identifier behind it are the same word. The accessible name is
-spelled `aria-label` wherever the named element is the component's root, and
-`ariaLabel` only where it is not.
+spelled `aria-label` on every component, the native spelling (ADR-0068); the
+old `ariaLabel` of Table, Chart, Schedule, TreeView, Popover and ContextMenu
+works for one more minor and warns.
 
 
 ## Design language
@@ -677,11 +678,11 @@ of its **Lead-in** and **Lead-out**, and they appear on selection only — a pla
 where every bar bristles with grips is a plan nobody can read. One word,
 because it is one gesture: press the small thing to move the big one.
 _Avoid_: Anfasser, handle, Ziehfläche, Titelleiste — for the drawn thing. The
-**Schedule** has a `ScheduleHandle` as well, and it is not a grip and not drawn
-at all: it is what a component offers a caller imperatively, the arithmetic
-between a point on the screen and a time on a lane. Two live concepts, so the
-word stands with the qualifier the glossary's own rule prescribes — a *grip* is
-taken hold of, a *handle* is held by the code.
+**Schedule** offers a caller the arithmetic between a point on the screen and a
+time on a lane as functions on `useSchedule`'s return, and that is not a grip
+and not drawn at all. Two live concepts, so the word stands with the qualifier
+the glossary's own rule prescribes — a *grip* is taken hold of, the *functions*
+are called by the code.
 
 **Refusal**:
 What a place a drag may not land in answers with, drawn in material and edge

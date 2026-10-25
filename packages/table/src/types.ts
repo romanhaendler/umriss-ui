@@ -11,10 +11,14 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { NumberFormat } from "@umriss-ui/core";
+import type { NumberOptions } from "@umriss-ui/core";
 import type { DateFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
+
+/** How a number column is written: `"percent"`, `"count"`, or Intl's number
+    options plus `decimals`; the same shape as core's `NumberFormat`. */
+export type NumberFormat = "percent" | "count" | NumberOptions;
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -489,7 +493,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
   /** Accessible name of the table.
-      @deprecated Use `aria-label`; this name goes in the next minor release. */
+      @deprecated since 0.43 - use `aria-label`. */
   ariaLabel?: string;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
@@ -760,6 +764,10 @@ export interface Table<Z> extends TableSnapshot<Z> {
   RowActions: (props: RowActionsProps) => ReactNode;
   Action: (props: ActionProps<Z>) => ReactNode;
   GroupBy: GroupByComponent<Z>;
+  /** Brings the row with this key into view and returns `true`: in a paged table its page, in a scroll area, virtual or not, the scroll to it. `false`, with nothing changed, for a key the table does not have, a row a search, a condition or the `preFilter` hides, a row inside a folded group or branch, or a table not mounted; nothing is unfolded and no filter cleared. In server mode it reaches the rows of the page it holds. */
+  scrollToRow: (key: string) => boolean;
+  /** In grid mode, brings the row into view as `scrollToRow` does, makes the cell of that row and column the Active cell and moves the focus to it. Outside grid mode, for a column the table does not show, and wherever `scrollToRow` returns `false`, it returns `false` and changes nothing. */
+  focusCell: (key: string, column: string) => boolean;
 }
 
 /** A column or group key the table can be grouped by. The columns stand in the

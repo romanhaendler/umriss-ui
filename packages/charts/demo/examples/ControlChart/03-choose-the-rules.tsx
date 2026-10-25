@@ -164,7 +164,7 @@ export default function ChooseTheRules() {
   return (
     <div className="side-by-side">
       <div style={{ flex: "1 1 320px" }}>
-        <Chart height={240} ariaLabel="Control chart of the tile length under three of the four rules">
+        <Chart height={240} aria-label="Control chart of the tile length under three of the four rules">
           <XAxis value="minute" label="Minute of the shift" />
           <YAxis label="mm" />
           <ControlChart

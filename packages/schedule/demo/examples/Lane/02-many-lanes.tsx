@@ -31,7 +31,7 @@ export default function ManyLanes() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
   return (
     <Schedule
-      ariaLabel="Twenty vans, Tuesday morning"
+      aria-label="Twenty vans, Tuesday morning"
       height={300}
       laneHeight={32}
       headerWidth={110}

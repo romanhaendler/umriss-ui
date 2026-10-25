@@ -204,7 +204,7 @@ export class SceneKeys {
   }
 
   /** The keys stand on this target: brought into view, drawn as the hover. */
-  private show(at: Active, reveal = true): void {
+  show(at: Active, reveal = true): void {
     const hit = this.hitOf(at);
     if (hit === null) return;
     if (reveal) this.reveal(at);
@@ -262,7 +262,7 @@ export class SceneKeys {
   /** Pans and scrolls just enough to bring a target into view, with a margin
       at the side it came in from; a target wider than the view shows its
       start. As a drag at the edge pans along, the keys do. */
-  private reveal(at: Active): void {
+  reveal(at: Active): void {
     const b = this.bounds(at);
     const view = this.host.view;
     if (b === null || view.width <= 0) return;

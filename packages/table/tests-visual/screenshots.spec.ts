@@ -33,6 +33,17 @@ for (const scenarioId of SCENARIO_IDS) {
   });
 }
 
+/* The current row that is also ticked: its accent bar beside the selection's
+   ground (ADR-0071). The example opens with the row current and nothing ticked. */
+test("Example selection--the-current-row ticked", async ({ page }, testInfo) => {
+  await openExample(page, "selection", "the-current-row");
+  const target = page.locator('[data-example="the-current-row"]');
+  await target.scrollIntoViewIfNeeded();
+  await target.locator("tbody tr[aria-current='true']").getByRole("checkbox").evaluate((box: HTMLElement) => box.click());
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-selection--the-current-row--ticked-${testInfo.project.name}.png`);
+});
+
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);

@@ -74,7 +74,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Alt+Shift+← / →", action: "Proposes a new end, where the application handles `stretch`." },
         ],
         accessibility: [
-          "The schedule is a figure named by `ariaLabel`, and its plot one tab stop with the role `application`, read as \"schedule\" (`aria-roledescription`), named alike and described by a summary: the lanes, the subtasks in view, the visible span, the findings by kind, then the keys. The canvas is hidden from a reader; the lane headers are text, and a group's fold button is named \"Fold group\" or \"Unfold group\" with the group's label. `ariaLabel` is required - name what the plan shows, \"Plan of week 38\".",
+          "The schedule is a figure named by `aria-label`, and its plot one tab stop with the role `application`, read as \"schedule\" (`aria-roledescription`), named alike and described by a summary: the lanes, the subtasks in view, the visible span, the findings by kind, then the keys. The canvas is hidden from a reader; the lane headers are text, and a group's fold button is named \"Fold group\" or \"Unfold group\" with the group's label. `aria-label` is required - name what the plan shows, \"Plan of week 38\".",
           "When a key comes to rest, a polite live region beside the plot reads the active subtask: its lane, task and name, the day and the times, and every finding on it by name - an overlap, a dependency short by how much, blocked time. On a dependency it reads the task, the lag and where the line runs. A pointer announces nothing; [Findings as data](#/findings) gives the application the same findings to list. The words are core's wording, so under `@umriss-ui/core/wording/de` the plot is read as \"Belegungsplan\".",
           "Under forced colours the plot paints itself in the system colours: the work in the text colour, told apart by lane and label; the active subtask in the selection colour; findings marked by a dash; grips and the ghost's label outlined. With reduced motion a group's chevron turns without its movement.",
         ],
@@ -356,11 +356,12 @@ export const OUTLINE: readonly Rubric[] = [
       },
       {
         id: "handle",
-        name: "The handle",
+        name: "Functions on the hook",
         sentence: "Converts between a point on the screen and a time on a lane, so marks of your own - a cut-off, a delivery window, a pin - stand at the right place beside the plan.",
         about: [
-          "The handle holds three functions and nothing else: `clientPointOf(time, lane?)`, `positionAt(clientX, clientY)` and `visibleDomain()`. Everything else the schedule does is props.",
+          "`useSchedule` hands back three functions for what is on the screen: `clientPointOf(time, lane?)`, `positionAt(clientX, clientY)` and `visibleDomain()`. Before a schedule is mounted the first two answer `null`. The `ref` of `Schedule` is its root element.",
           "Place your marks again whenever `view.domain` changes.",
+          "`scrollToLane(lane)`, `scrollToSubtask(id)` and `focusSubtask(id)` show a lane or a subtask picked from a list of your own, a findings list or a search. `scrollToSubtask` brings the lane and the time into view and leaves the focus where it is; `focusSubtask` also makes the subtask the active one and focuses the plot. All three answer `false`, and change nothing, for an unknown lane or subtask, a lane inside a folded group (none is unfolded) and a schedule that is not mounted.",
         ],
         alternatives: [{ when: "You need the time under the pointer during a hover or a click", use: "interactions" }],
         keysOf: ["schedule"],

@@ -32,6 +32,21 @@ for (const scenarioId of SCENARIO_IDS) {
   });
 }
 
+/* A plan while it reloads: stale and dimmed. The example ends its reload by a
+   timer, so the page's timers are stopped before Reload is pressed. */
+test("Example schedule--loading reloading", async ({ page }, testInfo) => {
+  await openExample(page, "schedule", "loading");
+  const target = page.locator('[data-example="loading"]');
+  await target.scrollIntoViewIfNeeded();
+  await page.evaluate(() => {
+    window.setTimeout = (() => 0) as unknown as typeof window.setTimeout;
+  });
+  await target.getByRole("button", { name: "Reload" }).click();
+  await expect(target.locator("[aria-busy='true']")).toHaveCount(2);
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-schedule--loading--reloading-${testInfo.project.name}.png`);
+});
+
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);

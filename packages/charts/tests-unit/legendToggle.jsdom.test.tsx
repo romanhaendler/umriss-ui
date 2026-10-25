@@ -44,7 +44,7 @@ function Toggled({ initialView, onViewChange, seen, unnamed, wording }: Props) {
   seen?.(parts);
   const { Chart, XAxis, YAxis, Line } = parts;
   return (
-    <Chart ariaLabel="Legend toggle" height={200} wording={wording}>
+    <Chart aria-label="Legend toggle" height={200} wording={wording}>
       <XAxis value="t" />
       <YAxis />
       <Line value="a" name="A" />
@@ -227,7 +227,7 @@ describe("A state band's entries", () => {
       { label: "Busy", color: "#c00" },
     ];
     return (
-      <Chart ariaLabel="Bands" height={200}>
+      <Chart aria-label="Bands" height={200}>
         <XAxis value="t" />
         <YAxis />
         <StateBand value={(row) => row.t} states={states} name="Van" />

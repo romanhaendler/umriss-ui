@@ -47,7 +47,7 @@ export default function MoveToAnotherLane() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Five vehicles on Tuesday, 17 March, editable"
+        aria-label="Five vehicles on Tuesday, 17 March, editable"
         height={284}
         intents={["move", "lane"]}
         onIntent={(intent) => {

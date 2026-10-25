@@ -30,7 +30,7 @@ afterEach(() => vi.restoreAllMocks());
 function Plan({ onIntent, data = MILESTONES }: { onIntent?: (intent: Intent) => void; data?: Milestone[] }) {
   const { Schedule, Lane, Subtasks, Milestones } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
   return (
-    <Schedule ariaLabel="Plan" intents={["move"]} onIntent={onIntent}>
+    <Schedule aria-label="Plan" intents={["move"]} onIntent={onIntent}>
       <Lane id="press" label="Press" />
       <Lane id="paint" label="Paint shop" />
       <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }]} />

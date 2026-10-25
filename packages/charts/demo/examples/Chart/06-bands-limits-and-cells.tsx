@@ -235,7 +235,7 @@ const STATES = vehicleDay("v2");
 function BatteryAndStates() {
   const { Chart, XAxis, YAxis, Line, StateBand } = useChart(BATTERY);
   return (
-    <Chart height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
+    <Chart height={280} aria-label="An e-van's battery against its reserve, above its states" encoding="marks">
       <XAxis value="t" time label="Time" tickCount={4} />
       <YAxis domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
       {/* One lane, and four places of room above it for the course. */}
@@ -253,7 +253,7 @@ function BatteryAndStates() {
 function SuccessCells() {
   const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
   return (
-    <Chart height={280} ariaLabel="Successful requests per service and hour, by limits and by marks" encoding="marks">
+    <Chart height={280} aria-label="Successful requests per service and hour, by limits and by marks" encoding="marks">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
       <Matrix

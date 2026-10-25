@@ -38,7 +38,7 @@ export default function PushTheLaterStops() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Tour T-01 on van FP 214 K" height={100}>
+      <Schedule aria-label="Tour T-01 on van FP 214 K" height={100}>
         <Lane id="van-214" label="Van FP 214 K" />
         <Dependencies data={DRIVES} />
         <Subtasks data={stops} tasks={TOURS} />

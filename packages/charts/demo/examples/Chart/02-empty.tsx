@@ -13,7 +13,7 @@ const NOTHING: Reading[] = [];
 function Latency({ empty }: { empty?: string }) {
   const { Chart, XAxis, YAxis, Line } = useChart(NOTHING);
   return (
-    <Chart height={220} ariaLabel="Latency of a service without readings" empty={empty}>
+    <Chart height={220} aria-label="Latency of a service without readings" empty={empty}>
       <XAxis value="t" time />
       <YAxis label="ms" />
       <Line value="p95" name="Refunds" />

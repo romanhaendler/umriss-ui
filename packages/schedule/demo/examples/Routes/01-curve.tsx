@@ -26,7 +26,7 @@ const HANDOVERS: Dependency[] = [
 export default function Curve() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(13, 30)] } });
   return (
-    <Schedule ariaLabel="Search results, from layout to polish, curved lines" height={188}>
+    <Schedule aria-label="Search results, from layout to polish, curved lines" height={188}>
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="chloe" label="Chloe Durand" />
       <Lane id="eva" label="Eva Novak" />

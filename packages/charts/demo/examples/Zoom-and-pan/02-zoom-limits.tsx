@@ -104,7 +104,7 @@ const SEARCH_WEEK = week("search", 60_000);
 export default function ZoomLimits() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
-    <Chart height={260} ariaLabel="Search latency over last week, zoomable between an hour and two days">
+    <Chart height={260} aria-label="Search latency over last week, zoomable between an hour and two days">
       {/* Never closer than an hour, never wider than two days - the week
           shows at the start and once more after a double click. */}
       <XAxis value="t" time domain="data" zoomable zoomLimits={{ min: HOUR, max: 2 * DAY }} />

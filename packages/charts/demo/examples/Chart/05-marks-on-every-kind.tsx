@@ -54,7 +54,7 @@ export const lead = "Under `encoding=\"marks\"` bars and ranges take a hatch, li
 export default function MarksOnEveryKind() {
   const { Chart, XAxis, YAxis, Bar, Area, Line, Scatter } = useChart(DEPOT_DAYS);
   return (
-    <Chart height={320} ariaLabel="North depot's pallets, told apart by marks" encoding="marks">
+    <Chart height={320} aria-label="North depot's pallets, told apart by marks" encoding="marks">
       <XAxis value="day" label="Day of March" tickCount={7} />
       <YAxis label="Pallets" />
       <Bar value="arrived" name="Arrived" />

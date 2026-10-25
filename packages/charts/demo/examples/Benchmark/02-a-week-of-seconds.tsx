@@ -122,7 +122,7 @@ export default function WeekOfSeconds() {
           <dd>{drawMs.toFixed(1)} ms</dd>
         </div>
       </dl>
-      <Chart height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
+      <Chart height={300} aria-label="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
         <XAxis value="t" time domain="data" zoomable />
         <YAxis label="ms" domain="visible" />
         <YAxis id="requests" position="right" label="Requests/min" domain="visible" />

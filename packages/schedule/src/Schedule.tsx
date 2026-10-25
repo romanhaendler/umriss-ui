@@ -37,13 +37,15 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
-  type CSSProperties,
+  type HTMLAttributes,
   type ReactNode,
   type Ref,
+  type RefObject,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
+import { warnDeprecated, warnOnce } from "./dev";
 import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
@@ -52,12 +54,31 @@ import { dayRun, fontScaleOf, opensRun, type ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
-/** The props of `Schedule`. */
-export interface ScheduleProps {
-  /** Receives the `ScheduleHandle` - not an element. */
-  ref?: Ref<ScheduleHandle>;
-  /** What the schedule shows, for a screen reader: "Plan of week 38". */
-  ariaLabel: string;
+/** The props of `Schedule`: the attributes of a `<div>` and what the schedule
+    reads itself. `ref`, `className`, `style` and the rest reach the root; the
+    name (`aria-label`, `aria-labelledby`) reaches the figure root and the plot,
+    and a `aria-describedby` of yours is joined to the plot's summary. */
+export type ScheduleProps = ScheduleOwnProps &
+  (
+    | {
+        /** What the schedule shows, for a screen reader: "Plan of week 38". */
+        "aria-label": string;
+        /** @deprecated since 0.43 - use `aria-label`. */
+        ariaLabel?: string;
+      }
+    | {
+        "aria-label"?: undefined;
+        /** What the schedule shows, for a screen reader.
+            @deprecated since 0.43 - use `aria-label`. */
+        ariaLabel: string;
+      }
+  );
+
+interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "aria-label"> {
+  /** Receives the root element. A ref to the deprecated `ScheduleHandle` still
+      works for one more minor release: the element carries its three
+      functions. */
+  ref?: Ref<HTMLDivElement> | RefObject<ScheduleHandle | null> | undefined;
   /** Height in CSS pixels, both bands included, fixed. Left out, the schedule
       fills its frame - a stretched grid cell, a card the grid stretches, a
       container of definite height - and never goes below 400 px, which is also
@@ -167,10 +188,6 @@ export interface ScheduleProps {
       meanwhile.
       @default false */
   loading?: boolean;
-  /** Goes to the root element. */
-  className?: string;
-  /** Goes to the root element. */
-  style?: CSSProperties;
   /** `Lane`, `Dependencies` and `Subtasks`, in the order they are to stand and
       be drawn. */
   children?: ReactNode;
@@ -188,7 +205,8 @@ const DATE_ROOM_MEDIUM = 84;
 const DATE_ROOM_LONG = 200;
 
 /** What a schedule offers a caller imperatively: the arithmetic between a
-    point on the screen and a time on a lane. Everything else is props. */
+    point on the screen and a time on a lane. Everything else is props.
+    @deprecated since 0.43 - use the functions on `useSchedule`'s return. */
 export interface ScheduleHandle {
   /** The time and the lane at a client point, or null outside the plot. */
   positionAt: (clientX: number, clientY: number) => { time: number; lane: string | null } | null;
@@ -204,11 +222,14 @@ export interface ScheduleHandle {
     `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones`); the planner pans,
     zooms and drags, and every drag ends as an **Intent** through `onIntent`.
     The data changes only where the caller applies it; without `intents` the
-    schedule is read-only. A ref gives the `ScheduleHandle`. */
+    schedule is read-only. A ref gives the root `<div>`. */
 export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): ReactNode {
   const {
     ref,
     scene,
+    "aria-label": nameLabel,
+    "aria-labelledby": labelledBy,
+    "aria-describedby": describedBy,
     ariaLabel,
     height,
     laneHeight = DEFAULT_LANE_HEIGHT,
@@ -233,7 +254,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     className,
     style,
     children,
+    ...rest
   } = props;
+  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
+  const name = { "aria-label": nameLabel ?? ariaLabel, "aria-labelledby": labelledBy };
 
   /* One id per schedule, so that two on a page do not both claim
      `#…-group-presses` for their chevron's `aria-controls`. */
@@ -274,15 +298,23 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange });
   }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange]);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      positionAt: (clientX, clientY) => scene.positionAt(clientX, clientY),
-      clientPointOf: (time, lane) => scene.clientPointOf(time, lane),
-      visibleDomain: () => scene.visibleDomain(),
-    }),
-    [scene],
-  );
+  /* The bridge for a ref typed at the deprecated `ScheduleHandle`: the root
+     carries the three functions, and the first call of one says where they
+     live now. */
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const through = <A extends unknown[], R>(name: string, call: (...args: A) => R) => (...args: A): R => {
+      warnOnce("handle", `a ref to the schedule's handle is deprecated and goes in the next minor release; call ${name} on useSchedule's return.`);
+      return call(...args);
+    };
+    Object.assign(root, {
+      positionAt: through("positionAt", (x: number, y: number) => scene.positionAt(x, y)),
+      clientPointOf: through("clientPointOf", (time: number, lane?: string) => scene.clientPointOf(time, lane)),
+      visibleDomain: through("visibleDomain", () => scene.visibleDomain()),
+    });
+  }, [scene]);
+  useImperativeHandle(ref as Ref<HTMLDivElement | null>, () => rootRef.current as HTMLDivElement, []);
 
   useEffect(() => {
     scene.setLoading(loading);
@@ -483,9 +515,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
   return (
     <ScheduleContext value={scene}>
       <div
+        {...rest}
         ref={rootRef}
         role="figure"
-        aria-label={ariaLabel}
+        {...name}
         className={className ? `${styles.root} ${className}` : styles.root}
         style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
       >
@@ -580,8 +613,8 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
           tabIndex={0}
           role="application"
           aria-roledescription={wording.scheduleRoleDescription}
-          aria-label={ariaLabel}
-          aria-describedby={summaryId}
+          {...name}
+          aria-describedby={describedBy ? `${summaryId} ${describedBy}` : summaryId}
           onKeyDown={(event) => {
             if (scene.key(event.nativeEvent)) event.preventDefault();
           }}

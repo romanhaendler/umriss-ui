@@ -89,7 +89,7 @@ const CHECKOUT = metrics("checkout");
 export default function OneSeries() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={280} ariaLabel="Checkout's 95th percentile latency today">
+    <Chart height={280} aria-label="Checkout's 95th percentile latency today">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <Line value="p95" name="Checkout p95" />
