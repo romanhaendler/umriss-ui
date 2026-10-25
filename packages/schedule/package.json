@@ -48,7 +48,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/schedule.js"
+      "import": "./dist/schedule.js",
+      "default": "./dist/schedule.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",

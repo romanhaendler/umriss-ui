@@ -49,7 +49,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/table.js"
+      "import": "./dist/table.js",
+      "default": "./dist/table.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",

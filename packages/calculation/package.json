@@ -45,7 +45,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/calculation.js"
+      "import": "./dist/calculation.js",
+      "default": "./dist/calculation.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",

@@ -41,7 +41,7 @@
    it in `prepublishOnly`, after the build. */
 
 import { spawnSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { transform } from "lightningcss";
@@ -203,8 +203,10 @@ try {
    blocks, taken by the file name in their info string; only the consumer test
    is written besides. */
 const SCOPE = "@umriss-ui/";
-/* Core's lines serve core; charts must work without core and gives its own in full. */
-const readmes = [join(name === "@umriss-ui/charts" ? "." : join("..", "core"), "README.md")];
+/* Core's lines serve core and the packages that draw with it; charts must work without core and
+   gives its own in full; schedule draws with both, so it takes both, and a file both name (the
+   setup file) is the two blocks one after the other, as its README says. */
+const readmes = (name === "@umriss-ui/charts" ? ["."] : name === "@umriss-ui/schedule" ? ["../core", "../charts"] : ["../core"]).map((dir) => join(dir, "README.md"));
 const runnerRoot = mkdtempSync(join(tmpdir(), "check-dist-runners-"));
 try {
   const tarballs = join(runnerRoot, "tarballs");
@@ -235,9 +237,14 @@ try {
   }
   for (const react of ["react", "react-dom"]) symlinkSync(resolve("node_modules", react), join(runnerRoot, "node_modules", react));
 
+  const written = new Set<string>();
   for (const readme of readmes) {
     for (const block of readFileSync(readme, "utf8").matchAll(/^```\S+ (\S+)\n([\s\S]*?)^```$/gm)) {
-      writeFileSync(join(runnerRoot, block[1]!), block[2]!);
+      const file = join(runnerRoot, block[1]!);
+      /* Configuration files are identical in both READMEs; only the setup file differs and is appended. */
+      if (written.has(file) && block[1] !== "umriss.setup.js") continue;
+      (written.has(file) ? appendFileSync : writeFileSync)(file, block[2]!);
+      written.add(file);
     }
   }
   copyFileSync(join("tests-consumer", `${name.slice(SCOPE.length)}.test.jsx`), join(runnerRoot, "consumer.test.jsx"));
