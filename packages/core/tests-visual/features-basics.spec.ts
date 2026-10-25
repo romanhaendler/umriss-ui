@@ -1080,7 +1080,7 @@ test("Menu opens and triggers an action", async ({ page }) => {
    layout to check that in (schedule-refinement 08). */
 test("ContextMenu opens at the point of the right-click", async ({ page }) => {
   await openExample(page, "contextmenu", "at-the-pointer");
-  const surface = page.locator('[data-example="at-the-pointer"] div', { hasText: "Right-click anywhere in here" }).last();
+  const surface = page.locator('[data-example="at-the-pointer"] div', { hasText: "anywhere in here" }).last();
   const box = (await surface.boundingBox())!;
   const at = { x: Math.round(box.x + 40), y: Math.round(box.y + 30) };
   await page.mouse.click(at.x, at.y, { button: "right" });
@@ -1099,7 +1099,7 @@ test("ContextMenu flips and stays inside the window at its edge", async ({ page 
   /* A window small enough that the surface reaches its corner: the panel
      cannot open down and to the right without leaving the window. */
   await page.setViewportSize({ width: 460, height: 340 });
-  const surface = page.locator('[data-example="at-the-pointer"] div', { hasText: "Right-click anywhere in here" }).last();
+  const surface = page.locator('[data-example="at-the-pointer"] div', { hasText: "anywhere in here" }).last();
   await surface.scrollIntoViewIfNeeded();
   const box = (await surface.boundingBox())!;
   const viewport = page.viewportSize()!;

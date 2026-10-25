@@ -154,6 +154,8 @@
      looks like the text around it and draws the focus ring only. */
   .rowButton {
     all: unset;
+    /* `all: unset` drops the base's border-box, which every own element keeps (ADR-0021). */
+    box-sizing: border-box;
     display: block;
     max-width: 100%;
     cursor: pointer;
