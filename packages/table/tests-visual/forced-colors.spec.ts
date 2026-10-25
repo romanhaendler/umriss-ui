@@ -34,6 +34,8 @@ const STATES: Array<{ pageId: string; exampleId: string; state?: string; act?: (
   { pageId: "grouping", exampleId: "in-bands" },
   { pageId: "grouping", exampleId: "a-whole-group-selected", act: tick([0]) },
   { pageId: "selection", exampleId: "selection", state: "ticked", act: tick([1, 2]) },
+  // The current row's bar beside the selection's lines, on one row.
+  { pageId: "selection", exampleId: "the-current-row", state: "current-and-ticked", act: tick([2]) },
 ];
 
 for (const { pageId, exampleId, state, act } of STATES) {
