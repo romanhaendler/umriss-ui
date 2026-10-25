@@ -66,7 +66,8 @@ export function asText(
     case "number": {
       const number = value as number;
       // A date name on a number writes as no format does.
-      return writeNumber(formats, number, format as NumberFormat | undefined);
+      const own = format === "date" || format === "time" || format === "dateTime" ? undefined : format;
+      return writeNumber(formats, number, own);
     }
     case "date": {
       const date = value as Date;
