@@ -9,7 +9,7 @@ import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { useFormats, useWording } from "../../lib/language";
+import { useFormats, useLanguage, useWording } from "../../lib/language";
 import { CalendarGlyph } from "../../lib/glyphs";
 
 
@@ -67,6 +67,8 @@ export function DatePicker(
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
+  // The width is measured with the real formats: it is the same on a server and in the browser, even while the instants are still empty.
+  const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.datePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
 
@@ -117,7 +119,7 @@ export function DatePicker(
         }}
         ariaLabel={wording.dateClear}
         chars={chars}
-        natural={naturalChars((sample) => formats.date(sample).length, placeholderText)}
+        natural={naturalChars((sample) => measure.date(sample).length, placeholderText)}
       />
       <Popover
         open={open}

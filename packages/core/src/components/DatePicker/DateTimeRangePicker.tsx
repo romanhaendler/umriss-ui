@@ -17,7 +17,7 @@ import { rangeFromDays, order, orderByDay } from "./contract";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { useFormats, useWording } from "../../lib/language";
+import { useFormats, useLanguage, useWording } from "../../lib/language";
 import { ClockGlyph } from "../../lib/glyphs";
 
 interface TimeValues {
@@ -139,6 +139,8 @@ export function DateTimeRangePicker(
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
+  // The width is measured with the real formats: it is the same on a server and in the browser, even while the instants are still empty.
+  const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.dateRangePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
   /* Out of the wording as in the DateRangePicker - the constant knew only
@@ -414,7 +416,7 @@ export function DateTimeRangePicker(
         }}
         ariaLabel={wording.dateTimeRangeClear}
         chars={chars}
-        natural={naturalChars((sample) => 2 * (formats.date(sample).length + 2 + formats.time(sample, withSeconds).length) + 3, placeholderText)}
+        natural={naturalChars((sample) => 2 * (measure.date(sample).length + 2 + measure.time(sample, withSeconds).length) + 3, placeholderText)}
       />
       <Popover
         open={open}
