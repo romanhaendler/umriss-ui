@@ -40,3 +40,7 @@ The cost: a chart without `height` in a frame taller than 300 px - beside a
 tall table, in a fixed-height container - now fills it. That is visible, and
 the changelogs say so. Whatever stands directly in a card is now a flex item,
 so margins between direct children no longer collapse.
+
+*Amended 2026-10-25:* the schedule follows the same rule. Without `height` it fills its frame and never goes below
+400 px, its height before; in a frame without a definite height, it is 400 px whatever its lanes. A number stays
+a fixed height, and a different floor goes through `style`'s `minHeight`.
