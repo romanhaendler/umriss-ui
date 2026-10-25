@@ -6,12 +6,13 @@ Size: S
 
 Blocked by: None (can start immediately)
 Spec: `.scratch/under-a-finger/spec.md`
+ADR:    ADR-0070, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 
 Write the ADR below into `docs/adr/` under the next free number, and add it to the ADR index the way the
 others stand there. The text is decided; adjust only its wording to the house style of the ADRs beside it
-(`docs/adr/0042-…`, `0043-…`, `0051-…`). Replace "ADR-NNNN" in this spec's tickets by the number given.
+(`docs/adr/0042-…`, `0043-…`, `0051-…`).
 
 ---
 

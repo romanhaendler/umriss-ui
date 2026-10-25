@@ -14,7 +14,7 @@ with no line of the application's code. A touch laptop with a trackpad and every
 
 - **Core's tokens** get one block under `@media (pointer: coarse)` that sets the `md` control height to
   44 px. It stands beside the phone-width and reduced-motion blocks, in the tokens layer, and its comment
-  says why `sm` and `xs` stay (ADR-NNNN).
+  says why `sm` and `xs` stay (ADR-0070).
 - **Nothing else changes:** no padding, icon size or type, and no `sm` or `xs` value.
 - **Whatever reads the `md` height follows.** Walk the readers of the token in every package and look at
   each under touch emulation at 375 px and at 1024 × 768:

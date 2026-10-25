@@ -6,6 +6,7 @@ Size: M
 
 Blocked by: none
 Spec: `.scratch/table-server-mode-2/spec.md`, "A late answer and an error (T1)"
+ADR:    ADR-0072, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 

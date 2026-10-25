@@ -6,6 +6,7 @@ Size: L
 
 Blocked by: none
 Spec: decisions R1-R6, R13, R15-R18; user stories 1-4, 8-17
+ADR:    ADR-0074, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 

@@ -161,11 +161,10 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   uncertainty, drag from the catalogue, a head slot, a mimic layer. Specs `.scratch/dashboard-small-wishes/`,
   `.scratch/dashboard-locked-widget/`, `.scratch/data-quality/`.
 
-## Not yet specified
+## The order of the work
 
-- **The order of the work.** Once the decisions stand, one page that orders the resulting specs into
-  releasable packages, as `.scratch/open-points-roadmap/spec.md` did for October - after that roadmap's
-  packages B and C, or interleaved with them.
+Settled in [`order.md`](order.md): six releases, package B of the October roadmap in the third, package C
+after the sixth, and the numbers of the thirteen new ADRs.
 
 ## Out of scope
 
