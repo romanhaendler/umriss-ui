@@ -31,7 +31,7 @@ import { DEFAULT_CHARTS_WORDING } from "../../../charts/src/wording/index.ts";
     table's sentence says them. */
 const ZONE = "Europe/Berlin";
 const SAMPLES_SAID =
-  "Each set as it writes Tuesday, 17 March 2026 at 09:05:03 in Berlin (the time without seconds), the number 1204.5 to one decimal, the count 1204, the share 0.74, three minutes ago, and `Zebra`, `Émile` and `Apple` in order.";
+  "Each set as it writes Tuesday, 17 March 2026 at 09:05:03 in Berlin (the time without seconds), the number 1204.5 to one decimal, the same in euros, the count 1204, the share 0.74, three minutes ago, and `Zebra`, `Émile` and `Apple` in order.";
 
 function samples(at: Date): Record<keyof Formats, (formats: Formats) => string> {
   return {
@@ -43,6 +43,7 @@ function samples(at: Date): Record<keyof Formats, (formats: Formats) => string> 
     dateTime: (f) => f.dateTime(at, false),
     offset: (f) => f.offset(at),
     number: (f) => f.number(1204.5, 1),
+    numberWith: (f) => f.numberWith(1204.5, { style: "currency", currency: "EUR" }),
     count: (f) => f.count(1204),
     percent: (f) => f.percent(0.74),
     compareText: (f) => ["Zebra", "Émile", "Apple"].sort(f.compareText).join(", "),
