@@ -78,7 +78,7 @@ and 04, and `date-jump-and-typed-entry` 06 waits for `plant-time-zone` 04.
 | Spec | Tickets | What |
 | --- | --- | --- |
 | `dashboard-small-wishes` | 5 | `headingLevel`, stored options, the never lines |
-| `dashboard-locked-widget` | 2 | A widget a reader cannot move |
+| `dashboard-locked-widget` | 2 | A widget a reader can only move, not remove, resize or reconfigure |
 | `table-small-wishes` | 5 | Shift-click ranges, a view that survives JSON, a column drag |
 | `schedule-keyboard-and-reader` | 3 | `+`, `-` and `0` zoom the plan; the plan as a table |
 | `charts-small-additions` | 4 | Side legend, `maxGap`, month ticks, `bin` on a typed column |
@@ -91,6 +91,21 @@ and 04, and `date-jump-and-typed-entry` 06 waits for `plant-time-zone` 04.
 | Spec | Tickets | What |
 | --- | --- | --- |
 | `alarms` | 11 | `@umriss-ui/alarms`, first release by hand |
+
+### What each release costs
+
+Counted from the tickets' sizes at about 150k tokens for S, 350k for M and 700k for L, plus 30 % for
+retries, review and the release check. Mechanical S tickets run on Haiku (the run rules in memory), which
+takes about another tenth off the total. A release is the place to stop when the week's limit runs low.
+
+| Release | S | M | L | Tokens | Running total |
+| --- | --- | --- | --- | --- | --- |
+| 1 - The ground | 15 | 9 | 0 | 7.0M | 7.0M |
+| 2 - The contract | 20 | 16 | 0 | 11.2M | 18.2M |
+| 3 - Package B and the warnings | 18 | 12 | 2 | 10.8M | 29.0M |
+| 4 - Time and pickers | 9 | 15 | 0 | 8.6M | 37.6M |
+| 5 - The wishes | 21 | 10 | 0 | 8.6M | 46.2M |
+| 6 - Alarms | 5 | 5 | 1 | 4.2M | 50.4M |
 
 ### After that
 
