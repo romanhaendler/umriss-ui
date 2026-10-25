@@ -12,6 +12,11 @@
      and `:root` in the tokens layer declares them to resolve to light,
    - and the entry holds the development-mode expression while no shipped
      JavaScript file holds `import.meta`,
+   - and every `import` entry has an equal `default`, which Jest's CommonJS
+     resolver reads,
+   - and the packed package, installed into a scratch project, passes its
+     consumer test (`tests-consumer/`) in a Vitest project and a Jest project
+     that hold only the files the README's Testing section gives,
    - and a strict consumer compiles against the declarations of every entry,
      under `bundler` and `node10` resolution,
    - and an import of any entry that uses nothing leaves a residue under the
@@ -25,9 +30,9 @@
    it in `prepublishOnly`, after the build. */
 
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { transform } from "lightningcss";
 import { HOSTED_HOST, SITE } from "../packages/demo/src/address.ts";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
@@ -46,6 +51,11 @@ const manifest = JSON.parse(readFileSync("package.json", "utf8")) as { exports: 
 const entries = new Set(
   Object.values(manifest.exports).flatMap((target) => (target && typeof target === "object" && "import" in target ? exported(target.import) : [])),
 );
+for (const [key, target] of Object.entries(manifest.exports)) {
+  if (target && typeof target === "object" && "import" in target && (!("default" in target) || target.default !== target.import)) {
+    problems.push(`exports["${key}"] has no "default" equal to its "import"; Jest does not find the entry`);
+  }
+}
 for (const file of entries) {
   if (!readFileSync(file, "utf8").startsWith(`"use client";\n`)) problems.push(`${file} does not begin with "use client"`);
 }
@@ -154,6 +164,64 @@ try {
   }
 } finally {
   rmSync(consumerRoot, { recursive: true, force: true });
+}
+
+/* The installed package under the test runners. The package and its umriss
+   dependencies are unpacked from their tarballs into the scratch project's
+   `node_modules`: a symlink would resolve to a path outside it, Vitest would
+   inline the package by itself, and the check would pass without the line the
+   README gives. The configuration and setup files are the README's fenced
+   blocks, taken by the file name in their info string; only the consumer test
+   is written besides. */
+const SCOPE = "@umriss-ui/";
+const readmes = [join("..", "core", "README.md")];
+const runnerRoot = mkdtempSync(join(tmpdir(), "check-dist-runners-"));
+try {
+  const tarballs = join(runnerRoot, "tarballs");
+  mkdirSync(tarballs);
+  const unpacked = new Set<string>();
+  const install = (directory: string, packageName: string) => {
+    if (unpacked.has(packageName)) return;
+    unpacked.add(packageName);
+    const packed = spawnSync("npm", ["pack", "--ignore-scripts", "--silent", "--pack-destination", tarballs], { cwd: directory, encoding: "utf8" });
+    if (packed.status !== 0) throw new Error(`npm pack failed in ${directory}:\n${packed.stderr}`);
+    const target = join(runnerRoot, "node_modules", packageName);
+    mkdirSync(target, { recursive: true });
+    const tarball = join(tarballs, packed.stdout.trim().split("\n").pop()!);
+    const untar = spawnSync("tar", ["-xzf", tarball, "-C", target, "--strip-components=1"], { encoding: "utf8" });
+    if (untar.status !== 0) throw new Error(`tar failed for ${packageName}:\n${untar.stderr}`);
+    const own = JSON.parse(readFileSync(join(directory, "package.json"), "utf8")) as { dependencies?: object; peerDependencies?: object };
+    for (const dependency of Object.keys({ ...own.dependencies, ...own.peerDependencies })) {
+      if (dependency.startsWith(SCOPE)) install(join("..", dependency.slice(SCOPE.length)), dependency);
+    }
+  };
+  install(".", name);
+
+  /* The tools and the libraries a test imports come from the workspace; React
+     and React DOM are the package's own, so that there is one copy of each. */
+  for (const tool of ["vitest", "jest", "jest-environment-jsdom", "@babel", "@testing-library"]) {
+    mkdirSync(dirname(join(runnerRoot, "node_modules", tool)), { recursive: true });
+    symlinkSync(resolve("..", "..", "node_modules", tool), join(runnerRoot, "node_modules", tool));
+  }
+  for (const react of ["react", "react-dom"]) symlinkSync(resolve("node_modules", react), join(runnerRoot, "node_modules", react));
+
+  for (const readme of readmes) {
+    for (const block of readFileSync(readme, "utf8").matchAll(/^```\S+ (\S+)\n([\s\S]*?)^```$/gm)) {
+      writeFileSync(join(runnerRoot, block[1]!), block[2]!);
+    }
+  }
+  copyFileSync(join("tests-consumer", `${name.slice(SCOPE.length)}.test.jsx`), join(runnerRoot, "consumer.test.jsx"));
+
+  const runners: [string, string[]][] = [
+    ["Vitest", [resolve("..", "..", "node_modules", "vitest", "vitest.mjs"), "run"]],
+    ["Jest", [resolve("..", "..", "node_modules", "jest", "bin", "jest.js")]],
+  ];
+  for (const [runner, args] of runners) {
+    const run = spawnSync(process.execPath, args, { cwd: runnerRoot, encoding: "utf8", env: { ...process.env, CI: "1" } });
+    if (run.status !== 0) problems.push(`the consumer test fails under ${runner} with the README's files:\n${run.stdout}${run.stderr}`);
+  }
+} finally {
+  rmSync(runnerRoot, { recursive: true, force: true });
 }
 
 /* An import that uses nothing must cost next to nothing. */
