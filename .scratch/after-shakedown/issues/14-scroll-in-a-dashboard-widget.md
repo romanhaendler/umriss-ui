@@ -1,7 +1,7 @@
 # Scroll in a dashboard widget
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

@@ -1,7 +1,7 @@
 # A touch size for the controls
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

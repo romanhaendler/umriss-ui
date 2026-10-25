@@ -1,7 +1,7 @@
 # Pivot with columns unknown at compile time
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

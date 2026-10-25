@@ -1,7 +1,7 @@
 # What umriss promises a Server Component
 
 Type:       grilling
-Status:     open
+Status:     claimed
 Blocked by: 03
 
 ## Question
