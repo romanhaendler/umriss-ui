@@ -89,7 +89,7 @@ const CHECKOUT = metrics("checkout");
 export default function AlongTime() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
+    <Chart height={260} aria-label="Checkout's latency across a maintenance window and the start of a release freeze">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <LimitBand orientation="x" from={new Date(2026, 2, 17, 2)} to={new Date(2026, 2, 17, 3)} color="#5b7c99" label="Maintenance" />

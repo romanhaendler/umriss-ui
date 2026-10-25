@@ -7,7 +7,7 @@ import { useChart } from "../src";
 
 function Empty() {
   const { Chart } = useChart<never>([]);
-  return <Chart ariaLabel="SSR test" height={200} />;
+  return <Chart aria-label="SSR test" height={200} />;
 }
 
 describe("SSR", () => {
@@ -22,7 +22,7 @@ describe("SSR", () => {
   it("marks a loading chart busy from the server on", () => {
     function Loading() {
       const { Chart } = useChart<never>([]);
-      return <Chart ariaLabel="SSR test" height={200} loading />;
+      return <Chart aria-label="SSR test" height={200} loading />;
     }
     expect(renderToString(<Loading />)).toContain('aria-busy="true"');
   });

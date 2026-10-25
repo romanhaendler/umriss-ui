@@ -35,7 +35,7 @@ function Marks({ encoding, series, tail }: { encoding?: "color" | "marks"; serie
   const parts = useChart(data);
   const { Chart, XAxis, YAxis } = parts;
   return (
-    <Chart ariaLabel="Marks" encoding={encoding}>
+    <Chart aria-label="Marks" encoding={encoding}>
       <XAxis value="t" />
       <YAxis />
       {series(parts)}

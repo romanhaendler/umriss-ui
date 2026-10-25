@@ -38,7 +38,7 @@ function Zoomable({ zoomable = true, zoomLimits, initialView, onViewChange, seen
   seen?.(parts);
   const { Chart, XAxis, YAxis, Line } = parts;
   return (
-    <Chart ariaLabel="Zoomable">
+    <Chart aria-label="Zoomable">
       <XAxis value="t" domain={[0, 100]} zoomable={zoomable} zoomLimits={zoomLimits} />
       <YAxis />
       <Line value="a" name="A" />
@@ -243,7 +243,7 @@ describe("Zoom keys without a tooltip (ADR-0030)", () => {
     function Bare() {
       const { Chart, XAxis, YAxis, Line } = useChart(data, { onViewChange: (v) => views.push(v) });
       return (
-        <Chart ariaLabel="Bare">
+        <Chart aria-label="Bare">
           <XAxis value="t" domain={[0, 100]} zoomable tickFormat={(v) => `t${v}`} />
           <YAxis />
           <Line value="a" name="A" />

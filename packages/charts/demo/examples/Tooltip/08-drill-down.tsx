@@ -93,7 +93,7 @@ export default function DrillDown() {
           Back to {above}
         </button>
       )}
-      <Chart height={260} ariaLabel={`Orders, ${where}`}>
+      <Chart height={260} aria-label={`Orders, ${where}`}>
         <XAxis value="label" />
         <YAxis label="orders" />
         <Bar value="orders" name="Orders" />

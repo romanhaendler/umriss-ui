@@ -31,7 +31,7 @@ const rest = (ms: number) => act(() => new Promise<void>((r) => setTimeout(r, ms
 function Tree({ domain, zoom }: { domain?: [number, number]; zoom: boolean }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="Two courses">
+    <Chart aria-label="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} domain={domain} zoomable={zoom} />
       <YAxis tickFormat={(v) => `${v} u`} />
       <Line value="a" name="A" />

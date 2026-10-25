@@ -37,7 +37,7 @@ const summary = (host: HTMLElement) => {
 function Tree({ limits }: { limits?: boolean }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart ariaLabel="Two courses, one on its own axis">
+    <Chart aria-label="Two courses, one on its own axis">
       <XAxis value="t" />
       <YAxis tickFormat={(v) => `${v} u`} />
       <YAxis id="right" position="right" tickFormat={(v) => `${v} r`} />
@@ -87,7 +87,7 @@ describe("Labelled limits for a reader without colour or pointer", () => {
 function Steps() {
   const { Chart, XAxis, YAxis, Line } = useChart(data.map((d) => ({ ...d, a: d.a - 10 })));
   return (
-    <Chart ariaLabel="A course on an axis stepping by one">
+    <Chart aria-label="A course on an axis stepping by one">
       <XAxis value="t" />
       <YAxis tickCount={5} />
       <LimitLine value={0.5} label="LL" />

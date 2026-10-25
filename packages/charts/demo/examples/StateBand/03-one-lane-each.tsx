@@ -162,7 +162,7 @@ const FLEET = VEHICLES.map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) 
 export default function OneLaneEach() {
   const { Chart, XAxis, YAxis, StateBand } = useChart(FLEET[0]!.day);
   return (
-    <Chart height={300} ariaLabel="The states of all eight vehicles through the day">
+    <Chart height={300} aria-label="The states of all eight vehicles through the day">
       <XAxis value="t" time label="Time" />
       <YAxis grid={false} />
       {FLEET.map(({ vehicle, day }) => (

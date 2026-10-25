@@ -33,7 +33,7 @@ export function Fields() {
   const { Chart, XAxis, YAxis, Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot } = useChart(latencies);
 
   return (
-    <Chart ariaLabel="Latency">
+    <Chart aria-label="Latency">
       {/* The row type comes from the rows: a field name is checked. */}
       <XAxis value="t" time />
       <YAxis label="ms" />
@@ -129,7 +129,7 @@ export function Fields() {
 export function NoData() {
   const { Chart } = useChart(latencies);
   // @ts-expect-error the rows are the hook's, the chart takes no data
-  return <Chart data={latencies} ariaLabel="Latency" />;
+  return <Chart data={latencies} aria-label="Latency" />;
 }
 
 export const unused = [FreeChart, FreeLine, FreeXAxis, FreeYAxis];

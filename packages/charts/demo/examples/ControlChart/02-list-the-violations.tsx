@@ -160,7 +160,7 @@ export default function ListTheViolations() {
   return (
     <div className="side-by-side">
       <div style={{ flex: "1 1 320px" }}>
-        <Chart height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
+        <Chart height={240} aria-label="Control chart of the tile length, its violations listed beside it">
           <XAxis value="minute" label="Minute of the shift" />
           <YAxis label="mm" />
           <ControlChart value="length" data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
