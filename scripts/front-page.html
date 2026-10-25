@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- The front page (.scratch/site-front-page): what the site opens on, before
+<!-- The front page: what the site opens on, before
      any demo. `build-site.mjs` fills the
      slots in double braces; everything else is fixed here, and the built-site guard
      (`frontFaults` in packages/demo/src/tooling/site.ts) holds the words and
@@ -14,8 +14,7 @@
      build into fonts/. The tiles' previews are pictures that `pnpm previews`
      takes of each package's first scenario, light and dark.
 
-     The workspace's own documents (.scratch/concepts-and-changelog-pages,
-     ADR-0046) wear this layout too: the build puts their rendered text in
+     The workspace's own documents (ADR-0046) wear this layout too: the build puts their rendered text in
      place of the main element, as a reading column (.document), and lets
      the relative addresses climb to the site's root. The copy key is then
      missing, and the script stops before it. -->
@@ -114,7 +113,6 @@
       .proof a { display: block; border-radius: var(--u-radius-lg); }
       .proof img { display: block; width: 100%; height: auto; border-radius: var(--u-radius-lg); box-shadow: var(--u-shadow-card); }
       .proof figcaption { margin-top: var(--u-space-3); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
-
 
       h2 { margin: 0; font-size: var(--u-text-lg); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-tight); }
 

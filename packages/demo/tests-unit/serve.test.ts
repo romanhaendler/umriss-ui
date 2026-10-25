@@ -19,6 +19,8 @@ beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "site-"));
   mkdirSync(join(dir, "core", "button"), { recursive: true });
   mkdirSync(join(dir, "standards"));
+  mkdirSync(join(dir, "\u20ac"));
+  writeFileSync(join(dir, "\u20ac", "index.html"), "euro");
   writeFileSync(join(dir, "index.html"), "front");
   writeFileSync(join(dir, "core", "button", "index.html"), "button");
   writeFileSync(join(dir, "core", "button.md"), "# Button");
@@ -53,5 +55,17 @@ describe("the documentation server", () => {
   it("forwards / to the front page", async () => {
     const response = await fetch(`${origin}/`, { redirect: "manual" });
     expect([response.status, response.headers.get("location")]).toEqual([302, BASE]);
+  });
+
+  it("forwards the base without its slash, and a directory without its slash by its encoded address", async () => {
+    for (const [path, to] of [[BASE.slice(0, -1), BASE], [`${BASE}%E2%82%AC`, `${BASE}%E2%82%AC/`], [`${BASE}standards`, `${BASE}standards/`]] as const) {
+      const response = await fetch(`${origin}${path}`, { redirect: "manual" });
+      expect([path, response.status, response.headers.get("location")]).toEqual([path, 301, to]);
+    }
+  });
+
+  it("answers a path the file system refuses with 400 and keeps serving", async () => {
+    expect((await fetch(`${origin}${BASE}core%00`)).status).toBe(400);
+    expect((await fetch(`${origin}${BASE}`)).status).toBe(200);
   });
 });

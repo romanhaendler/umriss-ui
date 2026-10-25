@@ -58,7 +58,7 @@ export interface LlmsJob {
 interface Manifest extends InstallManifest {
   version: string;
   description: string;
-  homepage: string;
+  place: string;
 }
 
 interface ExampleText {
@@ -207,7 +207,7 @@ function urlOf(homepage: string, place: string): string {
 }
 
 function pageUrl(manifest: Manifest, page: Page): string {
-  return urlOf(manifest.homepage, `/${page.id}`);
+  return urlOf(manifest.place, `/${page.id}`);
 }
 
 /** The absolute address of a place's Markdown twin - the format is
@@ -348,7 +348,7 @@ function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): str
           "",
           "Composed, realistic screens built from the package.",
           "",
-          ...scenarios.map((scenario) => `- [${scenario.title}](${twinUrl(manifest.homepage, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
+          ...scenarios.map((scenario) => `- [${scenario.title}](${twinUrl(manifest.place, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
           "",
         ]),
     ...outline.flatMap((rubric) => [
@@ -356,7 +356,7 @@ function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): str
       "",
       rubric.sentence,
       "",
-      ...rubric.pages.map((page) => `- [${page.name}](${twinUrl(manifest.homepage, `/${page.id}`)}): ${page.sentence}`),
+      ...rubric.pages.map((page) => `- [${page.name}](${twinUrl(manifest.place, `/${page.id}`)}): ${page.sentence}`),
       "",
     ]),
   ].join("\n");
@@ -498,7 +498,7 @@ function apiIndexOf({ manifest, pages, tables }: Run, packageDir: string, link: 
     what a crawler walks. */
 function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): { sitePages: SitePage[]; twins: Twin[] } {
   const { manifest, outline, pages, examples, scenarios, references, install, fullUrl } = run;
-  const home = manifest.homepage;
+  const home = manifest.place;
   /* Written at a page's heading levels: `###` is the page, so `####` is h2. */
   const everyPage = [
     `#### Every page of ${manifest.name}`,
@@ -597,29 +597,53 @@ function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): 
     a link to anything else keeps only its text. The "Demo page" lines name
     the site and go. Applied to the text after it is made, so that the site's
     pages and twins, cut from the unchanged text, keep their addresses. */
-function packagedText({ manifest, pages, scenarios }: Run, full: string): string {
+export function packagedText({ manifest, pages, scenarios }: Pick<Run, "manifest" | "pages" | "scenarios">, full: string): string {
   const slug = (title: string) => title.toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/ /g, "-");
-  const own = manifest.homepage;
+  const own = manifest.place;
   const root = own.replace(/[^/]+\/$/, "");
   const adr = readdirSync(fileURLToPath(new URL("../../../../docs/adr/", import.meta.url))).find((name) => name.startsWith("0032-"));
+  if (adr === undefined) throw new Error("docs/adr has no ADR-0032 file.");
+  const adrAt = `${ADR_HOME.replace("/blob/main/", `/blob/${manifest.name.split("/")[1]}-v${manifest.version}/`)}${adr}`;
+  /* The file's headings as the anchors a Markdown reader makes of them: a name
+     taken again gets `-1`, `-2`. A heading is found by its line, so a page is
+     its own `###`, not an earlier section of the same name. */
+  const anchors = new Set<string>();
+  const seen = new Map<string, number>();
+  const byHeading = new Map<string, string>();
+  let fence = false;
+  for (const line of full.split("\n")) {
+    if (line.startsWith("```")) fence = !fence;
+    const match = fence ? null : /^(#{1,6}) (.+)$/.exec(line);
+    if (match === null) continue;
+    const base = slug(match[2]!);
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    const anchor = count === 0 ? base : `${base}-${count}`;
+    anchors.add(anchor);
+    if (!byHeading.has(line)) byHeading.set(line, anchor);
+  }
   /* A place below this package's address, as the heading it names. */
   const heading = (place: string): string | undefined => {
     const [first, second] = place.split("/").filter((segment) => segment !== "");
-    if (first === undefined || (first === SCENARIOS && second === undefined)) return slug("Scenarios");
-    if (first === SCENARIOS) return scenarios.some((one) => one.id === second) ? slug(scenarios.find((one) => one.id === second)!.title) : undefined;
+    if (first === undefined || (first === SCENARIOS && second === undefined)) return byHeading.get("## Scenarios");
+    if (first === SCENARIOS) {
+      const scenario = scenarios.find((one) => one.id === second);
+      return scenario === undefined ? undefined : byHeading.get(`### ${scenario.title}`);
+    }
     const page = pages.find((one) => one.id === first);
-    return page === undefined ? undefined : slug(page.name);
+    return page === undefined ? undefined : byHeading.get(`### ${page.name}`);
   };
   return full
     .replace(/\n\nDemo page: [^\n]*\n/g, "\n")
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (link, text: string, href: string) => {
+      if (href.startsWith("#") && !href.startsWith("#/")) return anchors.has(href.slice(1)) ? link : text;
       const place = href.startsWith("#/") ? href.slice(2) : href.startsWith(own) ? href.slice(own.length) : undefined;
       if (place !== undefined) {
         const target = heading(place.split("#")[0]!);
         return target === undefined ? text : `[${text}](#${target})`;
       }
-      if (!href.startsWith(root)) return link;
-      return href.slice(root.length).split("#")[0] === "what-umriss-ui-is-not/" && adr !== undefined ? `[${text}](${ADR_HOME}${adr})` : text;
+      if (href === ADR_0032) return `[${text}](${adrAt})`;
+      return href.startsWith(root) ? text : link;
     });
 }
 
@@ -637,10 +661,10 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   /** The API index the app mounts, where the outline has one. */
   apiIndex?: ApiIndexModel;
 } {
-  const read = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
-  /* A package's `homepage` is its README; its place on the site is below the
-     site's address. */
-  const manifest: Manifest = { ...read, homepage: `${SITE}${read.name.split("/")[1]}/` };
+  const read = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Omit<Manifest, "place">;
+  /* A package's `homepage` is its README; `place` is where it stands on the
+     site, below the site's address. */
+  const manifest: Manifest = { ...read, place: `${SITE}${read.name.split("/")[1]}/` };
   const demoDir = join(packageDir, "demo");
   /* Every ADR number a text names, as a link to its file - as the shell
      shows the same texts (`references.ts`) - and every hook and function
@@ -676,10 +700,10 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     tables,
     references,
     install: installCommand(manifest),
-    fullUrl: `${manifest.homepage}llms-full.txt`,
+    fullUrl: `${manifest.place}llms-full.txt`,
     /* A neighbour's demo stands beside this one on the site, in the directory
        named after its package. */
-    neighbour: (packageName, pageId) => `${manifest.homepage.replace(/[^/]+\/$/, "")}${packageName.split("/")[1]}${addressOfPlace(`/${pageId}`)}`,
+    neighbour: (packageName, pageId) => `${manifest.place.replace(/[^/]+\/$/, "")}${packageName.split("/")[1]}${addressOfPlace(`/${pageId}`)}`,
   };
   const index = pageIndex(run);
 
@@ -711,7 +735,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
      forwards it there. */
   const forwarders = Object.entries(addresses(outline, moved).MOVED).filter(([old]) => !old.includes("/")).map(([old, current]): Forwarder => {
     const to = sitePages.find((page) => page.path === addressOfPlace(`/${current}`).slice(1))!;
-    return { url: urlOf(manifest.homepage, `/${old}`), to: to.url, title: to.title };
+    return { url: urlOf(manifest.place, `/${old}`), to: to.url, title: to.title };
   });
 
   /* The package's directory on the site is the second half of its name, as

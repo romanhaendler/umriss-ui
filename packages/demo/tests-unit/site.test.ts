@@ -3,7 +3,8 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { SEARCH_BUDGET, apiIndexFaults, documentFaults, forwarderHtml, frontFaults, HOSTED_HOST, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
+import { HOSTED_HOST } from "../src/address";
+import { SEARCH_BUDGET, apiIndexFaults, documentFaults, forwarderHtml, frontFaults, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>

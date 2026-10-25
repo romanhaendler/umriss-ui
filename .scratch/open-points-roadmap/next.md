@@ -76,7 +76,7 @@ Each is recorded where it belongs; here they stand together.
   the smallest brief that works; coordination, the review of every diff, the
   commits and the visual suite stay with the session that leads.
 - Before a release: lint, typecheck, unit tests, build, `check:dist`, the
-  whole visual suite - and `pnpm build:pages`, which the release of package A
+  whole visual suite - and `pnpm build:site`, which the release of package A
   went without and whose guard then refused the site.
 - The maintainer looks at a package by hand before it is released. His look
   found what no test had, twice.

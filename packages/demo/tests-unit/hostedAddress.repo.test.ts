@@ -7,10 +7,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
+import { HOSTED_HOST as HOSTED } from "../src/address";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const HISTORY = /(^|\/)CHANGELOG\.md$|^docs\/(journal\.md|research\/|archive\/|adr\/)|^\.scratch\//;
-const HOSTED = ["romanhaendler", "github", "io"].join(".");
 
 it("names the hosted address in no live file", () => {
   const files = execFileSync("git", ["ls-files", "-z"], { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26 }).split("\0").filter((f) => f && !HISTORY.test(f));

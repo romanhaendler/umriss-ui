@@ -53,10 +53,10 @@ import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
    imports nothing (and why `build:site` strips types). */
-import { SITE as HOME } from "../packages/demo/src/address.ts";
+import { HOSTED_HOST, SITE as HOME } from "../packages/demo/src/address.ts";
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, HOSTED_HOST, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
+import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
@@ -185,7 +185,7 @@ for (const dir of PACKAGES) {
    not its manifest's version - a release without its entry. */
 const adrs = adrLinksOf(readdirSync(join(ROOT, "docs", "adr")));
 const documents = DOCUMENTS.map((document) => {
-  /* A changelog's old entries link the address the site once had; the
+  /* A changelog's old entries link the old host (HOSTED_HOST); the
      entries stay as written, the page leads to the same page here. */
   const markdown = readFileSync(join(ROOT, document.source), "utf8").replaceAll(`https://${HOSTED_HOST}/umriss-ui/`, HOME);
   return {
@@ -375,10 +375,10 @@ ${documents
    file; every page has its Markdown twin and announces it, and every link
    in every llms.txt leads to a file (pages-as-markdown); the front page keeps
    its words, its links lead into the site and its tiles' previews are there
-   and light enough (site-front-page); every document has its page, its links
+   and light enough; every document has its page, its links
    lead to sitemap addresses, it ends with a suggested edit naming it, no
    page links ADR-0032 or a changelog on GitHub, and "What's new" leads to a
-   version on each changelog (concepts-and-changelog-pages); every find of
+   version on each changelog; every find of
    the search lands on a sitemap page and an anchor it carries, and the index
    keeps its budget (one-search). A build that breaks
    it fails here, before the site is served. */

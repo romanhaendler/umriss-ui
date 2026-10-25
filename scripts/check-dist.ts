@@ -27,6 +27,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync,
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { transform } from "lightningcss";
+import { HOSTED_HOST, SITE } from "../packages/demo/src/address.ts";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
 import { beginsWithLayerOrder, offendersIn } from "./styles/rules.ts";
 
@@ -50,7 +51,7 @@ for (const file of entries) {
 /* The documentation travels inside the package and is read without the site:
    an address of the site in it would lead nowhere. */
 const documentation = readFileSync(join("docs", "llms-full.md"), "utf8");
-if (/localhost:4170|github\.io/.test(documentation)) problems.push("docs/llms-full.md names a site address");
+if (documentation.includes(new URL(SITE).host) || documentation.includes(HOSTED_HOST)) problems.push("docs/llms-full.md names a site address");
 
 const js = readFileSync(join("dist", entry), "utf8");
 if (!js.startsWith(`"use client";\nimport "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} right after the directive`);

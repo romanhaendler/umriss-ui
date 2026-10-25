@@ -7,3 +7,7 @@
    loads it in Node without a bundler. */
 
 export const SITE = "http://localhost:4170/umriss-ui/";
+
+/** The host the documentation was once hosted on. No file the build writes and
+    no live file may name it; spelled in parts so that this one does not. */
+export const HOSTED_HOST = ["romanhaendler", "github", "io"].join(".");
