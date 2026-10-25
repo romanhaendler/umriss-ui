@@ -1118,7 +1118,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Arrow Right / Arrow Left", action: "Shows the next or previous tab, wrapping at the ends." },
           { key: "Home / End", action: "Shows the first or the last tab." },
         ],
-        limits: ["No scrolling or overflow menu for more tabs than fit, and no closing or reordering of tabs: keep the list short and fixed."],
+        limits: ["More tabs than fit scroll sideways within the list; there is no overflow menu, and no closing or reordering of tabs."],
         types: ["TabsProps", "TabProps", "TabPanelProps"],
         exports: ["Tabs", "TabList", "Tab", "TabPanel"],
       },
