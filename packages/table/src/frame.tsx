@@ -17,6 +17,7 @@ import { CurrentRowContext, chooseRow } from "./currentRow";
 import { warnOnce } from "./dev";
 import { CutValueTip } from "./cutValueTip";
 import {
+  useCurrentRowInView,
   useCutValueWarnings,
   useDraftOfVanishedRow,
   useFocusAfterFold,
@@ -77,6 +78,7 @@ export function Frame({
   useHeldColumnWidths(registry, tableRef, loading);
   useCutValueWarnings(tableRef);
   useVirtualPitch(registry, tableRef);
+  useCurrentRowInView(registry, tableRef, currentRow);
 
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */

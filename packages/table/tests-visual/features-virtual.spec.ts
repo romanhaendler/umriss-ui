@@ -241,3 +241,17 @@ test.describe("in a pane of fixed height", () => {
     });
   }
 });
+
+/* ---------------- Another view chooses a row ---------------- */
+
+test("a current row set from outside is rendered, in view and marked", async ({ page }) => {
+  await openExample(page, "virtualisation", "another-view-chooses");
+  const demo = page.locator('[data-example="another-view-chooses"]');
+  await demo.getByRole("button", { name: "Choose parcel 1,500" }).click();
+  const current = demo.locator("tr[aria-current='true']");
+  await expect(current).toHaveText(/P-1500/);
+  const area = (await demo.locator("table").locator("..").boundingBox())!;
+  const box = (await current.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(area.y);
+  expect(box.y + box.height).toBeLessThanOrEqual(area.y + area.height + 1);
+});
