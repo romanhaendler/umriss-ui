@@ -4,9 +4,11 @@ This document describes what changes for **callers** of the package: exports,
 props, behaviour.
 
 **The numbers.** The middle digit rises when something is added; the last one
-when something is repaired. As long as the first digit is `0`, no number
-promises compatibility — which is why whatever changes existing behaviour stands
-under a heading "Changed" of its own, no matter which digit rose.
+when something is repaired. The six packages are released in step, and a rename
+keeps its old name for one further minor, with a warning, before the minor after
+it removes the name ([the upgrade promise, ADR-0066](../../docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
+Whatever changes existing behaviour stands under a heading "Changed" of its own,
+no matter which digit rose, with a `Migration:` line.
 
 From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
 
