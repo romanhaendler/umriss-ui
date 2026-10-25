@@ -51,7 +51,7 @@ const { Dashboard, WidgetType } = useDashboard({
     name="figure"
     label="Figure"
     sentence="One number."
-    sizes={{ small: { columns: 3, rows: 2 }, medium: { columns: 4, rows: 3 } }}
+    sizes={{ small: { columns: 3, rows: 3 }, medium: { columns: 4, rows: 3 } }}
     start="small"
     defaultOptions={{ name: "Orders" }}
   >
@@ -67,7 +67,8 @@ const { Dashboard, WidgetType } = useDashboard({
   stacks of widgets sharing a place and a layout per breakpoint are not built.
 - **Sizes have names.** `small`, `medium`, `wide`, `tall`, `large` and `full`,
   worded in English and German by the library; a type offers some of them. The
-  height follows the size, never the content.
+  height follows the size, never the content: what the content needs beyond
+  the size scrolls inside the widget, and the keyboard reaches it.
 - **Editing is a mode and a draft.** "Edit" opens it; every change is a step
   that can be undone and redone; "Done" reports the whole arrangement once
   through `onViewChange`, "Cancel" puts it back, "Reset" steps to the default.

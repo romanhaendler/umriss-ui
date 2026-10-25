@@ -65,7 +65,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "No cell range selection and no undo: an edit is reported, never applied, and the application owns the rows (ADR-0032).",
-          "No pivot: compute the pivoted rows and declare their columns (ADR-0032).",
+          "No pivot: compute the pivoted rows and map one computed column per key from the data, as in [a matrix with row and column totals](#/aggregate) (ADR-0032).",
         ],
         keys: [
           { key: "Enter / Space", action: "On a sortable header: sorts by the column, ascending; pressed again, descending." },
