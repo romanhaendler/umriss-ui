@@ -41,7 +41,7 @@ Deprecated aliases are what ADR-0015 itself did for the prop renames, and they
 were right there, because there were callers. Here they would buy nothing but a
 cleanup ticket.
 
-## What stands from ADR-0015
+## What stands from ADR-0015 (superseded by ADR-0068)
 
 The spelling of the accessible name. `aria-label` wherever the named element is
 the component's root, because that is the native spelling and it already arrives
