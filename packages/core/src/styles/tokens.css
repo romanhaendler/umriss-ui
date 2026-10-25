@@ -192,7 +192,10 @@
        the bottom or a navigation rail at the side - and how wide a toast is.
        The region hangs in `body`, so set them on `:root`; a media query of
        your own may set another value per width. The center positions stand in
-       the middle of the window whatever the side tokens are. */
+       the middle of the window whatever the side tokens are. Each is the room
+       from the visible edge: under `viewport-fit=cover` the hardware's safe
+       area of that edge is added to it, so the token never reaches under a
+       notch or a home indicator. */
     --u-toast-inset-top: var(--u-space-5);    /* for the three `top-*` positions; `var(--u-space-4)` up to 600 px wide */
     --u-toast-inset-bottom: var(--u-space-5); /* for the three `bottom-*` positions; `var(--u-space-4)` up to 600 px wide */
     --u-toast-inset-start: var(--u-space-5);  /* for the `*-start` positions, and on a phone the room at the start side; `var(--u-space-4)` up to 600 px wide */
