@@ -170,4 +170,23 @@
       inset: -10px 0;
     }
   }
+
+  /* The steps are 24 px wide under a finger, the square of WCAG 2.5.8; the
+     field's width counts the 8 px, and the input is as tall as the field, so
+     a tap beside the digits lands in it. */
+  @media (pointer: coarse) {
+    .wrapper,
+    .sm {
+      --_chrome: calc(var(--u-space-2) + 50px);
+    }
+
+    .stepper button,
+    .sm .stepper button {
+      width: 24px;
+    }
+
+    .input {
+      align-self: stretch;
+    }
+  }
 }

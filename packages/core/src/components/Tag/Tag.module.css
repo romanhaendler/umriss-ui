@@ -136,4 +136,17 @@
       outline: 1px solid CanvasText;
     }
   }
+
+  /* Under a finger the cross is hit in a 24 px square, as WCAG 2.5.8 asks: 16 px is too small a target. The pad lies on the tag's own text and edge, never on another tag's key. */
+  @media (pointer: coarse) {
+    .remove {
+      position: relative;
+    }
+
+    .remove::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+  }
 }

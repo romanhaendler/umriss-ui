@@ -91,3 +91,14 @@ test("A token and its deprecated alias each reach a rule that reads the old name
   await style(page, "--u-probe-old: rgb(4, 5, 6)");
   expect(await color()).toBe("rgb(4, 5, 6)");
 });
+
+/* A reader who asks for more contrast gets the quiet text stronger: the muted hint of a
+   field is drawn in another tone than by default (the block under prefers-contrast: more). */
+test("A muted hint is drawn in a stronger tone when the reader asks for more contrast", async ({ page }) => {
+  await openExample(page, "input", "sizes");
+  const hint = page.getByText("Medium, the default.", { exact: true });
+  const colour = () => hint.evaluate((element) => getComputedStyle(element).color);
+  const normal = await colour();
+  await page.emulateMedia({ contrast: "more" });
+  expect(await colour()).not.toBe(normal);
+});
