@@ -100,7 +100,7 @@
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
     letter-spacing: var(--u-tracking-caps);
-    text-transform: uppercase;
+    text-transform: var(--u-transform-caps);
     color: var(--u-color-text-secondary);
     white-space: nowrap;
   }
@@ -899,7 +899,7 @@
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
     letter-spacing: var(--u-tracking-caps);
-    text-transform: uppercase;
+    text-transform: var(--u-transform-caps);
     color: var(--u-color-text-secondary);
   }
 
