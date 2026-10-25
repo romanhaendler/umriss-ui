@@ -31,3 +31,14 @@ for (const width of [1280, 390]) {
     expect(await bodies(page)).toEqual(rest);
   });
 }
+
+test("@quick under other spacing tokens every widget body still keeps its size in the editing mode", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await openExample(page, "dashboard", "dispatcher");
+  await page.addStyleTag({ content: ":root { --u-space-1: 6px; --u-space-2: 10px }" });
+  const rest = await bodies(page);
+  expect(rest.length).toBeGreaterThan(0);
+  await example(page).getByRole("button", { name: "Edit" }).click();
+  await expect(example(page).locator("[data-widget][data-editing]").first()).toBeVisible();
+  expect(await bodies(page)).toEqual(rest);
+});
