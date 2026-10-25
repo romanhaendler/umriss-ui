@@ -1072,13 +1072,15 @@ test("in a block with no height a schedule of thirty lanes is 400 px, and its pl
   expect((await root.boundingBox())!.height).toBe(400);
 
   const headers = example.locator("[data-schedule-headers]");
-  const frame = (await headers.boundingBox())!;
   const box = (await example.locator("[data-schedule-plot]").boundingBox())!;
   for (let i = 0; i < 40; i++) {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.wheel(0, 200);
     await page.waitForTimeout(30);
   }
+  /* At their end the lanes leave the wheel to the page, which scrolls on: the
+     frame is read after the wheel, in the same coordinates as the lane. */
+  const frame = (await headers.boundingBox())!;
   const moved = (await headers.getByText("Station 30").boundingBox())!;
   expect(moved.y + moved.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
   expect(moved.y).toBeGreaterThanOrEqual(frame.y - 1);

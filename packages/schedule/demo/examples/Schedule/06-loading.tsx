@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Button, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
@@ -65,16 +66,20 @@ export default function Loading() {
   return (
     <div className="pair">
       <div>
-        <p className="pair-caption">loading over a plan - the answer takes 1.5 s</p>
+        <Text as="p" size="sm" tone="muted">
+          loading over a plan - the answer takes 1.5 s
+        </Text>
         <Plan answer={answer} loading={loading} />
         <div className="demo-actions">
-          <button className="demo-button" onClick={reload} disabled={loading}>
+          <Button size="sm" onClick={reload} disabled={loading}>
             Reload
-          </button>
+          </Button>
         </div>
       </div>
       <div>
-        <p className="pair-caption">loading, before the first lanes</p>
+        <Text as="p" size="sm" tone="muted">
+          loading, before the first lanes
+        </Text>
         <Waiting />
       </div>
     </div>
