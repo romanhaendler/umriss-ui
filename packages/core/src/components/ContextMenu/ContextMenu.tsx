@@ -16,8 +16,9 @@ export interface ContextMenuProps {
   /** Reports every wish to change the state – an entry chosen, Escape, an
       outside click. */
   onOpenChange: (open: boolean) => void;
-  /** Where the menu opens, in client coordinates – typically `clientX` and
-      `clientY` of the event that asked for it. At a window edge the panel
+  /** Where the menu opens, in client coordinates – the point that
+      `useContextMenuTrigger` hands to its callback (right-click, context-menu
+      key or long press), or any `clientX` and `clientY` of your own. At a window edge the panel
       flips and clamps as every popover does. */
   position: { x: number; y: number };
   /** Accessible name of the menu: what it acts on. A context menu has no
@@ -29,7 +30,9 @@ export interface ContextMenuProps {
 
 /**
  * A menu that opens at a point instead of under a trigger – for a right-click
- * on something that is not a button: a canvas, a row, a subtask.
+ * on something that is not a button: a canvas, a row, a subtask. Open it with
+ * `useContextMenuTrigger`, which also covers the context-menu key and a long
+ * press, the only way on iOS.
  *
  * It hangs from an invisible anchor that stands at the point, so the one
  * popover does the placing, the dismissal and the portal. The focus goes to
