@@ -83,6 +83,8 @@ export interface ScheduleSnapshot {
   /** The tooltip's target and the point it stands at, while the pointer rests
       on a subtask or dependency and nothing is dragged. */
   readonly tooltip: { readonly target: ScheduleTooltipTarget; readonly x: number; readonly y: number } | null;
+  /** The plan is on its way: no new drag, hover or key intent. */
+  readonly loading: boolean;
   /** The now line's x on the plot, or null. */
   readonly now: number | null;
   /** The visible main time of every subtask in view, for the labels a caller
@@ -127,6 +129,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   grips: [],
   cursor: "default",
   tooltip: null,
+  loading: false,
   now: null,
   bars: [],
   spoken: null,
@@ -239,6 +242,15 @@ export class ScheduleScene {
 
   setHandlers(handlers: SceneHandlers): void {
     this.handlersNow = handlers;
+  }
+
+  /** The plan is on its way: the hover ends and no new drag starts; one under
+      way finishes. */
+  setLoading(loading: boolean): void {
+    if (loading === this.gestures.loading) return;
+    this.gestures.loading = loading;
+    if (loading) this.gestures.pointerLeave();
+    this.interactionChanged();
   }
 
   /** What the application says it is dragging in, while it drags it. */
@@ -491,6 +503,7 @@ export class ScheduleScene {
       grips,
       cursor: this.gestures.cursor,
       tooltip: this.tooltip(),
+      loading: this.gestures.loading,
       now: view.nowX(),
       bars: this.bars(),
       spoken: this.keys.spoken,
