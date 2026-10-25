@@ -16,7 +16,7 @@ pnpm add @umriss-ui/calculation @umriss-ui/core
 
 `@umriss-ui/core` is a **peer dependency**: the calculation takes its styling
 regime, formats, wording, assessment and freshness from there. React 19 or newer
-as a peer as well.
+as a peer as well. TypeScript 5.4 or newer (the declarations use `NoInfer`).
 
 The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.

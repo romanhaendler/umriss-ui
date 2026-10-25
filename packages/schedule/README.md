@@ -19,7 +19,7 @@ Both `@umriss-ui/core` and `@umriss-ui/charts` are **peer dependencies**
 (ADR-0022): the schedule takes its styling regime, provider, formats and
 wording from core, and its time arithmetic — the affine scale, the time steps,
 the working calendar, the canvas colour resolution — from charts. React 19 or
-newer as a peer as well.
+newer as a peer as well. TypeScript 5.4 or newer (the declarations use `NoInfer`).
 
 The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
