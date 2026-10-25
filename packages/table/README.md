@@ -23,8 +23,12 @@ The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
 Every entry begins with `"use client"`, the directive a framework
-with Server Components reads to treat a module as client code. No test runs
-inside such a framework: the
+with Server Components reads to treat a module as client code. A table is declared by its hook,
+`useTable`, so the declaration lives in a Client Component file: a Server Component renders that
+file and hands it the rows, with its `rowKey` and columns kept there. A date column formats in the
+server's zone, so a server in another zone than the reader's can raise React's hydration error #418.
+The rule that a server writes no instant is the one [ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md)
+sets; the table does not follow it yet. No test runs inside such a framework: the
 table is rendered to a string in a test.
 
 ## The smallest table that runs
