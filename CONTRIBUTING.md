@@ -118,3 +118,21 @@ Each of these is argued somewhere; the link is the argument, not the rule.
   no row.
 * **A word this workspace has is used as it is defined.** `CONTEXT.md` is the
   vocabulary, including the words each term may not collide with.
+* **A rename keeps its old name for one minor**
+  ([ADR-0066](docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
+  The old name carries `@deprecated since 0.<N> - use <new>.` (N is the minor that
+  renames; while developing it, the next one), and `check:dist` fails a marker
+  older than the package's own minor, so the next release removes it. By kind:
+  * **Prop**: the component reads `new ?? old` and calls `warnDeprecated` (the
+    package's `dev.ts`) when the old one is given; the old prop keeps its type,
+    marked, and stands in `demo/unshown.json` as "(g) deprecated alias".
+  * **Export** (component, hook, constant, type): the old name re-exports the new
+    one, marked. A component or hook warns on its first render or call; a
+    constant or a type is only marked.
+  * **Wording key**: the wording merge copies an old key onto the new one when the
+    new one is not given, and warns. The old key stays in the wording type, marked.
+  * **Token**: its own recipe, not yet written here.
+  * **Changelog**: the entry under "Changed" names the old name, the new one and
+    the release that removes the old one, in its migration line; the removal's
+    entry is under "Changed" too.
+  * What cannot keep an old form is a break, and is named as one under "Changed".
