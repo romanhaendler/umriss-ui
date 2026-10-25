@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useAxis } from "./context";
 import { readerOf } from "./value";
 import type { AxisConfig, AxisField, AxisValue } from "./types";
+import type { ValueFormat } from "./format";
 import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 
@@ -20,8 +21,9 @@ interface CommonProps {
   /** Label of a tick. Compared by its source text: one that reads a changed
       closure variable under the same text does not relabel the axis - give it
       a new text or remount. A bound `Intl.NumberFormat#format` is compared by
-      identity. */
-  tickFormat?: (v: number) => string;
+      identity. Or `NumberOptions`: Intl's options in the wording's locale,
+      compared by value; the step's places stay unless the options set digits. */
+  tickFormat?: ValueFormat;
   /** Grid lines.
       @default only on the first axis of its orientation */
   grid?: boolean;

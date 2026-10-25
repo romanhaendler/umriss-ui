@@ -20,6 +20,7 @@ import type {
   TooltipPoint,
 } from "./types";
 import { isFieldReader } from "./value";
+import { optionsEqual } from "./format";
 
 
 
@@ -71,6 +72,11 @@ export function fnEqual(a: unknown, b: unknown): boolean {
   // does.
   if (source.includes("[native code]")) return false;
   return source === String(b);
+}
+
+/** A format: functions by their text, options by value. */
+export function formatEqual(a: unknown, b: unknown): boolean {
+  return fnEqual(a, b) || optionsEqual(a, b);
 }
 
 export function sameNames(a: readonly string[], b: readonly string[]): boolean {

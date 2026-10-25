@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
 import type { ValueFunction, Value, BarSeriesConfig } from "./types";
+import type { ValueFormat } from "./format";
 
 /** The props of `Bar`. */
 export interface BarProps<T> {
@@ -28,9 +29,9 @@ export interface BarProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** The value as the tooltip writes it.
+  /** The value as the tooltip writes it, as a function or `NumberOptions`.
       @default the y axis' `tickFormat`, else the built-in number format */
-  format?: (value: number) => string;
+  format?: ValueFormat;
   /** Any CSS colour value.
       @default the palette's `--uc-series-N` */
   color?: string;
