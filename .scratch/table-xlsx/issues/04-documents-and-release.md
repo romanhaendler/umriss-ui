@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Size: S
 
-Blocked by: 01, 02, 03
+Blocked by: 01, 02, 03, 05
 Spec: `.scratch/table-xlsx/spec.md`
 
 ## What to build

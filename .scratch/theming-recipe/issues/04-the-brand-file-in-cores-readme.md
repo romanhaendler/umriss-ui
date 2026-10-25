@@ -5,7 +5,8 @@ Type: task
 Size: M
 
 Blocked by: `01-a-modal-width-the-capitals-and-the-press-as-tokens.md`,
-`02-table-rows-follow-the-density-tokens.md`, `03-the-layer-order-for-tailwind-and-a-wrapper-library.md`
+`02-table-rows-follow-the-density-tokens.md`, `03-the-layer-order-for-tailwind-and-a-wrapper-library.md`,
+`05-the-field-labels-size-as-a-token.md` (its line of tokens a brand may also change names `--u-label-size`)
 Spec: `.scratch/theming-recipe/spec.md`
 
 ## What to build

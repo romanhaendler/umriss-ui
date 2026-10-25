@@ -1,7 +1,7 @@
 # Core's single wishes
 
 Type:       grilling
-Status:     claimed
+Status:     resolved
 Blocked by: 06, 07
 
 ## Question
@@ -75,3 +75,7 @@ roadmap P5 **Timeline**, package C.
   and the press scale.
 - **E - recipes in core's demo** (one spec, examples only): a secret with reveal, files with progress and
   thumbnails, a clickable Stepper, a form's error summary with announcement and focus, an app shell.
+
+## Answer
+
+Decided 2026-10-25 by the maintainer: the proposed answer above, as it stands. It becomes the specs `.scratch/core-small-additions/` (MoreGlyph, the palette shortcut, `labelPlacement`, the recipes) and `.scratch/long-option-lists/`, plus tickets added to `.scratch/date-jump-and-typed-entry/` (the pickers' `min` and `max`) and `.scratch/theming-recipe/` (the label token).

@@ -1,7 +1,7 @@
 # The table's and the schedule's single wishes
 
 Type:       grilling
-Status:     claimed
+Status:     resolved
 Blocked by: 05, 13, 16
 
 ## Question
@@ -74,3 +74,7 @@ accessor: ticket 18. A plant time zone: ticket 25.
 - The never-examples (conditional formatting, the sticky head under an app bar, zoom buttons, a findings list,
   undo with a marked start-to-start) need no decision. Each lands in the spec its demo page belongs to, or in
   one examples ticket per demo.
+
+## Answer
+
+Decided 2026-10-25 by the maintainer: the proposed answer above, as it stands (the column drag in the ColumnMenu's list is taken; the header drag never). It becomes the specs `.scratch/table-small-wishes/` and `.scratch/schedule-keyboard-and-reader/`, plus tickets added to `.scratch/table-server-mode-2/` (debounce), `.scratch/table-xlsx/` (CSV dates), `.scratch/under-a-finger/` (touch editing) and `.scratch/dev-warnings/` (malformed schedule data).

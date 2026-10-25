@@ -140,6 +140,17 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   ticks on the zone's real hours across a clock change; the zone named once per view where the reader's
   differs; a new ADR supersedes ADR-0060's time-zone point. Spec `.scratch/plant-time-zone/`.
 
+- [Core's single wishes](issues/21-cores-single-wishes.md): taken - a `MoreGlyph`, a palette shortcut that
+  can be switched off, `labelPlacement` and a label token, a windowed and async listbox for Combobox and
+  MultiSelect, `min`/`max` on the pickers; the rest never, several as recipes. Specs
+  `.scratch/core-small-additions/`, `.scratch/long-option-lists/`.
+
+- [The table's and the schedule's single wishes](issues/23-the-tables-and-the-schedules-single-wishes.md):
+  taken - Shift-click row ranges, a column drag in the ColumnMenu's list, named own aggregates, a view that
+  survives JSON, search debounce, CSV day dates, keyboard zoom, touch editing, a schedule data table, a DEV
+  warning for malformed data; the rest never, several as examples. Specs `.scratch/table-small-wishes/`,
+  `.scratch/schedule-keyboard-and-reader/`.
+
 - [The charts' single wishes](issues/22-the-charts-single-wishes.md): taken - side legend, `maxGap`, month
   ticks under bars, `bin` on `ArrayLike`, `baseline` on `Bar` (waterfall, error bars), a matrix colour bar and
   cell labels; the rest are recipes in the charts demo; no new kind, no ADR. Four specs.
