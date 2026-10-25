@@ -35,7 +35,7 @@ export default function InitialView() {
 
   return (
     <Stack gap={3}>
-      <Table ariaLabel="Invoices">
+      <Table aria-label="Invoices">
         <Toolbar>
           <Search placeholder="Invoice or supplier" />
           <ColumnMenu />

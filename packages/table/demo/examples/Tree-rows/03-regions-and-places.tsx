@@ -45,7 +45,7 @@ const PLACES: Place[] = [
 export default function RegionsAndPlaces() {
   const { Table, Column } = useTable(PLACES, { rowKey: (p) => p.id, childRows: (p) => p.children, defaultBranches: 2 });
   return (
-    <Table ariaLabel="Sites by region">
+    <Table aria-label="Sites by region">
       <Column value="name" label="Region" rowHeader />
       <Column value="sites" label="Sites" />
       <Column value="postcode" label="Postcode" />

@@ -32,7 +32,7 @@ export default function SortBySeveralColumns() {
   });
 
   return (
-    <Table ariaLabel="Incidents, most severe and newest first">
+    <Table aria-label="Incidents, most severe and newest first">
       <Column value="id" label="Incident" rowHeader />
       <Column value="title" label="Title" />
       <Column value="severity" label="Severity" />

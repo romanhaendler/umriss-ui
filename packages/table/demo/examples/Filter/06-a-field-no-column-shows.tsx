@@ -171,7 +171,7 @@ export default function FieldNoColumnShows() {
   const { Table, Column } = t;
 
   return (
-    <Table ariaLabel="Shipments by tour">
+    <Table aria-label="Shipments by tour">
       <Toolbar>
         <Search placeholder="Shipment or customer" />
         <MultiSelect

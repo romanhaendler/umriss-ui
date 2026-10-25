@@ -68,7 +68,7 @@ export default function OnARow() {
         onOpenChange={(open) => {
           if (!open) setMenu(null);
         }}
-        ariaLabel={`Actions for shipment ${menu?.id ?? ""}`}
+        aria-label={`Actions for shipment ${menu?.id ?? ""}`}
       >
         <MenuItem onSelect={run("Tracked")}>Track the shipment</MenuItem>
         <MenuItem onSelect={run("Rescheduled")}>Move to tomorrow</MenuItem>

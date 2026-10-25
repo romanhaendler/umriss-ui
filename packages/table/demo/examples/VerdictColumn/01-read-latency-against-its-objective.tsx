@@ -29,7 +29,7 @@ export default function ReadLatency() {
   const { Table, Column, VerdictColumn } = useTable(ENDPOINTS, { rowKey: (e) => e.path });
 
   return (
-    <Table ariaLabel="Checkout endpoints">
+    <Table aria-label="Checkout endpoints">
       <Column value="path" label="Endpoint" rowHeader />
       <VerdictColumn value="p95" label="p95 latency (ms)" limits={OBJECTIVE} />
     </Table>

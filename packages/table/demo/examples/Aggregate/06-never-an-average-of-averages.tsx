@@ -23,7 +23,7 @@ const rate = (t: Tour) => t.failed / t.parcels;
 export default function NeverAnAverageOfAverages() {
   const { Table, Column } = useTable(TOURS, { rowKey: (t) => t.id, defaultGrouping: "depot" });
   return (
-    <Table ariaLabel="Failed deliveries by depot">
+    <Table aria-label="Failed deliveries by depot">
       <Column value="depot" label="Depot" />
       <Column value="id" label="Tour" rowHeader />
       <Column value="parcels" label="Parcels" format="count" aggregate="sum" share={false} />

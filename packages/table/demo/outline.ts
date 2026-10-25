@@ -72,7 +72,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Closes the tip that shows a cut value whole." },
         ],
         accessibility: [
-          "A native `table`, named by `ariaLabel`: without it a screen reader announces a table with no name, so pass one, the more so where a page holds two. The `rowHeader` column's cells are row headers, so a reader names the row as it moves along it, and the row's checkbox, expander and actions are named after it too.",
+          "A native `table`, named by `aria-label`: without it a screen reader announces a table with no name, so pass one, the more so where a page holds two. The `rowHeader` column's cells are row headers, so a reader names the row as it moves along it, and the row's checkbox, expander and actions are named after it too.",
           "A sortable header holds a button, and its cell carries `aria-sort`, so the reader says which column orders the rows and in which direction. While `loading` is set the table is `aria-busy`.",
           "A value cut short at the edge of its cell shows whole in a tip, under the pointer and on keyboard focus alike; the cell's text is the whole value all along, so a reader never meets the cut.",
         ],

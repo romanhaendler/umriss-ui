@@ -49,7 +49,7 @@ export default function PinAndSizeFromControls() {
           Note: {t.widths.note} px
         </Text>
       </Stack>
-      <Table className="delivery-notes" ariaLabel="Shipments with a note">
+      <Table className="delivery-notes" aria-label="Shipments with a note">
         <Column value="id" label="Shipment" rowHeader width={120} />
         <Column value="customer" label="Customer" width={200} />
         <Column value="town" label="Town" width={120} />

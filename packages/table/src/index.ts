@@ -33,7 +33,8 @@ export type {
   VerdictColumnComponent,
   RowAttributes,
 } from "./types";
-export type { DateFormat, NumberFormat } from "./values";
+export type { DateFormat } from "./values";
+export type { NumberFormat } from "@umriss-ui/core";
 
 /* The view as an object: `initialView` in, `t.view` out. Where it is kept the
    application decides. */

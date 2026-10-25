@@ -201,7 +201,7 @@ export default function QuestionOverSeveralFields() {
         />
       </Stack>
 
-      <Table ariaLabel="Shipments and their windows">
+      <Table aria-label="Shipments and their windows">
         <Toolbar />
         <Column value="id" label="Shipment" rowHeader />
         <Column value="customer" label="Customer" />

@@ -14,7 +14,7 @@ export default function ACardAtTheEdge() {
       <Button ref={anchor} size="sm" variant="ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         Maya Lindgren
       </Button>
-      <Popover open={open} onOpenChange={setOpen} anchorRef={anchor} align="end" offset={8} hideOnScroll role="dialog" ariaLabel="Maya Lindgren" width={260}>
+      <Popover open={open} onOpenChange={setOpen} anchorRef={anchor} align="end" offset={8} hideOnScroll role="dialog" aria-label="Maya Lindgren" width={260}>
         <Stack gap={1} style={{ padding: "var(--u-space-4)" }}>
           <Text size="sm" weight="medium">
             Maya Lindgren

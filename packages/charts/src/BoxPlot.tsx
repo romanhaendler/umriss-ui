@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
 import type { ValueFunction, BoxSeriesConfig, ListFunction, ListValue, Value } from "./types";
+import type { ValueFormat } from "./format";
 
 /** The props of `BoxPlot`. Every number is a number field of the row or a
     function of it; `outliers` a list field or a function. */
@@ -52,9 +53,9 @@ export interface BoxPlotProps<T> {
   /** The name in legend and tooltip. Without one a warning stands in DEV.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** Every number of the box as the tooltip and the table write it.
+  /** Every number of the box as the tooltip and the table write it, as a function or `NumberOptions`.
       @default the y axis' `tickFormat`, else the built-in number format */
-  format?: (value: number) => string;
+  format?: ValueFormat;
   /** Any CSS colour value.
       @default the palette's `--uc-series-N` */
   color?: string;

@@ -45,7 +45,7 @@ export default function ShowTheWorst() {
   const { Table, Column, VerdictColumn } = useTable(PEOPLE, { rowKey: (p) => p.id });
 
   return (
-    <Table ariaLabel="Booked hours this week">
+    <Table aria-label="Booked hours this week">
       <Column value="name" label="Name" rowHeader />
       <Column value="team" label="Team" />
       <Column value="capacity" label="Capacity (h)" />

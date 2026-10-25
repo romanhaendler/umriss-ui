@@ -84,7 +84,7 @@ export function FilterPanel({
       anchorRef={anchor}
       align={align}
       role="dialog"
-      ariaLabel={wording.filterColumn(label)}
+      aria-label={wording.filterColumn(label)}
       id={panelId}
       className={styles.filterPanel}
     >

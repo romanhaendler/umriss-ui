@@ -24,7 +24,7 @@ const INCIDENTS: Incident[] = [
 export default function NothingDeclared() {
   const { Table, Column } = useTable(INCIDENTS, { rowKey: (i) => i.id });
   return (
-    <Table ariaLabel="Incidents">
+    <Table aria-label="Incidents">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>

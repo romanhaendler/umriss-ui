@@ -20,7 +20,7 @@ export default function Defaults() {
   const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.name });
 
   return (
-    <Table ariaLabel="Defaults per value type">
+    <Table aria-label="Defaults per value type">
       <Column value="name" label="Text" rowHeader />
       <Column value="requests" label="Number" />
       <Column value="deployed" label="Point in time" />

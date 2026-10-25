@@ -74,7 +74,7 @@ const UNITS: Unit[] = [
 function Staff({ unit }: { unit: Unit }) {
   const { Table, Column } = useTable(unit.staff ?? [], { rowKey: (e) => e.id });
   return (
-    <Table ariaLabel={`Staff of ${unit.name}`} density="compact">
+    <Table aria-label={`Staff of ${unit.name}`} density="compact">
       <Column value="name" label="Employee" rowHeader />
       <Column value="role" label="Role" />
       <Column value="hours" label="Hours" />
@@ -85,7 +85,7 @@ function Staff({ unit }: { unit: Unit }) {
 export default function OwnStaffAndTeams() {
   const { Table, Column, RowDetail } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: ["it"] });
   return (
-    <Table ariaLabel="Units with their staff">
+    <Table aria-label="Units with their staff">
       <Column value="name" label="Unit" rowHeader />
       <Column value="headcount" label="Headcount" />
       <Column value="hours" label="Hours a week" />

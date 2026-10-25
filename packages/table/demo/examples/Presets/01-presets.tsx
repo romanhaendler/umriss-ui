@@ -32,7 +32,7 @@ const BUDGETS: Budget[] = [
 function Invoices() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id });
   return (
-    <Table ariaLabel="Invoices">
+    <Table aria-label="Invoices">
       <Column value="id" label="Invoice" rowHeader />
       <Column {...amount} />
     </Table>
@@ -42,7 +42,7 @@ function Invoices() {
 function Budgets() {
   const { Table, Column } = useTable(BUDGETS, { rowKey: (b) => b.costCentre });
   return (
-    <Table ariaLabel="Monthly budgets">
+    <Table aria-label="Monthly budgets">
       <Column value="costCentre" label="Cost centre" rowHeader />
       <Column {...amount} label="Monthly budget (€)" />
     </Table>
