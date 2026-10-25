@@ -1,7 +1,9 @@
 /* A number column's `format` is Intl's options, checked by the compiler: a key
    Intl does not know is an error. Compiled by `typecheck`, never run. */
 
+import type { NumberFormat as CoreNumberFormat } from "@umriss-ui/core";
 import { useTable } from "../src";
+import type { NumberFormat } from "../src";
 
 declare const rows: { id: string; amount: number }[];
 
@@ -16,3 +18,11 @@ export function Columns() {
     </>
   );
 }
+
+/* The table declares its own `NumberFormat` (the props gate wants a local
+   declaration); it and core's stay assignable both ways. */
+
+declare const own: NumberFormat;
+declare const core: CoreNumberFormat;
+export const fromOwn: CoreNumberFormat = own;
+export const fromCore: NumberFormat = core;

@@ -5,9 +5,28 @@
 import type { Registry } from "./registry";
 import { pageLines } from "./model/grouping";
 
-/** The row with this key brought into view: its page, or the scroll. `false`
-    and nothing changed for a key the table does not show. */
-export function scrollToRow(registry: Registry, key: string): boolean {
+/** The row `scrollToRow` asked for, shown once it stands in the document: at
+    the nearest edge, the sticky head kept clear by the scroll padding, and in
+    grid mode its cell made the Active cell. A page or a virtual window renders
+    the row a render after the call, so `useRevealedRow` asks again after every
+    render. `true` when nothing is pending any more. */
+export function showPending(registry: Registry): boolean {
+  const pending = registry.reveal;
+  if (!pending) return true;
+  const row = Array.from(registry.frameTable?.querySelectorAll<HTMLElement>("tr[data-motion]") ?? []).find(
+    (tr) => tr.dataset.motion === pending.key,
+  );
+  if (!row) return false;
+  registry.setReveal(null);
+  row.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  if (pending.column !== undefined) registry.cellFocus?.put(pending.key, pending.column);
+  return true;
+}
+
+/** The row with this key brought into view: its page, the window or the
+    scroll, once it is rendered (`showPending`). `false` and nothing changed
+    for a key the table does not show. */
+export function scrollToRow(registry: Registry, key: string, column?: string): boolean {
   const hook = registry.hook;
   if (!hook || !registry.frameTable) return false;
   const state = hook.tableState;
@@ -19,31 +38,24 @@ export function scrollToRow(registry: Registry, key: string): boolean {
   const at = list.findIndex((item) => (lines ? (item as { kind: string }).kind === "row" : true) && same(item));
   if (at < 0) return false;
 
+  let moves = false;
   if (state.virtual) {
-    /* The window moves to the row; `useRevealedRow` shows it once rendered. */
     state.virtual.showRow(at);
-    registry.setReveal(at);
+    moves = true;
   } else if (!registry.server && !registry.tree && registry.paginates() && state.pageSize > 0) {
     const page = lines
       ? Array.from({ length: state.pageCount }, (_, i) => i + 1).find((p) =>
           pageLines(lines, p, state.pageSize).lines.some((l) => l.kind === "row" && hook.rowKey(l.row) === key),
         )
       : Math.floor(at / state.pageSize) + 1;
-    if (page !== undefined && page !== state.page) state.setPage(page);
-  } else {
-    /* A scroll area, virtual or not: the offset from the row pitch (ADR-0042),
-       the head row standing above the rows. A virtual window follows the scroll
-       event. ponytail: a detail row or a footer
-       makes the pitch approximate; measure the row if that shows. */
-    const scroller = registry.frameTable?.parentElement;
-    const head = registry.frameTable?.tHead?.rows[0]?.getBoundingClientRect().height ?? 0;
-    if (scroller && head > 0) {
-      const top = head + at * head;
-      const bottom = top + head;
-      if (top < scroller.scrollTop + head) scroller.scrollTop = Math.max(0, top - head);
-      else if (bottom > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom - scroller.clientHeight;
+    if (page === undefined) return false;
+    if (page !== state.page) {
+      state.setPage(page);
+      moves = true;
     }
   }
+  registry.setReveal({ key, column });
+  if (!moves) showPending(registry);
   return true;
 }
 
@@ -51,7 +63,5 @@ export function scrollToRow(registry: Registry, key: string): boolean {
     mode only. */
 export function focusCell(registry: Registry, key: string, column: string): boolean {
   const focus = registry.cellFocus;
-  if (!focus || !focus.columns.includes(column) || !scrollToRow(registry, key)) return false;
-  focus.put(key, column);
-  return true;
+  return !!focus && focus.columns.includes(column) && scrollToRow(registry, key, column);
 }

@@ -493,7 +493,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
   /** Accessible name of the table.
-      @deprecated Use `aria-label`; this name goes in the next minor release. */
+      @deprecated since 0.43 - use `aria-label`. */
   ariaLabel?: string;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */

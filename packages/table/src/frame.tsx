@@ -87,8 +87,8 @@ export function Frame({
   useHeldColumnWidths(registry, tableRef, loading);
   useCutValueWarnings(tableRef);
   useVirtualPitch(registry, tableRef);
-  useCurrentRowInView(registry, tableRef, currentRow);
-  useRevealedRow(registry, tableRef);
+  useCurrentRowInView(registry, currentRow);
+  useRevealedRow(registry);
 
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */

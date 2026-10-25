@@ -11,6 +11,7 @@ import { rowLine } from "./model/gridWalk";
 import { NEW_LINE } from "./grid";
 import type { GridHandle } from "./grid";
 import { markStuck } from "./scrollMarks";
+import { scrollToRow, showPending } from "./reach";
 import styles from "./Table.module.css";
 
 type TableRef = RefObject<HTMLTableElement | null>;
@@ -130,50 +131,24 @@ export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   });
 }
 
-/* A row `scrollToRow` asked for in a virtual window is shown at the nearest
-   edge once it stands in the document, the sticky head kept clear by the
-   scroll padding; the window renders it a render after the scroll. */
-export function useRevealedRow(registry: Registry, tableRef: TableRef) {
+/* A row `scrollToRow` asked for is shown once it stands in the document - a
+   page or a window renders it a render after the call (`showPending`). */
+export function useRevealedRow(registry: Registry) {
   useLayoutEffect(() => {
-    const at = registry.reveal;
-    if (at === null) return;
-    const row = tableRef.current?.querySelector(`[data-row="${at}"]`);
-    if (!row) return;
-    registry.setReveal(null);
-    row.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    showPending(registry);
   });
 }
 
-/* A current row that changes is brought into view (ADR-0071): its page
-   opens, a virtual window renders it, the scroll area shows it at the
-   nearest edge. A row already in view stays where it is, so a click in the
-   table does not scroll it; a key outside the filtered set does nothing; the
-   focus never moves. The wish stays until the row stands in the document,
-   since a page or a window renders it a render later. */
-export function useCurrentRowInView(registry: Registry, tableRef: TableRef, currentRow: string | null | undefined) {
-  const wanted = useRef(false);
+/* A current row that changes is brought into view (ADR-0071) the way
+   `scrollToRow` does it: its page opens, a virtual window renders it, the
+   scroll area shows it at the nearest edge. A row already in view stays where
+   it is, so a click in the table does not scroll it; a key outside the
+   filtered set does nothing; the focus never moves. */
+export function useCurrentRowInView(registry: Registry, currentRow: string | null | undefined) {
   const last = useRef<string | null | undefined>(undefined);
   useLayoutEffect(() => {
-    const hook = registry.hook;
-    if (!hook) return;
-    const state = hook.tableState;
-    if (last.current !== currentRow) {
-      last.current = currentRow;
-      wanted.current = false;
-      if (currentRow === null || currentRow === undefined) return;
-      const at = state.lines
-        ? state.lines.findIndex((line) => line.kind === "row" && hook.rowKey(line.row) === currentRow)
-        : (state.shown ?? state.filtered).findIndex((row) => hook.rowKey(row) === currentRow);
-      if (at < 0) return;
-      wanted.current = true;
-      /* ponytail: a grouped table pages by lines, not by rows - it keeps its page; the window and the scroll still follow. */
-      if (registry.paginates() && !state.virtual && !state.lines && state.pageSize > 0) state.setPage(Math.floor(at / state.pageSize) + 1);
-      state.virtual?.showRow(at);
-    }
-    if (!wanted.current) return;
-    const row = tableRef.current?.querySelector("tr[data-current]");
-    if (!row) return;
-    wanted.current = false;
-    row.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    if (last.current === currentRow) return;
+    last.current = currentRow;
+    if (currentRow !== null && currentRow !== undefined) scrollToRow(registry, currentRow);
   });
 }

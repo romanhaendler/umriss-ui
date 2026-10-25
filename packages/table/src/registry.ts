@@ -631,11 +631,12 @@ export class Registry {
   /** The table element while the frame is mounted - absent otherwise. */
   frameTable: HTMLTableElement | null = null;
 
-  /** The virtual row `scrollToRow` wants shown once it is rendered. */
-  reveal: number | null = null;
+  /** The row `scrollToRow` wants shown once it is rendered, and the column of
+      the cell to make the Active cell in grid mode. */
+  reveal: { key: string; column?: string } | null = null;
 
-  setReveal(at: number | null) {
-    this.reveal = at;
+  setReveal(next: Registry["reveal"]) {
+    this.reveal = next;
   }
 
   setFrameTable(table: HTMLTableElement | null) {
