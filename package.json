@@ -34,6 +34,7 @@
     "jsdom": "^26.1.0",
     "lightningcss": "^1.33.0",
     "postcss": "8.5.26",
+    "react-server-dom-webpack": "19.2.8",
     "typescript-eslint": "^8.19.0",
     "vitest": "^4.1.11"
   },

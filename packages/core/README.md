@@ -74,7 +74,8 @@ export function OrdersTable({ rows }: { rows: Order[] }) {
 }
 ```
 
-The reasons, and what a calculation may do differently, are in
+The calculation is the one view a Server Component writes itself: its tree is read where it is
+written (see `@umriss-ui/calculation`). The reasons are in
 [ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
 
 ### What an import costs
