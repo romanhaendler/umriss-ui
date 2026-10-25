@@ -114,6 +114,27 @@ outside a layer wins over all of them, whatever the order of loading:
 }
 ```
 
+**Layered CSS of your own.** The order of the layers decides who wins, so
+declare it before anything else is read.
+
+- Tailwind v4: this line as the first CSS the page reads, before
+  `@import "tailwindcss"`. Utilities then win over umriss, and Tailwind's
+  preflight stays below it.
+
+  ```css
+  @layer theme, base, umriss.tokens, umriss.base, umriss.components, components, utilities;
+  ```
+
+- A wrapper library: this line as the first statement of its stylesheet,
+  with its own layer in place of `acme`. It holds in either load order.
+
+  ```css
+  @layer umriss.tokens, umriss.base, umriss.components, acme;
+  ```
+
+Unlayered CSS always wins. A classic unlayered reset (Bootstrap and the like) is
+not fixed by layer order.
+
 **Light and dark follow the application's `color-scheme`.** Every token with
 two values is written `light-dark(<light>, <dark>)`. An application that
 switches its mode with a theme library usually sets `color-scheme` already;
