@@ -66,6 +66,15 @@ export function Tabs({ ref, value, defaultValue, onChange, className, children, 
 /* TabList – the arrow keys switch and activate                        */
 /* ------------------------------------------------------------------ */
 
+/** Brings `tab` into view by the list's own scroll position: `scrollIntoView`
+    and `focus()` would scroll the page too. */
+function reveal(list: HTMLElement, tab: HTMLElement) {
+  const start = tab.offsetLeft;
+  const end = start + tab.offsetWidth;
+  if (start < list.scrollLeft) list.scrollLeft = start;
+  else if (end > list.scrollLeft + list.clientWidth) list.scrollLeft = end - list.clientWidth;
+}
+
 /** The row of `Tab`s inside `Tabs`. The arrow keys, Home and End move
     between the tabs and choose them. */
 export function TabList({
@@ -88,6 +97,7 @@ export function TabList({
       return;
     }
     setIndicator({ left: selectedTab.offsetLeft, width: selectedTab.offsetWidth });
+    reveal(list, selectedTab);
   }, []);
 
   useLayoutEffect(() => {
@@ -123,8 +133,11 @@ export function TabList({
     if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
     if (event.key === "Home") next = 0;
     if (event.key === "End") next = tabs.length - 1;
-    tabs[next]?.focus();
-    tabs[next]?.click();
+    const target = tabs[next];
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    reveal(event.currentTarget, target);
+    target.click();
   };
 
   return (

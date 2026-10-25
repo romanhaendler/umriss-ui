@@ -40,3 +40,10 @@ The cost: a chart without `height` in a frame taller than 300 px - beside a
 tall table, in a fixed-height container - now fills it. That is visible, and
 the changelogs say so. Whatever stands directly in a card is now a flex item,
 so margins between direct children no longer collapse.
+
+*Amended 2026-10-25:* a table does not fill its frame; it stays within one. Its
+outer frame is at most as tall as a parent of definite height, and its scroll
+area takes what the toolbar and pager leave. Where the parent has no definite
+height, nothing changes. A table is as tall as its rows and does not stretch:
+blank surface under the last row says nothing. A prop was rejected for the
+reason `"fill"` was: no one wants to opt out where the parent has a height.

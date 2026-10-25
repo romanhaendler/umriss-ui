@@ -946,10 +946,10 @@ _Avoid_: touch mode, mobile, touch device
 The one row of a table the reader chose for the rest of the screen to follow
 — the master of a master-detail screen. The application holds it; the table
 marks it (`aria-current`) and reports every choice. It is never the
-**Selection** and never the **Active cell**: walking makes no row current. The
+**Selection** and never the **Active cell**: walking makes no row current (ADR-0071). The
 word is "current" because `aria-current` means exactly this; a tree's active
 node, which avoids the word, is a different thing.
-_Avoid_: active row, selected row, focused row, highlighted row
+_Avoid_: active row, selected row, focused row, highlighted
 
 **Row draft**:
 The values a person has typed into the one row being edited when a grid edits
