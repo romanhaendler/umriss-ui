@@ -1514,6 +1514,43 @@
     }
   }
 
+  /* Under a finger no target is smaller than 24 x 24 px (WCAG 2.5.8): a control
+     drawn smaller is hit in a larger square by an invisible pad, which changes
+     no row's height. The pad of a fold, an expander or a filter button lies on
+     the cell's own padding and the text beside it, never on another target. */
+  @media (pointer: coarse) {
+    .fold,
+    .expander,
+    .filterButton,
+    .rowButton {
+      position: relative;
+    }
+
+    .fold::after,
+    .expander::after,
+    .filterButton::after,
+    .rowButton::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+
+    .expander::after,
+    .filterButton::after {
+      inset: -2px;
+    }
+
+    .rowButton::after {
+      inset: -4px 0;
+    }
+
+    /* The tag clips its text, so a pad on the button inside would be cut: the
+       button itself grows to 24 px and the tag with it. */
+    .conditionButton {
+      min-height: 24px;
+    }
+  }
+
   /* ---- Virtualisation -------------------------------------------------- */
 
   .striped .virtualBody tr:nth-child(even) .td {

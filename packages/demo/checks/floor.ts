@@ -216,6 +216,9 @@ export function checkTargetFloor({ demo, open, examples }: TargetFloorSuite): vo
       await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
       await open(page, pageId);
       await page.evaluate(() => document.fonts.ready);
+      // A control that fades in (the input's clear key) is measured at rest; a
+      // spinner never rests, so the wait is capped.
+      await page.waitForTimeout(300);
       const raw = await page.locator(".exampleStage").evaluateAll(probe, FLOOR);
       expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches), "touch emulation").toBe(true);
       const { found, stale } = judge(demo, pageId, raw, false);
@@ -230,6 +233,36 @@ export function checkTargetFloor({ demo, open, examples }: TargetFloorSuite): vo
  * entry names its follow-up.
  */
 export const OPEN: readonly Open[] = [
+  {
+    demo: "schedule",
+    page: "lane-groups",
+    examples: ["nesting"],
+    element: "chevron",
+    label: /^Fold group: North depot$/,
+    reason: "two open group heads stand directly above each other, 24 px apart: the chevron's 24 px square overlaps the next chevron's by under a pixel",
+    fix: "schedule: an open group's head is 25 px under a finger (`GROUP_HEAD_HEIGHT`, which the plot's rows share)",
+  },
+  {
+    demo: "table",
+    page: "first-table",
+    examples: [
+      "search-and-page-from-a-header-of-your-own",
+      "sort-arrange-and-export-from-controls-of-your-own",
+    ],
+    element: "button+ring+text+secondary+sm",
+    label: /^(Next|Previous) page$/,
+    reason: "a core Button sm whose label is one glyph is 16 px wide",
+    fix: "core: a Button's minimum width under a finger, 24 px",
+  },
+  {
+    demo: "table",
+    page: "first-table",
+    examples: ["sort-arrange-and-export-from-controls-of-your-own"],
+    element: "button+ring+text+ghost+sm",
+    label: /^Move /,
+    reason: "a core Button sm whose label is one glyph is 21 px wide",
+    fix: "core: a Button's minimum width under a finger, 24 px",
+  },
   {
     demo: "core",
     panel: true,

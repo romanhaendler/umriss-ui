@@ -646,6 +646,32 @@
     white-space: nowrap;
   }
 
+  /* Under a finger no target is smaller than 24 x 24 px (WCAG 2.5.8). A legend
+     entry is 17 px high and a show-all key 22: an invisible pad takes each to
+     24 or more. The legend's lines stand 10 px apart, so that the pad of one
+     line never covers the entry of the next. */
+  @media (pointer: coarse) {
+    .uc-legend {
+      row-gap: 10px;
+    }
+
+    button.uc-legend-item,
+    .uc-show-all {
+      position: relative;
+    }
+
+    .uc-show-all {
+      position: absolute;
+    }
+
+    button.uc-legend-item::after,
+    .uc-show-all::after {
+      content: "";
+      position: absolute;
+      inset: -4px 0;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .uc-tooltip,
     button.uc-legend-item,

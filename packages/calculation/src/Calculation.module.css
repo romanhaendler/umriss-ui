@@ -271,6 +271,21 @@
     cursor: pointer;
   }
 
+  /* Under a finger no target is smaller than 24 x 24 px (WCAG 2.5.8): the 20 px
+     disclosure is hit in a square of 24, by an invisible pad that lies on the
+     row's own padding. The square the falling line starts from stays 20. */
+  @media (pointer: coarse) {
+    button.disclosure {
+      position: relative;
+    }
+
+    button.disclosure::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+    }
+  }
+
   button.disclosure:hover,
   .line[data-foldable]:hover button.disclosure {
     background: var(--u-color-surface-sunken);
