@@ -13,6 +13,10 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    /* In a parent of definite height the frame is never taller than it, and the
+       scroll area - a flex item that may shrink - takes what the toolbar and
+       the parts beneath leave. Without one, the percentage resolves to none. */
+    max-height: 100%;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
     outline: 1px solid transparent;

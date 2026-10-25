@@ -19,18 +19,12 @@
    neither the cases nor the exceptions fails the first test. */
 
 import { describe, expect, it } from "vitest";
-import { createRef, forwardRef } from "react";
-import type { CSSProperties, ReactElement, Ref } from "react";
+import type { ReactElement } from "react";
 import { render } from "@testing-library/react";
 import * as core from "../src";
 import type { NodeReader } from "../src";
-
-interface Probe {
-  ref: Ref<Element>;
-  className: string;
-  style: CSSProperties;
-  "data-probe": string;
-}
+import { passThroughGuard } from "../../demo/tests-support/passThroughGuard.tsx";
+import type { PassThroughCase, Probe } from "../../demo/tests-support/passThroughGuard.tsx";
 
 /* The probe goes in untyped: a component that does not take a ref yet would
    otherwise fail the type check instead of this test - and the type check
@@ -234,79 +228,19 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
 
 /* The fields among them take the style where they take the class (ADR-0041):
    class and style are how a caller dresses and sizes what it lays out, and a
-   width in `style` that reached the input inside sized the wrong element - an
-   empty frame around a narrower field, or nothing at all where the input is
-   hidden behind a drawn box. The split button is no field and keeps its style
-   on the main action. */
-const STYLE_ON_WRAPPER = new Set(Object.keys(CLASS_ON_WRAPPER).filter((name) => name !== "SplitButton"));
+   width in `style` that reached the input inside sized the wrong element. The
+   split button is no field and keeps its style on the main action. */
+const shapeOf = (name: string): PassThroughCase["shape"] =>
+  name === "SplitButton" ? "split" : name in CLASS_ON_WRAPPER ? "field" : "element";
 
-/** The names of the exports that are `forwardRef` objects. */
-const wrappedIn = (exports: Record<string, unknown>): string[] =>
-  Object.entries(exports)
-    .filter(([, value]) => (value as { $$typeof?: symbol } | null)?.$$typeof === Symbol.for("react.forward_ref"))
-    .map(([name]) => name);
-
-/** What the package exports that React can render: a function with a capital
-    name, or a wrapped object (which the guard then refuses). Constants
-    (`DEFAULT_*`) are neither. */
-const components = Object.entries(core)
-  .filter(
-    ([name, value]) =>
-      /^[A-Z][a-z]/.test(name) &&
-      (typeof value === "function" ||
-        (typeof value === "object" && value !== null && "$$typeof" in value)),
-  )
-  .map(([name]) => name)
-  .sort();
-
-describe("Every exported component passes ref, class, style and the rest through", () => {
-  it("stands either among the cases or among the exceptions", () => {
-    const unaccounted = components.filter((name) => !(name in CASES) && !(name in EXCEPTIONS));
-    expect(unaccounted).toEqual([]);
-    const stale = [...Object.keys(CASES), ...Object.keys(EXCEPTIONS)].filter(
-      (name) => !components.includes(name),
-    );
-    expect(stale).toEqual([]);
-  });
-
-  it("refuses an export wrapped in forwardRef, by name", () => {
-    const Wrapped = forwardRef<HTMLDivElement>((_props, ref) => <div ref={ref} />);
-    expect(wrappedIn({ Wrapped, Plain: () => null })).toEqual(["Wrapped"]);
-    expect(wrappedIn(core)).toEqual([]);
-  });
-
-  it.each(Object.keys(CASES).sort())("%s", (name) => {
-    const ref = createRef<Element>();
-    const { container } = render(
-      CASES[name]!({
-        ref,
-        className: "probe-class",
-        style: { marginTop: "7px" },
-        "data-probe": name,
-      }),
-    );
-    const element = ref.current;
-    /* The four are asked together, so that one failure names everything that
-       is missing - not only the first. */
-    expect({
-      ref: element instanceof Element,
-      className:
-        name in CLASS_ON_WRAPPER
-          ? (element?.parentElement?.closest(".probe-class") ?? null) !== null
-          : (element?.classList.contains("probe-class") ?? false),
-      style: STYLE_ON_WRAPPER.has(name)
-        ? (element?.parentElement?.closest<HTMLElement>(".probe-class")?.style.marginTop ?? "") === "7px" &&
-          (element as HTMLElement).style.marginTop === ""
-        : element instanceof HTMLElement || element instanceof SVGElement
-          ? element.style.marginTop === "7px"
-          : false,
-      rest: element?.getAttribute("data-probe") === name,
-      root: element ? (ROOT[name]?.(element) ?? true) : false,
-    }).toEqual({ ref: true, className: true, style: true, rest: true, root: true });
-    // Nothing else in the rendered tree carries the probe: it went to one place.
-    expect(container.ownerDocument.querySelectorAll(`[data-probe="${name}"]`)).toHaveLength(1);
-  });
-});
+passThroughGuard(
+  "core",
+  core,
+  Object.fromEntries(
+    Object.entries(CASES).map(([name, draw]) => [name, { render: draw, shape: shapeOf(name), root: ROOT[name] }]),
+  ),
+  EXCEPTIONS,
+);
 
 /* P3: what `...rest` may not override. The role and the aria attributes a
    component computes are what it has read; a caller's attribute of the same
