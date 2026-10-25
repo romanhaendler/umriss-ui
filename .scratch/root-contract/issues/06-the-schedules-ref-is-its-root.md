@@ -16,22 +16,35 @@ The schedule becomes a composite with an element `ref`, and its handle moves to 
     `style`, `id` and `data-*` reach the root.
   - `aria-label` (required) and `aria-labelledby` name the figure root and the plot, as `ariaLabel` does
     today. A caller's `aria-describedby` is joined to the plot's summary.
-  - `ariaLabel` is removed.
-- **The handle goes.** `ScheduleHandle` is removed. `positionAt`, `clientPointOf` and `visibleDomain` stand
-  on `useSchedule`'s return with the same signatures. While no schedule is mounted, `positionAt` and
+  - `ariaLabel` stays for one further minor as a deprecated alias, and it warns once in development. The
+    warning uses the mechanism that the upgrade-promise spec defines.
+- **The handle moves to the hook.** `positionAt`, `clientPointOf` and `visibleDomain` stand on
+  `useSchedule`'s return with the same signatures.
+- **The bridge, for one further minor.** The old `ref` keeps working:
+  - the root element that the `ref` receives also carries the three functions;
+  - the `ref` prop accepts a ref to the element or a ref to `ScheduleHandle`;
+  - `ScheduleHandle` stays exported, marked deprecated;
+  - the first call of a handle function through the element warns once in development, naming the hook's
+    function.
+
+  Ticket 10 removes the bridge. While no schedule is mounted, `positionAt` and
   `clientPointOf` return `null`, and `visibleDomain` answers from the scene as it does today.
 - **README** names `setDomain(span)` as the way to zoom to a span and `setDomain(null)` as the way to fit
   the work. One line says the schedule's shape.
 - **The guard.** The schedule calls the shared guard with:
   - the `Schedule` that a `useSchedule` harness hands back, in the composite shape;
   - the parts as exceptions with their reason: they declare what the schedule draws.
-- **Types.** The existing type test asserts that `ref` takes an `HTMLDivElement` and that a ref typed at
-  the old handle is an error.
+- **Types.** The existing type test asserts that `ref` takes an `HTMLDivElement`, and that a ref typed at
+  the handle is still accepted and marked deprecated.
 - **Demo.** The handle example ("place a mark") uses the hook's functions. Every `ariaLabel` in the
   schedule's README, capabilities record, demo and tests, and in core's control-room page, moves to
   `aria-label`. Regenerate `API.md`.
-- **Changelog** (Changed): the rename; the `ref` is the root `<div>`; `ScheduleHandle` is gone, and its
-  three functions are on `useSchedule`'s return.
+- **Changelog** (Changed):
+  - the rename, deprecated;
+  - the `ref` is the root `<div>`;
+  - `ScheduleHandle` is deprecated, and its three functions are on `useSchedule`'s return.
+
+  Each names the release that removes it and carries a migration line.
 
 ## Acceptance criteria
 
@@ -39,7 +52,8 @@ The schedule becomes a composite with an element `ref`, and its handle moves to 
       which carries the test id.
 - [ ] `s.positionAt(x, y)` and `s.clientPointOf(t, lane)` answer as the handle did, in the existing tests
       moved to the hook, and return `null` before mount.
-- [ ] `ScheduleHandle` is no longer exported.
+- [ ] A `useRef<ScheduleHandle>()` handed to `ref` still answers `positionAt` as before, and its first call
+      warns once in development.
 - [ ] The guard covers `Schedule`, and the type test covers the ref.
 - [ ] `pnpm check schedule`, `pnpm typecheck` and `pnpm check:site` pass, and
       `pnpm test:visual:quick schedule` passes.

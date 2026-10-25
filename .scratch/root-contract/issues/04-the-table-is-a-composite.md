@@ -16,7 +16,8 @@ The tracer bullet for the composite shape, end to end in the table.
     `style` and the rest (`id`, `data-*`) reach the outer frame.
   - `aria-label`, `aria-labelledby` and `aria-describedby` are taken out of the rest and put on the
     `<table>`.
-  - `ariaLabel` is removed.
+  - `ariaLabel` stays for one further minor as a deprecated alias, and it warns once in development. The
+    warning uses the mechanism that the upgrade-promise spec defines.
 - **The exported parts.** `Toolbar`, `Pagination`, `Export` and `ColumnMenu` take the element shape on the
   element they render. `Search` takes the field shape, as the `Input` it is.
 - **The guard, composite shape.** The shared guard gains the composite shape. A case names how to find its
@@ -30,8 +31,10 @@ The tracer bullet for the composite shape, end to end in the table.
 - **README.** One line says which shape the table's components have and that the name goes to the
   `<table>`. Every `ariaLabel` in the table's README, demo, tests and in core's control-room page moves to
   `aria-label`. Regenerate `API.md`.
-- **Changelog** (Changed): `ariaLabel` becomes `aria-label`; `Table` takes `ref`, `id`, `style` and
-  `data-*` on its frame; the parts take their rest.
+- **Changelog** (Changed):
+  - `ariaLabel` becomes `aria-label`, deprecated, with the release that removes it;
+  - `Table` takes `ref`, `id`, `style` and `data-*` on its frame;
+  - the parts take their rest.
 
 ## Acceptance criteria
 
@@ -39,7 +42,8 @@ The tracer bullet for the composite shape, end to end in the table.
       frame, and `r.current` is that `<div>`.
 - [ ] `<t.Table aria-labelledby="h">` names the `<table>` (or the grid) by the heading. The frame carries no
       name.
-- [ ] `ariaLabel` is a type error on `Table`.
+- [ ] `ariaLabel` on `Table` still names the `<table>`, warns once in development, and is marked deprecated
+      in its type.
 - [ ] The guard covers `Table` and every exported part, and fails if the name lands on the frame.
 - [ ] `pnpm check table`, `pnpm typecheck` and `pnpm check:site` pass, and `pnpm test:visual:quick table`
       passes.

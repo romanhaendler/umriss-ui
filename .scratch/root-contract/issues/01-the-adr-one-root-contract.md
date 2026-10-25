@@ -77,10 +77,19 @@ Alternatives that were real:
 
 What it costs:
 
-- One breaking minor in every package. There are no aliases: `ariaLabel` becomes `aria-label`, a
-  `ScheduleHandle` ref becomes the hook's functions, and a picker's `ref` becomes its control's element.
-  The compiler reports each of these.
-- A selector or a test that found the pickers' `data-*` on the wrapper now finds it on the control.
+- One minor in every package, under the upgrade promise (its ADR):
+  - `ariaLabel` keeps working for one further minor as a deprecated alias, and it warns once in
+    development.
+  - A `ScheduleHandle` ref keeps working for one further minor, and it warns once in development. For that
+    minor the element also carries the handle's three functions.
+  - The release after that removes both.
+- The one break with no old form kept is where the rest and `ref` land:
+  - on the pickers and the combobox fields, which now use their control;
+  - on the Calculation, which now uses its surface.
+
+  A ref or an attribute stands on one element. A selector or a test that found a picker's `data-*` on the
+  wrapper now finds it on the control. The compiler reports a picker's `ref`, because its element type
+  changes.
 
 ## Acceptance criteria
 

@@ -919,6 +919,12 @@ The cell is a table's, where a column meets a line; a chart matrix's **Cell**
 is another thing, and the table's word stands only in this compound.
 _Avoid_: focused cell, selected cell, current cell, cursor
 
+**Under a finger**:
+The reader's primary pointer is coarse. Sizes and hit areas follow it; a
+behaviour follows the pointer of the gesture at hand. Never a setting, never
+a guess about the device.
+_Avoid_: touch mode, mobile, touch device
+
 **Current row**:
 The one row of a table the reader chose for the rest of the screen to follow
 — the master of a master-detail screen. The application holds it; the table

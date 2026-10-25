@@ -139,8 +139,9 @@ number never reads 0 at the calculation's default places.
   The table's `asText` and `VerdictColumn` call it in place of their own mapping. The table's footer
   places for a sum or an average stay as they are, for a column without a format.
 - **No negative zero.** Core's `number`, `count`, `percent` and `numberWith` set
-  `signDisplay: "negative"`; options that set `signDisplay` themselves win. The calculation already writes
-  no "-0" and is not touched for it.
+  `signDisplay: "negative"`, and so do the charts' built-in number formats and their options formats.
+  Options that set `signDisplay` themselves win. The calculation already writes no "-0" and is not touched
+  for it.
 - **The sign.** Every figure carries the sign Intl writes for the locale. No package replaces it. The
   calculation's operator symbols stay wording entries.
 - **NumberInput.** It gains `grouping?: boolean`, default `true`.
@@ -233,5 +234,6 @@ number never reads 0 at the calculation's default places.
 - **Invalid options.** Intl throws on an invalid combination, such as a currency without a code, and the
   library does not catch it. A key Intl does not know is a type error on an object literal. With a cast it
   is ignored, which is Intl's behaviour, and no longer renders garbage.
-- **Server Components.** The format is now plain data, so a server page can hand it on. Whether it may is
-  the map's ticket "What umriss promises a Server Component".
+- **Server Components.** Columns and series stay declared in a client file, as the map's ticket "What
+  umriss promises a Server Component" decided. That a format is now data changes nothing there. That
+  ticket's hydration-safe formats cover the instant members only, and `numberWith` is not one of them.

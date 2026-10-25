@@ -41,7 +41,8 @@ Decided 2026-10-25 by the agent; the maintainer delegated the technical question
   The library already works this way: the field text is 16 px under a finger, and a compact row is
   35 px under a finger (ADR-0042, ADR-0051). The native-picker ticket and every later touch decision reuse
   this signal.
-- **Under a finger, a `md` control is 44 px tall; `sm` stays 26 and `xs` stays 26 (ADR-0042)**
+- **Under a finger, a `md` control is 44 px tall; `sm` stays 26, and a dense surface's small control stays
+  26 as today (ADR-0042)**
   *(agent, product - for review)*. One token block in core's tokens, under `pointer: coarse`, sets
   `--u-control-height` to 44 px (WCAG 2.5.5, Apple's HIG). Only the height changes; padding and icon size
   do not.
