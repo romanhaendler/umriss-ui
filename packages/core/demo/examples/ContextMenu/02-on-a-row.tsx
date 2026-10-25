@@ -1,9 +1,8 @@
 import { useState } from "react";
-import type { KeyboardEvent, MouseEvent } from "react";
-import { ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "../../../src";
+import { ContextMenu, MenuItem, MenuSeparator, Stack, Text, useContextMenuTrigger } from "../../../src";
 
-export const title = "Open it on a row, by pointer or keyboard";
-export const lead = "Right-click opens it at the pointer; Shift+F10 or the menu key opens it at the focused row, so no reader is left out.";
+export const title = "Open it on a row, by pointer, finger or keyboard";
+export const lead = "`useContextMenuTrigger` per row: a right-click opens it at the pointer, a long press at the finger, Shift+F10 or the menu key at the focused row, so no reader is left out.";
 
 const SHIPMENTS = [
   { id: "SH-1042", customer: "Harlow Bakery", window: "09:00–11:00" },
@@ -19,21 +18,39 @@ const STYLE = `
 }
 `;
 
+function Row({ shipment, active, onOpen }: { shipment: (typeof SHIPMENTS)[number]; active: boolean; onOpen: (at: { x: number; y: number }) => void }) {
+  const trigger = useContextMenuTrigger(onOpen);
+  return (
+    <div
+      role="listitem"
+      tabIndex={0}
+      className="shipment-row"
+      {...trigger}
+      style={{
+        ...trigger.style,
+        display: "flex",
+        gap: "var(--u-space-3)",
+        padding: "var(--u-space-2) var(--u-space-3)",
+        borderBottom: "1px solid var(--u-edge-color)",
+        background: active ? "var(--u-color-accent-subtle)" : undefined,
+      }}
+    >
+      <Text as="span" size="sm" mono>
+        {shipment.id}
+      </Text>
+      <Text as="span" size="sm" style={{ flex: 1 }}>
+        {shipment.customer}
+      </Text>
+      <Text as="span" size="sm" tone="muted" mono>
+        {shipment.window}
+      </Text>
+    </div>
+  );
+}
+
 export default function OnARow() {
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [last, setLast] = useState("-");
-
-  const byPointer = (id: string) => (event: MouseEvent) => {
-    event.preventDefault();
-    setMenu({ id, x: event.clientX, y: event.clientY });
-  };
-
-  const byKey = (id: string) => (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
-    event.preventDefault();
-    const box = event.currentTarget.getBoundingClientRect();
-    setMenu({ id, x: box.left + 16, y: box.bottom });
-  };
 
   const run = (what: string) => () => setLast(`${what} ${menu?.id ?? ""}`);
 
@@ -42,31 +59,7 @@ export default function OnARow() {
       <style>{STYLE}</style>
       <div role="list" aria-label="Shipments">
         {SHIPMENTS.map((shipment) => (
-          <div
-            key={shipment.id}
-            role="listitem"
-            tabIndex={0}
-            className="shipment-row"
-            onContextMenu={byPointer(shipment.id)}
-            onKeyDown={byKey(shipment.id)}
-            style={{
-              display: "flex",
-              gap: "var(--u-space-3)",
-              padding: "var(--u-space-2) var(--u-space-3)",
-              borderBottom: "1px solid var(--u-edge-color)",
-              background: menu?.id === shipment.id ? "var(--u-color-accent-subtle)" : undefined,
-            }}
-          >
-            <Text as="span" size="sm" mono>
-              {shipment.id}
-            </Text>
-            <Text as="span" size="sm" style={{ flex: 1 }}>
-              {shipment.customer}
-            </Text>
-            <Text as="span" size="sm" tone="muted" mono>
-              {shipment.window}
-            </Text>
-          </div>
+          <Row key={shipment.id} shipment={shipment} active={menu?.id === shipment.id} onOpen={(at) => setMenu({ id: shipment.id, ...at })} />
         ))}
       </div>
       <ContextMenu

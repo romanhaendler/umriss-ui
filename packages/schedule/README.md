@@ -137,9 +137,19 @@ and lead-out and the findings; `tooltip` replaces its content or switches it
 off. `now` draws the present across the lanes. The wheel over the schedule,
 lane headers included, scrolls the lanes and releases the page at their end,
 Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans and a
-tap selects. The lane headers take at most 40 % of the width, so that on a
+tap selects, and a vertical swipe scrolls the page while all lanes fit (when they
+overflow, the lane names scroll the page). The lane headers take at most 40 % of the width, so that on a
 phone the plot keeps the larger part; a ref handle turns a client point into a
 time and a lane and back.
+
+## Its size
+
+The width is the host's. Without `height`, a schedule fills its frame - a stretched grid cell, a card the
+grid stretches, a container of definite height - and never goes below 400 px, which is also its height in
+a frame without one: alone in a block it is 400 px however many lanes it holds, and the lanes beyond the
+plot scroll inside it (ADR-0050). A number stays a fixed height. A different floor goes through `style`'s
+`minHeight`, and `style` wins over the schedule's own sizing. A wrapper of your own between the frame and
+the schedule passes the height on with `height: 100%`.
 
 ## The view
 
