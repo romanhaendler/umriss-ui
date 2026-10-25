@@ -125,3 +125,11 @@ the operating system did. `UmrissProvider` loses `theme`, and it stops writing
   application sets in CSS still flips; a mode set only from JavaScript or
   through a variable stays light in such a build, and the application then
   writes one CSS rule or raises its build target to the browser floor.
+- *Amended 2026-10-25:* the Alternatives' premise "Vitest handles CSS imports"
+  does not hold. Vitest's default pool hands a dependency to Node, and Node
+  rejects the `.css` import, in every package shape. The decision stands anyway:
+  no shape loads unconfigured in a test runner, because jsdom needs a setup file
+  regardless. A consumer's Vitest therefore writes
+  `server.deps.inline: [/@umriss-ui/]`. Jest writes a CSS `moduleNameMapper` and
+  `transformIgnorePatterns`. Core's README carries both, and `check:dist` runs
+  them.

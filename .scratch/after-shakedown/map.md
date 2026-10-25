@@ -48,6 +48,11 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   `"use client"`, field-name config and a data tree instead of element-type matching are what others do; dates
   either show the server's zone or need a browser-only pass.
 
+- [Jest and Vitest with no configuration](issues/02-jest-and-vitest-with-no-configuration.md): ADR-0021
+  stands (amended); the promise is a documented setup file plus two lines per runner, with a `default`
+  condition and no CJS build, held by a consumer check in `check:dist`; no motion switch. Spec
+  `.scratch/test-runners/`.
+
 ## Not yet specified
 
 - **Time zones.** ADR-0060 says "not yet; umriss shows the reader's time". Server rendering (hydration
