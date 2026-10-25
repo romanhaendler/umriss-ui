@@ -14,16 +14,14 @@ once for all five packages in [`../../docs/design-language.md`](../../docs/desig
 pnpm add @umriss-ui/core
 ```
 
-The demo is the documentation: <https://romanhaendler.github.io/umriss-ui/core/>.
+The demo is the documentation.
 Every prop of a props table is linked to the examples that show it, 27 pages
 open with a configurator, an API index lists every export, one search finds
 across all five packages, and the header switches the examples to German.
 For a coding agent the same material stands as one Markdown file inside the
 installed package, `docs/llms-full.md`, pinned to that version — every page
 with its examples' source, its props tables and why it is built as it is, and
-an index of every export with its comment and its declaration; each page also
-has a Markdown twin; online, for the latest version,
-<https://romanhaendler.github.io/umriss-ui/core/llms.txt>.
+an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm docs`.
 In an application:
 
 ```tsx

@@ -1,6 +1,6 @@
 # Decisions
 
-Sixty-four decisions, each one written where it was made and kept afterwards. An
+Sixty-five decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -50,7 +50,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | Table grid mode only when requested | accepted, amended by ADR-0036 (the first click edits) | table |
 | [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | Target audience: data-dense applications | accepted | scope |
 | [0036](0036-a-grid-edits-on-the-first-click-and-saves-rows-on-purpose.md) | A grid edits on the first click, and saves rows on purpose | Grid cells edit on first click | accepted | table |
-| [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | Demo pages get paths and prerendering | accepted | demo |
+| [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | Demo pages get paths and prerendering | accepted, superseded in part by ADR-0065 | demo |
 | [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | Calculations with several parallel metrics | accepted | calculation |
 | [0039](0039-an-icon-button-names-itself-once.md) | An icon button names itself once, and shows that name | Icon buttons name themselves once | accepted | components |
 | [0040](0040-a-box-carries-its-outliers.md) | A box carries its outliers | Box plots carry their outliers | accepted | charts |
@@ -59,7 +59,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0043](0043-the-select-draws-its-own-list-under-a-pointer.md) | The select draws its own list under a pointer and the keys | Select draws its own list | accepted | components |
 | [0044](0044-every-export-has-a-place-on-the-site.md) | Every export has a place on the site | Every export gets an API index entry | accepted | demo |
 | [0045](0045-tokens-are-the-styling-api-data-attributes-are-not.md) | Tokens are the styling API; data attributes are not | Styling through tokens, not data attributes | accepted | components |
-| [0046](0046-the-site-renders-the-workspaces-own-documents.md) | The site renders the workspace's own documents | Demo site renders the repository's documents | accepted | demo |
+| [0046](0046-the-site-renders-the-workspaces-own-documents.md) | The site renders the workspace's own documents | Demo site renders the repository's documents | accepted, superseded in part by ADR-0065 | demo |
 | [0047](0047-a-component-holds-its-own-view.md) | A component holds its own view | Components keep their own view state | accepted | architecture |
 | [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | Charts take rows through a hook | accepted | charts |
 | [0049](0049-a-sum-takes-rows-from-data.md) | A sum takes rows from data, and a line shows its contribution | Sums over rows from data | accepted | calculation |
@@ -71,12 +71,13 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0055](0055-the-summary-names-labelled-limits-the-tooltip-only-on-request.md) | The summary always names labelled limits, and the tooltip only on request | Chart summary and tooltip name limits | accepted | charts |
 | [0056](0056-a-chart-reports-a-chosen-hit-and-holds-no-selection.md) | A chart reports a chosen hit and holds no selection | Chart reports a hit, keeps no selection | accepted | charts |
 | [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | Alarm snoozing (withdrawn) | withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
-| [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | Agent skill instead of an MCP server | accepted | architecture |
+| [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | Agent skill instead of an MCP server | accepted, superseded in part by ADR-0065 | architecture |
 | [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | Chart kinds are an open set | accepted, supersedes ADR-0032 in two points | charts |
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | Never built: form validation, layout editor, time zones | accepted, extends ADR-0032; superseded in one point by ADR-0064 | scope |
 | [0061](0061-the-csv-follows-the-language-in-use.md) | The CSV follows the language in use | CSV follows the active language | accepted, extends ADR-0024 | table, language |
 | [0062](0062-react-19-is-the-floor.md) | React 19 is the floor: the peers are `>=19`, a component takes `ref` as a prop and is never wrapped, and no code reads React's version | React 19 is the floor | accepted | core, packages |
 | [0063](0063-inside-a-modal-dialog-the-toasts-and-the-tooltips-stand-in-the-top-layer.md) | Inside a modal dialog the toasts and the tooltips stand in the top layer, and everywhere else the token scale orders them | Toasts above a modal | accepted | core, table |
 | [0064](0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md) | A dashboard a user arranges is built: a sequence of widgets at named sizes on columns that never change in number | Dashboard a user arranges | accepted, supersedes ADR-0060 in one point | scope, dashboard |
+| [0065](0065-the-documentation-runs-locally-at-the-version-checked-out.md) | The documentation runs locally, at the version checked out | No hosted site; `pnpm docs` | accepted, supersedes ADR-0037 in part (hosting and search), ADR-0046 and ADR-0058 in part | demo, docs |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

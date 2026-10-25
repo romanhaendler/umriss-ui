@@ -29,6 +29,56 @@ All six published packages are released under the npm tag `latest`, so a plain
 `@umriss-ui/schedule` enters `core` and `charts` the same way (ADR-0022), and
 `@umriss-ui/calculation` and `@umriss-ui/dashboard` enter `core` alone.
 
+## See it running
+
+The documentation is the demos. They run on your machine, at the version you
+choose; there is no hosted site.
+
+<table>
+<tr>
+<td align="center"><a href="packages/core/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/core-dark.png"><img alt="The core demo" src="scripts/previews/core-light.png" width="100%"></picture><br><code>@umriss-ui/core</code></a></td>
+<td align="center"><a href="packages/charts/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/charts-dark.png"><img alt="The charts demo" src="scripts/previews/charts-light.png" width="100%"></picture><br><code>@umriss-ui/charts</code></a></td>
+</tr>
+<tr>
+<td align="center"><a href="packages/table/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/table-dark.png"><img alt="The table demo" src="scripts/previews/table-light.png" width="100%"></picture><br><code>@umriss-ui/table</code></a></td>
+<td align="center"><a href="packages/schedule/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/schedule-dark.png"><img alt="The schedule demo" src="scripts/previews/schedule-light.png" width="100%"></picture><br><code>@umriss-ui/schedule</code></a></td>
+</tr>
+<tr>
+<td align="center"><a href="packages/calculation/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/calculation-dark.png"><img alt="The calculation demo" src="scripts/previews/calculation-light.png" width="100%"></picture><br><code>@umriss-ui/calculation</code></a></td>
+<td align="center"><a href="packages/dashboard/README.md"><picture><source media="(prefers-color-scheme: dark)" srcset="scripts/previews/dashboard-dark.png"><img alt="The dashboard demo" src="scripts/previews/dashboard-light.png" width="100%"></picture><br><code>@umriss-ui/dashboard</code></a></td>
+</tr>
+</table>
+
+Three commands open it. They need Node 22 and pnpm 9 (`corepack enable` gives
+you the pnpm the repository names):
+
+```bash
+git clone --branch core-v0.41.0 https://github.com/romanhaendler/umriss-ui.git
+cd umriss-ui && pnpm install
+pnpm docs
+```
+
+`pnpm docs` builds the site and serves it at <http://localhost:4170/umriss-ui/>;
+it prints the address when it is ready. Replace the tag with the version you
+installed: tags are `<package>-v<version>`, and all six packages share one
+number, so any package's tag opens the whole site at that version. `main`
+documents what is not released yet. The same documentation travels inside every
+package as `docs/llms-full.md`, readable without a clone.
+
+The demo **is** the documentation for the components. Every page shows running
+examples together with the source that produced them and a props table generated
+from `src/` — there is no prose description of a component that could drift away
+from the component. Every row of a props table links the examples that show it,
+and the build stops at a prop no example shows, unless its package names it
+as an exception with the reason. 27 core pages open with a configurator. Each
+package has an API index of every export; one search (⌘K) finds pages, props,
+exports, tokens and wording keys across all six packages;
+the header switches the examples between English and German (the charts take
+German per chart, so their demo has no switch); and every page has a Markdown
+twin, listed in each package's `llms.txt`. The design language, the standards,
+what umriss-ui is not and each package's changelog are pages of the same site
+(ADR-0046).
+
 ## Quick start
 
 ```bash
@@ -62,19 +112,10 @@ Firefox 120, Safari 17.5 or newer — the tokens use `light-dark()`.
 
 ## The demos
 
-Online at **<https://romanhaendler.github.io/umriss-ui/>** —
-[core](https://romanhaendler.github.io/umriss-ui/core/),
-[charts](https://romanhaendler.github.io/umriss-ui/charts/),
-[table](https://romanhaendler.github.io/umriss-ui/table/),
-[schedule](https://romanhaendler.github.io/umriss-ui/schedule/),
-[calculation](https://romanhaendler.github.io/umriss-ui/calculation/),
-[dashboard](https://romanhaendler.github.io/umriss-ui/dashboard/). Rebuilt on every push
-to `main` (`.github/workflows/pages.yml`); `pnpm build:pages` assembles the same
-site locally into `site/`. After a package's first scenario changes, `pnpm previews`
-renews the front page's pictures of it from that built site (`scripts/previews/`,
-checked in).
+After a package's first scenario changes, `pnpm previews` renews the pictures above
+from the site `pnpm build:site` builds (`scripts/previews/`, checked in).
 
-Locally:
+For working on one demo:
 
 ```bash
 pnpm install
@@ -85,20 +126,6 @@ pnpm dev:schedule  # port 4176
 pnpm dev:calculation  # port 4177
 pnpm dev:dashboard    # port 4178
 ```
-
-The demo **is** the documentation for the components. Every page shows running
-examples together with the source that produced them and a props table generated
-from `src/` — there is no prose description of a component that could drift away
-from the component. Every row of a props table links the examples that show it,
-and the build stops at a prop no example shows, unless its package names it
-as an exception with the reason. 27 core pages open with a configurator. Each
-package has an API index of every export; one search (⌘K) finds pages, props,
-exports, tokens and wording keys across all six packages;
-the header switches the examples between English and German (the charts take
-German per chart, so their demo has no switch); and every page has a Markdown
-twin, listed in each package's `llms.txt`. The design language, the standards,
-what umriss-ui is not and each package's changelog are pages of the same site
-(ADR-0046).
 
 ## Where the documentation is
 
