@@ -45,6 +45,18 @@ test("a dense set of tokens shortens every line, a roomy one lengthens it, to a 
   }
 });
 
+test("a footer row is as tall as the head and the rows, under every set", { tag: "@quick" }, async ({ page }) => {
+  for (const tokens of Object.values(SETS)) {
+    await openExample(page, "aggregate", "sum-and-average");
+    if (tokens) await page.addStyleTag({ content: tokens });
+    const heights = await page.getByRole("table", { name: "Tours" }).locator("tfoot tr, thead tr, tbody tr").evaluateAll((rows) =>
+      rows.map((row) => row.getBoundingClientRect().height),
+    );
+    expect(heights.length).toBeGreaterThan(2);
+    expect(same(heights), tokens).toBe(true);
+  }
+});
+
 test.describe("under a finger", () => {
   test.use({ hasTouch: true });
 
