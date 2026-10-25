@@ -1,7 +1,7 @@
 # Alarm management: the standards claim and the slices of the first version
 
 Type:       grilling
-Status:     open
+Status:     claimed
 Blocked by: 08, 09, 10
 
 ## Question
