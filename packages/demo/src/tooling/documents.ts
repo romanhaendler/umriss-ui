@@ -3,7 +3,7 @@
    markdown when the site is built, never copied - the file in the repository
    stays the only text.
 
-   `scripts/build-pages.mjs` reads each file and wraps what this returns in
+   `scripts/build-site.mjs` reads each file and wraps what this returns in
    the front page's layout; the guard over the result is `documentFaults` in
    `site.ts`. It runs in Node, as the tooling beside it does. */
 

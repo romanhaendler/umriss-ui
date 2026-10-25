@@ -13,7 +13,7 @@
    What is NOT here: the examples. They come from the files under
    `demo/examples/` and from nothing else. */
 
-import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
+import { SITE, addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
 import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
@@ -29,7 +29,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Install the package, draw a first chart and size it in its container. Read this once before the component pages; everything after it assumes it.",
         about: [
-          "The command installs the package alone: React 19 or newer is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand. Its colours, type and sizes are `--uc-` tokens that fall back onto core's; [core's Theming page](https://romanhaendler.github.io/umriss-ui/core/theming/#charts-tokens) lists them all.",
+          "The command installs the package alone: React 19 or newer is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand. Its colours, type and sizes are `--uc-` tokens that fall back onto core's; [core's Theming page](" + SITE + "core/theming/#charts-tokens) lists them all.",
           "A chart takes its container's width and follows it; give it a `height` (300 px without one). `useChart(rows)` hands out `Chart`, its axes and its series, typed at the row; each reads its value from a row through `value`, a field name or a function - a value that is `null`, `undefined` or not finite is a gap, never a zero.",
           "An instant is a `Date`, milliseconds since 1970, or - where the x axis says `time` - the ISO string an API sends (ADR-0052). On a time axis the ticks stand on the viewer's local clock, so a day begins at local midnight. The words are English; German comes from `@umriss-ui/charts/wording/de`.",
           "The charts take German per chart: `wording={GERMAN_CHARTS_WORDING}` from `@umriss-ui/charts/wording/de`, as [the keyboard and screen reader example](#/chart/keyboard-and-screen-reader) shows. They read no language provider, so this demo has no EN/DE switch in its header.",
@@ -297,8 +297,8 @@ export const OUTLINE: readonly Rubric[] = [
     ],
   },
   apiIndexRubric("@umriss-ui/charts", {
-    DEFAULT_CHARTS_WORDING: "the table [Charts wording](https://romanhaendler.github.io/umriss-ui/core/language/#charts-wording) on core's Language page",
-    GERMAN_CHARTS_WORDING: "the table [Charts wording](https://romanhaendler.github.io/umriss-ui/core/language/#charts-wording) on core's Language page",
+    DEFAULT_CHARTS_WORDING: `the table [Charts wording](${SITE}core/language/#charts-wording) on core's Language page`,
+    GERMAN_CHARTS_WORDING: `the table [Charts wording](${SITE}core/language/#charts-wording) on core's Language page`,
   }),
 ];
 

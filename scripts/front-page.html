@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- The front page (.scratch/site-front-page): what a search for "umriss-ui"
-     or a shared link lands on before any demo. `build-pages.mjs` fills the
+     or a shared link lands on before any demo. `build-site.mjs` fills the
      slots in double braces; everything else is fixed here, and the built-site guard
      (`frontFaults` in packages/demo/src/tooling/site.ts) holds the words and
      the links to what they promise.
@@ -110,10 +110,6 @@
       .copy[data-state="copied"] { color: var(--u-color-success); }
       .copy[data-state="failed"] { color: var(--u-color-text-muted); }
 
-      .proof { margin: 0; }
-      .proof a { display: block; border-radius: var(--u-radius-lg); }
-      .proof img { display: block; width: 100%; height: auto; border-radius: var(--u-radius-lg); box-shadow: var(--u-shadow-card); }
-      .proof figcaption { margin-top: var(--u-space-3); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
 
       h2 { margin: 0; font-size: var(--u-text-lg); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-tight); }
 
@@ -229,11 +225,6 @@
         </div>
         <div class="install"><code>{{install}}</code><button type="button" class="copy" hidden>Copy</button></div>
       </section>
-
-      <figure class="proof">
-        <a href="./core/"><img src="./og-image.png" width="1200" height="630" alt="{{collageAlt}}" /></a>
-        <figcaption>Every picture on this site is a running component. The scenarios show them working.</figcaption>
-      </figure>
 
       <section class="packages" aria-labelledby="packages">
         <h2 id="packages">Packages</h2>

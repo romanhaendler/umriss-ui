@@ -70,7 +70,7 @@ describe("a rendered document", () => {
 
 it("ADR-0032's address in the shell is its document's page on the site", () => {
   const page = DOCUMENTS.find((document) => document.source === "docs/adr/0032-what-umriss-is-not.md")!;
-  expect(ADR_0032).toBe(`https://romanhaendler.github.io/umriss-ui/${page.path}`);
+  expect(ADR_0032).toBe(`http://localhost:4170/umriss-ui/${page.path}`);
 });
 
 describe("a changelog's version heading", () => {

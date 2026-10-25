@@ -33,7 +33,7 @@ const OWN_PACKAGE_WEIGHT = 0.25;
    window is never empty and a lost request breaks nothing.
 
    The other four packages come from the site's index (`search.json` at the
-   site's root, `scripts/build-pages.mjs`), fetched on the same first
+   site's root, `scripts/build-site.mjs`), fetched on the same first
    opening, without the own package's entries, which the fragment already
    has. A demo standing alone - the dev server, the test build - has no
    site above it and fetches nothing. A failed fetch is silent: the reader

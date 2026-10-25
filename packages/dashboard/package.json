@@ -4,7 +4,7 @@
   "description": "React dashboard for data-dense applications - widgets a reader arranges, packed in order on twelve columns.",
   "license": "MIT",
   "author": "Roman Händler",
-  "homepage": "https://romanhaendler.github.io/umriss-ui/dashboard/",
+  "homepage": "https://github.com/romanhaendler/umriss-ui/tree/main/packages/dashboard#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/romanhaendler/umriss-ui.git",

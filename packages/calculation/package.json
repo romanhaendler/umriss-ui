@@ -4,7 +4,7 @@
   "description": "React calculation view for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",
-  "homepage": "https://romanhaendler.github.io/umriss-ui/calculation/",
+  "homepage": "https://github.com/romanhaendler/umriss-ui/tree/main/packages/calculation#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/romanhaendler/umriss-ui.git",
