@@ -161,4 +161,4 @@ derivation, reference — stands in `CONTEXT.md` under "Calculations".
 For a coding agent the demo stands as one Markdown file inside the installed
 package, `docs/llms-full.md`, pinned to that version: every page with its
 examples' source, its props tables and why it is built as it is, and an index
-of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm docs`.
+of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm start`.

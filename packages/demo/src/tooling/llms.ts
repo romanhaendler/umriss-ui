@@ -639,9 +639,8 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
 } {
   const read = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   /* A package's `homepage` is its README; its place on the site is below the
-     site's address. A homepage that is itself a directory address names its
-     own place - the fixture of the generator's tests does. */
-  const manifest: Manifest = { ...read, homepage: read.homepage.endsWith("/") ? read.homepage : `${SITE}${read.name.split("/")[1]}/` };
+     site's address. */
+  const manifest: Manifest = { ...read, homepage: `${SITE}${read.name.split("/")[1]}/` };
   const demoDir = join(packageDir, "demo");
   /* Every ADR number a text names, as a link to its file - as the shell
      shows the same texts (`references.ts`) - and every hook and function

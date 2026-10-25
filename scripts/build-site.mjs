@@ -1,4 +1,4 @@
-/* The site `pnpm docs` serves: the six demos under one address, each in a
+/* The site `pnpm start` serves: the six demos under one address, each in a
    directory of its own, and a page in front that points at every page of them.
 
      site/index.html            the front page - the hub (scripts/front-page.html)
@@ -16,6 +16,7 @@
                                 whole site
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
      site/fonts/                the front page's Geist (each demo bundles its own copy)
+     site/collage.png           the front page's picture of the packages together
      site/previews/             the front page's tiles: each package's first scenario,
                                 light and dark (scripts/previews/, by `pnpm previews`)
 
@@ -31,8 +32,8 @@
 
    The demos are built with the absolute base the site's address gives them
    (`/umriss-ui/core/`): a page two directories deep must find the same assets.
-   The site therefore runs under that path only, as `pnpm docs` serves it
-   (`scripts/docs.mjs`).
+   The site therefore runs under that path only, as `pnpm start` serves it
+   (`scripts/start.mjs`).
 
    The vite configs of the demos stay untouched: the screenshot suites build
    them with the default base, and nothing here should move a baseline.
@@ -42,7 +43,7 @@
    (ADR-0046). Their list stands in
    `packages/demo/src/tooling/documents.ts`.
 
-   Run: `pnpm build:site`; `pnpm docs` builds and serves. The forwarders and the guard come from the demo's
+   Run: `pnpm build:site`; `pnpm start` builds and serves. The forwarders and the guard come from the demo's
    tooling (`packages/demo/src/tooling/site.ts`). */
 
 import { execFileSync } from "node:child_process";
@@ -65,6 +66,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
 const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
 const PACKAGES = LIST.map((p) => p.id);
+
+/* The front page's picture of the packages together, 1200 x 630: core's
+   controls opened - a date range picker, a multi-select, the command palette,
+   a tree - above parts of the kiln scenario for the other packages. Taken by
+   hand, so renewed by hand when they change. */
+const COLLAGE = "collage.png";
+const COLLAGE_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, a table of alerts, a production plan and an OEE calculation.";
 
 /* The front page's tiles: each package's first scenario, light and dark,
    1200 x 750 - photographed by `pnpm previews` (scripts/previews.mjs) and
@@ -223,6 +231,7 @@ const front = {
       "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule, a calculation view and a dashboard readers arrange. TypeScript, MIT, light and dark.",
     url: HOME,
   }),
+  collageAlt: escape(COLLAGE_ALT),
   jsonLd: jsonLd({ "@context": "https://schema.org", "@graph": rows.map(structuredData) }),
   /* Comments out: they are the stylesheet's, not the page's. */
   tokens: readFileSync(join(ROOT, "packages", "core", "src", "styles", "tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\n\s*\n/g, "\n"),
@@ -273,6 +282,7 @@ const fill = (template, values) =>
 writeFileSync(join(SITE, "index.html"), fill(FRONT_PAGE, front));
 /* Before the guard, which fails on a preview that is not there. */
 if (existsSync(join(ROOT, "scripts", PREVIEWS))) cpSync(join(ROOT, "scripts", PREVIEWS), join(SITE, PREVIEWS), { recursive: true });
+cpSync(join(ROOT, "scripts", COLLAGE), join(SITE, COLLAGE));
 
 /* A document page: the front page's layout - its head, header, foot and theme
    - with the document in place of the front page's <main>, and the layout's
@@ -308,7 +318,7 @@ ${urls.map((url) => `  <url><loc>${escape(url)}</loc><lastmod>${today}</lastmod>
 const search = siteSearch(PACKAGES.map((dir) => readFileSync(join(SITE, dir, "search.json"), "utf8")));
 writeFileSync(join(SITE, "search.json"), search);
 
-/* An address that is no page. `pnpm docs` serves this file for it; there is
+/* An address that is no page. `pnpm start` serves this file for it; there is
    no fallback to a demo's index.html as in the dev server. */
 writeFileSync(
   join(SITE, "404.html"),

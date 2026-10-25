@@ -10,7 +10,7 @@ Six packages, all `0.x`: `@umriss-ui/core` (components), `charts` (canvas charts
 ## Where to read
 
 1. The installed version, first: `node_modules/@umriss-ui/<package>/docs/llms-full.md`. Every page with its examples' source, its props tables, why it is built as it is, and an index of every export with its declaration. Search it for the component's name before you write a line.
-2. The same documentation as a running site, for any version: a checkout at the tag `<package>-v<version>`, then `pnpm docs`, served at `http://localhost:4170/umriss-ui/`. The root README, "See it running", says how.
+2. The same documentation as a running site, for any version: a checkout at the tag `<package>-v<version>`, then `pnpm start`, served at `http://localhost:4170/umriss-ui/`. The root README, "See it running", says how.
 
 What changes for a caller stands in the package's `CHANGELOG.md`.
 

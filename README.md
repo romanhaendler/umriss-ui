@@ -55,10 +55,10 @@ you the pnpm the repository names):
 ```bash
 git clone --branch core-v0.41.0 https://github.com/romanhaendler/umriss-ui.git
 cd umriss-ui && pnpm install
-pnpm docs
+pnpm start
 ```
 
-`pnpm docs` builds the site and serves it at <http://localhost:4170/umriss-ui/>;
+`pnpm start` builds the site and serves it at <http://localhost:4170/umriss-ui/>;
 it prints the address when it is ready. Replace the tag with the version you
 installed: tags are `<package>-v<version>`, and all six packages share one
 number, so any package's tag opens the whole site at that version. `main`
