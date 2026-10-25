@@ -52,11 +52,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/charts.js"
+      "import": "./dist/charts.js",
+      "default": "./dist/charts.js"
     },
     "./wording/de": {
       "types": "./dist/de.d.ts",
-      "import": "./dist/wording/de.js"
+      "import": "./dist/wording/de.js",
+      "default": "./dist/wording/de.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",

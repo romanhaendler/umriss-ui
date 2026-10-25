@@ -203,7 +203,8 @@ try {
    blocks, taken by the file name in their info string; only the consumer test
    is written besides. */
 const SCOPE = "@umriss-ui/";
-const readmes = [join("..", "core", "README.md")];
+/* Core's lines serve core; charts must work without core and gives its own in full. */
+const readmes = [join(name === "@umriss-ui/charts" ? "." : join("..", "core"), "README.md")];
 const runnerRoot = mkdtempSync(join(tmpdir(), "check-dist-runners-"));
 try {
   const tarballs = join(runnerRoot, "tarballs");
