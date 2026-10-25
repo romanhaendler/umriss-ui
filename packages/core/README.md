@@ -98,6 +98,11 @@ manifest marks CSS as a side effect, so a bundler keeps it. The stylesheet stays
 exported as `@umriss-ui/core/styles.css` for setups that link stylesheets by
 hand; nobody has to import it.
 
+**On a phone the safe area is honoured.** Under `viewport-fit=cover` the toasts,
+a full-window `Modal`, a `Drawer` and the `CommandPalette` keep clear of a notch
+and a home indicator, each edge's inset added to its room. Without
+`viewport-fit=cover` nothing moves.
+
 **They touch nothing else** (ADR-0021). No rule selects `html`, `body`, `*` or a
 native element of the page, and the only rules on `:root` declare the tokens.
 Each component carries what it needs itself: its type, `box-sizing` on its own

@@ -437,6 +437,10 @@ export class ScheduleScene {
     }
     if (this.domainInView === null && !this.fitted) this.fit();
     this.view.layout();
+    /* The browser decides `touch-action` when a touch begins, so a gesture
+       cannot be handed to the page halfway: the plot leaves the vertical swipe
+       to the page only while it has no lanes to scroll. */
+    if (this.plot !== null) this.plot.style.touchAction = this.view.maxScroll() === 0 ? "pan-y" : "none";
     this.moveSettled();
   }
 
