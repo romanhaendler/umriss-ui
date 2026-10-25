@@ -319,7 +319,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
         </ModalBody>
       </Drawer>
       {optionsType?.form && optionsWidget && (
-        <Popover open anchorRef={anchor} align="end" onOpenChange={() => setOptionsFor(null)} role="dialog" ariaLabel={wording.dashboardOptions}>
+        <Popover open anchorRef={anchor} align="end" onOpenChange={() => setOptionsFor(null)} role="dialog" aria-label={wording.dashboardOptions}>
           <div className={styles.options}>
             {optionsType.form({
               options: optionsWidget.options,
