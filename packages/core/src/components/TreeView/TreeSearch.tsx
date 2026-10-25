@@ -27,6 +27,8 @@ export function TreeSearch<K, S extends Key = string>({ ref, tree, placeholder, 
     <Input
       ref={ref}
       type="search"
+      autoComplete="off"
+      enterKeyHint="search"
       value={tree.search}
       placeholder={placeholder ?? wording.treeSearchPlaceholder}
       onChange={(e: ChangeEvent<HTMLInputElement>) => tree.setSearch(e.target.value)}

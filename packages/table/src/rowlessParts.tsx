@@ -115,6 +115,8 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
     <Input
       size={size}
       type="search"
+      autoComplete="off"
+      enterKeyHint="search"
       className={cx(grow && styles.searchGrow, className)}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
