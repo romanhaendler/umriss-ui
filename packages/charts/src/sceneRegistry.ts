@@ -9,6 +9,7 @@ import {
   laneOf,
   forget,
   fnEqual,
+  formatEqual,
   namesEqual,
   calendarEqual,
   takesPalette,
@@ -78,7 +79,7 @@ export function updateSeries(s: ChartScene, id: number, config: SeriesConfig): v
     previous.xAxisId === config.xAxisId &&
     previous.yAxisId === config.yAxisId &&
     previous.name === config.name &&
-    fnEqual(previous.format, config.format) &&
+    formatEqual(previous.format, config.format) &&
     previous.color === config.color &&
     previous.tone === config.tone &&
     isHidden(s, previous) === isHidden(s, config) &&
@@ -137,7 +138,7 @@ export function updateAxis(s: ChartScene, id: number, config: AxisConfig): void 
     fnEqual(previous.categoryLabel, config.categoryLabel) &&
     domainEqual(previous.domain, config.domain) &&
     zooms(s, previous) === zooms(s, config) &&
-    fnEqual(previous.tickFormat, config.tickFormat);
+    formatEqual(previous.tickFormat, config.tickFormat);
   entry.config = config;
   if (equal) return;
   // Another list is other places, and `time` decides whether a string is a

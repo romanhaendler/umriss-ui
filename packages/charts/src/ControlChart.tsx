@@ -30,6 +30,7 @@ import {
 import { fnEqual } from "./scene";
 import { readerOf } from "./value";
 import type { ValueFunction, Value } from "./types";
+import type { ValueFormat } from "./format";
 import type { ReactNode } from "react";
 
 /** The props of `ControlChart`. */
@@ -51,9 +52,9 @@ export interface ControlChartProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** The value as the tooltip writes it - on the line and on the violations.
+  /** The value as the tooltip writes it - on the line and on the violations., as a function or `NumberOptions`.
       @default the y axis' `tickFormat`, else the built-in number format */
-  format?: (value: number) => string;
+  format?: ValueFormat;
   /** Any CSS colour value.
       @default the palette's `--uc-series-N` */
   color?: string;
