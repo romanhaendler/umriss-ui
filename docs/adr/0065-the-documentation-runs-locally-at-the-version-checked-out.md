@@ -1,6 +1,6 @@
 # The documentation runs locally, at the version checked out
 
-Status: accepted, supersedes ADR-0037 in part (the hosting and the search premise), names the consequences for ADR-0046 and ADR-0058
+Status: accepted, supersedes ADR-0037 in part (hosting and search), ADR-0046 and ADR-0058 in part
 Date:   2026-10
 
 The demos were a public website on GitHub Pages, built and deployed on every

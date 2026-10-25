@@ -9,8 +9,9 @@ The code half of the spec. Everything that reads a package manifest's
 `homepage` to know where the site is reads the one constant
 `http://localhost:4170/umriss-ui/` from the demo shell's package list instead.
 `pnpm start` builds the site and serves it there; `build:pages` becomes
-`build:site` (script file renamed to match). The site verification file, the
-Open Graph tags and the share picture go. No generated output - the built
+`build:site` (script file renamed to match). The site verification file and the
+Open Graph tags go; the share picture stays as the front page's collage
+(`scripts/collage.png`). No generated output - the built
 site, the generated `llms.txt` / twins / `llms-full.md` - names
 `romanhaendler.github.io`; the packaged `llms-full.md` names no site address at
 all. Each manifest's `homepage` becomes
@@ -32,7 +33,7 @@ those.
 - [ ] `pnpm build:site` writes `site/`, its guard passes, and the guard has a rule that fails on `romanhaendler.github.io` in any file it wrote
 - [ ] `pnpm start` builds, then serves at `http://localhost:4170/umriss-ui/`: front page, a component page, a `.md` twin and a rendered document answer 200, an unknown path 404, `/` reaches the front page; a taken port is an error naming it; no new dependency
 - [ ] `check:dist` fails when a packed `llms-full.md` names a site address; links between pages inside it point into the file, other links keep only their text or go to GitHub
-- [ ] no `og:` tags, no share picture, no verification file in `site/`
+- [ ] no `og:` tags, no verification file in `site/`
 - [ ] `pnpm check demo`, `pnpm check:site`, `pnpm typecheck` green; the shell's built-site probes still find the site
 - [ ] `grep -r "github.io" scripts packages --include=*.ts --include=*.tsx --include=*.mjs --include=*.json` (outside `node_modules`, `dist*`, changelogs) finds nothing
 

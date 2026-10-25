@@ -122,8 +122,8 @@ Pages site itself is switched off in the repository settings, by the user.
 - **Each manifest's `homepage`** becomes the package's README on GitHub. The
   `repository` and `bugs` fields stay.
 - **What existed only for search engines and link previews goes:** the site
-  verification file and its copy step, the Open Graph tags and the share
-  picture. The sitemap and the canonical links stay only if they are what the
+  verification file and its copy step, the Open Graph tags (the share
+  picture stays: it is the front page's collage, `scripts/collage.png`). The sitemap and the canonical links stay only if they are what the
   built-site guard takes its inventory of addresses from; removing them is not
   a goal of this work, rewriting the guard for it is not either.
 - **The README of the repository** gets a section "See it running" high up,
@@ -152,11 +152,11 @@ Pages site itself is switched off in the repository settings, by the user.
   `.gitignore` comment on `site/` loses the workflow.
 - **ADR-0065, "The documentation runs locally, at the version checked out"**:
   no hosted site, for the legal reason and for version-exactness; records the
-  options above. It supersedes ADR-0037's hosting and search premise - the
+  options above. It supersedes ADR-0037 in part (hosting and search), and ADR-0046 and ADR-0058 in part - the
   path addresses and the prerendering stay, because the page text, the twins,
   the search index and the shell's built-site probes are made from them - and
-  names the consequences for ADR-0046 (the documents are pages of the local
-  site) and ADR-0058 (the skill points at the packaged file). The ADR index
+  for ADR-0046 the documents are pages of the local site, for ADR-0058 the
+  skill points at the packaged file. The ADR index
   gains the line; the superseded ADRs gain a "Superseded in part by" line and
   are otherwise left as written.
 - **The open search-visibility work is closed:** its last open ticket

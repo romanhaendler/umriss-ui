@@ -1,5 +1,5 @@
 /* `pnpm start`: the documentation, built from this checkout and served on this
-   machine at the site's address (packages/demo/src/address.ts). It builds
+   machine at the site's address (packages/demo/src/address.ts). It starts listening, then builds
    every time - after another tag is checked out, the site shown is that
    tag's, never the previous one's - and then serves `site/` until stopped.
 
@@ -15,11 +15,13 @@ import { siteServer } from "../packages/demo/src/tooling/serve.ts";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const { port, pathname } = new URL(SITE);
 
-execFileSync(process.execPath, ["--disable-warning=ExperimentalWarning", "--experimental-strip-types", join(ROOT, "scripts", "build-site.mjs")], { cwd: ROOT, stdio: "inherit" });
-
+/* Listening comes first: a taken port fails at once, not after the build. */
 const server = siteServer(join(ROOT, "site"), pathname);
 server.on("error", (error) => {
   console.error(error.code === "EADDRINUSE" ? `Port ${port} is taken. Stop what is using it - another \`pnpm start\`, perhaps - and run this again.` : error);
   process.exit(1);
 });
-server.listen(Number(port), "127.0.0.1", () => console.log(`\nThe documentation is ready: ${SITE}\nStop it with Ctrl+C.`));
+await new Promise((listening) => server.listen(Number(port), "127.0.0.1", listening));
+
+execFileSync(process.execPath, ["--disable-warning=ExperimentalWarning", "--experimental-strip-types", join(ROOT, "scripts", "build-site.mjs")], { cwd: ROOT, stdio: "inherit" });
+console.log(`\nThe documentation is ready: ${SITE}\nStop it with Ctrl+C.`);

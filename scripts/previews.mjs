@@ -13,13 +13,13 @@
    theme stored as the switch stores it, and photographs the first scenario's
    stage from its top left corner. */
 
-import { createServer } from "node:http";
-import { mkdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, extname, join } from "node:path";
+import { mkdirSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { SITE as SITE_ADDRESS } from "../packages/demo/src/address.ts";
 import { PACKAGES } from "../packages/demo/src/packages.ts";
+import { siteServer } from "../packages/demo/src/tooling/serve.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -29,28 +29,10 @@ const BASE = new URL(SITE_ADDRESS).pathname;
    whole number of CSS pixels and the product exact - Chromium cuts a
    fractional clip down, and the picture came out at 1199 x 749. */
 const SCALES = [1, 1.25, 1.5, 1.5625, 1.875, 2];
-const TYPES = {
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".css": "text/css",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".woff2": "font/woff2",
-  ".json": "application/json",
-};
 
 if (!statSync(join(SITE, PACKAGES[0].id, "index.html"), { throwIfNoEntry: false })) throw new Error("No built site: run `pnpm build:site` first.");
 
-const server = createServer((request, response) => {
-  const path = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
-  let file = path.startsWith(BASE) ? join(SITE, path.slice(BASE.length)) : "";
-  if (file !== "" && statSync(file, { throwIfNoEntry: false })?.isDirectory()) file = join(file, "index.html");
-  if (file === "" || !file.startsWith(SITE) || !statSync(file, { throwIfNoEntry: false })?.isFile()) {
-    response.writeHead(404).end();
-    return;
-  }
-  response.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" }).end(readFileSync(file));
-});
+const server = siteServer(SITE, BASE);
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 
