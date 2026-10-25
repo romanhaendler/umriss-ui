@@ -3,18 +3,10 @@ import { Badge, Button, Card, CardBody, CardHeader, Checkbox, Link, Stack, Switc
 
 export const title = "Accent for the application";
 export const lead =
-  "One rule on `:root`, outside any cascade layer, gives the whole application its own accent: it wins over the library's tokens whatever order the stylesheets load in. Set the accent's seven tokens together, each with a light and a dark value.";
+  "One rule on `:root`, outside any cascade layer, gives the whole application its own accent: it wins over the library's tokens whatever order the stylesheets load in. Set the accent's six tokens together, each with a light and a dark value.";
 
-/* In an application this is one rule in its own stylesheet:
-
-     :root {
-       --u-color-accent: light-dark(#4338ca, #818cf8);
-       --u-color-accent-hover: light-dark(#3730a3, #a5b4fc);
-       --u-color-accent-subtle: light-dark(#eef0fb, #1e1f3d);
-       --u-color-accent-subtle-pressed: light-dark(#dfe2f7, #282a52);
-       --u-color-accent-text: light-dark(#4338ca, #a5b4fc);
-       --u-color-on-accent: light-dark(#ffffff, #1e1b4b);
-     }
+/* In an application these tokens stand in the brand file of core's README,
+   in one rule in the application's own stylesheet.
 
    Here it is set on the example's root, so the rest of the page keeps the
    library's petrol. */

@@ -18,6 +18,8 @@
 import STYLESHEET from "../src/styles/tokens.css?raw";
 import ALERT_CSS from "../src/components/Alert/Alert.module.css?raw";
 import TAG_CSS from "../src/components/Tag/Tag.module.css?raw";
+import README from "../README.md?raw";
+import CHARTS_CSS from "../../charts/src/styles/charts.css?raw";
 import { describe, expect, it } from "vitest";
 
 /* ---------------------------------------------------------------
@@ -222,6 +224,15 @@ const PAIRS: readonly Pair[] = [
     name: "Type on the danger surface",
     fg: "--u-color-on-danger",
     bg: "--u-color-danger",
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+  },
+
+  /* The type on a filled accent surface: a checkbox tick, a selected day, the
+     dashboard's mode label (11 px). It reverses polarity in the dark theme. */
+  {
+    name: "Type on the accent surface",
+    fg: "--u-color-on-accent",
+    bg: "--u-color-accent",
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
 
@@ -452,3 +463,86 @@ for (const [themeName, theme] of THEMES) {
     }
   });
 }
+
+/* ---------------------------------------------------------------
+   The brand file of core's README
+
+   The fenced block `css brand.css` is held to the stylesheets: it names only
+   tokens that exist, it is complete, every colour has two values, and its
+   colours pass the pairs above laid over the stylesheet's own.
+   --------------------------------------------------------------- */
+
+function readBrand(readme: string): Map<string, string> {
+  const block = /```css brand\.css\n([\s\S]*?)\n```/.exec(readme);
+  if (!block) throw new Error("No block `css brand.css` in core's README");
+  const declarations = new Map<string, string>();
+  for (const d of block[1]!.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) declarations.set(d[1]!, d[2]!.trim());
+  return declarations;
+}
+
+const TWO_VALUES = /^light-dark\(\s*(#[0-9a-fA-F]{3,8})\s*,\s*(#[0-9a-fA-F]{3,8})\s*\)$/;
+
+/* Every problem of a brand file, by token. */
+function brandProblems(readme: string): string[] {
+  const brand = readBrand(readme);
+  const problems: string[] = [];
+  const declared = (token: string) => new RegExp(`${token}\\s*:`).test(STYLESHEET);
+  const chartsRead = [...CHARTS_CSS.matchAll(/var\((--u-chart-\d+)/g)].map((m) => m[1]!);
+  const accent = [...STYLESHEET.matchAll(/(--u-color-(?:accent[\w-]*|on-accent))\s*:/g)].map((m) => m[1]!);
+
+  for (const token of brand.keys()) {
+    if (!declared(token) && !chartsRead.includes(token)) problems.push(`${token} is declared nowhere`);
+  }
+  for (const token of new Set([...accent, ...chartsRead])) {
+    if (!brand.has(token)) problems.push(`${token} is missing`);
+  }
+  for (const [token, value] of brand) {
+    if (token !== "--u-font-sans" && !TWO_VALUES.test(value)) problems.push(`${token} has no light and dark value`);
+  }
+  for (const [name, base] of THEMES) {
+    const laid = new Map(base);
+    for (const [token, value] of brand) {
+      const two = TWO_VALUES.exec(value);
+      if (two) laid.set(token, two[name === "light" ? 1 : 2]!.toLowerCase());
+    }
+    for (const pair of PAIRS) {
+      if (!brand.has(pair.fg) && !brand.has(pair.bg)) continue;
+      const ratio = contrast(colour(laid, pair.fg), colour(laid, pair.bg));
+      if (ratio < pair.minimum[name]) {
+        const set = brand.has(pair.fg) ? pair.fg : pair.bg;
+        problems.push(`${set}: ${pair.name} is ${ratio.toFixed(2)}:1 in ${name}, under ${pair.minimum[name]}:1`);
+      }
+    }
+  }
+  return problems;
+}
+
+describe("The brand file of the README", () => {
+  it("passes", () => {
+    expect(brandProblems(README)).toEqual([]);
+  });
+
+  it("names a misspelt token", () => {
+    expect(brandProblems(README.replace("--u-color-accent-hover:", "--u-color-acent-hover:"))).toEqual(
+      expect.arrayContaining(["--u-color-acent-hover is declared nowhere", "--u-color-accent-hover is missing"]),
+    );
+  });
+
+  it("names an accent token that was removed", () => {
+    expect(brandProblems(README.replace(/ *--u-color-accent-subtle-pressed:.*\n/, ""))).toEqual([
+      "--u-color-accent-subtle-pressed is missing",
+    ]);
+  });
+
+  it("names a colour with one value only", () => {
+    expect(brandProblems(README.replace("light-dark(#db2777, #f472b6)", "#db2777"))).toEqual([
+      "--u-chart-2 has no light and dark value",
+    ]);
+  });
+
+  it("names a dark on-accent that is white", () => {
+    expect(brandProblems(README.replace("light-dark(#ffffff, #1e1b4b)", "light-dark(#ffffff, #ffffff)"))).toEqual([
+      expect.stringContaining("--u-color-on-accent: Type on the accent surface is 2.98:1 in dark"),
+    ]);
+  });
+});
