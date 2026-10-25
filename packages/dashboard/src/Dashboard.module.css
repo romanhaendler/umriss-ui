@@ -51,7 +51,7 @@
     font-weight: var(--u-weight-medium);
     line-height: var(--u-leading-none);
     letter-spacing: var(--u-tracking-caps);
-    text-transform: uppercase;
+    text-transform: var(--u-transform-caps);
   }
 
   /* The head shows the title alone; in the mode it is a sunken band, the grip of a drag. */
