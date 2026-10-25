@@ -24,7 +24,7 @@ const SHIPMENTS: Shipment[] = [
 export default function FilterAndSearch() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id, defaultGrouping: "tour" });
   return (
-    <Table ariaLabel="Shipments by tour, searchable">
+    <Table aria-label="Shipments by tour, searchable">
       <Toolbar>
         <Search />
       </Toolbar>

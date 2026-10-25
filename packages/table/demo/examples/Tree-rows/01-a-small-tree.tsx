@@ -35,7 +35,7 @@ const UNITS: Unit[] = [
 export default function ASmallTree() {
   const { Table, Column } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children });
   return (
-    <Table ariaLabel="Organisation">
+    <Table aria-label="Organisation">
       <Column value="name" label="Unit" rowHeader />
       <Column value="headcount" label="Headcount" />
     </Table>

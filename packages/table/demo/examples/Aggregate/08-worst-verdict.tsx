@@ -43,7 +43,7 @@ const READINGS: Reading[] = [
 export default function WorstVerdict() {
   const { Table, Column, VerdictColumn } = useTable(READINGS, { rowKey: (r) => r.id, defaultGrouping: ["kiln", "zone"] });
   return (
-    <Table ariaLabel="Kiln temperature by zone">
+    <Table aria-label="Kiln temperature by zone">
       <Column value="zone" label="Zone" />
       <Column value="kiln" label="Kiln" />
       <Column value="at" label="Hour" rowHeader />

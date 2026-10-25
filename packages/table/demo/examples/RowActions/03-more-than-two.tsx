@@ -23,7 +23,7 @@ export default function MoreThanTwo() {
 
   return (
     <Stack gap={3}>
-      <Table ariaLabel="Invoices">
+      <Table aria-label="Invoices">
         <Column value="id" label="Invoice" rowHeader />
         <Column value="supplier" label="Supplier" />
         <RowActions>

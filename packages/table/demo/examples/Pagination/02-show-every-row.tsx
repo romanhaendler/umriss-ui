@@ -18,7 +18,7 @@ export default function ShowEveryRow() {
   const { Table, Column } = useTable(DELIVERIES, { rowKey: (d) => d.id, pageSize: 5 });
 
   return (
-    <Table density="compact" ariaLabel="Deliveries without a paging bar">
+    <Table density="compact" aria-label="Deliveries without a paging bar">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="parcels" label="Parcels" />
     </Table>

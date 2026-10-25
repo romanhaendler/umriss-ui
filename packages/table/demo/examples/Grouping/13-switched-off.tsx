@@ -23,7 +23,7 @@ export default function SwitchedOff() {
   const report = useTable(INCIDENTS, { rowKey: (i) => i.id });
   return (
     <Stack gap={4}>
-      <list.Table ariaLabel="Incidents, groupable but not by id">
+      <list.Table aria-label="Incidents, groupable but not by id">
         <Toolbar>
           <ColumnMenu />
         </Toolbar>
@@ -32,7 +32,7 @@ export default function SwitchedOff() {
         <list.Column value="severity" label="Severity" />
         <list.Column value="minutes" label="Minutes to resolve" groupable={false} aggregate="sum" />
       </list.Table>
-      <report.Table ariaLabel="Incident report, never grouped" groupable={false}>
+      <report.Table aria-label="Incident report, never grouped" groupable={false}>
         <Toolbar>
           <ColumnMenu />
         </Toolbar>

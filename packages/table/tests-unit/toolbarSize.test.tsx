@@ -19,7 +19,7 @@ const ORDERS: Order[] = [
 function Orders({ size, searchSize }: { size?: "sm" | "md"; searchSize?: "sm" | "md" }) {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Toolbar size={size}>
         <Search size={searchSize} />
         <ColumnMenu />
@@ -63,7 +63,7 @@ describe("the toolbar's size", () => {
 function OwnControls({ size, own }: { size?: "sm" | "md"; own?: "sm" | "md" }) {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Toolbar size={size}>
         <Select aria-label="Status" size={own}>
           <option>Open</option>
