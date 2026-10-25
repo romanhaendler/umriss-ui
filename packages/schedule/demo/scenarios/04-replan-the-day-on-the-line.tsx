@@ -170,7 +170,7 @@ export default function ReplanTheDay() {
         onOpenChange={(open) => {
           if (!open) setMenu(null);
         }}
-        ariaLabel={target !== null ? `Actions for ${target.id}` : "Actions for the plan"}
+        aria-label={target !== null ? `Actions for ${target.id}` : "Actions for the plan"}
       >
         {target !== null ? (
           <>

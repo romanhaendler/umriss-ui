@@ -95,7 +95,7 @@ export default function OpenAContextMenu() {
         onOpenChange={(open) => {
           if (!open) setMenu(null);
         }}
-        ariaLabel={menu !== null ? `Hand over ${menu.duty.id}` : "Hand over"}
+        aria-label={menu !== null ? `Hand over ${menu.duty.id}` : "Hand over"}
       >
         {menu !== null &&
           ENGINEERS.filter((engineer) => engineer.id !== menu.duty.lane).map((engineer) => (
