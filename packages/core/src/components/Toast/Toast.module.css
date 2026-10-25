@@ -94,21 +94,33 @@
   }
 
   /* The distance from the edge is the application's to set; the tokens hold
-     the phone's own. */
+     the phone's own. The safe area of each edge is added on top of it, so a
+     token still means room from the visible edge. The sides are physical in
+     `env()`, and swap in a right-to-left region. */
+  .region {
+    --_safe-start: env(safe-area-inset-left);
+    --_safe-end: env(safe-area-inset-right);
+  }
+
+  .region:dir(rtl) {
+    --_safe-start: env(safe-area-inset-right);
+    --_safe-end: env(safe-area-inset-left);
+  }
+
   .region[data-edge="bottom"] {
-    bottom: var(--_toast-bottom);
+    bottom: calc(var(--_toast-bottom) + env(safe-area-inset-bottom));
   }
 
   .region[data-edge="top"] {
-    top: var(--_toast-top);
+    top: calc(var(--_toast-top) + env(safe-area-inset-top));
   }
 
   .region[data-along="start"] {
-    inset-inline-start: var(--_toast-start);
+    inset-inline-start: calc(var(--_toast-start) + var(--_safe-start));
   }
 
   .region[data-along="end"] {
-    inset-inline-end: var(--_toast-end);
+    inset-inline-end: calc(var(--_toast-end) + var(--_safe-end));
   }
 
   .region[data-along="center"] {
@@ -123,7 +135,7 @@
   @media (max-width: 600px) {
     .region.region {
       width: auto;
-      inset-inline: var(--_toast-start) var(--_toast-end);
+      inset-inline: calc(var(--_toast-start) + var(--_safe-start)) calc(var(--_toast-end) + var(--_safe-end));
       margin-inline: 0;
     }
   }
