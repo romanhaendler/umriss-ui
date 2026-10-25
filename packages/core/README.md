@@ -74,6 +74,9 @@ export function OrdersTable({ rows }: { rows: Order[] }) {
 }
 ```
 
+On a server, and until the page has hydrated, a date or time is empty, because only the browser
+knows the reader's zone.
+
 The reasons, and what a calculation may do differently, are in
 [ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
 
