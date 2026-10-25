@@ -143,6 +143,108 @@ token away.
 older nowhere; an older browser discards the tokens and shows the interface
 unstyled.
 
+## Testing
+
+Tested: Vitest 5 and Jest 30 (with babel-jest), both on jsdom. happy-dom and Jest 29 may work and are
+not promised. `check:dist` runs a test of the installed package in a Vitest project and a Jest project
+that hold exactly the files below.
+
+**Vitest** needs one line, `server.deps.inline`: Vitest hands a dependency to Node, and Node cannot
+import the stylesheet that the package's JavaScript imports (`Unknown file extension ".css"`). Inlined,
+Vitest's own pipeline handles it.
+
+```ts vitest.config.ts
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./umriss.setup.js"],
+    server: { deps: { inline: [/@umriss-ui/] } },
+  },
+});
+```
+
+**Jest** needs two settings: `moduleNameMapper` maps every stylesheet to an empty module, and
+`transformIgnorePatterns` lets babel-jest compile the package, which ships ES modules. Babel's config
+must apply to `node_modules`, so it is a root `babel.config.*`, not a `.babelrc`.
+
+```js jest.config.cjs
+module.exports = {
+  testEnvironment: "jsdom",
+  setupFilesAfterEnv: ["<rootDir>/umriss.setup.js"],
+  moduleNameMapper: { "\\.css$": "<rootDir>/css-stub.cjs" },
+  transformIgnorePatterns: ["/node_modules/(?!(@umriss-ui)/)"],
+};
+```
+
+```js css-stub.cjs
+module.exports = {};
+```
+
+```js babel.config.cjs
+module.exports = {
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-react", { runtime: "automatic" }],
+  ],
+};
+```
+
+**Next.js** with `next/jest`: put the umriss packages in `transpilePackages`; the preset stubs the
+stylesheets and compiles the packages itself.
+
+**The setup file** gives jsdom the five browser APIs that core's components use. It is the same file
+for both runners:
+
+```js umriss.setup.js
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+globalThis.IntersectionObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+};
+
+window.matchMedia ??= (query) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addEventListener() {},
+  removeEventListener() {},
+  addListener() {},
+  removeListener() {},
+  dispatchEvent: () => false,
+});
+
+Element.prototype.scrollIntoView ??= function () {};
+
+/* jsdom knows <dialog> but not showModal() and close(). */
+HTMLDialogElement.prototype.showModal ??= function () {
+  this.setAttribute("open", "");
+};
+HTMLDialogElement.prototype.close ??= function (value) {
+  if (!this.hasAttribute("open")) return;
+  this.removeAttribute("open");
+  if (value !== undefined) this.returnValue = value;
+  this.dispatchEvent(new Event("close"));
+};
+```
+
+**End-to-end suites.** The motion follows `prefers-reduced-motion`, so a Playwright suite turns it off
+with `reducedMotion: 'reduce'` in `use`. A tool without that switch sets, on `:root`, the tokens the
+reduced-motion block sets to `0ms`: `--u-transition`, `--u-duration-press`, `--u-duration-fast`,
+`--u-duration-medium`, `--u-duration-draw`, `--u-delay-draw`, `--u-duration-exit-fast`,
+`--u-duration-exit` and `--u-duration-exit-collapse`.
+
 ## Wording
 
 English is the default wording. German ships as well, as the subpath export
