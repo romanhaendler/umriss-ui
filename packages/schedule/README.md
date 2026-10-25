@@ -25,11 +25,11 @@ The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
 Every entry begins with `"use client"`, the directive a framework
-with Server Components reads to treat a module as client code. No test runs
-inside such a framework: the
-schedule is rendered to a string in a test. On a server it gives its labelled
-frame and empty canvases; the lanes, subtasks and the summary's counts arrive
-on the client after mount.
+with Server Components reads to treat a module as client code. A schedule is declared by its hook,
+`useSchedule`, so the declaration lives in a Client Component file: a Server Component renders that
+file and hands it the rows and subtasks. On a server a schedule gives its labelled frame and empty
+canvases; the lanes and subtasks arrive on the client after mount. No test runs inside such a
+framework: the schedule is rendered to a string in a test.
 
 ## The smallest schedule that runs
 
