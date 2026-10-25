@@ -70,6 +70,10 @@ jobs:
       # cannot do Trusted Publishing). npm runs no lifecycle scripts on a
       # tarball, so prepublishOnly's work is the steps above and check:dist.
       # One package failing stops the rest; the next push picks them up.
+      # `npm view` in `find` reports a version published minutes ago as
+      # missing, so a push right after a release asks again; npm's refusal to
+      # publish over an existing version is then the answer that it stands
+      # there, and the package is tagged as if it had just gone out.
       - name: Publish and tag
         env:
           DIRS: ${{ needs.find.outputs.dirs }}
@@ -80,7 +84,13 @@ jobs:
             case "$version" in *-*) dist_tag=next ;; *) dist_tag=latest ;; esac
             pnpm run check:dist
             pnpm pack
-            npm publish ./*.tgz --tag "$dist_tag"
+            if npm publish ./*.tgz --tag "$dist_tag" 2> publish.log; then
+              cat publish.log >&2
+            else
+              cat publish.log >&2
+              grep -q "cannot publish over the previously published versions" publish.log || exit 1
+              echo "$dir@$version is on npm already - only tagged"
+            fi
             tag="$dir-v$version"
             git tag "$tag"
             git ls-remote --exit-code --tags origin "$tag" > /dev/null || git push origin "$tag"
