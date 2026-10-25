@@ -58,10 +58,10 @@
 
   /* Compact (ADR-0051): the compact table's measures (ADR-0042), so that the
      two stand side by side - its type on a whole-pixel line, a small step
-     above and below. Under a finger the line is its own target and takes the
+     above and below, the line derived from the type as the table's is. Under a finger the line is its own target and takes the
      regular room back. */
   .frame[data-compact] {
-    --_calculation-line-text: 18px;
+    --_calculation-line-text: round(up, calc(var(--u-text-xs) * 1.63), 1px);
     --_calculation-line-pad: var(--u-space-1);
     --_calculation-line-gap: calc(var(--u-space-1) / 2);
     font-size: var(--u-text-xs);
