@@ -56,14 +56,16 @@ publish* ticked), and npm attaches the provenance itself. Under *Publishing
 access* every package requires two-factor authentication and refuses tokens
 that bypass it. The workflow packs with pnpm — only pnpm rewrites the
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
-`workspace:^`) — and uploads the tarball with npm, because pnpm 9.14.4 cannot
+`workspace:^0.<minor>.0`) — and uploads the tarball with npm, because pnpm 9.14.4 cannot
 do Trusted Publishing.
 
 1. **One number for all packages.** From `0.34.0` on, `core`, `charts`,
    `table`, `schedule` and `calculation` - and from `0.40.0` `dashboard` - are
    released together under one number, even where a package has no change of its own. The peer ranges
-   between them are that same number - `workspace:^` in the manifests, which
-   pnpm writes out as `^<version>` when it packs - so there is no table of
+   between them are `workspace:^0.<minor>.0` of that number, which pnpm packs
+   as `^0.<minor>.0`: a patch release leaves them, a minor release moves them
+   in the release commit, and `check:dist` holds both rules (one version for
+   all, and the form of every umriss peer) - so there is no table of
    which version needs which. At the release, in one commit: the `version` of
    every `packages/*/package.json` moves to the new number, and each
    `CHANGELOG.md` gets a heading of it.
