@@ -43,7 +43,7 @@ export default function ReportThePointer() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="One consignment on a truck and a van"
+        aria-label="One consignment on a truck and a van"
         height={152}
         onInteraction={(interaction) => setLast(describe(interaction))}
       >

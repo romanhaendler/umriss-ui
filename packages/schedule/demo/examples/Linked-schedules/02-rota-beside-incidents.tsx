@@ -136,12 +136,12 @@ export default function RotaBesideIncidents() {
   const incidents: ScheduleParts = useSchedule({ initialView: start, onViewChange: (v) => rota.setView(v) });
   return (
     <Stack gap={2}>
-      <rota.Schedule ariaLabel="Who was on call" height={140}>
+      <rota.Schedule aria-label="Who was on call" height={140}>
         <rota.Lane id="primary" label="Primary" />
         <rota.Lane id="secondary" label="Secondary" />
         <rota.Subtasks data={DUTIES} tasks={PEOPLE} />
       </rota.Schedule>
-      <incidents.Schedule ariaLabel="Incidents, the same hours" height={290}>
+      <incidents.Schedule aria-label="Incidents, the same hours" height={290}>
         {HIT.map((service) => (
           <incidents.Lane key={service.id} id={service.id} label={service.name} />
         ))}

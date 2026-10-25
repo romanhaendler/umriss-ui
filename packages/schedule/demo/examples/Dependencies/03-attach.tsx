@@ -35,7 +35,7 @@ function Variant({ attach }: { attach: DependencyAttachment }) {
       <Text size="xs" tone="muted" mono>
         attach=&quot;{attach}&quot;
       </Text>
-      <Schedule ariaLabel={`A release through three engineers, lines from the ${attach}`} height={188} attach={attach}>
+      <Schedule aria-label={`A release through three engineers, lines from the ${attach}`} height={188} attach={attach}>
         <Lane id="priya" label="Priya Raman" />
         <Lane id="ada" label="Ada Mwangi" />
         <Lane id="sam" label="Sam Okafor" />

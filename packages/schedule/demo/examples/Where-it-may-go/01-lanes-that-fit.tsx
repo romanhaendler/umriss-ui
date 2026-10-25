@@ -45,7 +45,7 @@ export default function LanesThatFit() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Two cooled vans and a dry van"
+        aria-label="Two cooled vans and a dry van"
         height={190}
         intents={["move", "lane"]}
         canMoveTo={mayGo}

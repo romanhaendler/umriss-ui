@@ -244,7 +244,7 @@ export default function TourPlan() {
     <Stack gap={3}>
       <div data-callout="1">
         <Schedule
-          ariaLabel="Tours of Wednesday, 18 March"
+          aria-label="Tours of Wednesday, 18 March"
           height={470}
           intents={["move"]}
           onIntent={apply}

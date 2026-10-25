@@ -60,7 +60,7 @@ function Covers({ target }: { target: ScheduleTooltipTarget }) {
 export default function SayWhatABarCoversAndALineJoins() {
   const { Schedule, Lane, Subtasks, Dependencies, BlockedTimes } = useSchedule({ initialView: { domain: [at(6, 30), at(15, 30)] } });
   return (
-    <Schedule ariaLabel="Design, build and test, with leave under the build" height={188} tooltip={(target) => <Covers target={target} />}>
+    <Schedule aria-label="Design, build and test, with leave under the build" height={188} tooltip={(target) => <Covers target={target} />}>
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="arjun" label="Arjun Mehta" />
       <Lane id="eva" label="Eva Novak" />

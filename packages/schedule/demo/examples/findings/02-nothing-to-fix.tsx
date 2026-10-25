@@ -22,7 +22,7 @@ export default function NothingToFix() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Two developers' week, without findings" height={140}>
+      <Schedule aria-label="Two developers' week, without findings" height={140}>
         <Lane id="hana" label="Hana Sato" />
         <Lane id="kofi" label="Kofi Mensah" />
         <Subtasks data={WORK} tasks={PROJECTS} />

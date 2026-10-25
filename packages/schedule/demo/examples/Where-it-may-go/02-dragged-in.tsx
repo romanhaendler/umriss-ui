@@ -64,7 +64,7 @@ export default function DraggedIn() {
         </div>
       </Card>
       <Schedule
-        ariaLabel="A chilled delivery waiting beside two cooled vans and a dry van"
+        aria-label="A chilled delivery waiting beside two cooled vans and a dry van"
         height={190}
         intents={["place"]}
         placing={placing}

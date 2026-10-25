@@ -111,7 +111,7 @@ describe("the loading schedule", () => {
   function Plan({ lanes, loading }: { lanes: boolean; loading: boolean }) {
     const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [0, 8 * HOUR] } });
     return (
-      <Schedule ariaLabel="Plan" loading={loading}>
+      <Schedule aria-label="Plan" loading={loading}>
         {lanes && <Lane id="press" label="Press" />}
         {lanes && <Subtasks data={[SUBTASK]} tasks={[{ id: "a", color: "red" }]} />}
       </Schedule>

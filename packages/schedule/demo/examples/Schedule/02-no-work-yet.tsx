@@ -19,7 +19,7 @@ const PEOPLE = [
 export default function NoWorkYet() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(23, 8), at(27, 18)] } });
   return (
-    <Schedule ariaLabel="Sprint 15, nothing planned yet" height={170}>
+    <Schedule aria-label="Sprint 15, nothing planned yet" height={170}>
       {PEOPLE.map((person) => (
         <Lane key={person.id} id={person.id} label={person.label} />
       ))}

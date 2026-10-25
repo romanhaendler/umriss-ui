@@ -23,7 +23,7 @@ export default function ChangeLeadInAndLeadOut() {
 
   return (
     <Schedule
-      ariaLabel="Two tours from North depot"
+      aria-label="Two tours from North depot"
       height={150}
       intents={["stretch", "leadIn", "leadOut"]}
       onIntent={(intent) => setTours((current) => current.map((tour) => applyIntent(tour, intent)))}

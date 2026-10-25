@@ -21,7 +21,7 @@ export default function SnapToADuration() {
   const [work, setWork] = useState(START);
   return (
     <Schedule
-      ariaLabel="Work planned in half days"
+      aria-label="Work planned in half days"
       height={140}
       snap={HALF_DAY}
       intents={["move", "stretch"]}

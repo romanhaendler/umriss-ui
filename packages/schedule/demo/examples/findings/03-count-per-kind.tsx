@@ -43,7 +43,7 @@ export default function CountPerKind() {
         <Badge tone={doubleBooked > 0 ? "warning" : "success"}>{doubleBooked} double-booked</Badge>
         <Badge tone={late > 0 ? "warning" : "success"}>{late} transfers too short</Badge>
       </Stack>
-      <Schedule ariaLabel="The day's legs with their findings counted" height={196}>
+      <Schedule aria-label="The day's legs with their findings counted" height={196}>
         {VEHICLES.map((vehicle) => (
           <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
         ))}

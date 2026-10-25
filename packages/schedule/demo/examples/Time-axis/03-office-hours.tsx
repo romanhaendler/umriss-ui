@@ -92,7 +92,7 @@ export default function OfficeHours() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(9, 9), at(20, 17)] } });
   return (
     <Schedule
-      ariaLabel="Sprint 14 of the web team, office hours only"
+      aria-label="Sprint 14 of the web team, office hours only"
       calendar={OFFICE_HOURS}
       height={280}
       label={(item) => item.name ?? item.id}

@@ -683,7 +683,7 @@ export default function ControlRoom() {
         }
       >
         <Schedule
-          ariaLabel="Plan of the early shift: press, dryer and kiln"
+          aria-label="Plan of the early shift: press, dryer and kiln"
           height={196}
           now={now}
           selectedTask={batch}

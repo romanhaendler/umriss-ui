@@ -53,7 +53,7 @@ export default function Combinations() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
     <Schedule
-      ariaLabel="Bars carrying several appearances at once"
+      aria-label="Bars carrying several appearances at once"
       height={230}
       label={(leg) => NAMES[leg.id] ?? leg.id}
     >

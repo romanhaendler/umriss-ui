@@ -17,7 +17,7 @@ export default function NoSnapping() {
   const [windows, setWindows] = useState(START);
   return (
     <Schedule
-      ariaLabel="A maintenance window placed freely"
+      aria-label="A maintenance window placed freely"
       height={100}
       snap={false}
       intents={["move"]}

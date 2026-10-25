@@ -26,7 +26,7 @@ describe("useSchedule", () => {
     function Plan() {
       const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [0, 3_600_000] } });
       return (
-        <Schedule ariaLabel="Plan of week 12">
+        <Schedule aria-label="Plan of week 12">
           <Lane id="press" label="Press" />
           <Subtasks data={[]} tasks={[]} />
         </Schedule>

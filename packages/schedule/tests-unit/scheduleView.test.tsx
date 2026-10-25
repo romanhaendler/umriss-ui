@@ -6,7 +6,7 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSchedule } from "../src";
-import type { ScheduleHandle, ScheduleOptions, ScheduleView, Subtask } from "../src";
+import type { ScheduleOptions, ScheduleView, Subtask } from "../src";
 
 const at = (hour: number) => new Date(2026, 2, 17).getTime() + hour * 3_600_000;
 const WORK: Subtask[] = [
@@ -24,7 +24,6 @@ afterEach(() => vi.restoreAllMocks());
 
 type Hook = ReturnType<typeof useSchedule>;
 let hook: Hook;
-let handle: ScheduleHandle | null;
 /* Through a function: a component may not assign what lies outside it. */
 const capture = (s: Hook) => {
   hook = s;
@@ -35,7 +34,7 @@ function Plan(options: ScheduleOptions) {
   capture(s);
   const { Schedule, Lane, LaneGroup, Subtasks } = s;
   return (
-    <Schedule ref={(r) => void (handle = r)} ariaLabel="Plan of Tuesday">
+    <Schedule aria-label="Plan of Tuesday">
       <LaneGroup id="hall" label="Hall">
         <Lane id="press" label="Press" />
         <Lane id="paint" label="Paint shop" />
@@ -45,37 +44,28 @@ function Plan(options: ScheduleOptions) {
   );
 }
 
-/* The ref of `Schedule` is a `ScheduleHandle`: a ref of another type does not compile. */
-declare const anElement: import("react").RefObject<HTMLDivElement | null>;
-function WrongRef() {
-  const { Schedule } = useSchedule();
-  // @ts-expect-error - a ref to an element is not a ref to the handle
-  return <Schedule ref={anElement} ariaLabel="x" />;
-}
-void WrongRef;
-
 const lanes = (host: HTMLElement) => host.querySelectorAll("[data-schedule-headers] [data-lane]").length;
 
 describe("the span in view", () => {
   it("is the subtasks' extent while the view names none, and the view says nothing of it", () => {
     render(<Plan />);
-    expect(handle!.visibleDomain()).toEqual([at(7.5), at(12)]);
+    expect(hook.visibleDomain()).toEqual([at(7.5), at(12)]);
     expect(hook.view).toEqual({});
   });
 
   it("is the view's span where it names one", () => {
     render(<Plan initialView={{ domain: [at(6), at(14)] }} />);
-    expect(handle!.visibleDomain()).toEqual([at(6), at(14)]);
+    expect(hook.visibleDomain()).toEqual([at(6), at(14)]);
     expect(hook.view).toEqual({ domain: [at(6), at(14)] });
   });
 
   it("moves through setDomain, and back to the extent with null", () => {
     render(<Plan />);
     act(() => hook.setDomain([at(9), at(10)]));
-    expect(handle!.visibleDomain()).toEqual([at(9), at(10)]);
+    expect(hook.visibleDomain()).toEqual([at(9), at(10)]);
     expect(hook.view).toEqual({ domain: [at(9), at(10)] });
     act(() => hook.setDomain(null));
-    expect(handle!.visibleDomain()).toEqual([at(7.5), at(12)]);
+    expect(hook.visibleDomain()).toEqual([at(7.5), at(12)]);
     expect(hook.view).toEqual({});
   });
 });
@@ -85,9 +75,9 @@ describe("a view set", () => {
     render(<Plan initialView={{ domain: [at(6), at(14)] }} />);
     act(() => hook.setDomain([at(9), at(10)]));
     act(() => hook.setView({ domain: [at(9), at(10)] }));
-    expect(handle!.visibleDomain()).toEqual([at(9), at(10)]);
+    expect(hook.visibleDomain()).toEqual([at(9), at(10)]);
     act(() => hook.setView({ domain: [at(7), at(13)], folded: ["hall"] }));
-    expect(handle!.visibleDomain()).toEqual([at(7), at(13)]);
+    expect(hook.visibleDomain()).toEqual([at(7), at(13)]);
     expect(hook.view).toEqual({ domain: [at(7), at(13)], folded: ["hall"] });
   });
 
@@ -95,7 +85,7 @@ describe("a view set", () => {
     render(<Plan initialView={{ domain: [at(6), at(14)], folded: ["hall"] }} />);
     act(() => hook.setView({}));
     expect(hook.view).toEqual({});
-    expect(handle!.visibleDomain()).toEqual([at(7.5), at(12)]);
+    expect(hook.visibleDomain()).toEqual([at(7.5), at(12)]);
   });
 
   it("is not reported, and a later change of the planner's is", () => {
@@ -195,10 +185,10 @@ describe("two schedules in step", () => {
     const { Schedule: Lower, Lane: LowerLane } = lower;
     return (
       <>
-        <Upper ariaLabel="Diesel">
+        <Upper aria-label="Diesel">
           <UpperLane id="truck" />
         </Upper>
-        <Lower ariaLabel="Electric">
+        <Lower aria-label="Electric">
           <LowerLane id="van" />
         </Lower>
       </>

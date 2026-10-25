@@ -40,7 +40,7 @@ export default function HandoversAndReleases() {
   const { Schedule, Lane, Subtasks, Milestones } = useSchedule({ initialView: { domain: [day(0, 6), day(5, 0)] } });
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Portal and billing plan, week of 16 March" height={188}>
+      <Schedule aria-label="Portal and billing plan, week of 16 March" height={188}>
         <Lane id="anna" label="Anna Berg" />
         <Lane id="ben" label="Ben Ortiz" />
         <Lane id="chloe" label="Chloe Lind" />

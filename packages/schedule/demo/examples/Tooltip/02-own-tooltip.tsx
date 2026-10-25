@@ -59,7 +59,7 @@ export default function OwnTooltip() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   return (
     <Schedule
-      ariaLabel="Three vehicles with the load in the tooltip"
+      aria-label="Three vehicles with the load in the tooltip"
       height={196}
       tooltip={(target) => <LoadTooltip target={target} />}
     >

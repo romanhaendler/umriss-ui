@@ -37,6 +37,9 @@ export interface PassThroughCase {
   /** Composite: finds, in the frame the ref reached, the element that carries
       the role the name belongs to. */
   named?: (frame: Element) => Element | null;
+  /** Composite: a second element that carries `aria-label` and `aria-labelledby`
+      beside the named one (the schedule names its figure root and its plot). */
+  alsoLabelled?: (frame: Element) => Element | null;
   /** Which element the ref has to reach, where the contract names one. */
   root?: (element: Element) => boolean;
 }
@@ -85,7 +88,7 @@ export function passThroughGuard(
     });
 
     it.each(Object.keys(cases).sort())("%s", (name) => {
-      const { render: draw, shape = "element", root, named } = cases[name]!;
+      const { render: draw, shape = "element", root, named, alsoLabelled } = cases[name]!;
       const ref = createRef<Element>();
       const { container } = render(
         draw({
@@ -116,8 +119,11 @@ export function passThroughGuard(
       const target = element && named ? named(element) : null;
       expect(target).not.toBeNull();
       for (const [attribute, value] of Object.entries(NAMES)) {
-        const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}="${value}"]`));
-        expect({ attribute, onNamed: carriers.length === 1 && carriers[0] === target }).toEqual({ attribute, onNamed: true });
+        /* `~=`: a caller's `aria-describedby` may stand in a list beside the component's own. */
+        const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}~="${value}"]`));
+        const second = attribute === "aria-describedby" || !element || !alsoLabelled ? null : alsoLabelled(element);
+        const expected = second && second !== target ? [target, second] : [target];
+        expect({ attribute, carriers: carriers.length === expected.length && expected.every((e) => carriers.includes(e!)) }).toEqual({ attribute, carriers: true });
       }
     });
   });

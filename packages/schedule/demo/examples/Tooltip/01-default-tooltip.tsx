@@ -36,7 +36,7 @@ const TRANSFERS: readonly Dependency[] = [
 export default function DefaultTooltip() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   return (
-    <Schedule ariaLabel="Three vehicles with the default tooltip" height={196}>
+    <Schedule aria-label="Three vehicles with the default tooltip" height={196}>
       {VEHICLES.map((vehicle) => (
         <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
       ))}

@@ -13,14 +13,14 @@ export function Parts() {
   // @ts-expect-error - useSchedule binds no row type and takes no rows.
   useSchedule([]);
   return (
-    <Plan ariaLabel="Plan">
+    <Plan aria-label="Plan">
       <Row id="a" />
       {/* @ts-expect-error - a subtask is the library's own type. */}
       <Subtasks data={[{ id: "x" }]} tasks={[]} />
       {/* @ts-expect-error - the span in view is the view's (ADR-0047): useSchedule({ initialView }). */}
-      <Plan ariaLabel="Plan" initialDomain={[0, 1]} />
+      <Plan aria-label="Plan" initialDomain={[0, 1]} />
       {/* @ts-expect-error - and so are the folded groups: no controlled pair beside the view. */}
-      <Plan ariaLabel="Plan" collapsedGroups={[]} />
+      <Plan aria-label="Plan" collapsedGroups={[]} />
     </Plan>
   );
 }
@@ -35,3 +35,22 @@ export function View() {
 }
 
 export const unused = [Schedule, Lane];
+
+declare const anElement: import("react").RefObject<HTMLDivElement | null>;
+declare const aHandle: import("react").RefObject<import("../src").ScheduleHandle | null>;
+declare const aButton: import("react").RefObject<HTMLButtonElement | null>;
+
+/* The `ref` is the root <div>; a ref typed at the deprecated `ScheduleHandle` is still accepted. */
+export function Refs() {
+  const { Schedule: Plan } = useSchedule();
+  return (
+    <>
+      <Plan ref={anElement} data-testid="plan" aria-label="Plan" />
+      <Plan ref={aHandle} aria-label="Plan" />
+      {/* @ts-expect-error - another element is not the root. */}
+      <Plan ref={aButton} aria-label="Plan" />
+      {/* @ts-expect-error - a name is required: aria-label, or the deprecated ariaLabel. */}
+      <Plan />
+    </>
+  );
+}

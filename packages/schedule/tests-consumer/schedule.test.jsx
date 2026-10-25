@@ -14,7 +14,7 @@ const SUBTASKS = [{ id: "cut", task: "a-2041", lane: "saw", from: at(6), to: at(
 function Plan() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(5), at(12)] } });
   return (
-    <Schedule ariaLabel="Plan of Tuesday">
+    <Schedule aria-label="Plan of Tuesday">
       <Lane id="saw" label="Saw" />
       <Subtasks data={SUBTASKS} tasks={TASKS} />
     </Schedule>

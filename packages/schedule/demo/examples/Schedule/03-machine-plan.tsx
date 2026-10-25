@@ -82,7 +82,7 @@ export default function MachinePlan() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: DAY_OF_PLAN } });
   return (
     <Schedule
-      ariaLabel="Machine shop, Tuesday 17 March"
+      aria-label="Machine shop, Tuesday 17 March"
       height={380}
       now={HALF_PAST_TEN}
       label={(step) => NAMES.get(step.task) ?? step.task}
