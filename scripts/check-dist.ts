@@ -3,6 +3,10 @@
    - every entry the manifest's `exports` names under `import` begins with
      `"use client";`,
    - the main entry imports its stylesheet as its second statement, right after,
+   - except where a package names a client file as a third argument: its main
+     entry is then server-safe, so it must not begin with the directive and must
+     import the client file, and the client file carries the directive and the
+     stylesheet import,
    - the stylesheet begins with the layer order,
    - and holds no rule outside the layers, no selector beyond the library's
      own elements,
@@ -14,6 +18,11 @@
      JavaScript file holds `import.meta`,
    - and a strict consumer compiles against the declarations of every entry,
      under `bundler` and `node10` resolution,
+   - and where a package names a client file, a Server Component module written
+     with the packed package renders through React's Flight server (the client
+     file as a client reference), decodes through the Flight client and comes
+     out as HTML (`scripts/flight/`); the same tree passed through a client
+     component of the caller's fails with the package's own message,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`),
    - and the packed `docs/llms-full.md`, read without any site, names none,
@@ -21,11 +30,11 @@
      minor (ADR-0066).
 
    Run from a package directory: `node --experimental-strip-types
-   ../../scripts/check-dist.ts <entry.js> <stylesheet.css>` - the packages call
+   ../../scripts/check-dist.ts <entry.js> <stylesheet.css> [client.js]` - the packages call
    it in `prepublishOnly`, after the build. */
 
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { transform } from "lightningcss";
@@ -33,9 +42,9 @@ import { HOSTED_HOST, SITE } from "../packages/demo/src/address.ts";
 import { RESIDUE_BUDGET_BYTES, residueOf } from "./residue.ts";
 import { beginsWithLayerOrder, offendersIn } from "./styles/rules.ts";
 
-const [entry, stylesheet] = process.argv.slice(2);
+const [entry, stylesheet, clientFile] = process.argv.slice(2);
 if (!entry || !stylesheet) {
-  console.error("usage: check-dist.ts <entry.js> <stylesheet.css>");
+  console.error("usage: check-dist.ts <entry.js> <stylesheet.css> [client.js]");
   process.exit(2);
 }
 
@@ -47,7 +56,10 @@ const entries = new Set(
   Object.values(manifest.exports).flatMap((target) => (target && typeof target === "object" && "import" in target ? exported(target.import) : [])),
 );
 for (const file of entries) {
-  if (!readFileSync(file, "utf8").startsWith(`"use client";\n`)) problems.push(`${file} does not begin with "use client"`);
+  const begins = readFileSync(file, "utf8").startsWith(`"use client";\n`);
+  if (clientFile && resolve(file) === resolve("dist", entry)) {
+    if (begins) problems.push(`${file} begins with "use client"; its entry must run on a server`);
+  } else if (!begins) problems.push(`${file} does not begin with "use client"`);
 }
 
 /* The documentation travels inside the package and is read without the site:
@@ -56,7 +68,12 @@ const documentation = readFileSync(join("docs", "llms-full.md"), "utf8");
 if (documentation.includes(new URL(SITE).host) || documentation.includes(HOSTED_HOST)) problems.push("docs/llms-full.md names a site address");
 
 const js = readFileSync(join("dist", entry), "utf8");
-if (!js.startsWith(`"use client";\nimport "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} right after the directive`);
+if (clientFile) {
+  if (!js.includes(`from "./${clientFile}"`)) problems.push(`dist/${entry} does not import ./${clientFile}`);
+  if (!readFileSync(join("dist", clientFile), "utf8").startsWith(`"use client";\nimport "./${stylesheet}";`)) {
+    problems.push(`dist/${clientFile} does not import ./${stylesheet} right after the directive`);
+  }
+} else if (!js.startsWith(`"use client";\nimport "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} right after the directive`);
 
 /* Development mode is one literal expression every toolchain reads (Vite's dev
    server, Node, Jest): a package whose source asks it must still ask it in the
@@ -152,8 +169,60 @@ try {
     const compiled = spawnSync(process.execPath, [resolve("node_modules", "typescript", "bin", "tsc"), "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
     if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
   }
+  if (clientFile) flightCheck(consumerRoot);
 } finally {
   rmSync(consumerRoot, { recursive: true, force: true });
+}
+
+/* The public packages release in step under one number, and each umriss peer is
+   written `workspace:^0.<minor>.0` of that number (pnpm packs `^0.<minor>.0`),
+   so a patch of the same minor is accepted and a minor release has to move it. */
+{
+  const own = JSON.parse(readFileSync("package.json", "utf8")) as { version: string; peerDependencies?: Record<string, string> };
+  const versions = readdirSync("..").flatMap((dir) => {
+    try {
+      const other = JSON.parse(readFileSync(join("..", dir, "package.json"), "utf8")) as { name: string; version: string; private?: boolean };
+      return other.private ? [] : [`${other.name} ${other.version}`];
+    } catch {
+      return [];
+    }
+  });
+  if (new Set(versions.map((line) => line.split(" ")[1])).size > 1) {
+    problems.push(`the public packages carry more than one version:\n${versions.map((line) => `  ${line}`).join("\n")}`);
+  }
+  const expected = `workspace:^0.${own.version.split(".")[1]}.0`;
+  for (const [peer, range] of Object.entries(own.peerDependencies ?? {})) {
+    if (peer.startsWith("@umriss-ui/") && range !== expected) problems.push(`peer ${peer} reads ${range}, expected ${expected}`);
+  }
+}
+
+/* A calculation written in a Server Component, rendered the way React's Flight
+   renderer does (`scripts/flight/`): the server half runs under the
+   `react-server` condition with the client file as a client reference, the
+   client half decodes its payload against the built client file. */
+function flightCheck(root: string) {
+  const here = resolve("../../scripts/flight");
+  for (const file of readdirSync(here)) copyFileSync(join(here, file), join(root, file));
+  writeFileSync(join(root, "register.mjs"), `import { register } from "node:module";\nregister("./loader.mjs", import.meta.url);\n`);
+  symlinkSync(resolve("node_modules", "react-dom"), join(root, "node_modules", "react-dom"));
+  symlinkSync(resolve("../../node_modules", "react-server-dom-webpack"), join(root, "node_modules", "react-server-dom-webpack"));
+  const run = (args: string[], input?: Buffer) =>
+    spawnSync(process.execPath, args, { cwd: root, input, env: { ...process.env, NODE_ENV: "development" }, maxBuffer: 1 << 26 });
+  const render = (page: string) => {
+    const payload = run(["--conditions", "react-server", "--import", "./register.mjs", "server.mjs", page]);
+    if (payload.status !== 0) return { html: "", error: `the Flight server failed:\n${payload.stderr}` };
+    const html = run(["--import", "./register.mjs", "client.mjs", resolve("dist", clientFile), join(root, "passthrough.client.js")], payload.stdout);
+    return { html: String(html.stdout), error: String(html.stderr) };
+  };
+  const costing = render("costing");
+  const missing = ["Costing", "Direct material", "Material cost", "Production cost", "Net offer price", "1,840"].filter((text) => !costing.html.includes(text));
+  if (costing.error || missing.length > 0) {
+    problems.push(`a calculation written in a Server Component does not render through Flight${costing.error ? `:\n${costing.error}` : ""}${missing.length > 0 ? `\nits HTML lacks: ${missing.join(", ")}` : ""}`);
+  }
+  const passed = render("passed");
+  if (!passed.error.includes("stands only directly inside a <Calculation>")) {
+    problems.push(`a tree passed through a client component does not fail with the calculation's error; it gave:\n${passed.error || passed.html.slice(0, 300)}`);
+  }
 }
 
 /* An import that uses nothing must cost next to nothing. */
@@ -172,4 +241,8 @@ if (problems.length > 0) {
   console.error(problems.join("\n"));
   process.exit(1);
 }
-console.log(`dist/${entry} and dist/${stylesheet} follow ADR-0021; ${entries.size} entr${entries.size === 1 ? "y begins" : "ies begin"} with "use client"`);
+console.log(
+  clientFile
+    ? `dist/${entry} runs on a server and dist/${clientFile} follows ADR-0021; a calculation written in a Server Component renders through Flight`
+    : `dist/${entry} and dist/${stylesheet} follow ADR-0021; ${entries.size} entr${entries.size === 1 ? "y begins" : "ies begin"} with "use client"`,
+);

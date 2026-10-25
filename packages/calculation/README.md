@@ -21,10 +21,14 @@ as a peer as well.
 The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.
 
-Every entry begins with `"use client"`, the directive a framework
-with Server Components reads to treat a module as client code. No test runs
-inside such a framework: the
-calculation is rendered to a string in a test.
+A calculation can be written in a Server Component or in a client file alike. The package's
+entry carries no `"use client"`, so `<Calculation>` reads its tree wherever the tree is written;
+its view, in a file of its own, begins with the directive and the stylesheet import. A tree must
+stand directly inside its `<Calculation>`, in one file: passed through a client component of your
+own, it fails with a message that says so. `check:dist` proves it by rendering a costing sheet
+written in a Server Component through React's Flight renderer, with the view as a client
+reference. No test runs inside a framework (`next build`): the calculation is rendered to a string
+in a test.
 
 ## Two forms, written as they are shown
 
