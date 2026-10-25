@@ -130,6 +130,10 @@ export function Columns() {
       </Column>
       <Column id="rate" value={(a) => a.amount / 100} label="Rate" format="percent" aggregate={(values, rows) => values.reduce((s, v) => s + v, 0) / rows.length} />
       <Column id="dueOwn" value={(a) => a.due} label="Due" format="date" aggregate={(values) => values[0]} />
+      {/* A column of a matrix, mapped from the data: a value that may be absent, summed, formatted, filtered. */}
+      <Column id="y2026" value={(a) => (a.urgent ? a.amount : undefined)} label="2026" aggregate="sum" format={{ decimals: 0 }} filter="range" />
+      {/* @ts-expect-error `footer` is no name for a total; `aggregate` is */}
+      <Column id="footerSum" value={(a) => a.amount * 2} label="Doppelt" footer="sum" />
       {/* @ts-expect-error a sum on text */}
       <Column value="number" label="Number" aggregate="sum" />
       {/* @ts-expect-error a range on numbers */}
