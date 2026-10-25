@@ -628,6 +628,29 @@ export class Registry {
     this.addRow = add;
   }
 
+  /** The table element while the frame is mounted - absent otherwise. */
+  frameTable: HTMLTableElement | null = null;
+
+  /** The virtual row `scrollToRow` wants shown once it is rendered. */
+  reveal: number | null = null;
+
+  setReveal(at: number | null) {
+    this.reveal = at;
+  }
+
+  setFrameTable(table: HTMLTableElement | null) {
+    this.frameTable = table;
+  }
+
+  /** Grid mode: the ids of the columns a cell can be focused in, and what
+      makes a cell the Active cell and focuses it - this render's, as `addRow`
+      is. */
+  cellFocus: { columns: readonly string[]; put: (key: string, column: string) => void } | null = null;
+
+  setCellFocus(focus: Registry["cellFocus"]) {
+    this.cellFocus = focus;
+  }
+
   /** Whether a table toolbar stands - one put there, or the table's own. */
   showsToolbar(): boolean {
     return this.count("toolbar") > 0 || this.needsOwnToolbar();
