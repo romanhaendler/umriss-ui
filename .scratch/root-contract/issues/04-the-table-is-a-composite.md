@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Size: M
 
-Blocked by: `01-the-adr-one-root-contract.md`, `02-the-pass-through-guard-is-shared.md`
+Blocked by: `01-the-adr-one-root-contract.md`, `02-the-pass-through-guard-is-shared.md`, `.scratch/upgrade-promise/issues/03-a-renamed-prop-export-or-wording-key-keeps-its-old-name-for-one-minor.md`
 Spec: `.scratch/root-contract/spec.md`
 
 ## What to build

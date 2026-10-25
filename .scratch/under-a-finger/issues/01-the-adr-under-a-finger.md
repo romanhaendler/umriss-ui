@@ -74,6 +74,8 @@ would stop at the same edge. Touch belongs to the device and reaches every surfa
   states it under "Changed", with the line that restores 32.
 - Later touch work uses this signal. Where a component hands a control to the platform on touch, it
   decides per gesture, as the Select does, or by CSS, never by a render-time test.
+- The date pickers keep their panel under a finger; their year Select reaches the platform's wheel
+  through the Select (ADR-0043), and nothing else is handed over.
 - **Under a finger** becomes a glossary term: the primary pointer is coarse. Sizes and hit areas follow
   it, and a behaviour follows the gesture's pointer type.
 

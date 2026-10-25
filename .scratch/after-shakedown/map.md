@@ -67,6 +67,11 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   four fixed levels ("diagnostic" later); acknowledge the selection or the rendered rows; ISA words in the
   wording only; sound as a callback; time as `asOf`; shortcuts only with focus.
 
+- [Alarm management: the standards claim and the slices of the first version](issues/11-alarm-management-standards-claim-and-first-slices.md):
+  a narrow ISA-18.2 claim (state model, no conformance) after the last slice; B.8's order with the ADR, two
+  table tickets (seconds, accessible grid selection), the claim and a first hand-published release after the
+  keyboard slice; `alarmFilter` never, analysis views and "diagnostic" later. Spec `.scratch/alarms/`.
+
 - [The upgrade promise](issues/19-the-upgrade-promise.md): release in step, peers `^0.x.0`, a rename works one
   more minor with a DEV warning, fixes in the latest minor only, TypeScript 5.4 floor; an ADR. Spec
   `.scratch/upgrade-promise/`.
@@ -124,6 +129,21 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   format that does not fit, a virtual table rendering every row); rows that are not an array read as none;
   strings as numbers and the browser floor documented; each package keeps its own `dev.ts`. Spec
   `.scratch/dev-warnings/`.
+
+- [Native pickers on touch](issues/07-native-pickers-on-touch.md): no picker hands over to a native input;
+  the calendar head gets a month and a year Select (the OS wheel under a finger), the grid the APG keys, the
+  DatePicker typed entry in its panel's foot; NumberInput with negatives asks for the text keyboard; time
+  fields take their digits themselves. Spec `.scratch/date-jump-and-typed-entry/`.
+
+- [The charts' single wishes](issues/22-the-charts-single-wishes.md): taken - side legend, `maxGap`, month
+  ticks under bars, `bin` on `ArrayLike`, `baseline` on `Bar` (waterfall, error bars), a matrix colour bar and
+  cell labels; the rest are recipes in the charts demo; no new kind, no ADR. Four specs.
+
+- [Calculation, dashboard and operator-screen wishes](issues/24-calculation-dashboard-and-operator-screen-wishes.md):
+  taken - a widget lock, `headingLevel`, stored options over `defaultOptions`, data quality as a third axis on
+  `Stat` and `Given`, the calculation in P3's print stylesheet; never - skipping missing values,
+  uncertainty, drag from the catalogue, a head slot, a mimic layer. Specs `.scratch/dashboard-small-wishes/`,
+  `.scratch/dashboard-locked-widget/`, `.scratch/data-quality/`.
 
 ## Not yet specified
 

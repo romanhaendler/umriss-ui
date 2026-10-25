@@ -1,7 +1,7 @@
 # The charts' single wishes
 
 Type:       grilling
-Status:     claimed
+Status:     resolved
 Blocked by: 12, 16
 
 ## Question
@@ -59,3 +59,7 @@ a chart below its floor in a widget - `.scratch/scroll-in-a-widget/`.
 - **C - recipes in the charts demo** (one spec, examples only): follow the live edge, fit line, density as a
   `Matrix`, small multiples, columns as input, per month, pens, log minor ticks, shares from `pareto()`.
 - **D - reading a matrix** (one spec): the colour bar and cell labels, with the label-colour decision.
+
+## Answer
+
+Decided 2026-10-25 by the maintainer: the proposed answer above, as it stands. It becomes four specs: small charts additions (A), the floating bar (B), reading a matrix (D) and recipes in the charts demo (C).

@@ -643,6 +643,16 @@ keeps its verdict (ADR-0010). The two ages at which it changes are a
 for a **Limit**, and these bound an age rather than a value.
 _Avoid_: Gültigkeit, validity, staleness as a verdict
 
+**Quality**:
+How far a value's source vouches for it, in three levels, OPC UA's: good,
+uncertain, bad. It is a third axis beside the **Verdict** and the
+**Freshness** and never collapses into either: a bad value keeps its number,
+its verdict and its age. The source states it; nothing derives it from the
+value, the limits or the age. Uncertain is not unknown: unknown is the verdict
+for no value, uncertain is the quality of a value we have.
+_Avoid_: status, status code, validity, reliability, confidence, health, Güte,
+Qualitätscode
+
 **Cadence**:
 How often a display must re-read the clock to keep a **Freshness** current,
 derived from the ages rather than from a fixed second — a tile that goes stale
@@ -1383,6 +1393,12 @@ _Avoid_: tile, Kachel, card (which is the surface), panel, gadget, **Cell**
 What a developer declares and a reader chooses from when adding to a
 **Dashboard**: what a **Widget** of this kind shows and which sizes it allows.
 _Avoid_: widget (for the kind rather than the placed one), template, component
+
+**Locked widget**:
+A **Widget** the application keeps on the dashboard at its size and with its
+options; the reader can only move it. Distinct from a dashboard that allows no
+editing at all.
+_Avoid_: pinned, fixed, mandatory widget
 
 **Widget size**:
 How much room a **Widget** takes, said by a name from one closed set that the
