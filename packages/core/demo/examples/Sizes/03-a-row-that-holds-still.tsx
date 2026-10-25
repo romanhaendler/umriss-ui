@@ -28,7 +28,7 @@ export default function ARowThatHoldsStill() {
   const [search, setSearch] = useState("");
   const [carriers, setCarriers] = useState<string[]>(["DHL", "UPS", "GLS"]);
   const [period, setPeriod] = useState<DateRange | null>(null);
-  const carriersRef = useRef<HTMLDivElement>(null);
+  const carriersRef = useRef<HTMLButtonElement>(null);
   const statusRef = useRef<HTMLSelectElement>(null);
   const carriersWidth = useWidth(carriersRef);
   const statusWidth = useWidth(statusRef);

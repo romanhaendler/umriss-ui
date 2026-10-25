@@ -13,7 +13,7 @@ export default function AnchoredSurface() {
       <Button ref={anchor} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         Sprint 14
       </Button>
-      <Popover open={open} onOpenChange={setOpen} anchorRef={anchor} role="dialog" ariaLabel="Sprint 14" restoreFocus width={280}>
+      <Popover open={open} onOpenChange={setOpen} anchorRef={anchor} role="dialog" aria-label="Sprint 14" restoreFocus width={280}>
         <Stack gap={2} style={{ padding: "var(--u-space-4)" }}>
           <Text size="sm" weight="medium">
             Member portal sign-in and profile

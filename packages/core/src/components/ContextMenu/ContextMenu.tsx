@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Popover } from "../Popover";
+import { warnDeprecated } from "../../lib/dev";
 import { MenuContext, handleMenuKeyDown } from "../Menu/Menu";
 import styles from "../Menu/Menu.module.css";
 
@@ -8,8 +9,10 @@ import styles from "../Menu/Menu.module.css";
 /* ContextMenu – the menu of a point.                                 */
 /* ------------------------------------------------------------------ */
 
-/** The props of `ContextMenu`. */
-export interface ContextMenuProps {
+interface ContextMenuBase {
+  /** Accessible name of the menu: what it acts on. A context menu has no
+      trigger whose label could name it. */
+  "aria-label"?: string;
   /** Whether the menu stands. Controlled, like `Popover`: a right-click
       opens it only because the caller says so. */
   open: boolean;
@@ -20,12 +23,17 @@ export interface ContextMenuProps {
       `clientY` of the event that asked for it. At a window edge the panel
       flips and clamps as every popover does. */
   position: { x: number; y: number };
-  /** Accessible name of the menu: what it acts on. A context menu has no
-      trigger whose label could name it. */
-  ariaLabel: string;
+  /** The old spelling of `aria-label`; both work for one further minor.
+      @deprecated since 0.43 - use `aria-label`. */
+  ariaLabel?: string;
   /** The entries – `MenuItem` and `MenuSeparator`, as in `Menu`. */
   children: ReactNode;
 }
+
+/** The props of `ContextMenu`. The menu is named by what it acts on - it has
+    no trigger whose label could name it: `aria-label` is required (`ariaLabel`
+    stands for one further minor). */
+export type ContextMenuProps = ContextMenuBase & ({ "aria-label": string } | { ariaLabel: string });
 
 /**
  * A menu that opens at a point instead of under a trigger – for a right-click
@@ -35,7 +43,9 @@ export interface ContextMenuProps {
  * popover does the placing, the dismissal and the portal. The focus goes to
  * the first entry and, on closing, back to where it was when the menu opened.
  */
-export function ContextMenu({ open, onOpenChange, position, ariaLabel, children }: ContextMenuProps) {
+export function ContextMenu({ open, onOpenChange, position, ariaLabel, "aria-label": name, children }: ContextMenuProps) {
+  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
+
   const anchorRef = useRef<HTMLSpanElement>(null);
   const returnRef = useRef<HTMLElement | null>(null);
 
@@ -77,7 +87,7 @@ export function ContextMenu({ open, onOpenChange, position, ariaLabel, children 
         focusRef={returnRef}
         offset={0}
         role="menu"
-        ariaLabel={ariaLabel}
+        aria-label={name ?? ariaLabel}
         className={styles.panel}
       >
         <div
