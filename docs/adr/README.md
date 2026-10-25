@@ -1,6 +1,6 @@
 # Decisions
 
-Sixty-five decisions, each one written where it was made and kept afterwards. An
+Sixty-six decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -79,5 +79,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0063](0063-inside-a-modal-dialog-the-toasts-and-the-tooltips-stand-in-the-top-layer.md) | Inside a modal dialog the toasts and the tooltips stand in the top layer, and everywhere else the token scale orders them | Toasts above a modal | accepted | core, table |
 | [0064](0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md) | A dashboard a user arranges is built: a sequence of widgets at named sizes on columns that never change in number | Dashboard a user arranges | accepted, supersedes ADR-0060 in one point | scope, dashboard |
 | [0065](0065-the-documentation-runs-locally-at-the-version-checked-out.md) | The documentation runs locally, at the version checked out | No hosted site; `pnpm start` | accepted, supersedes ADR-0037 in part (hosting and search), ADR-0046 and ADR-0058 in part | demo, docs |
+| [0067](0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md) | A Server Component hands umriss its data, and writes only a calculation itself | Server Components: data crosses, views are client, calculation reads its tree | accepted, amends ADR-0060 | core, packages, calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
