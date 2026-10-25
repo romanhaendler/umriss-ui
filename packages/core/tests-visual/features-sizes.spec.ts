@@ -423,3 +423,41 @@ for (const width of [1280, 320]) {
     await measure(stage.getByText(long, { exact: true }));
   });
 }
+
+/* Under a finger (ADR-0070): the `md` control is 44 px, `sm` stays 26, and the
+   same page without touch is as it was. */
+const sizesPage = async (page: Page) => {
+  await openExample(page, "sizes", "one-size-for-a-place");
+  const stage = example(page, "one-size-for-a-place");
+  const height = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement).offsetHeight);
+  const small = [
+    stage.getByLabel("Search tickets").locator(".."),
+    stage.getByLabel("Team"),
+    stage.getByRole("button", { name: "Opened on", exact: true }),
+    stage.getByRole("button", { name: "Open", exact: true }),
+    stage.getByRole("button", { name: "New ticket" }),
+  ];
+  const heights = await Promise.all(small.map(height));
+  await stage.getByRole("button", { name: "New ticket" }).click();
+  const save = page.getByRole("dialog").getByRole("button", { name: "Save" });
+  await expect(save).toBeVisible();
+  return { small: heights, save: await height(save) };
+};
+
+test.describe("under a finger", () => {
+  test.use({ hasTouch: true });
+
+  test("a md control is 44 px and a sm control 26", async ({ page }) => {
+    const { small, save } = await sizesPage(page);
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    expect(small).toEqual([26, 26, 26, 26, 26]);
+    expect(save).toBe(44);
+  });
+});
+
+test("without touch a md control stays 32 and a sm control 26", async ({ page }) => {
+  const { small, save } = await sizesPage(page);
+  expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(false);
+  expect(small).toEqual([26, 26, 26, 26, 26]);
+  expect(save).toBe(32);
+});

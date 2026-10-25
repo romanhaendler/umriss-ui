@@ -211,3 +211,33 @@ test("searching shrinks the set and the scrollbar", async ({ page }) => {
 test("there is no paging beside virtualisation", async ({ page }) => {
   await expect(example(page).getByRole("navigation", { name: "Pagination" })).toHaveCount(0);
 });
+
+/* ---------------- A table stays within a parent of definite height ---------------- */
+
+test.describe("in a pane of fixed height", () => {
+  test.beforeEach(async ({ page }) => {
+    await openExample(page, "virtualisation", "in-a-pane");
+  });
+
+  const pane = (page: Page) => page.locator('[data-example="in-a-pane"] [data-pane]');
+
+  for (const maxHeight of [undefined, "100%"]) {
+    test(`the frame is no taller than the pane and the document holds a window of rows (maxHeight ${maxHeight ?? "unset"})`, { tag: "@quick" }, async ({ page }) => {
+      const area = pane(page).locator("table").locator("..");
+      if (maxHeight) {
+        /* What the prop does is set this style; applied here as a caller's `maxHeight` would. */
+        await area.evaluate((el, value) => {
+          el.style.maxHeight = value;
+        }, maxHeight);
+      }
+      const paneBox = (await pane(page).boundingBox())!;
+      const frame = (await area.locator("..").boundingBox())!;
+      expect(frame.height).toBeLessThanOrEqual(paneBox.height + 1);
+      const search = (await pane(page).getByPlaceholder("Stop or dock").boundingBox())!;
+      expect(search.y + search.height).toBeLessThanOrEqual(paneBox.y + paneBox.height);
+      const rendered = await pane(page).locator("[data-row]").count();
+      expect(rendered).toBeGreaterThan(0);
+      expect(rendered).toBeLessThan(60);
+    });
+  }
+});
