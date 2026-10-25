@@ -65,8 +65,11 @@
     border-radius: var(--u-radius-lg) var(--u-radius-lg) 0 0;
   }
 
+  /* The band's room below the controls comes out of the room above them: the
+     head is as tall in the mode as at rest, so the body below it keeps its
+     height. */
   .editingHead {
-    padding-block-end: var(--u-space-1);
+    padding-block: var(--u-space-1);
     background: var(--u-color-surface-pressed);
     touch-action: none;
     user-select: none;
@@ -165,10 +168,6 @@
     min-height: 0;
     padding: 2px var(--u-space-3) 10px;
     overflow: hidden;
-  }
-
-  .item[data-editing] .body {
-    padding-block-start: var(--u-space-2);
   }
 
   @container (max-width: 755px) {
