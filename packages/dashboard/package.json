@@ -67,7 +67,7 @@
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts dashboard.js dashboard.css"
   },
   "peerDependencies": {
-    "@umriss-ui/core": "workspace:^",
+    "@umriss-ui/core": "workspace:^0.41.0",
     "react": ">=19",
     "react-dom": ">=19"
   },

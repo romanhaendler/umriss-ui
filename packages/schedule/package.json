@@ -72,8 +72,8 @@
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts schedule.js schedule.css"
   },
   "peerDependencies": {
-    "@umriss-ui/charts": "workspace:^",
-    "@umriss-ui/core": "workspace:^",
+    "@umriss-ui/charts": "workspace:^0.41.0",
+    "@umriss-ui/core": "workspace:^0.41.0",
     "react": ">=19",
     "react-dom": ">=19"
   },
