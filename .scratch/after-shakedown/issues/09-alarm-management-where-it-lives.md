@@ -1,7 +1,7 @@
 # Alarm management: where it lives and which ADR carries it
 
 Type:   grilling
-Status: open
+Status: resolved
 
 ## Question
 
@@ -17,3 +17,19 @@ Decisions 1 and 2 of `.scratch/alarm-management/requirements.md` part B:
 
 Also confirm part B.1: the first ticket restores `e027d1f7^` (model, list, tests) unchanged and green, every
 change follows against that baseline. Costly to reverse: the ADR is written from this answer.
+
+## Answer
+
+Decided 2026-10-25 by the maintainer.
+
+- **A new published package `@umriss-ui/alarms`**, depending on core and table. Core and table stay general;
+  the control-room audience finds model, list, `PriorityMark` and banner in one place, and the package carries
+  the standards claim. Costs accepted: a seventh published package, a demo of its own under ADR-0020, and
+  `CLAUDE.md`'s dependency map changes ("nothing depends on the table" no longer holds).
+- **One new ADR supersedes the withdrawn ADR-0009 and ADR-0057.** It keeps their boundary (generation,
+  thresholds, authorisation, audit trail, persistence and sound output are the application's) and adds
+  first-out and the banner. It is written as the alarms spec's first ticket.
+- **Part B.1 confirmed:** the first implementation ticket restores `e027d1f7^` (model, list, tests) unchanged
+  and green, moved into the new package; every change follows as its own ticket against that baseline.
+- **Becomes** the spec `.scratch/alarms/`, written after "Alarm management: the standards claim and the slices
+  of the first version".
