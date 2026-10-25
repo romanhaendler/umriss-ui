@@ -53,6 +53,20 @@ export interface Formats {
   relative: (ms: number) => string;
 }
 
+/** How a number is written: a share, a count, or a measurement to a number of places. */
+export type NumberFormat = "percent" | "count" | { decimals: number };
+
+/**
+ * A number as its format says, through the set's own functions - so an
+ * application's replaced `number`, `percent` or `count` is the one called.
+ * No format is `number` without places.
+ */
+export function writeNumber(formats: Formats, n: number, format?: NumberFormat): string {
+  if (format === "percent") return formats.percent(n);
+  if (format === "count") return formats.count(n);
+  return formats.number(n, typeof format === "object" ? format.decimals : undefined);
+}
+
 /* The decimal places `number` writes without a digit count. */
 const DEFAULT_PLACES = 10;
 
