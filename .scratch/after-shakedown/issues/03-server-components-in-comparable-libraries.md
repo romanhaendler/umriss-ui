@@ -1,7 +1,7 @@
 # Server Components in comparable libraries
 
 Type:   research
-Status: open
+Status: resolved
 
 ## Question
 
@@ -20,3 +20,21 @@ hydration mismatch?
   `cross-package.md` 3).
 
 Facts only, primary sources. The decision is "What umriss promises a Server Component".
+
+## Answer
+
+Findings: `docs/research/after-shakedown/server-components.md` on the local branch `research/server-components`
+(`git show research/server-components:docs/research/after-shakedown/server-components.md`).
+
+- Three shapes in use: a client boundary per file (MUI, Mantine: no wrapper, every prop must serialise), a
+  headless core run on the server (TanStack Table v9: only `useTable` is client), a component that detects
+  where it runs (KendoReact Grid). AG Grid and Highcharts are browser-only; ECharts renders SVG on the server.
+- umriss puts `"use client"` on one file per package, so even pure helpers become client references on the
+  server; TanStack and MUI mark per module.
+- Function config from a server page: field-name row keys and accessors, format strings; custom render code
+  crosses only as a component from a client file.
+- Dates: libraries render in UTC, take a zone as configuration, or format in the runtime zone (umriss today).
+  Server-only output cannot raise #418 but shows the server's zone; the escapes are `suppressHydrationWarning`,
+  a render after mount, and `use(browser())` (react-dom 19.3, per the research; verify before relying on it).
+- Element-type matching cannot work: a client type arrives as a lazy wrapper, so `child.type === Ref` and
+  static markers both fail. React's docs suggest an array of objects as a prop instead.

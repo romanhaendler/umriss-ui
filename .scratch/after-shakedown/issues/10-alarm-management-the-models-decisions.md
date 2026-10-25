@@ -19,3 +19,7 @@ Decisions 3 to 7 of `.scratch/alarm-management/requirements.md` part B, plus poi
   turned off or remapped - which promise, and if remappable, which API?
 
 Each answer is small; together they fix the model's surface for the spec.
+
+From "ISA-18.2 and EEMUA 191 in secondary sources": the non-annunciated level is called "diagnostic" in every
+source, never "journal"; a fourth level is a rare "highest" (under 1 % of alarms); "acknowledge only the rows
+shown" and a 1-2 Hz flash have no source, so they stand as umriss's own rules if kept.
