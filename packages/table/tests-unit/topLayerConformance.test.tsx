@@ -15,7 +15,7 @@ import { useTable } from "../src";
 function Shipments() {
   const { Table, Column } = useTable([{ id: "FP-1", note: "A note much longer than its cell" }], { rowKey: (s) => s.id });
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="note" label="Note" />
     </Table>

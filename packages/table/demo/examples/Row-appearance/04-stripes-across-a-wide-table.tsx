@@ -27,7 +27,7 @@ export default function StripesAcrossAWideTable() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table striped stickyRowHeader ariaLabel="Shipments with their addresses">
+    <Table striped stickyRowHeader aria-label="Shipments with their addresses">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="customer" label="Customer" />
       <Column value="street" label="Street" />

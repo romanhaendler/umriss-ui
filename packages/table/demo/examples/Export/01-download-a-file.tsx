@@ -22,7 +22,7 @@ export default function DownloadAFile() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Toolbar>
         <Search placeholder="Search customer" />
         <Export filename="shipments.csv" />

@@ -20,7 +20,7 @@ export default function ValuesThatDoNotFit() {
   const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.name });
 
   return (
-    <Table ariaLabel="Services with tags and notes">
+    <Table aria-label="Services with tags and notes">
       <Column value="name" label="Service" rowHeader width={120} />
       <Column value="tags" label="Tags" width={170} sortable={false}>
         {(tags) =>

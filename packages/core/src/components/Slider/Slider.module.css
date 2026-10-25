@@ -210,4 +210,13 @@
       background: Highlight;
     }
   }
+
+  /* Under a finger the range is 24 px high, the square of WCAG 2.5.8; the
+     margin gives the 4 px back, so the track stays where the marks expect it. */
+  @media (pointer: coarse) {
+    .range {
+      height: 24px;
+      margin-block: -2px;
+    }
+  }
 }

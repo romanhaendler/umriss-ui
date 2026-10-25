@@ -177,7 +177,7 @@ export default function ControlsAtTheToolbarsSize() {
   const { Table, Column } = t;
 
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Toolbar>
         <Search placeholder="Shipment or customer" />
         <MultiSelect

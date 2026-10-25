@@ -48,7 +48,7 @@ export default function StickyParts() {
   return (
     <>
       <style>{STYLE}</style>
-      <Table className="week-table" selectable stickyHeader stickyRowHeader maxHeight="300px" ariaLabel="Planned hours per day">
+      <Table className="week-table" selectable stickyHeader stickyRowHeader maxHeight="300px" aria-label="Planned hours per day">
         <Column value="team" label="Team" width={96} />
         <Column value="name" label="Person" rowHeader width={160} />
         {DAYS.map((day, d) => (

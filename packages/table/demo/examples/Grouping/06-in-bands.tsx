@@ -24,7 +24,7 @@ const band = (amount: number) => (amount < 1000 ? "Small (under €1,000)" : amo
 export default function InBands() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: "size" });
   return (
-    <Table ariaLabel="Invoices by size">
+    <Table aria-label="Invoices by size">
       <Column id="size" value={(i) => i.amount} label="Size" groupValue={band} format={{ decimals: 2 }} />
       <Column value="id" label="Invoice" rowHeader />
       <Column value="supplier" label="Supplier" />

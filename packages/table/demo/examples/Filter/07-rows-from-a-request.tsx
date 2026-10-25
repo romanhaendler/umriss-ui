@@ -203,7 +203,7 @@ export default function RowsFromARequest() {
   const { Table, Column } = t;
 
   return (
-    <Table ariaLabel="Shipments from a request" loading={isPending}>
+    <Table aria-label="Shipments from a request" loading={isPending}>
       <Toolbar>
         <MultiSelect<Status>
           aria-label="Status"

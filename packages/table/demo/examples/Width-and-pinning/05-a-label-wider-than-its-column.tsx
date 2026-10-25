@@ -19,7 +19,7 @@ export default function ALabelWiderThanItsColumn() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id, defaultSort: { column: "weight", direction: "desc" } });
 
   return (
-    <Table ariaLabel="Shipments in narrow columns">
+    <Table aria-label="Shipments in narrow columns">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="weight" label="Gross weight in kilograms" width={75} />
       <Column value="carrier" label="Carrier responsible for delivery" width={75} filter="list" />

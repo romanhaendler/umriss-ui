@@ -45,7 +45,7 @@ export default function TwentyThousand() {
     virtual: true,
   });
   return (
-    <Table ariaLabel="Requests" maxHeight="480px" stickyHeader>
+    <Table aria-label="Requests" maxHeight="480px" stickyHeader>
       <Column value="service" label="Service" />
       <Column value="at" label="Received" format="dateTime" aggregate="range" />
       <Column value="duration" label="Duration (ms)" format={{ decimals: 0 }} aggregate="avg" />

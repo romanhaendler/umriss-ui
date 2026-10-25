@@ -15,7 +15,7 @@ const UNITS: Unit[] = [{ id: "v", name: "Sales", children: [{ id: "vn", name: "N
 function Units() {
   const { Table, Column, RowDetail } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children });
   return (
-    <Table grid ariaLabel="Units" onRowAdd={() => undefined} newRow={() => ({})}>
+    <Table grid aria-label="Units" onRowAdd={() => undefined} newRow={() => ({})}>
       <Column value="name" label="Unit" rowHeader edit="text" />
       <RowDetail>{(u) => <p>Detail of {u.name}</p>}</RowDetail>
     </Table>

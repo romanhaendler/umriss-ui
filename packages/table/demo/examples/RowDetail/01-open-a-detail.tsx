@@ -34,7 +34,7 @@ export default function OpenADetail() {
   const { Table, Column, RowDetail } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="customer" label="Customer" />
       <RowDetail>

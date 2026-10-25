@@ -78,7 +78,7 @@ function Server({ grid = false, filterOptions = true, groupable }: { grid?: bool
   capture(t);
   const { Table: Frame, Column, RowActions, Action } = t;
   return (
-    <Frame selectable loading={loading} grid={grid} groupable={groupable} ariaLabel="Orders">
+    <Frame selectable loading={loading} grid={grid} groupable={groupable} aria-label="Orders">
       <Pagination />
       <Toolbar>
         <Search placeholder="Search orders" />

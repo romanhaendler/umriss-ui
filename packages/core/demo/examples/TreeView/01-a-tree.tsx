@@ -40,7 +40,7 @@ export default function ATree() {
   const tree = useTree(COMPANY, { reader: READER, defaultExpanded: ["commercial"], defaultActive: "CC-1200" });
 
   return (
-    <TreeView tree={tree} ariaLabel="Cost centres">
+    <TreeView tree={tree} aria-label="Cost centres">
       {(entry) => entry.node.name}
     </TreeView>
   );

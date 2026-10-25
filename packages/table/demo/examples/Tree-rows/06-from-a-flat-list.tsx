@@ -38,7 +38,7 @@ export default function FromAFlatList() {
   const rows = useMemo(() => nest(FLAT), []);
   const { Table, Column } = useTable(rows, { rowKey: (c) => c.id, childRows: (c) => c.children, defaultBranches: 1 });
   return (
-    <Table ariaLabel="Cost centres">
+    <Table aria-label="Cost centres">
       <Column value="name" label="Name" rowHeader />
       <Column value="id" label="Cost centre" />
       <Column value="amount" label="Amount (k€)" />

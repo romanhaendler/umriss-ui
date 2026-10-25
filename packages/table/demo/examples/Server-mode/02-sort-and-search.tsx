@@ -186,7 +186,7 @@ export default function SortAndSearch() {
 
   return (
     <Stack gap={2}>
-      <Table ariaLabel="Shipments on the server">
+      <Table aria-label="Shipments on the server">
         <Toolbar>
           <Search placeholder="Shipment or customer" />
         </Toolbar>

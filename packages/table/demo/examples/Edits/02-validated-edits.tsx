@@ -36,7 +36,7 @@ export default function ValidatedEdits() {
 
   return (
     <Stack gap={2}>
-      <Table grid ariaLabel="Capacity" onCellEdit={apply}>
+      <Table grid aria-label="Capacity" onCellEdit={apply}>
         <Column value="name" label="Person" rowHeader />
         <Column value="team" label="Team" />
         <Column

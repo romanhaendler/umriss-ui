@@ -312,6 +312,7 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
   }
 
   findCycle(quantities);
+  if (metrics === undefined) carryPlaces(quantities, result);
   return { result, quantities, metrics };
 }
 
@@ -332,6 +333,21 @@ export function perMetric(model: CalculationModel): readonly CalculationModel[] 
     }
     return { result: model.result, quantities };
   });
+}
+
+/** The places a quantity is shown with go down to the operands without their
+    own, where unit and format are the same. A reference is not followed: its
+    quantity takes the places of where it is defined. */
+function carryPlaces(quantities: Map<string, Quantity>, key: string): void {
+  const quantity = quantities.get(key)!;
+  for (const { key: operandKey, reference } of quantity.operands) {
+    if (reference) continue;
+    const operand = quantities.get(operandKey)!;
+    if (operand.decimals === undefined && operand.unit === quantity.unit && operand.format === quantity.format) {
+      operand.decimals = quantity.decimals;
+    }
+    carryPlaces(quantities, operandKey);
+  }
 }
 
 /** A quantity that depends on itself through references cannot be evaluated. */

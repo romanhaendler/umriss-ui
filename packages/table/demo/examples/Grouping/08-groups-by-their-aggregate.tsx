@@ -27,7 +27,7 @@ export default function GroupsByAggregate() {
     defaultSort: { column: "weight", direction: "desc" },
   });
   return (
-    <Table ariaLabel="Shipments by tour, heaviest first">
+    <Table aria-label="Shipments by tour, heaviest first">
       <Column value="tour" label="Tour" />
       <Column value="id" label="Shipment" rowHeader />
       <Column value="customer" label="Customer" />
