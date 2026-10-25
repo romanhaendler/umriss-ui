@@ -31,7 +31,7 @@
 
   /* The press point: the surface gives way minimally - no relief. */
   .button:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: scale(var(--u-button-press-scale));
   }
 
   /* Loading locks the button but does not grey it out: it says "running", not

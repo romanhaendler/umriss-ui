@@ -51,7 +51,7 @@
     font-weight: var(--u-weight-medium);
     line-height: var(--u-leading-none);
     letter-spacing: var(--u-tracking-caps);
-    text-transform: uppercase;
+    text-transform: var(--u-transform-caps);
   }
 
   /* The head shows the title alone; in the mode it is a sunken band, the grip of a drag. */
@@ -167,7 +167,13 @@
     flex: 1 1 auto;
     min-height: 0;
     padding: 2px var(--u-space-3) 10px;
-    overflow: hidden;
+    overflow: auto;
+  }
+
+  /* The ring is drawn inside the body, where the card does not clip it. */
+  .body:focus-visible {
+    outline: 2px solid var(--u-color-accent);
+    outline-offset: -2px;
   }
 
   @container (max-width: 755px) {
