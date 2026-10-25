@@ -75,7 +75,7 @@ const monthName = (month: string) => new Date(`${month}-01T00:00`).toLocaleStrin
 function GapPerCentre() {
   const { Chart, XAxis, YAxis, Bar } = useChart(YEAR);
   return (
-    <Chart height={240} ariaLabel="Outlook minus budget for the year, per cost centre">
+    <Chart height={240} aria-label="Outlook minus budget for the year, per cost centre">
       <XAxis value="name" />
       <YAxis label="k€" tickFormat={euros} />
       {/* One series per sign, stacked on one another so that each bar stands centred on its cost centre. */}
@@ -96,7 +96,7 @@ function GapPerCentre() {
 function MarketingByMonth() {
   const { Chart, XAxis, YAxis, Bar, Line } = useChart(MONTHLY);
   return (
-    <Chart height={260} ariaLabel="Marketing's budget, actual and forecast per month">
+    <Chart height={260} aria-label="Marketing's budget, actual and forecast per month">
       <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="k€" tickFormat={euros} />
       <Bar value={(d) => thousands(d.budget)} name="Budget" color="var(--uc-color-text)" barWidth={0.7} format={euros} />

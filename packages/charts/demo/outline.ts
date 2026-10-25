@@ -70,7 +70,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Clears the active point." },
         ],
         accessibility: [
-          "The plot is an image named by `ariaLabel` and described by a summary: the series, the visible stretch and each series' lowest and highest value in it. With a `Tooltip` it becomes one tab stop, the role `application` read as \"chart\", and the summary adds the keys. Pass `ariaLabel`: without it the plot has no name, and the development build warns.",
+          "The plot is an image named by `aria-label` and described by a summary: the series, the visible stretch and each series' lowest and highest value in it. With a `Tooltip` it becomes one tab stop, the role `application` read as \"chart\", and the summary adds the keys. Pass `aria-label` (or `aria-labelledby`): without it the plot has no name, and the development build warns.",
           "When a key comes to rest, a polite live region beside the plot reads the active position and every series' value there, as the tooltip shows it; a pointer announces nothing. A reader who wants every value at once opens the `DataTable` (on [Tooltip](#/tooltip)), a plain table of what the chart shows.",
           "Under forced colours the chart draws in the system colours and tells its series apart by their marks instead of by colour. With reduced motion the tooltip appears without fading in.",
         ],

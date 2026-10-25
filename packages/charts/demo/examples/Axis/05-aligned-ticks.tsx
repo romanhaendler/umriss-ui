@@ -104,7 +104,7 @@ const SEARCH_WEEK = week("search", 5 * 60_000);
 export default function AlignedTicks() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
-    <Chart height={260} ariaLabel="Search requests and latency over last week on one grid">
+    <Chart height={260} aria-label="Search requests and latency over last week on one grid">
       <XAxis value="t" time />
       <YAxis label="Requests/min" />
       <YAxis id="latency" position="right" label="ms" alignTicks />

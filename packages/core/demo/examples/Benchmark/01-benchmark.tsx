@@ -87,7 +87,7 @@ function Body({ built, onShown }: { built: { roots: Unit[]; open: string[] }; on
   });
   useEffect(onShown, [onShown]);
   return (
-    <TreeView tree={tree} ariaLabel="Benchmark tree" style={{ height: 320 }}>
+    <TreeView tree={tree} aria-label="Benchmark tree" style={{ height: 320 }}>
       {(entry) => entry.node.name}
     </TreeView>
   );

@@ -90,7 +90,7 @@ const SIGN_IN = metrics("sign-in");
 function Latencies({ mode }: { mode: "x" | "nearest" }) {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH);
   return (
-    <Chart height={220} ariaLabel={`Search and sign-in latency, tooltip mode ${mode}`}>
+    <Chart height={220} aria-label={`Search and sign-in latency, tooltip mode ${mode}`}>
       <XAxis value="t" time tickCount={4} />
       <YAxis label="ms" />
       <Line value="p95" name="Search" />

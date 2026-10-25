@@ -15,7 +15,7 @@ const TICKETS = [
 export default function TotalOfAStack() {
   const { Chart, XAxis, YAxis, Bar } = useChart(TICKETS);
   return (
-    <Chart height={260} ariaLabel="Tickets opened per working day, by channel">
+    <Chart height={260} aria-label="Tickets opened per working day, by channel">
       <XAxis value="day" />
       <YAxis label="Tickets" />
       <Bar value="mail" name="Mail" stack="tickets" />

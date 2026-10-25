@@ -67,7 +67,7 @@ const OBJECTIVE = SERVICES.find((one) => one.id === "checkout")!.latencySlo;
 export default function AgainstATarget() {
   const { Chart, XAxis, YAxis, Scatter } = useChart(TRACES);
   return (
-    <Chart height={300} ariaLabel="Traced Checkout requests against the latency objective">
+    <Chart height={300} aria-label="Traced Checkout requests against the latency objective">
       <XAxis value="t" time />
       <YAxis label="ms" />
       <LimitLine value={OBJECTIVE} severity="warning" label="Objective" />

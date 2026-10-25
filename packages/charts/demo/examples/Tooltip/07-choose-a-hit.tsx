@@ -18,7 +18,7 @@ export default function ChooseAHit() {
   const { Chart, XAxis, YAxis, Line } = useChart(ORDERS, { onSelect: setChosen });
   return (
     <>
-      <Chart height={260} ariaLabel="Orders per hour, by channel">
+      <Chart height={260} aria-label="Orders per hour, by channel">
         <XAxis value="hour" tickFormat={(v) => `${v}:00`} />
         <YAxis label="orders" />
         <Line value="web" name="Web" />

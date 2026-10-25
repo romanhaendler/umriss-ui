@@ -19,7 +19,7 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * along with it.
  */
 export interface DatePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The day, as a `Date` on local midnight; `null` means none. */
   value: Date | null;
   /** Runs as soon as a day is settled - on a click in the grid, on "Today" and
@@ -129,7 +129,7 @@ export function DatePicker(
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        ariaLabel={wording.datePanel}
+        aria-label={wording.datePanel}
         id={panelId}
         className={styles.panel}
       >

@@ -37,7 +37,7 @@ function Course({ rows, field }: { rows: Row[]; field: "a" | "b" }) {
   seen.push(parts);
   const { Chart, XAxis, YAxis, Line } = parts;
   return (
-    <Chart ariaLabel="One course">
+    <Chart aria-label="One course">
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
       <YAxis />
       <Line value={field} name="V" />

@@ -42,7 +42,7 @@ export const lead = "Several y axes stack outwards on their side, and a series p
 export default function Axes() {
   const { Chart, XAxis, YAxis, Line } = useChart(LOAD_TEST);
   return (
-    <Chart height={340} ariaLabel="A load test: CPU, throughput and latency on three y axes">
+    <Chart height={340} aria-label="A load test: CPU, throughput and latency on three y axes">
       <XAxis value="minute" label="Minute of the test" />
       <XAxis id="seconds" position="top" value={(d) => d.minute * 60} label="Seconds into the test" />
       <YAxis id="cpu" position="left" label="CPU %" />

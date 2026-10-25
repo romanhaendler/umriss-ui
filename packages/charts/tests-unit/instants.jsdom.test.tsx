@@ -50,7 +50,7 @@ function Hours<T extends { t: number | string | Date; signIns: number }>({
 }) {
   const { Chart, XAxis, YAxis, Line } = useChart<{ t: number | string | Date; signIns: number }>(rows);
   return (
-    <Chart ariaLabel="Sign-ins per hour">
+    <Chart aria-label="Sign-ins per hour">
       <XAxis id={axisId} value="t" time={time} />
       <YAxis />
       <Line value="signIns" name={name} xAxisId={axisId} />
@@ -110,7 +110,7 @@ describe("An instant on the x axis", () => {
     function Mixed() {
       const { Chart, XAxis, YAxis, Line } = useChart<{ t: number | Date; signIns: number }>(asMs);
       return (
-        <Chart ariaLabel="Mixed">
+        <Chart aria-label="Mixed">
           <XAxis value="t" />
           <YAxis />
           <Line value="signIns" name="In numbers" />
@@ -165,7 +165,7 @@ describe("A place the caller names on a time axis", () => {
     const to = new Date("2026-03-18T00:00");
     const freeze = new Date("2026-03-17T08:30");
     return (
-      <Chart ariaLabel="A day of sign-ins">
+      <Chart aria-label="A day of sign-ins">
         <XAxis value="t" time domain={dates ? [from, to] : [from.getTime(), to.getTime()]} />
         <YAxis />
         <Line value="signIns" name="Sign-ins" />

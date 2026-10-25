@@ -91,7 +91,7 @@ const CHECKOUT = metrics("checkout");
 export default function TimeAxis() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart height={260} ariaLabel="Checkout's error rate today">
+    <Chart height={260} aria-label="Checkout's error rate today">
       <XAxis value="t" />
       <YAxis label="Errors %" />
       <Line value="errorRate" name="Error rate" />

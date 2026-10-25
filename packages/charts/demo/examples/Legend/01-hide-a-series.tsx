@@ -105,7 +105,7 @@ export default function HideASeries() {
           Show all
         </button>
       </div>
-      <Chart height={260} ariaLabel="Latency of three services">
+      <Chart height={260} aria-label="Latency of three services">
         <XAxis value="t" time />
         <YAxis label="ms" />
         {SERIES.map((one) => (
