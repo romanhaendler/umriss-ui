@@ -39,7 +39,7 @@ describe("the schedule on a server", () => {
   it("renders no lane label on a server - the lanes arrive on the client, after mount", () => {
     const html = renderToString(<Plan now={at(9)} />);
     for (const text of ["Press", "Paint shop", "Cutting"]) expect(html).not.toContain(text);
-    expect(html).toContain("0 lanes, 0 subtasks");
+    expect(html).not.toContain("in view from");
   });
 
   it("renders with now following the clock", () => {
