@@ -72,7 +72,13 @@ do Trusted Publishing.
    The changelog is written at the release, from a draft: run `pnpm changelog`
    (the subjects of the commits since the last `Release:` commit, per package),
    keep what changes something for a caller, merge what belongs together, and
-   put it under the new heading. A changelog has no `## Unreleased` section:
+   put it under the new heading. Every top-level entry under `### Changed`
+   carries a nested item that begins `Migration:`: what a caller changes, or
+   that nothing changes and what to look at. A rename's line names the old
+   name, the new one and the release that removes the old one; a removal stands
+   under `### Changed` with its own line. `check:dist` reads the packed
+   `CHANGELOG.md` and fails without a heading of the package's version or with
+   an entry that lacks its line (earlier sections are not checked). A changelog has no `## Unreleased` section:
    nothing is written to it during development.
 2. The package's `README.md` read against what it now claims. Every roadmap
    line against the open work under `.scratch/` — work that
