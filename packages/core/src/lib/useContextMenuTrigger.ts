@@ -28,15 +28,13 @@ export function useContextMenuTrigger(open: (position: { x: number; y: number })
   const { handlers, touching } = useLongPress(open);
   return {
     ...handlers,
-    /** Opens at the pointer on a right-click; a finger's own `contextmenu` is held back. */
-  onContextMenu: (event) => {
+    onContextMenu: (event) => {
       event.preventDefault();
       /* A finger's `contextmenu` (Android) is the press's; the press opens it. */
       if (touching()) return;
       open({ x: event.clientX, y: event.clientY });
     },
-    /** Opens at the target's box on the context-menu key or Shift+F10. */
-  onKeyDown: (event) => {
+    onKeyDown: (event) => {
       if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
       event.preventDefault();
       const box = event.currentTarget.getBoundingClientRect();
