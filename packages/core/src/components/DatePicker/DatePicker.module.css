@@ -739,8 +739,9 @@
     .triggerClear::after {
       content: "";
       position: absolute;
-      /* Not towards the value: a tap at its end places the caret. */
-      inset: -8px -8px -8px 0;
+      /* Towards the value only the 3 px the 24 px square of WCAG 2.5.8
+         asks: a tap at the value's end places the caret. */
+      inset: -8px -8px -8px -3px;
     }
   }
 }

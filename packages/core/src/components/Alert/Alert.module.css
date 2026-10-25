@@ -147,4 +147,17 @@
   .close svg {
     transition: transform var(--u-transition-press);
   }
+
+  /* Under a finger the cross is hit in a 24 px square (WCAG 2.5.8); 20 px is too small a target. */
+  @media (pointer: coarse) {
+    .close {
+      position: relative;
+    }
+
+    .close::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+    }
+  }
 }

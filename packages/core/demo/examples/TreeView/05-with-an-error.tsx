@@ -54,7 +54,7 @@ export default function WithAnError() {
           </Text>
         )}
       </Stack>
-      <TreeView tree={tree} ariaLabel="Services by team" checkable>
+      <TreeView tree={tree} aria-label="Services by team" checkable>
         {(entry) => entry.node.name}
       </TreeView>
     </Stack>
