@@ -11,7 +11,8 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { DateFormat, NumberFormat } from "./values";
+import type { NumberFormat } from "@umriss-ui/core";
+import type { DateFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
 
