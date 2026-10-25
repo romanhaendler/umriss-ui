@@ -177,6 +177,8 @@ export function Combobox<T extends string = string>(
         style={{ ...extentStyle(chars), ...style }}
       >
         <input
+          autoComplete="off"
+          enterKeyHint="done"
           {...rest}
           ref={mergeRefs(ref, inputRef)}
           type="text"
@@ -186,8 +188,6 @@ export function Combobox<T extends string = string>(
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
-          autoComplete="off"
-          enterKeyHint="done"
           aria-activedescendant={open && filtered[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
           aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
           aria-required={field?.required || undefined}

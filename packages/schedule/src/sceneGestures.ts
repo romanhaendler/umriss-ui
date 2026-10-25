@@ -513,8 +513,9 @@ export class SceneGestures {
   contextMenu(event: MouseEvent): void {
     if (this.host.handlers().onInteraction === undefined) return;
     event.preventDefault();
-    /* Android fires one for the long press that grabs a bar; it is the grab's. */
-    if (this.armed || this.editing) return;
+    /* Android fires one for the long press that grabs a bar; it is the grab's.
+       A loading plan takes no pointer. */
+    if (this.armed || this.editing || this.loading) return;
     const { x, y } = this.local(event.clientX, event.clientY);
     this.report("contextmenu", this.host.view.hitAt(x, y), event.clientX, event.clientY, x, y);
   }
