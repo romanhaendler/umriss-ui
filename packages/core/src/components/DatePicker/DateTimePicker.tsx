@@ -11,7 +11,7 @@ import { TimeField } from "./TimeField";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { useFormats, useWording } from "../../lib/language";
+import { useFormats, useLanguage, useWording } from "../../lib/language";
 import { ClockGlyph } from "../../lib/glyphs";
 
 /* ------------------------------------------------------------------ */
@@ -81,6 +81,8 @@ export function DateTimePicker(
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
+  // The width is measured with the real formats: it is the same on a server and in the browser, even while the instants are still empty.
+  const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.dateTimePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
 
@@ -168,7 +170,7 @@ export function DateTimePicker(
         }}
         ariaLabel={wording.dateTimeClear}
         chars={chars}
-        natural={naturalChars((sample) => formats.dateTime(sample, withSeconds).length, placeholderText)}
+        natural={naturalChars((sample) => measure.dateTime(sample, withSeconds).length, placeholderText)}
       />
       <Popover
         open={open}

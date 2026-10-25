@@ -9,7 +9,7 @@
    falls back on the default and never on an empty text or a key name - that is
    the difference between an incomplete translation and a broken surface. */
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_FORMATS } from "./formats";
 import type { Formats } from "./formats";
@@ -84,8 +84,42 @@ export function LanguageProvider({ formats, wording, children }: LanguageProvide
 /** Formatting and wording together; without a provider, the defaults. */
 export const useLanguage = (): Language => useContext(LanguageContext) ?? DEFAULT_LANGUAGE;
 
-/** Only the formatting. */
-export const useFormats = (): Formats => useLanguage().formats;
+/* Until the page has hydrated the instants are written empty: the reader's
+   time zone is known only in the browser, and a server's text for an instant
+   would differ from the browser's (ADR-0060, amended). The server snapshot is
+   false and the client snapshot true, so a hydration renders once more right
+   after and a client-only render never sees the empty set. */
+const subscribeNever = () => () => {};
+const useHydrated = (): boolean =>
+  useSyncExternalStore(subscribeNever, () => true, () => false);
+
+const noInstant = () => "";
+/* One empty set per format set, so the formats' identity stays stable. */
+const withoutInstants = /* @__PURE__ */ new WeakMap<Formats, Formats>();
+
+function blankInstants(formats: Formats): Formats {
+  let blank = withoutInstants.get(formats);
+  if (!blank) {
+    blank = {
+      ...formats,
+      date: noInstant,
+      dateShort: noInstant,
+      month: noInstant,
+      dateLong: noInstant,
+      time: noInstant,
+      dateTime: noInstant,
+      offset: noInstant,
+    };
+    withoutInstants.set(formats, blank);
+  }
+  return blank;
+}
+
+/** Only the formatting. Dates and times are empty until the page has hydrated. */
+export function useFormats(): Formats {
+  const formats = useLanguage().formats;
+  return useHydrated() ? formats : blankInstants(formats);
+}
 
 /** Only the wording. */
 export const useWording = (): Wording => useLanguage().wording;
