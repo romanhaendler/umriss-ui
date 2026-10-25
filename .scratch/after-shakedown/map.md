@@ -59,6 +59,21 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   condition and no CJS build, held by a consumer check in `check:dist`; no motion switch. Spec
   `.scratch/test-runners/`.
 
+- [Alarm management: where it lives and which ADR carries it](issues/09-alarm-management-where-it-lives.md): a
+  new package `@umriss-ui/alarms` on core and table; one new ADR supersedes 0009 and 0057; the first ticket
+  restores `e027d1f7^` unchanged.
+
+- [Alarm management: priorities, acknowledge-all, wording, sound, time and shortcuts](issues/10-alarm-management-the-models-decisions.md):
+  four fixed levels ("diagnostic" later); acknowledge the selection or the rendered rows; ISA words in the
+  wording only; sound as a callback; time as `asOf`; shortcuts only with focus.
+
+- [The upgrade promise](issues/19-the-upgrade-promise.md): release in step, peers `^0.x.0`, a rename works one
+  more minor with a DEV warning, fixes in the latest minor only, TypeScript 5.4 floor; an ADR. Spec
+  `.scratch/upgrade-promise/`.
+
+- [A theme object](issues/20-a-theme-object.md): none; a complete token file to copy and the layer order in
+  core's README, row height follows density. Spec `.scratch/theming-recipe/`.
+
 ## Not yet specified
 
 - **Time zones.** ADR-0060 says "not yet; umriss shows the reader's time". Server rendering (hydration
