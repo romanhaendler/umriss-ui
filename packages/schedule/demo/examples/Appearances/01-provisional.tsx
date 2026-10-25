@@ -18,7 +18,7 @@ const WORK: Subtask[] = [
 export default function Provisional() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
-    <Schedule ariaLabel="Agreed work above, provisional work below" height={144}>
+    <Schedule aria-label="Agreed work above, provisional work below" height={144}>
       <Lane id="released" label="Agreed, with lead-in" />
       <Lane id="draft" label="Provisional" />
       <Subtasks data={WORK} tasks={PROJECTS} />

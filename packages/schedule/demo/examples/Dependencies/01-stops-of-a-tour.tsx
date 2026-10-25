@@ -30,7 +30,7 @@ const DRIVES: Dependency[] = [
 export default function StopsOfATour() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(7), at(10)] } });
   return (
-    <Schedule ariaLabel="Two morning tours with their stops" height={150}>
+    <Schedule aria-label="Two morning tours with their stops" height={150}>
       <Lane id="fp-214" label="Van FP 214 K" />
       <Lane id="fp-377" label="E-van FP 377 K" />
       <Dependencies data={DRIVES} />

@@ -94,7 +94,7 @@ const SPRINT_14: readonly [number, number] = [new Date(2026, 2, 9, 6).getTime(),
 export default function ASprint() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: SPRINT_14 } });
   return (
-    <Schedule ariaLabel="Sprint 14, 9 to 20 March" height={500} label={(s) => s.name ?? s.id}>
+    <Schedule aria-label="Sprint 14, 9 to 20 March" height={500} label={(s) => s.name ?? s.id}>
       {PEOPLE.map((person) => (
         <Lane key={person.id} id={person.id} label={person.name} />
       ))}

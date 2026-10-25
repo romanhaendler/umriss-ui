@@ -34,7 +34,7 @@ export default function RippleOnEveryDrag() {
 
   return (
     <Schedule
-      ariaLabel="Design, build and test of the shop search, rippling"
+      aria-label="Design, build and test of the shop search, rippling"
       height={184}
       intents={["move", "stretch"]}
       onIntent={onIntent}

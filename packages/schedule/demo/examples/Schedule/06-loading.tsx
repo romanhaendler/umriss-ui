@@ -33,7 +33,7 @@ const LANES = [
 function Plan({ answer, loading }: { answer: number; loading: boolean }) {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: DAY } });
   return (
-    <Schedule ariaLabel="Tours of the day" height={220} loading={loading} intents={["move", "lane"]}>
+    <Schedule aria-label="Tours of the day" height={220} loading={loading} intents={["move", "lane"]}>
       {LANES.map((lane) => (
         <Lane key={lane.id} id={lane.id} label={lane.label} />
       ))}
@@ -44,7 +44,7 @@ function Plan({ answer, loading }: { answer: number; loading: boolean }) {
 
 function Waiting() {
   const { Schedule } = useSchedule({ initialView: { domain: DAY } });
-  return <Schedule ariaLabel="Tours of the day, loading" height={220} loading />;
+  return <Schedule aria-label="Tours of the day, loading" height={220} loading />;
 }
 
 export default function Loading() {

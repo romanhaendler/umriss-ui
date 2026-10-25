@@ -42,7 +42,7 @@ export default function DragAround() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Two people, one on leave"
+        aria-label="Two people, one on leave"
         height={150}
         intents={["move", "lane"]}
         onIntent={onIntent}

@@ -53,13 +53,13 @@ export default function InStep() {
   const span = diesel.view.domain ?? start.domain;
   return (
     <Stack gap={2}>
-      <diesel.Schedule ariaLabel="Diesel vehicles on Tuesday, 17 March" height={240}>
+      <diesel.Schedule aria-label="Diesel vehicles on Tuesday, 17 March" height={240}>
         {DIESEL.map((vehicle) => (
           <diesel.Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
         ))}
         <diesel.Subtasks data={DIESEL_LEGS} tasks={CONSIGNMENTS} />
       </diesel.Schedule>
-      <electric.Schedule ariaLabel="Electric vans, the same hours" height={152}>
+      <electric.Schedule aria-label="Electric vans, the same hours" height={152}>
         {ELECTRIC.map((vehicle) => (
           <electric.Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
         ))}

@@ -196,7 +196,7 @@ export default function SprintAroundLeave() {
       </Stack>
       <div data-callout="2">
         <Schedule
-          ariaLabel="Sprint 14, work per person"
+          aria-label="Sprint 14, work per person"
           calendar={WORKING_DAYS}
           height={570}
           now={NOW}

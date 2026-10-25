@@ -103,7 +103,7 @@ export default function DetailPanelInstead() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Sprint 14 of the web team"
+        aria-label="Sprint 14 of the web team"
         height={260}
         tooltip={false}
         onInteraction={onInteraction}

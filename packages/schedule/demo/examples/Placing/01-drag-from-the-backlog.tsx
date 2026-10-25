@@ -80,7 +80,7 @@ export default function DragFromTheBacklog() {
         ))}
       </Stack>
       <Schedule
-        ariaLabel="Today's plan of three people, with the backlog beside it"
+        aria-label="Today's plan of three people, with the backlog beside it"
         height={196}
         intents={["place", "move", "lane"]}
         placing={placing}

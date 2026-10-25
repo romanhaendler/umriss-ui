@@ -51,6 +51,14 @@ export interface ScheduleParts {
   setDomain: (span: readonly [number, number] | null) => void;
   /** Folds or unfolds one **Lane group**. */
   toggleGroup: (id: string) => void;
+  /** The time and the lane at a client point, or null outside the plot - and
+      null while no schedule is mounted. */
+  positionAt: (clientX: number, clientY: number) => { time: number; lane: string | null } | null;
+  /** The client point of a time - on the middle of a lane where one is named -
+      or null while the schedule is not on screen. */
+  clientPointOf: (time: number, lane?: string) => { x: number; y: number } | null;
+  /** The visible span, as two wall-clock instants. */
+  visibleDomain: () => readonly [number, number];
   /** Folds every group. */
   foldAll: () => void;
   /** Unfolds every group. */
@@ -60,7 +68,7 @@ export interface ScheduleParts {
 /** Declares a schedule: hands back `Schedule` and the parts declared inside it
     - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones` -, its
     `view` and the setters `setView`, `setDomain`, `toggleGroup`, `foldAll` and
-    `unfoldAll`. A ref on `Schedule` still gives the `ScheduleHandle`. */
+    `unfoldAll`, and `positionAt`, `clientPointOf` and `visibleDomain`. */
 export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   const { initialView, onViewChange } = options;
   const [scene] = useState(() => new ScheduleScene(initialView));
@@ -83,6 +91,9 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
         reported.current = viewKey(scene.getView());
       },
       setDomain: scene.setDomain,
+      positionAt: (clientX: number, clientY: number) => scene.positionAt(clientX, clientY),
+      clientPointOf: (time: number, lane?: string) => scene.clientPointOf(time, lane),
+      visibleDomain: () => scene.visibleDomain(),
       toggleGroup: scene.toggleGroup,
       foldAll: scene.foldAll,
       unfoldAll: scene.unfoldAll,

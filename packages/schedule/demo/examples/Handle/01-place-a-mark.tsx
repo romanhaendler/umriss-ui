@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
-import type { ScheduleHandle, Subtask, Task } from "../../../src";
+import type { Subtask, Task } from "../../../src";
 
 export const title = "Place a mark of your own";
 
@@ -34,18 +34,17 @@ const CUT_OFF = at(14);
 const clock = (time: number) => new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function PlaceAMark() {
-  const { Schedule, Lane, Subtasks, view } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
-  const plan = useRef<ScheduleHandle>(null);
+  const { Schedule, Lane, Subtasks, view, clientPointOf, positionAt } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   const host = useRef<HTMLDivElement>(null);
   const [pin, setPin] = useState<number | null>(null);
   const [under, setUnder] = useState("Move the pointer over the plan");
 
   /* The client point, turned into one inside this example - anew whenever the span moves. */
   useEffect(() => {
-    const point = plan.current?.clientPointOf(CUT_OFF);
+    const point = clientPointOf(CUT_OFF);
     const left = host.current?.getBoundingClientRect().left;
     setPin(point == null || left === undefined ? null : point.x - left);
-  }, [view.domain]);
+  }, [view.domain, clientPointOf]);
 
   return (
     <Stack gap={2}>
@@ -57,13 +56,12 @@ export default function PlaceAMark() {
         )}
       </div>
       <Schedule
-        ref={plan}
-        ariaLabel="Three vehicles with a cut-off of the application's own"
+        aria-label="Three vehicles with a cut-off of the application's own"
         height={196}
         onInteraction={(interaction) => {
           /* The interaction carries time and lane already; `positionAt` is for
              listeners of your own, which have only a point. */
-          const there = plan.current?.positionAt(interaction.clientX, interaction.clientY);
+          const there = positionAt(interaction.clientX, interaction.clientY);
           setUnder(there == null ? "off the plan" : `${clock(there.time)} on ${there.lane ?? "no lane"}`);
         }}
       >

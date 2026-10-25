@@ -115,7 +115,7 @@ export default function RefuseADoubleBooking() {
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="Sprint 14 of the web team, editable"
+        aria-label="Sprint 14 of the web team, editable"
         height={240}
         intents={["move", "lane"]}
         onIntent={onIntent}

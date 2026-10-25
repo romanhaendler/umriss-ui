@@ -52,7 +52,7 @@ export default function KeepAndRestore() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Two teams on Tuesday, 17 March" height={290}>
+      <Schedule aria-label="Two teams on Tuesday, 17 March" height={290}>
         <LaneGroup id="product" label="Product">
           <Lane id="noah" label="Noah Fischer" />
           <Lane id="arjun" label="Arjun Mehta" />

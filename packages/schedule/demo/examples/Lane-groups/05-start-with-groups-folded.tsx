@@ -23,7 +23,7 @@ const WORK: Subtask[] = [
 export default function StartWithGroupsFolded() {
   const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(15)], folded: ["discovery"] } });
   return (
-    <Schedule ariaLabel="Two teams rolling out a release, Discovery folded at the start" height={280}>
+    <Schedule aria-label="Two teams rolling out a release, Discovery folded at the start" height={280}>
       <LaneGroup id="payments" label="Payments">
         <Lane id="priya" label="Priya Raman" />
         <Lane id="jonas" label="Jonas Keller" />

@@ -7,7 +7,7 @@ import { useSchedule } from "../src";
 
 function Plan({ loading }: { loading: boolean }) {
   const { Schedule } = useSchedule();
-  return <Schedule ariaLabel="Plan" loading={loading} />;
+  return <Schedule aria-label="Plan" loading={loading} />;
 }
 
 it("renders the plot busy while loading, and not otherwise", () => {

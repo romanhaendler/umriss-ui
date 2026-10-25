@@ -31,7 +31,7 @@ export default function WorkingCalendar() {
   const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
   return (
     <Schedule
-      ariaLabel="Three days at East Gate depot, nights removed"
+      aria-label="Three days at East Gate depot, nights removed"
       calendar={OPENING_HOURS}
       height={220}
       intents={["move"]}

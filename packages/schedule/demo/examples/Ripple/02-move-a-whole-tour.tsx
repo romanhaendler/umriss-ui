@@ -38,7 +38,7 @@ export default function MoveAWholeTour() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Two tours from North depot" height={140}>
+      <Schedule aria-label="Two tours from North depot" height={140}>
         <Lane id="van-214" label="Van FP 214 K" />
         <Lane id="van-377" label="E-van FP 377 K" />
         <Dependencies data={DRIVES} />

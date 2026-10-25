@@ -20,7 +20,7 @@ export default function MoveInTime() {
   const [work, setWork] = useState(START);
   return (
     <Schedule
-      ariaLabel="Two people's work this week"
+      aria-label="Two people's work this week"
       height={140}
       intents={["move"]}
       onIntent={(intent) => setWork((current) => current.map((item) => applyIntent(item, intent)))}

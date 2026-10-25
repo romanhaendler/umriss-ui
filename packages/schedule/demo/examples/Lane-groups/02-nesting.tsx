@@ -27,7 +27,7 @@ const LEGS: Subtask[] = [
 export default function Nesting() {
   const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(15)] } });
   return (
-    <Schedule ariaLabel="North depot with its vans and a truck, and a van from Riverside" height={330} headerWidth={200}>
+    <Schedule aria-label="North depot with its vans and a truck, and a van from Riverside" height={330} headerWidth={200}>
       <LaneGroup id="north" label="North depot">
         <LaneGroup id="vans" label="Vans">
           <Lane id="fp-214" label={`Van ${plate("FP 214 K")}`} />

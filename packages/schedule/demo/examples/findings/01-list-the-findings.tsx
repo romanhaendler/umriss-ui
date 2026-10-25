@@ -34,7 +34,7 @@ export default function ListTheFindings() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Three people's week with its findings" height={184}>
+      <Schedule aria-label="Three people's week with its findings" height={184}>
         <Lane id="noah" label="Noah Fischer" />
         <Lane id="chloe" label="Chloe Durand" />
         <Lane id="arjun" label="Arjun Mehta" />

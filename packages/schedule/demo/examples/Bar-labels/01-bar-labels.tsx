@@ -36,7 +36,7 @@ export default function BarLabels() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: DAY } });
   return (
     <Schedule
-      ariaLabel="Tuesday, 17 March, with the work items written in"
+      aria-label="Tuesday, 17 March, with the work items written in"
       height={196}
       label={(subtask) => subtask.name ?? subtask.id}
     >
