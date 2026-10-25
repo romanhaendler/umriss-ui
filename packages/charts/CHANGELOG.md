@@ -30,6 +30,14 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.42.0 – A chart under test in jsdom (Oct. 2026)
+
+### Added
+
+- **A chart is testable in jsdom.** The new "Testing" section gives the Vitest and Jest lines in full - a charts-only application installs no core - with a setup file whose ResizeObserver reports a fixed size and whose `getContext` stub keeps jsdom quiet; `.` and `./wording/de` carry a `default` condition for Jest's resolver. The release check runs a test of a legend and the data table from those blocks under both runners.
+- **The README names `--u-chart-1` to `--u-chart-6`** as the palette a brand changes, beside core's brand file.
+- **TypeScript 5.4 or newer**, stated in the Install section (the declarations use `NoInfer`); the release check compiles a strict consumer under 5.4 as well as the current TypeScript.
+
 ## 0.41.1 – The documentation runs where the code is (Oct. 2026)
 
 ### Changed
