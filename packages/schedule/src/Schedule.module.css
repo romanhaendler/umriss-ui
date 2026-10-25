@@ -201,6 +201,8 @@
     contain: size;
     position: relative;
     overflow: hidden;
+    /* The scene sets `pan-y` while the lanes fit (see `viewChanged`); the
+       browser decides at touch start, so the rule below is the rest state. */
     touch-action: none;
   }
 
