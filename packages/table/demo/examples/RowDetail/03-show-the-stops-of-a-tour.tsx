@@ -132,7 +132,7 @@ const time = (t: number) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-d
 function Stops({ tour }: { tour: Tour }) {
   const { Table, Column } = useTable(tour.stops, { rowKey: (s) => s.id });
   return (
-    <Table density="compact" ariaLabel={`Stops of ${tour.id}`}>
+    <Table density="compact" aria-label={`Stops of ${tour.id}`}>
       <Column value="shipment" label="Shipment" rowHeader />
       <Column value="customer" label="Customer" />
       <Column id="window" label="Window" value={(s) => `${time(s.window[0])}–${time(s.window[1])}`} />
@@ -145,7 +145,7 @@ export default function StopsOfATour() {
   const { Table, Column, RowDetail } = useTable(TOURS, { rowKey: (t) => t.id });
 
   return (
-    <Table ariaLabel="Tours">
+    <Table aria-label="Tours">
       <Column value="id" label="Tour" rowHeader />
       <Column id="driver" label="Driver" value={(t) => DRIVERS.find((d) => d.id === t.driver)?.name ?? t.driver} />
       <Column id="stops" label="Stops" value={(t) => t.stops.length} />

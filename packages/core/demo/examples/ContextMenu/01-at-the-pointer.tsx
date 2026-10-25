@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ContextMenu, MenuItem, MenuSeparator, Stack, Text, useContextMenuTrigger } from "../../../src";
 
 export const title = "Open it at the pointer";
-export const lead = "Spread `useContextMenuTrigger` on the target and keep the point it gives you as `position`: it opens on a right-click, the context-menu key and a long press with a finger, which is the only way on iOS. `ariaLabel` names what the menu acts on.";
+export const lead = "Spread `useContextMenuTrigger` on the target and keep the point it gives you as `position`: it opens on a right-click, the context-menu key and a long press with a finger, which is the only way on iOS. `aria-label` names what the menu acts on.";
 
 export default function AtThePointer() {
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
@@ -35,7 +35,7 @@ export default function AtThePointer() {
         onOpenChange={(open) => {
           if (!open) setAt(null);
         }}
-        ariaLabel="Actions for the surface"
+        aria-label="Actions for the surface"
       >
         <MenuItem onSelect={() => setLast("Split")}>Split here</MenuItem>
         <MenuItem onSelect={() => setLast("Note added")}>Add a note</MenuItem>

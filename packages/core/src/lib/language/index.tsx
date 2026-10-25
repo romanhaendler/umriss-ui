@@ -16,8 +16,8 @@ import type { Formats } from "./formats";
 import { DEFAULT_WORDING } from "./wording";
 import type { Wording } from "./wording";
 
-export { DEFAULT_FORMATS } from "./formats";
-export type { Formats } from "./formats";
+export { DEFAULT_FORMATS, writeNumber } from "./formats";
+export type { Formats, NumberFormat } from "./formats";
 export { DEFAULT_WORDING } from "./wording";
 export type { Wording } from "./wording";
 

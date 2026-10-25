@@ -65,7 +65,7 @@ const UNITS: Unit[] = [
 export default function AnUnevenOrganisation() {
   const { Table, Column } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: 1 });
   return (
-    <Table ariaLabel="Budget by unit">
+    <Table aria-label="Budget by unit">
       <Toolbar>
         <Search />
         <ColumnMenu />

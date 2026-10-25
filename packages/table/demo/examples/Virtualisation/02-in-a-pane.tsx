@@ -21,7 +21,7 @@ export default function InAPane() {
   return (
     <div data-pane style={{ height: 320, display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "1 1 0", minHeight: 0 }}>
-        <Table stickyHeader ariaLabel="Stops">
+        <Table stickyHeader aria-label="Stops">
           <Toolbar>
             <Search placeholder="Stop or dock" />
           </Toolbar>

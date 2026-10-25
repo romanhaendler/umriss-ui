@@ -197,7 +197,7 @@ export default function DispatchReport() {
     defaultGrouping: ["depot", "part"],
   });
   return (
-    <Table ariaLabel="Deliveries by depot" selectable stickyHeader maxHeight="560px">
+    <Table aria-label="Deliveries by depot" selectable stickyHeader maxHeight="560px">
       <Toolbar>
         <Search />
         <ColumnMenu />

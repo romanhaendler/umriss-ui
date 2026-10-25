@@ -42,7 +42,7 @@ export default function MatrixWithTotals() {
   const { rows, years } = pivot(FACTS);
   const { Table, Column } = useTable(rows, { rowKey: (r) => r.plant });
   return (
-    <Table ariaLabel="Output by plant and year">
+    <Table aria-label="Output by plant and year">
       <Column value="plant" label="Plant" rowHeader />
       {years.map((y) => (
         <Column key={y} id={`y${y}`} label={String(y)} value={(r: Row) => r.byYear[y]} aggregate="sum" format="count" filter="range" />

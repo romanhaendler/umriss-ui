@@ -27,7 +27,7 @@ export type { DateRange, RangePreset } from "./range";
  * Both ends count inclusively. There is no error state.
  */
 export interface DateRangePickerProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue">, RefProp<HTMLSpanElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The time span, both ends on local midnight and both inclusive; `null`
       means none. */
   value: DateRange | null;
@@ -222,7 +222,7 @@ export function DateRangePicker(
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        ariaLabel={wording.dateRangePanel}
+        aria-label={wording.dateRangePanel}
         id={panelId}
         className={cx(styles.panel, styles.rangePanel)}
       >

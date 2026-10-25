@@ -326,6 +326,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
        the plot, so that the wheel over a lane's name scrolls the lanes too. */
     const onWheel = (event: WheelEvent) => scene.wheel(event);
     root.addEventListener("wheel", onWheel, { passive: false });
+    /* Likewise the touch move: a grabbed bar must not scroll the page under
+       the finger, and only a non-passive listener can say so. */
+    const onTouchMove = (event: TouchEvent) => scene.touchMove(event);
+    root.addEventListener("touchmove", onTouchMove, { passive: false });
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && scene.cancelEdit()) event.preventDefault();
     };
@@ -333,6 +337,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     return () => {
       window.removeEventListener("keydown", onKey);
       root.removeEventListener("wheel", onWheel);
+      root.removeEventListener("touchmove", onTouchMove);
       observer.disconnect();
       fontWatch.disconnect();
       probe.remove();

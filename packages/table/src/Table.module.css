@@ -150,6 +150,21 @@
     font-weight: var(--u-weight-medium);
   }
 
+  /* The row header of a table that reports the current row: a button that
+     looks like the text around it and draws the focus ring only. */
+  .rowButton {
+    all: unset;
+    display: block;
+    max-width: 100%;
+    cursor: pointer;
+    border-radius: var(--u-radius-sm);
+  }
+
+  .rowButton:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
   /* A new row stands in a body of its own above the rows: it is last there,
      but its line to the rows beneath stays. */
   .table tbody tr:last-child:not([data-grid-line="new"]) .td {

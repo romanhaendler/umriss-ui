@@ -3,7 +3,7 @@ import { Stack, Text } from "@umriss-ui/core";
 import { useTable } from "../../../src";
 
 export const title = "The current row";
-export const lead = "`currentRow` marks the row you hold and `onCurrentRowChange` reports a click on one. The current row and the selection are independent: choosing a row ticks nothing, and ticking moves nothing.";
+export const lead = "`currentRow` marks the row you hold and `onCurrentRowChange` reports a click on one - or Enter on the focused machine name. The current row and the selection are independent: choosing a row ticks nothing, and ticking moves nothing.";
 
 interface Machine {
   id: string;
@@ -27,7 +27,7 @@ export default function TheCurrentRow() {
 
   return (
     <Stack direction="row" gap={4} align="start" wrap>
-      <Table selectable ariaLabel="Machines" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
+      <Table selectable aria-label="Machines" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
         <Column value="name" label="Machine" rowHeader />
         <Column value="line" label="Line" />
         <Column value="state" label="State" />

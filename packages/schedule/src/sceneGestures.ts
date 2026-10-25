@@ -6,6 +6,7 @@
    and reported when its target changes. Nothing here writes data or draws:
    the host lays out, publishes and draws when told that something changed. */
 
+import { createLongPress } from "@umriss-ui/core";
 import { MINUTE, calendarFrom, toWorkingTimeClamped, toWallClock } from "@umriss-ui/charts";
 import { autoPanSpeed } from "./autoPan";
 import { wallClockWithin } from "./timeAxis";
@@ -78,6 +79,11 @@ export class SceneGestures {
   /** The folded group the pointer is resting over, and the timer that will
       open it for this gesture. */
   private resting: { group: string; timer: ReturnType<typeof setTimeout> } | null = null;
+  /** The finger's long press, armed by a touch on a bar that may be moved.
+      `armed` is whether the press may still turn into a grab - and, once it
+      has, whether the `contextmenu` Android fires for it is the grab's. */
+  private readonly press = createLongPress((at) => this.grab(at));
+  private armed = false;
   hover: ScheduleHit = { kind: "nothing" };
   /** Where the pointer rests on the plot while nothing is being dragged - or,
       where the keyboard set the hover, the point its tooltip stands at. */
@@ -166,6 +172,8 @@ export class SceneGestures {
       this.touches.set(event.pointerId, { x, y });
       /* A third finger joins nothing: the pinch goes on with the first two. */
       if (this.touches.size >= 2) {
+        this.press.dispose();
+        this.armed = false;
         if (this.gesture.kind !== "pinch") {
           this.cancelEdit();
           this.gesture = { kind: "pinch", distance: this.touchDistance() };
@@ -178,9 +186,16 @@ export class SceneGestures {
     const selectedId = this.host.selectedSubtask();
     const selected = selectedId !== null ? (this.host.data.subtaskById.get(selectedId) ?? null) : null;
     if (event.pointerType === "touch") {
-      /* Touch pans and pinches; editing by touch is not supported, so a
-         finger on a subtask pans as well. */
+      /* A finger pans, and pinches with a second one, until it has been held
+         500 ms on a bar that may be moved: then the bar is grabbed (`grab`)
+         and the finger drags it as a mouse does. Only a move or a lane change
+         is grabbed - a bar's edge is too narrow a target under a finger. The
+         page's own scroll must be cancelled for as long as the grab lasts
+         (`touchMove`), because under `pan-y` the browser has already chosen
+         at touch start. */
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: "pan", subtask: null };
+      this.armed = this.modeAt(x, y).mode === "move";
+      this.press.pointerDown(event);
     } else if ((grip === "leadIn" || grip === "leadOut") && selected !== null) {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: grip, subtask: selected };
     } else {
@@ -277,6 +292,7 @@ export class SceneGestures {
     const { x, y } = this.local(event.clientX, event.clientY);
     if (event.pointerType === "touch" && this.touches.has(event.pointerId)) {
       this.touches.set(event.pointerId, { x, y });
+      this.press.pointerMove(event);
       if (this.gesture.kind === "pinch") {
         const distance = this.touchDistance();
         if (distance > 0 && this.gesture.distance > 0 && this.host.view.zoomAt(this.touchCentre(), this.gesture.distance / distance)) {
@@ -293,19 +309,7 @@ export class SceneGestures {
         this.gesture = { kind: "pan", pointerId: gesture.pointerId, lastX: gesture.x0, lastY: gesture.y0 };
         this.setCursor("grabbing");
       } else {
-        const t0 = this.host.view.viewport().scale.fromPx(gesture.x0);
-        this.gesture = {
-          kind: "edit",
-          pointerId: gesture.pointerId,
-          mode: gesture.mode,
-          subtask: gesture.subtask,
-          t0,
-          ghost: gesture.subtask,
-          /* Asked here, once, and drawn from the first frame of the drag: the
-             lanes that are closed are marked before the pointer reaches one. */
-          refused: gesture.mode === "move" ? this.askRefused(gesture.subtask, gesture.subtask.lane) : NONE_REFUSED,
-        };
-        this.setCursor(gesture.mode === "move" ? "grabbing" : "ew-resize");
+        this.startEdit(gesture, gesture.mode, gesture.subtask);
       }
     }
     const current = this.gesture;
@@ -334,8 +338,50 @@ export class SceneGestures {
     }
   }
 
+  /** The drag of `subtask` in `mode`, taking hold where the pending press
+      stands. */
+  private startEdit(from: Extract<Gesture, { kind: "pending" }>, mode: EditMode, subtask: Subtask): void {
+    this.gesture = {
+      kind: "edit",
+      pointerId: from.pointerId,
+      mode,
+      subtask,
+      /* The working time the drag took hold at - not a pixel, because
+         auto-pan moves the scale under a drag in flight. */
+      t0: this.host.view.viewport().scale.fromPx(from.x0),
+      ghost: subtask,
+      /* Asked here, once, and drawn from the first frame of the drag: the
+         lanes that are closed are marked before the pointer reaches one. */
+      refused: mode === "move" ? this.askRefused(subtask, subtask.lane) : NONE_REFUSED,
+    };
+    this.setCursor(mode === "move" ? "grabbing" : "ew-resize");
+  }
+
+  /** The finger has been held on a bar: the bar is grabbed, unless the finger
+      has become a pan or a pinch in the meantime. */
+  private grab(at: { x: number; y: number }): void {
+    const gesture = this.gesture;
+    if (!this.armed || this.loading || gesture.kind !== "pending") return;
+    const { x, y } = this.local(at.x, at.y);
+    const { mode, subtask } = this.modeAt(gesture.x0, gesture.y0);
+    if (mode !== "move" || subtask === null) return;
+    this.lastClient = { x: at.x, y: at.y };
+    this.dragPoint = { x, y };
+    this.startEdit(gesture, mode, subtask);
+    this.host.interactionChanged();
+  }
+
+  /** The page's own scroll, while a bar is grabbed. Registered as not passive
+      by the component: a passive listener cannot cancel it. Before the grab and
+      after the lift the swipe is the page's (`viewChanged`). */
+  touchMove(event: Event): void {
+    if (this.gesture.kind === "edit" && this.touches.has(this.gesture.pointerId)) event.preventDefault();
+  }
+
   pointerUp(event: PointerEvent): void {
     if (event.pointerType === "touch") {
+      this.press.pointerUp();
+      this.armed = false;
       this.touches.delete(event.pointerId);
       if (this.gesture.kind === "pinch") {
         /* The finger that stays pans on from where it is, as it would have
@@ -359,6 +405,11 @@ export class SceneGestures {
       this.setCursor("default");
       this.hoverAt(event.clientX, event.clientY, x, y);
     } else if (gesture.kind === "edit" && gesture.pointerId === event.pointerId) {
+      /* A grab lifted outside the plot is let go: nothing is reported. */
+      if (event.pointerType === "touch" && (x < 0 || y < 0 || x > this.host.view.width || y > this.host.view.height)) {
+        this.cancelEdit();
+        return;
+      }
       this.stopAutoPan();
       this.closeGestureFolds();
       this.gesture = { kind: "none" };
@@ -418,6 +469,8 @@ export class SceneGestures {
   }
 
   pointerCancel(event: PointerEvent): void {
+    this.press.pointerCancel();
+    this.armed = false;
     this.touches.delete(event.pointerId);
     this.closeGestureFolds();
     this.cancelEdit();
@@ -460,6 +513,8 @@ export class SceneGestures {
   contextMenu(event: MouseEvent): void {
     if (this.host.handlers().onInteraction === undefined) return;
     event.preventDefault();
+    /* Android fires one for the long press that grabs a bar; it is the grab's. */
+    if (this.armed || this.editing) return;
     const { x, y } = this.local(event.clientX, event.clientY);
     this.report("contextmenu", this.host.view.hitAt(x, y), event.clientX, event.clientY, x, y);
   }

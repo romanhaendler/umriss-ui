@@ -55,7 +55,7 @@ const TEAMS: Team[] = [
 function Employees({ team }: { team: Team }) {
   const { Table, Column } = useTable(team.employees ?? [], { rowKey: (e) => e.id, defaultSort: { column: "name", direction: "asc" } });
   return (
-    <Table ariaLabel={`Employees of ${team.name}`} density="compact">
+    <Table aria-label={`Employees of ${team.name}`} density="compact">
       <Column value="name" label="Employee" rowHeader />
       <Column value="role" label="Role" />
       <Column value="since" label="Since" />
@@ -67,7 +67,7 @@ function Employees({ team }: { team: Team }) {
 export default function EmployeesInTheDetail() {
   const { Table, Column, RowDetail } = useTable(TEAMS, { rowKey: (t) => t.id, childRows: (t) => t.children, defaultBranches: 1 });
   return (
-    <Table ariaLabel="Teams">
+    <Table aria-label="Teams">
       <Column value="name" label="Team" rowHeader />
       <Column value="headcount" label="Headcount" />
       <Column value="hours" label="Hours a week" />

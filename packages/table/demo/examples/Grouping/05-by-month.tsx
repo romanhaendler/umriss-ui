@@ -23,7 +23,7 @@ const INVOICES: Invoice[] = [
 export default function ByMonth() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: "received" });
   return (
-    <Table ariaLabel="Invoices by month received">
+    <Table aria-label="Invoices by month received">
       <Column value="received" label="Received" format="date" group="month" />
       <Column value="id" label="Invoice" rowHeader />
       <Column value="supplier" label="Supplier" />

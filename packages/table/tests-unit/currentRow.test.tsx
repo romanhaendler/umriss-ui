@@ -108,3 +108,88 @@ describe("The current row", () => {
     expect(b).toBe(a);
   });
 });
+
+function Keyed({ grid = false, rowHeader = true, tree = false, onCurrentRowChange }: {
+  grid?: boolean;
+  rowHeader?: boolean;
+  tree?: boolean;
+  onCurrentRowChange?: (key: string, row: Machine) => void;
+}) {
+  const t = useTable(MACHINES, { rowKey: (m) => m.id, childRows: tree ? (m) => (m.id === "m1" ? [MACHINES[1]!] : undefined) : undefined });
+  const { Table: Frame, Column } = t;
+  return (
+    <Frame grid={grid} selectable onCurrentRowChange={onCurrentRowChange}>
+      <Column value="name" label="Machine" rowHeader={rowHeader} />
+      <Column value="line" label="Line" children={(v) => (v === "L2" ? <button type="button">Go</button> : String(v))} />
+    </Frame>
+  );
+}
+
+describe("The current row by the keyboard", () => {
+  it("a native table's row header holds one button per row, and Enter on it reports", () => {
+    const on = vi.fn();
+    render(<Keyed onCurrentRowChange={on} />);
+    expect(document.querySelectorAll("tbody th button")).toHaveLength(3);
+    /* A button answers Enter and Space with a click; jsdom does not translate the key. */
+    fireEvent.click(screen.getByRole("button", { name: "Lathe" }));
+    expect(on).toHaveBeenCalledWith("m2", MACHINES[1]);
+  });
+
+  it("the current row's button carries aria-current", () => {
+    render(<Machines currentRow="m2" onCurrentRowChange={() => undefined} />);
+    expect(screen.getByRole("button", { name: "Lathe" }).getAttribute("aria-current")).toBe("true");
+    expect(screen.getByRole("button", { name: "Press" }).hasAttribute("aria-current")).toBe(false);
+  });
+
+  it("a tree row's toggle stays outside the button", () => {
+    render(<Keyed tree onCurrentRowChange={() => undefined} />);
+    const toggle = document.querySelector("[data-branch-key]")!;
+    const button = toggle.closest("th")!.querySelector("button:not([data-branch-key])")!;
+    expect(button).not.toBeNull();
+    expect(button.contains(toggle)).toBe(false);
+  });
+
+  it("in grid mode no button is rendered", () => {
+    render(<Keyed grid onCurrentRowChange={() => undefined} />);
+    expect(document.querySelectorAll("tbody th button")).toHaveLength(0);
+  });
+
+  it("in grid mode Enter on a plain cell reports, on a cell with a control enters it, and Space selects", () => {
+    const on = vi.fn();
+    render(<Keyed grid onCurrentRowChange={on} />);
+    const cell = (text: string) => screen.getByText(text).closest("td,th") as HTMLElement;
+    cell("Lathe").focus();
+    fireEvent.keyDown(cell("Lathe"), { key: "Enter" });
+    expect(on).toHaveBeenCalledWith("m2", MACHINES[1]);
+    on.mockClear();
+    cell("Go").focus();
+    fireEvent.keyDown(cell("Go"), { key: "Enter" });
+    expect(on).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(screen.getByText("Go"));
+    cell("Press").focus();
+    fireEvent.keyDown(cell("Press"), { key: " " });
+    expect(on).not.toHaveBeenCalled();
+    expect(rowOf("Press").hasAttribute("data-selected")).toBe(true);
+  });
+
+  it("without a row header there is one development warning, and none in a production build", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const first = render(<Keyed rowHeader={false} onCurrentRowChange={() => undefined} />);
+    first.rerender(<Keyed rowHeader={false} onCurrentRowChange={() => undefined} />);
+    expect(warn.mock.calls.filter(([m]) => String(m).includes("row header"))).toHaveLength(1);
+    first.unmount();
+    warn.mockClear();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.resetModules();
+    const [{ render: renderAgain }, { createElement }] = await Promise.all([import("@testing-library/react"), import("react")]);
+    const { useTable: useTableAgain } = await import("../src");
+    function Bare() {
+      const { Table: Frame, Column } = useTableAgain(MACHINES, { rowKey: (m) => m.id });
+      return createElement(Frame, { onCurrentRowChange: () => undefined }, createElement(Column, { value: "name", label: "Machine" }));
+    }
+    renderAgain(createElement(Bare));
+    expect(warn).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+    warn.mockRestore();
+  });
+});

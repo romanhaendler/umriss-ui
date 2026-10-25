@@ -86,7 +86,7 @@ function moveTo({ grid, lines, ids, virtual }: GridInput, table: HTMLTableElemen
 
 /* The handlers stand on the <table>: the element they are heard on is the grid. */
 export function onKeyDown(input: GridInput, actions: EditingActions, event: ReactKeyboardEvent<HTMLTableElement>) {
-  const { grid, lines, ids, columnById, select } = input;
+  const { grid, lines, ids, columnById, select, report } = input;
   const { rowAt, editable, startEdit, save, discard } = actions;
   const keys = lines.map((l) => l.key);
   const editing = grid.state.editing;
@@ -174,6 +174,13 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
       event.preventDefault();
       grid.setState((s) => ({ ...s, widget: true }));
       first.focus();
+      return;
+    }
+    /* Enter alone: F2 is the key of editing and of controls. */
+    const at = rowAt(here);
+    if (event.key === "Enter" && report && at && place.line !== NEW_LINE) {
+      event.preventDefault();
+      report(at.row);
     }
     return;
   }

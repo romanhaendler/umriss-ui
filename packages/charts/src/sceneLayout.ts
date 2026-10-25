@@ -176,7 +176,7 @@ export function updateLayout(s: ChartScene): void {
       tickCount: categories === undefined ? c.tickCount : undefined,
       tickFormat:
         categories === undefined
-          ? c.orientation === "y" ? yTickFormat(s, c.id) : c.tickFormat
+          ? c.orientation === "y" ? (c.tickFormat ?? yTickFormat(s, c.id)) : c.tickFormat
           : labelled(categories, c.categoryLabel),
       tickValues: categories?.ticks ?? c.ticks,
       time: categories === undefined && inTime(s, c) ? true : undefined,

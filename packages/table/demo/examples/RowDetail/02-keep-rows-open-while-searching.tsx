@@ -22,7 +22,7 @@ export default function KeepRowsOpen() {
   const { Table, Column, RowDetail } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Shipments with notes">
+    <Table aria-label="Shipments with notes">
       <Toolbar>
         <Search placeholder="Search customer" />
       </Toolbar>

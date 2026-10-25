@@ -5,10 +5,11 @@
    Empty and loading are props of the table (`empty`, `loading`), not parts:
    they are states of the one body. */
 
-import { useLayoutEffect, useRef, useState, useId } from "react";
-import type { ReactNode } from "react";
+import { useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button, Checkbox, Input, Popover, Select, Tooltip, useFormats, useWording } from "@umriss-ui/core";
+import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
 import { warnOnce } from "./dev";
@@ -43,7 +44,7 @@ function useRegistration(registry: Registry | undefined, kind: PartKind) {
 /* ---------------------------------------------------------------- Toolbar */
 
 /** The props of `Toolbar`. */
-export interface ToolbarProps {
+export interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
   /** Search, column menu, export – on the left in the table toolbar, before the conditions. */
   children?: ReactNode;
   /** Classes on the table toolbar. */
@@ -64,14 +65,14 @@ export interface ToolbarProps {
     rows and "reset" as long as something restricts, and the count of the
     selection with the bulk actions. A table with a search or a column filter
     has one, even where none stands; where one stands, there is no second. */
-export function Toolbar({ children, className, size = "sm", of }: ToolbarProps) {
+export function Toolbar({ children, className, size = "sm", of, ref, ...rest }: ToolbarProps) {
   const connection = useConnection(of);
   // A toolbar that has been put there registers, so that the table puts up none of its own.
   useRegistration(connection?.registry, "toolbar");
   const registry = connection?.registry;
 
   return (
-    <TableToolbar registry={registry ?? null} className={className} size={size}>
+    <TableToolbar registry={registry ?? null} className={className} size={size} frame={{ ...rest, ref }}>
       {children}
     </TableToolbar>
   );
@@ -80,7 +81,8 @@ export function Toolbar({ children, className, size = "sm", of }: ToolbarProps) 
 /* ----------------------------------------------------------------- Search */
 
 /** The props of `Search`. */
-export interface SearchProps {
+export interface SearchProps
+  extends Omit<InputProps, "size" | "type" | "value" | "onChange" | "clearable" | "onClear" | "children" | "invalid" | "numeric"> {
   /** The placeholder in the field.
       @default the wording's "Search …" */
   placeholder?: string;
@@ -102,7 +104,7 @@ export interface SearchProps {
 /** The table's search field: one text over every column that searches, in
     the table toolbar. With a search the table puts up a toolbar of its own
     where none stands. Outside the table it needs `of`. */
-export function Search({ placeholder, "aria-label": name, className, size: own, grow, of }: SearchProps) {
+export function Search({ placeholder, "aria-label": name, className, size: own, grow, of, ...rest }: SearchProps) {
   const connection = useConnection(of);
   const size = useToolbarSize(own);
   const wording = useWording();
@@ -113,8 +115,11 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
   const { snapshot } = connection;
   return (
     <Input
+      {...rest}
       size={size}
       type="search"
+      autoComplete="off"
+      enterKeyHint="search"
       className={cx(grow && styles.searchGrow, className)}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
@@ -129,7 +134,7 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
 /* ------------------------------------------------------------- ColumnMenu */
 
 /** The props of `ColumnMenu`. */
-export interface ColumnMenuProps {
+export interface ColumnMenuProps extends Omit<ButtonProps, "size" | "children" | "onClick" | "variant" | "loading"> {
   /** The size of the part: `sm` or `md`.
       @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
@@ -140,12 +145,14 @@ export interface ColumnMenuProps {
 /** Show and hide columns and arrange them. Every control is a real control -
     a box or a button -, so it is reachable without a pointer; after a move the
     focus stays on the button that was pressed. */
-export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
+export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
   const connection = useConnection(of);
   const size = useToolbarSize(own);
   const wording = useWording();
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
+  // The caller's ref reaches the trigger; the panel anchors to the same element.
+  useImperativeHandle(ref, () => button.current!);
   const list = useRef<HTMLUListElement>(null);
   const panelId = useId();
   /* Which button gets the focus back after a move or a pin: the key itself,
@@ -223,6 +230,7 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
   return (
     <>
       <Button
+        {...rest}
         ref={button}
         size={size}
         aria-haspopup="dialog"
@@ -240,7 +248,7 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
            button's start edge, and flips where there is no room. */
         align="start"
         role="dialog"
-        ariaLabel={wording.arrangeColumns}
+        aria-label={wording.arrangeColumns}
         id={panelId}
         className={styles.columnsPanel}
       >
@@ -301,7 +309,7 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
 
 /** The props of `Export`: by default a CSV file is downloaded; with
     `onExport` the text is handed over instead. */
-export interface ExportProps {
+export interface ExportProps extends Omit<ButtonProps, "size" | "children" | "onClick" | "variant" | "loading"> {
   /** File name of the download.
       @default the wording's "table.csv" */
   filename?: string;
@@ -317,7 +325,7 @@ export interface ExportProps {
 /** Writes the filtered set in the visible columns and their order – with the
     values, not with their presentation. In server mode the table holds one
     page of the server's, so it writes that page, and its button says so. */
-export function Export({ filename, onExport, size: own, of }: ExportProps) {
+export function Export({ filename, onExport, size: own, of, ...rest }: ExportProps) {
   const connection = useConnection(of);
   const size = useToolbarSize(own);
   const wording = useWording();
@@ -341,7 +349,7 @@ export function Export({ filename, onExport, size: own, of }: ExportProps) {
   };
 
   return (
-    <Button size={size} onClick={exportCsv}>
+    <Button {...rest} size={size} onClick={exportCsv}>
       {snapshot.server ? wording.exportPageLabel : wording.exportLabel}
     </Button>
   );
@@ -350,7 +358,7 @@ export function Export({ filename, onExport, size: own, of }: ExportProps) {
 /* ------------------------------------------------------------- Pagination */
 
 /** The props of `Pagination`. */
-export interface PaginationProps {
+export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "children">, RefProp<HTMLElement> {
   /** The selectable page sizes. */
   pageSizes?: readonly number[];
   /** Classes on the pagination bar. */
@@ -365,7 +373,7 @@ export interface PaginationProps {
     `pageSize` holds as soon as a pagination bar stands. Whoever places it
     outside the table puts it before the table: after it, it registers only
     after the first frame. */
-export function Pagination({ pageSizes = [10, 25, 50], className, of }: PaginationProps) {
+export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }: PaginationProps) {
   const connection = useConnection(of);
   const wording = useWording();
   const formats = useFormats();
@@ -383,7 +391,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
 
   const bar = (
-    <nav aria-label={wording.pagination} className={cx(styles.pagination, className)}>
+    <nav aria-label={wording.pagination} {...rest} className={cx(styles.pagination, className)}>
       <span>{wording.entries(count, formats.count(count))}</span>
       <div className={styles.paginationControls}>
         <label className={styles.pageSize}>

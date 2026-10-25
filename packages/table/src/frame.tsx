@@ -14,6 +14,7 @@ import { GridContext, GridFocus, useGridState } from "./grid";
 import { frameGrid } from "./frameGrid";
 import { copyKeyHandler } from "./copyKey";
 import { CurrentRowContext, chooseRow } from "./currentRow";
+import { warnOnce } from "./dev";
 import { CutValueTip } from "./cutValueTip";
 import {
   useCutValueWarnings,
@@ -31,7 +32,16 @@ import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
 import { markBeyond, markStuck, markUnder } from "./scrollMarks";
 import styles from "./Table.module.css";
 
-export function Frame({ registry, props }: { registry: Registry; props: TableProps<unknown> }) {
+export function Frame({
+  registry,
+  props,
+  name,
+}: {
+  registry: Registry;
+  props: TableProps<unknown>;
+  /** The three names of the table, for the <table> (ADR-0068). */
+  name: { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string };
+}) {
   const {
     selectable = false,
     stickyHeader = false,
@@ -43,7 +53,6 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
     rowProps,
     currentRow,
     onCurrentRowChange,
-    ariaLabel,
     grid: gridMode = false,
   } = props;
 
@@ -88,6 +97,10 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
   /* The toolbar's "New row" reaches the grid through the registry: this
      render's handler, over this render's lines. */
   registry.setAddRow(gridEvents?.addRow ?? null);
+
+  if (onCurrentRowChange && !registry.rowHeader()) {
+    warnOnce("currentRowHeader", "The keyboard cannot choose a row without a row header; mark a column `rowHeader` for `onCurrentRowChange`. The pointer still can.");
+  }
 
   /* A page holds its height (ADR-0042). Every line is one pitch, so a page
      of the table is `pageSize` pitches whatever it shows: with a pagination
@@ -155,7 +168,7 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
           onBlur={gridEvents?.onBlur}
           data-depth={lines ? grouping.length : undefined}
           style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
-          aria-label={ariaLabel}
+          {...name}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */
           aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
@@ -171,7 +184,7 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
         >
           <HeadRow registry={registry} hook={hook} layout={layout} props={props} wording={wording} />
           <GridContext value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
-            <CurrentRowContext value={{ key: currentRow, reports: onCurrentRowChange !== undefined }}>
+            <CurrentRowContext value={{ key: currentRow, report: onCurrentRowChange && ((row) => onCurrentRowChange(hook.rowKey(row), row)) }}>
               {fresh && newRowBody(body, fresh)}
               {shown.body}
             </CurrentRowContext>

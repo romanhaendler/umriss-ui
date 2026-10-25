@@ -23,7 +23,7 @@ export default function FindAPerson() {
   const { Table, Column } = useTable(PEOPLE, { rowKey: (p) => p.name });
 
   return (
-    <Table ariaLabel="People">
+    <Table aria-label="People">
       <Toolbar>
         <Search placeholder="Search people" />
       </Toolbar>

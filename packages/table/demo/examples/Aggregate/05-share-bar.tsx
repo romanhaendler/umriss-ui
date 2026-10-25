@@ -23,7 +23,7 @@ const INVOICES: Invoice[] = [
 export default function ShareBar() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: ["costCentre", "supplier"] });
   return (
-    <Table ariaLabel="Invoices by cost centre and supplier">
+    <Table aria-label="Invoices by cost centre and supplier">
       <Column value="supplier" label="Supplier" />
       <Column value="costCentre" label="Cost centre" />
       {/* The amount with its bar right beside the groups: after the invoice

@@ -36,11 +36,15 @@ export interface Evaluation {
 }
 
 /** The fraction digits a quantity is shown with at most: as the caller says,
-    else one for a percentage, two for a derived number, and a given as given. */
-export function placesOf(quantity: Quantity): number | undefined {
+    else one for a percentage, two for a derived number, and a given as given.
+    A built-in default that would round a non-zero value to 0 does not apply:
+    the value is then shown without fixed places. */
+export function placesOf(quantity: Quantity, value: number): number | undefined {
   if (quantity.decimals !== undefined) return quantity.decimals;
-  if (quantity.format === "percent") return 1;
-  return quantity.given ? undefined : 2;
+  const places = quantity.format === "percent" ? 1 : quantity.given ? undefined : 2;
+  if (places === undefined) return undefined;
+  const shown = quantity.format === "percent" ? value * 100 : value;
+  return shown !== 0 && round(shown, places) === 0 ? undefined : places;
 }
 
 /* The number times ten to the `by`, by moving the exponent of its string form. */
@@ -60,8 +64,8 @@ function round(value: number, places: number | undefined): number {
 }
 
 /** The number as shown: in per cent for a percentage, rounded. */
-export function shownOf(quantity: Quantity, value: number): number {
-  return round(quantity.format === "percent" ? value * 100 : value, placesOf(quantity));
+export function shownOf(quantity: Quantity, value: number, places = placesOf(quantity, value)): number {
+  return round(quantity.format === "percent" ? value * 100 : value, places);
 }
 
 /** The shown number back as the ratio the operator works on. */
@@ -123,7 +127,8 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
           operands.map((o) => asOperand(model.quantities.get(o.operand.key)!, o.shown!)),
           negated,
         );
-        approximate = shownOf(quantity, fromShown) !== shownOf(quantity, value);
+        const places = placesOf(quantity, value);
+        approximate = shownOf(quantity, fromShown, places) !== shownOf(quantity, value, places);
       }
     }
 
