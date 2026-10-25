@@ -956,8 +956,8 @@ export const OUTLINE: readonly Rubric[] = [
         name: "ContextMenu",
         sentence: "A menu that opens at a point, for a right-click on something that is not a button: a row, a canvas, a bar in a schedule (also called a right-click menu). The entries and the keyboard are those of the menu.",
         about: [
-          "It is controlled: on `contextmenu` you keep the point and open it there, and `onOpenChange` reports the wish to close. Focus goes to the first entry and back to where it was on closing.",
-          "A right-click is invisible to a keyboard. Open the same menu on Shift+F10 or the menu key at the focused element, and keep the actions reachable some other way too.",
+          "It is controlled: spread `useContextMenuTrigger` on the target and keep the point it hands you - a right-click, the menu key and a long press with a finger (the only way on iOS) all give one - and open it there. `onOpenChange` reports the wish to close. Focus goes to the first entry and back to where it was on closing.",
+          "A right-click and a long press are invisible to a keyboard; the hook also opens it on Shift+F10 or the menu key at the focused element. Keep the actions reachable some other way too.",
         ],
         alternatives: [
           { when: "The actions have a visible trigger", use: "menu" },
@@ -967,14 +967,14 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Home / End", action: "Moves to the first or last entry." },
           { key: "Escape", action: "Closes the menu and returns focus to where it was." },
           { key: "Enter or Space", action: "Runs the focused entry and closes the menu." },
-          { key: "Shift+F10 or the menu key", action: "Opens the menu where you listen for them, as the row example does." },
+          { key: "Shift+F10 or the menu key", action: "Opens the menu at the focused element, which `useContextMenuTrigger` listens for." },
         ],
         limits: [
-          "It listens to no right-click itself: the element that is clicked is yours, and so is the point.",
+          "It listens to no right-click itself: the element and the point are yours, through the hook.",
           "No submenus, no checkable entries and no type-ahead, as in the menu.",
         ],
-        types: ["ContextMenuProps"],
-        exports: ["ContextMenu", "MenuItem", "MenuSeparator"],
+        types: ["ContextMenuProps", "ContextMenuTriggerProps"],
+        exports: ["ContextMenu", "MenuItem", "MenuSeparator", "useContextMenuTrigger"],
       },
       {
         id: "modal",
