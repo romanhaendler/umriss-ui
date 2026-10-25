@@ -17,8 +17,8 @@ const fontSize = (locator: Locator) =>
 test("A FormField's label takes the label token, and the field keeps its own size", { tag: "@quick" }, async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await openExample(page, "formfield", "label-and-hint");
-  const label = page.getByText("Cost centre", { exact: true });
-  const input = page.getByPlaceholder("CC-0000");
+  const label = page.getByLabel("Label and hint").getByText("Cost centre", { exact: true });
+  const input = page.getByLabel("Label and hint").getByPlaceholder("CC-0000");
 
   const textSm = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.8125);
   expect(await fontSize(label)).toBeCloseTo(textSm, 1);

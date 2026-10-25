@@ -28,7 +28,7 @@ In an application:
 import { Button, Card } from "@umriss-ui/core";
 ```
 
-Nothing else is required. React 19 or newer as a peer.
+Nothing else is required. React 19 or newer as a peer. TypeScript 5.4 or newer (the declarations use `NoInfer`).
 
 The package ships ES2022 syntax; an application that serves older browsers
 transpiles it itself.

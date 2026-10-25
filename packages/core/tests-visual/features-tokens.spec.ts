@@ -71,3 +71,23 @@ test("A pressed button is scaled by the press token", { tag: "@quick" }, async (
   await style(page, "--u-button-press-scale: 0.9");
   expect(await scaleWhilePressed()).toBeCloseTo(0.9, 2);
 });
+
+/* A renamed token's alias (`--u-old: var(--u-new)` in the tokens layer) with a rule that reads the old name:
+   either name set on `:root` reaches that rule. */
+test("A token and its deprecated alias each reach a rule that reads the old name", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "button", "one-action");
+  await page.addStyleTag({
+    content: "@layer umriss.tokens { :root { --u-probe-old: var(--u-probe-new); } } .probe { color: var(--u-probe-old); }",
+  });
+  const probe = await page.locator("body").evaluateHandle((body) => {
+    const element = document.createElement("div");
+    element.className = "probe";
+    body.append(element);
+    return element;
+  });
+  const color = () => probe.evaluate((element) => getComputedStyle(element).color);
+  await style(page, "--u-probe-new: rgb(1, 2, 3)");
+  expect(await color()).toBe("rgb(1, 2, 3)");
+  await style(page, "--u-probe-old: rgb(4, 5, 6)");
+  expect(await color()).toBe("rgb(4, 5, 6)");
+});

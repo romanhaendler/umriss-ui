@@ -38,6 +38,9 @@ importers:
       typescript-eslint:
         specifier: ^8.19.0
         version: 8.67.0(eslint@9.39.5)(typescript@5.9.3)
+      typescript-floor:
+        specifier: npm:typescript@~5.4.5
+        version: typescript@5.4.5
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@22.20.2)(happy-dom@21.0.4)(jsdom@26.1.0)(vite@6.4.3(@types/node@22.20.2)(lightningcss@1.33.0)(terser@5.51.2))
@@ -2109,6 +2112,11 @@ packages:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
+  typescript@5.4.5:
+    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -4015,6 +4023,8 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
+
+  typescript@5.4.5: {}
 
   typescript@5.9.3: {}
 

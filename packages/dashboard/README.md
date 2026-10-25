@@ -15,7 +15,7 @@ pnpm add @umriss-ui/dashboard @umriss-ui/core
 
 `@umriss-ui/core` is a **peer dependency**: the dashboard takes its styling
 regime, its frames, menus and drawer, its wording and its announcements from
-there. React 19 or newer as a peer as well. The dashboard depends on `core`
+there. React 19 or newer as a peer as well. TypeScript 5.4 or newer (the declarations use `NoInfer`). The dashboard depends on `core`
 alone; nothing depends on the dashboard, and it takes no chart, table or
 schedule - what stands in a widget is the application's.
 

@@ -26,6 +26,8 @@
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`),
    - and the packed `docs/llms-full.md`, read without any site, names none,
+   - and the changelog has a heading of the package's version, and every
+     "Changed" entry under it a `Migration:` item,
    - and no `@deprecated` marker in `src/` is older than the package's own
      minor (ADR-0066).
 
@@ -142,6 +144,7 @@ const subpaths = Object.keys(manifest.exports).map((key) => name + key.slice(1))
 const CONSUMER_HOOKS: Record<string, string[]> = {
   "@umriss-ui/core": ["export const toast = () => e0.useToast();", "export const field = () => e0.useFormField();"],
 };
+const versionOf = (dir: string) => (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { version: string }).version;
 const consumerRoot = mkdtempSync(join(tmpdir(), "check-dist-"));
 try {
   mkdirSync(join(consumerRoot, "node_modules", "@umriss-ui"), { recursive: true });
@@ -154,20 +157,28 @@ try {
     `export const entries = { ${subpaths.flatMap((path, index) => (path.endsWith(".css") ? [] : [`e${index}`])).join(", ")} };`,
   ].join("\n");
   writeFileSync(join(consumerRoot, "consumer.ts"), code);
-  for (const [moduleName, resolution] of [["ESNext", "bundler"], ["CommonJS", "node10"]]) {
+  /* The floor's compiler (TypeScript 5.4, the root's `typescript-floor`) compiles the same files: a
+     declaration that needs a newer one fails there. It lacks `noUncheckedSideEffectImports` (from 5.6)
+     and keeps every other option; `skipLibCheck` stays off, or an unknown `NoInfer` would pass. */
+  const compilers = [
+    ["TypeScript " + versionOf(resolve("node_modules", "typescript")), resolve("node_modules", "typescript", "bin", "tsc"), true],
+    ["TypeScript " + versionOf(resolve("../../node_modules", "typescript-floor")), resolve("../../node_modules", "typescript-floor", "bin", "tsc"), false],
+  ] as const;
+  for (const [compiler, tsc, sideEffectImports] of compilers) for (const [moduleName, resolution] of [["ESNext", "bundler"], ["CommonJS", "node10"]]) {
     writeFileSync(
       join(consumerRoot, "tsconfig.json"),
       JSON.stringify({
         compilerOptions: {
           strict: true, exactOptionalPropertyTypes: true, skipLibCheck: false, declaration: true, noEmit: false, emitDeclarationOnly: true,
-          outDir: "out", noUncheckedSideEffectImports: true, module: moduleName, moduleResolution: resolution, target: "ES2022", jsx: "react-jsx",
+          outDir: "out", ...(sideEffectImports ? { noUncheckedSideEffectImports: true } : {}), module: moduleName, moduleResolution: resolution, target: "ES2022", jsx: "react-jsx",
           lib: ["ES2022", "DOM", "DOM.Iterable"], types: [],
         },
         files: ["consumer.ts"],
       }),
     );
-    const compiled = spawnSync(process.execPath, [resolve("node_modules", "typescript", "bin", "tsc"), "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
-    if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
+    const compiled = spawnSync(process.execPath, [tsc, "-p", "."], { cwd: consumerRoot, encoding: "utf8" });
+    if (compiled.status !== 0) problems.push(`a strict consumer does not compile under ${compiler} with ${resolution} resolution:\n${compiled.stdout}${compiled.stderr}`);
+    else console.log(`a strict consumer compiles under ${compiler} with ${resolution} resolution`);
   }
   if (clientFile) flightCheck(consumerRoot);
 } finally {
@@ -193,6 +204,23 @@ try {
   const expected = `workspace:^0.${own.version.split(".")[1]}.0`;
   for (const [peer, range] of Object.entries(own.peerDependencies ?? {})) {
     if (peer.startsWith("@umriss-ui/") && range !== expected) problems.push(`peer ${peer} reads ${range}, expected ${expected}`);
+  }
+}
+
+/* The changelog's section of this version has its heading, and every top-level
+   entry under its `### Changed` carries a nested `Migration:` item with text
+   after it. Earlier sections predate the rule. */
+{
+  const version = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
+  const changelog = readFileSync("CHANGELOG.md", "utf8");
+  const start = changelog.indexOf(`\n## ${version} \u2013 `);
+  if (start < 0) problems.push(`CHANGELOG.md: no heading for ${version}`);
+  else {
+    const section = changelog.slice(start + 1).split(/\n## /)[0];
+    const changed = /\n### Changed\n([\s\S]*?)(?=\n### |$)/.exec(section)?.[1] ?? "";
+    for (const entry of changed.split(/\n(?=- )/).filter((text) => text.startsWith("- "))) {
+      if (!/^ {2}- Migration: *\S/m.test(entry)) problems.push(`CHANGELOG.md ${version}: the entry ${/\*\*[^*]+\*\*/.exec(entry)?.[0] ?? entry.slice(0, 60)} has no "Migration:" item`);
+    }
   }
 }
 
