@@ -12,7 +12,7 @@
   }
 
   .label {
-    font-size: var(--u-text-sm);
+    font-size: var(--u-label-size);
     font-weight: var(--u-weight-medium);
     color: var(--u-color-text);
     line-height: var(--u-leading-tight);
