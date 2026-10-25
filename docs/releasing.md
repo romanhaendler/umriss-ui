@@ -2,7 +2,7 @@
 
 How a version of `@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
 `@umriss-ui/schedule`, `@umriss-ui/calculation` or `@umriss-ui/dashboard`
-reaches npm, and how the demos reach GitHub Pages. What a version *means* for a
+reaches npm, and that the demos are not hosted (ADR-0065). What a version *means* for a
 caller stands in the package's own `CHANGELOG.md`; this page is only the
 mechanics.
 
@@ -12,7 +12,6 @@ mechanics.
 |---|---|
 | Source | <https://github.com/romanhaendler/umriss-ui> |
 | Packages | the npm org <https://www.npmjs.com/org/umriss-ui> |
-| Demos | <https://romanhaendler.github.io/umriss-ui/> — deployed by `.github/workflows/pages.yml` on every push to `main` |
 | Checks | `.github/workflows/ci.yml` — lint, types, `check:site`, unit tests, build. The screenshot suite stays local (its baselines are darwin's) |
 | Publishing | `.github/workflows/publish.yml` — on every push to `main`, every version not on npm yet |
 

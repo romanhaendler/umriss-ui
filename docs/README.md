@@ -6,7 +6,7 @@ what a reader has — the filename is what they are looking for.
 | I want to know | Read |
 |---|---|
 | what umriss is and how to install it | [`../README.md`](../README.md) |
-| how a component is used, with running code | the demo of its package — [online](https://romanhaendler.github.io/umriss-ui/), or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard` |
+| how a component is used, with running code | the demo of its package — `pnpm docs` for all of them at the version checked out, or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard` |
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |
@@ -25,7 +25,7 @@ what a reader has — the filename is what they are looking for.
 | what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/) |
 | how other chart libraries take their data, and what follows for the charts | [`research/chart-data-input-2026-10/`](research/chart-data-input-2026-10/) |
 | how dashboards that users arrange themselves are built elsewhere, what their users ask for, and what follows for a dashboard package | [`research/user-dashboards-2026-10/`](research/user-dashboards-2026-10/) (`report.md` is the synthesis, in German) |
-| how a coding agent reads a package's documentation | `llms.txt` beside each demo online, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once, or `docs/llms-full.md` inside the installed package — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
+| how a coding agent reads a package's documentation | `docs/llms-full.md` inside the installed package, the version in the lockfile; the local site (`pnpm docs`) has `llms.txt` beside each demo, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | how the packed packages are put into real applications and customers' hands to find what the own checks cannot see, and who those customers are | [`agents/shakedown/`](agents/shakedown/) - the findings of the last run stand in [`../.scratch/shakedown/`](../.scratch/shakedown/) |
 | what a document used to be called | **What moved**, below |
@@ -54,11 +54,12 @@ above.
 
 ## What is deliberately not here
 
-**No documentation website beside the demos.** The demos are the documentation
-for the components, online at <https://romanhaendler.github.io/umriss-ui/>, built
-by `pnpm build:pages`. Every demo page is a path with its text prerendered, so
-that a search engine reads it (ADR-0037) — the demos, prerendered, are the
-website. The same build renders a fixed list of the documents here as pages of
+**No hosted documentation.** The demos are the documentation for the
+components; `pnpm docs` builds and serves them on the reader's machine, at the
+version checked out (ADR-0065). A public site would need an imprint, and it
+could only ever show `main`. Every demo page is a path with its text prerendered, so
+that the text, the Markdown twins and the search index are made from it
+(ADR-0037). The same build renders a fixed list of the documents here as pages of
 that site — the design language, the standards and ADR-0032, ADR-0059 and ADR-0060 — read from their
 files when it runs, so that no second text exists to drift (ADR-0046). The list
 stands in `packages/demo/src/tooling/documents.ts`; a document not on it stays
