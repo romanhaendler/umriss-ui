@@ -9,7 +9,7 @@ of an imprint, and the maintainer does not want to publish one. The site also
 showed only `main`: whoever installed `0.39.0` read pages for `0.41.0` or for
 something not released yet, with no way to see their own version.
 
-**There is no hosted documentation. `pnpm docs` builds the demos and serves
+**There is no hosted documentation. `pnpm start` builds the demos and serves
 them on the reader's machine at `http://localhost:4170/umriss-ui/`; checked out
 at a release tag (`<package>-v<version>`, all six packages sharing one number),
 the reader sees exactly the documentation of that version.** The README of the
@@ -56,5 +56,5 @@ each package, `docs/llms-full.md`, is version-exact by construction.
   address that hosts nothing.
 - The search-visibility work (Search Console, Bing) is closed; nobody registers
   an address that is gone.
-- `pnpm docs` always builds, so after checking out another tag the reader never
+- `pnpm start` always builds, so after checking out another tag the reader never
   sees the previous one.

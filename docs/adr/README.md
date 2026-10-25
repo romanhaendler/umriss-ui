@@ -78,6 +78,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0062](0062-react-19-is-the-floor.md) | React 19 is the floor: the peers are `>=19`, a component takes `ref` as a prop and is never wrapped, and no code reads React's version | React 19 is the floor | accepted | core, packages |
 | [0063](0063-inside-a-modal-dialog-the-toasts-and-the-tooltips-stand-in-the-top-layer.md) | Inside a modal dialog the toasts and the tooltips stand in the top layer, and everywhere else the token scale orders them | Toasts above a modal | accepted | core, table |
 | [0064](0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md) | A dashboard a user arranges is built: a sequence of widgets at named sizes on columns that never change in number | Dashboard a user arranges | accepted, supersedes ADR-0060 in one point | scope, dashboard |
-| [0065](0065-the-documentation-runs-locally-at-the-version-checked-out.md) | The documentation runs locally, at the version checked out | No hosted site; `pnpm docs` | accepted, supersedes ADR-0037 in part (hosting and search), ADR-0046 and ADR-0058 in part | demo, docs |
+| [0065](0065-the-documentation-runs-locally-at-the-version-checked-out.md) | The documentation runs locally, at the version checked out | No hosted site; `pnpm start` | accepted, supersedes ADR-0037 in part (hosting and search), ADR-0046 and ADR-0058 in part | demo, docs |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

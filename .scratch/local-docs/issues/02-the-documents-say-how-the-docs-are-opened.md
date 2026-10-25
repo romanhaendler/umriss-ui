@@ -6,14 +6,14 @@ Spec: `.scratch/local-docs/spec.md` (Implementation Decisions: the README of the
 ## What to build
 
 The prose half of the spec, plus the repository guard. Names to use, fixed by
-ticket 01: `pnpm docs` (builds and serves `http://localhost:4170/umriss-ui/`),
+ticket 01: `pnpm start` (builds and serves `http://localhost:4170/umriss-ui/`),
 `pnpm build:site` (builds only), tags `<dir>-v<version>`, all six packages
 on one number. Node 22 and pnpm 9 (via Corepack, `packageManager` in the root
 manifest).
 
 - Root `README.md`: the "See it running" section with the previews
   (`scripts/previews/<pkg>-light.png` / `-dark.png`, `<picture>` with
-  `prefers-color-scheme`), the clone-at-tag / install / `pnpm docs` commands;
+  `prefers-color-scheme`), the clone-at-tag / install / `pnpm start` commands;
   "The demos" loses the online links and the Pages sentence.
 - Each `packages/<pkg>/README.md`: online demo and `llms.txt` lines replaced as
   the spec says (absolute GitHub link to the root README section).

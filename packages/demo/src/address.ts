@@ -1,4 +1,4 @@
-/* The address of the site: the one `pnpm docs` serves it at, and the root of
+/* The address of the site: the one `pnpm start` serves it at, and the root of
    every absolute address the build, the llms text and the built-site probes
    write or read. The path is the base the demos are built with, so a page two
    directories deep finds the same assets.

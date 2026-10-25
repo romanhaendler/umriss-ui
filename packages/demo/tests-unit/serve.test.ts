@@ -1,4 +1,4 @@
-/* What `pnpm docs` answers: the front page, a page two levels deep, a
+/* What `pnpm start` answers: the front page, a page two levels deep, a
    Markdown twin and a rendered document load; an unknown path is a 404; `/`
    reaches the front page. */
 

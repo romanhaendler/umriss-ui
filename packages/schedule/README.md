@@ -191,7 +191,7 @@ Done from this list: **blocked time** per lane and **milestones**.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
-  and an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm docs`.
+  and an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm start`.
 * The vocabulary — **Task**, **Subtask**, **Lead-in**, **Lead-out**,
   **Dependency**, **Violated dependency**, **Blocked time**, **Milestone**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's

@@ -22,7 +22,7 @@ documentation of `main`: whoever installed `0.39.0` reads pages describing
 There is no hosted documentation any more. The demos - the documentation of
 the components, with the front page and the rendered documents (ADR-0046) -
 are built and served on the reader's own machine with one command,
-`pnpm docs`, from a checkout of the repository. Checked out at a release tag
+`pnpm start`, from a checkout of the repository. Checked out at a release tag
 (`core-v0.41.0`), the reader sees exactly the documentation of that version;
 on `main` they see what comes next.
 
@@ -39,7 +39,7 @@ Pages site itself is switched off in the repository settings, by the user.
 
 **Why this form and not another** (the decision the user delegated):
 
-- **`pnpm docs` from a checkout** (chosen): no new artifact, no hosting, the
+- **`pnpm start` from a checkout** (chosen): no new artifact, no hosting, the
   version is the tag, the build is the one that exists. Cost: a clone and an
   install.
 - **A published `@umriss-ui/docs` package run by `npx`**: one command, no
@@ -65,7 +65,7 @@ Pages site itself is switched off in the repository settings, by the user.
 9. As a developer evaluating umriss-ui, I want the pictures to follow my light or dark GitHub theme, so that I see the theme I read in.
 10. As a developer evaluating umriss-ui, I want three copy-paste commands that open the full documentation locally, so that I can try it in a few minutes.
 11. As a developer evaluating umriss-ui, I want the README to say which Node and pnpm versions the command needs, so that it does not fail on my machine for a reason I have to guess.
-12. As a developer evaluating umriss-ui, I want `pnpm docs` to print the address and say when it is ready, so that I know where to open it.
+12. As a developer evaluating umriss-ui, I want `pnpm start` to print the address and say when it is ready, so that I know where to open it.
 13. As a developer using umriss-ui at a given version, I want to open the documentation of exactly that version, so that every prop and example I read exists in what I installed.
 14. As a developer using umriss-ui, I want the README to say which tag belongs to my version, so that I do not have to work out the tag scheme.
 15. As a developer using umriss-ui, I want to know that `main` documents what is not released yet, so that I do not mistake an unreleased prop for one I have.
@@ -74,8 +74,8 @@ Pages site itself is switched off in the repository settings, by the user.
 18. As a developer on the local site, I want every page, example, props table, search (⌘K), API index, changelog page and rendered document to work as they did online, so that nothing is lost by running it locally.
 19. As a developer on the local site, I want links between packages and to the rendered documents (ADR-0032, the design language, the standards) to stay inside the local site, so that I am never sent to the old address.
 20. As a developer on the local site, I want links to other repository files to go to GitHub, so that I can still read an ADR that is not rendered.
-21. As a developer, I want `pnpm docs` to build the site every time it runs, so that after checking out another tag I never see the documentation of the previous one.
-22. As a developer, I want `pnpm docs` to stop with a clear message when the port is taken, so that I am not left with a silent failure.
+21. As a developer, I want `pnpm start` to build the site every time it runs, so that after checking out another tag I never see the documentation of the previous one.
+22. As a developer, I want `pnpm start` to stop with a clear message when the port is taken, so that I am not left with a silent failure.
 23. As a coding agent working in an application that uses umriss-ui, I want the skill to point me at `docs/llms-full.md` in the installed package, so that I read the documentation of the version in the lockfile.
 24. As a coding agent, I want the packaged `llms-full.md` to contain no links to a hosted site, so that every link I follow resolves.
 25. As a coding agent working in this repository, I want `docs/README.md` to say where the documentation is and how it is run, so that I do not cite a URL that no longer answers.
@@ -90,7 +90,7 @@ Pages site itself is switched off in the repository settings, by the user.
 
 - **No hosted site.** The Pages workflow is deleted. Nothing in the repository
   deploys the site anywhere.
-- **One command, `pnpm docs`.** It builds the site (the existing build of
+- **One command, `pnpm start`.** It builds the site (the existing build of
   ADR-0037 and ADR-0046, unchanged in what it renders) and then serves the
   built directory on a fixed local port at the site's path, printing the
   address. It always builds; it never serves a site built from another
@@ -100,7 +100,7 @@ Pages site itself is switched off in the repository settings, by the user.
   site's front page or forwards to it. A taken port is an error with the port
   named, not a silent fallback.
 - **The build command is renamed** from `build:pages` to `build:site`, with
-  every mention in comments, test skip messages and documents. `pnpm docs` is
+  every mention in comments, test skip messages and documents. `pnpm start` is
   the entry for readers; `build:site` is for contributors and for
   `pnpm previews`.
 - **The site's address no longer comes from the manifests.** Today the site's
@@ -109,7 +109,7 @@ Pages site itself is switched off in the repository settings, by the user.
   is (`/umriss-ui/<package>/`, so the demos' builds, the forwarders and the
   document links do not move). The site's address becomes one constant in the
   demo shell's package list, `http://localhost:4170/umriss-ui/`: the address
-  `pnpm docs` serves, read by the build, the llms generator and the built-site
+  `pnpm start` serves, read by the build, the llms generator and the built-site
   probes alike, where they read the manifests' `homepage` today. The site
   itself may name that local address (canonical links, `llms.txt`, the
   prerendered text); it never names the old hosted one. Links the outlines
@@ -131,7 +131,7 @@ Pages site itself is switched off in the repository settings, by the user.
   following the reader's GitHub theme, from the previews that are already
   checked in; then the commands - clone at the tag of a version (the tag
   scheme `<package>-v<version>`, all six sharing one number), `pnpm install`,
-  `pnpm docs` - with the Node and pnpm versions they need; then what the
+  `pnpm start` - with the Node and pnpm versions they need; then what the
   documentation contains (today's paragraph "The demo **is** the
   documentation", kept). The "The demos" section loses the online links and
   the Pages sentence; the dev-server list stays, for contributors.
@@ -144,7 +144,7 @@ Pages site itself is switched off in the repository settings, by the user.
 - **The skill** (ADR-0058) points at `node_modules/@umriss-ui/<package>/docs/llms-full.md`
   instead of the online `llms.txt` files. Its drift test stays a test of names.
 - **The documents map** (`docs/README.md`): the row "how a component is used"
-  names `pnpm docs` and the dev servers; the row "how a coding agent reads a
+  names `pnpm start` and the dev servers; the row "how a coding agent reads a
   package's documentation" names the packaged file and the local site's
   `llms.txt`; "What is deliberately not here" says there is no hosted site and
   why, and keeps "no prose copy of the demos". `docs/releasing.md` loses the
@@ -203,7 +203,7 @@ Pages site itself is switched off in the repository settings, by the user.
 - **The packaged documentation** is checked where packages are already checked
   before publishing (`check:dist`): the packed `llms-full.md` names no hosted
   address.
-- **`pnpm docs` itself** is checked by running it once: the front page, a
+- **`pnpm start` itself** is checked by running it once: the front page, a
   component page two levels deep, a Markdown twin and a rendered document load
   at the printed address, and an unknown path answers 404. If the server is
   hand-written rather than Vite's, one small unit test starts it on a free port

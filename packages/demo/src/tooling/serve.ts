@@ -1,5 +1,5 @@
 /* A static server for the built site, `site/`, under the path it is built for
-   (`/umriss-ui/`): what `pnpm docs` serves. A directory page is found by its
+   (`/umriss-ui/`): what `pnpm start` serves. A directory page is found by its
    `index.html`, a directory asked for without its slash is forwarded to it
    (the page's relative addresses need it), a Markdown twin is a file, and an
    address that is no file is a 404 with the site's own 404 page - the site

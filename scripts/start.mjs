@@ -1,9 +1,9 @@
-/* `pnpm docs`: the documentation, built from this checkout and served on this
+/* `pnpm start`: the documentation, built from this checkout and served on this
    machine at the site's address (packages/demo/src/address.ts). It builds
    every time - after another tag is checked out, the site shown is that
    tag's, never the previous one's - and then serves `site/` until stopped.
 
-   A port that is taken is an error naming it: another `pnpm docs` may be
+   A port that is taken is an error naming it: another `pnpm start` may be
    running, and it would show the documentation of another checkout. */
 
 import { execFileSync } from "node:child_process";
@@ -19,7 +19,7 @@ execFileSync(process.execPath, ["--disable-warning=ExperimentalWarning", "--expe
 
 const server = siteServer(join(ROOT, "site"), pathname);
 server.on("error", (error) => {
-  console.error(error.code === "EADDRINUSE" ? `Port ${port} is taken. Stop what is using it - another \`pnpm docs\`, perhaps - and run this again.` : error);
+  console.error(error.code === "EADDRINUSE" ? `Port ${port} is taken. Stop what is using it - another \`pnpm start\`, perhaps - and run this again.` : error);
   process.exit(1);
 });
 server.listen(Number(port), "127.0.0.1", () => console.log(`\nThe documentation is ready: ${SITE}\nStop it with Ctrl+C.`));

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "build:site": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/build-site.mjs",
-    "docs": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/docs.mjs",
+    "start": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/start.mjs",
     "previews": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/previews.mjs",
     "prepare": "git config core.hooksPath .githooks",
     "check": "node scripts/check.mjs",
