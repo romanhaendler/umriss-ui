@@ -24,7 +24,7 @@ const LOOPS: Loop[] = [
 function Loops({ onCellEdit }: { onCellEdit: (edit: CellEdit<Loop>) => void }) {
   const { Table, Column } = useTable(LOOPS, { rowKey: (l) => l.id });
   return (
-    <Table grid onCellEdit={onCellEdit} ariaLabel="Loops">
+    <Table grid onCellEdit={onCellEdit} aria-label="Loops">
       <Column value="name" label="Loop" rowHeader />
       <Column
         value="setpoint"

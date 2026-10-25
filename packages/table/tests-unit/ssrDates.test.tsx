@@ -22,7 +22,7 @@ const ORDERS: Order[] = [
 function Orders() {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Column value="id" label="Order" rowHeader />
       <Column value="quantity" label="Quantity" aggregate="sum" />
       <Column value="due" label="Due" format="date" aggregate="range" />

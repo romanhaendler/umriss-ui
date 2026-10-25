@@ -23,7 +23,7 @@ const WORK: WorkItem[] = [
 export default function NoValue() {
   const { Table, Column } = useTable(WORK, { rowKey: (w) => w.id, defaultGrouping: "person" });
   return (
-    <Table ariaLabel="Work items by person">
+    <Table aria-label="Work items by person">
       <Column value="person" label="Person" />
       <Column value="id" label="Item" rowHeader />
       <Column value="name" label="Title" />

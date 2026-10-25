@@ -29,7 +29,7 @@ export interface MultiSelectOption<T extends string = string> {
 
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
@@ -96,11 +96,8 @@ export function MultiSelect<T extends string = string>(
     clearable = false,
     className,
     style,
+    id,
     onClick,
-    onKeyDown,
-    "aria-label": ariaLabel,
-    "aria-labelledby": ariaLabelledBy,
-    "aria-describedby": ariaDescribedBy,
     ...rest
   }: MultiSelectProps<T>,
 ) {
@@ -251,7 +248,6 @@ export function MultiSelect<T extends string = string>(
     Array.from(fieldRef.current?.querySelectorAll<HTMLElement>("[data-nav]") ?? []);
 
   const handleFieldKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    onKeyDown?.(event);
     if (event.defaultPrevented || disabled) return;
     const target = event.target as HTMLElement;
     const navs = navElements();
@@ -348,19 +344,17 @@ export function MultiSelect<T extends string = string>(
 
   return (
     <>
-      {/* The caller's ref, class and rest go to the field, the element that
-          carries the ring; its handlers run before
-          the field's own and can prevent them. The caller's name and
-          description go to the button, for a field without `FormField`. */}
+      {/* The class and the style dress the field, the element that carries
+          the ring; the ref and the rest belong to the button that takes the
+          focus (principle 1). Its key handler runs before the field's own and
+          can prevent them. */}
       <div
-        ref={mergeRefs(fieldRef, ref)}
+        ref={fieldRef}
         className={cx(styles.field, size === "sm" && styles.sm, clearable && styles.fieldClearable, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
-        {...rest}
         /* The width in characters, and the caller's own style over it. */
         style={{ ...extentStyle(chars), ...style }}
-        onClick={(event) => {
-          onClick?.(event);
-          if (event.defaultPrevented || disabled) return;
+        onClick={() => {
+          if (disabled) return;
           if (open) {
             setOpen(false);
           } else {
@@ -436,20 +430,21 @@ export function MultiSelect<T extends string = string>(
           </button>
         )}
         <button
-          ref={mainRef}
+          {...rest}
+          ref={mergeRefs(mainRef, ref)}
           type="button"
-          id={field?.id}
+          id={id ?? field?.id}
           disabled={disabled}
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
-          aria-label={ariaLabel}
-          aria-labelledby={ariaLabelledBy}
-          aria-describedby={ariaDescribedBy ?? field?.describedBy}
+          aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
           aria-invalid={isInvalid || undefined}
           className={cx(styles.main, value.length === 0 && styles.mainEmpty)}
           onClick={(event) => {
+            onClick?.(event);
             event.stopPropagation();
+            if (event.defaultPrevented) return;
             if (open) {
               setOpen(false);
             } else {
@@ -471,7 +466,7 @@ export function MultiSelect<T extends string = string>(
         width="anchor"
         minWidth={260}
         role="dialog"
-        ariaLabel={placeholderText}
+        aria-label={placeholderText}
         id={panelId}
         className={styles.panel}
       >

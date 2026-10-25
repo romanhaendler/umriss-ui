@@ -25,7 +25,7 @@ export default function ActOnASelection() {
 
   return (
     <Stack gap={3}>
-      <Table selectable ariaLabel="Invoices awaiting approval">
+      <Table selectable aria-label="Invoices awaiting approval">
         <Toolbar />
         <Column value="id" label="Invoice" rowHeader />
         <Column value="supplier" label="Supplier" />

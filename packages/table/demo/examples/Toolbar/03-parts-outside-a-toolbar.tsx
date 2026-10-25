@@ -43,7 +43,7 @@ export default function PartsOutsideAToolbar() {
       <CardBody>
         <Stack gap={2}>
           <Pagination of={t} pageSizes={[4, 10]} />
-          <Table ariaLabel="Incidents">
+          <Table aria-label="Incidents">
             <Column value="id" label="Incident" rowHeader />
             <Column value="title" label="Title" />
             <Column value="service" label="Service" />

@@ -33,7 +33,7 @@ export default function SaveARowOnPurpose() {
 
   return (
     <Stack gap={2}>
-      <Table grid editMode="row" ariaLabel="Projects" onRowSave={save}>
+      <Table grid editMode="row" aria-label="Projects" onRowSave={save}>
         <Column value="name" label="Project" rowHeader />
         <Column value="phase" label="Phase" edit="select" editOptions={["Discovery", "Build", "Launch"]} width={140} />
         <Column value="owner" label="Owner" edit="text" />

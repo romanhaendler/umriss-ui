@@ -22,7 +22,7 @@ export default function Presentation() {
   const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.name });
 
   return (
-    <Table ariaLabel="Services">
+    <Table aria-label="Services">
       <Column value="name" label="Service" rowHeader />
       <Column value="state" label="State">
         {(state) => <Badge tone={TONE[state]}>{state}</Badge>}

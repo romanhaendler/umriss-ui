@@ -24,7 +24,7 @@ const WORK: WorkItem[] = [
 export default function GroupOfOne() {
   const { Table, Column } = useTable(WORK, { rowKey: (w) => w.id, defaultGrouping: ["team", "person"] });
   return (
-    <Table ariaLabel="Work items by team and person">
+    <Table aria-label="Work items by team and person">
       <Column value="person" label="Person" />
       <Column value="id" label="Item" rowHeader />
       <Column value="team" label="Team" />

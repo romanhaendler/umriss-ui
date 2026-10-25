@@ -5,7 +5,7 @@
    style and a data attribute, and all four have to arrive at one element -
    the one decision P1 of the spec names: the root the component renders; for
    `Modal` and `ConfirmDialog` the <dialog>, for the pickers and the combobox
-   family the field's wrapper, for `TreeView` the `role="tree"` list. A caller
+   family the field's control, for `TreeView` the `role="tree"` list. A caller
    can then hang a tooltip on a `Stat`, measure a `Card` or set a
    `data-testid`, which is the whole point.
 
@@ -18,9 +18,9 @@
    The list of exports is read, not written: a new component that stands in
    neither the cases nor the exceptions fails the first test. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import * as core from "../src";
 import type { NodeReader } from "../src";
 import { passThroughGuard } from "../../demo/tests-support/passThroughGuard.tsx";
@@ -55,7 +55,7 @@ const roots: Leaf[] = [{ id: "one" }];
 function TreeViewCase({ probe }: { probe: Probe }) {
   const tree = core.useTree(roots, { reader });
   return (
-    <core.TreeView tree={tree} ariaLabel="Files" {...p(probe)}>
+    <core.TreeView tree={tree} aria-label="Files" {...p(probe)}>
       {(e) => e.node.id}
     </core.TreeView>
   );
@@ -201,12 +201,12 @@ const ROOT: Record<string, (element: Element) => boolean> = {
   ConfirmDialog: (e) => e.tagName === "DIALOG",
   CommandPalette: (e) => e.tagName === "DIALOG",
   TreeView: (e) => e.getAttribute("role") === "tree",
-  Combobox: (e) => e.querySelector('[role="combobox"]') !== null,
-  MultiSelect: (e) => e.querySelector("button") !== null,
-  DatePicker: (e) => e.querySelector('[aria-haspopup="dialog"]') !== null,
-  DateTimePicker: (e) => e.querySelector('[aria-haspopup="dialog"]') !== null,
-  DateRangePicker: (e) => e.querySelector('[aria-haspopup="dialog"]') !== null,
-  DateTimeRangePicker: (e) => e.querySelector('[aria-haspopup="dialog"]') !== null,
+  Combobox: (e) => e instanceof HTMLInputElement && e.getAttribute("role") === "combobox",
+  MultiSelect: (e) => e instanceof HTMLButtonElement && e.getAttribute("aria-haspopup") === "dialog",
+  DatePicker: (e) => e instanceof HTMLButtonElement && e.getAttribute("aria-haspopup") === "dialog",
+  DateTimePicker: (e) => e instanceof HTMLButtonElement && e.getAttribute("aria-haspopup") === "dialog",
+  DateRangePicker: (e) => e instanceof HTMLButtonElement && e.getAttribute("aria-haspopup") === "dialog",
+  DateTimeRangePicker: (e) => e instanceof HTMLButtonElement && e.getAttribute("aria-haspopup") === "dialog",
 };
 
 /* The native fields that wear a wrapper: the ref and the rest reach the
@@ -223,6 +223,12 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
   Select: "the class on the wrapper with the chevron, the rest on the <select>",
   SplitButton: "the class on the group, the rest on the main action",
   Slider: "the class on the wrapper with marks and readout, the rest on the range <input>",
+  Combobox: "the class on the wrapper with the chevron, the rest on the input",
+  MultiSelect: "the class on the field with the chips, the rest on the button that opens the panel",
+  DatePicker: "the class on the wrapper with the cross, the rest on the trigger button",
+  DateTimePicker: "the class on the wrapper with the cross, the rest on the trigger button",
+  DateRangePicker: "the class on the wrapper with the cross, the rest on the trigger button",
+  DateTimeRangePicker: "the class on the wrapper with the cross, the rest on the trigger button",
   Switch: "the checkbox's construction: the class on the label that holds track and text, the rest on the <input>",
 };
 
@@ -261,5 +267,76 @@ describe("What the rest may not override", () => {
     expect(meter.getAttribute("role")).toBe("meter");
     expect(meter.getAttribute("aria-valuenow")).toBe("40");
     expect(meter.getAttribute("aria-label")).toBe("Load");
+  });
+});
+
+/* The field shape in use: what a caller does with the rest of a combobox or a
+   picker lands on the control that takes the focus. */
+describe("The pickers are fields", () => {
+  it("a test id on a Combobox finds the input, and typing filters", async () => {
+    const { findAllByRole, getByTestId } = render(
+      <core.Combobox
+        data-testid="city"
+        options={[{ value: "a", label: "Aachen" }, { value: "b", label: "Berlin" }]}
+        value={null}
+        onChange={noop}
+      />,
+    );
+    const input = getByTestId("city") as HTMLInputElement;
+    expect(input.getAttribute("role")).toBe("combobox");
+    fireEvent.change(input, { target: { value: "Ber" } });
+    expect(await findAllByRole("option")).toHaveLength(1);
+  });
+
+  it("an id on a DatePicker reaches the trigger, so a label names it", () => {
+    const { getByLabelText } = render(
+      <>
+        <label htmlFor="d">Day</label>
+        <core.DatePicker id="d" value={null} onChange={noop} />
+      </>,
+    );
+    expect(getByLabelText("Day").getAttribute("aria-haspopup")).toBe("dialog");
+  });
+});
+
+describe("The name is aria-label", () => {
+  const roots: Leaf[] = [{ id: "one" }];
+  function Tree(props: { name: object }) {
+    const tree = core.useTree(roots, { reader });
+    return (
+      <core.TreeView tree={tree} {...(props.name as { "aria-label": string })}>
+        {(e) => e.node.id}
+      </core.TreeView>
+    );
+  }
+
+  it("TreeView takes aria-label, and ariaLabel for one more minor with a warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const named = render(<Tree name={{ "aria-label": "Files" }} />);
+    expect(named.getByRole("tree").getAttribute("aria-label")).toBe("Files");
+    expect(warn).not.toHaveBeenCalled();
+    named.unmount();
+    const old = render(<Tree name={{ ariaLabel: "Old" }} />);
+    expect(old.getByRole("tree").getAttribute("aria-label")).toBe("Old");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0]![0])).toContain("ariaLabel");
+    warn.mockRestore();
+  });
+
+  it("Popover and ContextMenu take aria-label", () => {
+    const anchor = { current: document.body };
+    const popover = render(
+      <core.Popover open onOpenChange={noop} anchorRef={anchor} role="dialog" aria-label="Filter">
+        x
+      </core.Popover>,
+    );
+    expect(document.querySelector('[role="dialog"]')?.getAttribute("aria-label")).toBe("Filter");
+    popover.unmount();
+    render(
+      <core.ContextMenu open onOpenChange={noop} position={{ x: 1, y: 1 }} aria-label="Row">
+        <core.MenuItem>Open</core.MenuItem>
+      </core.ContextMenu>,
+    );
+    expect(document.querySelector('[role="menu"]')?.getAttribute("aria-label")).toBe("Row");
   });
 });

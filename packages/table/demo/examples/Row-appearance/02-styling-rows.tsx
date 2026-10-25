@@ -29,7 +29,7 @@ export default function StylingRows() {
   return (
     <>
       <style>{STYLE}</style>
-      <Table className="invoice-list" ariaLabel="Invoices" rowProps={(i) => ({ "data-overdue": i.overdue ? "" : undefined })}>
+      <Table className="invoice-list" aria-label="Invoices" rowProps={(i) => ({ "data-overdue": i.overdue ? "" : undefined })}>
         <Column value="id" label="Invoice" rowHeader />
         <Column value="supplier" label="Supplier" />
         <Column value="due" label="Due" format="date" />

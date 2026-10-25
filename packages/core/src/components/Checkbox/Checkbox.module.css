@@ -153,4 +153,13 @@
       background: CanvasText;
     }
   }
+
+  /* Under a finger the control is as large as the 24 px square of WCAG 2.5.8:
+     the box is 16 px, and a pad on it would lie on the label's text. */
+  @media (pointer: coarse) {
+    .wrapper {
+      min-width: 24px;
+      min-height: 24px;
+    }
+  }
 }

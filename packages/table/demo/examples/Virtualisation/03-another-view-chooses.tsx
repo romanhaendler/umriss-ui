@@ -25,7 +25,7 @@ export default function AnotherViewChooses() {
         <Button onClick={() => setCurrent("P-1500")}>Choose parcel 1,500</Button>
         <Button onClick={() => setCurrent("P-0001")}>Choose parcel 1</Button>
       </Stack>
-      <Table stickyHeader maxHeight="300px" ariaLabel="Parcels" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
+      <Table stickyHeader maxHeight="300px" aria-label="Parcels" currentRow={current} onCurrentRowChange={(key) => setCurrent(key)}>
         <Column value="id" label="Parcel" rowHeader />
         <Column value="town" label="Town" />
         <Column value="weight" label="Weight (kg)" />

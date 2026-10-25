@@ -34,7 +34,7 @@ const INVOICES: Invoice[] = [
 function Invoices() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id });
   return (
-    <Table ariaLabel="Invoices">
+    <Table aria-label="Invoices">
       <Toolbar>
         <Search />
         <ColumnMenu />

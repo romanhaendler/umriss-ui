@@ -58,7 +58,7 @@ export default function PinnedBothSides() {
   return (
     <Stack gap={2}>
       <style>{STYLE}</style>
-      <Table className="hourly-output" selectable ariaLabel="Output per hour">
+      <Table className="hourly-output" selectable aria-label="Output per hour">
         <Toolbar>
           <ColumnMenu />
         </Toolbar>

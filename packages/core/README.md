@@ -65,7 +65,7 @@ export function OrdersTable({ rows }: { rows: Order[] }) {
   const { Table, Column } = useTable(rows, { rowKey: (o) => o.number });
 
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Column value="number" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
       <Column value="quantity" label="Quantity" />
@@ -394,23 +394,32 @@ The table is not part of this package. It lives in
 
 ## Principles for new components
 
-1. Pass `ref`, `className` and `...rest` through to the root element –
-   every component that renders a root element. Excepted are the wrappers that
-   have none: `Popover` renders into a portal, `Tooltip` around the caller's
-   child, `Menu`, `ContextMenu` and `ToastProvider` are composed of other
-   parts, and the providers render no element at all. The ref goes
-   to the element a caller lays out: the `<dialog>` of `Modal`, `Drawer`,
-   `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
-   and the combobox family, the `role="tree"` list of `TreeView`. The native
-   fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
-   `Select`, `FileInput`, `Input`, `Textarea`) put the class and the style on
-   the wrapper - what a caller dresses and sizes - and ref and rest on the
-   control (ADR-0041). The pickers and the combobox family take a caller's
-   `aria-label`, `aria-labelledby` and `aria-describedby` out of the rest and
-   put them on the field that has the focus. The component's own
-   `role`, the `aria-*` it computes and its handlers are not replaced by
-   `rest`: a caller's handler runs first and can `preventDefault`. Held by
-   `tests-unit/passthrough.test.tsx`, which renders every export.
+1. Every component has one of four shapes (ADR-0068), and `ref` is always an
+   element - never a handle. The other packages follow the same contract.
+   - **An element**: `ref`, `className`, `style` and the rest reach the root
+     element. Most of core: `Button`, `Card`, `Stack`, `Stat`, `TreeView` (its
+     `role="tree"` list), the `<dialog>` of `Modal`, `Drawer`, `ConfirmDialog`
+     and `CommandPalette`, and the rest that render a root.
+   - **A field**: the class and the style reach the wrapper, which a caller
+     dresses and sizes (ADR-0041); `ref` and the rest reach the control that
+     takes the focus. In core: `Checkbox`, `Switch`, `Slider`, `NumberInput`,
+     `Select`, `FileInput`, `Input`, `Textarea` and `TreeSearch` (the native
+     control), `Combobox` (its input), and `MultiSelect`, `DatePicker`,
+     `DateTimePicker`, `DateRangePicker` and `DateTimeRangePicker` (the trigger
+     button). So `data-testid` on a `Combobox` finds the input, and a
+     `<label htmlFor>` names a picker. `SplitButton` keeps its class on the
+     group and its style and rest on the main action.
+   - **A composite** - a frame that holds several parts, with the name routed to
+     the part that carries the role: core has none; the table, the chart, the
+     schedule and the calculation are the ones.
+   - **No element of its own**, each with its reason: `Popover` renders into a
+     portal, `Tooltip` wraps the caller's child, `Menu` and `ContextMenu` are
+     composed of other parts, `ToastProvider` is a context with a portal, and the
+     providers render no element at all.
+
+   The component's own `role`, the `aria-*` it computes and its handlers are not
+   replaced by `rest`: a caller's handler runs first and can `preventDefault`.
+   Held by `tests-unit/passthrough.test.tsx`, which renders every export.
 2. Support controlled **and** uncontrolled use (`value`/`defaultValue`).
    Deliberately controlled only: `Combobox` and `MultiSelect` – the field keeps
    no second state beside the caller's – as well as `Modal`, `Drawer` and
@@ -422,9 +431,9 @@ The table is not part of this package. It lives in
    selector reaches beyond the component's own elements, and every rule lies in
    a layer (ADR-0021; the guards in `tests-unit/stylesheets.test.ts` hold it).
 6. Everything is English – identifiers, props and prose (ADR-0018, which
-   reversed ADR-0015). What still stands from ADR-0015 is the spelling of the
-   accessible name: it is `aria-label` where it names the root element, and
-   `ariaLabel` only where it does not.
+   reversed ADR-0015). The accessible name is spelled `aria-label` everywhere
+   (ADR-0068). `ariaLabel` on `TreeView`, `Popover` and `ContextMenu` is a
+   deprecated alias for one further minor.
 7. A field's root composes `extent` from `#own-styles`: it fills the place
    that gives it a width, is its natural width where the place asks, and is
    never wider than its place; what it shows never moves it (ADR-0041). A field

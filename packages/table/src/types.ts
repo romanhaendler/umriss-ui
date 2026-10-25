@@ -4,8 +4,8 @@
    of the hook it came from, and `tests-unit/types.test-d.tsx` records what must
    compile and what must not. */
 
-import type { ReactNode } from "react";
-import type { LimitSet } from "@umriss-ui/core";
+import type { HTMLAttributes, ReactNode } from "react";
+import type { LimitSet, RefProp } from "@umriss-ui/core";
 import type { TableRequest, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
@@ -451,7 +451,9 @@ export type RowAttributes = { className?: string } & {
 
 /** The props of `Table`: how the table looks and behaves. Its state comes from
     `useTable`, its columns from the JSX inside it. */
-export interface TableProps<Z> {
+export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
+  /* `ref`, `className`, `style` and the rest reach the outer frame. The names
+     (`aria-label`, `aria-labelledby`, `aria-describedby`) reach the <table>. */
   /** Adds the selection column. "All" means: the filtered set. */
   selectable?: boolean;
   /** Keeps the header row visible while scrolling. */
@@ -486,10 +488,9 @@ export interface TableProps<Z> {
       grid mode Enter on a cell with nothing to edit or enter. Without a
       `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
-  /** Accessible name of the table (not of the outer frame). */
+  /** Accessible name of the table.
+      @deprecated Use `aria-label`; this name goes in the next minor release. */
   ariaLabel?: string;
-  /** Classes on the outer frame of the table. */
-  className?: string;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
   groupable?: boolean;

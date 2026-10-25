@@ -108,7 +108,7 @@ export default function AMillionRowsOnAServer() {
 
   return (
     <Stack gap={2}>
-      <Table selectable loading={loading} ariaLabel="Requests on the server">
+      <Table selectable loading={loading} aria-label="Requests on the server">
         <Toolbar>
           <Search placeholder="Request or service" />
           <ColumnMenu />
