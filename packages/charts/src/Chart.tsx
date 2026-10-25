@@ -59,7 +59,7 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
   padding?: number | Partial<Padding>;
   /** Accessible name of the plot. Without a name, `aria-label` or
       `aria-labelledby`, the chart warns in development.
-      @deprecated Use `aria-label`; this name goes in the next minor release. */
+      @deprecated since 0.43 - use `aria-label`. */
   ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;

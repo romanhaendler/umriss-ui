@@ -63,13 +63,13 @@ export type ScheduleProps = ScheduleOwnProps &
     | {
         /** What the schedule shows, for a screen reader: "Plan of week 38". */
         "aria-label": string;
-        /** @deprecated Use `aria-label`; this name goes in the next minor release. */
+        /** @deprecated since 0.43 - use `aria-label`. */
         ariaLabel?: string;
       }
     | {
         "aria-label"?: undefined;
         /** What the schedule shows, for a screen reader.
-            @deprecated Use `aria-label`; this name goes in the next minor release. */
+            @deprecated since 0.43 - use `aria-label`. */
         ariaLabel: string;
       }
   );
@@ -206,8 +206,7 @@ const DATE_ROOM_LONG = 200;
 
 /** What a schedule offers a caller imperatively: the arithmetic between a
     point on the screen and a time on a lane. Everything else is props.
-    @deprecated The three functions stand on `useSchedule`'s return; the `ref` is
-    the root element. The handle goes in the next minor release. */
+    @deprecated since 0.43 - use the functions on `useSchedule`'s return. */
 export interface ScheduleHandle {
   /** The time and the lane at a client point, or null outside the plot. */
   positionAt: (clientX: number, clientY: number) => { time: number; lane: string | null } | null;
