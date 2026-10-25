@@ -1454,3 +1454,28 @@ test("Spinner in a card's head leaves the card's height alone", async ({ page })
   await expect(card.getByRole("button", { name: "Refresh" })).toHaveAttribute("aria-busy", "true");
   expect((await card.boundingBox())!.height).toBe(height);
 });
+
+/* The palette's close cross is in the markup for every device; CSS shows it
+   under a finger only. */
+test.describe("the palette's close", () => {
+  const open = async (page: Page) => {
+    await openExample(page, "commandpalette", "commands");
+    await page.getByRole("button", { name: "Open the palette" }).click();
+    return page.getByRole("dialog").getByRole("button", { name: "Close" });
+  };
+
+  test("is hidden under a fine pointer", async ({ page }) => {
+    await expect(await open(page)).toBeHidden();
+  });
+
+  test.describe("under a finger", () => {
+    test.use({ hasTouch: true });
+
+    test("is visible and closes the palette", async ({ page }) => {
+      const close = await open(page);
+      await expect(close).toBeVisible();
+      await close.click();
+      await expect(page.getByRole("dialog")).toBeHidden();
+    });
+  });
+});

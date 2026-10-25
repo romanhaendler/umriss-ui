@@ -238,6 +238,24 @@
     pointer-events: none;
   }
 
+  /* Loading over a plan keeps it: it dims after the family's delay and takes
+     no pointer until the answer is in, as the chart's course does. The axes,
+     the lane column and the focus ring stay as they are. */
+  .plot[data-stale] {
+    pointer-events: none;
+  }
+
+  .plot[data-stale] > :not(.focusRing) {
+    opacity: 0.5;
+    transition: opacity var(--u-transition, 120ms cubic-bezier(0.22, 1, 0.36, 1)) var(--u-delay-stale, 200ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plot[data-stale] > :not(.focusRing) {
+      transition-duration: 0s;
+    }
+  }
+
   .grip {
     position: absolute;
     width: 9px;
