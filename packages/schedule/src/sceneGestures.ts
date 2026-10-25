@@ -361,7 +361,7 @@ export class SceneGestures {
       has become a pan or a pinch in the meantime. */
   private grab(at: { x: number; y: number }): void {
     const gesture = this.gesture;
-    if (!this.armed || gesture.kind !== "pending") return;
+    if (!this.armed || this.loading || gesture.kind !== "pending") return;
     const { x, y } = this.local(at.x, at.y);
     const { mode, subtask } = this.modeAt(gesture.x0, gesture.y0);
     if (mode !== "move" || subtask === null) return;
