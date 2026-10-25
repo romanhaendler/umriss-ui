@@ -1,6 +1,6 @@
 # Decisions
 
-Sixty-eight decisions, each one written where it was made and kept afterwards. An
+Sixty-nine decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -82,5 +82,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0066](0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md) | The upgrade promise: one number, peers over the minor, a rename lives one minor | Six packages in step; a rename keeps its old name for one minor | accepted, supersedes ADR-0035 in part ("no deprecated aliases") | scope, packages |
 | [0067](0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md) | A Server Component hands umriss its data, and writes only a calculation itself | Server Components: data crosses, views are client, calculation reads its tree | accepted, amends ADR-0060 | core, packages, calculation |
 | [0068](0068-every-component-has-one-of-four-shapes-its-ref-is-an-element-and-its-name-is-aria-label.md) | Every component has one of four shapes, its ref is an element, and its name is `aria-label` | Four shapes; ref is an element; `aria-label` everywhere | accepted, supersedes ADR-0018 in part (its section "What stands from ADR-0015") | components, packages |
+| [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
