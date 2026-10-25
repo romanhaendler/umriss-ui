@@ -16,7 +16,7 @@ const SETS = {
 
 /** The heights of every line - head and rows, and a footer where there is one - of the regular and the compact table. */
 const lines = async (page: Page, tokens: string) => {
-  await openExample(page, "table", "density");
+  await openExample(page, "row-appearance", "density");
   if (tokens) await page.addStyleTag({ content: tokens });
   const measure = (label: string) =>
     page.getByRole("table", { name: label }).locator("tr").evaluateAll((rows) => rows.map((row) => row.getBoundingClientRect().height));
