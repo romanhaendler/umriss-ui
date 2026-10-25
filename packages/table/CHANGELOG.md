@@ -5,8 +5,11 @@ props, behaviour.
 
 **The numbers** follow the rule of `@umriss-ui/core` and `@umriss-ui/charts`: the
 middle digit rises when something is added, the last one when something is
-repaired, and **whatever changes existing behaviour stands under a heading
-"Changed" of its own**, no matter which digit rose.
+repaired. The six packages are released in step, and a rename keeps its old name
+for one further minor, with a warning, before the minor after it removes the name
+([the upgrade promise, ADR-0066](../../docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
+**Whatever changes existing behaviour stands under a heading "Changed" of its
+own**, no matter which digit rose, with a `Migration:` line.
 
 From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
 

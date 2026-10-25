@@ -148,8 +148,7 @@ npx skills add romanhaendler/umriss-ui --skill umriss-ui
 
 ## Maturity
 
-Every package is `0.x` and the six are released together under one number (from `0.34.0`, the dashboard from `0.40.0`), and while the first digit is `0` no version number
-promises compatibility. All six are released under `latest`. The release
+The six packages are released together under one number, which is `0.x` for now (from `0.34.0`, the dashboard from `0.40.0`). A peer is named `^0.x.0`, so a minor moves the peer ranges and a patch does not; a rename keeps its old name for one further minor, with a warning, and the minor after removes it; fixes go into the latest minor only; TypeScript 5.4 is the floor. [The upgrade promise](docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md) states it in full. All six are released under `latest`. The release
 candidates of `charts`, `table` and `schedule` stand in their changelogs, and so
 do the numbers `core` counted inside this repository before its first release,
 as *internal* ones. What changes for a caller stands in that package's own
