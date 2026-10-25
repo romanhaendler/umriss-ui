@@ -16,7 +16,9 @@
      under `bundler` and `node10` resolution,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`),
-   - and the packed `docs/llms-full.md`, read without any site, names none.
+   - and the packed `docs/llms-full.md`, read without any site, names none,
+   - and no `@deprecated` marker in `src/` is older than the package's own
+     minor (ADR-0066).
 
    Run from a package directory: `node --experimental-strip-types
    ../../scripts/check-dist.ts <entry.js> <stylesheet.css>` - the packages call
@@ -72,6 +74,23 @@ if (sources.some(([, text]) => text.includes(DEV_EXPRESSION)) && !js.includes(DE
 }
 for (const file of readdirSync("dist", { recursive: true, encoding: "utf8" })) {
   if (file.endsWith(".js") && readFileSync(join("dist", file), "utf8").includes("import.meta")) problems.push(`dist/${file} contains import.meta`);
+}
+
+/* A renamed name keeps its old form for one minor (ADR-0066): a marker names
+   `since 0.<N>`, N is the package's minor or the next, so the release of the
+   minor after N cannot go out while the old name stands. */
+const version = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
+const packageMinor = Number(/^0\.(\d+)\./.exec(version)?.[1]);
+for (const file of readdirSync("src", { recursive: true, encoding: "utf8" }).filter((f) => /\.(tsx?|css)$/.test(f))) {
+  readFileSync(join("src", file), "utf8").split("\n").forEach((line, index) => {
+    if (!line.includes("@deprecated")) return;
+    const minor = /@deprecated since 0\.(\d+)\b/.exec(line)?.[1];
+    const at = `src/${file}:${index + 1}`;
+    if (minor === undefined) problems.push(`${at}: @deprecated names no "since 0.<N>"`);
+    else if (Number(minor) !== packageMinor && Number(minor) !== packageMinor + 1) {
+      problems.push(`${at}: deprecated since 0.${minor}, the package is ${version}; remove it`);
+    }
+  });
 }
 
 const css = readFileSync(join("dist", stylesheet), "utf8");
