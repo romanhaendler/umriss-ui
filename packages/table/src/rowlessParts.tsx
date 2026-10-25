@@ -240,7 +240,7 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
            button's start edge, and flips where there is no room. */
         align="start"
         role="dialog"
-        ariaLabel={wording.arrangeColumns}
+        aria-label={wording.arrangeColumns}
         id={panelId}
         className={styles.columnsPanel}
       >

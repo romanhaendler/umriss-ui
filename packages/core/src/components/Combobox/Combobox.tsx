@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Listbox, optionId } from "../../lib/listbox";
+import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Combobox.module.css";
 import { useControlSize } from "../../lib/controlSize";
@@ -26,7 +27,7 @@ export interface ComboboxOption<T extends string = string> {
 
 /** The props of `Combobox`. */
 export interface ComboboxProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
+  extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
@@ -75,11 +76,10 @@ export function Combobox<T extends string = string>(
     clearable = false,
     className,
     style,
+    id,
     onKeyDown,
-    onKeyDownCapture,
-    "aria-label": ariaLabel,
-    "aria-labelledby": ariaLabelledBy,
-    "aria-describedby": ariaDescribedBy,
+    onClick,
+    onBlur,
     ...rest
   }: ComboboxProps<T>,
 ) {
@@ -128,6 +128,7 @@ export function Combobox<T extends string = string>(
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(event);
     // An input method's own keys (Enter ends the composition) are not ours.
     if (event.nativeEvent.isComposing || event.defaultPrevented) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -163,41 +164,30 @@ export function Combobox<T extends string = string>(
 
   return (
     <>
-      {/* The caller's ref, class and rest go to the wrapper, the field's
-          outermost element; the field id from `FormField` stays on the input,
-          and so do the caller's name and description. The caller's `onKeyDown`
-          listens in the capture phase: the keys land on the input inside, and
-          a handler on the wrapper would otherwise run after the field's own
-          and could not prevent it. */}
+      {/* The class and the style dress the wrapper; the ref and the rest
+          belong to the input, the control that takes the focus (principle 1). */}
       <div
-        ref={ref}
         className={cx(
           styles.wrapper,
           size === "sm" && styles.wrapperSm,
           clearable && styles.wrapperClearable,
           className,
         )}
-        {...rest}
         /* The width in characters, and the caller's own style over it. */
         style={{ ...extentStyle(chars), ...style }}
-        onKeyDownCapture={(event) => {
-          onKeyDownCapture?.(event);
-          onKeyDown?.(event);
-        }}
       >
         <input
-          ref={inputRef}
+          {...rest}
+          ref={mergeRefs(ref, inputRef)}
           type="text"
           role="combobox"
-          id={field?.id}
+          id={id ?? field?.id}
           disabled={disabled}
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
           aria-activedescendant={open && filtered[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
-          aria-label={ariaLabel}
-          aria-labelledby={ariaLabelledBy}
-          aria-describedby={ariaDescribedBy ?? field?.describedBy}
+          aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
           aria-required={field?.required || undefined}
           aria-invalid={isInvalid || undefined}
           placeholder={placeholderText}
@@ -210,11 +200,15 @@ export function Combobox<T extends string = string>(
             // After the opening's count, which is the old query's: the later wins.
             sayCount(filterOptions(options, event.target.value).length);
           }}
-          onClick={() => {
+          onClick={(event) => {
+            onClick?.(event);
             if (!open) openPanel();
           }}
           onKeyDown={handleKeyDown}
-          onBlur={() => closePanel()}
+          onBlur={(event) => {
+            onBlur?.(event);
+            closePanel();
+          }}
         />
         {clearable && !disabled && (value !== null || (query ?? "") !== "") && (
           <button

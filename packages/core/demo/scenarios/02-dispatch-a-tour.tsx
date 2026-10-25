@@ -298,7 +298,7 @@ function Content() {
         <CardHeader title="Fleet" />
         <CardBody>
           <div data-callout="1">
-            <TreeView tree={tree} ariaLabel="Depots and vehicles">
+            <TreeView tree={tree} aria-label="Depots and vehicles">
               {(entry) => entry.node.name}
             </TreeView>
           </div>
