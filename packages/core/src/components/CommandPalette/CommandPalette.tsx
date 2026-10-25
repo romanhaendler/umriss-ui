@@ -31,6 +31,8 @@ import { useDialogChoreography } from "../../lib/dialogChoreography";
 import { idPart } from "../../lib/idPart";
 import { useWording } from "../../lib/language";
 import { announce, silence } from "../../lib/announce";
+import { CrossGlyph } from "../../lib/glyphs";
+import { IconButton } from "../Button";
 import { Row, rowId } from "./PaletteRow";
 import { usePaletteFinds } from "./usePaletteFinds";
 import { usePaletteGrowth } from "./usePaletteGrowth";
@@ -253,25 +255,32 @@ export function CommandPalette({
       }}
     >
       <div className={styles.pane}>
-        <input
-          ref={fieldRef}
-          type="text"
-          className={styles.field}
-          value={query}
-          placeholder={wording.palettePlaceholder}
-          aria-label={wording.paletteField}
-          role="combobox"
-          aria-expanded={order.length > 0}
-          aria-controls={order.length > 0 ? listId : undefined}
-          aria-activedescendant={activeId === null ? undefined : rowId(baseId, activeId)}
-          autoComplete="off"
-          spellCheck={false}
-          onChange={(event) => {
-            keyboardTakesOver();
-            setQuery(event.target.value);
-          }}
-          onKeyDown={onKeyDown}
-        />
+        {/* The cross is always in the markup; CSS shows it under a finger only. */}
+        <div className={styles.head}>
+          <input
+            ref={fieldRef}
+            type="text"
+            className={styles.field}
+            value={query}
+            placeholder={wording.palettePlaceholder}
+            aria-label={wording.paletteField}
+            role="combobox"
+            aria-expanded={order.length > 0}
+            aria-controls={order.length > 0 ? listId : undefined}
+            aria-activedescendant={activeId === null ? undefined : rowId(baseId, activeId)}
+            autoComplete="off"
+            enterKeyHint="go"
+            spellCheck={false}
+            onChange={(event) => {
+              keyboardTakesOver();
+              setQuery(event.target.value);
+            }}
+            onKeyDown={onKeyDown}
+          />
+          <IconButton size="sm" aria-label={wording.close} className={styles.close} onClick={onClose}>
+            <CrossGlyph />
+          </IconButton>
+        </div>
 
         {/* Grows and shrinks with the number of finds. In the resting state it
             is zero high - the window is then only the field, and that is
