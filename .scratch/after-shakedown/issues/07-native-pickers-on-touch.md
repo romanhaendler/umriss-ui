@@ -49,6 +49,9 @@ Decided 2026-10-25 by the agent; the maintainer delegated the technical question
     native dates.
   - The month names come from a new format, `monthName` (the month alone, "March"). It is built from the
     locale, as `month` is, and is additive in `Formats`.
+  - A Select inside a panel needs one fix first *(agent)*. Its own list is portalled outside the date
+    panel, so by the code a pick in it would close the panel. A surface opened from inside a Popover's
+    panel counts as inside that panel, and Escape closes only the innermost surface.
   - The grid gets the APG date-grid keys: PageUp and PageDown move a month, Shift+PageUp and
     Shift+PageDown move a year, Home and End go to the start and end of the week.
 - **Typed entry, in the DatePicker's panel** *(agent, product - for review)*:
@@ -59,7 +62,7 @@ Decided 2026-10-25 by the agent; the maintainer delegated the technical question
     nearest to today), and ISO `1985-03-17`.
   - As soon as the text is a date, the grid shows it. Enter picks it and closes the panel. A text that is
     no date (31 February, too few parts) is marked invalid on Enter and picks nothing.
-  - A digit typed while the grid has the focus starts typed entry. So Enter on the field, then
+  - A digit typed while the grid has the focus starts typed entry. So Enter on the trigger, then
     `17.03.1985`, then Enter is the whole way.
   - The trigger stays a button: no consumer's role-based test breaks, and the four pickers keep one
     trigger. A typed trigger (an APG combobox, Mantine's `DateInput`) is later.

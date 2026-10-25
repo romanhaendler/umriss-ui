@@ -52,7 +52,7 @@ decisions here are binding for those specs and are not argued again in them.
 | X6 | A chart that filters a table | No feature - a scenario, built with the range. |
 | P1 | Saved views | A part that lists named views, changes between them and offers "save this view"; where they are kept is the application's, through callbacks (ADR-0047). |
 | P2 | Utilisation | A line under the plan on the same time axis, drawn from the occupancy the schedule already computes (ADR-0026). |
-| P3 | Print | A print stylesheet for all five packages first. A schedule over several pages is a large piece of its own and waits for a need. |
+| P3 | Print | A print stylesheet for all six packages first. The calculation's share: its folded levels stand open and its disclosure buttons are hidden under `@media print`. The chart's picture and print is `.scratch/chart-picture-and-print/`. A schedule over several pages is a large piece of its own and waits for a need. |
 | P4 | Avatar | A mark for a person or a team - initials, a picture if given - in two sizes, for a lane's header and a table's cell. No stack, no presence. |
 | P5 | Timeline | A vertical list of events with their instant, text and state, in core, not a chart. Its spec says how it differs from `AlarmList` and `Stepper`. |
 

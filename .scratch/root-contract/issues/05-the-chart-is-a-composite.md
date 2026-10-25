@@ -4,7 +4,7 @@ Status: ready-for-agent
 Type: task
 Size: S
 
-Blocked by: `04-the-table-is-a-composite.md`
+Blocked by: `04-the-table-is-a-composite.md`, `.scratch/upgrade-promise/issues/03-a-renamed-prop-export-or-wording-key-keeps-its-old-name-for-one-minor.md`
 Spec: `.scratch/root-contract/spec.md`
 
 ## What to build

@@ -220,7 +220,7 @@ its dense screen.
 ## Out of Scope
 
 - The native pickers, the date picker's year jump and typed entry, MultiSelect's autofocus on touch,
-  NumberInput's minus key and the time fields on WebKit: the ticket "Native pickers on touch".
+  NumberInput's minus key and the time fields on WebKit: the spec `.scratch/date-jump-and-typed-entry/`.
 - Touch editing of a Schedule (long-press to grab): the ticket "The table's and the schedule's single
   wishes".
 - A bottom sheet, a Drawer from the bottom, a media-query hook, swipe actions, pull-to-refresh, a FAB and an

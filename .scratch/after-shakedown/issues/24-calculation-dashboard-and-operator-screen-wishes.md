@@ -1,7 +1,7 @@
 # Calculation, dashboard and operator-screen wishes
 
 Type:       grilling
-Status:     claimed
+Status:     resolved
 Blocked by: 14, 15, 17
 
 ## Question
@@ -57,3 +57,7 @@ one spec, `.scratch/dashboard-small-wishes/`. The ADR lines (ADR-0032: uncertain
 drag from the catalogue "never", lock taken) go into the first ticket of whichever spec lands first, or one
 docs commit. The calculation's print share goes into P3's spec. Lock and data quality are a spec each, after
 their decision.
+
+## Answer
+
+Decided 2026-10-25 by the maintainer: the proposed answer above, as it stands; the lock is option (a) - it cannot be removed, resized or have its options changed, and moves with the others. It becomes the specs `.scratch/dashboard-small-wishes/` (heading level, the options merge, the three examples, the README sentence, and the ADR-0032 and ADR-0064 lines), `.scratch/dashboard-locked-widget/` and `.scratch/data-quality/`; the calculation's print part goes to roadmap P3.
