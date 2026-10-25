@@ -9,13 +9,15 @@
    `assess`, stays with the view. */
 
 import type { HTMLAttributes, ReactNode } from "react";
+import type { RefProp } from "@umriss-ui/core";
 import type { Metric } from "./elements";
 import { readCalculation } from "./model";
 import { CalculationView } from "./Calculation";
 
-/** `className` and `style` size and place the surface; every other attribute -
-    `aria-label` first of all - lands on the list the surface holds. */
-export interface CalculationProps extends Omit<HTMLAttributes<HTMLUListElement>, "children"> {
+/** A composite: `ref`, `className`, `style` and every other attribute reach the
+    surface; `aria-label`, `aria-labelledby` and `aria-describedby` reach the
+    list it holds, which carries the role they name. */
+export interface CalculationProps extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
   /** The result: exactly one quantity - a tree (`<Sum>`, `<Difference>`,
       `<Product>`, `<Quotient>` with their operands, `<Given>` as leaves) or a
       `<Chain>`, the two mixing freely; `<Ref>` for a quantity defined

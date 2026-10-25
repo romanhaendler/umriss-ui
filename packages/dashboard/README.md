@@ -60,6 +60,8 @@ const { Dashboard, WidgetType } = useDashboard({
 </Dashboard>;
 ```
 
+`Dashboard` is an element: `ref`, `className`, `style` and the rest reach its root `role="group"`.
+
 - **A sequence, never coordinates (ADR-0064).** One stored arrangement is right
   at every width. A widget that does not fit its row starts the next, and the
   room it leaves stays free. Below the width at which a column would be too
