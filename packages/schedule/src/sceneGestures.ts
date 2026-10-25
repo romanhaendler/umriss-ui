@@ -155,7 +155,12 @@ export class SceneGestures {
     this.host.handlers().onInteraction?.({ type, hit, clientX, clientY, time: view.timeAt(x), lane: view.laneIdAt(y) });
   }
 
+  /** The plan is on its way: no drag, no hover, no placing begins. One under
+      way finishes and reports as usual. */
+  loading = false;
+
   pointerDown(event: PointerEvent): void {
+    if (this.loading) return;
     const { x, y } = this.local(event.clientX, event.clientY);
     if (event.pointerType === "touch") {
       this.touches.set(event.pointerId, { x, y });
@@ -323,7 +328,7 @@ export class SceneGestures {
       this.autoPan();
       return;
     }
-    if (current.kind === "none") {
+    if (current.kind === "none" && !this.loading) {
       this.byKeyboard = false;
       this.hoverAt(event.clientX, event.clientY, x, y);
     }
@@ -557,7 +562,7 @@ export class SceneGestures {
       shows where the work would land. */
   dragOver(event: DragEvent, placing: PlacingItem | null): void {
     const view = this.host.view;
-    if (placing === null || !view.options.intents.includes("place")) return;
+    if (this.loading || placing === null || !view.options.intents.includes("place")) return;
     const { x, y } = this.local(event.clientX, event.clientY);
     /* Off the rows entirely - not merely over a folded group, which is where
        resting opens one. */

@@ -367,6 +367,27 @@ export function TreeRows() {
   return null;
 }
 
+/* The current row: the handler's row has the table's row type. */
+export function CurrentRow() {
+  const t = useTable(orders, { rowKey: (a) => a.id });
+  const { Table: Frame, Column } = t;
+  return (
+    <Frame
+      currentRow="a"
+      onCurrentRowChange={(key, row) => {
+        const k: string = key;
+        const id: string = row.id;
+        // @ts-expect-error not a field of the row
+        void row.nothing;
+        void k;
+        void id;
+      }}
+    >
+      <Column value="amount" label="Quantity" />
+    </Frame>
+  );
+}
+
 /* Row filters (table-filters 08): the condition's type comes from `matches`. */
 const atLeast = rowFilter({
   id: "atLeast",

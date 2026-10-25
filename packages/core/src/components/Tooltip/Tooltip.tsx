@@ -1,5 +1,6 @@
 import { cloneElement, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactElement, ReactNode } from "react";
+import { useLongPress } from "../../lib/longPress";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor, topLayerPopover, useShownInTopLayer } from "../../lib/portalTarget";
@@ -48,6 +49,18 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     if (timer.current) clearTimeout(timer.current);
     setWanted(false);
   };
+
+  /* A finger holding the trigger names it: the tip shows at once, stays while
+     the finger is held and for a while after it lifts. */
+  const press = useLongPress(
+    () => {
+      if (timer.current) clearTimeout(timer.current);
+      setWanted(true);
+    },
+    () => {
+      timer.current = setTimeout(() => setWanted(false), 1500);
+    },
+  );
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -113,16 +126,42 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
             .join(" ") || undefined,
         onPointerEnter: (event: PointerEvent) => {
           (childProps.onPointerEnter as ((e: PointerEvent) => void) | undefined)?.(event);
-          show();
+          /* A finger has no hover: only its long press shows the tip. */
+          if (event.pointerType !== "touch") show();
         },
-        /* A press acts; the tip has said what it would do. */
-        onPointerDown: (event: PointerEvent) => {
-          (childProps.onPointerDown as ((e: PointerEvent) => void) | undefined)?.(event);
-          hide();
+        /* A press acts; the tip has said what it would do. A finger instead
+           arms the long press, which shows it. */
+        onPointerDown: (event: ReactPointerEvent<HTMLElement>) => {
+          (childProps.onPointerDown as ((e: ReactPointerEvent<HTMLElement>) => void) | undefined)?.(event);
+          press.handlers.onPointerDown(event);
+          if (event.pointerType !== "touch") hide();
+          else if (timer.current) clearTimeout(timer.current);
         },
+        onPointerMove: (event: ReactPointerEvent<HTMLElement>) => {
+          (childProps.onPointerMove as ((e: ReactPointerEvent<HTMLElement>) => void) | undefined)?.(event);
+          press.handlers.onPointerMove(event);
+        },
+        onPointerUp: (event: ReactPointerEvent<HTMLElement>) => {
+          (childProps.onPointerUp as ((e: ReactPointerEvent<HTMLElement>) => void) | undefined)?.(event);
+          press.handlers.onPointerUp(event);
+        },
+        onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => {
+          (childProps.onPointerCancel as ((e: ReactPointerEvent<HTMLElement>) => void) | undefined)?.(event);
+          press.handlers.onPointerCancel(event);
+        },
+        onClickCapture: (event: ReactMouseEvent<HTMLElement>) => {
+          (childProps.onClickCapture as ((e: ReactMouseEvent<HTMLElement>) => void) | undefined)?.(event);
+          press.handlers.onClickCapture(event);
+        },
+        /* Android's menu for the held finger would cover the tip. */
+        onContextMenu: (event: ReactMouseEvent<HTMLElement>) => {
+          (childProps.onContextMenu as ((e: ReactMouseEvent<HTMLElement>) => void) | undefined)?.(event);
+          if (press.touching()) event.preventDefault();
+        },
+        /* A finger's lift ends in a leave that the tip must outlive. */
         onPointerLeave: (event: PointerEvent) => {
           (childProps.onPointerLeave as ((e: PointerEvent) => void) | undefined)?.(event);
-          hide();
+          if (event.pointerType !== "touch") hide();
         },
         /* Only a focus the keyboard gave: the one a click hands over follows
            the press, and the press has just hidden the tip. */
