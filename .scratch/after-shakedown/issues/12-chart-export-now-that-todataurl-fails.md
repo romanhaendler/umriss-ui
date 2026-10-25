@@ -1,7 +1,7 @@
 # Chart export, now that toDataURL fails
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

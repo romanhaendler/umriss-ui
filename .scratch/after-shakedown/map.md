@@ -16,6 +16,12 @@ outline that `/to-spec` and then `/to-tickets` can take without asking the maint
   maintainer answers, the agent never answers for them. Research tickets run AFK in a subagent with the skill
   `research`; findings go on a local `research/<name>` branch (never pushed: only `main` goes to GitHub) and
   the ticket points at the file.
+- **The maintainer delegates technical questions** (2026-10-25). The agent decides how umriss does a
+  thing (API shape, build, mechanism) and marks each such decision *(agent)* in the answer. Only
+  product questions go to the maintainer: what umriss offers or leaves out, what it promises, its
+  scope. Technical tickets may then run in parallel, AFK, each through `/to-spec` and `/to-tickets`.
+  The map's own files (this file, `CONTEXT.md`, ADR numbers) are written only by the coordinating
+  session.
 - **Read before claiming absence:** `packages/<pkg>/API.md`, `CONTEXT.md`, `docs/adr/`. The shakedown file
   each ticket names holds the three proofs per wish (task, workaround with lines, where it exists elsewhere).
 - **The answer is shaped for `/to-spec`:** what is decided, what is explicitly out, whether it is costly to

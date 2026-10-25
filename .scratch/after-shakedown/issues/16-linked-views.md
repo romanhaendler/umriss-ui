@@ -1,7 +1,7 @@
 # Linked views
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 
