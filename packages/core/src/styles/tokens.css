@@ -123,6 +123,10 @@
     --u-weight-semibold: 600;
 
     --u-tracking-caps: 0.07em;
+    /* The case of eyebrows, table heads, divider labels, group headings and the
+       dashboard's mode label - everything set in spaced capitals. `none` turns
+       the capitals off across the library. */
+    --u-transform-caps: uppercase;
     --u-tracking-display: -0.022em; /* large titles: slightly compressed */
     --u-tracking-tight: -0.011em;   /* medium titles (cards, dialogs) */
     --u-tracking-figures: -0.01em;  /* figures set in the mono face */
@@ -163,11 +167,20 @@
        quick keys) - so they read it here instead of repeating the number. */
     --u-button-padding: 10px;
     --u-button-padding-sm: 6px;
+    /* How far a button gives way under the pointer or a finger. `1` turns the
+       press off. */
+    --u-button-press-scale: 0.98;
 
     /* The width of a drawer A token rather than a size
        prop: a detail beside a process picture wants one width across an
        application, and one drawer that needs another sets it in its `style`. */
     --u-drawer-width: 400px;
+
+    /* The width of a modal's sheet, one per `size`; the sheet is never wider
+       than the window. */
+    --u-modal-width-sm: 400px;
+    --u-modal-width-md: 520px;
+    --u-modal-width-lg: 720px;
 
     /* ---- Toast ----
 
