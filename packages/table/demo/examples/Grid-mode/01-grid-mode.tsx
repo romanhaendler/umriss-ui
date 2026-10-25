@@ -22,7 +22,7 @@ const SERVICES: Service[] = [
 export default function GridMode() {
   const { Table, Column, RowActions, Action } = useTable(SERVICES, { rowKey: (s) => s.id });
   return (
-    <Table grid selectable ariaLabel="Services">
+    <Table grid selectable aria-label="Services">
       <Column value="name" label="Service" rowHeader />
       <Column value="team" label="Team" />
       <Column value="requests" label="Requests a minute" format="count" aggregate="sum" />

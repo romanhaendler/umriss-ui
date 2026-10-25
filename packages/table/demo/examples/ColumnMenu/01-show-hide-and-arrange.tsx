@@ -23,7 +23,7 @@ export default function ShowHideAndArrange() {
   const { Table, Column } = useTable(CENTRES, { rowKey: (c) => c.name });
 
   return (
-    <Table stickyRowHeader ariaLabel="Cost centres in March">
+    <Table stickyRowHeader aria-label="Cost centres in March">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>

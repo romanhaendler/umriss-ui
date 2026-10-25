@@ -31,7 +31,7 @@ function Pumps({ grid = true, grouped = false, rows = PUMPS, detail = false, sel
   capture(t);
   const { Table: Frame, Column, RowDetail } = t;
   return (
-    <Frame grid={grid} selectable={selectable} ariaLabel="Pumps">
+    <Frame grid={grid} selectable={selectable} aria-label="Pumps">
       <Column value="name" label="Pump" rowHeader />
       <Column value="area" label="Area" />
       <Column value="flow" label="Flow" aggregate="sum" />

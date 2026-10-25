@@ -27,7 +27,7 @@ const INCIDENTS: Incident[] = [
 export default function ThreeLevels() {
   const { Table, Column } = useTable(INCIDENTS, { rowKey: (i) => i.id, defaultGrouping: ["tier", "team", "service"] });
   return (
-    <Table ariaLabel="Incidents by tier, team and service">
+    <Table aria-label="Incidents by tier, team and service">
       <Column value="service" label="Service" />
       <Column value="id" label="Incident" rowHeader />
       <Column value="tier" label="Tier" />

@@ -46,7 +46,7 @@ function Shipments({ initialView, pageSize }: { initialView?: TableView; pageSiz
   capture(table);
   const { Table: Frame, Column } = table;
   return (
-    <Frame ariaLabel="Shipments">
+    <Frame aria-label="Shipments">
       <Toolbar />
       <Column value="id" label="Shipment" rowHeader />
       <Column value="status" label="Status" filter="list" />

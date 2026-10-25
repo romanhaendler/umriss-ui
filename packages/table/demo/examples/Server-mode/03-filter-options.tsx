@@ -177,7 +177,7 @@ export default function ListFilter() {
   });
 
   return (
-    <Table ariaLabel="Shipments on the server">
+    <Table aria-label="Shipments on the server">
       <Column value="id" label="Shipment" rowHeader sortable={false} />
       <Column value="customer" label="Customer" sortable={false} />
       <Column value="status" label="Status" filter="list" sortable={false} />

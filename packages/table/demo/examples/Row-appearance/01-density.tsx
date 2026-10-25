@@ -23,7 +23,7 @@ function Services({ caption, density }: { caption: string; density?: "regular" |
       <Text size="xs" tone="muted">
         {caption}
       </Text>
-      <Table density={density} ariaLabel={`Services, ${caption}`}>
+      <Table density={density} aria-label={`Services, ${caption}`}>
         <Column value="name" label="Service" rowHeader />
         <Column value="team" label="Team" />
         <Column value="p95" label="p95 latency (ms)" />

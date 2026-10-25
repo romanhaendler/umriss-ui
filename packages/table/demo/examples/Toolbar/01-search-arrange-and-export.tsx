@@ -26,7 +26,7 @@ export default function SearchArrangeAndExport() {
 
   return (
     <Stack gap={3}>
-      <Table selectable ariaLabel="Incidents">
+      <Table selectable aria-label="Incidents">
         <Toolbar>
           <Search placeholder="Search incidents" />
           <ColumnMenu />

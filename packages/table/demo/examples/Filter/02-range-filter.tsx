@@ -23,7 +23,7 @@ export default function RangeFilter() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id });
 
   return (
-    <Table ariaLabel="Invoices">
+    <Table aria-label="Invoices">
       <Column value="id" label="Invoice" rowHeader />
       <Column value="supplier" label="Supplier" />
       <Column value="amount" label="Amount (€)" format={{ decimals: 2 }} filter="range" aggregate="sum" />

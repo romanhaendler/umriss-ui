@@ -22,7 +22,7 @@ const TOURS: Tour[] = [
 export default function SumAndAverage() {
   const { Table, Column } = useTable(TOURS, { rowKey: (t) => t.id });
   return (
-    <Table ariaLabel="Tours">
+    <Table aria-label="Tours">
       <Toolbar>
         <Search placeholder="Search depot" />
       </Toolbar>

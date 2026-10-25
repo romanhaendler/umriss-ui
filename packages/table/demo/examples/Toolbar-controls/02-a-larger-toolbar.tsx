@@ -169,7 +169,7 @@ export default function ALargerToolbar() {
   const { Table, Column } = t;
 
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Toolbar size="md">
         <Search placeholder="Shipment or customer" />
         <MultiSelect

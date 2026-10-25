@@ -69,7 +69,7 @@ export default function OpenBranchesFromControls() {
           Show it
         </Button>
       </Stack>
-      <Table ariaLabel="Budget by unit">
+      <Table aria-label="Budget by unit">
         <Column value="name" label="Unit" rowHeader />
         <Column value="budget" label="Budget (k€)" />
         <Column value="spent" label="Spent (k€)" />

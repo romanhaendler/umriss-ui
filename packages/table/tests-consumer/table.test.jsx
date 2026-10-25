@@ -16,7 +16,7 @@ const ORDERS = [
 function Orders() {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.number });
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Column value="number" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
       <Column value="quantity" label="Quantity" />

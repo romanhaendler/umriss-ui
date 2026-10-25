@@ -21,7 +21,7 @@ const ORDERS: Order[] = [
 function Orders() {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Column value="id" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
       <Column id="open" label="Open" value={(o) => o.id}>
@@ -105,7 +105,7 @@ function Shipments({ rows = SHIPMENTS, grouped = false, paged = true }: { rows?:
   const t = useTable(rows, { rowKey: (s) => s.id, pageSize: 10, defaultGrouping: grouped ? "depot" : undefined });
   capture(t);
   return (
-    <t.Table ariaLabel="Shipments">
+    <t.Table aria-label="Shipments">
       <Search />
       <t.Column value="id" label="Shipment" rowHeader />
       <t.Column value="depot" label="Depot" />

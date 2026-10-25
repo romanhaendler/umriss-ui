@@ -21,7 +21,7 @@ export default function ListFilter() {
   const { Table, Column } = useTable(INCIDENTS, { rowKey: (i) => i.id });
 
   return (
-    <Table ariaLabel="Incidents">
+    <Table aria-label="Incidents">
       <Column value="id" label="Incident" rowHeader />
       <Column value="service" label="Service" filter="list" />
       <Column value="assignee" label="Assignee" filter="list" />

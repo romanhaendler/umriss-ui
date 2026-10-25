@@ -22,7 +22,7 @@ const LINES: Line[] = [
 export default function OwnAggregate() {
   const { Table, Column } = useTable(LINES, { rowKey: (l) => l.id, defaultGrouping: "costCentre" });
   return (
-    <Table ariaLabel="Invoice lines by cost centre">
+    <Table aria-label="Invoice lines by cost centre">
       <Column value="costCentre" label="Cost centre" />
       <Column value="description" label="Description" rowHeader />
       <Column value="quantity" label="Quantity" aggregate="sum" />
