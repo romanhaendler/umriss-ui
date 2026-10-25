@@ -88,9 +88,31 @@
 
   /* ---------------- The field ---------------- */
 
+  .head {
+    flex: none;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Only under a finger: a fine pointer has Escape and the backdrop. */
+  .head .close {
+    display: none;
+    flex: none;
+    margin-right: var(--u-space-3);
+  }
+
+  @media (pointer: coarse) {
+    .head .close {
+      display: inline-flex;
+      min-width: 24px;
+      min-height: 24px;
+    }
+  }
+
   .field {
     composes: field from "#own-styles";
-    flex: none;
+    flex: 1 1 auto;
+    min-width: 0;
     height: 56px;
     padding: 0 var(--u-space-5);
     border: none;

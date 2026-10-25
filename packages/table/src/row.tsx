@@ -21,6 +21,7 @@ import { RowActionsCell, RowDraftButtons } from "./rowActions";
 import { TreeCellContent, detailOf } from "./tree";
 import type { TreeDetail, TreeSetup } from "./tree";
 import { TabStopContext } from "./virtualBody";
+import { CurrentRowContext, rowOfElement } from "./currentRow";
 import styles from "./Table.module.css";
 
 /** The name of a row: the text of its row header. Without a row header its key
@@ -93,6 +94,7 @@ export function Row({
   wording: Wording;
 }) {
   const tabStop = useContext(TabStopContext);
+  const current = useContext(CurrentRowContext);
   const snapshot = hook.publicSnapshot;
   const key = fresh ? NEW_LINE : hook.rowKey(row);
   const name = fresh ? wording.newRow : rowName(row, header, hook, formats, wording);
@@ -120,6 +122,9 @@ export function Row({
     <>
       <tr
         {...data}
+        ref={current.reports && !fresh ? (el) => void (el && rowOfElement.set(el, row)) : undefined}
+        aria-current={!fresh && current.key === key ? "true" : undefined}
+        data-current={!fresh && current.key === key ? "" : undefined}
         className={cx(
           rowClass,
           virtual && styles.virtualRow,

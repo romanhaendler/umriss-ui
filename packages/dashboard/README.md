@@ -69,6 +69,12 @@ const { Dashboard, WidgetType } = useDashboard({
   worded in English and German by the library; a type offers some of them. The
   height follows the size, never the content: what the content needs beyond
   the size scrolls inside the widget, and the keyboard reaches it.
+- **A view fills its widget's body.** A chart and a schedule fill the body and
+  need no height of their own; a table stays within it, its toolbar and pager
+  in view, and its rows scroll. A wrapper of the application's own between the
+  body and the view passes the height on with `height: 100%`. A view whose floor
+  is taller than a size (a chart's 300 px, a schedule's 400 px) takes a lower one
+  through `style`'s `minHeight`, as the dispatcher's trends do.
 - **Editing is a mode and a draft.** "Edit" opens it; every change is a step
   that can be undone and redone; "Done" reports the whole arrangement once
   through `onViewChange`, "Cancel" puts it back, "Reset" steps to the default.
@@ -80,6 +86,13 @@ const { Dashboard, WidgetType } = useDashboard({
 - **A kept arrangement is read leniently.** A widget of a type that is gone
   falls out, a size a type no longer offers falls back to its starting size.
   A widget whose content throws keeps its frame and says so in a sentence.
+- **A failed widget is reported and may be retried.** React's `onCaughtError`,
+  given to `createRoot` or to the application's root, receives the error of a
+  widget whose content throws; the other widgets render. A retry is an error
+  boundary of the application's own inside the content: it catches first, so the
+  dashboard's boundary never sees the error, and it can reset the application's
+  data layer. Without one, a widget gets another try by itself when its size or
+  its options change.
 - **The application's, not the library's:** where an arrangement is stored,
   which default a role gets, several dashboards, sharing, and what stands in a
   widget.
