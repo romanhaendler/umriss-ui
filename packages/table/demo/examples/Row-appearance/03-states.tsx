@@ -22,7 +22,7 @@ const NONE: Incident[] = [];
 function Incidents({ rows, label, ...props }: { rows: Incident[]; label: string; loading?: boolean; empty?: ReactNode; search?: string }) {
   const { Table, Column } = useTable(rows, { rowKey: (i) => i.id, initialView: props.search ? { search: props.search } : undefined });
   return (
-    <Table ariaLabel={label} loading={props.loading} empty={props.empty}>
+    <Table aria-label={label} loading={props.loading} empty={props.empty}>
       {props.search !== undefined && (
         <Toolbar>
           <Search placeholder="Search incidents" />

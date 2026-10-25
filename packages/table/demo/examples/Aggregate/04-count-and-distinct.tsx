@@ -24,7 +24,7 @@ const ALERTS: Alert[] = [
 export default function CountAndDistinct() {
   const { Table, Column } = useTable(ALERTS, { rowKey: (a) => a.id });
   return (
-    <Table ariaLabel="Alerts this morning">
+    <Table aria-label="Alerts this morning">
       <Column value="id" label="Alert" rowHeader aggregate="count" />
       <Column value="service" label="Service" aggregate="distinct" />
       <Column value="assignee" label="Assignee" aggregate="distinct" />

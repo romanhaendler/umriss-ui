@@ -5,6 +5,9 @@
    - element: all four on the element the ref reaches.
    - field:   class and style on an ancestor wrapper, ref and the rest on the control.
    - split:   class on the wrapper, style with the rest on the control.
+   - composite: all four on the frame the ref reaches; and the three names
+     (`aria-label`, `aria-labelledby`, `aria-describedby`) on the element the
+     case's `named` finds in it - and on no other.
 
    The list of exports is read, not written: a component that stands in
    neither the cases nor the exceptions fails the first test. A `forwardRef`
@@ -21,15 +24,25 @@ export interface Probe {
   className: string;
   style: CSSProperties;
   "data-probe": string;
+  /** Composite cases only. */
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  "aria-describedby"?: string;
 }
 
 export interface PassThroughCase {
   render: (probe: Probe) => ReactElement;
   /** Default `element`. */
-  shape?: "element" | "field" | "split";
+  shape?: "element" | "field" | "split" | "composite";
+  /** Composite: finds, in the frame the ref reached, the element that carries
+      the role the name belongs to. */
+  named?: (frame: Element) => Element | null;
   /** Which element the ref has to reach, where the contract names one. */
   root?: (element: Element) => boolean;
 }
+
+/** The three names a composite routes to the element that carries the role. */
+const NAMES = { "aria-label": "probe-label", "aria-labelledby": "probe-by", "aria-describedby": "probe-description" };
 
 /** The names of the exports that are `forwardRef` objects. */
 const wrappedIn = (exports: Record<string, unknown>): string[] =>
@@ -72,10 +85,16 @@ export function passThroughGuard(
     });
 
     it.each(Object.keys(cases).sort())("%s", (name) => {
-      const { render: draw, shape = "element", root } = cases[name]!;
+      const { render: draw, shape = "element", root, named } = cases[name]!;
       const ref = createRef<Element>();
       const { container } = render(
-        draw({ ref, className: "probe-class", style: { marginTop: "7px" }, "data-probe": name }),
+        draw({
+          ref,
+          className: "probe-class",
+          style: { marginTop: "7px" },
+          "data-probe": name,
+          ...(shape === "composite" ? NAMES : {}),
+        }),
       );
       const element = ref.current;
       const wrapper = element?.parentElement?.closest<HTMLElement>(".probe-class") ?? null;
@@ -85,13 +104,21 @@ export function passThroughGuard(
          that is missing - not only the first. */
       expect({
         ref: element instanceof Element,
-        className: shape === "element" ? (element?.classList.contains("probe-class") ?? false) : wrapper !== null,
+        className: shape === "element" || shape === "composite" ? (element?.classList.contains("probe-class") ?? false) : wrapper !== null,
         style: shape === "field" ? (wrapper?.style.marginTop ?? "") === "7px" && own === "" : styled && own === "7px",
         rest: element?.getAttribute("data-probe") === name,
         root: element ? (root?.(element) ?? true) : false,
       }).toEqual({ ref: true, className: true, style: true, rest: true, root: true });
       // Nothing else in the rendered tree carries the probe: it went to one place.
       expect(container.ownerDocument.querySelectorAll(`[data-probe="${name}"]`)).toHaveLength(1);
+      if (shape !== "composite") return;
+      // The names stand on the named element, and on no other.
+      const target = element && named ? named(element) : null;
+      expect(target).not.toBeNull();
+      for (const [attribute, value] of Object.entries(NAMES)) {
+        const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}="${value}"]`));
+        expect({ attribute, onNamed: carriers.length === 1 && carriers[0] === target }).toEqual({ attribute, onNamed: true });
+      }
     });
   });
 }

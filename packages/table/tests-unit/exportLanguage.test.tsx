@@ -31,7 +31,7 @@ function Parts({ onExport }: { onExport?: (text: string) => void }) {
   capture(t);
   const { Table: Frame, Column } = t;
   return (
-    <Frame ariaLabel="Parts">
+    <Frame aria-label="Parts">
       <Toolbar>
         <Export onExport={onExport} />
       </Toolbar>

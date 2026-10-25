@@ -38,7 +38,7 @@ export default function HoldTheSelectionYourself() {
           {selection.count} of {SHIPMENTS.length} to load
         </Text>
       </Stack>
-      <Table selectable ariaLabel="Shipments">
+      <Table selectable aria-label="Shipments">
         <Column value="id" label="Shipment" rowHeader />
         <Column value="customer" label="Customer" />
         <Column value="tour" label="Tour" />

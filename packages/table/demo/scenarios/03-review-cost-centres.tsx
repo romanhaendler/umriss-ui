@@ -158,7 +158,7 @@ export default function ReviewCostCentres() {
       </Toolbar>
 
       <div data-callout="3">
-        <Table ariaLabel="Cost centres, first quarter">
+        <Table aria-label="Cost centres, first quarter">
           <Column value="area" label="Area" />
           <Column value="id" label="Cost centre" rowHeader />
           <Column value="name" label="Name">

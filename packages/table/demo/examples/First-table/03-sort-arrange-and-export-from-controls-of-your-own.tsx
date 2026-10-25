@@ -87,7 +87,7 @@ export default function SortArrangeAndExport() {
           );
         })}
       </Stack>
-      <Table ariaLabel="Services">
+      <Table aria-label="Services">
         <Column value="name" label="Service" rowHeader />
         <Column value="team" label="Team" />
         <Column value="tier" label="Tier" />

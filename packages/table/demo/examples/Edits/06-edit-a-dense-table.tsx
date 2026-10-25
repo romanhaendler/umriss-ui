@@ -26,7 +26,7 @@ export default function EditADenseTable() {
       grid
       editMode="row"
       density="compact"
-      ariaLabel="Meeting rooms"
+      aria-label="Meeting rooms"
       onRowSave={({ rowKey, changes }) => setRooms((all) => all.map((r) => (r.id === rowKey ? { ...r, ...changes } : r)))}
       onRowDelete={({ rowKey }) => setRooms((all) => all.filter((r) => r.id !== rowKey))}
     >

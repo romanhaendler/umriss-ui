@@ -393,7 +393,7 @@ function Content() {
         <TabPanel value="alerts">
           <div data-callout="4">
             <Stack gap={2}>
-              <Table selectable ariaLabel="Alerts of the incident">
+              <Table selectable aria-label="Alerts of the incident">
                 <Column value="raised" label="Raised">
                   {(raised) => time(raised)}
                 </Column>

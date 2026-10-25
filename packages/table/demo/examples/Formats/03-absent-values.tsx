@@ -21,7 +21,7 @@ export default function AbsentValues() {
   const { Table, Column } = useTable(WORK, { rowKey: (w) => w.id });
 
   return (
-    <Table ariaLabel="Work items">
+    <Table aria-label="Work items">
       <Column value="id" label="Item" rowHeader />
       <Column value="name" label="Title" />
       <Column value="estimate" label="Estimate" aggregate="avg">

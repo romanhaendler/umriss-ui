@@ -23,7 +23,7 @@ const SHIPMENTS: Shipment[] = [
 export default function OneLevel() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id, defaultGrouping: "tour" });
   return (
-    <Table ariaLabel="Shipments by tour">
+    <Table aria-label="Shipments by tour">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="tour" label="Tour" />
       <Column value="customer" label="Customer" />

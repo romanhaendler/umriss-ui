@@ -19,7 +19,7 @@ export default function ValueFromField() {
   const { Table, Column } = useTable(VEHICLES, { rowKey: (v) => v.plate });
 
   return (
-    <Table ariaLabel="Vehicles">
+    <Table aria-label="Vehicles">
       <Column value="plate" label="Plate" rowHeader />
       <Column value="type" label="Type" />
       <Column value="capacity" label="Payload (kg)" />

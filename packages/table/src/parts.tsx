@@ -11,7 +11,7 @@
 import { useContext, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { cx } from "./cx";
-import { DEV, warnOnce } from "./dev";
+import { DEV, warnDeprecated, warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
 import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
@@ -20,6 +20,13 @@ import { link } from "./registry";
 import type { TableProps } from "./types";
 import { Frame } from "./frame";
 import styles from "./Table.module.css";
+
+/* The props the table reads itself: what is left of its props is the frame's
+   rest (ADR-0068). */
+const OWN = [
+  "selectable", "stickyHeader", "stickyRowHeader", "striped", "density", "maxHeight", "empty", "loading",
+  "rowProps", "groupable", "grid", "onCellEdit", "editMode", "onRowSave", "onRowAdd", "newRow", "onRowDelete",
+] as const satisfies readonly (keyof TableProps<unknown>)[];
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
    stricter; here only what is there counts. */
@@ -225,6 +232,18 @@ export function buildParts(registry: Registry): Parts {
     if (registry.server && props.groupable === true) {
       warnOnce("server-groupable", "`groupable` is passed over in server mode: the groups would be the page's, not the server's.");
     }
+    /* The frame takes ref, class, style and the rest; the three names go to
+       the <table> (ADR-0068). What the table itself reads is taken out first. */
+    const {
+      ref, className, style, children,
+      "aria-label": label, "aria-labelledby": labelledBy, "aria-describedby": describedBy,
+      ariaLabel,
+      ...others
+    } = props;
+    const rest: Record<string, unknown> = { ...others };
+    for (const key of OWN) delete rest[key];
+    if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
+    const name = { "aria-label": label ?? ariaLabel, "aria-labelledby": labelledBy, "aria-describedby": describedBy };
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
 
@@ -238,15 +257,15 @@ export function buildParts(registry: Registry): Parts {
 
     return (
       <TableContext value={contextValue}>
-        <div className={cx(styles.frame, props.className)}>
+        <div {...rest} ref={ref} className={cx(styles.frame, className)} style={style}>
           <div ref={childrenRef} className={styles.children}>
-            {props.children}
+            {children}
           </div>
           {/* After the children: toolbar and frame read the columns that
               registered in this pass - and the toolbar knows whether a table
               toolbar already stood among them. */}
           <OwnToolbar registry={registry} />
-          <Frame registry={registry} props={props} />
+          <Frame registry={registry} props={props} name={name} />
           <div ref={setFooterTarget} className={styles.footerTarget} />
         </div>
       </TableContext>

@@ -26,7 +26,7 @@ export default function PlaceItOutside() {
         <Search of={t} placeholder="Search incidents" />
         <Export of={t} filename="incidents.csv" />
       </Toolbar>
-      <Table ariaLabel="Incidents">
+      <Table aria-label="Incidents">
         <Column value="id" label="Incident" rowHeader />
         <Column value="title" label="Title" />
       </Table>
