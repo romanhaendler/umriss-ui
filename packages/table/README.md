@@ -51,7 +51,7 @@ export function Orders() {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.number });
 
   return (
-    <Table ariaLabel="Orders">
+    <Table aria-label="Orders">
       <Column value="number" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
       <Column value="quantity" label="Quantity" />
@@ -64,6 +64,8 @@ What the columns do not say is decided by the value: text on the left, a number
 right-aligned in the provider's notation and sortable. `rowHeader` makes the
 order number the name of the row — for a screen reader, and for the sticky
 column.
+
+The table is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its outer frame, a `<div>`, and `aria-label`, `aria-labelledby` and `aria-describedby` reach the `<table>`, so give the name there. `ariaLabel` still works for one further minor and warns once in development. `Toolbar`, `Pagination`, `Export` and `ColumnMenu` take the attributes and the `ref` of the element they render; `Search` is an `Input` and takes its props.
 
 A table wider than its place scrolls in its own frame, never the page; in a
 narrow place - a phone, beside a sidebar - the toolbar and the paging bar wrap
@@ -84,7 +86,7 @@ const { Table, Column } = useTable(orders, {
   defaultGrouping: ["line", "customer"],
 });
 
-<Table ariaLabel="Orders by line and customer">
+<Table aria-label="Orders by line and customer">
   <Column value="customer" label="Customer" />
   <Column value="number" label="Order" rowHeader />
   <Column value="line" label="Line" />

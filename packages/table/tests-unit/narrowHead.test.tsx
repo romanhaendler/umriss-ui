@@ -21,7 +21,7 @@ const LABEL = "Gross weight in kilograms";
 function Shipments() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
   return (
-    <Table ariaLabel="Shipments">
+    <Table aria-label="Shipments">
       <Column value="id" label="Shipment" rowHeader />
       <Column value="weight" label={LABEL} width={75} filter="range" />
     </Table>
@@ -89,7 +89,7 @@ describe("a label wider than its column", () => {
     function Resizable() {
       const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
       return (
-        <Table ariaLabel="Shipments">
+        <Table aria-label="Shipments">
           <Column value="weight" label={LABEL} width={75} resizable />
         </Table>
       );

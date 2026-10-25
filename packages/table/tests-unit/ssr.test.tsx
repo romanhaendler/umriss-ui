@@ -21,7 +21,7 @@ function Orders({ selected = false, loading = false }: { selected?: boolean; loa
   const selection = useTableSelection(ORDERS.map((o) => o.id));
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id, selection: selected ? selection : undefined });
   return (
-    <Table ariaLabel="Orders" selectable={selected} loading={loading}>
+    <Table aria-label="Orders" selectable={selected} loading={loading}>
       <Column value="id" label="Order" rowHeader />
       <Column value="article" label="Article" />
       <Column value="quantity" label="Quantity" aggregate="sum" />

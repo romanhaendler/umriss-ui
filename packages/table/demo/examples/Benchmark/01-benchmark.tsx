@@ -73,7 +73,7 @@ function Measured({ rows, mode, onTable }: { rows: Request[]; mode: Mode; tick: 
   onTable(t);
   const { Table, Column } = t;
   return (
-    <Table maxHeight="340px" stickyHeader ariaLabel="Requests">
+    <Table maxHeight="340px" stickyHeader aria-label="Requests">
       <Toolbar>
         <Search placeholder="Request or service" />
       </Toolbar>

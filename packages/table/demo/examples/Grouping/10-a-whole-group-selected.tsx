@@ -28,7 +28,7 @@ export default function WholeGroup() {
     pageSize: 5,
   });
   return (
-    <Table ariaLabel="Shipments to reschedule" selectable>
+    <Table aria-label="Shipments to reschedule" selectable>
       <Toolbar />
       <Pagination pageSizes={[5, 10]} />
       <Column value="tour" label="Tour" />

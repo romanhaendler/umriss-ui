@@ -19,7 +19,7 @@ export default function Width() {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Shipments with a note">
+    <Table aria-label="Shipments with a note">
       <Column value="id" label="Shipment" rowHeader width={120} />
       <Column value="customer" label="Customer" resizable width={180} />
       <Column value="note" label="Note" resizable sortable={false} width={160} />

@@ -26,7 +26,7 @@ const INVOICES: Invoice[] = [
 export default function Paging() {
   const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: ["costCentre", "supplier"], pageSize: 5 });
   return (
-    <Table ariaLabel="Invoices, five lines per page">
+    <Table aria-label="Invoices, five lines per page">
       <Pagination pageSizes={[5, 10, 25]} />
       <Column value="supplier" label="Supplier" />
       <Column value="id" label="Invoice" rowHeader />

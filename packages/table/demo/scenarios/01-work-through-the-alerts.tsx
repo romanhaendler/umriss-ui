@@ -149,7 +149,7 @@ export default function WorkThroughTheAlerts() {
       </div>
 
       <div data-callout="2">
-        <Table selectable ariaLabel="Alerts">
+        <Table selectable aria-label="Alerts">
           <Column value="raised" label="Raised">
             {(raised) => time(raised)}
           </Column>

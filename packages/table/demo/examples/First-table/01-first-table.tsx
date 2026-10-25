@@ -22,7 +22,7 @@ export default function FirstTable() {
   const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Services">
+    <Table aria-label="Services">
       <Column value="name" label="Service" rowHeader />
       <Column value="team" label="Team" />
       <Column value="tier" label="Tier" />

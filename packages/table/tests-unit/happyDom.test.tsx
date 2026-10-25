@@ -13,7 +13,7 @@ const ROWS = [
 function People() {
   const { Table, Column } = useTable(ROWS, { rowKey: (r) => r.id });
   return (
-    <Table ariaLabel="People">
+    <Table aria-label="People">
       <Column value="id" label="Id" rowHeader />
       <Column value="name" label="Name" />
     </Table>

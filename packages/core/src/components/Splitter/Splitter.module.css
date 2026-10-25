@@ -95,4 +95,18 @@
       background: CanvasText;
     }
   }
+
+  /* Under a finger the strip is 24 px wide, the square of WCAG 2.5.8: 8 px is
+     too narrow, and a pad would lie on the panes' content. The line and the
+     grip stay in its middle. */
+  @media (pointer: coarse) {
+    .separator {
+      width: 24px;
+    }
+
+    .vertical > .separator {
+      width: auto;
+      height: 24px;
+    }
+  }
 }

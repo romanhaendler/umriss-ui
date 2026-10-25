@@ -39,7 +39,7 @@ export default function OwnFilter() {
   const { Table, Column } = useTable(PEOPLE, { rowKey: (p) => p.id });
 
   return (
-    <Table ariaLabel="Team">
+    <Table aria-label="Team">
       <Column value="name" label="Person" rowHeader />
       <Column value="role" label="Role" />
       <Column value="capacity" label="Hours a week" filter={workload} />

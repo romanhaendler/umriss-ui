@@ -26,7 +26,7 @@ export default function Selection() {
 
   return (
     <Stack gap={3}>
-      <Table selectable ariaLabel="Shipments">
+      <Table selectable aria-label="Shipments">
         <Toolbar>
           <Search placeholder="Search customer" />
         </Toolbar>
