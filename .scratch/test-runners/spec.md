@@ -118,7 +118,10 @@ importing its CSS, and an application still needs a single import.
 - **The check.** `check-dist`'s scratch consumer, which today compiles a strict TypeScript consumer, also:
   1. writes a Vitest project and a Jest project from the README blocks: core's blocks always, and charts'
      blocks for charts and schedule;
-  2. links the package as an installed dependency, the way the type check does;
+  2. installs the package as an installed dependency: the packed tarball is unpacked into the scratch
+     project's `node_modules`, together with its umriss dependencies. A symlink, as the type check uses,
+     would not do: it resolves to a path outside `node_modules`, Vitest then inlines the package by itself,
+     and the check passes without the documented line;
   3. runs one consumer test file of the package in each runner.
 
   Each package holds that file; it renders one representative component and asserts on what a user sees.
