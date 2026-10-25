@@ -6,6 +6,7 @@ Size: M
 
 Blocked by: `.scratch/table-export-by-language/issues/01-conventions-from-formats-and-wording.md`
 Spec: `.scratch/table-xlsx/spec.md`
+ADR:    ADR-0073, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 

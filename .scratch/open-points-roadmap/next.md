@@ -16,6 +16,9 @@ build package B.*
 
 ## Next: package B
 
+**Superseded in order (2026-10-25):** package B is release 3 of
+`.scratch/after-shakedown/order.md`, and package C follows that page's sixth release.
+
 Three specs, 17 tickets, all `ready-for-agent`. Each ticket names what blocks
 it and its size.
 

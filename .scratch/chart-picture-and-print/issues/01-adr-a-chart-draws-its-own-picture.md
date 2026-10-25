@@ -6,6 +6,7 @@ Size: S
 
 Blocked by: None (can start immediately)
 Spec: `.scratch/chart-picture-and-print/spec.md`
+ADR:    ADR-0075, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 

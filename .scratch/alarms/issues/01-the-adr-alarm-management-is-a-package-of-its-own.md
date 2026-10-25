@@ -6,6 +6,7 @@ Size: S
 
 Blocked by: None (can start immediately)
 Spec: `.scratch/alarms/spec.md`
+ADR:    ADR-0078, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 
@@ -115,7 +116,7 @@ model, and change nothing of its substance.
 
 - [ ] The ADR stands in `docs/adr/` with the next free number, `Status: accepted`, and the date of writing.
 - [ ] Its row stands in `docs/adr/README.md`, and the count in that README's first sentence goes up by one.
-- [ ] ADR-0009 and ADR-0057 say "superseded by ADR-NNNN" in their status line and in their README rows.
+- [ ] ADR-0009 and ADR-0057 say "superseded by ADR-0078" in their status line and in their README rows.
 - [ ] ADR-0035 has its amendment line pointing at the new ADR.
 - [ ] `CONTEXT.md` has an **Alarms** section with **Alarm**, **Alarm type**, **Lifecycle state**,
       **Priority**, **Flood**, **Availability**, **Snoozed**, **Suppressed**, **Disabled**, **First-out**,

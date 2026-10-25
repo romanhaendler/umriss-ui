@@ -6,6 +6,7 @@ Size: S
 
 Blocked by: `.scratch/server-components/issues/01-the-adr-and-what-each-readme-says.md`
 Spec: `.scratch/plant-time-zone/spec.md`
+ADR:    ADR-0076, given in `.scratch/after-shakedown/order.md`; use it wherever this ticket says "the next free number" or ADR-NNNN
 
 ## What to build
 
@@ -19,7 +20,7 @@ the server-components ADR because that ticket writes the amendment to ADR-0060 t
   - Its status line names the new ADR as superseding it in one point, time zones, beside ADR-0064's point.
   - Its "Not yet: time zones" section stays as history. One line at its head points at the new ADR.
   - The amendment of 2026-10-25 ends "A zone the application names would let the server write instants
-    again. That is the 'not yet' above." Add after it: "Taken by ADR-NNNN: with a named zone, the server
+    again. That is the 'not yet' above." Add after it: "Taken by ADR-0076: with a named zone, the server
     writes the instants."
 
 ### The ADR's text
