@@ -49,7 +49,8 @@ export interface DatePickerProps
       as its longest value in the formats in use, so a date never truncates. */
   chars?: number;
   /** Shows a cross where a value is set, which fades in on hover/focus and
-      clears the value. */
+      clears the value, and the open panel offers Clear. Without it
+      no way to empty the value is offered. */
   clearable?: boolean;
   /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
   min?: Date;
@@ -217,7 +218,7 @@ export function DatePicker(
                 {wording.today}
               </Button>
               <ZoneNote />
-              {value && (
+              {clearable && value && (
                 <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}
                 </Button>
