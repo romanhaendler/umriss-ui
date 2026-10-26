@@ -15,7 +15,7 @@
 
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Checkbox, DateRangePicker, FormField, NumberInput, useFormats, useWording, zoneFields, zoneInstant } from "@umriss-ui/core";
+import { Checkbox, DateRangePicker, FormField, NumberInput, useFormats, useWording, zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import type { Present } from "./types";
 import { asText, ABSENT_KEY, filterKey, isAbsent } from "./values";
@@ -294,10 +294,7 @@ export interface Range {
   to?: number | Date;
 }
 
-const dayStart = (day: Date, timeZone?: string): number => {
-  const { year, month, day: d } = zoneFields(day, timeZone);
-  return zoneInstant({ year, month, day: d }, timeZone).getTime();
-};
+const dayStart = (day: Date, timeZone?: string): number => zoneDayStart(day, timeZone).getTime();
 const nextDay = (day: Date, timeZone?: string): number => {
   const { year, month, day: d } = zoneFields(day, timeZone);
   return zoneInstant({ year, month, day: d + 1 }, timeZone).getTime();

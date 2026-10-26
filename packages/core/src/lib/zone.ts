@@ -1,6 +1,6 @@
 /* The days and the clock of a time zone. Without a zone the Date's local
-   methods answer, as every caller did before; with an IANA name the fields
-   are read through Intl's `timeZone`, with no date library. */
+   methods answer; with an IANA name the fields are read through Intl's
+   `timeZone`, with no date library. */
 
 /** The wall-clock fields of an instant. `month` counts from 0 and `weekday`
     from Sunday = 0, as the Date's own getters do. */
@@ -170,4 +170,11 @@ export function zoneInstant(clock: ZoneClock, timeZone: string | undefined): Dat
   const late = w - after;
   if (offsetAt(early, timeZone) === before) return new Date(early);
   return new Date(offsetAt(late, timeZone) === after ? late : early);
+}
+
+/** The instant at which the zone's day containing `instant` begins; `undefined`
+    is the reader's zone. */
+export function zoneDayStart(instant: Date | number, timeZone: string | undefined): Date {
+  const { year, month, day } = zoneFields(instant, timeZone);
+  return zoneInstant({ year, month, day }, timeZone);
 }
