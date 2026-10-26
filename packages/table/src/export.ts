@@ -5,7 +5,7 @@
 
 import { separatorsOf } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
-import { allDays, dayText } from "./xlsx/day";
+import { allDays, dayText } from "./model/day";
 import { asCsv, asTabbed, plain } from "./model/csv";
 import type { CsvColumn, CsvConventions } from "./model/csv";
 import type { Registry, ColumnEntry } from "./registry";
@@ -60,17 +60,17 @@ function exportColumns(registry: Registry, rows: readonly unknown[]): ColumnEntr
   );
 }
 
-/** How a column writes a date: the local day when the whole column is days,
+/** How a column writes a date: the zone's day when the whole column is days,
     ISO text otherwise - and as ISO text always where the column's own
     `exportValue` made the value, which is written as it comes. */
-const dateWriter = (cells: Iterable<unknown>, own: boolean) => {
-  const days = !own && allDays(cells);
-  return (cell: ExportCell) => (cell instanceof Date ? (days ? dayText(cell) : cell.toISOString()) : cell);
+const dateWriter = (cells: Iterable<unknown>, own: boolean, timeZone: string | undefined) => {
+  const days = !own && allDays(cells, timeZone);
+  return (cell: ExportCell) => (cell instanceof Date ? (days ? dayText(cell, timeZone) : cell.toISOString()) : cell);
 };
 
-const csvColumn = (e: ColumnEntry, rows: readonly unknown[]): CsvColumn<unknown> => {
+const csvColumn = (e: ColumnEntry, rows: readonly unknown[], timeZone: string | undefined): CsvColumn<unknown> => {
   const own = !!e.spec.ownExportValue;
-  const write = dateWriter(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)), own);
+  const write = dateWriter(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)), own, timeZone);
   return {
     id: e.spec.id,
     label: e.spec.label,
@@ -103,7 +103,7 @@ export function sheetOf(registry: Registry, levelLabel: string, given?: readonly
   };
 }
 
-/** The CSV: the language's conventions; a column of days as its local day,
+/** The CSV: the language's conventions; a column of days as the zone's day,
     other points in time as ISO text. */
 export const csv: ExportFormat = {
   extension: "csv",
@@ -112,7 +112,7 @@ export const csv: ExportFormat = {
     asCsv(
       sheet.rows,
       sheet.columns.map((c, i): CsvColumn<readonly ExportCell[]> => {
-        const write = dateWriter(sheet.rows.map((row) => row[i]), !!c.own);
+        const write = dateWriter(sheet.rows.map((row) => row[i]), !!c.own, formats.timeZone);
         return { id: String(i), label: c.label, value: (row) => write(row[i]) };
       }),
       conventionsOf(formats, wording),
@@ -136,7 +136,7 @@ export function selectionText(registry: Registry, formats: Formats, wording: Wor
   const hook = registry.hook;
   const rows = selectedInOrder(registry);
   if (!hook || rows.length === 0) return "";
-  return asTabbed(rows, exportColumns(registry, hook.rows).map((e) => csvColumn(e, rows)), conventionsOf(formats, wording));
+  return asTabbed(rows, exportColumns(registry, hook.rows).map((e) => csvColumn(e, rows, formats.timeZone)), conventionsOf(formats, wording));
 }
 
 /** One cell as the copy writes it: the export's value in the language's notation. */

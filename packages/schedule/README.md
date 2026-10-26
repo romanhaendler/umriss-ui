@@ -185,6 +185,17 @@ pointer's tooltip names it by label (or id) and time; the keys walk to it in
 time order among the work of its lane, and the live region reads its lane,
 label and time.
 
+## The plant's time zone
+
+The schedule follows the `timeZone` of core's formats (`<LanguageProvider formats={{ timeZone: "Europe/Berlin" }}>`);
+it takes no prop of its own. The fine band reads the zone's hours, the day band holds the zone's days, "today"
+is the zone's, and the now line, an instant, does not move. A `snap` raster is laid on the zone's time: eight
+hours offset by six snap to 06:00, 14:00 and 22:00 there on both sides of a clock change (`snapTime(time,
+raster, timeZone?)` takes the zone as its last argument). A time inside the hour a clock change doubles carries
+its offset (`02:30 GMT+1`), in the band, the tooltip, the ghost and the summary. Where the reader's zone is
+another, the zone's name stands once above the lane headers and in the plot's description (core's
+`useTimeZoneLabel`); without a named zone, nothing changes.
+
 ## Not yet
 
 What the schedule does not do today, and waits for a caller who needs it (what

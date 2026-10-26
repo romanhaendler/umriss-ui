@@ -48,6 +48,8 @@ export interface SceneOptions {
   readonly intents: readonly IntentKind[];
   /** The present, as a wall-clock instant, or null for no now line. */
   readonly now: number | null;
+  /** The IANA zone the bands, the raster and today follow; the reader's where absent. */
+  readonly timeZone?: string;
   /** How the dependencies are drawn, where one does not say otherwise. */
   readonly route: DependencyRoute;
   readonly attach: DependencyAttachment;
@@ -208,11 +210,11 @@ export class SceneView {
     const scale = this.viewport().scale;
     const calendar = this.options.calendar;
     return {
-      days: days(this.domain, calendar).map((day) => {
+      days: days(this.domain, calendar, this.options.timeZone).map((day) => {
         const x = Math.round(scale.toPx(day.from));
         return { start: day.start, x, width: Math.round(scale.toPx(day.to)) - x };
       }),
-      ticks: fineTicks(this.domain, step, calendar).map((tick) => ({ wallClock: tick.wallClock, x: Math.round(scale.toPx(tick.workingTime)) })),
+      ticks: fineTicks(this.domain, step, calendar, this.options.timeZone).map((tick) => ({ wallClock: tick.wallClock, x: Math.round(scale.toPx(tick.workingTime)) })),
       step,
     };
   }
