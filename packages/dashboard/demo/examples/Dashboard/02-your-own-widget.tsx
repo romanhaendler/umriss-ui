@@ -45,7 +45,7 @@ export default function YourOwnWidget() {
     },
   });
   return (
-    <Dashboard aria-label="Tours">
+    <Dashboard headingLevel={4} aria-label="Tours">
       <WidgetType
         name="tours"
         label="Tours on the road"

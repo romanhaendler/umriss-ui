@@ -34,7 +34,9 @@ a test, without a layout engine.
 back `Dashboard` and `WidgetType`. A widget type is JSX: its name, a sentence,
 the sizes it offers with the columns (of twelve) and rows each takes, the size
 to start from, its default options, and its content as a function of the size
-and the options. The options type is inferred from the default options.
+and the options. The options type is inferred from the default options. The
+`headingLevel` prop (2 to 6, default 2) is the level of the heading widgets, and a
+widget's title stands one level below them when the dashboard holds one.
 
 ```tsx
 import { Stat } from "@umriss-ui/core";

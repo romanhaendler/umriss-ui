@@ -28,7 +28,7 @@ export default function OneRole() {
     <>
       <Button variant={role === "controller" ? "primary" : "secondary"} onClick={() => setRole("controller")}>Controller</Button>{" "}
       <Button variant={role === "dispatcher" ? "primary" : "secondary"} onClick={() => setRole("dispatcher")}>Dispatcher</Button>
-      <Dashboard aria-label="Dispatch, by role">
+      <Dashboard headingLevel={4} aria-label="Dispatch, by role">
         <WidgetType name="stock" label="Stock" sentence="A stock on hand." sizes={{ small: { columns: 4, rows: 2 } }} start="small" defaultOptions={{ name: "Pallets" }} title={(options) => options.name}>
           {({ options }) => <Text size="sm">{`${options.name} on hand`}</Text>}
         </WidgetType>
