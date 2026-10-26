@@ -75,15 +75,17 @@ test("- widens and 0 fits the work, and the live region says the span the plot's
   const plot = await tabIn(page, example);
   const live = example.locator("[aria-live='polite']");
   const summary = async () => (await plot.evaluate((el) => document.getElementById(el.getAttribute("aria-describedby")!.split(" ")[0]!)!.textContent)) ?? "";
-  const span = (text: string) => /from (.+) to (.+?)\./.exec(text)!.slice(1, 3).join("|");
+  const span = (text: string) => /from (.+?) to (.+?)\./.exec(text)!.slice(1, 3).join("|");
   const before = span(await summary());
   await page.keyboard.press("-");
   await expect(live).toHaveText(/^From .+ to .+\.$/);
   const widened = span(await summary());
   expect(widened).not.toBe(before);
   expect((await live.textContent())!.replace(/^From (.+) to (.+)\.$/, "$1|$2")).toBe(widened);
+  const said = (await live.textContent())!;
   await page.keyboard.press("0");
-  await expect(live).toHaveText(/^From .+ to .+\.$/);
+  /* The old words stand until the keys rest. */
+  await expect(live).not.toHaveText(said);
   expect((await live.textContent())!.replace(/^From (.+) to (.+)\.$/, "$1|$2")).toBe(span(await summary()));
 });
 
