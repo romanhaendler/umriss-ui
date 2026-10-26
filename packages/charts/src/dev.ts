@@ -27,6 +27,35 @@ export function warnOnce(key: string, message: string): void {
   console.warn(`@umriss-ui/charts: ${message}`);
 }
 
+const differs = (a: unknown, b: unknown): boolean => {
+  if (a instanceof Date && b instanceof Date) return !Object.is(a.getTime(), b.getTime());
+  const plain = (v: unknown) => (typeof v !== "object" || v === null) && typeof v !== "function";
+  return plain(a) && plain(b) && !Object.is(a, b);
+};
+
+/** DEV: an accessor held because its source text equals the new one's is stale when it reads a value from
+    outside its row that has changed. Calls both on the first 1,000 rows and warns once per series name on
+    the first difference; primitives compare by `Object.is`, Dates by time, anything else is not compared.
+    Never changes which function is held. */
+export function probeStale(name: string | undefined, held: unknown, next: unknown, rows: unknown): void {
+  if (!DEV || held === next || typeof held !== "function" || typeof next !== "function" || !Array.isArray(rows)) return;
+  const key = `stale:${name ?? ""}`;
+  if (warned.has(key)) return;
+  try {
+    for (let i = 0; i < Math.min(rows.length, 1000); i++) {
+      if (!differs(held(rows[i], i), next(rows[i], i))) continue;
+      warnOnce(
+        key,
+        `${name === undefined ? "A series without a name" : `Series "${name}"`}: its function reads a value from outside the row, and that value has changed - ` +
+          `a function with the same source text is kept, so the old course stays. Carry the value in the rows, or give the series a \`key\` that changes with it.`,
+      );
+      return;
+    }
+  } catch {
+    // An accessor that throws on a row is the caller's to find; the probe says nothing.
+  }
+}
+
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
