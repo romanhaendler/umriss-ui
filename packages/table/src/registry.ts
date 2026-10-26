@@ -56,6 +56,7 @@ const signatureOf = (a: ColumnSpec): string =>
     typeof a.value === "string" ? a.value : "ƒ",
     a.format,
     typeof a.aggregate === "function" ? "ƒ" : a.aggregate,
+    a.aggregateLabel,
     a.share,
     a.rowHeader,
     a.rightAligned,
@@ -230,7 +231,8 @@ export class Registry {
       if (
         old.presentation !== spec.presentation ||
         old.ownExportValue !== spec.ownExportValue ||
-        old.aggregate !== spec.aggregate
+        old.aggregate !== spec.aggregate ||
+        old.aggregateLabel !== spec.aggregateLabel
       ) {
         this.presentation++;
       }

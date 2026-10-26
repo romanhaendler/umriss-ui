@@ -104,7 +104,7 @@ export function AggregateValue({
   /** A value computed elsewhere (the server) for rows the table does not hold. */
   given?: { value: unknown };
 }) {
-  const { aggregate: spec, format, presentation } = entry.spec;
+  const { aggregate: spec, aggregateLabel, format, presentation } = entry.spec;
   if (!spec) return null;
   const kind = typeof spec === "function" ? "own" : spec;
   /* A range handed in that is not a pair is read as absent. */
@@ -135,14 +135,17 @@ export function AggregateValue({
   } else if (kind === "own" && presentation) content = (presentation as (w: unknown, z: unknown) => ReactNode)(value, rows[0]);
   else content = text(value);
   const sign = AGGREGATE_SIGN[kind];
+  /* A name stands where a sign stands and is itself the word read out. */
+  const named = kind === "own" && !!aggregateLabel;
   return (
     <>
+      {signed && named && <span className={styles.footerKind}>{aggregateLabel} </span>}
       {signed && sign && (
         <span aria-hidden="true" className={styles.footerKind}>
           {sign}
         </span>
       )}
-      {signed && <VisuallyHidden>{aggregateWord(kind, wording)} </VisuallyHidden>}
+      {signed && !named && <VisuallyHidden>{aggregateWord(kind, wording)} </VisuallyHidden>}
       {content}
     </>
   );
