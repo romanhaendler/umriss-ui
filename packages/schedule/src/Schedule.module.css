@@ -327,6 +327,12 @@
       inset: -4px;
     }
 
+    /* The table's key sits in the 28 px time band's corner, so it grows to the
+       floor itself; a pad would be cut by its ellipsis. */
+    .dataKey {
+      min-height: 24px;
+    }
+
     /* An open group's head is 24 px with its hairline, so the pad would be cut
        at the hairline: the head clips with a margin of its own, and its label
        still cuts by its own ellipsis. */
