@@ -1,5 +1,4 @@
 {
-  "ChartOptions.onRange": "not shown yet",
   "ChartProps.ref": "(a) pass-through: the root element",
   "ChartProps.className": "(a) pass-through: goes to the root element",
   "ChartProps.style": "(a) pass-through: goes to the root element",
