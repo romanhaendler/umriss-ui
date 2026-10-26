@@ -12,9 +12,11 @@ import {
   shiftMonth,
   dayStep,
   beforeDay,
+  startOfWeek,
 } from "./grid";
 import styles from "./DatePicker.module.css";
 import { IconButton } from "../Button";
+import { Select } from "../Select";
 import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
 
 /* A pass-through of the wording's weekday heads; part of the calendar
@@ -50,6 +52,15 @@ export interface CalendarProps {
   /** The reference day for the "today" mark. Injectable, so that the grid is
       deterministically checkable; the default is the current day. */
   today?: Date;
+}
+
+/* The APG keys beyond the arrows: a month, a year (with Shift), the week's ends. */
+function jumpKey(key: string, shift: boolean, active: Date): Date | undefined {
+  if (key === "PageUp") return shiftMonth(active, shift ? -12 : -1);
+  if (key === "PageDown") return shiftMonth(active, shift ? 12 : 1);
+  if (key === "Home") return startOfWeek(active);
+  if (key === "End") return addDays(startOfWeek(active), 6);
+  return undefined;
 }
 
 /** The shared month grid for DatePicker, DateTimePicker and DateRangePicker. */
@@ -103,6 +114,13 @@ export function Calendar({
       if (viewFollows(next, view)) onView(startOfMonth(next));
       return;
     }
+    const moved = jumpKey(event.key, event.shiftKey, active);
+    if (moved) {
+      event.preventDefault();
+      onActive(moved);
+      if (viewFollows(moved, view)) onView(startOfMonth(moved));
+      return;
+    }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onPick(active);
@@ -116,6 +134,11 @@ export function Calendar({
     onView(addMonths(view, months));
     onActive(shiftMonth(active, months));
   };
+
+  const year = view.getFullYear();
+  const thisYear = (today ?? new Date()).getFullYear();
+  const firstYear = Math.min(thisYear - 100, year);
+  const years = Array.from({ length: Math.max(thisYear + 100, year) - firstYear + 1 }, (_, i) => firstYear + i);
 
   const days = monthGrid(view);
   const referenceDay = today ?? new Date();
@@ -135,7 +158,38 @@ export function Calendar({
             </svg>
           </IconButton>
         )}
-        <span className={styles.month}>{formats.month(view)}</span>
+        {withoutPrevious ? (
+          <span className={styles.month}>{formats.month(view)}</span>
+        ) : (
+          <span className={styles.jump}>
+            <Select
+              size="sm"
+              chars={9}
+              aria-label={wording.monthSelect}
+              value={view.getMonth()}
+              onChange={(event) => page(Number(event.target.value) - view.getMonth())}
+            >
+              {Array.from({ length: 12 }, (_, month) => (
+                <option key={month} value={month}>
+                  {formats.monthName(new Date(year, month, 1))}
+                </option>
+              ))}
+            </Select>
+            <Select
+              size="sm"
+              chars={4}
+              aria-label={wording.yearSelect}
+              value={year}
+              onChange={(event) => page((Number(event.target.value) - year) * 12)}
+            >
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {String(y)}
+                </option>
+              ))}
+            </Select>
+          </span>
+        )}
         {withoutNext ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
