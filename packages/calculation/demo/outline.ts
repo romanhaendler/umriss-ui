@@ -120,6 +120,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "The numbers a calculation starts from (inputs, leaves): where they came from, when they were true, and whether they are still fresh.",
         about: [
           "A given with `asOf` and `ages` carries a freshness through core, as a `Stat` does – beside the number, never instead of its verdict. There are no default ages.",
+          "`quality` (`good`, `uncertain`, `bad`) says how far the source vouches for the number. It is carried up: every line built on the given shows the worst quality of its operands. The freshness is not.",
           "The operator words, the reasons for absence and the number formats are core's wording; German comes from `@umriss-ui/core/wording/de` (ADR-0019).",
         ],
         keysOf: ["calculation"],

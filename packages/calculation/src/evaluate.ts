@@ -12,7 +12,7 @@
    carried on as zero. */
 
 import { assess, verdictWeight } from "@umriss-ui/core";
-import type { Assessment, Verdict } from "@umriss-ui/core";
+import type { Assessment, Quality, Verdict } from "@umriss-ui/core";
 import type { CalculationModel, Operator, Quantity } from "./model";
 
 /** Why a quantity has no number: a given is missing, or a divisor is zero. */
@@ -33,6 +33,9 @@ export interface Evaluation {
   verdict?: Verdict;
   /** The worst verdict inside the derivation, the quantity's own excluded. */
   worst?: Verdict;
+  /** A given's own quality, else the worst among its operands'; an operand
+      without one counts as good. */
+  quality: Quality;
 }
 
 /** The fraction digits a quantity is shown with at most: as the caller says,
@@ -90,6 +93,8 @@ function apply(operator: Operator, values: readonly number[], negated: readonly 
 const worse = (a: Verdict | undefined, b: Verdict | undefined): Verdict | undefined =>
   b === undefined || (a !== undefined && verdictWeight(a) >= verdictWeight(b)) ? a : b;
 
+const QUALITY_WEIGHT: Record<Quality, number> = { good: 0, uncertain: 1, bad: 2 };
+
 /** Every quantity of the model, evaluated. */
 export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluation> {
   const results = new Map<string, Evaluation>();
@@ -103,13 +108,18 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
     let absence: Absence | undefined;
     let approximate = false;
     let worst: Verdict | undefined;
+    let quality: Quality = "good";
 
     if (quantity.given) {
       const given = quantity.given.value;
       if (typeof given === "number" && Number.isFinite(given)) value = given;
       else absence = { kind: "missing", label: quantity.label };
+      quality = quantity.given.quality ?? "good";
     } else {
       const operands = quantity.operands.map((operand) => ({ operand, ...run(operand.key) }));
+      for (const o of operands) {
+        if (QUALITY_WEIGHT[o.quality] > QUALITY_WEIGHT[quality]) quality = o.quality;
+      }
       for (const { operand, verdict, worst: inside } of operands) {
         const here = operand.reference ? verdict : worse(verdict, inside);
         worst = worse(worst, here);
@@ -145,6 +155,7 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
       assessment,
       verdict,
       worst,
+      quality,
     };
     results.set(key, evaluation);
     return evaluation;
