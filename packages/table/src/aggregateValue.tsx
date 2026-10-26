@@ -122,7 +122,7 @@ export function AggregateValue({
        totals of a column stand aligned on the point. */
     content = formats.number(value, Math.min(10, kind === "avg" && !given ? places + 1 : places));
   }
-  else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown])) {
+  else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown], formats.timeZone)) {
     /* The year once: "02/10–14/10" says as much as the long form within one
        year, and a group header has no room for the repetition. */
     const [from, to] = value as [Date, Date];
@@ -158,8 +158,8 @@ const decimalsOf = (n: number): number => {
   return Math.max(0, (mantissa.split(".")[1]?.length ?? 0) - Number(exponent));
 };
 
-const sameYear = ([from, to]: [unknown, unknown]): boolean =>
-  from instanceof Date && to instanceof Date && zoneFields(from, undefined).year === zoneFields(to, undefined).year;
+const sameYear = ([from, to]: [unknown, unknown], timeZone: string | undefined): boolean =>
+  from instanceof Date && to instanceof Date && zoneFields(from, timeZone).year === zoneFields(to, timeZone).year;
 
 /** Whether an aggregate stands right-aligned in tabular figures: counts and
     numbers do, a point in time or a range of them follows its column. */
