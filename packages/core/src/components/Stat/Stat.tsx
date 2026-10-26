@@ -6,9 +6,11 @@
    noise. The history line shows the shape; where a target is given, the
    deviation from it is shown.
 
-   Assessment and freshness are two axes. A stale value keeps its verdict
-   (ADR-0010) and does not turn into `unknown`: a lost connection must not
-   take away the last picture. */
+   Assessment, freshness and quality are three axes. A stale value keeps its
+   verdict (ADR-0010) and does not turn into `unknown`: a lost connection must
+   not take away the last picture. A bad value keeps its number, its verdict
+   and its age (ADR-0077): the source's doubt is said in a word and a line
+   under the figure, never in a verdict colour. */
 
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
@@ -16,6 +18,7 @@ import type { RefProp } from "../../lib/refProp";
 import { assess, type LimitSet, type Verdict } from "../../lib/limit";
 import { useFreshness } from "../../lib/useFreshness";
 import type { FreshnessAges } from "../../lib/freshness";
+import type { Quality } from "../../lib/quality";
 import { useFormats, useWording } from "../../lib/language";
 import type { Formats, Wording } from "../../lib/language";
 import { Sparkline } from "../DataViz";
@@ -43,6 +46,10 @@ export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   asOf?: Date | number | null;
   /** Without ages there is no freshness display and no cadence. */
   ages?: FreshnessAges;
+  /** How far the value's source vouches for it. Absent and `good` show
+      nothing; `uncertain` and `bad` say so in a word, in the tile's name and
+      in a line under the figure. The verdict and the freshness stay. */
+  quality?: Quality;
 }
 
 function verdictWord(verdict: Verdict, wording: Wording): string {
@@ -98,7 +105,7 @@ function FreshnessLine({
 }
 
 /** Metric tile: one value, read against its limits. */
-export function Stat({ ref, label, value, unit, decimals, limits, history, asOf, ages, className, ...rest }: StatProps) {
+export function Stat({ ref, label, value, unit, decimals, limits, history, asOf, ages, quality, className, ...rest }: StatProps) {
   const formats = useFormats();
   const wording = useWording();
 
@@ -117,10 +124,19 @@ export function Stat({ ref, label, value, unit, decimals, limits, history, asOf,
     ? formats.number(value as number, decimals)
     : wording.statAbsentValue;
 
-  // The accessible name carries both what is measured and how it stands.
+  const qualityWord =
+    quality === "bad" ? wording.qualityBad : quality === "uncertain" ? wording.qualityUncertain : null;
+  const hasFreshness = asOf !== undefined && ages !== undefined;
+
+  // The accessible name carries what is measured, how it stands and how far its source vouches for it.
   const name = `${label}: ${known ? `${display}${unit ? ` ${unit}` : ""}` : word}${
     known && showsVerdict && verdict !== "ok" ? `, ${word}` : ""
-  }`;
+  }${qualityWord ? `, ${qualityWord}` : ""}`;
+  const qualitySpan = qualityWord && (
+    <span className={styles.quality} data-quality={quality}>
+      {qualityWord}
+    </span>
+  );
 
   return (
     <div
@@ -140,7 +156,7 @@ export function Stat({ ref, label, value, unit, decimals, limits, history, asOf,
         <div className={styles.figures}>
           <span className={styles.label}>{label}</span>
           <span className={styles.valueRow}>
-            <span className={styles.value}>{display}</span>
+            <span className={styles.value} data-quality={qualityWord ? quality : undefined}>{display}</span>
             {known && unit !== undefined && <span className={styles.unit}>{unit}</span>}
           </span>
           {showsVerdict && (
@@ -151,8 +167,15 @@ export function Stat({ ref, label, value, unit, decimals, limits, history, asOf,
           {deviation !== null && known && (
             <span className={styles.deviation}>{deviation}</span>
           )}
-          {asOf !== undefined && ages !== undefined && (
+          {hasFreshness && qualitySpan ? (
+            <span className={styles.statusLine}>
+              {qualitySpan}
+              <FreshnessLine asOf={asOf ?? null} ages={ages} />
+            </span>
+          ) : hasFreshness ? (
             <FreshnessLine asOf={asOf ?? null} ages={ages} />
+          ) : (
+            qualitySpan
           )}
         </div>
         {history !== undefined && history.length >= 2 && (

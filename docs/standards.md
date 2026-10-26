@@ -33,6 +33,20 @@ The rule, its check and its limits stand in
 - **Screens, navigation and faceplates** are the application's. umriss ships
   components, not an operator interface.
 
+## OPC UA - how far a source vouches for a value
+
+### What umriss follows
+
+- **The three levels of a status code's severity:** good, uncertain, bad
+  (`Quality`). A tile whose source says uncertain or bad keeps its number, its
+  verdict and its age, and says the level in a word and a line under the figure
+  (ADR-0077).
+
+### Where umriss departs, and why
+
+- **No status codes and no sub-statuses.** They are a protocol's vocabulary;
+  the application maps its source's code to one of the three levels.
+
 ## Sources
 
 The norm text of ISA-101 is paywalled and was **not** read.
@@ -49,3 +63,8 @@ wrong.
   <https://industrialmonitordirect.com/blogs/knowledgebase/isa-101-high-performance-hmi-design-principles-color-strategy>
 - Tatsoft, FrameworX ISA-101 compliance guide (vendor) -
   <https://docs.tatsoft.com/display/FX/ISA-101+HMI+Compliance+How-to+Guide>
+
+**OPC UA**
+
+- OPC Foundation, *OPC UA Part 4: Services - StatusCode* -
+  <https://reference.opcfoundation.org/Core/Part4/v105/docs/7.38>

@@ -3,7 +3,7 @@ import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react"
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
-import { Listbox, optionId } from "../../lib/listbox";
+import { Listbox, optionId, WINDOW_ABOVE } from "../../lib/listbox";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Combobox.module.css";
@@ -141,6 +141,19 @@ export function Combobox<T extends string = string>(
       const next = filtered[index];
       if (next === undefined) return;
       setActiveIndex(index);
+      announce(
+        wording.optionActive(next.label, { selected: next.value === value, disabled: next.disabled }),
+        inputRef.current,
+      );
+      return;
+    }
+    /* Home and End are the caret's in a short list; in a windowed one the
+       list is too long to walk, so they move its cursor to the ends. */
+    if ((event.key === "Home" || event.key === "End") && open && filtered.length > WINDOW_ABOVE) {
+      event.preventDefault();
+      const index = event.key === "Home" ? 0 : filtered.length - 1;
+      setActiveIndex(index);
+      const next = filtered[index]!;
       announce(
         wording.optionActive(next.label, { selected: next.value === value, disabled: next.disabled }),
         inputRef.current,
