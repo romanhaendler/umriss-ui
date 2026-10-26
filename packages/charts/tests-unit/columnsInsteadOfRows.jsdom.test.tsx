@@ -77,7 +77,6 @@ describe("The columns example", () => {
     const tableAfter = r.host.querySelector("table")?.textContent ?? "";
     expect(tableAfter).not.toBe("");
     expect(tableAfter).not.toBe(tableBefore);
-    // The stale probe (dev.ts) also warns here, although the rows changed too and the new course is drawn.
-    expect(warn.mock.calls.length).toBeLessThanOrEqual(1);
+    expect(warn).not.toHaveBeenCalled();
   });
 });

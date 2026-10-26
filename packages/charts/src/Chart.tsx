@@ -255,7 +255,10 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   }, [scene]);
 
   // Taking over data and configuration: only a scene entry plus a dirty flag.
-  useEffect(() => {
+  // The rows in a layout effect, so that they stand before the series' effects
+  // of the same commit compare their functions on them: new rows with a new
+  // function are a new course, not a function that reads a changed outer value.
+  useLayoutEffect(() => {
     scene.setData(asRows(data, "the rows of useChart"));
   }, [scene, data]);
 
