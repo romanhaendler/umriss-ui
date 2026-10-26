@@ -444,6 +444,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
     const px = (xs[i] as number) * xm + xb + edgePx;
     const py = value * ym + yb;
     const footPx = us === null ? baselinePx : (us[i] as number) * ym + yb;
+    if (Number.isNaN(footPx)) continue; // a gap in the baseline leaves it out too
     path.rect(px, py, widthPx, footPx - py);
     if (feet !== null && us?.[i] !== 0) {
       feet.moveTo(px, footPx);

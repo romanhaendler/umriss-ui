@@ -32,7 +32,7 @@ export interface DashboardView {
   widgets: ReadonlyArray<DashboardWidget>;
 }
 
-type Types = ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize }>;
+type Types = ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize; defaultOptions: unknown }>;
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -55,9 +55,18 @@ export const unreadWidgets = (view: DashboardView, read: DashboardView): Dashboa
   return shaped(view).filter((widget) => !held.has(widget.id));
 };
 
+const isPlain = (value: unknown): value is Record<string, unknown> => isObject(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value));
+
+/** The options a stored widget is read with: plain stored options spread over plain
+    defaults, one level deep; absent or non-plain stored options against plain
+    defaults read as the defaults; against other defaults only absent ones do. */
+const readOptions = (stored: unknown, defaults: unknown) =>
+  isPlain(defaults) ? (isPlain(stored) ? { ...defaults, ...stored } : defaults) : stored === undefined ? defaults : stored;
+
 /** A view as the declared widget types read it: entries that are no widgets,
     widgets of unknown types and every id after its first fall out; a size the
-    type does not offer becomes the type's starting size. Options stay as they are. */
+    type does not offer becomes the type's starting size. Options are read over the
+    type's `defaultOptions`. */
 export function readView(view: DashboardView, types: Types): DashboardView {
   const seen = new Set<string>();
   return {
@@ -66,7 +75,7 @@ export function readView(view: DashboardView, types: Types): DashboardView {
       const type = types.get(widget.type);
       if (!type || seen.has(widget.id)) return [];
       seen.add(widget.id);
-      return [type.sizes[widget.size] ? widget : { ...widget, size: type.start }];
+      return [{ ...widget, size: type.sizes[widget.size] ? widget.size : type.start, options: readOptions(widget.options, type.defaultOptions) }];
     }),
   };
 }
