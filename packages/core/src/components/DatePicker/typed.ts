@@ -2,6 +2,7 @@
    use: no React, no clock of its own (`today` is injectable). */
 
 import type { Formats } from "../../lib/language/formats";
+import { dayShown } from "./zoned";
 
 type Part = "d" | "m" | "y";
 
@@ -9,12 +10,16 @@ type Part = "d" | "m" | "y";
    part stands where. */
 const SAMPLE = new Date(2031, 11, 25);
 
+/* The sample as the formats write it: the zone's noon of that day, so that a
+   named zone shows the 25th as well. */
+const sampleIn = (formats: Formats) => dayShown(SAMPLE, formats.timeZone);
+
 /** The sample date written in the formats in use: the field's placeholder. */
-export const sampleDate = (formats: Formats) => formats.date(SAMPLE);
+export const sampleDate = (formats: Formats) => formats.date(sampleIn(formats));
 
 /* The order the formats write day, month and year in. */
 function orderOf(formats: Formats): Part[] {
-  const numbers = formats.date(SAMPLE).match(/\d+/g) ?? [];
+  const numbers = formats.date(sampleIn(formats)).match(/\d+/g) ?? [];
   const names: Record<string, Part> = { "25": "d", "12": "m", "2031": "y" };
   const order = numbers.map((n) => names[n]).filter((p): p is Part => !!p);
   return order.length === 3 ? order : ["d", "m", "y"];
@@ -28,7 +33,8 @@ function nearestYear(yy: number, todayYear: number): number {
   );
 }
 
-/** The day a text names, on local midnight, or `null` where it is no date. */
+/** The calendar day a text names (local midnight, as the grid has them), or
+    `null` where it is no date. `today` is a calendar day as well. */
 export function readTypedDate(text: string, formats: Formats, today: Date = new Date()): Date | null {
   const trimmed = text.trim();
   let order = orderOf(formats);

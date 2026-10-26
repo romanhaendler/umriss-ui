@@ -11,6 +11,7 @@
 
 import { dayOnly } from "./grid";
 import type { DateRange } from "./range";
+import { dayEnd, dayStart } from "./zoned";
 
 export type Resolution = "day" | "instant";
 
@@ -42,10 +43,11 @@ export function rangeFromDays(
   toDay: Date,
   resolution: Resolution,
   withSeconds: boolean,
+  timeZone?: string,
 ): DateRange {
   const [a, b] = orderByDay(fromDay, toDay);
   return {
-    from: startOfDay(a),
-    to: resolution === "day" ? startOfDay(b) : endOfDay(b, withSeconds),
+    from: dayStart(a, timeZone),
+    to: resolution === "day" ? dayStart(b, timeZone) : dayEnd(b, withSeconds, timeZone),
   };
 }

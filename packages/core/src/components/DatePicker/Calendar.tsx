@@ -17,6 +17,7 @@ import {
 import styles from "./DatePicker.module.css";
 import { IconButton } from "../Button";
 import { Select } from "../Select";
+import { dayShown, zoneToday } from "./zoned";
 import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
 
 /* A pass-through of the wording's weekday heads; part of the calendar
@@ -87,6 +88,7 @@ export function Calendar({
   const wording = useWording();
   const formats = useFormats();
   const gridRef = useRef<HTMLDivElement>(null);
+  const { timeZone } = formats;
 
   // Focus into the grid once on opening
   useEffect(() => {
@@ -144,12 +146,12 @@ export function Calendar({
   };
 
   const year = view.getFullYear();
-  const thisYear = (today ?? new Date()).getFullYear();
+  const thisYear = (today ?? zoneToday(timeZone)).getFullYear();
   const firstYear = Math.min(thisYear - 100, year);
   const years = Array.from({ length: Math.max(thisYear + 100, year) - firstYear + 1 }, (_, i) => firstYear + i);
 
   const days = monthGrid(view);
-  const referenceDay = today ?? new Date();
+  const referenceDay = today ?? zoneToday(timeZone);
 
   // A settled end or - as long as only the start is there - the preview.
   const { from: bandFrom, to: bandTo, isPreview } = bandBounds(rangeFrom, rangeTo, previewTo);
@@ -167,7 +169,7 @@ export function Calendar({
           </IconButton>
         )}
         {withoutPrevious ? (
-          <span className={styles.month}>{formats.month(view)}</span>
+          <span className={styles.month}>{formats.month(dayShown(view, timeZone))}</span>
         ) : (
           <span className={styles.jump}>
             <Select
@@ -237,7 +239,7 @@ export function Calendar({
               type="button"
               tabIndex={isActive ? 0 : -1}
               data-active={isActive || undefined}
-              aria-label={formats.dateLong(day)}
+              aria-label={formats.dateLong(dayShown(day, timeZone))}
               aria-pressed={sameDay(day, value) || isBandFrom || isBandTo || isStartWithoutEnd}
               aria-current={sameDay(day, referenceDay) ? "date" : undefined}
               className={cx(

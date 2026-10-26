@@ -16,7 +16,7 @@ test("A failed submit focuses the first invalid field, the summary links to the 
   await expect(stage.getByRole("textbox", { name: /Invoice number/ })).toBeFocused();
   const summary = stage.getByRole("region", { name: "There are 3 problems" });
   await expect(summary.getByRole("link")).toHaveCount(3);
-  await expect(page.locator('[aria-live="polite"]')).toContainText("3 problems with the invoice.");
+  await expect(page.locator("[data-umriss-announcer]")).toContainText("3 problems with the invoice.");
 
   await summary.getByRole("link", { name: "Give the due date from the invoice." }).click();
   await expect(stage.getByRole("button", { name: /Due/ })).toBeFocused();
