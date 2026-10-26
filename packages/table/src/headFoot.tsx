@@ -121,6 +121,8 @@ export function FootRow({
             formats={formats}
             wording={wording}
             pin={pinAt(leading + i)}
+            totals={layout.totals}
+            busy={layout.busy}
           />
         ))}
         {trailing && (
@@ -138,6 +140,8 @@ function FooterCell({
   wording,
   pin = NOT_PINNED,
   topLevel = false,
+  totals,
+  busy = false,
 }: {
   entry: ColumnEntry;
   rows: readonly unknown[];
@@ -146,9 +150,25 @@ function FooterCell({
   pin?: PinnedCell;
   /** Tree rows: the aggregate is over the roots, and says so. */
   topLevel?: boolean;
+  /** Server mode: the values over every match, by column id. */
+  totals?: Readonly<Record<string, unknown>>;
+  /** Server mode: the totals are not current. */
+  busy?: boolean;
 }) {
   if (!entry.spec.aggregate) return <td className={cx(styles.td, pin.className)} style={pin.style} />;
   const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
+  if (totals) {
+    return (
+      <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)} style={pin.style} data-footer={kind}>
+        {busy ? (
+          <span aria-hidden="true" className={styles.skeleton} style={{ width: "60%" }} />
+        ) : (
+          <AggregateValue entry={entry} rows={rows} formats={formats} wording={wording} signed given={{ value: totals[entry.spec.id] }} />
+        )}
+        <VisuallyHidden>{` (${wording.footerOfMatches})`}</VisuallyHidden>
+      </td>
+    );
+  }
   return (
     <td
       className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)}

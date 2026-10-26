@@ -215,6 +215,7 @@ export const GERMAN_WORDING: Wording = {
   levelColumn: "Ebene",
   pathRow: "auf dem Weg zu einem Treffer",
   footerTopLevel: "Nur oberste Ebene",
+  footerOfMatches: "Alle Treffer",
   selectGroup: (name) => `${name} auswählen`,
   calendarWeek: (week, year) => `KW ${week}/${year}`,
   entries: (count, formatted) => (count === 1 ? "1 Eintrag" : `${formatted} Einträge`),

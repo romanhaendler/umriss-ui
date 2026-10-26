@@ -91,6 +91,7 @@ export function AggregateValue({
   wording,
   signed = false,
   known,
+  given,
 }: {
   entry: ColumnEntry;
   rows: readonly unknown[];
@@ -100,11 +101,15 @@ export function AggregateValue({
   signed?: boolean;
   /** The value the rows' group already holds - not computed again. */
   known?: { value: unknown };
+  /** A value computed elsewhere (the server) for rows the table does not hold. */
+  given?: { value: unknown };
 }) {
   const { aggregate: spec, format, presentation } = entry.spec;
   if (!spec) return null;
   const kind = typeof spec === "function" ? "own" : spec;
-  const { value, places } = summaryOf(entry, rows, known);
+  const { value, places } = given
+    ? { value: given.value, places: typeof given.value === "number" ? decimalsOf(given.value) : 0 }
+    : summaryOf(entry, rows, known);
   const text = (v: unknown) => asText(v, format, formats, wording);
   let content: ReactNode;
   if (isAbsent(value)) content = <Absent wording={wording} />;
@@ -113,7 +118,7 @@ export function AggregateValue({
        decimals of its most precise value, an average one more - whole hours
        average to tenths, not to 13.3333333333. A fixed count, so that the
        totals of a column stand aligned on the point. */
-    content = formats.number(value, Math.min(10, kind === "avg" ? places + 1 : places));
+    content = formats.number(value, Math.min(10, kind === "avg" && !given ? places + 1 : places));
   }
   else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown])) {
     /* The year once: "02/10–14/10" says as much as the long form within one
