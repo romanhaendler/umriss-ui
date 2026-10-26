@@ -60,19 +60,21 @@ function exportColumns(registry: Registry, rows: readonly unknown[]): ColumnEntr
   );
 }
 
-/** A date as the CSV writes it: the local day when the whole column is days,
-    ISO text otherwise. */
-const dateText = (d: Date, days: boolean) => (days ? dayText(d) : d.toISOString());
+/** How a column writes a date: the local day when the whole column is days,
+    ISO text otherwise - and as ISO text always where the column's own
+    `exportValue` made the value, which is written as it comes. */
+const dateWriter = (cells: Iterable<unknown>, own: boolean) => {
+  const days = !own && allDays(cells);
+  return (cell: ExportCell) => (cell instanceof Date ? (days ? dayText(cell) : cell.toISOString()) : cell);
+};
 
 const csvColumn = (e: ColumnEntry, rows: readonly unknown[]): CsvColumn<unknown> => {
-  const days = allDays(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)));
+  const own = !!e.spec.ownExportValue;
+  const write = dateWriter(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)), own);
   return {
     id: e.spec.id,
     label: e.spec.label,
-    value: (row) => {
-      const cell = exportCell(e.read(row), e.spec.ownExportValue);
-      return cell instanceof Date ? dateText(cell, days) : cell;
-    },
+    value: (row) => write(exportCell(e.read(row), e.spec.ownExportValue)),
   };
 };
 
@@ -85,9 +87,10 @@ export function sheetOf(registry: Registry, levelLabel: string, given?: readonly
   if (!hook) return { columns: [], rows: [] };
   const entries = exportColumns(registry, given ?? hook.rows);
   const { widths } = hook.publicSnapshot;
-  const columns: { label: string; width?: number }[] = entries.map((e) => ({
+  const columns: { label: string; width?: number; own?: true }[] = entries.map((e) => ({
     label: e.spec.label ?? e.spec.id,
     width: widths[e.spec.id],
+    ...(e.spec.ownExportValue && { own: true as const }),
   }));
   const cells = (row: unknown) => entries.map((e) => exportCell(e.read(row), e.spec.ownExportValue));
   /* Rows handed in (every match of a server) are written as they are. */
@@ -109,15 +112,8 @@ export const csv: ExportFormat = {
     asCsv(
       sheet.rows,
       sheet.columns.map((c, i): CsvColumn<readonly ExportCell[]> => {
-        const days = allDays(sheet.rows.map((row) => row[i]));
-        return {
-          id: String(i),
-          label: c.label,
-          value: (row) => {
-            const cell = row[i];
-            return cell instanceof Date ? dateText(cell, days) : cell;
-          },
-        };
+        const write = dateWriter(sheet.rows.map((row) => row[i]), !!c.own);
+        return { id: String(i), label: c.label, value: (row) => write(row[i]) };
       }),
       conventionsOf(formats, wording),
     ),

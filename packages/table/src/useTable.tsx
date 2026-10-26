@@ -549,11 +549,18 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
   }, [reportKey, answersKey]);
+  /* A keystroke is typed for the commit it caused only: one that left the key
+     as it was must not make a later sort or page change wait. Declared after
+     the report effect, so that it runs after it takes the flag. */
+  useEffect(() => {
+    registry.takeTyped();
+  });
 
-  /* "All that match" is relative to the search and the conditions it was chosen
-     under: when either changes, the state ends after the commit (a selection
-     held outside is cleared the same way). Sort, page and page size leave the
-     set as it is. Automatic mode has no such state; it is ignored. */
+  /* A selection in server mode - "all that match" and ticked keys alike - is
+     relative to the search and the conditions it was made under: when either
+     changes, it ends after the commit (a selection held outside is cleared the
+     same way). Sort, page and page size leave it as it is. Automatic mode keeps
+     its keys; `allMatching` there is ignored. */
   const matchKey = JSON.stringify([request.search, request.conditions]);
   const matchSeen = useRef(matchKey);
   useEffect(() => {
@@ -562,7 +569,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     }
     if (matchSeen.current === matchKey) return;
     matchSeen.current = matchKey;
-    if (server && selection.allMatching) selection.clear();
+    if (server) selection.clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
   }, [matchKey, selection.allMatching]);
 
@@ -664,7 +671,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     selectedRows,
     late,
     error: options.server && !late ? options.error : undefined,
-    retry: () => onRequestNow.current?.(request),
+    retry: () => {
+      registry.settleSearch(false);
+      onRequestNow.current?.(request);
+    },
     totals: options.server ? options.totals : undefined,
     rowFilters,
   });

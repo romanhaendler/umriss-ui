@@ -140,7 +140,7 @@ dependency (ADR-0073).
 
 **It holds** one sheet, named by the wording's `exportSheetName`; a header line;
 cells typed as number, date, boolean or text; the table's column widths
-(7 px a character); the rows and columns of the CSV. A date is the reader's local
+(7 px a character, plus one character of padding); the rows and columns of the CSV. A date is the reader's local
 wall-clock time as a serial number, `yyyy-mm-dd` where a column's dates are all
 at midnight and `yyyy-mm-dd hh:mm:ss` otherwise; one before 1900-03-01 is ISO
 text. A text is an inline string, so `=1+1` is not a formula.
