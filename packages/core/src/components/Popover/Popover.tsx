@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
@@ -13,6 +13,14 @@ import { usePresence } from "../../lib/motion";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/* A surface opened from inside a panel belongs to it: the panel portals
+   elsewhere, so the DOM cannot tell, and the React tree does. Each open
+   popover registers its "contains" with the popover around it, at any depth. */
+const ParentPanel = createContext<((contains: (node: Node) => boolean) => () => void) | null>(null);
+
+/* The open popovers, outermost first: Escape belongs to the last one. */
+const openStack: object[] = [];
 
 /** The props of `Popover`. */
 export interface PopoverProps {
@@ -92,6 +100,12 @@ export function Popover({
   children,
 }: PopoverProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const registerInParent = useContext(ParentPanel);
+  const nested = useRef(new Set<(node: Node) => boolean>());
+  const registerNested = useCallback((contains: (node: Node) => boolean) => {
+    nested.current.add(contains);
+    return () => void nested.current.delete(contains);
+  }, []);
   const insideRefsRef = useRef(insideRefs);
   useEffect(() => {
     insideRefsRef.current = insideRefs;
@@ -165,8 +179,11 @@ export function Popover({
   useEffect(() => {
     if (!open) return;
 
-    const isInside = (node: Node) =>
+    const self = {};
+    openStack.push(self);
+    const isInside = (node: Node): boolean =>
       panelRef.current?.contains(node) ||
+      [...nested.current].some((contains) => contains(node)) ||
       anchorRef.current?.contains(node) ||
       (insideRefsRef.current ?? []).some((ref) => ref.current?.contains(node));
 
@@ -177,7 +194,7 @@ export function Popover({
       if (!isInside(event.composedPath()[0] as Node)) close(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || openStack.at(-1) !== self) return;
       /* Escape closes the panel and nothing more: the same key is a dialog's
          close request. */
       event.preventDefault();
@@ -205,6 +222,7 @@ export function Popover({
        only after the field has the focus and the panel already stands. */
     const visualViewport = window.visualViewport;
 
+    const unregister = registerInParent?.(isInside);
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
     window.addEventListener("scroll", handleScroll, true);
@@ -214,6 +232,8 @@ export function Popover({
     return () => {
       visualViewport?.removeEventListener("resize", reposition);
       visualViewport?.removeEventListener("scroll", reposition);
+      unregister?.();
+      openStack.splice(openStack.indexOf(self), 1);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scroll", handleScroll, true);
@@ -222,7 +242,7 @@ export function Popover({
     };
     // insideRefs deliberately not in the dependencies: it is read through a ref
     // so that a fresh array per render does not rebind the listeners.
-  }, [open, anchorRef, close, measure, hideOnScroll]);
+  }, [open, anchorRef, close, measure, hideOnScroll, registerInParent]);
 
   /* A dialog takes the focus in: the first focusable element, else the panel
      itself - unless its content placed the focus already. Children's effects
@@ -267,7 +287,9 @@ export function Popover({
       {/* A surface of its own: no field and no size from the place it was
           opened from (ADR-0041). */}
       <FormFieldBoundary>
-        <SurfaceSizeReset>{children}</SurfaceSizeReset>
+        <SurfaceSizeReset>
+          <ParentPanel.Provider value={registerNested}>{children}</ParentPanel.Provider>
+        </SurfaceSizeReset>
       </FormFieldBoundary>
     </div>,
     target,

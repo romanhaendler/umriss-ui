@@ -29,6 +29,9 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
   // eslint-disable-next-line react-hooks/refs
   valueRef.current = value;
 
+  // True until the first digit after the field gained focus has been typed.
+  const fresh = useRef(true);
+
   const step = (direction: 1 | -1) => {
     const current = Number.parseInt(valueRef.current, 10) || 0;
     onValue(pad2((current + direction + max + 1) % (max + 1)));
@@ -68,13 +71,22 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
         ref={own}
         type="text"
         inputMode="numeric"
-        maxLength={2}
         aria-label={label}
         disabled={disabled}
         className={styles.timeField}
         value={value}
         onChange={(event) => {
-          const digits = event.target.value.replace(/\D/g, "").slice(0, 2);
+          // The typed digit is taken by itself, never by the caret or the
+          // selection: a touch undoes the selection, and the field would
+          // otherwise hold three digits or swallow the new one.
+          const native = event.nativeEvent as InputEvent;
+          const typed = (native.data ?? event.target.value).replace(/\D/g, "").slice(-1);
+          const deleting = native.inputType?.startsWith("delete") ?? typed === "";
+          let digits: string;
+          if (deleting || typed === "") digits = event.target.value.replace(/\D/g, "").slice(0, 2);
+          else if (fresh.current || valueRef.current.length !== 1) digits = typed;
+          else digits = valueRef.current + typed;
+          fresh.current = digits.length === 2;
           onValue(digits);
           // On to the next field only after the commit - a synchronous change of
           // focus would fire onBlur with a stale value.
@@ -84,7 +96,10 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
           }
         }}
         onKeyDown={handleKeyDown}
-        onFocus={(event) => event.target.select()}
+        onFocus={(event) => {
+          fresh.current = true;
+          event.target.select();
+        }}
         onBlur={(event) => {
           // Always clamp the actual content of the field, never the (possibly
           // not yet re-rendered) prop.
