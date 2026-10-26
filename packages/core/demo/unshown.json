@@ -6,8 +6,5 @@
   "PopoverProps.focusRef": "(b) escape hatch: focus return for a non-focusable anchor shell; the row states the one case, and a picture shows nothing",
   "PopoverProps.insideRefs": "(b) escape hatch: exempts further elements from the outside-click rule, for builders of composite fields; the prose suffices",
   "PopoverProps.id": "(a) pass-through: a DOM id for aria-controls",
-  "PopoverProps.className": "(a) pass-through: a class on the surface",
-  "PopoverProps.ariaLabel": "(g) deprecated alias: the old spelling of aria-label for one further minor",
-  "ContextMenuProps.ariaLabel": "(g) deprecated alias: the old spelling of aria-label for one further minor",
-  "TreeViewProps.ariaLabel": "(g) deprecated alias: the old spelling of aria-label for one further minor"
+  "PopoverProps.className": "(a) pass-through: a class on the surface"
 }
