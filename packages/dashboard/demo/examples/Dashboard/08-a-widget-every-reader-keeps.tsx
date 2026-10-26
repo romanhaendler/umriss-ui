@@ -53,7 +53,7 @@ function Start({ kept }: { kept: DashboardView }) {
   const summary = view.widgets.find((widget) => widget.id === SUMMARY);
   return (
     <Stack gap={2}>
-      <Dashboard aria-label="Start">
+      <Dashboard aria-label="Start" headingLevel={4}>
         <WidgetType
           name="figure"
           label="Figure"
