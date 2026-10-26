@@ -550,7 +550,10 @@ here.
   `tickFormat` and the tooltip's `render` are compared by their source text,
   because inline ones are new on every render. Two functions of the same text
   that read different captured values count as equal: a value is not read
-  again, an axis not relabelled. The remedy is a new data reference or a new
-  text; solving it would mean re-running every function on every render (Q10).
+  again, an axis not relabelled. In development the chart probes a function
+  held by its text, calls both on the first 1,000 rows, and warns once per series
+  name when the results differ. The ways out are the value carried in the rows (a
+  new data reference), or a `key` on the series that changes with it; solving it
+  would mean re-running every function on every render (Q10).
   The limit holds for functions only: a `value` given as a field name is
   compared by its name, and a switched name redraws (ADR-0048).
