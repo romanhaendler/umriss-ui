@@ -21,7 +21,7 @@ const open = async (page: Page, width: number) => {
   await openExample(page, "formfield", "put-the-labels-in-a-column");
   const stage = page.locator('[data-example="put-the-labels-in-a-column"]');
   /* A place of its own width inside the stage. */
-  await stage.locator("> *").first().evaluate((element, w) => ((element as HTMLElement).style.maxWidth = `${w}px`), width);
+  await stage.locator("label").first().locator("xpath=../..").evaluate((element, w) => ((element as HTMLElement).style.maxWidth = `${w}px`), width);
   return stage;
 };
 
@@ -84,7 +84,8 @@ test("The hint and the error start at the field's left edge, under it", { tag: "
     ["Budget", "The budget must be above zero."],
   ];
   for (const [name, message] of pairs) {
-    const input = await box(stage.getByLabel(name, { exact: true }));
+    /* The control's own box: a NumberInput's native input stands inside its frame. */
+    const input = await box(stage.locator("label", { hasText: name }).locator("xpath=following-sibling::div[1]/*[1]"));
     const text = await box(stage.getByText(message, { exact: true }));
     expect(text.x).toBeCloseTo(input.x, 0);
     expect(text.y).toBeGreaterThan(input.y + input.height - 0.5);
