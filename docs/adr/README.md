@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-six decisions, each one written where it was made and kept afterwards. An
+Seventy-seven decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -89,6 +89,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0073](0073-no-package-takes-a-foreign-runtime-dependency.md) | No package takes a foreign runtime dependency | No runtime dependency; XLSX is written by hand | accepted | packages, table |
 | [0074](0074-a-chart-reports-a-range-as-it-reports-a-hit-and-keeps-none.md) | A chart reports a range as it reports a hit, and keeps none | Chart reports a range, keeps none; Alt-drag on a zoomable chart, plain drag elsewhere | accepted | charts |
 | [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
+| [0076](0076-an-application-names-the-time-zone-its-instants-are-shown-in.md) | An application names the time zone its instants are shown in | An application names a time zone; every package shows its instants in it | accepted, supersedes ADR-0060 in one point (time zones) | core, packages, scope |
 | [0077](0077-a-bad-value-keeps-its-verdict.md) | A bad value keeps its verdict | A source's quality is a third axis beside the verdict and the freshness | accepted, extends ADR-0010 | limits and alarms |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
