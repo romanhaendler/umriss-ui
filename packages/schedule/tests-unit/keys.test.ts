@@ -243,3 +243,91 @@ describe("editing by key proposes what the drag would", () => {
     expect(intents).toEqual([{ kind: "move", subtask: "m", from: 21 * HOUR, to: 22 * HOUR }]);
   });
 });
+
+describe("zooming by key", () => {
+  const span = (scene: ScheduleScene) => {
+    const [from, to] = scene.visibleDomain();
+    return to - from;
+  };
+
+  it("narrows the span with + and = by the chart's factor about the active subtask, and - and _ widen it back", () => {
+    const { scene } = sceneWith();
+    scene.focus(true);
+    expect(active(scene)).toBe("p1");
+    const about = 1.5 * HOUR;
+    const x = scene.view.viewport().scale.toPx(about);
+    expect(scene.key(key("+"))).toBe(true);
+    expect(span(scene)).toBeCloseTo((8 * HOUR) / 1.25);
+    expect(scene.view.viewport().scale.toPx(about)).toBeCloseTo(x);
+    scene.key(key("_"));
+    expect(span(scene)).toBeCloseTo(8 * HOUR);
+    scene.key(key("="));
+    scene.key(key("-"));
+    expect(span(scene)).toBeCloseTo(8 * HOUR);
+    expect(active(scene)).toBe("p1");
+  });
+
+  it("zooms about the middle of the plot without an active subtask", () => {
+    const { scene } = sceneWith();
+    scene.key(key("+"));
+    const [from, to] = scene.visibleDomain();
+    expect((from + to) / 2).toBeCloseTo(4 * HOUR);
+  });
+
+  it("stops at zoomLimits", () => {
+    const { scene } = sceneWith({ zoomLimits: { min: 7 * HOUR, max: 9 * HOUR } });
+    scene.key(key("+"));
+    scene.key(key("+"));
+    expect(span(scene)).toBeCloseTo(7 * HOUR);
+    for (let i = 0; i < 8; i++) scene.key(key("-"));
+    expect(span(scene)).toBeCloseTo(9 * HOUR);
+  });
+
+  it("fits the work with 0 and leaves the view without a domain", () => {
+    const { scene } = sceneWith();
+    scene.key(key("+"));
+    expect(scene.key(key("0"))).toBe(true);
+    expect(scene.getView().domain).toBeUndefined();
+    const [from, to] = scene.visibleDomain();
+    expect(from).toBeLessThanOrEqual(HOUR);
+    expect(to).toBeGreaterThanOrEqual(21 * HOUR);
+  });
+
+  it("reports each key through onViewChange once", async () => {
+    const { scene } = sceneWith();
+    let n = 0;
+    scene.subscribeView(() => n++);
+    scene.key(key("+"));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(n).toBe(1);
+    scene.key(key("0"));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(n).toBe(2);
+  });
+
+  it("speaks the span once the keys rest, also for a key at a limit", () => {
+    vi.useFakeTimers();
+    const { scene } = sceneWith({ zoomLimits: { min: 8 * HOUR, max: 9 * HOUR } });
+    scene.key(key("+"));
+    scene.key(key("+"));
+    expect(scene.getSnapshot().spoken).toBeNull();
+    vi.advanceTimersByTime(200);
+    const spoken = scene.getSnapshot().spoken;
+    expect(spoken?.span).toEqual(scene.visibleDomain());
+    scene.key(key("+"));
+    vi.advanceTimersByTime(200);
+    expect(scene.getSnapshot().spoken?.count).toBe((spoken?.count ?? 0) + 1);
+  });
+
+  it("leaves Ctrl with a key, Alt with a key and a key during a drag alone", () => {
+    const { scene } = sceneWith();
+    expect(scene.key(key("+", { ctrlKey: true }))).toBe(false);
+    expect(scene.key(key("0", { ctrlKey: true }))).toBe(false);
+    expect(scene.key(key("-", { altKey: true }))).toBe(false);
+    expect(span(scene)).toBeCloseTo(8 * HOUR);
+    scene.pointerDown(pointer("pointerdown", 150, 20));
+    scene.pointerMove(pointer("pointermove", 170, 20));
+    expect(scene.key(key("-"))).toBe(false);
+    expect(span(scene)).toBeCloseTo(8 * HOUR);
+  });
+});
