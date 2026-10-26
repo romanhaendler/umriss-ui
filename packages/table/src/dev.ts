@@ -71,7 +71,3 @@ export function probeStale(who: string, held: unknown, next: unknown, rows: read
     // An accessor that throws on a row is the caller's to find; the probe says nothing.
   }
 }
-
-/** The one wording of a renamed name that still works. */
-export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);

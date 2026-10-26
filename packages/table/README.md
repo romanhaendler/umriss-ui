@@ -65,7 +65,7 @@ right-aligned in the provider's notation and sortable. `rowHeader` makes the
 order number the name of the row — for a screen reader, and for the sticky
 column.
 
-The table is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its outer frame, a `<div>`, and `aria-label`, `aria-labelledby` and `aria-describedby` reach the `<table>`, so give the name there. `ariaLabel` still works for one further minor and warns once in development. `Toolbar`, `Pagination`, `Export` and `ColumnMenu` take the attributes and the `ref` of the element they render; `Search` is an `Input` and takes its props.
+The table is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its outer frame, a `<div>`, and `aria-label`, `aria-labelledby` and `aria-describedby` reach the `<table>`, so give the name there. `Toolbar`, `Pagination`, `Export` and `ColumnMenu` take the attributes and the `ref` of the element they render; `Search` is an `Input` and takes its props.
 
 A table wider than its place scrolls in its own frame, never the page; in a
 narrow place - a phone, beside a sidebar - the toolbar and the paging bar wrap
@@ -157,6 +157,10 @@ stylesheets by hand.
   Typing in `Search` is reported after a pause of 300 ms without a keystroke
   (the field and `t.search` take each letter at once); Enter, an emptied field,
   `setSearch` and any other change of the request report at once.
+  `Export` writes the page; with `exportRows(request)` it writes every match
+  instead, in the table's own columns. The application caps and refuses: the
+  table asks for what the request names, and a rejection's message shows beside
+  the button.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.

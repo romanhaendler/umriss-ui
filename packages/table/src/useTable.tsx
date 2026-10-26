@@ -583,8 +583,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     selectedRows = [...selection.selected].filter((key) => seenRows.has(key)).map((key) => seenRows.get(key));
   }
 
-  const exportAs = <R,>(format: ExportFormat<R>): R =>
-    format.write(sheetOf(registry, wording.levelColumn), { formats, wording });
+  const exportAs = <R,>(format: ExportFormat<R>, given?: readonly unknown[]): R =>
+    format.write(sheetOf(registry, wording.levelColumn, given), { formats, wording });
 
   const snapshot: TableSnapshot<Z> = {
     rows,
@@ -658,6 +658,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     formats,
     pins: pinsChosen,
     filterOptions: server ? options.filterOptions : undefined,
+    exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
     late,
     rowFilters,

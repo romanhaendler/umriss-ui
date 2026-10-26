@@ -3,6 +3,7 @@
    that a re-render does not materialise again. Registration order is drawing
    order, palette assignment and band stacking. Functions over the scene. */
 
+import { DEV, warnOnce } from "./dev";
 import type { ChartScene } from "./scene";
 import { markLayoutDirty } from "./sceneBinding";
 import {
@@ -21,6 +22,7 @@ import {
 } from "./sceneConfig";
 import { type SeriesEntry } from "./sceneModel";
 import { isHidden, zooms } from "./sceneView";
+import { FALLBACK_THEME } from "./theme";
 import type { AxisConfig, LimitConfig, SeriesConfig } from "./types";
 
 let nextRegistration = 0;
@@ -48,9 +50,24 @@ export function slotTaken(s: ChartScene, slot: number, except?: SeriesEntry): bo
   return false;
 }
 
+/** DEV: a series past the palette's last place takes the colour of an earlier place, and under encoding by marks
+    its dash and marker too. A series with its own `color` or `tone` is not a repeat. Warns once per series. */
+function warnIfRepeatsPlace(s: ChartScene, entry: SeriesEntry): void {
+  const places = (s.theme?.series ?? FALLBACK_THEME.series).length;
+  if (!DEV || entry.slot < places || entry.config.color !== undefined || entry.config.tone !== undefined) return;
+  const first = [...s.series.values()].find((e) => e !== entry && e.slot >= 0 && e.slot % places === entry.slot % places);
+  const who = (e: SeriesEntry) => (e.config.name !== undefined ? `"${e.config.name}"` : `in place ${e.slot + 1}`);
+  warnOnce(
+    `palette:${entry.config.name ?? entry.order}`,
+    `The series ${who(entry)} repeats the colour of ${first ? `the series ${who(first)}` : "an earlier series"} - ` +
+      "it has no `color` and no `tone` beyond the palette's places, and under encoding by marks its dash and marker too. " +
+      "Give it a `color` or a `tone`, or split the chart.",
+  );
+}
+
 export function registerSeries(s: ChartScene, config: SeriesConfig): number {
   const id = nextRegistration++;
-  s.series.set(id, {
+  const entry: SeriesEntry = {
     order: id,
     config,
     slot: takesPalette(config) ? slotFor(s, config.name) : -1,
@@ -63,7 +80,9 @@ export function registerSeries(s: ChartScene, config: SeriesConfig): number {
     buckets: null,
     own: null,
     stacked: null,
-  });
+  };
+  s.series.set(id, entry);
+  warnIfRepeatsPlace(s, entry);
   s.materialsDirty = true;
   markLayoutDirty(s);
   return id;

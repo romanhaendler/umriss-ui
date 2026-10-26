@@ -8,7 +8,7 @@
 import { useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Button, Checkbox, Input, Popover, Select, Tooltip, useFormats, useWording } from "@umriss-ui/core";
+import { Button, Checkbox, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
@@ -341,18 +341,22 @@ export interface ExportProps<R = string>
 
 /** Writes the filtered set in the visible columns and their order – with the
     values, not with their presentation. In server mode the table holds one
-    page of the server's, so it writes that page, and its button says so. */
+    page of the server's, so it writes that page, and its button says so;
+    with `exportRows` it asks the application for every row of the current
+    request instead and writes those. */
 export function Export<R = string>({ format: given, filename, onExport, label, size: own, of, ...rest }: ExportProps<R>) {
   const connection = useConnection(of, "Export");
   const size = useToolbarSize(own);
   const wording = useWording();
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
   if (!connection) return null;
-  const { snapshot } = connection;
+  const { snapshot, registry } = connection;
+  const all = registry.hook?.exportRows;
   /* Without a format the text is the CSV, and `R` is `string`. */
   const format = given ?? (csv as unknown as ExportFormat<R>);
 
-  const exportFile = () => {
-    const content = snapshot.exportAs(format);
+  const deliver = (content: R) => {
     if (onExport) {
       onExport(content);
       return;
@@ -367,10 +371,40 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
+  const exportFile = () => {
+    setFailure(null);
+    if (!all || !snapshot.request) {
+      deliver(snapshot.exportAs(format));
+      return;
+    }
+    if (busy) return;
+    setBusy(true);
+    /* The request of the click goes out and its rows are written, whatever the
+       table has moved on to meanwhile. */
+    all(snapshot.request).then(
+      (rows) => {
+        setBusy(false);
+        deliver(snapshot.exportAs(format, rows));
+      },
+      (error: unknown) => {
+        setBusy(false);
+        setFailure(error instanceof Error && error.message ? error.message : wording.exportFailed);
+      },
+    );
+  };
+
   return (
-    <Button {...rest} size={size} onClick={exportFile}>
-      {label ?? (snapshot.server ? wording.exportPageLabel : wording.exportLabel)}
-    </Button>
+    <>
+      <Button {...rest} size={size} onClick={exportFile} disabled={rest.disabled || busy} aria-busy={busy || undefined}>
+        {label ?? (snapshot.server && !all ? wording.exportPageLabel : wording.exportLabel)}
+      </Button>
+      {busy && (
+        <VisuallyHidden>
+          <span role="status">{wording.exporting}</span>
+        </VisuallyHidden>
+      )}
+      {failure && <span role="alert">{failure}</span>}
+    </>
   );
 }
 

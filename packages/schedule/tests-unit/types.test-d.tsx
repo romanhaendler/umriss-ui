@@ -37,19 +37,20 @@ export function View() {
 export const unused = [Schedule, Lane];
 
 declare const anElement: import("react").RefObject<HTMLDivElement | null>;
-declare const aHandle: import("react").RefObject<import("../src").ScheduleHandle | null>;
+declare const aHandle: import("react").RefObject<{ positionAt: () => null } | null>;
 declare const aButton: import("react").RefObject<HTMLButtonElement | null>;
 
-/* The `ref` is the root <div>; a ref typed at the deprecated `ScheduleHandle` is still accepted. */
+/* The `ref` is the root <div>; a ref typed at a handle is not. */
 export function Refs() {
   const { Schedule: Plan } = useSchedule();
   return (
     <>
       <Plan ref={anElement} data-testid="plan" aria-label="Plan" />
+      {/* @ts-expect-error - a handle is not the root. */}
       <Plan ref={aHandle} aria-label="Plan" />
       {/* @ts-expect-error - another element is not the root. */}
       <Plan ref={aButton} aria-label="Plan" />
-      {/* @ts-expect-error - a name is required: aria-label, or the deprecated ariaLabel. */}
+      {/* @ts-expect-error - a name is required. */}
       <Plan />
     </>
   );
