@@ -643,6 +643,36 @@ export class Registry {
       table beneath itself where no toolbar stands. The frame hands in what the
       button does - its grid's handler of this render. */
   rowAdding = false;
+  /* The search in server mode: the field marks a keystroke as typed, and the
+     hook holds that request's report for a pause. Anything else that reports,
+     Enter and unmounting settle the held one. */
+  private typed = false;
+  private held: { timer: ReturnType<typeof setTimeout>; report: () => void } | null = null;
+
+  markTyped(on: boolean) {
+    this.typed = on;
+  }
+
+  takeTyped(): boolean {
+    const was = this.typed;
+    this.typed = false;
+    return was;
+  }
+
+  /** Drops what is held, or reports it when `send`. */
+  settleSearch(send: boolean) {
+    if (!this.held) return;
+    clearTimeout(this.held.timer);
+    const { report } = this.held;
+    this.held = null;
+    if (send) report();
+  }
+
+  holdSearch(report: () => void, ms: number) {
+    this.settleSearch(false);
+    this.held = { timer: setTimeout(() => this.settleSearch(true), ms), report };
+  }
+
   addRow: (() => void) | null = null;
 
   setRowAdding(on: boolean) {

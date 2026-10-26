@@ -154,6 +154,9 @@ stylesheets by hand.
   the rows are one page a server answered; the table reports the request -
   search, conditions, sort, page, page size - through `onRequest` once per
   change and keeps the previous page, dimmed, while the next is on its way.
+  Typing in `Search` is reported after a pause of 300 ms without a keystroke
+  (the field and `t.search` take each letter at once); Enter, an emptied field,
+  `setSearch` and any other change of the request report at once.
   `Export` writes the page; with `exportRows(request)` it writes every match
   instead, in the table's own columns. The application caps and refuses: the
   table asks for what the request names, and a rejection's message shows beside
