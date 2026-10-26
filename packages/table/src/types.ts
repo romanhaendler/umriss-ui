@@ -60,6 +60,11 @@ export interface AggregateOptions<W, Z> {
       of one's own. Always from the values, never from other aggregates; absent
       values count towards nothing. */
   aggregate?: AggregateFor<W, Z>;
+  /** The word for an `aggregate` function of one's own: it stands before the
+      value in the footer and is what a screen reader reads. A group header
+      shows no word. A built-in kind keeps its own word, the wording's; a name
+      beside it is ignored. */
+  aggregateLabel?: string;
   /** The share bar in a group's header – the group's share of the filtered
       set's sum. It stands under the first column with a sum, one per header;
       `false` passes it on to the next. */
@@ -263,6 +268,11 @@ export type Computed<Z, W> = ColumnBase &
     /** The id is required where the value is a function. */
     id: string;
     value: (row: Z) => W;
+    /** The word for an `aggregate` function of one's own: it stands before the
+        value in the footer and is what a screen reader reads. A group header
+        shows no word. A built-in kind keeps its own word, the wording's; a name
+        beside it is ignored. */
+    aggregateLabel?: string;
     /* The two names stand here without a condition on the value type, unlike on
        a field column: the value of a computed column is derived from `value`,
        and a condition over this W is not yet resolved when the overload is
@@ -395,6 +405,8 @@ export interface VerdictBase {
   /** `"worst"`: the worst verdict among the rows – in the footer and in a
       group's header. */
   aggregate?: "worst";
+  /** The word for the aggregate in the footer, read by a screen reader. */
+  aggregateLabel?: string;
 }
 
 /** The `VerdictColumn` of a table, typed at its row: a numeric field, or a

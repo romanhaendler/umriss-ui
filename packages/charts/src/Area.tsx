@@ -58,6 +58,13 @@ export interface AreaProps<T> {
       stays whole.
       @default a solid outline */
   dash?: readonly number[];
+  /** The longest step between two readings that is still filled through, in
+      the x axis' units: milliseconds on a time axis, working time on a
+      calendar axis, places on a category axis. A longer step is a gap: the
+      area closes on both sides of it. A pointer farther than this from the
+      nearest reading finds no hit. In a `stack` this is not read.
+      @default no limit, a stretch without rows is bridged */
+  maxGap?: number;
 }
 
 /** A series drawn as a filled area between its values and a baseline, 0
@@ -78,6 +85,7 @@ export function Area<T>(props: AreaProps<T>): null {
     fillOpacity = 0.18,
     strokeWidth = 1.5,
     dash,
+    maxGap,
   } = props;
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
@@ -99,8 +107,9 @@ export function Area<T>(props: AreaProps<T>): null {
         fillOpacity,
         strokeWidth,
         dash,
+        maxGap,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash, maxGap],
   );
 
   useSeries("Area", config);
