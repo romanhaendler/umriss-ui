@@ -12,6 +12,7 @@ import { firstUnsortedIndex } from "./materialize";
 import { hatchFor, type Hatch } from "./marks";
 import type { ChartScene } from "./scene";
 import { matrixColors, matrixBuckets, paint, colorFor, limitItems } from "./sceneColors";
+import { formatY } from "./sceneSpeech";
 import { LANE_WIDTH, widthOf, stackOf } from "./sceneConfig";
 import { type SeriesEntry } from "./sceneModel";
 import { isHidden } from "./sceneView";
@@ -145,6 +146,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
           buckets: (entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length)),
           colors: colors,
           hatches: s.marked() ? colors.map((_, k) => hatchFor(k)) : null,
+          labels: config.labels === true ? cellLabels(s, entry, mat, s.theme ?? FALLBACK_THEME) : null,
           width: cellSize(
             entry.step ?? 0,
             xAxis.scale.domain[1] - xAxis.scale.domain[0],
@@ -159,6 +161,18 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
     }
   });
   return items;
+}
+
+/** The text of every cell in the matrix' format, and the font it stands in:
+    the tick's size and the chart's font, one line at the tick's leading. */
+function cellLabels(s: ChartScene, entry: SeriesEntry, mat: MaterializedSeries, theme: ResolvedTheme) {
+  const w = mat.w;
+  const texts: string[] = [];
+  for (let i = 0; i < mat.length; i++) {
+    const v = w === null ? Number.NaN : (w[i] as number);
+    texts.push(Number.isFinite(v) ? formatY(s, entry, v) : "");
+  }
+  return { texts, font: `${theme.sizeTick}px ${theme.font}`, lineHeight: theme.sizeTick * 1.25 };
 }
 
 /** Whether a channel ascends, found once per materialised channel: a channel
