@@ -24,6 +24,9 @@ const MILESTONE = "\u0000milestone:";
     held key speaks where it stops, not at every step on the way. */
 const READOUT_REST = 150;
 
+/** The charts' key factor: a zoom key narrows or widens the span by it. */
+const KEY_ZOOM = 1.25;
+
 const MOVES: Readonly<Record<string, WalkMove>> = {
   ArrowRight: "next",
   ArrowLeft: "previous",
@@ -45,13 +48,20 @@ export interface KeyHost {
   select(task: string | null, subtask: string | null): void;
   /** The keys panned the view to bring the active subtask into it. */
   viewMoved(time: boolean): void;
+  /** Zooms about a plot x by a factor, through the view's zoom. */
+  zoomBy(x: number, factor: number): void;
+  /** The view names no span: the subtasks' extent shows. */
+  fitWork(): void;
   /** What is spoken changed: publish. */
   spokenChanged(): void;
 }
 
 /** What the live region reads: the target and the lane it stands on. */
 export interface Spoken {
-  readonly target: ScheduleTooltipTarget;
+  readonly target: ScheduleTooltipTarget | null;
+  /** Set where a zoom key spoke: the span in view, two wall-clock instants,
+      and no target. */
+  readonly span?: readonly [number, number];
   /** The lane's id, for its header's label; null for a dependency. */
   readonly lane: string | null;
   /** Counts the readouts: the same words twice - a key at the end of a lane -
@@ -105,6 +115,7 @@ export class SceneKeys {
       return true;
     }
     if (event.ctrlKey) return false;
+    if (!event.altKey && this.zoom(event)) return true;
     if (event.altKey) return this.edit(event);
     if (event.key === "Escape") {
       if (!gestures.byKeyboard) return false;
@@ -115,6 +126,22 @@ export class SceneKeys {
     const move = event.shiftKey ? undefined : MOVES[event.key];
     if (move === undefined) return false;
     this.walk(move);
+    return true;
+  }
+
+  /** + and = zoom in, - and _ zoom out, 0 fits the work: by the character, so
+      that every layout reaches them (Shift is how a US keyboard types +). The
+      anchor is the middle of the active subtask's main time, else of the plot. */
+  private zoom(event: KeyboardEvent): boolean {
+    const factor = event.key === "+" || event.key === "=" ? 1 / KEY_ZOOM : event.key === "-" || event.key === "_" ? KEY_ZOOM : 1;
+    if (factor === 1 && event.key !== "0") return false;
+    if (factor !== 1) {
+      const at = this.active();
+      const box = at?.kind === "subtask" ? this.host.view.boxById.get(at.id) : undefined;
+      const width = this.host.view.width;
+      this.host.zoomBy(box === undefined ? width / 2 : Math.max(0, Math.min(width, (box.mainFrom + box.mainTo) / 2)), factor);
+    } else this.host.fitWork();
+    this.scheduleSpan();
     return true;
   }
 
@@ -294,6 +321,16 @@ export class SceneKeys {
       const target = this.host.data.tooltipTargetFor(hover);
       if (target === null) return;
       this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1 };
+      this.host.spokenChanged();
+    }, READOUT_REST);
+  }
+
+  /** The span in view, said once the keys rest - also after a key that changed nothing. */
+  private scheduleSpan(): void {
+    if (this.timer !== null) clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.timer = null;
+      this.spoken = { target: null, lane: null, span: this.host.visibleDomain(), count: (this.spoken?.count ?? 0) + 1 };
       this.host.spokenChanged();
     }, READOUT_REST);
   }
