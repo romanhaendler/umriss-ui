@@ -89,7 +89,7 @@ function Server({ grid = false, filterOptions = true, groupable }: { grid?: bool
       <Column value="line" label="Line" filter="list" />
       <Column value="amount" label="Quantity" aggregate="sum" />
       <RowActions>
-        <Action bulk onSelect={(rows) => bulk.push(rows)}>
+        <Action bulk onSelect={(rows) => bulk.push(Array.isArray(rows) ? rows : [])}>
           Release
         </Action>
       </RowActions>

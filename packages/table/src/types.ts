@@ -434,7 +434,7 @@ interface ActionBase {
 
 /** The props of `Action`: one action on a row, or with `bulk` on a list of
     rows - then it also stands in the table toolbar for the selection. */
-export type ActionProps<Z> =
+export type ActionProps<Z, S extends boolean = false> =
   | (ActionBase & {
       bulk?: false;
       /** Gets the row the action was triggered on. */
@@ -445,8 +445,19 @@ export type ActionProps<Z> =
           toolbar on the selection within the filtered set. */
       bulk: true;
       /** With `bulk` a list: at the row one made from it, in the table toolbar the selection. */
-      onSelect: (rows: readonly Z[]) => void;
+      /* A method, not a property: a server table stays assignable where an
+         automatic one is asked for (`of`). */
+      onSelect(selected: S extends true ? Z[] | AllMatching : Z[]): void;
     });
+
+/** What a server-mode bulk action receives, in the toolbar, while all that
+    match are selected: the request they match and the keys unticked since.
+    `Array.isArray` tells it from rows - the rows are typed as a mutable array
+    so that it narrows both ways. */
+export interface AllMatching {
+  request: TableRequest;
+  except: readonly string[];
+}
 
 /** What a row carries in classes and data attributes. */
 export type RowAttributes = { className?: string } & {
@@ -797,13 +808,13 @@ export type TableRef = Omit<TableSnapshot<unknown>, "setFilter" | "conditionOf">
 
 /** What `useTable` returns: the table's state, and its parts typed at the
     row. Pass it as `of` to a part that stands outside the table. */
-export interface Table<Z> extends TableSnapshot<Z> {
+export interface Table<Z, S extends boolean = false> extends TableSnapshot<Z> {
   Table: (props: TableProps<Z>) => ReactNode;
   Column: ColumnComponent<Z>;
   VerdictColumn: VerdictColumnComponent<Z>;
   RowDetail: (props: RowDetailProps<Z>) => ReactNode;
   RowActions: (props: RowActionsProps) => ReactNode;
-  Action: (props: ActionProps<Z>) => ReactNode;
+  Action: (props: ActionProps<Z, S>) => ReactNode;
   GroupBy: GroupByComponent<Z>;
   /** Brings the row with this key into view and returns `true`: in a paged table its page, in a scroll area, virtual or not, the scroll to it. `false`, with nothing changed, for a key the table does not have, a row a search, a condition or the `preFilter` hides, a row inside a folded group or branch, or a table not mounted; nothing is unfolded and no filter cleared. In server mode it reaches the rows of the page it holds. */
   scrollToRow: (key: string) => boolean;
