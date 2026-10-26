@@ -8,7 +8,7 @@
 import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Button, Checkbox, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
+import { Button, Checkbox, GripGlyph, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
@@ -388,9 +388,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
                   onPointerCancel={cancelDrag}
                   onLostPointerCapture={cancelDrag}
                 >
-                  <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                    <path d="M3.5 2h.01M6.5 2h.01M3.5 5h.01M6.5 5h.01M3.5 8h.01M6.5 8h.01" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                  </svg>
+                  <GripGlyph />
                 </span>
                 <Checkbox
                   label={label}
