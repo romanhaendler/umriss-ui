@@ -42,13 +42,13 @@ import {
   type Ref,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
-import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useTimeZoneLabel, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind, Subtask, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
-import { dayRun, fontScaleOf, opensRun, type ZoomLimits } from "./timeAxis";
+import { dayRun, fontScaleOf, opensRun, timeText, type ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
@@ -239,6 +239,8 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
   const overlayRef = useRef<HTMLCanvasElement | null>(null);
   const formats = useFormats();
   const wording = useWording();
+  const timeZone = formats.timeZone;
+  const zoneLabel = useTimeZoneLabel();
 
   const limitMin = zoomLimits?.min ?? DEFAULT_LIMITS.min;
   const limitMax = zoomLimits?.max ?? DEFAULT_LIMITS.max;
@@ -261,8 +263,8 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
 
   useLayoutEffect(() => {
     const raster = snapKind ?? { step: snapStep ?? 0, offset: snapOffset ?? 0 };
-    scene.setOptions({ laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, attach, ends });
-  }, [scene, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, attach, ends]);
+    scene.setOptions({ laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, timeZone, route, attach, ends });
+  }, [scene, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, timeZone, route, attach, ends]);
 
   useEffect(() => {
     scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange });
@@ -357,7 +359,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
   const ghost = snapshot.ghost;
   const spoken = snapshot.spoken;
   const summary = snapshot.summary;
-  const instant = (at: number) => `${formats.dateShort(new Date(at))} ${formats.time(new Date(at), false)}`;
+  const instant = (at: number) => `${formats.dateShort(new Date(at))} ${timeText(formats, at)}`;
   /* What a group's chevron controls: every row that lies inside it - its heads
      and lanes while it is open, its one miniature row while it is folded, so
      the ids point at elements that exist either way. By the row's own key and
@@ -476,17 +478,23 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         className={className ? `${styles.root} ${className}` : styles.root}
         style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
       >
-        <div className={styles.corner} />
+        <div className={styles.corner}>
+          {zoneLabel !== null && (
+            <span className={styles.zoneLabel} data-schedule-overlay="zone label">
+              {zoneLabel}
+            </span>
+          )}
+        </div>
         <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">
           {snapshot.days.map((day, index) => {
             /* A day that opens its run carries the date, and so does the first
                day in view, whose run began before it. The run's width is the
                label's room, up to the next date or the end of the view. */
-            const labelled = daysPerDate === 1 || index === 0 || opensRun(day.start, daysPerDate);
+            const labelled = daysPerDate === 1 || index === 0 || opensRun(day.start, daysPerDate, timeZone);
             const end =
               daysPerDate === 1
                 ? day.x + day.width
-                : (snapshot.days.slice(index + 1).find((next) => opensRun(next.start, daysPerDate))?.x ?? snapshot.width);
+                : (snapshot.days.slice(index + 1).find((next) => opensRun(next.start, daysPerDate, timeZone))?.x ?? snapshot.width);
             /* The label stands at the visible start of its day: a day that began
                before the view still says which day it is. */
             const hidden = Math.max(0, -day.x);
@@ -649,7 +657,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                 visibility: ghostAt.at === ghostKey ? undefined : "hidden",
               }}
             >
-              {wording.scheduleGhostTimes(formats.time(new Date(ghost.from), false), formats.time(new Date(ghost.to), false))}
+              {wording.scheduleGhostTimes(timeText(formats, ghost.from), timeText(formats, ghost.to))}
               {ghost.refused && <span className={styles.refusal}>{wording.scheduleLaneRefused}</span>}
               {ghost.blocked && <span className={styles.refusal}>{wording.scheduleBlockedTime}</span>}
               {ghost.overlap && <span className={styles.finding}>{wording.scheduleOverlap}</span>}
@@ -670,9 +678,9 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                   so is a date inside another date's run; the line stays. */}
               {tick.x >= LABEL_MARGIN &&
                 tick.x <= snapshot.width - LABEL_MARGIN &&
-                (daysPerTick === 1 || opensRun(tick.wallClock, daysPerTick)) && (
+                (daysPerTick === 1 || opensRun(tick.wallClock, daysPerTick, timeZone)) && (
                 <span className={styles.tickLabel} data-schedule-overlay="time label">
-                  {snapshot.step >= DAY ? formats.dateShort(new Date(tick.wallClock)) : formats.time(new Date(tick.wallClock), false)}
+                  {snapshot.step >= DAY ? formats.dateShort(new Date(tick.wallClock)) : timeText(formats, tick.wallClock)}
                 </span>
               )}
             </span>
@@ -693,7 +701,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         <VisuallyHidden id={summaryId}>
           {snapshot === scene.getServerSnapshot()
             ? wording.scheduleKeyHelp
-            : `${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })} ${wording.scheduleKeyHelp}`}
+            : `${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })}${zoneLabel === null ? "" : ` ${zoneLabel}.`} ${wording.scheduleKeyHelp}`}
         </VisuallyHidden>
       </div>
       {children}
