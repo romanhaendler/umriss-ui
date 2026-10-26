@@ -52,6 +52,7 @@ export * from "./lib/glyphs";
 export * from "./components/Stat";
 export * from "./lib/limit";
 export * from "./lib/freshness";
+export * from "./lib/quality";
 export * from "./lib/useFreshness";
 export * from "./lib/useContextMenuTrigger";
 export { createLongPress } from "./lib/longPress";

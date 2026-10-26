@@ -12,7 +12,7 @@
    The reference time is a parameter. No clock is read here; the cadence
    belongs to `useFreshness`. */
 
-/** How much a value can be relied on right now - independently of how it is judged. */
+/** How old a value is right now - independently of how it is judged and how far its source vouches for it. */
 export type Freshness = "fresh" | "stale" | "lost";
 
 /**

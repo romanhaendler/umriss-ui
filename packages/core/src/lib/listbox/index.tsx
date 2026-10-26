@@ -3,9 +3,10 @@
    popover, the options, the list's cursor and the check; the field keeps the
    focus, the keys and the value, and tells the list which option is active. */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { cx } from "../cx";
+import { useVirtual } from "../useVirtual";
 import { Popover } from "../../components/Popover";
 import styles from "./Listbox.module.css";
 
@@ -37,6 +38,9 @@ export interface ListboxProps {
   emptyText: ReactNode;
 }
 
+/** A list of more than this many options is drawn through a window. */
+export const WINDOW_ABOVE = 500;
+
 /** The id of option `index` in the listbox `id` - for `aria-activedescendant`. */
 export const optionId = (id: string, index: number) => `${id}-${index}`;
 
@@ -58,11 +62,14 @@ export function Listbox({
      `open` - its arrival must show the active option too. */
   const [list, setList] = useState<HTMLDivElement | null>(null);
 
-  // Keep the active option in view
+  /* A grouped list is drawn whole: the window covers a flat list only. */
+  const windowed = items.length > WINDOW_ABOVE && !items.some((item) => item.group !== undefined);
+
+  // Keep the active option in view (a windowed list does it through its hook)
   useEffect(() => {
-    if (!open) return;
+    if (!open || windowed) return;
     list?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)?.scrollIntoView({ block: "nearest" });
-  }, [open, activeIndex, list]);
+  }, [open, activeIndex, list, windowed]);
 
   /* A press anywhere in the panel keeps the focus in the field: a group's
      label, the padding and the scrollbar closed the list on the field's blur. */
@@ -79,6 +86,9 @@ export function Listbox({
       key={index}
       id={optionId(id, index)}
       data-index={index}
+      data-row={windowed ? "" : undefined}
+      aria-setsize={windowed ? items.length : undefined}
+      aria-posinset={windowed ? index + 1 : undefined}
       role="option"
       aria-selected={item.selected ?? false}
       aria-disabled={item.disabled || undefined}
@@ -140,9 +150,91 @@ export function Listbox({
       minWidth={200}
       className={styles.panel}
     >
-      <div ref={setList} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
-        {items.length === 0 ? <div className={styles.empty}>{emptyText}</div> : rows}
-      </div>
+      {windowed ? (
+        <WindowedList
+          listRef={setList}
+          id={id}
+          ariaLabel={ariaLabel}
+          count={items.length}
+          activeIndex={activeIndex}
+          open={open}
+          option={(index) => option(items[index]!, index)}
+        />
+      ) : (
+        <div ref={setList} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
+          {items.length === 0 ? <div className={styles.empty}>{emptyText}</div> : rows}
+        </div>
+      )}
     </Popover>
+  );
+}
+
+interface WindowedListProps {
+  listRef: (element: HTMLDivElement | null) => void;
+  id: string;
+  ariaLabel: string;
+  count: number;
+  activeIndex: number;
+  open: boolean;
+  option: (index: number) => ReactNode;
+}
+
+/* The scroll element of a long list: it draws the options in view and filler
+   rows for the rest. The active option is always drawn - apart from the window
+   when it lies outside, so that aria-activedescendant names an element at
+   once - and the hook brings it into view. Mounted inside the panel, so the
+   hook finds the list when it measures. */
+function WindowedList({ listRef, id, ariaLabel, count, activeIndex, open, option }: WindowedListProps) {
+  const { scrollRef, from, to, fillerBefore, fillerAfter, showRow, onScroll } = useVirtual(count, { rowHeight: 32 });
+
+  const ref = useCallback(
+    (element: HTMLDivElement | null) => {
+      scrollRef.current = element;
+      listRef(element);
+    },
+    [scrollRef, listRef],
+  );
+
+  useEffect(() => {
+    if (open && activeIndex >= 0 && activeIndex < count) showRow(activeIndex);
+  }, [open, activeIndex, count, showRow]);
+
+  // The height of a row, from whichever filler stands beside rows
+  const rowHeight =
+    from > 0 ? fillerBefore / from : to < count ? fillerAfter / (count - to) : 32;
+  const apart = activeIndex >= 0 && activeIndex < count && (activeIndex < from || activeIndex >= to);
+  const filler = (rows: number) =>
+    rows > 0 ? <div aria-hidden="true" style={{ height: rows * rowHeight, flexShrink: 0 }} /> : null;
+  const range = (a: number, b: number) => Array.from({ length: b - a }, (_, i) => option(a + i));
+
+  return (
+    <div
+      ref={ref}
+      role="listbox"
+      id={id}
+      className={styles.list}
+      aria-label={ariaLabel}
+      onScroll={onScroll}
+    >
+      {apart && activeIndex < from ? (
+        <>
+          {filler(activeIndex)}
+          {option(activeIndex)}
+          {filler(from - activeIndex - 1)}
+        </>
+      ) : (
+        filler(from)
+      )}
+      {range(from, to)}
+      {apart && activeIndex >= to ? (
+        <>
+          {filler(activeIndex - to)}
+          {option(activeIndex)}
+          {filler(count - activeIndex - 1)}
+        </>
+      ) : (
+        filler(count - to)
+      )}
+    </div>
   );
 }

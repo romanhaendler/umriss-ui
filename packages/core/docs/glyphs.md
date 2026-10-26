@@ -40,7 +40,7 @@ is not 10 is what the check refuses.
 The glyph names are English since `english-and-umriss-ui` 15: `CrossGlyph`,
 `GripGlyph`, `MeasureGlyph`, `GridGlyph`, `AngleGlyph`, beside `PlusGlyph` and
 `MinusGlyph`; `CalendarGlyph` and `ClockGlyph` joined with
-`visuelle-wertigkeit` 03. `GridGlyph` depicts a grid, which is a picture and not
+`visuelle-wertigkeit` 03, `MoreGlyph` after them. `GridGlyph` depicts a grid, which is a picture and not
 the layout grid the **Month grid** entry in `CONTEXT.md` forbids, and
 `MeasureGlyph` follows **Measure**.
 
@@ -56,6 +56,7 @@ the layout grid the **Month grid** entry in `CONTEXT.md` forbids, and
 | `GripGlyph` | Splitter |
 | `GridGlyph` | the demo's command palette page |
 | `MeasureGlyph` | no component |
+| `MoreGlyph` | the table's row-actions trigger, through core's public entry; the Menu triggers of core's examples |
 
 A glyph drawn in more than one place stands here once. The four crosses (Alert
 at width 1.5, Tag at 1.6, MultiSelect in a box of 8, Modal and Toast in a box of
