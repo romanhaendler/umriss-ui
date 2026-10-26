@@ -31,7 +31,7 @@ export default function AnAppShell() {
       <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--u-space-1)" }}>
         {PAGES.map((name) => (
           <li key={name}>
-            <Text as="span">
+            <Text as="span" weight={name === page ? "semibold" : "regular"}>
             <Link
               href="#"
               aria-current={name === page ? "page" : undefined}
@@ -40,7 +40,7 @@ export default function AnAppShell() {
                 setPage(name);
                 setOpen(false);
               }}
-              style={{ display: "block", padding: "var(--u-space-2) var(--u-space-3)", fontWeight: name === page ? 600 : 400 }}
+              style={{ display: "block", padding: "var(--u-space-2) var(--u-space-3)", fontWeight: "inherit" }}
             >
               {name}
             </Link>
