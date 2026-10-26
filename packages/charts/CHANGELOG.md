@@ -30,6 +30,18 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.45.0 – A chart in a named time zone (Oct. 2026)
+
+### Added
+
+- **`timeZone` on `Chart`** draws every time axis, a calendar axis included, in an IANA zone (ADR-0076): ticks stand on that zone's hours and midnights, and the labels, tooltip, readout, data table and summary write its time. Where the reader's zone is another, the axis title names it. An application on core passes `useFormats().timeZone`.
+- **`localOffset(instant, timeZone?)` and `workingTimeTicks(…, offset, timeZone?)`** take the zone as an optional last argument; no existing call changes meaning. **`inDoubledHour(instant, timeZone?)`** says whether an instant lies in the hour a clock change doubles.
+
+### Changed
+
+- **The hour a clock change doubles is ticked twice** on a time axis, each label, tooltip and readout carrying its offset (`01:00 GMT+2`, `01:00 GMT+1`), and ticks below a day stand on the zone's whole multiples in real time.
+  - Migration: none needed; only an axis across the autumn change shows the second tick.
+
 ## 0.44.0 – A range a reader marks, and a picture of the chart (Oct. 2026)
 
 ### Added

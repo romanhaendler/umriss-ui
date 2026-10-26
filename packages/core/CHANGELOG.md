@@ -27,6 +27,42 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.45.0 – A plant's time, and dates a finger reaches (Oct. 2026)
+
+### Added
+
+- **A named time zone** (ADR-0076): `timeZone` in the formats, an IANA name, is the zone every date and time is written in, every day is cut in and every picker picks in; without it the reader's zone holds as before. `Formats` gains `locale`, `timeZone` and `timeZoneName`, `formatsFor(locale, timeZone)` builds a set, and `useTimeZoneLabel()` returns the zone's name where the reader's own zone is another. With a zone named a server writes the instants; only the label waits for the page to hydrate. `zoneFields`, `zoneInstant` and `zoneDayStart` are the seam the other packages read. In development, a DatePicker or DateRangePicker day value off the named zone's midnight warns once.
+- **The calendar jumps.** The four date pickers' calendar has a month and a year Select between its arrows (in the month pair, on the left month), and the grid takes PageUp and PageDown (a month), Shift with them (a year), Home and End (Monday and Sunday of the week). `Formats.monthName` writes the month alone.
+- **A date can be typed** in the DatePicker panel's foot, in the order of the formats in use (`17.03.1985`, `17031985`, `1985-03-17`); a digit pressed on the grid starts it.
+- **`min` and `max`** on DatePicker, DateTimePicker, DateRangePicker and DateTimeRangePicker - inclusive, by the zone's day - bound the calendar, its years and months, the typed date, Today, Now and the presets.
+- **Long option lists.** The Combobox's list and the Select's own list draw only the options in view above 500 options, the MultiSelect its checkboxes; drawn options carry `aria-setsize` and `aria-posinset`, and Home and End reach the ends of a list that long.
+- **A Combobox that searches with the application:** `onSearch` reports what is typed, `filter={false}` shows the application's results as given, and `loading` shows a Loading line and marks the list busy. The chosen label stays when a search replaces the options.
+- **`Quality`** (`"good" | "uncertain" | "bad"`, ADR-0077) and `Stat`'s `quality`: an uncertain or bad reading keeps its number, verdict and age, says its quality in a word and in the tile's name, and is marked by a dotted or wavy line under the figure.
+- **`MoreGlyph`**, three dots to the glyph specification.
+- **`useCommandPaletteShortcut(onOpen, { slash })`**: `slash: false` makes "/" no shortcut (WCAG 2.1.4); `CommandPaletteShortcutOptions` is exported.
+- **`labelPlacement` on `FormField`**: `"start"` puts the label beside the field, in a column as wide as the new token `--u-label-width` (10rem).
+- **New wording keys**, English and German: `monthSelect`, `yearSelect`, `typeDate`, `notADate`, `dateOutOfRange`, `qualityGood`, `qualityUncertain` and `qualityBad`.
+
+### Changed
+
+- **`Formats` has four more required members:** `locale`, `timeZone`, `timeZoneName` and `monthName`.
+  - Migration: a set spread from `DEFAULT_FORMATS` or `GERMAN_FORMATS` needs nothing; a `Formats` written from scratch adds `locale: "en-GB"`, `timeZone: undefined`, `timeZoneName: () => ""` and a `monthName`.
+- **A wording written out in full needs the new keys** above.
+  - Migration: add the eight keys to a custom wording object, or spread the shipped one and override.
+- **NumberInput asks for the text keyboard while a negative value is allowed** (`min` unset or below 0), because a phone's number pad has no minus key.
+  - Migration: a NumberInput without `min` now shows the text keyboard on a phone; add `min={0}`, or the caller's own `inputMode`, to keep the pad.
+- **The DateTimePicker's time fields draw no arrows under a coarse pointer**; the digits are typed.
+  - Migration: none needed; a fine pointer keeps the arrows.
+- **Lists above 500 options are windowed** (see Added): an option outside the view is not in the document.
+  - Migration: none for a list of up to 500 options; a test that looks for an option far down a longer list scrolls to it or types to filter first.
+
+### Fixed
+
+- **A Select, Combobox or Menu opened inside a Popover's panel belongs to it**: a pick in its list no longer closes the panel, and Escape closes only the innermost open surface.
+- **Typing `0930` into the DateTimePicker's time fields gives 09:30 on iOS**: each digit counts, whatever the caret and the selection.
+- **A MultiSelect opened by a touch no longer raises the keyboard**: the focus goes to its first enabled option.
+- **The palette's "/" no longer opens** from a select or from an element with the role textbox, searchbox or combobox, and neither shortcut opens inside a modal dialog; the guard holds in an engine without `:modal`, as jsdom.
+
 ## 0.44.0 – The old names go, and server mode answers (Oct. 2026)
 
 ### Added

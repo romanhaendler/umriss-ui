@@ -26,6 +26,20 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.45.0 – A table in the plant's time (Oct. 2026)
+
+### Added
+
+- **The table follows the time zone named in core's formats** (ADR-0076): cells, day, week, month and year groups, the date filter's days and the aggregate's year are the zone's, and the head of a `"date"`, `"time"` or `"dateTime"` column names the zone where the reader's own is another. A date editor opens on the zone's day and commits its midnight.
+- **The exports write the zone's wall clock:** the XLSX shows the times and days the screen shows, the CSV and the copy write a column of the zone's midnights as days, and other instants stay ISO. `ExportContext.wallClock` hands a custom format the zone's wall-clock fields of an instant.
+
+### Changed
+
+- **The row-actions trigger draws core's `MoreGlyph`** instead of the text "⋯"; its name and size stay.
+  - Migration: none for the trigger; a caller that styled it by its text styles the svg instead.
+- **The peer range on core moves to `^0.45.0`.**
+  - Migration: install the 0.45 version of `@umriss-ui/core` beside it.
+
 ## 0.44.0 – A server that answers late, and an Excel file (Oct. 2026)
 
 ### Added

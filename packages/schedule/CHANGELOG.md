@@ -18,6 +18,19 @@ moves from here under the rule above.
 
 ---
 
+## 0.45.0 – A plan in the plant's time (Oct. 2026)
+
+### Added
+
+- **The schedule follows the time zone named in core's formats** (ADR-0076): the day and fine bands, the snap raster of a drag or a key move, and today are the zone's, and the zone's name stands once above the lane headers and in the plot's description where the reader's own zone is another. `snapTime` takes the zone as an optional last argument.
+
+### Changed
+
+- **On the day the clocks go back, the time axis follows the clock change** in the reader's zone as in a named one: a two-hour step stays on even hours, and a time inside the doubled hour carries its offset (`02:30 GMT+1`) in the band, the tooltip, the ghost and the summary. Today covers the whole 25-hour day.
+  - Migration: none needed; only a plan across a clock change looks different.
+- **The peer ranges on core and charts move to `^0.45.0`.**
+  - Migration: install the 0.45 versions of `@umriss-ui/core` and `@umriss-ui/charts` beside it.
+
 ## 0.44.0 – Malformed data says so, and the handle goes (Oct. 2026)
 
 ### Added

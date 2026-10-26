@@ -14,6 +14,17 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.45.0 – A given says how far its source vouches for it (Oct. 2026)
+
+### Added
+
+- **`quality` on `Given` and the chain operands** `Plus`, `Minus`, `Times` and `DividedBy` (core's `Quality`, ADR-0077): every quantity built on a given carries the worst quality of its operands, as a word in the assessment column, a dotted or wavy line under the amount and in the line's sentence; a doubtful result shows that line in place of its double rule. Freshness is not carried up.
+
+### Changed
+
+- **The peer range on core moves to `^0.45.0`.**
+  - Migration: install the 0.45 version of `@umriss-ui/core` beside it.
+
 ## 0.44.0 – A calculation without a name says so (Oct. 2026)
 
 ### Added
