@@ -19,6 +19,9 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   walkHelp:
     "Pfeil links und rechts gehen durch die Werte, Pfeil hoch und runter wechseln die Serie, Pos1 und Ende springen zum ersten und letzten Wert, Escape hebt die Markierung auf.",
   selectHelp: "Enter wählt den Punkt.",
+  rangeStarted: (from) => `Bereich ab ${from} begonnen.`,
+  rangeMade: (from, to) => `Bereich von ${from} bis ${to}.`,
+  rangeHelp: "Leertaste setzt Anfang und Ende eines Bereichs, Escape bricht ab.",
   zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 kehrt zum eigenen Bereich der Achse zurück.",
   legendHelp: "In der Legende blendet Enter eine Serie aus oder ein, Umschalt+Enter zeigt nur sie.",
   allShown: "Sonst wäre nichts mehr zu sehen, darum werden alle Serien gezeigt.",
