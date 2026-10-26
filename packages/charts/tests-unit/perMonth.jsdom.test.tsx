@@ -4,7 +4,7 @@
    one name under each of the six bars of the first half of 2026. */
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import PerMonth from "../demo/examples/Bar/11-per-month";
+import PerMonth from "../demo/examples/Bar/10-per-month";
 import { renderChart, sizePlot } from "./renderChart";
 
 let unmount: (() => void) | null = null;

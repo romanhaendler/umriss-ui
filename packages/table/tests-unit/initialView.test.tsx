@@ -242,6 +242,28 @@ describe("A view that went through JSON", () => {
     warn.mockRestore();
   });
 
+  it("setFilter: a condition set before the columns register stays as given, an ISO string bound is foreign", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const bound = "2026-03-05T00:00:00.000Z";
+    function Late({ show }: { show: boolean }) {
+      const t = useTable(TRIPS, { rowKey: (r) => r.id });
+      captureTrips(t);
+      const { Table: Frame, Column } = t;
+      return (
+        <Frame>
+          {show && <Column value="id" label="Id" rowHeader />}
+          {show && <Column value="day" label="Day" filter="range" />}
+        </Frame>
+      );
+    }
+    const { rerender } = render(<Late show={false} />);
+    act(() => trips!.setFilter("day", { from: bound, to: bound } as never));
+    rerender(<Late show />);
+    expect(trips!.view.conditions).toBeUndefined();
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
   it("setView: the same, and the view shown set again reports nothing", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const report = vi.fn();

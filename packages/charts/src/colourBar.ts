@@ -7,7 +7,7 @@ export interface BarEdge {
   text: string;
 }
 
-/** The bar's width in px (`.uc-legend-bar`), and the room a character and the gap between two values take.
+/** The bar's width in px (`.uc-legend-bar` takes it as its width), and the room a character and the gap between two values take.
     The legend's font is not measured: a value is a few digits wide, and an estimate keeps the entry free of the DOM. */
 export const BAR_WIDTH = 160;
 const CHAR = 7;

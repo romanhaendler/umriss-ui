@@ -449,7 +449,7 @@
     forced-color-adjust: none;
   }
 
-  /* A matrix' colour bar stands under its name: the steps in a row, 160 px or the legend's width where that is
+  /* A matrix' colour bar stands under its name: the steps in a row, the bar's width in colourBar.ts or the legend's width where that is
      narrower, the values under the edges they name. The step colours are the caller's own and stay as they are
      under forced colours. */
   .uc-legend-item[data-bar] {
@@ -460,7 +460,6 @@
 
   .uc-legend-bar {
     display: block;
-    width: 160px;
     max-width: 100%;
   }
 

@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import ErrorBars from "../demo/examples/Bar/10-error-bars";
+import ErrorBars from "../demo/examples/Bar/09-error-bars";
 import { focusPlot, press, renderChart, sizePlot, tooltipOf } from "./renderChart";
 
 let unmount: (() => void) | null = null;
