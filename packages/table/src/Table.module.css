@@ -928,6 +928,7 @@
     background: var(--u-color-surface);
     border-radius: var(--u-radius-xs);
     box-shadow: var(--u-shadow-overlay);
+    outline: 1px solid transparent;
   }
 
   .columnsEntry[data-lifted] .columnGrip {

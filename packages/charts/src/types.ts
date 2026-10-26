@@ -100,6 +100,8 @@ export interface LineSeriesConfig<T = unknown> extends SeriesBase<T> {
   markers: "auto" | "always" | "never";
   /** Sample-and-hold: each value holds until the next sample. */
   step?: boolean;
+  /** A step between readings longer than this is a gap. */
+  maxGap?: number;
 }
 
 /** A `Scatter` as the chart holds it once registered. */
@@ -128,6 +130,8 @@ export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable 
   strokeWidth: number;
   /** Dash pattern of the outline. */
   dash?: readonly number[];
+  /** A step between readings longer than this is a gap; not read in a stack. */
+  maxGap?: number;
 }
 
 /** A `Bar` as the chart holds it once registered. */

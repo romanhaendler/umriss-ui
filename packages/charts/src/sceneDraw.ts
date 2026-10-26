@@ -66,6 +66,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
           dash: config.dash ?? marks?.dash,
           markers: config.markers,
           step: config.step,
+          maxGap: config.maxGap,
           marker: marks?.marker,
         });
         break;
@@ -80,6 +81,9 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
           dash: config.dash ?? marks?.dash,
           hatch: marks?.hatch,
           edges: entry.stacked !== null,
+          // A stack stands on sums at every x; a hole in one member would
+          // leave the members above standing on nothing.
+          maxGap: entry.stacked === null ? config.maxGap : undefined,
         });
         break;
       case "bar": {
