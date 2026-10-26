@@ -67,7 +67,10 @@ the one a reader starts from.**
   per role, decides whether the reader may edit at all, and holds as many
   dashboards as it wants. Reading a kept arrangement is lenient: a widget of
   a type that is gone falls out, a size its type no longer offers falls back
-  to the type's default. A widget's frame outlives its content, so a widget
+  to the type's default. *Amended 2026-10-26:* a widget of a type not declared
+  is not drawn, and it stays in the stored arrangement through "Done", after
+  the widgets that are drawn. A role, a flag or a plugin loaded late never
+  deletes it. A widget's frame outlives its content, so a widget
   that fails can still be removed.
 - **Depends on `@umriss-ui/core` only**, and on nothing foreign. What stands in
   a widget - a chart, a table, a calculation - is the application's.
@@ -85,11 +88,16 @@ outcome, not a fault.
 ## Not yet, and never
 
 - *Not yet:* sections that wrap as a whole (the arrangement is an object, so
-  a level of groups can join it without breaking what was kept); dragging from
-  the catalogue to a chosen place; a height that follows the content in the
-  list form; hiding a widget that has nothing to show; locking one widget.
+  a level of groups can join it without breaking what was kept); a height that
+  follows the content in the list form; hiding a widget that has nothing to
+  show; locking one widget.
 - *Never:* stacks of widgets that share one place. They hide all but one value
   at a time, as the carousel does (ADR-0032).
+- *Added 2026-10-26, never:* dragging from the catalogue to a chosen place. The
+  catalogue is a drawer over the board, so a drag from it reaches the grid with
+  a pointer only, and only once the drawer is moved aside. Adding puts the
+  widget at the end, and its menu, the arrow keys and "to the start" place it
+  from there.
 
 ## Considered Options
 
