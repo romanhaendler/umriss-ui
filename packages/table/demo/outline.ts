@@ -445,8 +445,9 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "What the user did to the table – search, conditions, sort, hidden columns, widths, page – as one value to keep and hand back.",
         about: [
           "The table remembers nothing, not in the address and not in any storage. Everything stands in `t.view`, and `onViewChange` reports every change of it; keep it where the application keeps things. `initialView` is read once; `t.setView(view)` goes to another view later and is not reported through `onViewChange`, so two tables stay in step by `onViewChange: (v) => other.setView(v)` in both directions.",
+          "A view survives JSON: stored with `JSON.stringify` and handed back to `initialView` or `setView`, it filters the same rows, and `t.view` holds `Date`s again. Read back as a `Date` is a string in the form `toISOString` writes - as a bound of a range condition on any column, and as a value of a list condition on a column of points in time. Any other string, a day-only `\"2026-03-17\"` among them, stays text.",
         ],
-        keysOf: ["first-table", core("Input"), "columnmenu", core("Button")],
+        keysOf: ["first-table", core("Input"), "columnmenu", core("Button"), core("Popover")],
         types: [],
         exports: ["useTable"],
       },

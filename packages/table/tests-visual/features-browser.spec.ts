@@ -259,3 +259,25 @@ test("reordering in the column menu moves head, body and foot on the screen", as
   expect(Math.abs((await x(amountCell)) - (await x(amountHeader)))).toBeLessThan(1);
   expect(Math.abs((await x(sum)) - (await x(amountHeader)))).toBeLessThan(1);
 });
+
+test("a date filter kept in the URL stands, with its rows, after a reload", async ({ page }) => {
+  await openExample(page, "view", "keep-the-view-in-the-url");
+  const table = example(page, "keep-the-view-in-the-url");
+  await expect(table.locator("tbody tr")).toHaveCount(3);
+
+  /* What a filter set by hand leaves in the address: JSON, with the bounds as text. */
+  const view = JSON.stringify({ conditions: { due: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 14) } } });
+  await page.evaluate((json) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", json);
+    window.history.replaceState(null, "", url);
+  }, view);
+
+  for (let round = 0; round < 2; round++) {
+    await page.reload();
+    await expect(table.locator("tbody tr")).toHaveCount(2);
+    await expect(table.locator("tbody")).toContainText("Corrin Travel");
+    await expect(table.locator("tbody")).not.toContainText("Fenwright Legal");
+    await expect(page.locator("[data-role='url-view']")).toContainText("conditions");
+  }
+});
