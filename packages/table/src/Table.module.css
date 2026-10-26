@@ -652,6 +652,18 @@
     min-height: var(--u-control-height);
   }
 
+  /* The offer to select all that match: one line in the toolbar's frame. */
+  .matchOffer {
+    composes: text from "#own-styles";
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--u-space-1) var(--u-space-2);
+    padding: var(--u-space-1) var(--u-space-3);
+    border-bottom: 1px solid var(--u-hairline);
+    font-size: var(--u-text-sm);
+  }
+
   .toolbarInfo {
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);

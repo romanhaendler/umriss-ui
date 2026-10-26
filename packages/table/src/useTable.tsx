@@ -186,7 +186,9 @@ function effectiveWidths(
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z> {
+export function useTable<Z>(rows: readonly Z[], options: Extract<TableOptions<Z>, { server: true }>): Table<Z, true>;
+export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z>;
+export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z, boolean> {
   const [registry] = useState(() => new Registry());
   const [parts] = useState(() => {
     const bound = buildParts(registry);

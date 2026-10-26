@@ -441,3 +441,39 @@ export const handBuilt: import("../src").TableSelection<string> = {
 };
 // @ts-expect-error allMatching, except and selectMatching are required
 export const missing: import("../src").TableSelection<string> = base;
+
+/* A bulk action's argument: rows or "all that match" in server mode, rows only
+   in an automatic table. */
+export function BulkArgument() {
+  const server = useTable(orders, { rowKey: (a) => a.id, server: true, rowCount: 0, onRequest: () => {} });
+  const automatic = useTable(orders, { rowKey: (a) => a.id });
+  return (
+    <>
+      <server.Action
+        bulk
+        onSelect={(selected) => {
+          if (Array.isArray(selected)) {
+            const first: Order | undefined = selected[0];
+            void first;
+          } else {
+            const except: readonly string[] = selected.except;
+            void except;
+          }
+        }}
+      >
+        Release
+      </server.Action>
+      <automatic.Action
+        bulk
+        onSelect={(rows) => {
+          // @ts-expect-error an automatic table never gets "all that match"
+          void rows.except;
+          const first: Order | undefined = rows[0];
+          void first;
+        }}
+      >
+        Release
+      </automatic.Action>
+    </>
+  );
+}

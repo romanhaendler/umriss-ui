@@ -17,6 +17,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { Button, ControlSizeProvider, useFormats, useWording } from "@umriss-ui/core";
 import type { RefProp } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
+import type { AllMatching } from "./types";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
 import { GroupingTag } from "./groupingChoice";
@@ -75,6 +76,10 @@ export function TableToolbar({
     const selected = own || snapshot.selection.count === 0
       ? []
       : (hook.selectedRows ?? snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row))));
+    /* In server mode "all that match" is a state, not rows: the count is the
+       server's less the exceptions, and an action gets the request instead. */
+    const all = snapshot.server && snapshot.selection.allMatching && !own;
+    const selectedTotal = all ? snapshot.rowCount - snapshot.selection.except.size : selected.length;
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
 
     conditions = (
@@ -86,7 +91,7 @@ export function TableToolbar({
     /* Holding nothing but the empty ratio, the group leaves the flow. Said
        here, not by `:has(:empty)` in the style: a browser that does not ask
        that again when the ratio's text comes keeps the group out of the flow. */
-    const idle = !restricted && selected.length === 0 && !registry.rowAdding;
+    const idle = !restricted && selectedTotal === 0 && !registry.rowAdding;
     right = (
       <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>
         <span role="status" className={styles.filteredCount}>
@@ -102,15 +107,18 @@ export function TableToolbar({
             {wording.resetAll}
           </Button>
         )}
-        {selected.length > 0 && (
+        {selectedTotal > 0 && (
           <>
-            <span className={styles.toolbarInfo}>{wording.selectedCount(selected.length, formats.count(selected.length))}</span>
+            <span className={styles.toolbarInfo}>{wording.selectedCount(selectedTotal, formats.count(selectedTotal))}</span>
             {bulkActions.map(({ key, spec }) => (
               <Button
                 key={key}
                 size={size}
                 variant={spec.tone === "danger" ? "danger" : "secondary"}
-                onClick={() => (spec.onSelect as (rows: readonly unknown[]) => void)(selected)}
+                onClick={() =>
+                  (spec.onSelect as (rows: readonly unknown[] | AllMatching) => void)(
+                    all ? { request: snapshot.request!, except: [...snapshot.selection.except] } : selected,
+                  )}
               >
                 {spec.label}
               </Button>
