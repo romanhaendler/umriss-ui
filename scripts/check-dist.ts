@@ -30,6 +30,8 @@
      component of the caller's fails with the package's own message,
    - and an import of any entry that uses nothing leaves a residue under the
      budget (`residue.ts`),
+   - and where a package ships `dist/xlsx.js` (the XLSX writer's entry): it imports nothing, is at most
+     4 kB minified and gzipped, and the main entry holds no part of the writer,
    - and the packed `docs/llms-full.md`, read without any site, names none,
    - and the changelog has a heading of the package's version, and every
      "Changed" entry under it a `Migration:` item,
@@ -41,8 +43,10 @@
    it in `prepublishOnly`, after the build. */
 
 import { spawnSync } from "node:child_process";
-import { appendFileSync, copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
+import { gzipSync } from "node:zlib";
 import { dirname, join, resolve } from "node:path";
 import { transform } from "lightningcss";
 import { HOSTED_HOST, SITE } from "../packages/demo/src/address.ts";
@@ -120,6 +124,19 @@ for (const file of readdirSync("src", { recursive: true, encoding: "utf8" }).fil
       problems.push(`${at}: deprecated since 0.${minor}, the package is ${version}; remove it`);
     }
   });
+}
+
+/* The XLSX writer is an entry of its own (ADR-0019): no import at run time, small, and absent from the main entry. */
+if (existsSync(join("dist", "xlsx.js"))) {
+  const writer = readFileSync(join("dist", "xlsx.js"), "utf8");
+  if (/^\s*import\b|\bfrom\s*["']|\bimport\s*\(/m.test(writer)) problems.push("dist/xlsx.js imports something; it must import nothing at run time");
+  const minified = await (createRequire(createRequire(join(process.cwd(), "package.json")).resolve("vite"))("esbuild") as {
+    transform: (code: string, options: object) => Promise<{ code: string }>;
+  }).transform(writer, { minify: true, format: "esm" });
+  const size = gzipSync(minified.code, { level: 9 }).length;
+  console.log(`dist/xlsx.js: ${size} B minified and gzipped (limit 4096 B)`);
+  if (size > 4096) problems.push(`dist/xlsx.js is ${size} B minified and gzipped, over 4096 B`);
+  if (js.includes("[Content_Types].xml")) problems.push(`dist/${entry} contains the XLSX writer`);
 }
 
 const css = readFileSync(join("dist", stylesheet), "utf8");
