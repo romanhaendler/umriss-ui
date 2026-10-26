@@ -31,7 +31,7 @@ export interface WidgetTypeProps<Options> {
   sizes: Partial<Record<WidgetSize, SizeSpan>>;
   /** The size a new widget of this type starts at. One of `sizes`. */
   start: WidgetSize;
-  /** The options a new widget starts with. Their type is the options type of `title` and of the content. */
+  /** The options a new widget starts with, and the ones a stored widget's missing keys are read from: stored plain options are spread over them, one level deep. Their type is the options type of `title` and of the content. */
   defaultOptions: Options;
   /** The title of a frame as a function of its options; the `label` without it. */
   title?: (options: NoInfer<Options>) => string;
