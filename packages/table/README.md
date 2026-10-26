@@ -146,6 +146,19 @@ stylesheets by hand.
   point in time as ISO text. Ctrl or Cmd with C copies the selected rows as tab-separated
   text (in grid mode with no selection, the Active cell), says so in a live
   region, and `selectionAsText()` hands the same text to a button of one's own.
+* **An Excel file** (ADR-0073): `import { xlsx } from "@umriss-ui/table/xlsx"` and
+  `<Export format={xlsx} />` write one sheet - a header line, numbers, dates,
+  booleans and text as what they are, and the table's column widths - the rows
+  and columns of the CSV, dates in the reader's local time. No styling, no
+  formulas, no group rows, no compression (a file is about the size of its XML,
+  so 100,000 rows of ten columns are tens of megabytes). A sheet over 1,048,576
+  rows or 16,384 columns throws a `RangeError`; a text over 32,767 characters is
+  cut. A text stays a text: `=1+1` opens as those characters, a leading zero
+  stays. `label` lets a CSV and an Excel button stand side by side, `onExport`
+  gets the bytes (`Uint8Array`), and `snapshot.exportAs(xlsx)` hands them to
+  code. An application that never imports the subpath does not bundle the
+  writer (about 4 kB gzipped). To read the file back, open it in a spreadsheet
+  or unzip it: it is a ZIP of XML parts.
 * **On a row**: a detail row that stays open across a change of filter, row
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.

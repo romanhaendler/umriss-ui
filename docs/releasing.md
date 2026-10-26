@@ -86,7 +86,16 @@ do Trusted Publishing.
    holds it (the charts' benchmark stands once, in `docs/capabilities.md`); a
    "cannot" against ADR-0032. No test holds this: a README is prose, and a lint
    over prose would check the wording, not the truth.
-3. `pnpm test:visual` — green. It is the one check the workflow cannot run.
+3. The full check, with the machine kept awake (`caffeinate`): lint, types
+   (`pnpm typecheck`), unit, build and `check:dist`, then `pnpm test:visual`.
+   Wait for parallel suites to end, and free ports 4173-4177 first. A test that
+   times out on a busy machine is rerun alone.
+   When the table's XLSX writer changed since the last release, the maintainer
+   also opens one file from the table demo's "An Excel file" example in Excel
+   (desktop), Numbers, LibreOffice and Google Sheets, after looking at the demo
+   by hand and before publishing: no repair prompt, and a date, a boolean, a
+   leading-zero text and an umlaut intact. No test can do this.
+   `test:visual` is the one check the workflow cannot run.
 4. Push to `main`. The run is under *Actions → Publish*; if one package fails,
    the rest of that run stops, and the next push — or *Run workflow* on the
    same page — publishes what is still missing.
