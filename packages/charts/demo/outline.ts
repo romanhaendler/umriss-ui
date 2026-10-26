@@ -104,6 +104,10 @@ export const OUTLINE: readonly Rubric[] = [
           "Charts stay in step by sending each other what the reader did: each chart's `onViewChange` calls the other's `setView`. `setView` is not reported, so two charts linked both ways do not answer each other, and a pan does not jump back. `syncId` shares only the pointer.",
           "A zoom stops at `zoomLimits`; without them at three readings and at the data's extent. A y axis with `domain=\"visible\"` follows the stretch shown.",
         ],
+        keys: [
+          { key: "Alt + drag", action: "Mark a range, where `onRange` is given and the x axis is `zoomable`; a plain drag pans." },
+          { key: "Space", action: "Start a range at the active point; Space again ends it, Escape cancels. Needs a `Tooltip`." },
+        ],
         keysOf: ["chart"],
         limits: ["No zoom along y, no rectangle zoom and no navigator: the x span is the one zoom there is."],
         types: ["XAxisProps", "ChartOptions"],
