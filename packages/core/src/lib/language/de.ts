@@ -34,7 +34,7 @@ import type { Wording } from "./wording";
 /** The German notation: 17.03.2026, 09:05, 1.204,5, "vor 3 Minuten" - and
     German collation, which files Ä with A. The clock is 24-hour here as it is
     in the default; that never was a question of language. */
-export const GERMAN_FORMATS: Formats = formatsFor("de-DE");
+export const GERMAN_FORMATS: Formats = /* @__PURE__ */ formatsFor("de-DE");
 
 /** The German instance. Complete, because it is typed `Wording`. */
 export const GERMAN_WORDING: Wording = {
