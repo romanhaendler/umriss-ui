@@ -173,6 +173,7 @@ axis with the map kept by the library: every promise above holds on it.
 | `step`: the tooltip reports the sample the hold began with | Q22 | Unit (jsdom scene) |
 | Downsampling above two points per pixel column: first, min, max and last per column, a gap kept; only the window of the x domain and one point beyond each edge | Q20 | Unit (downsample), Screenshot (`gestures-and-keys`, unchanged by it) |
 | The tooltip searches the raw data, not what the drawing kept | Q20 | Unit (jsdom scene) |
+| `maxGap`: a step between readings longer than it breaks the stroke, one of exactly `maxGap` does not; a `step` hold ends `maxGap` after its reading; a reading between two gaps keeps its marker; a pointer farther than `maxGap` from the nearest reading finds no hit; the gap survives downsampling; off by default | charts-small-additions 02 | Unit (maxGapDraw, maxGapHit), Screenshot (`an-outage`) |
 
 ## `Area`
 
@@ -189,6 +190,7 @@ axis with the map kept by the library: every promise above holds on it.
 | `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
+| `maxGap`: a step longer than it closes the area's section on both sides, as a missing value does; not read in a `stack` | charts-small-additions 02 | Unit (maxGapDraw), Screenshot (`an-outage`) |
 | `stack`: areas of one id stand on the ones registered before, the stack below as their baseline channel; a gap stacks as zero; downsampled after stacking, each member keeping its own extremes per pixel column | charts-stacking K1-K3 | Unit (stack, jsdom stacking), Screenshot (`stacked`) |
 | Below a stacked area's outline a 1px line in the ground's colour parts its fill from the member above, in both encodings | charts-stacking 04 | Unit (draw), Screenshot (`stacked`) |
 
@@ -210,6 +212,8 @@ axis with the map kept by the library: every promise above holds on it.
 | The foot at 0, with 0 inside the Y axis' value range; negative values hang below it | R-4.13 | Unit (scene), Screenshot (`deviation`) |
 | `baseline`: a bar floating from one value to another, either way up, in the baseline channel; both edges enter the value range and zero only without a baseline; a gap in either edge leaves the bar out; in a stack it is not read | floating-bar 01 | Unit (floatingBar, materialisation), Type (floatingBar), Screenshot (`waterfall`) |
 | A waterfall from a running sum and one `Bar`; its tooltip, readout and data table name each step by both edges, no helper series | floating-bar 01 | Unit (jsdom floatingBar), Screenshot (`waterfall`) |
+| Error bars: a thin floating `Bar` for the interval (`baseline` the lower bound, `value` the upper) and a `Scatter` for the mean; the tooltip names the interval by both bounds and the mean by its value, and no text says "quartile" | floating-bar 02 | Unit (jsdom errorBars), Screenshot (`error-bars`) |
+| A range bar, a minimum to a maximum per hour, is the same floating `Bar` with a `baseline` | floating-bar 01 | Unit (jsdom floatingBar) |
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
