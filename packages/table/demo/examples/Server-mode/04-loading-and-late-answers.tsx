@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Stack, Text } from "@umriss-ui/core";
 import { Pagination, useTable } from "../../../src";
 import type { TableRequest } from "../../../src";
 
@@ -180,14 +181,16 @@ export default function LoadingAndLateAnswers() {
   });
 
   return (
-    <>
-    <p>Asked for page {request?.page}, showing page {answer.answers.page}.</p>
-    <Table aria-label="Shipments on the server">
-      <Column value="id" label="Shipment" rowHeader sortable={false} />
-      <Column value="customer" label="Customer" sortable={false} />
-      <Column value="weight" label="Weight (kg)" sortable={false} />
-      <Pagination />
-    </Table>
-    </>
+    <Stack gap={2}>
+      <Text size="xs" tone="muted">
+        Asked for page {request?.page}, showing page {answer.answers.page}.
+      </Text>
+      <Table aria-label="Shipments on the server">
+        <Column value="id" label="Shipment" rowHeader sortable={false} />
+        <Column value="customer" label="Customer" sortable={false} />
+        <Column value="weight" label="Weight (kg)" sortable={false} />
+        <Pagination />
+      </Table>
+    </Stack>
   );
 }
