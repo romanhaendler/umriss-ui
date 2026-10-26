@@ -10,7 +10,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { checkForcedColours } from "@umriss-ui/demo/checks/forcedColors";
 import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
-import { around, open, openExample, standstill } from "./navigation";
+import { aloneStage, around, open, openExample, openScenario, standstill } from "./navigation";
 
 checkForcedColours({ open, openExample, examples: EXAMPLE_ADDRESSES, sample: SAMPLE });
 
@@ -107,4 +107,19 @@ test("A chosen range under forced colours", async ({ page }, testInfo) => {
   await expect(panel).toBeVisible();
   await standstill(page);
   await expect(page).toHaveScreenshot(`forced-range-${testInfo.project.name}.png`, { clip: await around(page, panel) });
+});
+
+/* The stretch of the "Mark a stretch" scenario: the band in the trend and the table of its alarms, in system colours. */
+test("The marked stretch of a scenario under forced colours", async ({ page }, testInfo) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await openScenario(page, "mark-a-stretch");
+  const target = await aloneStage(page, "mark-a-stretch");
+  await target.getByRole("application").focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+  for (let i = 0; i < 12; i++) await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+  await expect(target.getByRole("button", { name: "Clear the stretch" })).toBeEnabled();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`forced-scenario-mark-a-stretch-${testInfo.project.name}.png`);
 });
