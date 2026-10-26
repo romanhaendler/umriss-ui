@@ -2,7 +2,7 @@
    inside the row, and the buttons of an open Row draft. */
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { Button, IconButton, Menu, MenuItem, Popover } from "@umriss-ui/core";
+import { Button, IconButton, Menu, MenuItem, MoreGlyph, Popover } from "@umriss-ui/core";
 import type { Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { Registry } from "./registry";
@@ -97,7 +97,7 @@ export function RowActionsCell({
           align="end"
           trigger={
             <IconButton size="sm" variant="ghost" aria-label={wording.rowActionsMenu(name)}>
-              ⋯
+              <MoreGlyph />
             </IconButton>
           }
         >
