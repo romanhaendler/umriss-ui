@@ -26,13 +26,13 @@ export default function ProgressAndThumbnails() {
     live.current = entries;
   });
 
-  /* A simulated upload: one file at a time, a quarter every 300 ms; every third file fails at half. */
+  /* A simulated upload: one file at a time, a quarter every 300 ms; every second file fails at half. */
   const active = entries.find((entry) => entry.phase === "sending") ?? entries.find((entry) => entry.phase === "waiting");
   useEffect(() => {
     if (!active) return;
     const timer = setTimeout(() => {
       const progress = active.phase === "waiting" ? 0 : Math.min(1, active.progress + 0.25);
-      const phase: Phase = active.id % 3 === 0 && progress >= 0.5 ? "failed" : progress >= 1 ? "done" : "sending";
+      const phase: Phase = active.id % 2 === 0 && progress >= 0.5 ? "failed" : progress >= 1 ? "done" : "sending";
       setEntries((all) => all.map((one) => (one.id === active.id ? { ...one, progress, phase } : one)));
     }, 300);
     return () => clearTimeout(timer);

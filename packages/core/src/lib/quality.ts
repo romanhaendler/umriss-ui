@@ -12,5 +12,6 @@
    number). It is never derived from the value, the limits or the age, and no
    function here weighs one level against another. */
 
-/** How far a value's source vouches for it - independently of how the value is judged and how old it is. */
+/** How far a value's source vouches for it - independently of how the value is judged and how old it is.
+    The levels are the severities of an OPC UA status code; mapping a code (or another protocol's quality) to a level is the application's. */
 export type Quality = "good" | "uncertain" | "bad";

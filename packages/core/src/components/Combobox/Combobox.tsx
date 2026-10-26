@@ -140,15 +140,16 @@ export function Combobox<T extends string = string>(
   };
 
   /* Options the application hands over: the count is theirs to announce (not
-     the keystroke's), and the cursor starts again at the first. Not while
-     results are on their way. */
+     the keystroke's), and the cursor starts again at the first. The count
+     waits while results are on their way. */
   const seen = useRef({ options, loading });
   useEffect(() => {
     const before = seen.current;
     seen.current = { options, loading };
-    if (filter || !open || loading || (before.options === options && before.loading === loading)) return;
+    const arrived = before.loading && !loading;
+    if (filter || !open || (before.options === options && !arrived)) return;
     setActiveIndex(0);
-    sayCount(options.length);
+    if (!loading) sayCount(options.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only the options and loading are triggers
   }, [options, loading]);
 

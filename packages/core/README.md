@@ -347,12 +347,14 @@ A switch between the plant's time and the reader's is a provider whose formats n
 schedule following:
 
 ```tsx
-const formats = useMemo(() => (plantTime ? { timeZone: "Europe/Berlin" } : {}), [plantTime]);
+const parent = useLanguage().formats;
+const formats = useMemo(() => (plantTime ? { ...parent, timeZone: "Europe/Berlin" } : parent), [parent, plantTime]);
 <LanguageProvider formats={formats}>…</LanguageProvider>;
 ```
 
 `useFormats().timeZone` tells the zone in use. A section in another zone is a nested `LanguageProvider`
-that names it. A misspelled name throws Intl's `RangeError` where the formats are merged, so a screen never
+that names it; under a language, nest `{ ...useLanguage().formats, timeZone }`, since a bare `{ timeZone }`
+merges over the English set and drops the parent's language. A misspelled name throws Intl's `RangeError` where the formats are merged, so a screen never
 shows the reader's time while claiming the plant's.
 
 - **What follows the zone:** every date and time the formats write (`date`, `dateShort`, `month`,
@@ -493,7 +495,7 @@ root (ADR-0068) and the targets under a finger (ADR-0070).
 
 What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
-caller's, and umriss shows the reader's time
-([ADR-0060](../../docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md)); a dashboard
+caller's, and umriss shows the reader's time unless the application names a zone
+([ADR-0076](../../docs/adr/0076-an-application-names-the-time-zone-its-instants-are-shown-in.md)); a dashboard
 a user arranges is its own package, `@umriss-ui/dashboard`
 ([ADR-0064](../../docs/adr/0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md)).
