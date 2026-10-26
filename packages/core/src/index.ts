@@ -50,8 +50,10 @@ export * from "./lib/glyphs";
    the module styles land in the bundle, and two rules of equal specificity are
    decided by it. */
 export * from "./components/Stat";
+export * from "./lib/zone";
 export * from "./lib/limit";
 export * from "./lib/freshness";
+export * from "./lib/quality";
 export * from "./lib/useFreshness";
 export * from "./lib/useContextMenuTrigger";
 export { createLongPress } from "./lib/longPress";
