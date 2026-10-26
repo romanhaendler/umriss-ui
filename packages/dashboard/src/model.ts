@@ -20,6 +20,9 @@ export interface DashboardWidget {
   size: WidgetSize;
   /** The type's own options, typed through the hook. */
   options: unknown;
+  /** Set by the application, never by the dashboard: the reader can move the widget but not
+      resize it, change its options or remove it. Only `true` locks. Kept through every edit. */
+  locked?: boolean;
 }
 
 /** The arrangement of a dashboard: which widgets, in what order, at which

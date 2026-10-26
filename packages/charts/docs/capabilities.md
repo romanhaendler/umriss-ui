@@ -284,6 +284,7 @@ axis with the map kept by the library: every promise above holds on it.
 | A single row stays a point value range | R-4.13 | Unit (limits and bands in the scene) |
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
 | The tooltip carries the level, not the row number; a render prop reads it as `level`, the row as `yValue` | R-4.8 | Interaction, Unit (jsdom tooltip format) |
+| `labels`: each cell writes its level in the matrix' `format`, in the tick size, in the text colour over a halo of the ground colour; none where its width plus 4 px and its line height plus 2 px do not fit, none for a hole, dimmed with the cell; off by default | ADR-0011 | Unit (matrix labels), Screenshot (`correlation-read`) |
 | The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
 
 ## `LimitLine` / `LimitBand`
