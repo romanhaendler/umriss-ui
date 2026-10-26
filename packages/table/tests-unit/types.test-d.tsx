@@ -421,3 +421,23 @@ export function RowFilters() {
     </Frame>
   );
 }
+
+/* The new members of the selection are required: a hand-built one must add them. */
+const base = {
+  selected: new Set<string>(),
+  isSelected: () => false,
+  toggle: () => {},
+  toggleAll: () => {},
+  clear: () => {},
+  allSelected: false,
+  someSelected: false,
+  count: 0,
+};
+export const handBuilt: import("../src").TableSelection<string> = {
+  ...base,
+  allMatching: false,
+  except: new Set<string>(),
+  selectMatching: () => {},
+};
+// @ts-expect-error allMatching, except and selectMatching are required
+export const missing: import("../src").TableSelection<string> = base;
