@@ -78,7 +78,7 @@ test("select all that match: the offer line under a ticked page, then the state"
   await expect(example).toHaveScreenshot(`server-offer-${info.project.name}.png`);
   await offer.getByRole("button", { name: /12,400 that match/ }).click();
   await expect(offer).toContainText("All 12,400 that match are selected");
-  await example.getByRole("button", { name: "Archive" }).click();
+  await example.getByRole("button", { name: "Archive", exact: true }).click();
   await expect(example.getByText("except 0 orders")).toBeVisible();
 });
 
