@@ -144,6 +144,7 @@ export function hitTest(
       marked: hit.marked,
       areal: hit.areal,
       covers: hit.covers === true,
+      baseline: hit.baseline,
       level: hit.level,
       segment: hit.segment,
       box: hit.box,
@@ -220,6 +221,7 @@ export function hitTest(
       yValue: k.yValue,
       datum: rowsOfSeries(s, k.entry.config)[row],
       index: row,
+      baseline: k.baseline,
       level: k.level,
       segment: k.segment,
       box: k.box,
@@ -270,6 +272,7 @@ export function hitIn(
   marked: boolean;
   areal: boolean;
   covers?: boolean;
+  baseline?: number;
   color?: string;
   level?: number;
   segment?: { from: number; to: number; label: string };
@@ -352,8 +355,13 @@ export function hitIn(
   const top = mat.y[index] as number;
   if (Number.isNaN(top)) return null; // gaps are no hits
   const xValue = mat.x[index] as number;
-  // A stacked point is marked at its top and named by its own value.
-  const foot = entry.stacked === null || mat.y0 === null ? Number.NaN : (mat.y0[index] as number);
+  // A stacked point is marked at its top and named by its own value. A bar or
+  // an area outside a stack with a baseline of its own names that as well; a
+  // bar with a gap in it is no hit, since it is not drawn.
+  const own = entry.stacked === null && mat.y0 !== null && (config.kind === "bar" || config.kind === "area");
+  const lower = mat.y0 === null ? Number.NaN : (mat.y0[index] as number);
+  if (own && config.kind === "bar" && Number.isNaN(lower)) return null;
+  const foot = entry.stacked === null || mat.y0 === null ? Number.NaN : lower;
   return {
     index,
     px: xAxis.scale.toPx(xValue),
@@ -363,6 +371,7 @@ export function hitIn(
     marked: true,
     areal: false,
     covers: targetY >= Math.min(foot, top) && targetY <= Math.max(foot, top),
+    baseline: own && !Number.isNaN(lower) ? lower : undefined,
     box: mat.box === null ? undefined : boxAt(mat.box, index),
   };
 }

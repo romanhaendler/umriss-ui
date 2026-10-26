@@ -133,6 +133,8 @@ export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable 
 /** A `Bar` as the chart holds it once registered. */
 export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "bar";
+  /** Lower edge; without a value the fixed baseline 0. */
+  baseline?: ValueFunction<T>;
   /** Width as a fraction of the step; the group shares this fraction. */
   barWidth: number;
 }
@@ -208,6 +210,8 @@ export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
       The base accessor yields the row position, not this level. */
   level: ValueFunction<T>;
   coloring: MatrixColoring;
+  /** Each cell writes its level. */
+  labels?: boolean;
 }
 
 /** Any registered series, told apart by `kind`. */
@@ -431,6 +435,11 @@ export interface TooltipPoint<T = unknown> {
   yValue: number;
   datum: T;
   index: number;
+  /** The lower edge, where the series has a baseline of its own - a `Bar` or
+      an `Area` outside a stack; `yValue` is the upper one. A stack's foot is no
+      reading and never stands here. A field of its own, as `level` and `box`
+      have (ADR-0011). */
+  baseline?: number;
   /** Only for the matrix: its level, out of the level channel. It stands here and
       not in yValue, because yValue is the position on the y axis - for a matrix
       therefore the row. Putting both into one field would be exactly the

@@ -179,6 +179,7 @@ axis with the map kept by the library: every promise above holds on it.
 |---|---|---|
 | Fill down to baseline 0 when none is given | ADR-0002 | Unit (materialisation, scene), Screenshot (`filled`) |
 | A band area between two values, `baseline` and `value` | 4.3 | Screenshot (`mixed`, `corridor`) |
+| The tooltip and the readout write a corridor "baseline – value", as the data table does | floating-bar 01 | Unit (jsdom floatingBar) |
 | The baseline pulls its Y axis' value range | R-4.13 | Unit (materialisation, scene) |
 | Fill and outline as separate paths | R-2.12 | Screenshot (`mixed`) |
 | A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`, `corridor`) |
@@ -205,6 +206,8 @@ axis with the map kept by the library: every promise above holds on it.
 | Grouping in registration order | R-2.1 | Unit (bars) |
 | Bars on other X axes do not count towards the group | ADR-0002 | Unit (bars) |
 | The foot at 0, with 0 inside the Y axis' value range; negative values hang below it | R-4.13 | Unit (scene), Screenshot (`deviation`) |
+| `baseline`: a bar floating from one value to another, either way up, in the baseline channel; both edges enter the value range and zero only without a baseline; a gap in either edge leaves the bar out; in a stack it is not read | floating-bar 01 | Unit (floatingBar, materialisation), Type (floatingBar), Screenshot (`waterfall`) |
+| A waterfall from a running sum and one `Bar`; its tooltip, readout and data table name each step by both edges, no helper series | floating-bar 01 | Unit (jsdom floatingBar), Screenshot (`waterfall`) |
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
@@ -279,6 +282,7 @@ axis with the map kept by the library: every promise above holds on it.
 | A single row stays a point value range | R-4.13 | Unit (limits and bands in the scene) |
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
 | The tooltip carries the level, not the row number; a render prop reads it as `level`, the row as `yValue` | R-4.8 | Interaction, Unit (jsdom tooltip format) |
+| `labels`: each cell writes its level in the matrix' `format`, in the tick size, in the text colour over a halo of the ground colour; none where its width plus 4 px and its line height plus 2 px do not fit, none for a hole, dimmed with the cell; off by default | ADR-0011 | Unit (matrix labels), Screenshot (`correlation-read`) |
 | The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
 | A gradient's legend entry is a colour bar: its steps in a row (hatched under `encoding="marks"`), 160 px or the legend's width where narrower, the range's two ends written under it and the inner edges at every k-th where they fit, in the matrix' `format`; the values are hidden from assistive technology and the entry's name gains the range; an assessment keeps its chip | charts-matrix-reading 01 | Unit (colour bar, jsdom legend bar, picture), Screenshot (`gradient`) |
 
@@ -358,6 +362,7 @@ axis with the map kept by the library: every promise above holds on it.
 | A stack: each series' own value (a normalised one's share), and the stack's total as its last row - in the series' `format` where the stack is normalised; the readout the same, the totals last | charts-stacking K4 | Unit (jsdom stacking) |
 | `"nearest"` over a stack: the segment under the pointer, not the nearest top; at a shared edge the upper one, so the keys reach a segment of zero height | charts-stacking K4 | Unit (jsdom stacking) |
 | A render prop gets each stacked point's own value in `yValue` and no total - it sums the points itself | charts-stacking K4 | Unit (jsdom stacking) |
+| A render prop gets the lower edge of a `Bar` or an `Area` outside a stack in `baseline`, `yValue` being the upper; a stack's foot is never put there | floating-bar 01 | Unit (jsdom floatingBar) |
 | `limits`: a row per labelled limit of the hit's y axis, its label and value in that axis' format; the readout the same; off by default | — | Unit (jsdom tooltip limits) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |

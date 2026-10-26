@@ -247,9 +247,10 @@ gap interrupts a mark; it is never a hit and never contributes to an extent.
 _Avoid_: null value, missing point, hole
 
 **Baseline**:
-The value a filled mark is drawn back to — zero for a bar, zero or a second
-value (`baseline`) for an area. A baseline is part of the series' extent, so an axis that
-carries a filled mark always shows the baseline.
+The value a filled mark is drawn back to — zero for a bar or an area, or a second value (`baseline`) on
+either: an area between two courses, a bar floating from one value to another. A baseline is part of
+the series' extent, so an axis that carries a filled mark always shows it. In a **Stack** the stack
+below is the baseline, and a series' own is not read.
 _Avoid_: zero line, Nulllinie (which is the grid line at y = 0), floor
 
 **Stack**:
