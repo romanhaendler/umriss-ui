@@ -418,7 +418,7 @@ export type LimitConfig = LimitLineConfig | LimitBandConfig;
 
 /** A `Legend` as the chart holds it once registered. */
 export interface LegendConfig {
-  placement: "top" | "bottom";
+  placement: "top" | "bottom" | "left" | "right";
 }
 
 /** One hit per series in the tooltip. */

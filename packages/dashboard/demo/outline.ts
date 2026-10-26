@@ -38,8 +38,8 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "A widget's height follows its size, never its content: what does not fit is cut, not grown.",
-          "Not yet: sections that wrap as a whole, dragging from the catalogue to a chosen place, a height that follows the content in the list form, hiding a widget that has nothing to show, locking one widget (ADR-0064).",
-          "Never: stacks of widgets that share one place, coordinates and free placement, a layout per breakpoint, dense packing (ADR-0064).",
+          "Not yet: sections that wrap as a whole, a height that follows the content in the list form, hiding a widget that has nothing to show, locking one widget (ADR-0064).",
+          "Never: stacks of widgets that share one place, coordinates and free placement, a layout per breakpoint, dense packing, dragging from the catalogue to a chosen place (ADR-0064).",
           "Where an arrangement is stored, which default a role gets, several dashboards and what stands in a widget are the application's.",
         ],
         types: ["DashboardOptions", "DashboardParts", "DashboardProps", "DashboardView", "DashboardWidget", "WidgetSize", "SizeSpan", "WidgetTypeProps", "WidgetContent", "WidgetFormProps", "HeadingOptions"],

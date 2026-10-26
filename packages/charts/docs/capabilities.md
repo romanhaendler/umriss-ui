@@ -372,6 +372,7 @@ axis with the map kept by the library: every promise above holds on it.
 | Capability | Rule | Proved at |
 |---|---|---|
 | `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `above-or-below`) |
+| `placement="left" \| "right"`: the entries in a column beside the plot, as wide as the longest up to a quarter of the chart, a longer name wrapping under its own text, as tall as the plot and scrolling; toggling, highlight, "Show data" and the Tab order as above; in a chart narrower than 480 px it stands above the plot as `top` | charts-small-additions 01 | Unit (jsdom legend side), Screenshot (`beside-the-plot`) |
 | A colour chip plus a name per series | R-4.11 | Unit (jsdom), Screenshot |
 | Hover highlights the series, the others at 0.25 alpha | R-4.11 | Manual |
 | Toggles by default: every entry of a named series is a button with `aria-pressed`, a click hides or shows it at once through the view; a state's entry hides every band showing it; a series without a name has no button | ADR-0047, component-view Q9, Q10 | Unit (scene, jsdom legend toggle), Screenshot (`hide-a-series`) |
