@@ -53,6 +53,14 @@ kind is for.
   `tests-unit/range.jsdom.test.tsx`, the axes in `rangeAxes.jsdom.test.tsx`, the
   keys and the readout in `rangeKeys.jsdom.test.tsx`; no Playwright test draws
   its band yet, so the band is looked at in the demo.
+  The XLSX writer is proved there without Excel: `xlsxWriter.test.ts` unzips the
+  result with a test-only reader of stored ZIPs, checks every CRC-32 against
+  Node's `zlib`, parses each part as XML and reads the sheet back (cell types,
+  serials, widths, escapes); `xlsxExport.test.tsx` mounts `Export` with the
+  format; `exportFormat.test.tsx` and `csvDays.test.tsx` hold the seam and the
+  CSV. Excel is no part of CI - it cannot run there, and unzip-and-read shows
+  what a reader finds in the file; the one manual look at the release is in
+  `docs/releasing.md`.
 * **Smoke tests of a demo** open every page and every example in jsdom and check
   that each renders, and that the package is named in the source it shows.
 * **Guards** read the sources as text or walk the exports and fail on a rule,
