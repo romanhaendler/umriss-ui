@@ -53,6 +53,18 @@ export function CrossGlyph({ ref, size = 9, ...rest }: GlyphProps) {
   );
 }
 
+/** The "more" of a menu trigger: three dots. Each is a zero-length stroke, which
+    a round cap draws as a dot. */
+export function MoreGlyph({ ref, size = 12, ...rest }: GlyphProps) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      <path d="M2 5h0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M5 5h0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M8 5h0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** The plus of `NumberInput`'s step buttons. */
 export function PlusGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   return (

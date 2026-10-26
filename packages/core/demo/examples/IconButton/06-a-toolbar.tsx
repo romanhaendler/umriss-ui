@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ButtonGroup, IconButton, Menu, MenuItem, MenuSeparator, MinusGlyph, PlusGlyph, Stack, Text } from "../../../src";
+import { ButtonGroup, IconButton, Menu, MenuItem, MenuSeparator, MinusGlyph, MoreGlyph, PlusGlyph, Stack, Text } from "../../../src";
 
 export const title = "Build a toolbar";
 export const lead = "Plain buttons for the bar, a group for the pair that belongs together, a menu for the rest – every square the same size, every name a tooltip.";
@@ -52,7 +52,7 @@ export default function Toolbar() {
           align="end"
           trigger={
             <IconButton size="sm" aria-label="More actions for the tours">
-              ⋯
+              <MoreGlyph />
             </IconButton>
           }
         >
