@@ -8,6 +8,10 @@ export interface TableSelection<T extends string | number> {
   selected: ReadonlySet<T>;
   isSelected: (id: T) => boolean;
   toggle: (id: T) => void;
+  /** Gives every key in `ids` the state `selected`, in one update; keys
+      outside `ids` stay as they are. While `allMatching` it moves the keys in
+      or out of `except` instead. The table calls it for a range of rows. */
+  set: (ids: readonly T[], selected: boolean) => void;
   /** Selects all the keys passed in - or, when all of them are selected
       already, deselects them. Keys outside them stay as they are. */
   toggleAll: () => void;
@@ -56,6 +60,22 @@ export function useTableSelection<T extends string | number>(ids: readonly T[]):
     [allMatching],
   );
 
+  const set = useCallback(
+    (keys: readonly T[], on: boolean) => {
+      const apply = (current: ReadonlySet<T>, add: boolean) => {
+        const next = new Set(current);
+        for (const key of keys) {
+          if (add) next.add(key);
+          else next.delete(key);
+        }
+        return next;
+      };
+      if (allMatching) setExcept((current) => apply(current, !on));
+      else setSelected((current) => apply(current, on));
+    },
+    [allMatching],
+  );
+
   const allSelected = useMemo(
     () => (allMatching ? except.size === 0 : ids.length > 0 && ids.every((id) => selected.has(id))),
     [ids, selected, allMatching, except],
@@ -99,6 +119,7 @@ export function useTableSelection<T extends string | number>(ids: readonly T[]):
     selected,
     isSelected,
     toggle,
+    set,
     toggleAll,
     clear,
     allSelected,
