@@ -147,6 +147,18 @@ export function extentFor(s: ChartScene, config: AxisConfig): readonly [number, 
   return axisExtentOf(s, config.orientation, config.id);
 }
 
+/** The Step of the bars and boxes on an x axis (the group's, ADR-0002); none
+    where there are no bars. */
+function barStepOn(s: ChartScene, axis: AxisConfig): number | undefined {
+  if (axis.orientation !== "x") return undefined;
+  let smallest = Number.POSITIVE_INFINITY;
+  for (const e of s.seriesInOrder()) {
+    const k = e.config.kind;
+    if ((k === "bar" || k === "box") && e.config.xAxisId === axis.id && e.step !== null && e.step > 0) smallest = Math.min(smallest, e.step);
+  }
+  return Number.isFinite(smallest) ? smallest : undefined;
+}
+
 export function updateLayout(s: ChartScene): void {
   const measurer = s.measurer;
   // A zooming chart keeps the horizontal drag and the pinch; the page keeps
@@ -183,6 +195,7 @@ export function updateLayout(s: ChartScene): void {
       time: categories === undefined && inTime(s, c) ? true : undefined,
       timeZone: categories === undefined && inTime(s, c) ? s.timeZone : undefined,
       calendar: categories === undefined ? c.calendar : undefined,
+      barStep: categories === undefined && c.calendar === undefined && inTime(s, c) ? barStepOn(s, c) : undefined,
       alignTicks: c.alignTicks,
       limitLabels:
         c.orientation === "y"
