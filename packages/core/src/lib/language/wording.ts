@@ -116,6 +116,10 @@ export interface Wording {
       the dialog. */
   datePanel: string;
   dateClear: string;
+  /** The name of the DatePicker panel's typed field. */
+  typeDate: string;
+  /** Announced when the typed text is no date. */
+  notADate: string;
   dateTimePlaceholder: string;
   dateTimePanel: string;
   dateTimeClear: string;
@@ -662,6 +666,8 @@ export const DEFAULT_WORDING: Wording = {
   datePlaceholder: "Select date",
   datePanel: "Select date",
   dateClear: "Clear date",
+  typeDate: "Type a date",
+  notADate: "Not a date",
   dateTimePlaceholder: "Select date and time",
   dateTimePanel: "Select date and time",
   dateTimeClear: "Clear date and time",

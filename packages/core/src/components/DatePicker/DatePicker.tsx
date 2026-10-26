@@ -1,6 +1,9 @@
 import { useId, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
+import { Input } from "../Input";
+import { VisuallyHidden } from "../VisuallyHidden";
+import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
@@ -47,7 +50,8 @@ export interface DatePickerProps
   clearable?: boolean;
 }
 
-/** A date selection with a calendar panel; weeks begin on Monday. */
+/** A date selection with a calendar panel; weeks begin on Monday. The panel's
+    foot takes a typed date, read in the order the formats in use write one. */
 export function DatePicker(
   {
     ref,
@@ -75,6 +79,9 @@ export function DatePicker(
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<Date>(() => startOfMonth(value ?? new Date()));
   const [active, setActive] = useState<Date>(() => value ?? new Date());
+  const [typed, setTyped] = useState("");
+  const [notADate, setNotADate] = useState(false);
+  const typedRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
   const panelId = useId();
@@ -83,12 +90,24 @@ export function DatePicker(
     const start = value ?? new Date();
     setView(startOfMonth(start));
     setActive(start);
+    setTyped("");
+    setNotADate(false);
     setOpen(true);
   };
 
   const closePanel = (refocus = true) => {
     setOpen(false);
     if (refocus) triggerRef.current?.focus();
+  };
+
+  const type = (text: string) => {
+    setTyped(text);
+    setNotADate(false);
+    const date = readTypedDate(text, formats);
+    if (date) {
+      setView(startOfMonth(date));
+      setActive(date);
+    }
   };
 
   const choose = (day: Date) => {
@@ -142,9 +161,37 @@ export function DatePicker(
               onActive={setActive}
               value={value}
               onPick={choose}
+              onDigit={(digit) => {
+                type(digit);
+                typedRef.current?.focus();
+              }}
             />
             <div className={styles.foot}>
-              <Button size="sm" variant="ghost" className={styles.hangStart} onClick={() => choose(new Date())}>
+              <Input
+                ref={typedRef}
+                size="sm"
+                className={styles.typed}
+                aria-label={wording.typeDate}
+                placeholder={sampleDate(formats)}
+                inputMode="numeric"
+                autoComplete="off"
+                invalid={notADate}
+                value={typed}
+                onChange={(event) => type(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  const date = readTypedDate(typed, formats);
+                  if (date) choose(date);
+                  else setNotADate(true);
+                }}
+              />
+              {notADate && (
+                <VisuallyHidden>
+                  <span role="alert">{wording.notADate}</span>
+                </VisuallyHidden>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => choose(new Date())}>
                 {wording.today}
               </Button>
               {value && (
