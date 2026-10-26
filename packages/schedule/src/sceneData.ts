@@ -9,7 +9,7 @@
 import type { ReactNode } from "react";
 import { inBlockedTime, violatedDependencies, overlapDepth, overlaps, type InBlockedTime, type ViolatedDependency, type Overlap } from "./findings";
 import type { BlockedTime, Milestone, Subtask, Task, Dependency } from "./model";
-import { warnOnce } from "./dev";
+import { DEV, warnOnce } from "./dev";
 import type { ScheduleHit } from "./sceneView";
 
 export interface LaneConfig {
@@ -164,6 +164,7 @@ export class SceneData {
       the lanes are still on their way, and an empty `tasks` is a plan drawn
       muted on purpose. */
   private warnOfMalformedData(): void {
+    if (!DEV) return;
     const twice = (kind: string, ids: readonly string[]) => {
       const seen = new Set<string>();
       for (const id of ids) {
