@@ -142,7 +142,8 @@ stylesheets by hand.
 * **Export and copy follow the language** (ADR-0061): the CSV takes its decimal
   mark from the formats, yes/no from the wording and its separator from the
   mark - English gets commas and a point, `@umriss-ui/core/wording/de` the file
-  it always had. Ctrl or Cmd with C copies the selected rows as tab-separated
+  it always had. A column of days is written as `YYYY-MM-DD`, any other
+  point in time as ISO text. Ctrl or Cmd with C copies the selected rows as tab-separated
   text (in grid mode with no selection, the Active cell), says so in a live
   region, and `selectionAsText()` hands the same text to a button of one's own.
 * **On a row**: a detail row that stays open across a change of filter, row
