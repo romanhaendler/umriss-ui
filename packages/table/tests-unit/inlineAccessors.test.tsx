@@ -2,8 +2,11 @@
    of the same text is not a change. */
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useTable } from "../src";
+
+// These tests count accessor calls to see the held functions kept; the development probe calls them too, and has tests of its own.
+vi.mock("../src/dev", async (original) => ({ ...(await original<typeof import("../src/dev")>()), probeStale: () => {} }));
 
 interface Item {
   id: string;

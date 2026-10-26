@@ -114,7 +114,7 @@ describe("a surface of its own starts without the provider", () => {
       return (
         <ControlSizeProvider size="sm">
           <button ref={anchor}>Anchor</button>
-          <Popover open onOpenChange={() => {}} anchorRef={anchor} role="dialog" ariaLabel="Surface">
+          <Popover open onOpenChange={() => {}} anchorRef={anchor} role="dialog" aria-label="Surface">
             <Button>Inside</Button>
           </Popover>
         </ControlSizeProvider>

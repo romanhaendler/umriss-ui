@@ -234,6 +234,10 @@ export interface Wording {
   exportLabel: string;
   /** The export button of a table in server mode, which holds and writes one page. */
   exportPageLabel: string;
+  /** The status while the application prepares an export of every match. */
+  exporting: string;
+  /** The alert beside the export button when preparing the export failed without a message. */
+  exportFailed: string;
   /** The export's file name, where the application names none. */
   exportFileName: string;
   /** The name of the sheet an XLSX export holds. */
@@ -725,6 +729,8 @@ export const DEFAULT_WORDING: Wording = {
   unpinHint: "Unpin",
   exportLabel: "Export",
   exportPageLabel: "Export page",
+  exporting: "Preparing the export",
+  exportFailed: "The export failed",
   exportFileName: "table.csv",
   exportSheetName: "Table",
   tableSearchPlaceholder: "Search …",

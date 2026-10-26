@@ -4,7 +4,7 @@
    parts that `useTable` hands back are read from a harness, so that they stand
    among the exports the guard lists. */
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { ReactElement, ReactNode } from "react";
 import { createRef } from "react";
 import { render, renderHook } from "@testing-library/react";
@@ -88,26 +88,5 @@ describe("the name of the table", () => {
     const { container } = render(<Harness through={{ ref, id: "frame", style: { marginTop: 8 } }} />);
     expect(ref.current).toBe(container.querySelector("#frame"));
     expect(ref.current!.style.marginTop).toBe("8px");
-  });
-
-  it("ariaLabel still names the <table>, and warns once for two tables", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { container } = render(
-      <>
-        <Harness through={{ ariaLabel: "Old" }} />
-        <Harness through={{ ariaLabel: "Old" }} />
-      </>,
-    );
-    expect(container.querySelectorAll('table[aria-label="Old"]')).toHaveLength(2);
-    expect(container.querySelectorAll('div[aria-label="Old"]')).toHaveLength(0);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]![0]).toContain("ariaLabel is deprecated");
-    warn.mockRestore();
-  });
-
-  it("aria-label wins over ariaLabel when both stand", () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { container } = render(<Harness through={{ ariaLabel: "Old", "aria-label": "New" }} />);
-    expect(container.querySelector("table")!.getAttribute("aria-label")).toBe("New");
   });
 });

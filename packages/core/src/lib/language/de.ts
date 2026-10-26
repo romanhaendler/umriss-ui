@@ -167,6 +167,8 @@ export const GERMAN_WORDING: Wording = {
   unpinHint: "Fixierung lösen",
   exportLabel: "Exportieren",
   exportPageLabel: "Seite exportieren",
+  exporting: "Export wird vorbereitet",
+  exportFailed: "Der Export ist fehlgeschlagen",
   exportFileName: "tabelle.csv",
   exportSheetName: "Tabelle",
   tableSearchPlaceholder: "Suchen …",

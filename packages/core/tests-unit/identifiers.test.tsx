@@ -100,7 +100,7 @@ describe("TreeView – two trees on one page", () => {
       { reader: READER, onChecked },
     );
     return (
-      <TreeView tree={tree} ariaLabel={name} checkable>
+      <TreeView tree={tree} aria-label={name} checkable>
         {(e) => e.node.name}
       </TreeView>
     );

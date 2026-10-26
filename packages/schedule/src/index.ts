@@ -28,7 +28,6 @@ export type { ZoomLimits } from "./timeAxis";
 /* Further exports stand at the end, by the workspace's rule for new exports -
    none of these modules brings a stylesheet, so no picture could move by their
    place. */
-export type { ScheduleHandle } from "./Schedule";
 export type { ScheduleTooltipTarget, PlacingItem } from "./scene";
 export { subtaskFromPlace } from "./model";
 export type { PlaceIntent } from "./model";
