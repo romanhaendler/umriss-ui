@@ -134,7 +134,10 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
         if (event.key === "Enter") connection.registry.settleSearch(true);
       }}
       clearable
-      onClear={() => snapshot.setSearch("")}
+      onClear={() => {
+        connection.registry.markTyped(false);
+        snapshot.setSearch("");
+      }}
       placeholder={placeholder ?? wording.tableSearchPlaceholder}
       aria-label={name ?? wording.tableSearchLabel}
     />
@@ -349,6 +352,8 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
   const size = useToolbarSize(own);
   const wording = useWording();
   const [busy, setBusy] = useState(false);
+  /* The state is read late: two clicks in one tick both see it false. */
+  const running = useRef(false);
   const [failure, setFailure] = useState<string | null>(null);
   if (!connection) return null;
   const { snapshot, registry } = connection;
@@ -377,16 +382,19 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
       deliver(snapshot.exportAs(format));
       return;
     }
-    if (busy) return;
+    if (running.current) return;
+    running.current = true;
     setBusy(true);
     /* The request of the click goes out and its rows are written, whatever the
        table has moved on to meanwhile. */
     all(snapshot.request).then(
       (rows) => {
+        running.current = false;
         setBusy(false);
         deliver(snapshot.exportAs(format, rows));
       },
       (error: unknown) => {
+        running.current = false;
         setBusy(false);
         setFailure(error instanceof Error && error.message ? error.message : wording.exportFailed);
       },

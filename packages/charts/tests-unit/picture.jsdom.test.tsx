@@ -7,6 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, useEffect } from "react";
 import { Legend, LimitLine, Tooltip, useChart, type ChartParts } from "../src";
+import { lineTexts } from "../src/picture";
 import { focusPlot, renderChart, sizePlot } from "./renderChart";
 
 const rows = [
@@ -98,6 +99,20 @@ describe("toPng", () => {
     expect(texts).toContain("Torque");
     expect(texts).toContain("Too fast");
     expect(texts).not.toContain("Show data");
+  });
+
+  it("splits a soft-wrapped label by its line boxes", () => {
+    const node = document.createTextNode("Mean time between faults");
+    const line = (top: number) => ({ left: 0, right: 100, top, bottom: top + 10, width: 100, height: 10 }) as DOMRect;
+    const boxes = [line(0), line(10)];
+    // The first 17 characters ("Mean time between") fill the first box; the swallowed space has no rect.
+    (Range.prototype as { getClientRects: unknown }).getClientRects = function (this: Range) {
+      const i = this.startOffset;
+      if (this.endOffset - i !== 1 || i === 17) return [];
+      return [{ ...line(i < 17 ? 0 : 10), left: 10, width: 5, right: 15 }];
+    };
+    expect(lineTexts(node, boxes)).toEqual(["Mean time between", "faults"]);
+    expect(lineTexts(node, [boxes[0] as DOMRect])).toEqual(["Mean time between faults"]);
   });
 
   it("rejects on a chart that is not mounted", async () => {

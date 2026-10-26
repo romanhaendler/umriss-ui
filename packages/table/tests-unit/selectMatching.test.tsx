@@ -99,8 +99,20 @@ describe("a change of the request and the selection", () => {
     });
   }
 
-  it("leaves plain keys alone when a search changes", () => {
-    render(<Probe outside={false} />);
+  for (const outside of [false, true]) {
+    it(`${outside ? "held outside" : "the table's own"}: a search or a condition clears plain keys in server mode`, () => {
+      render(<Probe outside={outside} />);
+      act(() => current!.selection.toggle("a"));
+      act(() => current!.setSearch("x"));
+      expect(current!.selection.isSelected("a")).toBe(false);
+      act(() => current!.selection.toggle("b"));
+      act(() => current!.setFilter("id", ["a"]));
+      expect(current!.selection.isSelected("b")).toBe(false);
+    });
+  }
+
+  it("leaves plain keys alone when a search changes in automatic mode", () => {
+    render(<Probe outside={false} server={false} />);
     act(() => current!.selection.toggle("a"));
     act(() => current!.setSearch("x"));
     expect(current!.selection.isSelected("a")).toBe(true);

@@ -18,7 +18,7 @@
    y band as wide as the fallback font had measured it, when a layout ran before
    Geist arrived (fixed in `ChartScene`, see `docs/testing.md`, Known open). */
 
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { navigation } from "@umriss-ui/demo/checks/navigation";
 import { addressOf } from "../demo/outline";
 
@@ -93,4 +93,23 @@ export async function openScenario(page: Page, scenarioId: string): Promise<void
 export async function openExample(page: Page, pageId: string, exampleId: string): Promise<void> {
   await shell.openExample(page, pageId, exampleId);
   await drawn(page);
+}
+
+/** Presses Alt and the primary button at 30% of the plot's width and drags to 70%, then stops with the
+    button still down: the band stands on the overlay. `release` lets go of both. */
+export async function altDragHalfway(page: Page, plot: Locator): Promise<{ release: () => Promise<void> }> {
+  const box = await plot.boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width * 0.3, y);
+  await page.keyboard.down("Alt");
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.7, y, { steps: 8 });
+  await drawn(page);
+  return {
+    release: async () => {
+      await page.mouse.up();
+      await page.keyboard.up("Alt");
+    },
+  };
 }

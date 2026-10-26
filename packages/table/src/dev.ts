@@ -54,8 +54,9 @@ const differs = (a: unknown, b: unknown): boolean => {
     `arg` turns a row into what the accessor takes (a sort or group function takes the column's value).
     Never changes which function is held. */
 export function probeStale(who: string, held: unknown, next: unknown, rows: readonly unknown[], arg?: (row: unknown) => unknown): void {
-  if (!DEV || held === next || typeof held !== "function" || typeof next !== "function") return;
   const key = `stale:${who}`;
+  if (!DEV || held === next || warned.has(key) || typeof held !== "function" || typeof next !== "function") return;
+  const way = who === "The rowKey" ? "Carry the value in the rows." : "Carry the value in the rows, or give the column a `key` that changes with it.";
   try {
     for (let i = 0; i < Math.min(rows.length, 1000); i++) {
       const input = arg ? arg(rows[i]) : rows[i];
@@ -63,7 +64,7 @@ export function probeStale(who: string, held: unknown, next: unknown, rows: read
       warnOnce(
         key,
         `${who}: its function reads a value from outside the row, and that value has changed - ` +
-          `a function with the same source text is kept, so the old figures stay. Carry the value in the rows, or give the column a \`key\` that changes with it.`,
+          `a function with the same source text is kept, so the old figures stay. ${way}`,
       );
       return;
     }

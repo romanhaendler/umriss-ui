@@ -688,10 +688,11 @@ interface ServerMode<Z> {
 /** The options of `useTable`: automatic, or in server mode over a server's rows. */
 export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode<Z>);
 
-/** What a format writes: the header labels, the widths the table holds, and
-    the rows as typed cells. A tree's level is its first column, a number. */
+/** What a format writes: the header labels, the widths the table holds, whether
+    a column's own `exportValue` made its values (`own`: written as they come),
+    and the rows as typed cells. A tree's level is its first column, a number. */
 export interface ExportSheet {
-  columns: readonly { label: string; width?: number }[];
+  columns: readonly { label: string; width?: number; own?: true }[];
   rows: readonly (readonly ExportCell[])[];
 }
 

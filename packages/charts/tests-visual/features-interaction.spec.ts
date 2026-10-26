@@ -7,7 +7,7 @@
    as they stand. */
 
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { openExample } from "./navigation";
+import { altDragHalfway, openExample } from "./navigation";
 
 /* Every test opens what it means itself: the demo shows one page at a time, and
    `openExample` waits for the fonts and two frames - the canvas draws inside the
@@ -700,4 +700,28 @@ test("the pointer takes the Active point over, and a synced chart follows the ke
   await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2);
   await page.waitForTimeout(150);
   expect(await example.locator(".uc-tooltip").first().innerText()).not.toBe(keyed);
+});
+
+/* The range (ADR-0074): Alt with a real drag draws a band on the overlay while the button is down, with no
+   tooltip; after release the band is gone and the application has heard the range. */
+test("range: an Alt drag draws the band mid-drag, one baseline of it, and it is gone after release", async ({ page }, testInfo) => {
+  await openExample(page, "zoom-and-pan", "mark-a-range");
+  const example = page.locator('[data-example="mark-a-range"]');
+  await example.scrollIntoViewIfNeeded();
+  const plot = example.locator(".uc-plot").first();
+  // Away from the plot first: the crosshair of a hover is no part of what is measured.
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(150);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
+
+  const drag = await altDragHalfway(page, plot);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBeGreaterThan(0);
+  await expect(example.locator(".uc-tooltip")).toHaveCSS("opacity", "0");
+  await expect(example).toHaveScreenshot(`range-mid-drag-${testInfo.project.name}.png`);
+
+  await drag.release();
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(150);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
+  await expect(example.getByText(/^Marked:/)).toBeVisible();
 });

@@ -107,8 +107,10 @@ export function AggregateValue({
   const { aggregate: spec, format, presentation } = entry.spec;
   if (!spec) return null;
   const kind = typeof spec === "function" ? "own" : spec;
+  /* A range handed in that is not a pair is read as absent. */
+  const handed = kind === "range" && !(Array.isArray(given?.value) && given.value.length === 2) ? undefined : given?.value;
   const { value, places } = given
-    ? { value: given.value, places: typeof given.value === "number" ? decimalsOf(given.value) : 0 }
+    ? { value: handed, places: typeof handed === "number" ? decimalsOf(handed) : 0 }
     : summaryOf(entry, rows, known);
   const text = (v: unknown) => asText(v, format, formats, wording);
   let content: ReactNode;

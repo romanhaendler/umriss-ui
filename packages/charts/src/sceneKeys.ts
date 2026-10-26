@@ -126,14 +126,15 @@ export function key(s: ChartScene, event: KeyboardEvent): boolean {
 }
 
 /** Space: the first sets the start at the Active point, the next reports the
-    range - the earlier end first - and says it. */
+    range - the earlier end first - and says it. A start on another x axis is
+    not an end of this one: Space starts anew where the Active point is. */
 function rangeKey(s: ChartScene): boolean {
   const hover = s.hover;
   const axisId = emphasised(s)?.config.xAxisId;
   if (hover === null || axisId === undefined || s.onRange === null) return false;
   const x = hover.hit.xValue;
   const start = s.rangeStart;
-  if (start === null) {
+  if (start === null || start.axisId !== axisId) {
     s.rangeStart = { axisId, x };
     say(s, s.wording.rangeStarted(s.xLabel(axisId, x)));
     return true;

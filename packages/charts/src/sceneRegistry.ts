@@ -92,7 +92,7 @@ export function updateSeries(s: ChartScene, id: number, config: SeriesConfig): v
   const entry = s.series.get(id);
   if (entry === undefined) return;
   const previous = entry.config;
-  const dataEqual = materialEqual(previous, config, config.data ?? s.data);
+  const dataEqual = materialEqual(previous, config, config.data ?? s.data, entry.order);
   const equal =
     dataEqual &&
     previous.xAxisId === config.xAxisId &&
