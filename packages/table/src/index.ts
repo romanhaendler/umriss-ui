@@ -19,6 +19,7 @@ export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, Toolba
    declarations carry them along anyway. */
 export type {
   ActionProps,
+  AllMatching,
   RangeCondition,
   Field,
   FieldCondition,
