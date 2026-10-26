@@ -26,7 +26,7 @@ import { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 
 /** What `useChart` takes besides the rows: the view to start from and the
     handler that hears every change of it. */
-export interface ChartOptions<Z = unknown> {
+export interface ChartOptions<Z = unknown, V extends number | string = number> {
   /** The view to start from, read once when the hook first runs; a different
       value on a later render is ignored, as React ignores a changed
       `defaultValue`. To go to a view later, call `setView`. The chart
@@ -46,12 +46,12 @@ export interface ChartOptions<Z = unknown> {
   onSelect?: (hit: TooltipHit<Z>) => void;
   /** The reader marked a stretch of an x axis: Alt with a drag where the chart
       zooms, a plain drag where it does not. Called once, on release - once per
-      x axis -, with `from` not after `to`, in the axis' own values. A band
+      x axis -, with `from` not after `to`, in the axis' own values: numbers, milliseconds on a time axis, wall-clock instants on a calendar axis, and on a category axis the first and last category covered, as strings - say so in the handler's parameter, `ChartRange<string>`. A band
       covers the stretch while the pointer is down; the chart keeps no range and
       draws none afterwards, and it does not travel over `syncId`. A press that
       travels 4 px or less is a click and reaches `onSelect`; Escape and a
       cancelled pointer report nothing. */
-  onRange?: (range: ChartRange) => void;
+  onRange?: (range: ChartRange<V>) => void;
 }
 
 /** What `useChart` hands back: the chart and its parts, typed at the row `Z`,
@@ -115,7 +115,7 @@ const NO_NAMES: readonly string[] = [];
     @returns `Chart`, `XAxis`, `YAxis` and every series kind - each keeps its
     identity over the renders -, the `view`, its `domains` and `hidden`, and
     the setters that change them. */
-export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): ChartParts<Z> {
+export function useChart<Z, V extends number | string = number>(rows: readonly Z[], options: ChartOptions<Z, V> = {}): ChartParts<Z> {
   const { initialView, onViewChange, onSelect, onRange } = options;
   /* The key of the view last reported, or applied by `setView` - what the
      effect below compares the view against. */
@@ -163,11 +163,15 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
   // eslint-disable-next-line react-hooks/immutability -- as the rows: read when the reader acts, never during a render
   scene.onSelect = (onSelect ?? null) as ChartScene["onSelect"];
   // eslint-disable-next-line react-hooks/immutability -- as onSelect
-  scene.onRange = onRange ?? null;
+  scene.onRange = (onRange as typeof scene.onRange) ?? null;
   useEffect(() => {
     if (onSelect !== undefined && !scene.hasTooltip)
       warnOnce("select-without-tooltip", "`onSelect` needs a <Tooltip> - the hits it reports are the tooltip's.");
   }, [onSelect === undefined, scene]); // eslint-disable-line react-hooks/exhaustive-deps -- presence only
+  useEffect(() => {
+    if (onRange !== undefined && !scene.hasTooltip)
+      warnOnce("range-without-tooltip", "`onRange` needs a <Tooltip> for the keyboard - without one only the pointer marks a range.");
+  }, [onRange === undefined, scene]); // eslint-disable-line react-hooks/exhaustive-deps -- presence only
   // A new object only when the view changed: the parts keep their identity.
   return useMemo(() => ({ ...bound.parts, view, domains: view.domains ?? NO_DOMAINS, hidden: view.hidden ?? NO_NAMES }), [bound, view]);
 }

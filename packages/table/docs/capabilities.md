@@ -55,7 +55,8 @@ before anything else about its speed was changed.
 An accessor written in the call (a column's `value`, `sortValue`, `groupValue`
 and the `rowKey`) is held while the next one has the same source text; a native
 or bound function is compared by identity. A closure over a changed outer
-variable reads as unchanged. The `preFilter` is not compared this way: it is
+variable reads as unchanged; development warns, and the way out is the value in
+the rows or a `key` on the column. The `preFilter` is not compared this way: it is
 applied on every render and its result reconciled, because a pre-filter that
 reads the caller's state is the ordinary case. With it, an aggregate is computed
 once for a set of rows, and a scroll inside the virtual window renders nothing.
