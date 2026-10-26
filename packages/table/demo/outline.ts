@@ -326,6 +326,9 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Actions that act on the ticked rows", use: "rowactions" },
         ],
         keysOf: ["first-table", core("Checkbox"), core("Input")],
+        keys: [
+          { key: "Shift + click, Shift + Space", action: "On a row's checkbox: ticks the rows from the one toggled last to this one, or clears them when this row is ticked." },
+        ],
         limits: [
           "In [server mode](#/server-mode) “select all” selects the page, and with the page ticked the table offers all that match: a state that a bulk action receives as `{ request, except }`, since the table holds no rows for it.",
         ],
@@ -555,6 +558,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Cancels an edit, or goes back from a control to its cell." },
           { key: "Ctrl / Cmd + C", action: "Copies the selected rows, or the active cell; its cell flashes. In an open editor with nothing marked it copies the field's value." },
           { key: "Space", action: "Selects the row of the active cell." },
+          { key: "Shift + Space", action: "Selects the rows from the one toggled last to the row of the active cell." },
         ],
         types: [],
         exports: ["useTable"],

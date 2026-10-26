@@ -154,11 +154,22 @@ export function Row({
           <td key={i} className={cx(styles.td, i < controls && styles.control, pinAt(i).className)} style={pinAt(i).style} />
         ))}
         {!fresh && selectable && (
-          <td className={cx(styles.td, styles.control, pinAt(0).className)} style={pinAt(0).style}>
+          <td
+            className={cx(styles.td, styles.control, pinAt(0).className)}
+            style={pinAt(0).style}
+            onMouseDown={(event) => event.shiftKey && event.preventDefault()}
+          >
             <Checkbox
               aria-label={wording.selectRow(name)}
               checked={snapshot.selection.isSelected(key)}
-              onChange={() => snapshot.selection.toggle(key)}
+              onChange={(event) => hook.pick(key, (event.nativeEvent as MouseEvent).shiftKey === true)}
+              onKeyDown={(event) => {
+                /* A click from the keyboard carries Shift unreliably: the key is read itself. */
+                if (event.key !== " " || !event.shiftKey) return;
+                event.preventDefault();
+                hook.pick(key, true);
+              }}
+              onKeyUp={(event) => event.key === " " && event.shiftKey && event.preventDefault()}
             />
           </td>
         )}

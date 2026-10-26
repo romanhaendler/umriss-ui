@@ -159,7 +159,7 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
     const at = rowAt(here);
     if (select && at && place.line !== NEW_LINE) {
       event.preventDefault();
-      select(at.row);
+      select(at.row, event.shiftKey);
     }
     return;
   }
