@@ -590,6 +590,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keys: [
           { key: "Arrow Down / Arrow Up", action: "Opens the list, then moves through the rows." },
+          { key: "Home / End", action: "In a list of more than 500 options, moves to the first or last row; in a shorter one they move the caret." },
           { key: "Enter", action: "Chooses the active row." },
           { key: "Escape", action: "Closes the list." },
         ],
