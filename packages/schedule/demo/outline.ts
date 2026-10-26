@@ -407,8 +407,19 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Cancels a drag in flight: the ghost goes and nothing is reported." },
         ],
         limits: [
-          "No undo: your application owns the data, and with it the history (ADR-0032).",
+          "No undo: your application owns the data, and with it the history - see [Undo](#/undo) (ADR-0032).",
           "The keys move work in time only; a lane change needs the pointer.",
+        ],
+        keysOf: ["schedule"],
+        types: [],
+        exports: ["useSchedule", "applyIntent"],
+      },
+      {
+        id: "undo",
+        name: "Undo",
+        sentence: "Taking back the last applied change: the application keeps the plan before each intent and pops it on Ctrl+Z, ⌘Z on a Mac, or an Undo button (also called history).",
+        about: [
+          "The schedule keeps no history: it reports each intent and the application applies it (ADR-0023), so the stack of plans is the application's to keep (ADR-0032). The key is the page's, not the plot's - the plot leaves Ctrl and ⌘ to it.",
         ],
         keysOf: ["schedule"],
         types: [],
