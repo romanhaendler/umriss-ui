@@ -148,3 +148,12 @@ import type { StateBandProps } from "../src";
 export interface OwnBandProps extends StateBandProps<Latency> {
   title: string;
 }
+
+/* `onRange` hands a numeric caller numbers: no cast to add or compare them
+   (ADR-0074). */
+export function RangeHandler() {
+  const span = (from: number, to: number) => to - from;
+  useChart(latencies, { onRange: ({ axisId, from, to }) => [axisId.length, span(from, to)] });
+  // @ts-expect-error the handler takes the range, not a hit
+  useChart(latencies, { onRange: (range: { points: number }) => range.points });
+}

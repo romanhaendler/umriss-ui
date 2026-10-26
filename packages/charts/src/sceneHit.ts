@@ -48,6 +48,7 @@ export function inPlot(s: ChartScene, x: number, y: number): boolean {
 }
 
 export function pointerMove(s: ChartScene, x: number, y: number): void {
+  if (s.range?.live === true) return; // marking a range: no tooltip
   if (!inPlot(s, x, y)) {
     pointerLeave(s);
     return;

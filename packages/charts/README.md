@@ -152,6 +152,30 @@ loaded: Geist when the application has it, the system fonts otherwise.
   [`docs/capabilities.md`](docs/capabilities.md) under "Performance" — they are
   not repeated here, so that a new measurement has one place to go.
 
+### The picture
+
+`toPng()` on what `useChart` returns resolves to a PNG `Blob` of the chart as
+the reader sees it: plot, axes and legend on the chart's own ground, in the
+colour scheme in use, at least twice its CSS pixels (ADR-0075). The tooltip,
+the crosshair, the "Show all" button and the data table are not in it. It
+rejects when the chart is not mounted or has no size. Where the picture goes
+is yours:
+
+```tsx
+const { Chart, toPng } = useChart(rows);
+
+// Download
+const save = async () => {
+  const url = URL.createObjectURL(await toPng());
+  Object.assign(document.createElement("a"), { href: url, download: "trend.png" }).click();
+  URL.revokeObjectURL(url);
+};
+
+// Clipboard
+const copy = async () =>
+  navigator.clipboard.write([new ClipboardItem({ "image/png": toPng() })]);
+```
+
 What it deliberately cannot do — animations, a log scale, pie, donut and
 radar — stands in the same record, with the reason,
 and across all five packages in

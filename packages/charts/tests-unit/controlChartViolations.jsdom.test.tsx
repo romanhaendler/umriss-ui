@@ -7,10 +7,14 @@
    recomputed the limits, which made a new list of violations, which was
    reported again. The chart rendered forever. */
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ControlChart, useChart, type Violation } from "../src";
+
+// These tests count the calls of the value function to see the limits held;
+// the development probe calls it too, and has tests of its own.
+vi.mock("../src/dev", async (original) => ({ ...(await original<typeof import("../src/dev")>()), probeStale: () => {} }));
 
 interface Point {
   n: number;

@@ -857,6 +857,9 @@ export interface OverlayLayerInput {
   /** The crosshair another chart's pointer asks for (`syncId`); the own
       hover wins. */
   syncPx: number | null;
+  /** The stretch a reader is marking, in pixels - drawn while the pointer is
+      down and never kept (ADR-0074). */
+  band?: readonly [number, number] | null;
 }
 
 export function drawOverlayLayer(
@@ -865,6 +868,25 @@ export function drawOverlayLayer(
 ): void {
   const { width, height, plot, theme, hover } = input;
   ctx.clearRect(0, 0, width, height);
+  if (input.band != null && plot.width > 0 && plot.height > 0) {
+    // The first series colour: the theme's emphasis. In forced colours that is
+    // the text colour, so the band is an outline and no fill.
+    const [a, b] = input.band;
+    const x = Math.min(a, b);
+    const w = Math.abs(b - a);
+    ctx.save();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = theme.series[0] ?? theme.colorText;
+    ctx.lineWidth = 1;
+    if (!theme.forced) {
+      ctx.globalAlpha = 0.15;
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.fillRect(x, plot.y, w, plot.height);
+      ctx.globalAlpha = 1;
+    }
+    ctx.strokeRect(crisp(x), plot.y + 0.5, w, plot.height - 1);
+    ctx.restore();
+  }
   const at = hover?.hit.xPx ?? input.syncPx;
   if (at === null || plot.width <= 0 || plot.height <= 0) return;
 
