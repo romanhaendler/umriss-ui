@@ -2,10 +2,14 @@
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
 import type { ExportSheet } from "../types";
-/* Kept here and not imported from `./day`: the entry must import nothing, and a module shared with the
-   main entry would be split into a chunk it imports. `day.ts` holds the same test for the CSV. */
-const isDay = (d: Date): boolean => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
 import { escapeXml } from "./parts";
+
+/* The same rule as `allDays` in `./day`, written twice on purpose: a module both entries import becomes a
+   chunk that `xlsx.js` would import, and this entry must import nothing. Change both together. */
+const allDays = (values: Iterable<unknown>): boolean => {
+  for (const v of values) if (v instanceof Date && v.getHours() + v.getMinutes() + v.getSeconds() + v.getMilliseconds() !== 0) return false;
+  return true;
+};
 
 const MAX_ROWS = 1048576;
 const MAX_COLUMNS = 16384;
@@ -30,8 +34,6 @@ function letters(n: number): string {
 const serialOf = (d: Date) =>
   (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) - EPOCH) / DAY;
 
-const hasSerial = (v: unknown): v is Date => v instanceof Date && serialOf(v) >= FIRST_SERIAL;
-
 function text(raw: string): string {
   let s = raw.replace(FORBIDDEN, "");
   if (s.length > MAX_TEXT) {
@@ -51,14 +53,8 @@ export function sheetXml(sheet: ExportSheet): string {
   if (columns.length > MAX_COLUMNS) throw new RangeError(`A worksheet holds at most ${MAX_COLUMNS.toLocaleString("en")} columns.`);
   if (rows.length + 1 > MAX_ROWS) throw new RangeError(`A worksheet holds at most ${MAX_ROWS.toLocaleString("en")} rows.`);
 
-  /* A column of dates is a date column when no date in it has a time. */
-  const styles = columns.map((_, c) => {
-    for (const row of rows) {
-      const v = row[c];
-      if (hasSerial(v) && !isDay(v)) return 2;
-    }
-    return 1;
-  });
+  /* A column of dates is a date column when no date in it has a time - the CSV's rule. */
+  const styles = columns.map((_, c) => (allDays(rows.map((row) => row[c])) ? 1 : 2));
 
   const cols = columns
     .map((c, i) => (c.width === undefined ? "" : `<col min="${i + 1}" max="${i + 1}" width="${c.width / 7 + 1}" customWidth="1"/>`))

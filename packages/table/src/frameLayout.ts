@@ -108,8 +108,9 @@ export function frameLayout({
 
   const rows = projection.visible;
   /* In server mode the aggregates would be the page's, standing where the
-     filtered set's belong - the footer shows the server's totals, or none. */
-  const footerShown = (snapshot.server ? hook.totals !== undefined : !loading) && dataColumns.some((e) => e.spec.aggregate);
+     filtered set's belong - the footer shows the server's totals, or none; under
+     an error the totals are the old request's, so none. */
+  const footerShown = (snapshot.server ? hook.totals !== undefined && hook.error === undefined : !loading) && dataColumns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
   return {

@@ -4,7 +4,9 @@
 
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { act } from "react";
 import { useTable } from "../src";
+import type { Table as TableOf } from "../src";
 
 interface Item {
   id: string;
@@ -19,12 +21,19 @@ const ITEMS: Item[] = [
 afterEach(() => vi.restoreAllMocks());
 const warnings = (warn: { mock: { calls: unknown[][] } }, id: string) => warn.mock.calls.filter(([t]) => String(t).includes(id));
 
+let current: TableOf<Item> | null = null;
+const capture = (t: TableOf<Item>) => {
+  current = t;
+};
+
 function Probe({ rate, id, part, rows = ITEMS, colKey }: { rate: number; id: string; part: string; rows?: Item[]; colKey?: number }) {
   const props: Record<string, unknown> = {};
   if (part === "sort") props.sortValue = (v: number) => v * rate;
   if (part === "group") props.groupValue = (v: number) => v * rate;
-  const { Table, Column } = useTable(rows, { defaultSort: { column: "keyed", direction: "asc" },
+  const t = useTable(rows, { defaultSort: { column: "keyed", direction: "asc" },
     rowKey: part === "rowKey" ? (r: Item) => `${r.id}${rate}`.slice(0, 1 + (rate > 1 ? 1 : 0)) : (r: Item) => r.id });
+  capture(t);
+  const { Table, Column } = t;
   return (
     <Table empty="none">
       <Column key={colKey} id={id} label={id} value={part === "value" ? (r: Item) => r.net * rate : (r: Item) => r.net} {...props} />
@@ -41,7 +50,8 @@ describe("a stale column", () => {
     rerender(<Probe rate={3} id={id} part={part} />);
     const found = part === "rowKey" ? warnings(warn, "rowKey") : warnings(warn, id);
     expect(found).toHaveLength(1);
-    expect(String(found[0]?.[0])).toMatch(/`key`/);
+    // A rowKey has no column to give a key to.
+    expect(/`key`/.test(String(found[0]?.[0]))).toBe(part !== "rowKey");
   });
 
   it("stays silent for an unchanged closure, a field name and a native function", () => {
@@ -68,9 +78,15 @@ describe("a stale column", () => {
     const { rerender } = render(<Probe rate={1} colKey={1} id="keyed" part="value" />);
     const cells = () => screen.getAllByRole("cell").map((c) => c.textContent);
     expect(cells()).toEqual(["1", "2", "3"]);
+    act(() => {
+      current!.toggleSort("keyed");
+      current!.setWidth("keyed", 222);
+    });
+    expect(cells()).toEqual(["3", "2", "1"]);
     rerender(<Probe rate={2} colKey={2} id="keyed" part="value" />);
-    // The new figures, and the sort the user (here: the default) chose still holds.
-    expect(cells()).toEqual(["2", "4", "6"]);
+    // The new figures, with the sort and the width the user chose.
+    expect(cells()).toEqual(["6", "4", "2"]);
+    expect(screen.getByRole("columnheader", { name: /keyed/ }).style.width).toBe("222px");
   });
 
   it("calls an accessor at most 1,000 times per side per render", () => {

@@ -1,5 +1,5 @@
 /* What the CSV needs about a day: a date at local midnight. The XLSX writer
-   holds its own `isDay` (see `sheet.ts`): its entry must import nothing. */
+   holds the same `allDays` again (see `sheet.ts`): its entry must import nothing. */
 
 /** Whether a date lies at local midnight. */
 export const isDay = (d: Date): boolean => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
