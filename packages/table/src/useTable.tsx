@@ -646,6 +646,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
     late,
+    totals: options.server ? options.totals : undefined,
     rowFilters,
   });
 
