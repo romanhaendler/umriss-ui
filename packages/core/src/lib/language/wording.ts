@@ -551,6 +551,12 @@ export interface Wording {
   /** At the top of the menu, and in the name of a head the arrow keys move. */
   dashboardPlace: (place: number, of: number) => string;
   dashboardHead: (title: string, place: number, of: number) => string;
+  /** The name of the head of a locked widget in the editing mode. */
+  dashboardHeadLocked: (title: string, place: number, of: number) => string;
+  /** The word beside a locked widget's size in the mode. */
+  dashboardLocked: string;
+  /** The disabled line in a locked widget's menu, where the sizes, the options and "Remove" would stand. */
+  dashboardLockedLine: string;
   dashboardMoveStart: string;
   dashboardMoveEarlier: string;
   dashboardMoveLater: string;
@@ -945,6 +951,9 @@ export const DEFAULT_WORDING: Wording = {
   dashboardMenu: (title) => `Actions for ${title}`,
   dashboardPlace: (place, of) => `Place ${place} of ${of}`,
   dashboardHead: (title, place, of) => `${title}, place ${place} of ${of}`,
+  dashboardHeadLocked: (title, place, of) => `${title}, place ${place} of ${of}, locked`,
+  dashboardLocked: "Locked",
+  dashboardLockedLine: "Locked: keeps its size and options",
   dashboardMoveStart: "Move to start",
   dashboardMoveEarlier: "Move earlier",
   dashboardMoveLater: "Move later",
