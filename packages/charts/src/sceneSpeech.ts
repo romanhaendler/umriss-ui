@@ -149,6 +149,7 @@ export function summaryText(s: ChartScene): string {
   if (limits.length > 0) parts.push(w.limitList(limits));
   if (s.tooltip !== null) parts.push(w.walkHelp);
   if (s.tooltip !== null && s.onSelect !== null) parts.push(w.selectHelp);
+  if (s.tooltip !== null && s.onRange !== null) parts.push(w.rangeHelp);
   if (s.hasZoom()) parts.push(w.zoomHelp);
   if (s.legend !== null && s.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
   return parts.join(" ");

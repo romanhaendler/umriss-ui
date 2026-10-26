@@ -67,7 +67,7 @@ export interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, "chil
     selection with the bulk actions. A table with a search or a column filter
     has one, even where none stands; where one stands, there is no second. */
 export function Toolbar({ children, className, size = "sm", of, ref, ...rest }: ToolbarProps) {
-  const connection = useConnection(of);
+  const connection = useConnection(of, "Toolbar");
   // A toolbar that has been put there registers, so that the table puts up none of its own.
   useRegistration(connection?.registry, "toolbar");
   const registry = connection?.registry;
@@ -106,7 +106,7 @@ export interface SearchProps
     the table toolbar. With a search the table puts up a toolbar of its own
     where none stands. Outside the table it needs `of`. */
 export function Search({ placeholder, "aria-label": name, className, size: own, grow, of, ...rest }: SearchProps) {
-  const connection = useConnection(of);
+  const connection = useConnection(of, "Search");
   const size = useToolbarSize(own);
   const wording = useWording();
   /* With a search the table puts up a table toolbar when none stands - the
@@ -147,7 +147,7 @@ export interface ColumnMenuProps extends Omit<ButtonProps, "size" | "children" |
     a box or a button -, so it is reachable without a pointer; after a move the
     focus stays on the button that was pressed. */
 export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
-  const connection = useConnection(of);
+  const connection = useConnection(of, "ColumnMenu");
   const size = useToolbarSize(own);
   const wording = useWording();
   const [open, setOpen] = useState(false);
@@ -334,7 +334,7 @@ export interface ExportProps<R = string>
     values, not with their presentation. In server mode the table holds one
     page of the server's, so it writes that page, and its button says so. */
 export function Export<R = string>({ format: given, filename, onExport, label, size: own, of, ...rest }: ExportProps<R>) {
-  const connection = useConnection(of);
+  const connection = useConnection(of, "Export");
   const size = useToolbarSize(own);
   const wording = useWording();
   if (!connection) return null;
@@ -384,7 +384,7 @@ export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "chil
     outside the table puts it before the table: after it, it registers only
     after the first frame. */
 export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }: PaginationProps) {
-  const connection = useConnection(of);
+  const connection = useConnection(of, "Pagination");
   const wording = useWording();
   const formats = useFormats();
   // Only with a pagination bar does the table page.

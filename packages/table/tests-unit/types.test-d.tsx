@@ -364,6 +364,9 @@ export function TreeRows() {
   useTable(units, { rowKey: (u) => u.id, childRows: () => [1, 2] });
   // @ts-expect-error a tree in server mode
   useTable(units, { rowKey: (u) => u.id, server: true, rowCount: 0, onRequest: () => {}, childRows: (u) => u.children });
+  useTable(units, { rowKey: (u) => u.id, server: true, rowCount: 0, onRequest: () => {}, answers: undefined });
+  // @ts-expect-error answers is for server mode
+  useTable(units, { rowKey: (u) => u.id, answers: { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 } });
   return null;
 }
 
@@ -418,3 +421,23 @@ export function RowFilters() {
     </Frame>
   );
 }
+
+/* The new members of the selection are required: a hand-built one must add them. */
+const base = {
+  selected: new Set<string>(),
+  isSelected: () => false,
+  toggle: () => {},
+  toggleAll: () => {},
+  clear: () => {},
+  allSelected: false,
+  someSelected: false,
+  count: 0,
+};
+export const handBuilt: import("../src").TableSelection<string> = {
+  ...base,
+  allMatching: false,
+  except: new Set<string>(),
+  selectMatching: () => {},
+};
+// @ts-expect-error allMatching, except and selectMatching are required
+export const missing: import("../src").TableSelection<string> = base;
