@@ -379,6 +379,52 @@
     padding-top: 8px;
   }
 
+  /* Beside the plot the root runs in a row and the legend is a column as tall
+     as the plot: as wide as its longest entry up to a quarter of the chart, a
+     longer name wrapping under its own text with the chip on its first line,
+     and entries that do not fit scrolling inside it. */
+  .uc-root:has(> .uc-legend-left, > .uc-legend-right) {
+    flex-direction: row;
+  }
+
+  .uc-legend-left,
+  .uc-legend-right {
+    box-sizing: border-box;
+    flex: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    width: max-content;
+    max-width: 25%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .uc-legend-left {
+    order: -1;
+    padding-right: 12px;
+  }
+
+  .uc-legend-right {
+    order: 1;
+    padding-left: 12px;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-legend-item {
+    align-items: flex-start;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-legend-item > :is(.uc-legend-chip, .uc-legend-mark) {
+    flex: none;
+    margin-top: 4px;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-data-key {
+    margin-left: 0;
+  }
+
   .uc-legend-item {
     display: inline-flex;
     align-items: center;
