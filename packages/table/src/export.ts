@@ -8,8 +8,9 @@ import type { Formats, Wording } from "@umriss-ui/core";
 import { asCsv, asTabbed, plain } from "./model/csv";
 import type { CsvColumn, CsvConventions } from "./model/csv";
 import type { Registry, ColumnEntry } from "./registry";
-import type { TableSnapshot } from "./types";
-import { exportValue } from "./values";
+import type { ExportFormat, ExportSheet, TableSnapshot } from "./types";
+import { exportCell, exportValue } from "./values";
+import type { ExportCell } from "./values";
 
 /** The visible columns in the order the user sees - with the pinned blocks at
     either end. Screen and export both read here, so that they cannot drift
@@ -48,38 +49,66 @@ export function conventionsOf(formats: Formats, wording: Wording): CsvConvention
 
 /** The columns a file or the clipboard holds: the visible ones, in the order
     shown. */
-function exportColumns(registry: Registry, rows: readonly unknown[]): CsvColumn<unknown>[] {
+function exportColumns(registry: Registry, rows: readonly unknown[]): ColumnEntry[] {
   return (
     visibleColumns(registry)
       /* A value without a text form and without an export path of its own does
          not belong in a spreadsheet - a column full of "[object Object]" is not
          one. */
       .filter((e) => registry.kindOf(e, rows) !== "other" || e.spec.ownExportValue)
-      .map(
-        (e): CsvColumn<unknown> => ({
-          id: e.spec.id,
-          label: e.spec.label,
-          value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
-        }),
-      )
   );
 }
 
-export function csvOf(registry: Registry, levelLabel: string, formats: Formats, wording: Wording, given?: readonly unknown[]): string {
+const csvColumn = (e: ColumnEntry): CsvColumn<unknown> => ({
+  id: e.spec.id,
+  label: e.spec.label,
+  value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
+});
+
+/** The filtered set in the visible columns as typed cells, with the widths the
+    table holds. A tree writes every row of its filtered tree, open or not, with
+    its level first: a consumer filtering by level gets a whole level. With
+    `given` rows, those instead of the filtered set. */
+export function sheetOf(registry: Registry, levelLabel: string, given?: readonly unknown[]): ExportSheet {
   const hook = registry.hook;
-  if (!hook) return "";
-  const columns = exportColumns(registry, given ?? hook.rows);
-  const conventions = conventionsOf(formats, wording);
+  if (!hook) return { columns: [], rows: [] };
+  const entries = exportColumns(registry, given ?? hook.rows);
+  const { widths } = hook.publicSnapshot;
+  const columns: { label: string; width?: number }[] = entries.map((e) => ({
+    label: e.spec.label ?? e.spec.id,
+    width: widths[e.spec.id],
+  }));
+  const cells = (row: unknown) => entries.map((e) => exportCell(e.read(row), e.spec.ownExportValue));
   /* Rows handed in (every match of a server) are written as they are. */
-  if (given) return asCsv(given, columns, conventions);
-  /* A tree writes every row of its filtered tree, open or not, with its level
-     first: a consumer filtering by level gets a whole level. */
+  if (given) return { columns, rows: given.map(cells) };
   const { exported, filtered } = registry.projection();
-  if (!exported) return asCsv(filtered, columns, conventions);
-  const level = new Map(exported.map((e) => [e.node, e.level + 1]));
-  const levelColumn: CsvColumn<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
-  return asCsv(exported.map((e) => e.node), [levelColumn, ...columns], conventions);
+  if (!exported) return { columns, rows: filtered.map(cells) };
+  return {
+    columns: [{ label: levelLabel }, ...columns],
+    rows: exported.map((e) => [e.level + 1, ...cells(e.node)]),
+  };
 }
+
+/** The CSV: the language's conventions, a point in time as ISO text. */
+export const csv: ExportFormat = {
+  extension: "csv",
+  mime: "text/csv;charset=utf-8",
+  write: (sheet, { formats, wording }) =>
+    asCsv(
+      sheet.rows,
+      sheet.columns.map(
+        (c, i): CsvColumn<readonly ExportCell[]> => ({
+          id: String(i),
+          label: c.label,
+          value: (row) => {
+            const cell = row[i];
+            return cell instanceof Date ? cell.toISOString() : cell;
+          },
+        }),
+      ),
+      conventionsOf(formats, wording),
+    ),
+};
 
 /** The selected rows within the filtered set, in the export's order - a tree's
     open and closed branches alike, no group line. What lies outside the filter
@@ -98,7 +127,7 @@ export function selectionText(registry: Registry, formats: Formats, wording: Wor
   const hook = registry.hook;
   const rows = selectedInOrder(registry);
   if (!hook || rows.length === 0) return "";
-  return asTabbed(rows, exportColumns(registry, hook.rows), conventionsOf(formats, wording));
+  return asTabbed(rows, exportColumns(registry, hook.rows).map(csvColumn), conventionsOf(formats, wording));
 }
 
 /** One cell as the copy writes it: the export's value in the language's notation. */

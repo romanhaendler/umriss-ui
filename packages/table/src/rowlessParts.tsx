@@ -19,7 +19,8 @@ import type { ToolbarSize } from "./toolbarSize";
 import { GroupingChoice, TreeChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
-import type { TableRef } from "./types";
+import type { ExportFormat, TableRef } from "./types";
+import { csv } from "./export";
 import type { Pin } from "./model/pinning";
 import styles from "./Table.module.css";
 
@@ -309,12 +310,19 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
 
 /** The props of `Export`: by default a CSV file is downloaded; with
     `onExport` the text is handed over instead. */
-export interface ExportProps extends Omit<ButtonProps, "size" | "children" | "onClick" | "variant" | "loading"> {
+export interface ExportProps<R = string>
+  extends Omit<ButtonProps, "size" | "children" | "onClick" | "variant" | "loading"> {
+  /** What is written: `csv`, or a format of one's own.
+      @default csv */
+  format?: ExportFormat<R>;
   /** File name of the download.
-      @default the wording's "table.csv" */
+      @default the base of the wording's "table.csv" with the format's extension */
   filename?: string;
-  /** Gets the text instead of triggering a file. */
-  onExport?: (text: string) => void;
+  /** Gets what the format wrote instead of triggering a file. */
+  onExport?: (content: R) => void;
+  /** The button's text.
+      @default the wording's export label */
+  label?: ReactNode;
   /** The size of the part: `sm` or `md`.
       @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
@@ -327,7 +335,7 @@ export interface ExportProps extends Omit<ButtonProps, "size" | "children" | "on
     page of the server's, so it writes that page, and its button says so;
     with `exportRows` it asks the application for every row of the current
     request instead and writes those. */
-export function Export({ filename, onExport, size: own, of, ...rest }: ExportProps) {
+export function Export<R = string>({ format: given, filename, onExport, label, size: own, of, ...rest }: ExportProps<R>) {
   const connection = useConnection(of, "Export");
   const size = useToolbarSize(own);
   const wording = useWording();
@@ -336,26 +344,28 @@ export function Export({ filename, onExport, size: own, of, ...rest }: ExportPro
   if (!connection) return null;
   const { snapshot, registry } = connection;
   const all = registry.hook?.exportRows;
+  /* Without a format the text is the CSV, and `R` is `string`. */
+  const format = given ?? (csv as unknown as ExportFormat<R>);
 
-  const deliver = (text: string) => {
+  const deliver = (content: R) => {
     if (onExport) {
-      onExport(text);
+      onExport(content);
       return;
     }
-    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    const url = URL.createObjectURL(new Blob([content as BlobPart], { type: format.mime }));
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = filename ?? wording.exportFileName;
+    anchor.download = filename ?? `${wording.exportFileName.replace(/\.[^.]*$/, "")}.${format.extension}`;
     anchor.click();
     /* Not at once: some browsers (Safari among them) fetch the address only
        after the click has returned, and a revoked one yields no file. */
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
-  const exportCsv = () => {
+  const exportFile = () => {
     setFailure(null);
     if (!all || !snapshot.request) {
-      deliver(snapshot.asCsv());
+      deliver(snapshot.exportAs(format));
       return;
     }
     if (busy) return;
@@ -365,7 +375,7 @@ export function Export({ filename, onExport, size: own, of, ...rest }: ExportPro
     all(snapshot.request).then(
       (rows) => {
         setBusy(false);
-        deliver(snapshot.asCsv(rows));
+        deliver(snapshot.exportAs(format, rows));
       },
       (error: unknown) => {
         setBusy(false);
@@ -376,8 +386,8 @@ export function Export({ filename, onExport, size: own, of, ...rest }: ExportPro
 
   return (
     <>
-      <Button {...rest} size={size} onClick={exportCsv} disabled={rest.disabled || busy} aria-busy={busy || undefined}>
-        {snapshot.server && !all ? wording.exportPageLabel : wording.exportLabel}
+      <Button {...rest} size={size} onClick={exportFile} disabled={rest.disabled || busy} aria-busy={busy || undefined}>
+        {label ?? (snapshot.server && !all ? wording.exportPageLabel : wording.exportLabel)}
       </Button>
       {busy && (
         <VisuallyHidden>

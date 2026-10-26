@@ -30,12 +30,12 @@ import type { ModelColumn } from "./model/tableModel";
 import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
-import { csvOf, selectionText } from "./export";
-import { DEV, warnOnce } from "./dev";
+import { csv, selectionText, sheetOf } from "./export";
+import { DEV, asRows, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { SetFilter, Table, TableOptions, TableSnapshot } from "./types";
+import type { ExportFormat, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
 /** The conditions per column or row filter, in the order in which they were set. */
 type ConditionList = readonly (readonly [string, unknown])[];
@@ -186,7 +186,8 @@ function effectiveWidths(
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z> {
+export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z> {
+  const rows = asRows(given, "the rows of useTable");
   const [registry] = useState(() => new Registry());
   const [parts] = useState(() => {
     const bound = buildParts(registry);
@@ -561,6 +562,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     selectedRows = [...selection.selected].filter((key) => seenRows.has(key)).map((key) => seenRows.get(key));
   }
 
+  const exportAs = <R,>(format: ExportFormat<R>, given?: readonly unknown[]): R =>
+    format.write(sheetOf(registry, wording.levelColumn, given), { formats, wording });
+
   const snapshot: TableSnapshot<Z> = {
     rows,
     filtered: b.filtered as Z[],
@@ -609,7 +613,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     },
     unfoldAllBranches: () => setBranchesState([...liveBranches]),
     foldAllBranches: () => setBranchesState([]),
-    asCsv: (given) => csvOf(registry, wording.levelColumn, formats, wording, given),
+    asCsv: () => exportAs(csv),
+    exportAs,
     selectionAsText: () => selectionText(registry, formats, wording),
     virtual,
     rowCount: server ? rowCount : b.filtered.length,
