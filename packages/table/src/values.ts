@@ -104,27 +104,35 @@ export function sortValue(
   }
 }
 
-/** What goes into the export: numbers and booleans stay what they are - the
-    writer gives them the language's notation (`model/csv.ts`) - a point in time
-    becomes an ISO timestamp, an absent value an empty field. */
+/** What a spreadsheet cell holds: numbers, booleans and points in time stay
+    what they are, an absent value is `undefined`. */
+export type ExportCell = string | number | boolean | Date | undefined;
+
+/** What goes into the export, typed: the value itself - a date stays a `Date` -
+    for a format that writes types. */
+export function exportCell(value: unknown, own?: (value: never) => unknown): ExportCell {
+  if (isAbsent(value)) return undefined;
+  if (own) return exportCell(own(value as never));
+  switch (kindOf(value)) {
+    case "text":
+    case "number":
+    case "boolean":
+    case "date":
+      return value as ExportCell;
+    default:
+      return undefined;
+  }
+}
+
+/** What goes into text - the copy and the CSV: numbers and booleans stay what
+    they are - the writer gives them the language's notation (`model/csv.ts`) -
+    a point in time becomes an ISO timestamp, an absent value an empty field. */
 export function exportValue(
   value: unknown,
   own?: (value: never) => unknown,
 ): string | number | boolean | undefined {
-  if (isAbsent(value)) return undefined;
-  if (own) return exportValue(own(value as never));
-  switch (kindOf(value)) {
-    case "text":
-      return value as string;
-    case "number":
-      return value as number;
-    case "date":
-      return (value as Date).toISOString();
-    case "boolean":
-      return value as boolean;
-    default:
-      return undefined;
-  }
+  const cell = exportCell(value, own);
+  return cell instanceof Date ? cell.toISOString() : cell;
 }
 
 /** The key of a value in a list filter. Values that are present carry a
