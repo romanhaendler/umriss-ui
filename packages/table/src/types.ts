@@ -492,9 +492,6 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       grid mode Enter on a cell with nothing to edit or enter. Without a
       `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
-  /** Accessible name of the table.
-      @deprecated since 0.43 - use `aria-label`. */
-  ariaLabel?: string;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
   groupable?: boolean;

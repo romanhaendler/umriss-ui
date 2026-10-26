@@ -61,7 +61,7 @@ function Fixture({
   return (
     <>
       {withSearchField ? <TreeSearch tree={tree} aria-label="Suche" /> : null}
-      <TreeView tree={tree} ariaLabel="Ablage">
+      <TreeView tree={tree} aria-label="Ablage">
         {(e) => e.node.name}
       </TreeView>
     </>

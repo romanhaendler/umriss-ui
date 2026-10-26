@@ -68,7 +68,7 @@ an x axis that reads such rows names their type: `<XAxis<Row> value="t" />`.
 A y axis reads no value: its series place the rows along y. `Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
 are imported as they are (ADR-0048).
 
-The chart is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its root `<div>`; `aria-label` and `aria-labelledby` name the plot, and your `aria-describedby` is added after the plot's own summary. `ariaLabel` still works for one further minor and warns once in development.
+The chart is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its root `<div>`; `aria-label` and `aria-labelledby` name the plot, and your `aria-describedby` is added after the plot's own summary.
 
 A series is an element, not an entry in a configuration object: the order in the
 JSX decides what lies over what, and at the same time the palette colour.

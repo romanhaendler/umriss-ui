@@ -33,7 +33,7 @@ import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
 import { useSilhouette } from "./Silhouette";
 import { TooltipHtml } from "./TooltipHtml";
-import { warnDeprecated, warnOnce } from "./dev";
+import { warnOnce } from "./dev";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
@@ -57,10 +57,6 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
-  /** Accessible name of the plot. Without a name, `aria-label` or
-      `aria-labelledby`, the chart warns in development.
-      @deprecated since 0.43 - use `aria-label`. */
-  ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
   /** Goes to the root element, after the chart's own styles: a `height` or
@@ -119,8 +115,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     width = "100%",
     height,
     padding = 8,
-    ariaLabel,
-    "aria-label": label = ariaLabel,
+    "aria-label": label,
     "aria-labelledby": labelledBy,
     "aria-describedby": describedBy,
     ref,
@@ -172,7 +167,6 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     [padTop, padRight, padBottom, padLeft],
   );
 
-  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
   if (label === undefined && labelledBy === undefined) {
     warnOnce(
       "chart-arialabel",

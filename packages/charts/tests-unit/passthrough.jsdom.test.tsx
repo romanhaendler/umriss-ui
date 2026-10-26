@@ -73,7 +73,7 @@ describe("the name and the root of the chart", () => {
     expect(container.querySelector(`[id="${ids[0]}"]`)).not.toBeNull();
   });
 
-  it("ariaLabel still names the plot and warns once; a chart without a name warns naming aria-label", async () => {
+  it("a chart without a name warns naming aria-label", async () => {
     /* The warnings are once per module: this test reads a fresh one. */
     vi.resetModules();
     const fresh = await import("../src");
@@ -88,14 +88,6 @@ describe("the name and the root of the chart", () => {
       );
     }
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { container } = render(
-      <>
-        <Fresh through={{ ariaLabel: "Old" }} />
-        <Fresh through={{ ariaLabel: "Old" }} />
-      </>,
-    );
-    expect(container.querySelectorAll('.uc-plot[aria-label="Old"]')).toHaveLength(2);
-    expect(warn.mock.calls.filter((c) => String(c[0]).includes("ariaLabel is deprecated"))).toHaveLength(1);
     render(<Fresh />);
     render(<Fresh />);
     expect(warn.mock.calls.filter((c) => String(c[0]).includes("Chart without aria-label"))).toHaveLength(1);

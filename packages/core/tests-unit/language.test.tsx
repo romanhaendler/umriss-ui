@@ -175,7 +175,7 @@ describe("Wording of the tree", () => {
     return (
       <>
         <TreeSearch tree={tree} aria-label="Suche" />
-        <TreeView tree={tree} ariaLabel="Ablage">
+        <TreeView tree={tree} aria-label="Ablage">
           {(e) => e.node.name}
         </TreeView>
       </>
