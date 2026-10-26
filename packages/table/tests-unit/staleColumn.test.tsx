@@ -1,0 +1,85 @@
+/* An accessor held for its source text is stale when it reads a value from outside its row that has changed.
+   Development says so once per column (or for the rowKey); a `key` on the column that changes with the value
+   is the way out and keeps the column's sort and width. Each test has its own ids: a warning is once per id. */
+
+import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { useTable } from "../src";
+
+interface Item {
+  id: string;
+  net: number;
+}
+const ITEMS: Item[] = [
+  { id: "a", net: 3 },
+  { id: "b", net: 1 },
+  { id: "c", net: 2 },
+];
+
+afterEach(() => vi.restoreAllMocks());
+const warnings = (warn: { mock: { calls: unknown[][] } }, id: string) => warn.mock.calls.filter(([t]) => String(t).includes(id));
+
+function Probe({ rate, id, part, rows = ITEMS, colKey }: { rate: number; id: string; part: string; rows?: Item[]; colKey?: number }) {
+  const props: Record<string, unknown> = {};
+  if (part === "sort") props.sortValue = (v: number) => v * rate;
+  if (part === "group") props.groupValue = (v: number) => v * rate;
+  const { Table, Column } = useTable(rows, { defaultSort: { column: "keyed", direction: "asc" },
+    rowKey: part === "rowKey" ? (r: Item) => `${r.id}${rate}`.slice(0, 1 + (rate > 1 ? 1 : 0)) : (r: Item) => r.id });
+  return (
+    <Table empty="none">
+      <Column key={colKey} id={id} label={id} value={part === "value" ? (r: Item) => r.net * rate : (r: Item) => r.net} {...props} />
+    </Table>
+  );
+}
+
+describe("a stale column", () => {
+  it.each(["value", "sort", "group", "rowKey"])("warns once for %s, naming the column", (part) => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const id = `stale-${part}`;
+    const { rerender } = render(<Probe rate={1} id={id} part={part} />);
+    rerender(<Probe rate={2} id={id} part={part} />);
+    rerender(<Probe rate={3} id={id} part={part} />);
+    const found = part === "rowKey" ? warnings(warn, "rowKey") : warnings(warn, id);
+    expect(found).toHaveLength(1);
+    expect(String(found[0]?.[0])).toMatch(/`key`/);
+  });
+
+  it("stays silent for an unchanged closure, a field name and a native function", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    function Quiet({ n }: { n: number }) {
+      const { Table, Column } = useTable(ITEMS, { rowKey: (r: Item) => r.id });
+      return (
+        <Table empty="none">
+          <Column id="quiet-closure" label="a" value={(r: Item) => r.net * 2} />
+          <Column id="quiet-field" label="b" value="net" />
+          <Column id="quiet-native" label="c" value={(r: Item) => r.net} sortValue={Number} />
+          <span hidden>{n}</span>
+        </Table>
+      );
+    }
+    const { rerender } = render(<Quiet n={1} />);
+    rerender(<Quiet n={2} />);
+    expect(warnings(warn, "quiet-")).toHaveLength(0);
+    expect(warnings(warn, "outside the row")).toHaveLength(0);
+  });
+
+  it("a key that changes with the rate shows the new figures", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { rerender } = render(<Probe rate={1} colKey={1} id="keyed" part="value" />);
+    const cells = () => screen.getAllByRole("cell").map((c) => c.textContent);
+    expect(cells()).toEqual(["1", "2", "3"]);
+    rerender(<Probe rate={2} colKey={2} id="keyed" part="value" />);
+    // The new figures, and the sort the user (here: the default) chose still holds.
+    expect(cells()).toEqual(["2", "4", "6"]);
+  });
+
+  it("calls an accessor at most 1,000 times per side per render", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const rows = Array.from({ length: 5000 }, (_, i) => ({ id: String(i), net: i }));
+    let n = 0;
+    return import("../src/dev").then(({ probeStale: probe }) => {
+      probe("count", (r: Item) => (n++, r.net), (r: Item) => (n++, r.net), rows);
+      expect(n).toBe(2000);
+    });
+  });
+});

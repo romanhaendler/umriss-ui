@@ -197,7 +197,8 @@ token away.
 
 **Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer. `light-dark()` is
 older nowhere; an older browser discards the tokens and shows the interface
-unstyled.
+unstyled. An application checks the floor itself with
+`CSS.supports("color", "light-dark(red, red)")`.
 
 ## Testing
 
