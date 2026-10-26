@@ -700,6 +700,10 @@ export interface ExportSheet {
 export interface ExportContext {
   formats: Formats;
   wording: Wording;
+  /** The wall-clock fields of an instant in the table's time zone; absent
+      without one, where the writer reads the Date's own. A format that must
+      import nothing gets the zone this way, as data. */
+  wallClock?: (d: Date) => { year: number; month: number; day: number; hours: number; minutes: number; seconds: number };
 }
 
 /** A way to write the export: the file's extension and MIME type, and the
