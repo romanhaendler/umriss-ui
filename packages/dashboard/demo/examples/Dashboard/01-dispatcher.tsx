@@ -164,7 +164,7 @@ export default function Dispatcher() {
     onViewChange: () => setKept((count) => count + 1),
   });
   return (
-    <Dashboard aria-label="Dispatch, today" catalogue={["figure", "trend", "alerts"]} data-draft={open || undefined} data-kept={kept}>
+    <Dashboard headingLevel={4} aria-label="Dispatch, today" catalogue={["figure", "trend", "alerts"]} data-draft={open || undefined} data-kept={kept}>
       <HeadingType />
       <WidgetType
         name="figure"

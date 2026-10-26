@@ -34,7 +34,9 @@ a test, without a layout engine.
 back `Dashboard` and `WidgetType`. A widget type is JSX: its name, a sentence,
 the sizes it offers with the columns (of twelve) and rows each takes, the size
 to start from, its default options, and its content as a function of the size
-and the options. The options type is inferred from the default options.
+and the options. The options type is inferred from the default options. The
+`headingLevel` prop (2 to 6, default 2) is the level of the heading widgets, and a
+widget's title stands one level below them when the dashboard holds one.
 
 ```tsx
 import { Stat } from "@umriss-ui/core";
@@ -90,7 +92,9 @@ const { Dashboard, WidgetType } = useDashboard({
   resize it, change its options or remove it, and the editing mode says so on
   its head and in its menu. The mark lives in the view, so it comes back through
   `initialView` and "Reset" brings back the default's. Only the application sets
-  it; the reader never can.
+  it; the reader never can. An arrangement a reader kept before the lock lacks
+  it: the application sets it before `initialView`, as the demo's "A widget every
+  reader keeps" shows.
 - **A kept arrangement is read leniently.** A widget of a type not declared is
   not drawn and stays in the stored arrangement: "Done" keeps it after the
   widgets that are drawn, so a widget behind a role, a flag or a plugin loaded

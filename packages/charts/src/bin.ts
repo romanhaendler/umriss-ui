@@ -44,12 +44,13 @@ const MAX_BINS = 10_000;
     A value on an edge belongs to the bin that edge starts - `[from, to)` - but
     the last bin is closed, so the greatest value of a domain is counted and not
     lost. Values that are not finite (`NaN`, ±Infinity, `null`, `undefined`)
-    are skipped, as a gap is on a chart. Without values there are no bins; with
+    are skipped, as a gap is on a chart. The values may be a typed array
+    (`Float64Array`, `Int32Array`): they are read by index. Without values there are no bins; with
     values there is at least one, even when they are all equal. */
-export function bin(values: readonly (number | null | undefined)[], options?: BinOptions): Bin[];
+export function bin(values: ArrayLike<number | null | undefined>, options?: BinOptions): Bin[];
 export function bin<T>(rows: readonly T[], value: (row: T) => number | null | undefined, options?: BinOptions): Bin[];
 export function bin<T>(
-  rows: readonly T[],
+  rows: ArrayLike<T>,
   second?: BinOptions | ((row: T) => number | null | undefined),
   third?: BinOptions,
 ): Bin[] {
@@ -59,8 +60,8 @@ export function bin<T>(
   invariant(o.count === undefined || o.count >= 1, "bin: `count` has to be at least 1.");
 
   const values: number[] = [];
-  for (const row of rows) {
-    const v = read(row);
+  for (let i = 0; i < rows.length; i++) {
+    const v = read(rows[i] as T);
     if (typeof v === "number" && Number.isFinite(v)) values.push(v);
   }
   const given = o.domain;

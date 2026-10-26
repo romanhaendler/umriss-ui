@@ -485,7 +485,7 @@
     position: relative;
     display: block;
     height: 1.3em;
-    font-size: 0.85em;
+    font-size: var(--uc-size-tick);
     text-decoration: none;
   }
 
