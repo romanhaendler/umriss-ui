@@ -93,11 +93,11 @@ outcome, not a fault.
   show; locking one widget.
 - *Never:* stacks of widgets that share one place. They hide all but one value
   at a time, as the carousel does (ADR-0032).
-- *Added 2026-10-26, never:* dragging from the catalogue to a chosen place. The
-  catalogue is a drawer over the board, so a drag from it reaches the grid with
-  a pointer only, and only once the drawer is moved aside. Adding puts the
-  widget at the end, and its menu, the arrow keys and "to the start" place it
-  from there.
+  - *Added 2026-10-26:* dragging from the catalogue to a chosen place. The
+    catalogue is a drawer over the board, so a drag from it reaches the grid
+    with a pointer only, and only once the drawer is moved aside. Adding puts
+    the widget at the end, and its menu, the arrow keys and "to the start"
+    place it from there.
 
 ## Considered Options
 
