@@ -616,6 +616,7 @@ interface AutomaticMode<Z> {
   defaultBranches?: readonly string[] | number;
   rowCount?: never;
   onRequest?: never;
+  exportRows?: never;
   filterOptions?: never;
   answers?: never;
 }
@@ -625,7 +626,7 @@ interface AutomaticMode<Z> {
     its own; select all, the export and the footer would act on one page and
     call it the whole, so "select all" says it selects the page, the export
     writes the page and says so, and there is no footer and no grouping. */
-interface ServerMode {
+interface ServerMode<Z> {
   /** Server mode: the rows are one page a server answered. */
   server: true;
   childRows?: never;
@@ -649,10 +650,16 @@ interface ServerMode {
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];
+  /** Every row of a request, for the export: `Export` hands over the current
+      request unchanged and writes what comes back in the visible columns. The
+      application ignores `page` and `pageSize`, keeps the sort, and caps or
+      refuses a set that is too large - a rejection's message shows beside the
+      button. Without it `Export` writes the page. */
+  exportRows?: (request: TableRequest) => Promise<readonly Z[]>;
 }
 
 /** The options of `useTable`: automatic, or in server mode over a server's rows. */
-export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode);
+export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode<Z>);
 
 /** The state of a table, as everything outside the columns reads it. */
 export interface TableSnapshot<Z> {
@@ -743,8 +750,8 @@ export interface TableSnapshot<Z> {
       the options set it up is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet - in
-      server mode the page. */
-  asCsv: () => string;
+      server mode the page, or the rows handed in. */
+  asCsv(rows?: readonly Z[]): string;
   /** The selected rows within the filtered set as tab-separated text under a
       header line - the text Ctrl+C writes. `""` with nothing selected. */
   selectionAsText: () => string;
