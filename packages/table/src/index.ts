@@ -9,6 +9,9 @@ export { useTable } from "./useTable";
 export { column } from "./column";
 export { columnFilter } from "./columnFilter";
 export type { FilterInputProps, ColumnFilter } from "./columnFilter";
+export { csv } from "./export";
+export type { ExportContext, ExportFormat, ExportSheet } from "./types";
+export type { ExportCell } from "./values";
 export { ColumnMenu, Export, Pagination, Search, Toolbar } from "./rowlessParts";
 export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, ToolbarProps } from "./rowlessParts";
 /* The types a caller names by name - for a wrapper with `of`, a preset, props
