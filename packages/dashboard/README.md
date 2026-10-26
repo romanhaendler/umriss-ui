@@ -90,7 +90,9 @@ const { Dashboard, WidgetType } = useDashboard({
   resize it, change its options or remove it, and the editing mode says so on
   its head and in its menu. The mark lives in the view, so it comes back through
   `initialView` and "Reset" brings back the default's. Only the application sets
-  it; the reader never can.
+  it; the reader never can. An arrangement a reader kept before the lock lacks
+  it: the application sets it before `initialView`, as the demo's "A widget every
+  reader keeps" shows.
 - **A kept arrangement is read leniently.** A widget of a type not declared is
   not drawn and stays in the stored arrangement: "Done" keeps it after the
   widgets that are drawn, so a widget behind a role, a flag or a plugin loaded
