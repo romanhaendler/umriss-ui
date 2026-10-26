@@ -29,9 +29,19 @@ function inTextEntry(target: EventTarget | null): boolean {
 function inModal(target: EventTarget | null): boolean {
   for (let el = target instanceof Element ? target : null; el; el = el.parentElement) {
     if (el.getAttribute("aria-modal") === "true") return true;
-    if (el.tagName === "DIALOG" && el.matches(":modal")) return true;
+    if (el.tagName === "DIALOG" && isModalDialog(el)) return true;
   }
   return false;
+}
+
+/* jsdom, where a host application's tests run, throws on `:modal`; it has no
+   modal dialog either. */
+function isModalDialog(dialog: Element): boolean {
+  try {
+    return dialog.matches(":modal");
+  } catch {
+    return false;
+  }
 }
 
 /**
