@@ -74,6 +74,7 @@ function combineConditions(
   conditions: ConditionList,
   registry: Registry,
   rowFilters: RowFilters,
+  timeZone: string | undefined,
 ): ((row: unknown) => boolean) | undefined {
   if (conditions.length === 0) return undefined;
   let resolvedFor = -1;
@@ -92,7 +93,7 @@ function combineConditions(
         if (entry && appliesTo(registry, id, condition)) {
           resolved.push((r) => {
             const filter = filterOf(entry.spec.filter);
-            return !filter || satisfies(filter, entry.read(r), condition);
+            return !filter || satisfies(filter, entry.read(r), condition, timeZone);
           });
         }
       }
@@ -253,7 +254,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; a condition under that id is the row filter's, and the column's filter cannot hold one of its own.`);
     }
   }
-  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters), [conditions, registry, rowFilters]);
+  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats.timeZone), [conditions, registry, rowFilters, formats.timeZone]);
 
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
@@ -316,7 +317,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       : groupingState.slice(0, MOST_LEVELS);
   const groupingPrefix = groupingNow.join("|");
   const foldedSet = useMemo(() => new Set(foldedState), [foldedState]);
-  const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown) : null;
+  const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown, formats.timeZone) : null;
   const grouping = useMemo(
     () => (model && model.levels.length ? { ...model, folded: foldedSet, compareText: formats.compareText } : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the model's identity carries the ids and the columns

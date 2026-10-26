@@ -82,6 +82,8 @@ interface BuiltIn<B> {
   isEmpty: (condition: B) => boolean;
   /** Whether an absent value matches. */
   absentMatches: (condition: B) => boolean;
+  /** `matches`, with the formats' time zone: a day is the zone's day. */
+  matchesIn?: (value: unknown, condition: B, timeZone: string | undefined) => boolean;
   /** `describe`, with the provider's formats and wording. */
   describeIn: (condition: B, env: FilterEnv) => string;
 }
@@ -114,9 +116,10 @@ export function checkCondition(filter: Filter, condition: unknown): "effective" 
 }
 
 /** Whether a value satisfies an effective condition. */
-export function satisfies(filter: Filter, value: unknown, condition: unknown): boolean {
-  if (isAbsent(value)) return BUILT_IN.get(filter)?.absentMatches(condition) ?? false;
-  return filter.matches(value, condition);
+export function satisfies(filter: Filter, value: unknown, condition: unknown, timeZone?: string): boolean {
+  const more = BUILT_IN.get(filter);
+  if (isAbsent(value)) return more?.absentMatches(condition) ?? false;
+  return more?.matchesIn ? more.matchesIn(value, condition, timeZone) : filter.matches(value, condition);
 }
 
 /** The text of an effective condition, without the column's name. */
@@ -304,17 +307,27 @@ const isNumber = (value: unknown): value is number => typeof value === "number" 
 const isDate = (value: unknown): value is Date => value instanceof Date && !Number.isNaN(value.getTime());
 
 /** The lower bound as a number - for a point in time the start of its day. */
-const lowerBound = (bound: number | Date | undefined): number | undefined =>
-  isDate(bound) ? dayStart(bound) : isNumber(bound) ? bound : undefined;
+const lowerBound = (bound: number | Date | undefined, timeZone?: string): number | undefined =>
+  isDate(bound) ? dayStart(bound, timeZone) : isNumber(bound) ? bound : undefined;
 
 /** The upper bound, read exclusively: for a point in time the start of the
     following day, for a number the number itself (then inclusive). */
-const upperBound = (bound: number | Date | undefined): { value: number; open: boolean } | undefined =>
+const upperBound = (bound: number | Date | undefined, timeZone?: string): { value: number; open: boolean } | undefined =>
   isDate(bound)
-    ? { value: nextDay(bound), open: true }
+    ? { value: nextDay(bound, timeZone), open: true }
     : isNumber(bound)
       ? { value: bound, open: false }
       : undefined;
+
+function rangeMatches(value: unknown, condition: Range, timeZone: string | undefined): boolean {
+  const number = isDate(value) ? value.getTime() : isNumber(value) ? value : undefined;
+  if (number === undefined) return false;
+  const from = lowerBound(condition.from, timeZone);
+  const to = upperBound(condition.to, timeZone);
+  if (from !== undefined && number < from) return false;
+  if (to !== undefined && (to.open ? number >= to.value : number > to.value)) return false;
+  return true;
+}
 
 const boundText = (bound: number | Date, env: FilterEnv): string =>
   isDate(bound) ? env.formats.date(bound) : (asText(bound, env.format, env.formats, env.wording) ?? String(bound));
@@ -381,15 +394,7 @@ function RangeInput(props: FilterInputProps<unknown, Range> & BuiltInEnv) {
 
 const RANGE = /* @__PURE__ */ builtIn<Range>(
   /* @__PURE__ */ columnFilter<unknown, Range>({
-    matches: (value, condition) => {
-      const number = isDate(value) ? value.getTime() : isNumber(value) ? value : undefined;
-      if (number === undefined) return false;
-      const from = lowerBound(condition.from);
-      const to = upperBound(condition.to);
-      if (from !== undefined && number < from) return false;
-      if (to !== undefined && (to.open ? number >= to.value : number > to.value)) return false;
-      return true;
-    },
+    matches: (value, condition) => rangeMatches(value, condition, undefined),
     Input: RangeInput,
     describe: (condition) =>
       [condition.from, condition.to].map((bound) => (bound === undefined ? "" : String(bound))).join("–"),
@@ -407,11 +412,13 @@ const RANGE = /* @__PURE__ */ builtIn<Range>(
     },
     isEmpty: (condition) => condition.from === undefined && condition.to === undefined,
     absentMatches: () => false,
+    matchesIn: (value, condition, timeZone) => rangeMatches(value, condition, timeZone),
     describeIn: (condition, env) => {
       const { from, to } = condition;
       if (from !== undefined && to !== undefined) {
         /* Two days of the same year name it once: "01.09.–30.09.2026". */
-        const oneYear = isDate(from) && isDate(to) && zoneFields(from, undefined).year === zoneFields(to, undefined).year;
+        const zone = env.formats.timeZone;
+        const oneYear = isDate(from) && isDate(to) && zoneFields(from, zone).year === zoneFields(to, zone).year;
         return env.wording.rangeFromTo(
           oneYear ? env.formats.dateShort(from as Date) : boundText(from, env),
           boundText(to, env),
