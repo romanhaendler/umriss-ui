@@ -2,7 +2,7 @@
    by the footer, the group headers and the folded spans. */
 
 import type { ReactNode } from "react";
-import { VisuallyHidden } from "@umriss-ui/core";
+import { VisuallyHidden, zoneFields } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { aggregate } from "./model/grouping";
 import type { AggregateColumn } from "./model/grouping";
@@ -159,7 +159,7 @@ const decimalsOf = (n: number): number => {
 };
 
 const sameYear = ([from, to]: [unknown, unknown]): boolean =>
-  from instanceof Date && to instanceof Date && from.getFullYear() === to.getFullYear();
+  from instanceof Date && to instanceof Date && zoneFields(from, undefined).year === zoneFields(to, undefined).year;
 
 /** Whether an aggregate stands right-aligned in tabular figures: counts and
     numbers do, a point in time or a range of them follows its column. */

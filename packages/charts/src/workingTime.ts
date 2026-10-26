@@ -17,6 +17,7 @@
    onto its local boundaries. */
 
 import { tickStep } from "./ticks";
+import { fieldTicks, offsetAt, wallMultipleTicks } from "./zone";
 
 /** One second in milliseconds, the unit of a time axis. */
 export const SECOND = 1000;
@@ -263,9 +264,10 @@ export function timeStep(span: number, count: number): number {
 
 /** The local offset at an instant, as the shift of a grid that is to lie on
     local time: `wallClock = offset + k · step`. Taken at one instant, it holds
-    for a grid up to the next clock change. */
-export function localOffset(instant: number): number {
-  return new Date(instant).getTimezoneOffset() * MINUTE;
+    for a grid up to the next clock change. With a `timeZone` (an IANA name)
+    the zone's offset, else the reader's. */
+export function localOffset(instant: number, timeZone?: string): number {
+  return timeZone === undefined ? new Date(instant).getTimezoneOffset() * MINUTE : 0 - offsetAt(instant, timeZone);
 }
 
 /** A tick: where it stands on the clock and where it lies on the axis. */
@@ -289,6 +291,11 @@ export interface WorkingTimeTick {
     the beginning of the next - the earlier one stays: two labels on the same
     pixel would be one too many.
 
+    With a `timeZone` the grid is the zone's, and `offset` is not read: a step
+    of whole days stands on the zone's midnights, a shorter one on its whole
+    multiples in real time - none in the hour a clock change removes, two in
+    the one it doubles.
+
     Both times come back, because the axis needs both: the working time to
     place the tick, the wall clock time to label it. */
 export function workingTimeTicks(
@@ -297,16 +304,22 @@ export function workingTimeTicks(
   to: number,
   step: number,
   offset = 0,
+  timeZone?: string,
 ): WorkingTimeTick[] {
   const calendar = calendarFrom(input);
   const ticks: WorkingTimeTick[] = [];
   if (!Number.isFinite(from) || !Number.isFinite(to) || !(step > 0)) return ticks;
-  const first = Math.ceil((from - offset) / step);
-  const last = Math.floor((to - offset) / step);
-  if (!Number.isFinite(first) || !Number.isFinite(last)) return ticks;
+  const walls: number[] = [];
+  if (timeZone !== undefined) {
+    walls.push(...(step % DAY === 0 ? fieldTicks(from, to, "day", step / DAY, timeZone) : wallMultipleTicks(from, to, step, timeZone)));
+  } else {
+    const first = Math.ceil((from - offset) / step);
+    const last = Math.floor((to - offset) / step);
+    if (!Number.isFinite(first) || !Number.isFinite(last)) return ticks;
+    for (let k = first; k <= last; k++) walls.push(offset + k * step);
+  }
   let previous = Number.NaN;
-  for (let k = first; k <= last; k++) {
-    const wallClock = offset + k * step;
+  for (const wallClock of walls) {
     const workingTime = toWorkingTime(wallClock, calendar);
     if (Number.isNaN(workingTime) || workingTime === previous) continue;
     ticks.push({ wallClock, workingTime });
