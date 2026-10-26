@@ -283,7 +283,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "What a column's values come to: a sum, an average, the extremes, a count. It stands in the footer over the filtered rows and in each group header over the group's rows.",
         about: [
           "An aggregate is always computed from rows: a group's average is over its rows, not over the averages of the groups inside it. Absent values do not count.",
-          "A rate or a weighted average is the application's to say, with an aggregate of its own.",
+          "A rate or a weighted average is the application's to say, with an aggregate of its own; `aggregateLabel` names that function in the footer, while a built-in kind keeps its own word.",
         ],
         alternatives: [
           { when: "A key figure outside the table", use: "`Stat` from @umriss-ui/core" },
