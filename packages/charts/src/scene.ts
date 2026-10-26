@@ -725,6 +725,10 @@ export class ChartScene {
       the press became a drag, and the band is drawn.
       @internal */
   range: { from: number; to: number; live: boolean; pointerId: number } | null = null;
+  /** Where the keyboard set the start of a range: the x axis and value of the
+      Active point then.
+      @internal */
+  rangeStart: { axisId: string; x: number } | null = null;
   /** Where the press that may become a click began; a click after the pointer
       travelled is the end of a drag, and selects nothing.
       @internal */
