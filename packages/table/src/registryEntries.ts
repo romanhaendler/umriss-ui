@@ -110,6 +110,10 @@ export interface HookSnapshot {
   selectedRows?: readonly unknown[];
   /** Server mode: the rows answer an older request than the current one. */
   late: boolean;
+  /** Server mode: the message that stands in place of the rows, when it is the
+      current request's; `retry` reports that request once more. */
+  error?: string;
+  retry?: () => void;
   /** Server mode: the footer's values by column id. */
   totals?: Readonly<Record<string, unknown>>;
   /** The row filters the table was given, by id - their chips read them. */

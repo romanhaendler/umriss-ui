@@ -28,7 +28,7 @@ import {
   useStickyHeaderHeights,
   useVirtualPitch,
 } from "./frameEffects";
-import { newRowBody, pageFiller, renderBody } from "./frameBody";
+import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
 import { FootRow, HeadRow } from "./headFoot";
@@ -48,7 +48,8 @@ export function Frame({
   name: { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string };
 }) {
   /* A late answer makes the table busy as `loading` does. */
-  const props = registry.hook?.late ? { ...given, loading: true } : given;
+  const error = registry.hook?.error;
+  const props = error !== undefined ? { ...given, loading: false } : registry.hook?.late ? { ...given, loading: true } : given;
   const {
     selectable = false,
     stickyHeader = false,
@@ -164,7 +165,7 @@ export function Frame({
     heldLines,
     filler: pageFiller(heldLines, shownLines, pageSize, columnCount),
   };
-  const shown = renderBody(body, loading, stale);
+  const shown = error !== undefined ? { body: errorBody(body, error, hook.retry), empty: true } : renderBody(body, loading, stale);
 
   return (
     <>

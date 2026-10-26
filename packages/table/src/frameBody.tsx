@@ -124,6 +124,32 @@ function loadingBody(ctx: BodyContext) {
   );
 }
 
+/** In place of the rows: the application's message and the way to ask again,
+    in the height of a page. The alert is announced where it appears; the button
+    is in the tab order and takes no focus from the table. */
+export function errorBody(ctx: BodyContext, message: string, retry: (() => void) | undefined) {
+  return (
+    <tbody>
+      <tr data-grid-line={lineKey(ctx.gridMode, "error")}>
+        <td
+          colSpan={ctx.layout.columnCount}
+          className={styles.emptyCell}
+          style={ctx.pageSize && ctx.heldLines ? { height: `calc(var(--_table-pitch) * ${ctx.heldLines})`, verticalAlign: "top" } : undefined}
+        >
+          <div className={styles.empty}>
+            <p role="alert" className={styles.emptyTitle}>
+              {message}
+            </p>
+            <Button size="sm" variant="ghost" onClick={retry}>
+              {ctx.wording.tryAgain}
+            </Button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  );
+}
+
 function emptyBody(ctx: BodyContext) {
   const { hook, layout, wording } = ctx;
   const { snapshot } = layout;
