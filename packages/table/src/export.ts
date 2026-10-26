@@ -65,11 +65,13 @@ function exportColumns(registry: Registry, rows: readonly unknown[]): CsvColumn<
   );
 }
 
-export function csvOf(registry: Registry, levelLabel: string, formats: Formats, wording: Wording): string {
+export function csvOf(registry: Registry, levelLabel: string, formats: Formats, wording: Wording, given?: readonly unknown[]): string {
   const hook = registry.hook;
   if (!hook) return "";
-  const columns = exportColumns(registry, hook.rows);
+  const columns = exportColumns(registry, given ?? hook.rows);
   const conventions = conventionsOf(formats, wording);
+  /* Rows handed in (every match of a server) are written as they are. */
+  if (given) return asCsv(given, columns, conventions);
   /* A tree writes every row of its filtered tree, open or not, with its level
      first: a consumer filtering by level gets a whole level. */
   const { exported, filtered } = registry.projection();
