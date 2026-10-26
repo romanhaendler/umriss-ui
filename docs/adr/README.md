@@ -85,6 +85,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 | [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | accepted | components, core |
 | [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
+| [0072](0072-the-server-mode-asks-and-is-answered-the-application-names-the-answer.md) | The server mode asks and is answered; the application names the answer | `answers` names the request the rows answer; error, select-all, export and totals follow | accepted | table |
 | [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

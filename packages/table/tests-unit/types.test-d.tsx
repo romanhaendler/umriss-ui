@@ -364,6 +364,9 @@ export function TreeRows() {
   useTable(units, { rowKey: (u) => u.id, childRows: () => [1, 2] });
   // @ts-expect-error a tree in server mode
   useTable(units, { rowKey: (u) => u.id, server: true, rowCount: 0, onRequest: () => {}, childRows: (u) => u.children });
+  useTable(units, { rowKey: (u) => u.id, server: true, rowCount: 0, onRequest: () => {}, answers: undefined });
+  // @ts-expect-error answers is for server mode
+  useTable(units, { rowKey: (u) => u.id, answers: { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 } });
   return null;
 }
 
