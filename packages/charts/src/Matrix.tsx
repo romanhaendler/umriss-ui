@@ -43,7 +43,8 @@ export interface MatrixProps<T> {
       function of it. A missing level is a hole, not a zero. */
   level: Value<T>;
   /** How the level colours a cell: by assessment against limits, or across
-      a gradient.
+      a gradient. A gradient's legend entry shows a colour bar: its steps, with the range's two ends written under
+      them in `format` and the inner edges where they fit. An assessment keeps its three colours.
       @default { kind: "gradient", stops: DEFAULT_GRADIENT } */
   coloring?: MatrixColoring;
   /** Binding to an x axis. */

@@ -11,7 +11,7 @@ import type { ScheduleTooltipTarget } from "./scene";
 import styles from "./Schedule.module.css";
 
 /** A duration in hours and minutes, from the wording. */
-function useDuration(): (ms: number) => string {
+export function useDuration(): (ms: number) => string {
   const wording = useWording();
   return (ms) => {
     const minutes = Math.round(ms / MINUTE);

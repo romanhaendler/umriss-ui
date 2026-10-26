@@ -29,7 +29,12 @@ describe("Focus styles of @umriss-ui/schedule (ADR-0021)", () => {
        reader cannot reach is a view a screen reader cannot leave; the plot,
        since schedule-a11y, as the one tab stop whose keys walk the subtasks
        (ADR-0030). The grips stay the pointer's. */
-    expect(elements.map((element) => element.key)).toEqual(["Schedule.tsx button .chevron", "Schedule.tsx div .plot"]);
+    expect(elements.map((element) => element.key)).toEqual([
+      "DataTable.tsx button .dataKey",
+      "DataTable.tsx div .dataPanel",
+      "Schedule.tsx button .chevron",
+      "Schedule.tsx div .plot",
+    ]);
   });
 
   it("give every element in the tab order a focus style of its own", () => {
