@@ -107,6 +107,8 @@ export { toWorkingTimeClamped } from "./workingTime";
 /* The shift of a tick grid onto local time:
    the calendar axis stands its days on it as well. */
 export { localOffset } from "./workingTime";
+/* Whether a zone's clock shows an instant's time twice: the schedule's labels carry their offset there. */
+export { inDoubledHour } from "./zone";
 
 /* The charts' own wording (ADR-0031); German stands behind the subpath
    `@umriss-ui/charts/wording/de`. */
