@@ -9,7 +9,6 @@
   "PopoverProps.className": "(a) pass-through: a class on the surface",
   "DateTimePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
   "DateTimePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
-  "DateRangePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
   "DateTimeRangePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
   "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows"
 }

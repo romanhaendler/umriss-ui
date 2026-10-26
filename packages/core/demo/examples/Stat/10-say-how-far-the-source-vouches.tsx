@@ -21,11 +21,11 @@ const FURNACE: LimitSet = {
 export default function SourceQuality() {
   return (
     <Grid minItemWidth="200px" gap={4}>
-      <Stat label="Furnace 1 · good" value={805} unit="°C" decimals={0} limits={FURNACE} quality="good" />
-      <Stat label="Furnace 2 · uncertain" value={812} unit="°C" decimals={0} limits={FURNACE} quality="uncertain" />
-      <Stat label="Furnace 3 · bad, in alarm" value={905} unit="°C" decimals={0} limits={FURNACE} quality="bad" />
+      <Stat label="Furnace 1" value={805} unit="°C" decimals={0} limits={FURNACE} quality="good" />
+      <Stat label="Furnace 2" value={812} unit="°C" decimals={0} limits={FURNACE} quality="uncertain" />
+      <Stat label="Furnace 3" value={905} unit="°C" decimals={0} limits={FURNACE} quality="bad" />
       <Stat
-        label="Furnace 4 · bad and stale"
+        label="Furnace 4"
         value={841}
         unit="°C"
         decimals={0}

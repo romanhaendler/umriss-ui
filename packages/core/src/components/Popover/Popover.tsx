@@ -125,6 +125,12 @@ export function Popover({
     },
     [onOpenChange, restoreFocus, anchorRef, focusRef],
   );
+  /* Read through a ref: a fresh `onOpenChange` per render must not rebuild the
+     listeners, which would move this panel above a nested one in `openStack`. */
+  const closeRef = useRef(close);
+  useEffect(() => {
+    closeRef.current = close;
+  });
 
   /* Measure and set before painting, so the clamping holds from the first
      opening: before the panel is in the document its size would measure zero. */
@@ -191,14 +197,14 @@ export function Popover({
     const handlePointerDown = (event: MouseEvent) => {
       /* The first node of the composed path: inside a shadow root `target` is
          retargeted to the host, which no ref contains. */
-      if (!isInside(event.composedPath()[0] as Node)) close(false);
+      if (!isInside(event.composedPath()[0] as Node)) closeRef.current(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || openStack.at(-1) !== self) return;
       /* Escape closes the panel and nothing more: the same key is a dialog's
          close request. */
       event.preventDefault();
-      close(true);
+      closeRef.current(true);
     };
 
     // One recomputation per frame instead of one per scroll event.
@@ -214,7 +220,7 @@ export function Popover({
       /* A scroll inside the panel moves nothing the position depends on; a
          re-measure would drop its cut and jump it back to its top. */
       if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
-      if (hideOnScroll) close(false);
+      if (hideOnScroll) closeRef.current(false);
       else reposition();
     };
     /* The on-screen keyboard and a zoom change the visible part of the window
@@ -242,7 +248,7 @@ export function Popover({
     };
     // insideRefs deliberately not in the dependencies: it is read through a ref
     // so that a fresh array per render does not rebind the listeners.
-  }, [open, anchorRef, close, measure, hideOnScroll, registerInParent]);
+  }, [open, anchorRef, measure, hideOnScroll, registerInParent]);
 
   /* A dialog takes the focus in: the first focusable element, else the panel
      itself - unless its content placed the focus already. Children's effects

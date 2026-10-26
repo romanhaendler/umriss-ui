@@ -118,6 +118,7 @@ export function formatsFor(locale: string, timeZone?: string): Formats {
   if (!set) {
     set = buildFormats(locale, timeZone);
     sets.set(key, set);
+    for (const name of INSTANT_ENTRIES) builtInInstants.add(set[name]);
   }
   return set;
 }
@@ -125,6 +126,9 @@ export function formatsFor(locale: string, timeZone?: string): Formats {
 /* One set per locale and zone, so that `DEFAULT_FORMATS` and `GERMAN_FORMATS`
    keep their identity and a zone's set is built once. */
 const sets = new Map<string, Formats>();
+
+/** Every instant entry `formatsFor` built, whatever its zone. */
+export const builtInInstants = /* @__PURE__ */ new WeakSet<object>();
 
 /** The entries that write an instant: a named zone replaces those an
     application left as the built-in set has them. */
