@@ -10,10 +10,11 @@
 
    Deliberately free of the DOM and of the scene. */
 
-import { zoneFields, zoneInstant } from "@umriss-ui/core";
+import { zoneFields, zoneInstant, type Formats } from "@umriss-ui/core";
 import {
   calendarFrom,
   DAY,
+  inDoubledHour,
   localOffset,
   MINUTE,
   workingTimeTicks,
@@ -52,9 +53,10 @@ export function fineTicks(
   domain: readonly [number, number],
   step: number,
   calendar: CalendarInput = WALL_CLOCK,
+  timeZone?: string,
 ): WorkingTimeTick[] {
   const [from, to] = wallExtentWithin(domain, calendar);
-  return workingTimeTicks(calendar, from, to, step, localOffset(from)).filter(
+  return workingTimeTicks(calendar, from, to, step, localOffset(from, timeZone), timeZone).filter(
     (tick) => tick.workingTime >= domain[0] && tick.workingTime <= domain[1],
   );
 }
@@ -104,12 +106,21 @@ export function dayRun(dayWidth: number, room: number): number {
     Counted from a Monday, so that a week's date stands on its first day - and
     counted on the calendar, not in the view, so that the dates hold still while
     the plot pans instead of hopping from day to day. */
-export function opensRun(start: number, run: number): boolean {
+export function opensRun(start: number, run: number, timeZone?: string): boolean {
   /* The local day's number since 1 January 1970; the 5th, day 4, was a Monday.
      Rounded, because a grid laid on one offset is an hour off after a clock
      change (`localOffset`). */
-  const day = Math.round((start - localOffset(start)) / DAY);
+  const day = Math.round((start - localOffset(start, timeZone)) / DAY);
   return (((day - 4) % run) + run) % run === 0;
+}
+
+/** The clock time of an instant; inside the hour a clock change doubles it
+    carries its offset (`02:30 GMT+2`), so the two readings differ. */
+export function timeText(formats: Formats, instant: number): string {
+  const text = formats.time(new Date(instant), false);
+  return formats.timeZone !== undefined && inDoubledHour(instant, formats.timeZone)
+    ? `${text} ${formats.offset(new Date(instant))}`
+    : text;
 }
 
 /** The narrowest and the widest span zoom may reach. */

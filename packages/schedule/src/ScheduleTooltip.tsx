@@ -6,6 +6,7 @@
 import type { ReactNode } from "react";
 import { MINUTE } from "@umriss-ui/charts";
 import { useFormats, useWording } from "@umriss-ui/core";
+import { timeText } from "./timeAxis";
 import type { ScheduleTooltipTarget } from "./scene";
 import styles from "./Schedule.module.css";
 
@@ -29,7 +30,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
   const formats = useFormats();
   const wording = useWording();
   const duration = useDuration();
-  const time = (instant: number) => formats.time(new Date(instant), false);
+  const time = (instant: number) => timeText(formats, instant);
   if (target.kind === "subtask") {
     const { subtask, task } = target;
     const parts = [
@@ -68,7 +69,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
 export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarget }): ReactNode {
   const formats = useFormats();
   const wording = useWording();
-  const time = (instant: number) => formats.time(new Date(instant), false);
+  const time = (instant: number) => timeText(formats, instant);
   const duration = useDuration();
 
   if (target.kind === "subtask") {

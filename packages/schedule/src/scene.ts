@@ -338,8 +338,9 @@ export class ScheduleScene {
       this.fitted = true;
       return;
     }
-    const { year, month, day } = zoneFields(Date.now(), undefined);
-    const today = zoneInstant({ year, month, day }, undefined).getTime();
+    const zone = this.view.options.timeZone;
+    const { year, month, day } = zoneFields(Date.now(), zone);
+    const today = zoneInstant({ year, month, day }, zone).getTime();
     this.view.showWall([today, today + DAY]);
   }
 

@@ -20,6 +20,17 @@
     background: var(--u-color-surface);
   }
 
+  .zoneLabel {
+    display: block;
+    padding: 0 var(--u-space-2);
+    overflow: hidden;
+    color: var(--u-color-text-muted);
+    font-size: var(--u-text-xs);
+    line-height: 2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .dayBand,
   .tickBand {
     position: relative;

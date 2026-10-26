@@ -18,12 +18,12 @@ export interface SnapRaster {
   readonly offset: number;
 }
 
-/** `time` onto the nearest line of the raster in local time - a step alone
-    starts at local midnight. A step of zero or less is no raster: the time
-    stays as it is. */
-export function snapTime(time: number, raster: number | SnapRaster): number {
+/** `time` onto the nearest line of the raster in the zone's time, the reader's
+    unless one is named - a step alone starts at the zone's midnight. A step of
+    zero or less is no raster: the time stays as it is. */
+export function snapTime(time: number, raster: number | SnapRaster, timeZone?: string): number {
   const { step, offset } = typeof raster === "number" ? { step: raster, offset: 0 } : raster;
   if (!(step > 0) || !Number.isFinite(time)) return time;
-  const origin = localOffset(time) + offset;
+  const origin = localOffset(time, timeZone) + offset;
   return origin + Math.round((time - origin) / step) * step;
 }
