@@ -5,7 +5,7 @@
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
    typecheck fails. The typing is the product, as the table's is (ADR-0017). */
 
-import { ControlChart, LimitBand, LimitLine, useChart, type TooltipPoint } from "../src";
+import { ControlChart, LimitBand, LimitLine, useChart, type ChartRange, type TooltipPoint } from "../src";
 // @ts-expect-error no free Chart: it comes from the hook (ADR-0048)
 import { Chart as FreeChart } from "../src";
 // @ts-expect-error no free series
@@ -147,4 +147,20 @@ export function CellLevel(point: TooltipPoint<Latency>) {
 import type { StateBandProps } from "../src";
 export interface OwnBandProps extends StateBandProps<Latency> {
   title: string;
+}
+
+/* `onRange` hands a numeric caller numbers: no cast to add or compare them
+   (ADR-0074). */
+export function RangeHandler() {
+  const span = (from: number, to: number) => to - from;
+  useChart(latencies, { onRange: ({ axisId, from, to }) => [axisId.length, span(from, to)] });
+  // @ts-expect-error the handler takes the range, not a hit
+  useChart(latencies, { onRange: (range: { points: number }) => range.points });
+}
+
+export function RangeOnACategoryAxis() {
+  // A category axis' handler says string; a numeric one's is left alone.
+  useChart(latencies, { onRange: (r: ChartRange<string>) => r.from.toUpperCase() + r.to.toUpperCase() });
+  // @ts-expect-error a numeric axis' bounds are not strings
+  useChart(latencies, { onRange: (r) => r.from.toUpperCase() });
 }

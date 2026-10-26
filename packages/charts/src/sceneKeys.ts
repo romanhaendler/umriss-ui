@@ -8,7 +8,8 @@ import { nearestIndex } from "./hit";
 import { type AxisLayout } from "./layout";
 import type { ChartScene } from "./scene";
 import { type SeriesEntry } from "./sceneModel";
-import { scheduleReadout } from "./sceneSpeech";
+import { say, scheduleReadout } from "./sceneSpeech";
+import { rangeOf } from "./sceneView";
 import type { MaterializedSeries } from "./types";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 
@@ -87,6 +88,7 @@ export function select(s: ChartScene): boolean {
 
 /** The focus left: a point the keyboard set goes with it. */
 export function blur(s: ChartScene): void {
+  s.rangeStart = null;
   if (s.activeBy === "keyboard") s.clearActive();
 }
 
@@ -96,7 +98,13 @@ export function key(s: ChartScene, event: KeyboardEvent): boolean {
   // Without a tooltip there is no Active point to walk: only the zoom keys.
   if (s.tooltip === null) return zoomKey(s, event);
   if (event.key === "Enter" && !event.shiftKey) return select(s);
+  if (event.key === " " && !event.shiftKey && s.onRange !== null) return rangeKey(s);
   if (event.key === "Escape") {
+    // The first Escape cancels a start and leaves the Active point.
+    if (s.rangeStart !== null) {
+      s.rangeStart = null;
+      return true;
+    }
     if (s.hover === null) return false;
     s.clearActive();
     return true;
@@ -115,6 +123,26 @@ export function key(s: ChartScene, event: KeyboardEvent): boolean {
     return true;
   }
   return false;
+}
+
+/** Space: the first sets the start at the Active point, the next reports the
+    range - the earlier end first - and says it. */
+function rangeKey(s: ChartScene): boolean {
+  const hover = s.hover;
+  const axisId = emphasised(s)?.config.xAxisId;
+  if (hover === null || axisId === undefined || s.onRange === null) return false;
+  const x = hover.hit.xValue;
+  const start = s.rangeStart;
+  if (start === null) {
+    s.rangeStart = { axisId, x };
+    say(s, s.wording.rangeStarted(s.xLabel(axisId, x)));
+    return true;
+  }
+  s.rangeStart = null;
+  const [from, to] = start.x <= x ? [start.x, x] : [x, start.x];
+  say(s, s.wording.rangeMade(s.xLabel(axisId, from), s.xLabel(axisId, to)));
+  s.onRange(rangeOf(s, axisId, from, to));
+  return true;
 }
 
 /** Zoom and pan by key, only where an x axis is zoomable: each key

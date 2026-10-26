@@ -83,7 +83,10 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect,
           className="uc-break"
           style={{ left: `${Math.round(px - band.x)}px` }}
           aria-hidden="true"
-        />
+        >
+          <i />
+          <i />
+        </span>
       ))}
       {/* The label of a limit says what the number means: a line at 90 does not
           explain what 90 is. */}
