@@ -642,6 +642,18 @@ describe("useCommandPaletteShortcut – the slash switch and its guard", () => {
     expect(onOpen).not.toHaveBeenCalled();
     dialog.remove();
   });
+
+  it("opens beside a dialog in an engine that does not know :modal", () => {
+    const onOpen = vi.fn();
+    render(<Shortcut onOpen={onOpen} />);
+    const dialog = document.createElement("dialog");
+    const button = document.createElement("button");
+    dialog.append(button);
+    document.body.append(dialog);
+    fireEvent.keyDown(button, { key: "k", ctrlKey: true });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    dialog.remove();
+  });
 });
 
 /* An input method (Japanese, Chinese, Korean) ends its composition with Enter.
