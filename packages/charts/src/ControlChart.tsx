@@ -16,6 +16,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Line } from "./Line";
+import { asRows } from "./dev";
 import { Scatter } from "./Scatter";
 import { LimitLine } from "./LimitLine";
 import {
@@ -118,7 +119,6 @@ function violationsEqual(a: readonly Violation[], b: readonly Violation[]): bool
     `Scatter`, so that limits, zones and violations come from the same values. */
 export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   const {
-    data,
     xAxisId = "x",
     yAxisId = "y",
     name,
@@ -132,6 +132,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     violationName,
     onViolations,
   } = props;
+  const data = asRows(props.data, "the data of the ControlChart");
   // Compared as the scene compares a series' value: a field by its name, a
   // function by its source text.
   const accessor = useKept(readerOf<ValueFunction<T>>(props.value), fnEqual);
