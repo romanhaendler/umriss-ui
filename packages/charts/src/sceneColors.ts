@@ -2,17 +2,19 @@
    colour as the canvas can paint it, the matrix' colouring in steps, and the
    labels and marks of the limits. Functions over the scene. */
 
+import { barEdges } from "./colourBar";
 import { warnOnce } from "./dev";
+import { formatFn, formatValue } from "./format";
 import { type LimitDrawItem } from "./draw";
 import { CLASS_TICK, insideContainer, spread } from "./layout";
 import { assess } from "./limit";
 import { hatchFor } from "./marks";
 import type { ChartScene } from "./scene";
 import { takesPalette } from "./sceneConfig";
-import { type SeriesEntry, type LegendItem, type LegendMark, type LimitLabel } from "./sceneModel";
+import { type SeriesEntry, type LegendBar, type LegendItem, type LegendMark, type LimitLabel } from "./sceneModel";
 import { isHidden } from "./sceneView";
 import { FALLBACK_THEME, resolveColours, type ResolvedTheme } from "./theme";
-import type { LimitConfig, MatrixColoring, MaterializedSeries } from "./types";
+import type { LimitConfig, MatrixColoring, MatrixSeriesConfig, MaterializedSeries } from "./types";
 
 
 
@@ -217,6 +219,7 @@ export function legendItems(s: ChartScene): LegendItem[] {
           color: z.color,
           seriesIds: [entry.order],
           mark: hatches === null ? null : { dash: null, marker: null, swatches: [{ color: paint(s, z.color), hatch: hatches.get(z.label) ?? "none" }], ground: theme.colorBg },
+          bar: null,
         };
         seen.set(key, item);
         out.push(item);
@@ -234,9 +237,23 @@ export function legendItems(s: ChartScene): LegendItem[] {
           : colorFor(s, entry),
       seriesIds: [entry.order],
       mark: legendMark(s, entry, theme),
+      bar: config.kind === "matrix" ? colourBar(s, entry, config) : null,
     });
   });
   return out;
+}
+
+/** A gradient-coloured matrix' colour bar, over the range its cells are coloured across; none for an assessment,
+    or for a matrix with no data to take a range from. */
+function colourBar(s: ChartScene, entry: SeriesEntry, config: MatrixSeriesConfig): LegendBar | null {
+  const coloring = config.coloring;
+  const mat = entry.materialized;
+  if (coloring.kind !== "gradient" || mat === null) return null;
+  const [min, max] = gradientRange(mat.w ?? new Float64Array(0), mat.w === null ? 0 : mat.length, coloring.range);
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  const format = config.format === undefined ? (v: number) => formatValue(v, s.wording.locale) : formatFn(config.format, s.wording.locale);
+  const edges = barEdges(coloring.stops.length, min, max, format);
+  return { colors: coloring.stops, edges, range: s.wording.levelRange(format(min), format(max)) };
 }
 
 /** What a series' chip shows under encoding by marks. */

@@ -1,4 +1,4 @@
-import { Tooltip, useChart } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -61,7 +61,7 @@ const SUCCESS_BY_HOUR: readonly SuccessCell[] = (() => {
 
 
 export const title = "Colour cells along a gradient";
-export const lead = "Without `coloring` the cells run along `DEFAULT_GRADIENT` from the lowest value to the highest; a cell without a value stays a hole.";
+export const lead = "Without `coloring` the cells run along `DEFAULT_GRADIENT` from the lowest value to the highest; a cell without a value stays a hole. The legend shows the steps as a colour bar, the range's ends written in `format`.";
 
 export default function Gradient() {
   const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
@@ -69,7 +69,8 @@ export default function Gradient() {
     <Chart height={280} aria-label="Successful requests per service and hour yesterday, as a gradient">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
-      <Matrix value="service" level="success" name="Success rate" />
+      <Matrix value="service" level="success" name="Success rate" format={{ decimals: 1 }} />
+      <Legend />
       <Tooltip mode="nearest" />
     </Chart>
   );
