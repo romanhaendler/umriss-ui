@@ -5,8 +5,8 @@
    Bars sit on the numeric x axis (ADR-0002) - a category's place is a number
    there too (ADR-0052): barWidth is a fraction of the step, not a width in
    pixels. Several bar series on the same x axis share this
-   fraction and stand side by side. The foot lies at 0, and that 0 enters the
-   extent of the y axis. */
+   fraction and stand side by side. The foot lies at 0, or at the `baseline`;
+   either enters the extent of the y axis, and zero only without a baseline. */
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
@@ -19,6 +19,12 @@ export interface BarProps<T> {
   /** Height - a number field of the row or a function of it;
       null/undefined/NaN/±Infinity means a gap. */
   value: Value<T>;
+  /** Lower edge - a number field of the row or a function of it: the bar
+      floats from here to `value`, either way up. A gap in either edge leaves
+      the bar out. In a `stack` the stack below is the lower edge, and this is
+      not read.
+      @default a fixed baseline at 0 */
+  baseline?: Value<T>;
   /** Binding to an x axis. */
   xAxisId?: string;
   /** Binding to a y axis. */
@@ -53,12 +59,13 @@ export interface BarProps<T> {
   barWidth?: number;
 }
 
-/** A series drawn as bars from 0 to its values, one at each x: a category
+/** A series drawn as bars from 0, or from its `baseline`, to its values, one at each x: a category
     the x axis reads from the row, a number or an instant. Several bar series
     on one x axis stand side by side, or on each other with `stack`. Renders
     nothing itself: it registers with the surrounding `Chart`. */
 export function Bar<T>(props: BarProps<T>): null {
   const {
+    baseline,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -77,6 +84,7 @@ export function Bar<T>(props: BarProps<T>): null {
       ({
         kind: "bar",
         accessor,
+        baseline: readerOf<ValueFunction<T>>(baseline),
         xAxisId,
         yAxisId,
         data,
@@ -88,7 +96,7 @@ export function Bar<T>(props: BarProps<T>): null {
         normalize,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, barWidth],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, barWidth],
   );
 
   useSeries("Bar", config);
