@@ -169,7 +169,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           ...handlers(widget.id, i),
           role: "group",
           tabIndex: 0,
-          "aria-label": wording.dashboardHead(title, at + 1, total),
+          "aria-label": (widget.locked === true ? wording.dashboardHeadLocked : wording.dashboardHead)(title, at + 1, total),
           onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
             if (event.target !== event.currentTarget) return;
             const to = { ArrowLeft: at - 1, ArrowUp: at - 1, ArrowRight: at + 1, ArrowDown: at + 1, Home: 0, End: total - 1 }[event.key];
@@ -183,6 +183,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   /* The menu of a widget's head: the moves, the sizes, the options, remove. */
   const menuOf = (widget: DashboardWidget, type: AnyType, title: string, i: number, at: number) => {
     const sizes = Object.entries(type.sizes).sort(([, a], [, b]) => area(a) - area(b));
+    const locked = widget.locked === true;
     return (
       <Menu
         align="end"
@@ -199,7 +200,13 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
         <MenuItem disabled={at === 0} onSelect={() => moveTo(widget.id, title, at - 1)}>{wording.dashboardMoveEarlier}</MenuItem>
         <MenuItem disabled={at === total - 1} onSelect={() => moveTo(widget.id, title, at + 1)}>{wording.dashboardMoveLater}</MenuItem>
         <MenuItem disabled={at === total - 1} onSelect={() => moveTo(widget.id, title, total - 1)}>{wording.dashboardMoveEnd}</MenuItem>
-        {sizes.length > 1 && (
+        {locked && (
+          <>
+            <MenuSeparator />
+            <MenuItem disabled>{wording.dashboardLockedLine}</MenuItem>
+          </>
+        )}
+        {!locked && sizes.length > 1 && (
           <>
             <MenuSeparator />
             {sizes.map(([name, span]) => (
@@ -216,7 +223,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             ))}
           </>
         )}
-        {type.form && (
+        {!locked && type.form && (
           <>
             <MenuSeparator />
             <MenuItem
@@ -229,8 +236,8 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             </MenuItem>
           </>
         )}
-        <MenuSeparator />
-        <MenuItem
+        {!locked && <MenuSeparator />}
+        {!locked && <MenuItem
           tone="danger"
           onSelect={() => {
             focusAfter.current = (shown[i + 1] ?? shown[i - 1])?.widget.id ?? null;
@@ -239,7 +246,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           }}
         >
           {wording.dashboardRemove}
-        </MenuItem>
+        </MenuItem>}
       </Menu>
     );
   };
@@ -289,6 +296,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 {editing && <GripGlyph className={styles.grip} />}
                 <h2 className={styles.title}>{title}</h2>
                 {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
+                {editing && widget.locked === true && <span className={styles.size}>{wording.dashboardLocked}</span>}
                 {menu}
               </div>
               <Body title={title} editing={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></Body>
