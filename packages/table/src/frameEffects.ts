@@ -5,6 +5,7 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
+import type { VirtualRows } from "@umriss-ui/core";
 import { DEV, warnOnce } from "./dev";
 import type { Registry } from "./registry";
 import { rowLine } from "./model/gridWalk";
@@ -117,6 +118,18 @@ export function useCutValueWarnings(tableRef: TableRef) {
         `head-without-room:${box.closest("th")?.dataset.column ?? label}`,
         `the width of "${label}" leaves its label no room: the column is as wide as its sort arrow and filter, and the label shows only in its tip. A head is never cut at its state (ADR-0042): give the column a width its label can begin in.`,
       );
+    }
+  });
+}
+
+/* A virtual table whose scroll area is taller than the viewport and whose
+   window holds every row has no bound: the area grows with its rows. */
+export function useUnboundedVirtualWarning(virtual: VirtualRows | undefined) {
+  useEffect(() => {
+    const area = virtual?.scrollRef.current;
+    if (!DEV || !virtual || !area || virtual.count === 0) return;
+    if (virtual.from === 0 && virtual.to >= virtual.count && area.clientHeight > window.innerHeight) {
+      warnOnce("virtual-unbounded", "`virtual` renders every row because its scroll area has no bound. Give the table a `maxHeight`, or a parent of definite height.");
     }
   });
 }

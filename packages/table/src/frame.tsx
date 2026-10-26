@@ -21,6 +21,7 @@ import {
   useCurrentRowInView,
   useRevealedRow,
   useCutValueWarnings,
+  useUnboundedVirtualWarning,
   useDraftOfVanishedRow,
   useFocusAfterFold,
   useHeldColumnWidths,
@@ -88,6 +89,7 @@ export function Frame({
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
   useCutValueWarnings(tableRef);
+  useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
   useCurrentRowInView(registry, currentRow);
   useRevealedRow(registry);
