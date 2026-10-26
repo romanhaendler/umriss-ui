@@ -1,13 +1,32 @@
 /* The one sheet: a header line of inline strings and a row per row, each cell
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
-import type { ExportSheet } from "../types";
+import type { ExportContext, ExportSheet } from "../types";
 import { escapeXml } from "./parts";
 
-/* The same rule as `allDays` in `./day`, written twice on purpose: a module both entries import becomes a
+/* The same rule as `allDays` in `../model/day`, written twice on purpose: a module both entries import becomes a
    chunk that `xlsx.js` would import, and this entry must import nothing. Change both together. */
-const allDays = (values: Iterable<unknown>): boolean => {
-  for (const v of values) if (v instanceof Date && v.getHours() + v.getMinutes() + v.getSeconds() + v.getMilliseconds() !== 0) return false;
+type Wall = NonNullable<ExportContext["wallClock"]>;
+
+/* The Date's own local fields; the zone's come in as `wallClock`. */
+const localWall: Wall = (d) => ({
+  year: d.getFullYear(),
+  month: d.getMonth(),
+  day: d.getDate(),
+  hours: d.getHours(),
+  minutes: d.getMinutes(),
+  seconds: d.getSeconds(),
+});
+
+const millis = (d: Date) => ((d.getTime() % 1000) + 1000) % 1000;
+
+const allDays = (values: Iterable<unknown>, wall: Wall): boolean => {
+  for (const v of values) {
+    if (v instanceof Date && !Number.isNaN(v.getTime())) {
+      const f = wall(v);
+      if (f.hours + f.minutes + f.seconds + millis(v) !== 0) return false;
+    }
+  }
   return true;
 };
 
@@ -30,9 +49,11 @@ function letters(n: number): string {
   return s;
 }
 
-/** The local wall-clock fields of a date as days since 1899-12-30. */
-const serialOf = (d: Date) =>
-  (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) - EPOCH) / DAY;
+/** The wall-clock fields of a date as days since 1899-12-30. */
+const serialOf = (d: Date, wall: Wall) => {
+  const f = wall(d);
+  return (Date.UTC(f.year, f.month, f.day, f.hours, f.minutes, f.seconds, millis(d)) - EPOCH) / DAY;
+};
 
 function text(raw: string): string {
   let s = raw.replace(FORBIDDEN, "");
@@ -48,13 +69,13 @@ const inline = (ref: string, s: string) => `<c r="${ref}" t="inlineStr"><is><t x
 
 /** `sheet1.xml` for a sheet. Throws a `RangeError` naming the limit when the
     sheet has more rows or columns than a worksheet holds. */
-export function sheetXml(sheet: ExportSheet): string {
+export function sheetXml(sheet: ExportSheet, wall: Wall = localWall): string {
   const { columns, rows } = sheet;
   if (columns.length > MAX_COLUMNS) throw new RangeError(`A worksheet holds at most ${MAX_COLUMNS.toLocaleString("en")} columns.`);
   if (rows.length + 1 > MAX_ROWS) throw new RangeError(`A worksheet holds at most ${MAX_ROWS.toLocaleString("en")} rows.`);
 
   /* A column of dates is a date column when no date in it has a time - the CSV's rule. */
-  const styles = columns.map((_, c) => (allDays(rows.map((row) => row[c])) ? 1 : 2));
+  const styles = columns.map((_, c) => (allDays(rows.map((row) => row[c]), wall) ? 1 : 2));
 
   const cols = columns
     .map((c, i) => (c.width === undefined ? "" : `<col min="${i + 1}" max="${i + 1}" width="${c.width / 7 + 1}" customWidth="1"/>`))
@@ -72,7 +93,8 @@ export function sheetXml(sheet: ExportSheet): string {
       } else if (typeof v === "boolean") cells += `<c r="${ref}" t="b"><v>${v ? 1 : 0}</v></c>`;
       else if (typeof v === "string") cells += inline(ref, v);
       else if (v instanceof Date && !Number.isNaN(v.getTime())) {
-        if (serialOf(v) >= FIRST_SERIAL) cells += `<c r="${ref}" s="${styles[c]}"><v>${serialOf(v)}</v></c>`;
+        const serial = serialOf(v, wall);
+        if (serial >= FIRST_SERIAL) cells += `<c r="${ref}" s="${styles[c]}"><v>${serial}</v></c>`;
         else cells += inline(ref, v.toISOString());
       }
     }
