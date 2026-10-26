@@ -33,7 +33,7 @@ import { buildVerdictColumn } from "./VerdictColumn";
 import { csv, selectionText, sheetOf } from "./export";
 import { DEV, asRows, probeStale, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
-import { satisfies, filterOf, checkCondition } from "./columnFilter";
+import { satisfies, filterOf, checkCondition, reviveCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
 import type { ExportFormat, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
@@ -66,6 +66,15 @@ function appliesTo(registry: Registry, column: string, condition: unknown): bool
   return check === "effective";
 }
 
+/** A condition from outside - `initialView` or `setView`, perhaps through JSON
+    - read at the column it first meets. It arrives before the columns register,
+    so it is read here and not on the way in. */
+function readIn(registry: Registry, rows: readonly unknown[], column: string, condition: unknown): unknown {
+  const entry = registry.columnById(column);
+  const filter = entry ? filterOf(entry.spec.filter) : undefined;
+  return entry && filter ? reviveCondition(filter, condition, registry.kindOf(entry, rows)) : condition;
+}
+
 /** The conditions, united into one function. The columns are looked up on the
     call, not on building: that way the function stays stable when columns
     register, and a filter of one's own is asked with its latest spec each
@@ -75,6 +84,7 @@ function combineConditions(
   registry: Registry,
   rowFilters: RowFilters,
   timeZone: string | undefined,
+  rows: readonly unknown[],
 ): ((row: unknown) => boolean) | undefined {
   if (conditions.length === 0) return undefined;
   let resolvedFor = -1;
@@ -83,13 +93,14 @@ function combineConditions(
     if (resolvedFor !== registry.structureVersion()) {
       resolvedFor = registry.structureVersion();
       resolved = [];
-      for (const [id, condition] of conditions) {
+      for (const [id, given] of conditions) {
         const rowFilter = rowFilters.get(id);
         if (rowFilter) {
-          resolved.push((r) => rowFilter.matches(r, condition));
+          resolved.push((r) => rowFilter.matches(r, given));
           continue;
         }
         const entry = registry.columnById(id);
+        const condition = readIn(registry, rows, id, given);
         if (entry && appliesTo(registry, id, condition)) {
           resolved.push((r) => {
             const filter = filterOf(entry.spec.filter);
@@ -254,7 +265,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; a condition under that id is the row filter's, and the column's filter cannot hold one of its own.`);
     }
   }
-  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats.timeZone), [conditions, registry, rowFilters, formats.timeZone]);
+  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats.timeZone, rowsUnknown), [conditions, registry, rowFilters, formats.timeZone, rowsUnknown]);
 
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
@@ -416,10 +427,12 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     }
   }
 
+  const read = conditions.map(([id, condition]) =>
+    [id, rowFilters.has(id) ? condition : readIn(registry, rowsUnknown, id, condition)] as const);
   const effective =
     known.size === 0
-      ? conditions
-      : conditions.filter(([id, condition]) => rowFilters.has(id) || appliesTo(registry, id, condition));
+      ? read
+      : read.filter(([id, condition]) => rowFilters.has(id) || appliesTo(registry, id, condition));
   const withoutConditions = onlyKnown(b.view, known);
   const view: TableView =
     effective.length > 0 ? { ...withoutConditions, conditions: Object.fromEntries(effective) } : withoutConditions;

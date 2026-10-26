@@ -77,6 +77,8 @@ export interface Candidate {
   /** A stacked segment reaching over the pointer's y: under "nearest" it wins
       over a nearer top, which may be the segment above's. */
   covers: boolean;
+  /** The series' own lower edge, where it has one (`TooltipPoint.baseline`). */
+  baseline?: number;
   level?: number;
   segment?: { from: number; to: number; label: string };
   box?: TooltipPoint["box"];
