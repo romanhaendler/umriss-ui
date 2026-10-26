@@ -9,8 +9,8 @@ import type { ValueFormat } from "./format";
 /** A **value** computed from the row - the function form of `Value`.
     Compared by its source text, not its identity - an inline function is new
     on every render. Known limit: one that reads a
-    changed closure variable under the same text is not run again; pass a new
-    data reference then. A native or bound function is compared by identity. */
+    changed closure variable under the same text is not run again, and DEV warns;
+    carry the value in the rows, or give the series a `key` that changes with it. A native or bound function is compared by identity. */
 export type ValueFunction<T> = (d: T, index: number) => number | null | undefined;
 
 /** A list computed from the row - a box's outliers (ADR-0040), the
@@ -448,6 +448,16 @@ export interface TooltipPoint<T = unknown> {
       /** As the caller gave them; only where the series has `outliers`. */
       outliers?: readonly number[];
     };
+}
+
+/** A stretch of an x axis the reader marked (`onRange`): `from` is not after
+    `to`, both in the axis' own values - numbers on a numeric or time axis
+    (milliseconds). A caller that reads numbers takes the default and needs no
+    cast; `V` is what a category axis widens it to. */
+export interface ChartRange<V extends number | string = number> {
+  axisId: string;
+  from: V;
+  to: V;
 }
 
 /** What the pointer hit: the x value under it and one point per series there.
