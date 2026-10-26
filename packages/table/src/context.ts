@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useSyncExternalStore } from "react";
 import { registryOf } from "./registry";
+import { warnOnce } from "./dev";
 import type { Registry } from "./registry";
 import type { TableRef, TableSnapshot } from "./types";
 
@@ -26,8 +27,11 @@ export interface Connection {
 }
 
 /** The table a part stands in - or the one it gets through `of`. */
-export function useConnection(of: TableRef | undefined): Connection | null {
+export function useConnection(of: TableRef | undefined, part: string): Connection | null {
   const surrounding = useContext(TableContext);
+  if (!of && !surrounding) {
+    warnOnce(`no-table:${part}`, `\`${part}\` stands in no table and renders nothing: place it inside the table, or give it \`of\` (the return value of \`useTable\`).`);
+  }
   const registry = of ? (registryOf(of.Table) ?? null) : (surrounding?.registry ?? null);
   useSyncExternalStore(
     registry ? registry.subscribe : neverSubscribe,
