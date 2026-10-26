@@ -133,6 +133,11 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **A chart that is loading says so**, as the table does: `loading` keeps
   and dims a course already drawn, and where there is nothing yet a
   silhouette of the chart to come shimmers in the plot (ADR-0042).
+* **A chart follows the printed page**: when the page goes to print, the chart
+  measures its plot as the print layout gives it and draws there, its axes
+  included, and returns to its screen width afterwards. Proved in Chromium
+  (`page.pdf()`); hiding controls and page breaks stay with your print
+  stylesheet.
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
   rule violations, `pareto()` with a collected remainder, `bin()` for a
   histogram, and a working-time axis that takes the empty hours out and marks
@@ -146,6 +151,30 @@ loaded: Geist when the application has it, the system fonts otherwise.
   measuring run and its conditions stand once, in
   [`docs/capabilities.md`](docs/capabilities.md) under "Performance" — they are
   not repeated here, so that a new measurement has one place to go.
+
+### The picture
+
+`toPng()` on what `useChart` returns resolves to a PNG `Blob` of the chart as
+the reader sees it: plot, axes and legend on the chart's own ground, in the
+colour scheme in use, at least twice its CSS pixels (ADR-0075). The tooltip,
+the crosshair, the "Show all" button and the data table are not in it. It
+rejects when the chart is not mounted or has no size. Where the picture goes
+is yours:
+
+```tsx
+const { Chart, toPng } = useChart(rows);
+
+// Download
+const save = async () => {
+  const url = URL.createObjectURL(await toPng());
+  Object.assign(document.createElement("a"), { href: url, download: "trend.png" }).click();
+  URL.revokeObjectURL(url);
+};
+
+// Clipboard
+const copy = async () =>
+  navigator.clipboard.write([new ClipboardItem({ "image/png": toPng() })]);
+```
 
 What it deliberately cannot do — animations, a log scale, pie, donut and
 radar — stands in the same record, with the reason,

@@ -29,6 +29,7 @@ import {
   type Violation,
 } from "./controlLimits";
 import { fnEqual } from "./scene";
+import { probeStale } from "./dev";
 import { readerOf } from "./value";
 import type { ValueFunction, Value } from "./types";
 import type { ValueFormat } from "./format";
@@ -89,9 +90,13 @@ export interface ControlChartProps<T> {
     writes a value function and origin inline, and every render hands them over with a
     new identity - as dependencies of a memo they would recompute the limits on
     every render. Boxed, because React would call a function it is handed. */
-function useKept<V>(value: V, equal: (a: V, b: V) => boolean): V {
+function useKept<V>(value: V, equal: (a: V, b: V) => boolean, onHeld?: (kept: V, next: V) => void): V {
   const [kept, setKept] = useState({ value });
-  if (kept.value === value || equal(kept.value, value)) return kept.value;
+  if (kept.value === value) return kept.value;
+  if (equal(kept.value, value)) {
+    onHeld?.(kept.value, value);
+    return kept.value;
+  }
   setKept({ value });
   return value;
 }
@@ -135,7 +140,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   const data = asRows(props.data, "the data of the ControlChart");
   // Compared as the scene compares a series' value: a field by its name, a
   // function by its source text.
-  const accessor = useKept(readerOf<ValueFunction<T>>(props.value), fnEqual);
+  const accessor = useKept(readerOf<ValueFunction<T>>(props.value), fnEqual, (kept, next) => probeStale(name, kept, next, data));
   const origin = useKept(props.origin, originEqual);
 
   const values = useMemo(() => {

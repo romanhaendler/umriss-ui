@@ -28,6 +28,7 @@ import {
   type Ref,
   type RefObject,
 } from "react";
+import { flushSync } from "react-dom";
 import { ChartContext } from "./context";
 import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
@@ -206,6 +207,19 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     });
     observer.observe(plot);
 
+    // The page's print layout is not a resize the observer reports, and at
+    // `beforeprint` the page is still laid out for the screen; inside the
+    // media query's change the print layout can be measured. The frame runs
+    // here and in `flushSync`, so that the HTML axes are in the DOM before
+    // the page is printed. The same change on the way back restores the screen.
+    const printMedia = typeof matchMedia === "function" ? matchMedia("print") : null;
+    const onPrint = (): void => {
+      const box = plot.getBoundingClientRect();
+      scene.requestResize(box.width, box.height);
+      flushSync(() => scene.frameNow());
+    };
+    printMedia?.addEventListener("change", onPrint);
+
     // Leaving the window ends the hover just as pointerleave does.
     const onBlur = (): void => scene.pointerLeave();
     window.addEventListener("blur", onBlur);
@@ -223,6 +237,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
       window.removeEventListener("blur", onBlur);
       document.removeEventListener("pointerdown", onTapOutside);
       observer.disconnect();
+      printMedia?.removeEventListener("change", onPrint);
       scene.unbind();
     };
   }, [scene]);
