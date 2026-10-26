@@ -370,6 +370,8 @@ export interface Wording {
   rangeInvalid: string;
   /** Clears search and conditions - in the table toolbar and in the empty body. */
   resetAll: string;
+  /** The button under a server-mode table's error that sends the request once more. */
+  tryAgain: string;
   /** "43 of 1.204" - the numbers come from the formats. */
   filteredOfTotal: (matches: string, total: string) => string;
 
@@ -815,6 +817,7 @@ export const DEFAULT_WORDING: Wording = {
   rangeTo: (to) => `to ${to}`,
   rangeInvalid: "“From” lies after “To”.",
   resetAll: "Reset",
+  tryAgain: "Try again",
   filteredOfTotal: (matches, total) => `${matches} of ${total}`,
 
   verdictOk: "OK",
