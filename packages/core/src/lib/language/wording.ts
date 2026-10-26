@@ -521,6 +521,19 @@ export interface Wording {
   scheduleVisibleRange: (from: string, to: string) => string;
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
+  /** The disclosure key of the plan's table. */
+  scheduleShowData: string;
+  scheduleHideData: string;
+  /** The open table's caption: the span it lists, both ends formatted. */
+  scheduleTableCaption: (from: string, to: string) => string;
+  /** The table's column heads. */
+  scheduleColumnLane: string;
+  scheduleColumnTask: string;
+  scheduleColumnSubtask: string;
+  scheduleColumnFrom: string;
+  scheduleColumnTo: string;
+  scheduleColumnDuration: string;
+  scheduleColumnFindings: string;
 
   /* -------- @umriss-ui/dashboard ----------------------------------- */
   /* The dashboard's entries stand here for the table's reason: one provider
@@ -918,6 +931,16 @@ export const DEFAULT_WORDING: Wording = {
   scheduleVisibleRange: (from, to) => `From ${from} to ${to}.`,
   scheduleKeyHelp:
     "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Plus zooms in, minus zooms out, zero fits all the work. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+  scheduleShowData: "Show data",
+  scheduleHideData: "Hide data",
+  scheduleTableCaption: (from, to) => `Subtasks from ${from} to ${to}.`,
+  scheduleColumnLane: "Lane",
+  scheduleColumnTask: "Task",
+  scheduleColumnSubtask: "Subtask",
+  scheduleColumnFrom: "From",
+  scheduleColumnTo: "To",
+  scheduleColumnDuration: "Duration",
+  scheduleColumnFindings: "Findings",
   dashboardEdit: "Edit",
   dashboardEditing: "Editing the dashboard",
   dashboardCancel: "Cancel",
