@@ -15,11 +15,11 @@ const PLANT = "Europe/Berlin";
 
 const room = (page: Page) => page.locator('[data-scenario="watch-a-kiln-line"]');
 
-/** What the zone is called, as the browser under test spells it. */
+/** What the zone is called, as the browser under test spells it in the formats' locale (en-GB). */
 const plantName = (page: Page) =>
   page.evaluate(
     (timeZone) =>
-      new Intl.DateTimeFormat("en", { timeZone, timeZoneName: "shortGeneric" })
+      new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "shortGeneric" })
         .formatToParts(new Date())
         .find((part) => part.type === "timeZoneName")!.value,
     PLANT,

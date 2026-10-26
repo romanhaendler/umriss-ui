@@ -12,7 +12,7 @@ test("A Select inside a Popover inside a Modal: a pick reaches, Escape closes on
   const window = page.getByRole("dialog", { name: "Due date" });
   await expect(window).toBeVisible();
 
-  await window.getByRole("button", { name: "Select date" }).click();
+  await window.getByRole("button", { name: "Due", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Select date" });
   await expect(panel).toBeVisible();
 
@@ -42,9 +42,9 @@ test("The typed field, Today and Clear stand in one row at 375 px, with no overf
   await openExample(page, "datepicker", "pick-a-day");
   const example = page.locator('[data-example="pick-a-day"]');
   // A day must be picked first, or the panel has no Clear.
-  await example.getByRole("button", { name: "Select date" }).click();
+  await example.getByRole("button", { name: "Delivery date" }).click();
   await page.getByRole("dialog", { name: "Select date" }).getByRole("button", { name: /, 15 / }).first().click();
-  await example.getByRole("button", { name: /\d{2}\/\d{2}\/\d{4}/ }).click();
+  await example.getByRole("button", { name: "Delivery date" }).click();
 
   const panel = page.getByRole("dialog", { name: "Select date" });
   const field = panel.getByRole("textbox", { name: "Type a date" });

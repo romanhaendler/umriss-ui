@@ -115,12 +115,12 @@ test("in WebKit under touch, 0930 typed into the time fields gives 09:30", async
     const page = await context.newPage();
     await openExample(page, "datetimepicker", "set-an-instant");
     await page.locator('[data-example="set-an-instant"] .exampleStage button').first().click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "Select date and time" });
     await expect(dialog.getByRole("button", { name: /^(Increase|Decrease) / }).first()).toBeHidden();
-    await dialog.getByLabel("Hour").tap();
+    await dialog.getByRole("textbox", { name: "Hour", exact: true }).tap();
     await page.keyboard.type("0930");
-    await expect(dialog.getByLabel("Hour")).toHaveValue("09");
-    await expect(dialog.getByLabel("Minute")).toHaveValue("30");
+    await expect(dialog.getByRole("textbox", { name: "Hour", exact: true })).toHaveValue("09");
+    await expect(dialog.getByRole("textbox", { name: "Minute", exact: true })).toHaveValue("30");
   } finally {
     await browser.close();
   }

@@ -1,9 +1,9 @@
 import { useState, useSyncExternalStore } from "react";
-import { Button, Drawer, ModalBody, ModalHeader, Text } from "../../../src";
+import { Button, Drawer, Link, ModalBody, ModalHeader, Text } from "../../../src";
 
 export const title = "An app shell";
 export const lead =
-  "A frame is layout, so it is your application's: the same links stand in a side column or in a drawer, and your router's own link (react-router's `NavLink` sets `aria-current` itself) replaces the anchor.";
+  "A frame is layout, so it is your application's: the same links stand in a side column or in a drawer, and your router's own link (react-router's `NavLink` sets `aria-current` itself) replaces core's `Link`.";
 
 const PAGES = ["Overview", "Shipments", "Tours", "Settings"];
 const NARROW = "(max-width: 719px)";
@@ -31,7 +31,8 @@ export default function AnAppShell() {
       <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--u-space-1)" }}>
         {PAGES.map((name) => (
           <li key={name}>
-            <a
+            <Text as="span">
+            <Link
               href="#"
               aria-current={name === page ? "page" : undefined}
               onClick={(event) => {
@@ -42,7 +43,8 @@ export default function AnAppShell() {
               style={{ display: "block", padding: "var(--u-space-2) var(--u-space-3)", fontWeight: name === page ? 600 : 400 }}
             >
               {name}
-            </a>
+            </Link>
+          </Text>
           </li>
         ))}
       </ul>
