@@ -316,7 +316,7 @@ function Stage({ shown }: { shown: Case }) {
       )}
       <div data-callout="4" style={{ overflowX: "auto" }}>
         <div style={{ width: width ?? "100%" }}>
-          <Dashboard aria-label="Dispatch, today">
+          <Dashboard headingLevel={3} aria-label="Dispatch, today">
             <HeadingType />
             <WidgetType
               name="figure"
