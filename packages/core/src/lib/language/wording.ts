@@ -129,6 +129,10 @@ export interface Wording {
   dateTimeRangeClear: string;
   previousMonth: string;
   nextMonth: string;
+  /** Name of the calendar head's month list. */
+  monthSelect: string;
+  /** Name of the calendar head's year list. */
+  yearSelect: string;
   /** Group name of the preset column. */
   quickSelect: string;
   today: string;
@@ -668,6 +672,8 @@ export const DEFAULT_WORDING: Wording = {
   dateTimeRangeClear: "Clear range with time",
   previousMonth: "Previous month",
   nextMonth: "Next month",
+  monthSelect: "Month",
+  yearSelect: "Year",
   quickSelect: "Quick select",
   today: "Today",
   now: "Now",

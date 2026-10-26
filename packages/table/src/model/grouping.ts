@@ -7,7 +7,7 @@
    arrives as a parameter. The form of a group follows its level and nothing
    else (ADR-0029). */
 
-import { DEFAULT_FORMATS } from "@umriss-ui/core";
+import { DEFAULT_FORMATS, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { filterKey, isAbsent } from "../values";
 import type { SortLevel } from "./tableModel";
@@ -218,34 +218,36 @@ export type DatePeriod = "day" | "week" | "month" | "year";
 /** A point in time brought to the start of its day, ISO week (Monday), month
     or year - in local time, as the formats show it. */
 export const periodStart =
-  (kind: DatePeriod) =>
+  (kind: DatePeriod, timeZone?: string) =>
   (value: unknown): Date | undefined => {
     if (!(value instanceof Date) || Number.isNaN(value.getTime())) return undefined;
-    const y = value.getFullYear();
-    const m = value.getMonth();
-    const d = value.getDate();
-    if (kind === "year") return new Date(y, 0, 1);
-    if (kind === "month") return new Date(y, m, 1);
-    if (kind === "week") return new Date(y, m, d - ((value.getDay() + 6) % 7));
-    return new Date(y, m, d);
+    const { year: y, month: m, day: d, weekday } = zoneFields(value, timeZone);
+    if (kind === "year") return zoneInstant({ year: y, month: 0, day: 1 }, timeZone);
+    if (kind === "month") return zoneInstant({ year: y, month: m, day: 1 }, timeZone);
+    if (kind === "week") return zoneInstant({ year: y, month: m, day: d - ((weekday + 6) % 7) }, timeZone);
+    return zoneInstant({ year: y, month: m, day: d }, timeZone);
   };
 
 /** ISO week number of a Monday-started week. */
-export function isoWeek(date: Date): { week: number; year: number } {
-  const thursday = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 3 - ((date.getDay() + 6) % 7));
-  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
-  const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / 86_400_000 / 7 - ((firstThursday.getDay() + 6) % 7 - 3) / 7);
-  return { week, year: thursday.getFullYear() };
+export function isoWeek(date: Date, timeZone?: string): { week: number; year: number } {
+  const { year, month, day, weekday } = zoneFields(date, timeZone);
+  // The calendar day alone matters from here on, so UTC does the counting.
+  const thursday = new Date(Date.UTC(year, month, day + 3 - ((weekday + 6) % 7)));
+  const thursdayYear = thursday.getUTCFullYear();
+  const firstThursday = new Date(Date.UTC(thursdayYear, 0, 4));
+  const week =
+    1 + Math.round((thursday.getTime() - firstThursday.getTime()) / 86_400_000 / 7 - ((((firstThursday.getUTCDay() + 6) % 7) - 3) / 7));
+  return { week, year: thursdayYear };
 }
 
 /** A period's name, as its group shows it: the day's date, "Week 42, 2026",
     the month, the year. Formats and wording arrive as parameters - only a
     component can read the provider. */
-export function periodText(period: DatePeriod, start: Date, formats: Formats, wording: Wording): string {
-  if (period === "year") return String(start.getFullYear());
+export function periodText(period: DatePeriod, start: Date, formats: Formats, wording: Wording, timeZone?: string): string {
+  if (period === "year") return String(zoneFields(start, timeZone).year);
   if (period === "month") return formats.month(start);
   if (period === "week") {
-    const { week, year } = isoWeek(start);
+    const { week, year } = isoWeek(start, timeZone);
     return wording.calendarWeek(week, year);
   }
   return formats.date(start);
