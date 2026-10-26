@@ -8,14 +8,17 @@ import {
   CardHeader,
   Drawer,
   Grid,
+  LanguageProvider,
   Link,
   ModalBody,
   ModalFooter,
   ModalHeader,
   ProgressBar,
+  SegmentedControl,
   Stack,
   Stat,
   Text,
+  useFormats,
 } from "../../src";
 import type { FreshnessAges, LimitSet } from "../../src";
 import { ControlChart, DataTable, LimitBand, LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
@@ -337,6 +340,7 @@ export const callouts = [
   "The alarm the kiln raised stands in the table; acknowledging it records who knew when and changes nothing else on the screen.",
   "Choosing a batch in the plan and opening its details shows what the kiln has fired of it so far, in a drawer.",
   "The OEE shows its working, down to the counts it is made of, so the scrap from the excursion can be traced back.",
+  "The plant runs in Berlin time. From another zone the trend, the alarm table and the plan name the zone once; Your time shows every time in the reader's zone instead. The switch is the formats' `timeZone`, the recipe for an application that wants one.",
 ];
 
 export const builtFrom = ["stat", "card", "progressbar", "drawer", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "Table", page: "@umriss-ui/table#first-table" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
@@ -363,7 +367,23 @@ const LAST = SHIFT_MINUTES - 1;
 const SECOND = 1000;
 const MIN = 60_000;
 /* The shift begins at 06:00 today; everything below counts from there. */
-const START = new Date(new Date().setHours(6, 0, 0, 0)).getTime();
+/** The plant's zone: its shift starts at 06:00 here, whoever reads the page. */
+const PLANT_ZONE = "Europe/Berlin";
+
+/** Today's 06:00 in the plant's zone, as an instant. */
+function plantSix(): number {
+  const [year, month, day] = new Intl.DateTimeFormat("en-CA", { timeZone: PLANT_ZONE })
+    .format(new Date())
+    .split("-")
+    .map(Number) as [number, number, number];
+  const guess = Date.UTC(year, month - 1, day, 6);
+  const wall = new Intl.DateTimeFormat("en-GB", { timeZone: PLANT_ZONE, hourCycle: "h23", hour: "numeric", minute: "numeric" })
+    .formatToParts(guess)
+    .reduce((minutes, part) => (part.type === "hour" ? minutes + Number(part.value) * 60 : part.type === "minute" ? minutes + Number(part.value) : minutes), 0);
+  return guess - (wall - 6 * 60) * 60000;
+}
+
+const START = plantSix();
 const at = (minute: number) => START + minute * MIN;
 
 const AGES: FreshnessAges = { stale: 5 * MIN, lost: 30 * MIN };
@@ -509,8 +529,6 @@ function skipTo(event: MouseEvent<HTMLAnchorElement>, id: string) {
   region?.scrollIntoView({ block: "start" });
 }
 
-const clock = (t: number) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-
 const RANK = { high: 0, medium: 1, low: 2 } as const;
 
 /** Worst first: by priority, then what nobody has acknowledged, then the newest. */
@@ -520,7 +538,35 @@ const WORST_FIRST = [
   { column: "raised", direction: "desc" },
 ] as const;
 
+/* The switch between the plant's time and the reader's is the recipe for an
+   application that wants one: it changes the zone in the formats, and every
+   time below - the formats' texts, the charts through `Chart`'s `timeZone`, the
+   table, the schedule - follows at once. */
 export default function ControlRoom() {
+  const [plantTime, setPlantTime] = useState(true);
+  const formats = useMemo(() => (plantTime ? { timeZone: PLANT_ZONE } : {}), [plantTime]);
+  return (
+    <LanguageProvider formats={formats}>
+      <Stack gap={4}>
+        <SegmentedControl
+          data-callout="7"
+          aria-label="Time shown in"
+          value={plantTime ? "plant" : "reader"}
+          onChange={(value) => setPlantTime(value === "plant")}
+          options={[
+            { value: "plant", label: "Plant time" },
+            { value: "reader", label: "Your time" },
+          ]}
+        />
+        <ControlRoomBody />
+      </Stack>
+    </LanguageProvider>
+  );
+}
+
+function ControlRoomBody() {
+  const { timeZone, time } = useFormats();
+  const clock = (t: number) => time(new Date(t), false);
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: PLAN_DOMAIN } });
   const { minute, wall, running, setRunning } = usePlantMinute();
   const now = at(minute);
@@ -547,7 +593,7 @@ export default function ControlRoom() {
         const ended = one.resolved === undefined ? "Active" : "Resolved";
         return {
           id: one.id,
-          raised: one.raised,
+          raised: new Date(one.raised),
           priority: type.priority,
           message: type.label,
           state: one.availability === "suppressed" || one.availability === "disabled" ? `${ended}, ${one.availability}` : ended,
@@ -575,7 +621,7 @@ export default function ControlRoom() {
     <Stack gap={4}>
       <Stack direction="row" gap={4} align="center" wrap>
         <Text mono>
-          {new Date(now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+          {clock(now)}
         </Text>
         <Button size="sm" data-callout="1" disabled={minute === LAST} onClick={() => setRunning(!running)}>
           {running ? "Pause the shift" : "Run the shift"}
@@ -631,7 +677,7 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-trend" title="Kiln trend" callout="3">
-        <kilnTrend.Chart height={240} aria-label="Kiln K1, zone 3, over the shift">
+        <kilnTrend.Chart height={240} timeZone={timeZone} aria-label="Kiln K1, zone 3, over the shift">
           <kilnTrend.XAxis value="t" domain={[at(0), at(LAST)]} time />
           <kilnTrend.YAxis domain={[1170, 1250]} label="°C" />
           <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
@@ -645,9 +691,7 @@ export default function ControlRoom() {
       <Region id="room-alarms" title="Alarms" quiet callout="4">
         <Stack gap={2}>
           <Table selectable aria-label="Alarms">
-            <Column value="raised" label="Raised">
-              {(raised) => clock(raised)}
-            </Column>
+            <Column value="raised" label="Raised" format="time" />
             <Column value="priority" label="Priority" sortValue={(priority) => RANK[priority]}>
               {(priority) => <Badge tone={priority === "high" ? "danger" : priority === "medium" ? "warning" : "neutral"}>{priority}</Badge>}
             </Column>
@@ -699,7 +743,7 @@ export default function ControlRoom() {
 
       <Grid columns={2} gap={4}>
         <Region id="room-quality" title="Tile length">
-          <tileLength.Chart aria-label="Tile length after firing, individuals chart">
+          <tileLength.Chart timeZone={timeZone} aria-label="Tile length after firing, individuals chart">
             <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
             <tileLength.YAxis domain={[597, 602]} label="mm" />
             <LimitLine value={601.5} severity="alarm" label="USL" />
@@ -755,7 +799,8 @@ function BatchDetails({ batch, minute, onClose }: { batch: Batch; minute: number
   const fired = upTo(SHIFT.readings, minute).filter((one) => batch.kiln[0] <= one.minute && one.minute < batch.kiln[1]);
   const total = fired.reduce((sum, one) => sum + one.fired, 0);
   const good = fired.reduce((sum, one) => sum + one.good, 0);
-  const time = (m: number) => new Date(at(m)).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const formats = useFormats();
+  const time = (m: number) => formats.time(new Date(at(m)), false);
 
   return (
     <>
