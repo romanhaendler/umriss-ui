@@ -319,6 +319,8 @@ export interface Wording {
   pathRow: string;
   /** The footer of a tree: it sums the top level, since a parent holds its children. */
   footerTopLevel: string;
+  /** The footer of a server-mode table: its sums come from the server and cover every match, not the page. Read out only. */
+  footerOfMatches: string;
   /** The box that selects every row of a group. */
   selectGroup: (name: string) => string;
   /** A group of the week key: "Week 42, 2026". */
@@ -783,6 +785,7 @@ export const DEFAULT_WORDING: Wording = {
   levelColumn: "Level",
   pathRow: "on the path to a match",
   footerTopLevel: "Top level only",
+  footerOfMatches: "All matches",
   selectGroup: (name) => `Select ${name}`,
   calendarWeek: (week, year) => `Week ${week}, ${year}`,
   entries: (count, formatted) => (count === 1 ? "1 entry" : `${formatted} entries`),

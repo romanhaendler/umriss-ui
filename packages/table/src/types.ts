@@ -627,13 +627,15 @@ interface AutomaticMode<Z> {
   exportRows?: never;
   filterOptions?: never;
   answers?: never;
+  totals?: never;
 }
 
 /** Server mode: the rows are the page a server answered for the request the
     table reported. The table searches, filters, sorts, groups and pages nothing of
-    its own; select all, the export and the footer would act on one page and
-    call it the whole, so "select all" says it selects the page, the export
-    writes the page and says so, and there is no footer and no grouping. */
+    its own; select all and the export would act on one page and call it the
+    whole, so "select all" says it selects the page, the export writes the
+    page and says so, and there is no grouping. The footer shows `totals` or
+    nothing. */
 interface ServerMode<Z> {
   /** Server mode: the rows are one page a server answered. */
   server: true;
@@ -655,6 +657,14 @@ interface ServerMode<Z> {
       answer. In development the table warns once when it has matched none of
       the requests it reported. */
   answers?: TableRequest;
+  /** By column id, the value of the column's declared `aggregate` over every
+      match - handed in beside `rows` and current when `answers` is. The footer
+      shows when this is passed and a column declares an `aggregate`; its cells
+      take the value instead of computing it, formatted with the column's
+      format (a `range` is `[min, max]`; every kind and an aggregate of one's
+      own are taken as given). A missing key shows the absent value; while the
+      table is busy the cells are skeleton. Without it there is no footer. */
+  totals?: Readonly<Record<string, unknown>>;
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];
