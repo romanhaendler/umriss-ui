@@ -451,6 +451,12 @@
     color: var(--u-color-accent);
   }
 
+  /* The time zone's name after a time column's text. */
+  .zoneLabel {
+    color: var(--u-color-text-muted);
+    font-weight: var(--u-weight-regular);
+  }
+
   .sortRank {
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);

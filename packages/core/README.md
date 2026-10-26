@@ -75,7 +75,7 @@ export function OrdersTable({ rows }: { rows: Order[] }) {
 ```
 
 On a server, and until the page has hydrated, a date or time is empty, because only the browser
-knows the reader's zone.
+knows the reader's zone - unless the application names a time zone in its formats (see Time zone).
 
 The calculation is the one view a Server Component writes itself: its tree is read where it is
 written (see `@umriss-ui/calculation`). The reasons are in
@@ -329,6 +329,32 @@ import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 
 <UmrissProvider language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}>…</UmrissProvider>;
 ```
+
+### Time zone
+
+Every instant is shown in the reader's time zone. An application whose screen belongs to one place - a
+plant in Berlin, read from Chicago - names that zone in the formats, an IANA name:
+
+```tsx
+<UmrissProvider language={{ formats: { timeZone: "Europe/Berlin" } }}>…</UmrissProvider>;
+
+// German notation in the zone: spread the set
+<UmrissProvider language={{ formats: { ...GERMAN_FORMATS, timeZone: "Europe/Berlin" } }}>…</UmrissProvider>;
+```
+
+`useFormats().timeZone` tells the zone in use. A section in another zone is a nested `LanguageProvider`
+that names it. A misspelled name throws Intl's `RangeError` where the formats are merged, so a screen never
+shows the reader's time while claiming the plant's.
+
+- **What follows the zone:** every date and time the formats write (`date`, `dateShort`, `month`,
+  `dateLong`, `time`, `dateTime`, `offset`, `timeZoneName`), so a table's cells, its day groups and its day
+  filter. A date entry you replaced stays yours.
+- **What stays the reader's:** the language, "now", and ages such as "3 minutes ago".
+- **The label:** `useTimeZoneLabel()` returns the zone's generic name (`formats.timeZoneName`) where the
+  formats name a zone, the page has hydrated and the reader's own zone is another, and `null` otherwise.
+  A table puts it in the head of its time columns.
+- **The server:** with a zone named, the server writes every instant, because the zone does not depend
+  on the reader; only the label waits for hydration.
 
 ## Components
 

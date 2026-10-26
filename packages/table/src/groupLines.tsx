@@ -32,7 +32,7 @@ import styles from "./Table.module.css";
 export function groupText(entry: ColumnEntry | undefined, value: unknown, formats: Formats, wording: Wording): string {
   if (value === undefined) return wording.groupNoValue;
   const spec = entry?.spec;
-  if (spec?.group && value instanceof Date) return periodText(spec.group, value, formats, wording);
+  if (spec?.group && value instanceof Date) return periodText(spec.group, value, formats, wording, formats.timeZone);
   const format = spec?.ownGroupValue ? undefined : spec?.format;
   return asText(value, format, formats, wording) ?? String(value);
 }
