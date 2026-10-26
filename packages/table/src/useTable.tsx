@@ -37,8 +37,13 @@ import { satisfies, filterOf, checkCondition, reviveCondition } from "./columnFi
 import type { RowFilter } from "./rowFilter";
 import type { ExportFormat, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
-/** The conditions per column or row filter, in the order in which they were set. */
-type ConditionList = readonly (readonly [string, unknown])[];
+/** The conditions per column or row filter, in the order in which they were
+    set. The third element marks one that came in with a view (`initialView`,
+    `setView`): only those are revived; `setFilter`'s stay as given. */
+type ConditionList = readonly (readonly [string, unknown, true?])[];
+
+const outsideConditions = (conditions: TableView["conditions"]): ConditionList =>
+  Object.entries(conditions ?? {}).map(([id, condition]) => [id, condition, true] as const);
 
 /** The row filters a table was given, by id. */
 type RowFilters = ReadonlyMap<string, RowFilter<unknown, unknown>>;
@@ -93,14 +98,14 @@ function combineConditions(
     if (resolvedFor !== registry.structureVersion()) {
       resolvedFor = registry.structureVersion();
       resolved = [];
-      for (const [id, given] of conditions) {
+      for (const [id, given, outside] of conditions) {
         const rowFilter = rowFilters.get(id);
         if (rowFilter) {
           resolved.push((r) => rowFilter.matches(r, given));
           continue;
         }
         const entry = registry.columnById(id);
-        const condition = readIn(registry, rows, id, given);
+        const condition = outside ? readIn(registry, rows, id, given) : given;
         if (entry && appliesTo(registry, id, condition)) {
           resolved.push((r) => {
             const filter = filterOf(entry.spec.filter);
@@ -247,7 +252,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
 
   /* The conditions of the view hold already in the first render: the table
      never appears unfiltered only to jump afterwards. */
-  const [conditions, setConditions] = useState<ConditionList>(() => Object.entries(start?.conditions ?? {}));
+  const [conditions, setConditions] = useState<ConditionList>(() => outsideConditions(start?.conditions));
 
   /* The row filters by id. They are defined outside the component; a list
      written in the call is new on every render, so the map follows the ids -
@@ -427,8 +432,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     }
   }
 
-  const read = conditions.map(([id, condition]) =>
-    [id, rowFilters.has(id) ? condition : readIn(registry, rowsUnknown, id, condition)] as const);
+  const read = conditions.map(([id, condition, outside]) =>
+    [id, outside && !rowFilters.has(id) ? readIn(registry, rowsUnknown, id, condition) : condition] as const);
   const effective =
     known.size === 0
       ? read
@@ -463,7 +468,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   const [applied, setApplied] = useState(0);
   const setView = (next: TableView) => {
     b.restart(next);
-    setConditions(Object.entries(next.conditions ?? {}));
+    setConditions(outsideConditions(next.conditions));
     setGroupingState(next.grouping ? [...next.grouping] : listOf(options.defaultGrouping));
     setFoldedState(next.folded ?? []);
     setPinsChosen(next.pinned ? { ...next.pinned } : null);
