@@ -9,6 +9,7 @@ import { type AxisLayout } from "./layout";
 import type { ChartScene } from "./scene";
 import { type SeriesEntry } from "./sceneModel";
 import { say, scheduleReadout } from "./sceneSpeech";
+import { rangeOf } from "./sceneView";
 import type { MaterializedSeries } from "./types";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 
@@ -140,7 +141,7 @@ function rangeKey(s: ChartScene): boolean {
   s.rangeStart = null;
   const [from, to] = start.x <= x ? [start.x, x] : [x, start.x];
   say(s, s.wording.rangeMade(s.xLabel(axisId, from), s.xLabel(axisId, to)));
-  s.onRange({ axisId, from, to });
+  s.onRange(rangeOf(s, axisId, from, to));
   return true;
 }
 
