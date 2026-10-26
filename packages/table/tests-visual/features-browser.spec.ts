@@ -303,3 +303,17 @@ test("a date filter kept in the URL stands, with its rows, after a reload", asyn
     await expect(page.locator("[data-role='url-view']")).toContainText("conditions");
   }
 });
+
+/* ---------------- A range of rows marks no text ---------------- */
+
+test("a Shift-click range in the selection column ticks the rows between and leaves no text marked", async ({ page }) => {
+  await openExample(page, "selection", "selection");
+  const rows = example(page, "selection").locator("tbody tr");
+  const box = (n: number) => rows.nth(n).locator("td").first().locator("label");
+
+  await box(0).click();
+  await box(4).click({ modifiers: ["Shift"] });
+
+  await expect(example(page, "selection").locator("tbody tr[data-selected]")).toHaveCount(5);
+  expect(await page.evaluate(() => window.getSelection()?.toString())).toBe("");
+});
