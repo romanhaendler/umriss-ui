@@ -635,6 +635,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     filterOptions: server ? options.filterOptions : undefined,
     selectedRows,
     late,
+    totals: options.server ? options.totals : undefined,
     rowFilters,
   });
 
