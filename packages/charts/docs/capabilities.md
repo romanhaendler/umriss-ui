@@ -560,7 +560,8 @@ here.
   not repeat from one render to the next; a deterministic beeswarm would be a
   kind of its own.
 * **Pie, donut, radar, candle.** None answers a question a data-dense screen
-  asks (ADR-0059).
+  asks (ADR-0059). The share of a whole is bars on a percent axis: the Pareto
+  page, "Shares, not counts".
 * **A fit line or regression.** A fit is a model the analyst chooses: which
   line, which band, which interval. The chart draws the rows it is given; the
   least-squares line and its 95 % band are built from `Line` and `Area` in the
