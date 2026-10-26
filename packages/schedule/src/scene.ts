@@ -212,6 +212,10 @@ export class ScheduleScene {
       visibleDomain: () => this.visibleDomain(),
       select: (task, subtask) => this.select(task, subtask),
       viewMoved: (time) => this.viewMoved(time),
+      zoomBy: (x, factor) => {
+        if (this.view.zoomAt(x, factor)) this.viewMoved(true);
+      },
+      fitWork: () => this.setDomain(null),
       spokenChanged: () => this.publish(),
     });
   }
