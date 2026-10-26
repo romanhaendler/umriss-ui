@@ -11,12 +11,12 @@ interface Run {
 }
 
 const RUNS: Run[] = [
-  { id: "R-1", cycleSeconds: 41, scrapPercent: 2 },
-  { id: "R-2", cycleSeconds: 38, scrapPercent: 3 },
-  { id: "R-3", cycleSeconds: 44, scrapPercent: 4 },
-  { id: "R-4", cycleSeconds: 40, scrapPercent: 5 },
-  { id: "R-5", cycleSeconds: 47, scrapPercent: 6 },
-  { id: "R-6", cycleSeconds: 43, scrapPercent: 4 },
+  { id: "Run 1", cycleSeconds: 41, scrapPercent: 2 },
+  { id: "Run 2", cycleSeconds: 38, scrapPercent: 3 },
+  { id: "Run 3", cycleSeconds: 44, scrapPercent: 4 },
+  { id: "Run 4", cycleSeconds: 40, scrapPercent: 5 },
+  { id: "Run 5", cycleSeconds: 47, scrapPercent: 6 },
+  { id: "Run 6", cycleSeconds: 43, scrapPercent: 4 },
 ];
 
 const median = (values: readonly number[]) => {
