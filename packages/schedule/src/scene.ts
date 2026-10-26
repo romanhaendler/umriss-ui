@@ -20,6 +20,7 @@
 
 import type { ReactNode } from "react";
 import { DAY, HOUR, subscribeTheme, toWorkingTimeClamped } from "@umriss-ui/charts";
+import { zoneFields, zoneInstant } from "@umriss-ui/core";
 import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
 import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
@@ -337,9 +338,9 @@ export class ScheduleScene {
       this.fitted = true;
       return;
     }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    this.view.showWall([today.getTime(), today.getTime() + DAY]);
+    const { year, month, day } = zoneFields(Date.now(), undefined);
+    const today = zoneInstant({ year, month, day }, undefined).getTime();
+    this.view.showWall([today, today + DAY]);
   }
 
   /** `undefined`: the scene keeps the selection itself. */

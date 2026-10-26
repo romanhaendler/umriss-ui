@@ -6,32 +6,44 @@
    needs the same parts - a picker is no home for shared logic. */
 
 import { DEFAULT_FORMATS } from "../../lib/language/formats";
+import { zoneFields, zoneInstant } from "../../lib/zone";
 
 export type DstStatus =
   | { kind: "ok"; date: Date }
   | { kind: "missing"; date: Date }
   | { kind: "ambiguous"; earlier: Date; later: Date };
 
-const matchesWallTime = (d: Date, h: number, m: number, s: number) =>
-  d.getHours() === h && d.getMinutes() === m && d.getSeconds() === s;
+const matchesWallTime = (d: Date, h: number, m: number, s: number, timeZone: string | undefined) => {
+  const f = zoneFields(d, timeZone);
+  return f.hours === h && f.minutes === m && f.seconds === s;
+};
 
-/** Resolves a wall-clock time into an instant and reports the doubtful cases. */
-export function resolveLocalTime(year: number, month: number, day: number, h: number, m: number, s: number): DstStatus {
-  const d = new Date(year, month, day, h, m, s);
+/** Resolves a wall-clock time of a zone (`undefined`: the reader's) into an
+    instant and reports the doubtful cases. */
+export function resolveLocalTime(
+  year: number,
+  month: number,
+  day: number,
+  h: number,
+  m: number,
+  s: number,
+  timeZone?: string,
+): DstStatus {
+  const d = zoneInstant({ year, month, day, hours: h, minutes: m, seconds: s }, timeZone);
 
-  // The missing hour: the browser shifts forward automatically.
-  if (!matchesWallTime(d, h, m, s)) {
+  // The missing hour: the clock shifts forward automatically.
+  if (!matchesWallTime(d, h, m, s, timeZone)) {
     return { kind: "missing", date: d };
   }
 
   // The doubled hour: the same wall-clock time exists again an hour away.
   const oneHour = 3_600_000;
   const before = new Date(d.getTime() - oneHour);
-  if (matchesWallTime(before, h, m, s)) {
+  if (matchesWallTime(before, h, m, s, timeZone)) {
     return { kind: "ambiguous", earlier: before, later: d };
   }
   const after = new Date(d.getTime() + oneHour);
-  if (matchesWallTime(after, h, m, s)) {
+  if (matchesWallTime(after, h, m, s, timeZone)) {
     return { kind: "ambiguous", earlier: d, later: after };
   }
 
