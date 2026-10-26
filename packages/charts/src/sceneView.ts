@@ -214,9 +214,56 @@ export function wheel(s: ChartScene, event: WheelEvent): void {
   }
 }
 
+/** Alt with a drag marks a range where the chart zooms (a plain drag pans, and
+    a finger pans); where nothing zooms, any primary drag does (ADR-0074). */
+function rangeWanted(s: ChartScene, event: PointerEvent): boolean {
+  if (s.onRange === null) return false;
+  if (event.pointerType !== "touch" && event.button !== 0) return false;
+  return !hasZoom(s) || (event.altKey && event.pointerType !== "touch");
+}
+
+const clampToPlot = (s: ChartScene, px: number): number => {
+  const p = s.layout.plot;
+  return Math.min(p.x + p.width, Math.max(p.x, px));
+};
+
+/** The range gone, reported or not; the band with it. */
+export function endRange(s: ChartScene): void {
+  if (s.range === null) return;
+  s.range = null;
+  if (typeof document !== "undefined") document.removeEventListener("keydown", cancelOnEscape);
+  s.markOverlayDirty();
+}
+
+// One range is under the pointer at a time, so one listener, aimed at its scene.
+let ranging: ChartScene | null = null;
+function cancelOnEscape(event: KeyboardEvent): void {
+  if (event.key === "Escape" && ranging !== null) endRange(ranging);
+}
+
+/** Reports the range once per x axis, in registration order, `from` first. */
+function reportRange(s: ChartScene, a: number, b: number): void {
+  const report = s.onRange;
+  if (report === null) return;
+  for (const { config } of s.axesInOrder()) {
+    if (config.orientation !== "x") continue;
+    const layout = s.findAxis("x", config.id);
+    if (layout === null) continue;
+    const [from, to] = [layout.scale.fromPx(a), layout.scale.fromPx(b)].sort((u, v) => u - v);
+    report({ axisId: config.id, from: from ?? 0, to: to ?? 0 });
+  }
+}
+
 export function pointerDown(s: ChartScene, event: PointerEvent): void {
   s.downAt = event.offsetX;
   s.travelled = false;
+  if (rangeWanted(s, event)) {
+    s.range = { from: clampToPlot(s, event.offsetX), to: clampToPlot(s, event.offsetX), live: false, pointerId: event.pointerId };
+    ranging = s;
+    document.addEventListener("keydown", cancelOnEscape);
+    s.container?.setPointerCapture?.(event.pointerId);
+    return;
+  }
   if (!hasZoom(s)) return;
   if (event.pointerType !== "touch" && event.button !== 0) return;
   s.pointers.set(event.pointerId, event.offsetX);
@@ -227,6 +274,17 @@ export function pointerDown(s: ChartScene, event: PointerEvent): void {
 /** A drag pans, two fingers pinch. */
 export function drag(s: ChartScene, event: PointerEvent): void {
   if (s.downAt !== null && Math.abs(event.offsetX - s.downAt) > 4 && event.buttons !== 0) s.travelled = true;
+  const range = s.range;
+  if (range !== null && range.pointerId === event.pointerId) {
+    range.to = clampToPlot(s, event.offsetX);
+    // Under 4 px it may still be a click: the tooltip and its hit stay until it is not.
+    if (s.travelled && !range.live) {
+      range.live = true;
+      s.clearActive();
+    }
+    s.markOverlayDirty();
+    return;
+  }
   const last = s.pointers.get(event.pointerId);
   if (last === undefined) return;
   s.pointers.set(event.pointerId, event.offsetX);
@@ -243,6 +301,16 @@ export function drag(s: ChartScene, event: PointerEvent): void {
 }
 
 export function pointerUp(s: ChartScene, event: PointerEvent): void {
+  const range = s.range;
+  if (range !== null && range.pointerId === event.pointerId) {
+    const end = clampToPlot(s, event.offsetX);
+    const made = event.type !== "pointercancel" && Math.abs(event.offsetX - (s.downAt ?? event.offsetX)) > 4;
+    endRange(s);
+    if (made) {
+      s.travelled = true; // the click that follows is the end of a drag
+      reportRange(s, range.from, end);
+    }
+  }
   s.pointers.delete(event.pointerId);
   s.pinch = pinchWidth(s);
 }

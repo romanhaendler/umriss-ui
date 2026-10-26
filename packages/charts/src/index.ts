@@ -95,6 +95,7 @@ export type {
   SeriesKind,
   TooltipConfig,
   TooltipHit,
+  ChartRange,
   TooltipPoint,
 } from "./types";
 

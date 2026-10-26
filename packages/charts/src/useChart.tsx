@@ -12,7 +12,8 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactN
 import { Chart as FreeChart, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
 import { warnOnce } from "./dev";
-import type { TooltipHit } from "./types";
+import { toPicture } from "./picture";
+import type { ChartRange, TooltipHit } from "./types";
 import { viewKey, type AxisSpans, type ChartView } from "./view";
 import { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 import { Line, type LineProps } from "./Line";
@@ -43,6 +44,14 @@ export interface ChartOptions<Z = unknown> {
       none: what is chosen is the application's state. Needs a `<Tooltip>`,
       which makes the hits; the hit does not travel over `syncId`. */
   onSelect?: (hit: TooltipHit<Z>) => void;
+  /** The reader marked a stretch of an x axis: Alt with a drag where the chart
+      zooms, a plain drag where it does not. Called once, on release - once per
+      x axis -, with `from` not after `to`, in the axis' own values. A band
+      covers the stretch while the pointer is down; the chart keeps no range and
+      draws none afterwards, and it does not travel over `syncId`. A press that
+      travels 4 px or less is a click and reaches `onSelect`; Escape and a
+      cancelled pointer report nothing. */
+  onRange?: (range: ChartRange) => void;
 }
 
 /** What `useChart` hands back: the chart and its parts, typed at the row `Z`,
@@ -85,6 +94,15 @@ export interface ChartParts<Z> {
   showOnly: (name: string) => void;
   /** Shows every series again. */
   showAllSeries: () => void;
+  /** A PNG of the chart as it stands: the plot with its grid, series and
+      limits, the axes with ticks, labels and titles, and the legend, on the
+      chart's own ground in the colour scheme in use, at the chart's size on
+      screen and at least twice its CSS pixels. Not in it: the tooltip, the
+      crosshair and hover marks, the "Show all" button, the data key and
+      its table, the screen-reader texts, and any title. Where the picture goes
+      - a download, the clipboard, an upload - is the application's. Rejects
+      with an `Error` when the chart is not on screen or has no size. */
+  toPng: () => Promise<Blob>;
 }
 
 const NO_DOMAINS: AxisSpans = {};
@@ -98,7 +116,7 @@ const NO_NAMES: readonly string[] = [];
     identity over the renders -, the `view`, its `domains` and `hidden`, and
     the setters that change them. */
 export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): ChartParts<Z> {
-  const { initialView, onViewChange, onSelect } = options;
+  const { initialView, onViewChange, onSelect, onRange } = options;
   /* The key of the view last reported, or applied by `setView` - what the
      effect below compares the view against. */
   const reported = useRef("");
@@ -117,6 +135,7 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
       toggleSeries: scene.toggleSeries,
       showOnly: scene.showOnly,
       showAllSeries: scene.showAllSeries,
+      toPng: () => toPicture(scene),
     };
     return { held, scene, parts };
   });
@@ -143,6 +162,8 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
   bound.held.rows = rows;
   // eslint-disable-next-line react-hooks/immutability -- as the rows: read when the reader acts, never during a render
   scene.onSelect = (onSelect ?? null) as ChartScene["onSelect"];
+  // eslint-disable-next-line react-hooks/immutability -- as onSelect
+  scene.onRange = onRange ?? null;
   useEffect(() => {
     if (onSelect !== undefined && !scene.hasTooltip)
       warnOnce("select-without-tooltip", "`onSelect` needs a <Tooltip> - the hits it reports are the tooltip's.");
