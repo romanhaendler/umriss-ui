@@ -9,6 +9,7 @@
 import type { ReactNode } from "react";
 import { inBlockedTime, violatedDependencies, overlapDepth, overlaps, type InBlockedTime, type ViolatedDependency, type Overlap } from "./findings";
 import type { BlockedTime, Milestone, Subtask, Task, Dependency } from "./model";
+import { DEV, warnOnce } from "./dev";
 import type { ScheduleHit } from "./sceneView";
 
 export interface LaneConfig {
@@ -153,7 +154,50 @@ export class SceneData {
     this.violatedById = new Map(violatedDependencies(this.subtasks, this.dependencies).map((l) => [l.dependency, l] as const));
     this.depth = overlapDepth(this.subtasks);
     this.inBlocked = inBlockedTime(this.subtasks, this.blocked);
+    this.warnOfMalformedData();
     return true;
+  }
+
+  /** Says in development what the data gets wrong and is drawn, dropped or
+      counted regardless. It runs here, once the parts have registered, so a
+      lane declared after its subtasks is not missing; with no lane declared
+      the lanes are still on their way, and an empty `tasks` is a plan drawn
+      muted on purpose. */
+  private warnOfMalformedData(): void {
+    if (!DEV) return;
+    const twice = (kind: string, ids: readonly string[]) => {
+      const seen = new Set<string>();
+      for (const id of ids) {
+        if (seen.has(id)) warnOnce(`twice:${kind}:${id}`, `the ${kind} id "${id}" stands twice; give each ${kind} an id of its own, or only the first is found.`);
+        seen.add(id);
+      }
+    };
+    twice("subtask", this.subtasks.map((s) => s.id));
+    twice("dependency", this.dependencies.map((d) => d.id));
+    twice("lane", this.lanes.map((l) => l.id));
+    for (const s of this.subtasks) {
+      if (!(s.to > s.from))
+        warnOnce(`span:${s.id}`, `subtask "${s.id}" does not end after it starts (from ${s.from}, to ${s.to}); a point in time is a Milestone, and a span with no length is drawn as a hairline.`);
+    }
+    for (const layer of this.layers) {
+      if (layer.kind !== "subtasks" || layer.tasks.length === 0) continue;
+      const known = new Set(layer.tasks.map((t) => t.id));
+      for (const s of layer.data)
+        if (!known.has(s.task))
+          warnOnce(`task:${s.id}`, `subtask "${s.id}" names the task "${s.task}", which is not among the tasks of its Subtasks layer; it is drawn muted. Add the task, or correct the subtask's task.`);
+    }
+    for (const d of this.dependencies)
+      for (const end of [d.from, d.to])
+        if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
+    if (this.lanes.length === 0) return;
+    const declared = new Set(this.lanes.map((l) => l.id));
+    const onLane = (kind: string, items: readonly { id: string; lane: string }[]) => {
+      for (const { id, lane } of items)
+        if (!declared.has(lane)) warnOnce(`lane:${kind}:${id}`, `${kind} "${id}" is on the lane "${lane}", which no Lane declares; it is left out. Declare <Lane id="${lane}" />.`);
+    };
+    onLane("subtask", this.subtasks);
+    onLane("milestone", this.milestones);
+    onLane("blocked time", this.blocked);
   }
 
   /** The task a dependency belongs to: its departing subtask's. */
