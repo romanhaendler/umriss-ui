@@ -146,13 +146,15 @@ stylesheets by hand.
   mark from the formats, yes/no from the wording and its separator from the
   mark - English gets commas and a point, `@umriss-ui/core/wording/de` the file
   it always had. A column of days is written as `YYYY-MM-DD`, any other
-  point in time as ISO text. Ctrl or Cmd with C copies the selected rows as tab-separated
+  point in time as ISO text with its offset. Under a named time zone the day is
+  the zone's, and a day is a date at the zone's midnight; the ISO text stays
+  the instant, the same for every reader. Ctrl or Cmd with C copies the selected rows as tab-separated
   text (in grid mode with no selection, the Active cell), says so in a live
   region, and `selectionAsText()` hands the same text to a button of one's own.
 * **An Excel file** (ADR-0073): `import { xlsx } from "@umriss-ui/table/xlsx"` and
   `<Export format={xlsx} />` write one sheet - a header line, numbers, dates,
   booleans and text as what they are, and the table's column widths - the rows
-  and columns of the CSV, dates in the reader's local time. No styling, no
+  and columns of the CSV, dates as the wall clock of the formats' time zone (the reader's local time without one). No styling, no
   formulas, no group rows, no compression (a file is about the size of its XML,
   so 100,000 rows of ten columns are tens of megabytes). A sheet over 1,048,576
   rows or 16,384 columns throws a `RangeError`; a text over 32,767 characters is
