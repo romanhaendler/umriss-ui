@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactN
 import { Chart as FreeChart, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
 import { warnOnce } from "./dev";
+import { toPicture } from "./picture";
 import type { TooltipHit } from "./types";
 import { viewKey, type AxisSpans, type ChartView } from "./view";
 import { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
@@ -85,6 +86,15 @@ export interface ChartParts<Z> {
   showOnly: (name: string) => void;
   /** Shows every series again. */
   showAllSeries: () => void;
+  /** A PNG of the chart as it stands: the plot with its grid, series and
+      limits, the axes with ticks, labels and titles, and the legend, on the
+      chart's own ground in the colour scheme in use, at the chart's size on
+      screen and at least twice its CSS pixels. Not in it: the tooltip, the
+      crosshair and hover marks, the "Show all" button, the data key and
+      its table, the screen-reader texts, and any title. Where the picture goes
+      - a download, the clipboard, an upload - is the application's. Rejects
+      with an `Error` when the chart is not on screen or has no size. */
+  toPng: () => Promise<Blob>;
 }
 
 const NO_DOMAINS: AxisSpans = {};
@@ -117,6 +127,7 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
       toggleSeries: scene.toggleSeries,
       showOnly: scene.showOnly,
       showAllSeries: scene.showAllSeries,
+      toPng: () => toPicture(scene),
     };
     return { held, scene, parts };
   });
