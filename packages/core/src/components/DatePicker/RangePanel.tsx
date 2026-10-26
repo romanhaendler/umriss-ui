@@ -15,12 +15,14 @@ export interface PresetColumnProps {
   presets: readonly RangePreset[];
   /** Which preset currently corresponds to the chosen time span. */
   isActive: (preset: RangePreset) => boolean;
+  /** A preset with no day inside `min` and `max` cannot be chosen. */
+  isDisabled?: (preset: RangePreset) => boolean;
   /** The caller decides what the preset means - the resolution distinguishes
       the two pickers. */
   onChoose: (preset: RangePreset) => void;
 }
 
-export function PresetColumn({ presets, isActive, onChoose }: PresetColumnProps) {
+export function PresetColumn({ presets, isActive, isDisabled, onChoose }: PresetColumnProps) {
   /* Before the early return, so that the number of hooks does not depend on
      whether there are presets. */
   const wording = useWording();
@@ -32,6 +34,7 @@ export function PresetColumn({ presets, isActive, onChoose }: PresetColumnProps)
           key={preset.label}
           type="button"
           className={cx(styles.preset, isActive(preset) && styles.presetActive)}
+          disabled={isDisabled?.(preset)}
           onClick={() => onChoose(preset)}
         >
           {preset.label}

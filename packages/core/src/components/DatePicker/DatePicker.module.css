@@ -164,6 +164,15 @@
     color: var(--u-color-text-muted);
   }
 
+  /* A day outside `min` and `max`: quiet, and it does not answer a hover. */
+  .outside,
+  .outside:hover,
+  .outside:active {
+    background: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   /* Today: the accent figure and a dot beneath it. An outline read as the
      keyboard focus beside it - the focus is the only ring (the canon of
      states). The dot takes the day's type colour, so on a chosen day it
@@ -523,11 +532,16 @@
       color var(--u-transition);
   }
 
-  .preset:hover {
+  .preset:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .preset:hover:not(:disabled) {
     background: var(--u-color-surface-sunken);
   }
 
-  .preset:active {
+  .preset:active:not(:disabled) {
     background: var(--u-color-surface-pressed);
   }
 
