@@ -491,7 +491,8 @@ The core scope is complete, and so are the command palette, the
 danger text tone, the pass-through of rules 1 and 2 above, the six basic
 components and the layout extras, forced colours, the listbox
 announcements, the fields' widths and sizes (ADR-0041), the four shapes of a
-root (ADR-0068) and the targets under a finger (ADR-0070).
+root (ADR-0068), the targets under a finger (ADR-0070), long option lists, a date
+that can be typed and bounded, and a source's quality (ADR-0077).
 
 What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the

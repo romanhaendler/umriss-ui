@@ -199,8 +199,7 @@ another, the zone's name stands once above the lane headers and in the plot's de
 ## Not yet
 
 What the schedule does not do today, and waits for a caller who needs it (what
-it never does stands in ADR-0032): umriss shows the reader's time unless the
-application names a zone in the formats (ADR-0076).
+it never does stands in ADR-0032).
 
 * **Stacked overlap** — overlapping subtasks packed into sub-lanes on request;
   today an overlap is always drawn offset, as the finding it is.
