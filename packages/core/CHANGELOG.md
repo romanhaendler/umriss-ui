@@ -27,6 +27,20 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.44.0 – The old names go, and server mode answers (Oct. 2026)
+
+### Added
+
+- **New wording keys** for what the table's server mode and export say, in English and German: `tryAgain`, `exporting`, `exportFailed`, `selectedOnPage`, `selectAllMatching`, `allMatchingSelected`, `footerOfMatches` and `exportSheetName` (the Excel sheet's name). The table, schedule and calculation move with them.
+- **A scenario, Mark a stretch,** on the control room page: a trend reports a range, the scenario holds it as one value, an alarm table takes it as a row filter and the trend draws it back as a band.
+
+### Changed
+
+- **`ariaLabel` on `TreeView`, `Popover` and `ContextMenu` is removed** (ADR-0068); 0.43.0 renamed it `aria-label` and kept the old name for one minor.
+  - Migration: write `aria-label` (TypeScript flags every use of `ariaLabel`).
+- **A wording written out in full needs the new keys** above, as it did for earlier additions; a wording built on the shipped English or German needs nothing.
+  - Migration: add the eight keys to a custom wording object, or spread the shipped one and override.
+
 ## 0.43.0 – One root contract, and a finger as a pointer (Oct. 2026)
 
 ### Added
