@@ -137,3 +137,101 @@ describe("Paging with the arrows", () => {
     expect(document.activeElement).toBe(next);
   });
 });
+
+const stop = () =>
+  document.querySelector<HTMLButtonElement>('[role="dialog"] button[tabindex="0"]')?.getAttribute("aria-label");
+const key = (k: string, init: object = {}) =>
+  fireEvent.keyDown(document.querySelector<HTMLButtonElement>('[role="dialog"] button[tabindex="0"]')!, { key: k, ...init });
+
+describe("The calendar's head jumps to a month and a year", () => {
+  it("shows the chosen year and month with the tab stop in it", () => {
+    render(<DatePicker value={new Date(2026, 9, 31)} onChange={vi.fn()} />);
+    openPanel("31/10/2026");
+    fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "1985" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Month" }), { target: { value: "1" } });
+    expect(stop()).toBe("Thursday, 28 February 1985");
+    expect(screen.getByRole("combobox", { name: "Year" })).toHaveProperty("value", "1985");
+  });
+
+  it("lists 100 years either side of today and always the year in view", () => {
+    render(<DatePicker value={new Date(2500, 0, 1)} onChange={vi.fn()} />);
+    openPanel("01/01/2500");
+    const years = Array.from((screen.getByRole("combobox", { name: "Year" }) as HTMLSelectElement).options).map((o) => o.value);
+    const now = new Date().getFullYear();
+    expect(years).toContain(String(now - 100));
+    expect(years).toContain(String(now + 100));
+    expect(years).toContain("2500");
+  });
+
+  it("is carried by the left month of a pair, which the right follows", () => {
+    render(<DateRangePicker value={null} onChange={vi.fn()} />);
+    openPanel("Select range");
+    expect(screen.getAllByRole("combobox", { name: "Year" })).toHaveLength(1);
+    fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "1985" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Month" }), { target: { value: "2" } });
+    expect(screen.getByLabelText("Sunday, 17 March 1985")).toBeTruthy();
+    expect(screen.getByLabelText("Monday, 15 April 1985")).toBeTruthy();
+  });
+
+  it("opens no own list of its year under a finger", () => {
+    render(<DatePicker value={new Date(2026, 9, 31)} onChange={vi.fn()} />);
+    openPanel("31/10/2026");
+    const year = screen.getByRole("combobox", { name: "Year" });
+    fireEvent.pointerDown(year, { pointerType: "touch", button: 0 });
+    expect(fireEvent.mouseDown(year, { button: 0 })).toBe(true);
+    expect(screen.queryByRole("listbox")).toBeNull();
+  });
+
+  it("reads German in the German wording and formats", async () => {
+    const { GERMAN_WORDING, GERMAN_FORMATS } = await import("../src/lib/language/de");
+    render(
+      <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
+        <DatePicker value={new Date(2026, 2, 17)} onChange={vi.fn()} />
+      </LanguageProvider>,
+    );
+    openPanel("17.03.2026");
+    expect(screen.getByRole("combobox", { name: "Jahr" })).toBeTruthy();
+    expect((screen.getByRole("combobox", { name: "Monat" }) as HTMLSelectElement).selectedOptions[0]?.text).toBe("März");
+  });
+
+  it("takes monthName from an override", () => {
+    const formats = { monthName: () => "Mmm" };
+    render(
+      <LanguageProvider formats={formats}>
+        <DatePicker value={new Date(2026, 2, 17)} onChange={vi.fn()} />
+      </LanguageProvider>,
+    );
+    openPanel("17/03/2026");
+    expect((screen.getByRole("combobox", { name: "Month" }) as HTMLSelectElement).selectedOptions[0]?.text).toBe("Mmm");
+  });
+});
+
+describe("The grid's keys", () => {
+  it("PageUp and PageDown move a month, keeping the day, across a year", () => {
+    render(<DatePicker value={new Date(2026, 0, 31)} onChange={vi.fn()} />);
+    openPanel("31/01/2026");
+    key("PageUp");
+    expect(stop()).toBe("Wednesday, 31 December 2025");
+    key("PageDown");
+    key("PageDown");
+    expect(stop()).toBe("Saturday, 28 February 2026");
+  });
+
+  it("Shift with them moves a year", () => {
+    render(<DatePicker value={new Date(2024, 1, 29)} onChange={vi.fn()} />);
+    openPanel("29/02/2024");
+    key("PageDown", { shiftKey: true });
+    expect(stop()).toBe("Friday, 28 February 2025");
+    key("PageUp", { shiftKey: true });
+    expect(stop()).toBe("Wednesday, 28 February 2024");
+  });
+
+  it("Home and End go to Monday and Sunday of the week, across a month", () => {
+    render(<DatePicker value={new Date(2026, 2, 1)} onChange={vi.fn()} />);
+    openPanel("01/03/2026"); // a Sunday
+    key("Home");
+    expect(stop()).toBe("Monday, 23 February 2026");
+    key("End");
+    expect(stop()).toBe("Sunday, 1 March 2026");
+  });
+});
