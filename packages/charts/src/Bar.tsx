@@ -62,7 +62,12 @@ export interface BarProps<T> {
 /** A series drawn as bars from 0, or from its `baseline`, to its values, one at each x: a category
     the x axis reads from the row, a number or an instant. Several bar series
     on one x axis stand side by side, or on each other with `stack`. Renders
-    nothing itself: it registers with the surrounding `Chart`. */
+    nothing itself: it registers with the surrounding `Chart`.
+
+    On a time axis the ticks are never closer than the bars' step, and stand
+    on the unit's local boundaries: a period's bar at the period's first
+    instant (a month's at the 1st) gets its tick at its centre. `ticks` names
+    others. */
 export function Bar<T>(props: BarProps<T>): null {
   const {
     baseline,

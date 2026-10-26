@@ -101,6 +101,7 @@ Screenshot pages carry their name in brackets.
 | `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick and on the first of a new day (the year on a day axis); `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
 | `time` with `domain="nice"`: widened to whole local units of the step (the hour under six-hour ticks), a minute step to itself | Q15 | Unit (time axis) |
 | `ticks` with `domain="nice"`: widened to the named ticks, not to a 1-2-5 grid | — | Unit (layout), Screenshot (`by-limits`, `burn-down`) |
+| `time` with a `Bar` or `BoxPlot` series: the step is never shorter than the bars' step, shorter ones of the step table skipped and `tickCount` choosing among the rest; none for a line alone, a working-time axis or explicit `ticks` | — | Unit (bar time ticks), jsdom (bar time ticks) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
 | `zoomable`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click goes back to the axis' own `domain`; without it nothing zooms and the plain wheel stays the page's | Q19, ADR-0047 | Unit (jsdom zoom keys), Interaction (zoom and pan) |
 | The span shown is the chart's view (`domains`, by axis id, `"x"` for a lone axis): `useChart(rows, { initialView, onViewChange })`, `initialView` read once, changes the reader makes reported whole once per change and at most once per frame, never for the start; `setView(view)`, `domains` and `setDomain(axisId, span \| null)` on the hook; an id that names no zoomable x axis falls out | ADR-0047, component-view Q5, Q6, Q10, Q22 | Unit (view), Unit (jsdom zoom keys) |
@@ -203,11 +204,14 @@ axis with the map kept by the library: every promise above holds on it.
 | A group shares the step width and the width fraction | ADR-0002 | Unit (bars) |
 | Different `barWidth` within a group: DEV warning | ADR-0002 | Unit (scene) |
 | The group as a whole centred on the X value | ADR-0002 | Unit (bars) |
+| Monthly bars on `Date` rows: a tick under each bar, on the month's local boundary | — | Unit (bar time ticks), jsdom (bar time ticks), Screenshot (`bar`) |
 | Grouping in registration order | R-2.1 | Unit (bars) |
 | Bars on other X axes do not count towards the group | ADR-0002 | Unit (bars) |
 | The foot at 0, with 0 inside the Y axis' value range; negative values hang below it | R-4.13 | Unit (scene), Screenshot (`deviation`) |
 | `baseline`: a bar floating from one value to another, either way up, in the baseline channel; both edges enter the value range and zero only without a baseline; a gap in either edge leaves the bar out; in a stack it is not read | floating-bar 01 | Unit (floatingBar, materialisation), Type (floatingBar), Screenshot (`waterfall`) |
 | A waterfall from a running sum and one `Bar`; its tooltip, readout and data table name each step by both edges, no helper series | floating-bar 01 | Unit (jsdom floatingBar), Screenshot (`waterfall`) |
+| Error bars: a thin floating `Bar` for the interval (`baseline` the lower bound, `value` the upper) and a `Scatter` for the mean; the tooltip names the interval by both bounds and the mean by its value, and no text says "quartile" | floating-bar 02 | Unit (jsdom errorBars), Screenshot (`error-bars`) |
+| A range bar, a minimum to a maximum per hour, is the same floating `Bar` with a `baseline` | floating-bar 01 | Unit (jsdom floatingBar) |
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
@@ -343,6 +347,7 @@ axis with the map kept by the library: every promise above holds on it.
 | Nice edges on the 1-2-5 grid for a width or a count; none for no values | — | Unit (bin) |
 | A value on an edge falls into the bin the edge starts; the last bin is closed | — | Unit (bin) |
 | A given domain is taken as it is; values outside it and values that are not finite are left out | — | Unit (bin) |
+| The values may be a typed array (`Float64Array`, `Int32Array`), read by index | — | Unit (binTyped), Type (`binTyped.test-d`) |
 
 ## `Tooltip`
 
@@ -557,6 +562,14 @@ here.
   kind of its own.
 * **Pie, donut, radar, candle.** None answers a question a data-dense screen
   asks (ADR-0059).
+* **A fit line or regression.** A fit is a model the analyst chooses: which
+  line, which band, which interval. The chart draws the rows it is given; the
+  least-squares line and its 95 % band are built from `Line` and `Area` in the
+  application (the Scatter page, "A fit line with its band").
+* **Point opacity.** A scatter is one path and one fill, so translucent points
+  do not add up where they crowd, and a fill per point breaks the
+  million-point budget. Density is the application's count into cells, drawn as
+  a `Matrix` with its colour bar (the Scatter page, "Where the points crowd").
 
 ## Known limits
 

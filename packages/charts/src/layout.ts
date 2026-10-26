@@ -63,6 +63,9 @@ export interface AxisInput {
   tickValues?: readonly number[];
   /** The values are instants: ticks on local boundaries, labels by level. */
   time?: boolean;
+  /** The Step of the bars and boxes on a time axis: its ticks are never closer
+      than that. */
+  barStep?: number;
   /** The IANA zone the instants are ticked and written in; the reader's
       where it is left out. */
   timeZone?: string;
@@ -177,8 +180,8 @@ function readable(domain: readonly [number, number]): boolean {
 }
 
 /** The readable step of a time axis over its domain. */
-function stepOf(domain: readonly [number, number], tickCount: number) {
-  return timeStepFor(domain[1] - domain[0], tickCount);
+function stepOf(axis: AxisInput, domain: readonly [number, number], tickCount: number) {
+  return timeStepFor(domain[1] - domain[0], tickCount, axis.barStep);
 }
 
 function domainOf(
@@ -214,7 +217,7 @@ function domainOf(
     // exception - a whole minute is no margin, and a point on the edge would
     // be cut in half.
     if (!readable([min, max])) return dataDomain(min, max);
-    const step = stepOf([min, max], tickCount);
+    const step = stepOf(axis, [min, max], tickCount);
     return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n }, axis.timeZone);
   }
   return niceDomain(min, max, tickCount);
@@ -241,7 +244,7 @@ function tickValuesFor(
     const built = calendarFrom(calendar);
     const inside = (v: number) => toWallClock(Math.min(Math.max(v, 0), built.total), built);
     const values: number[] = [];
-    for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(domain, tickCount), axis.timeZone)) {
+    for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(axis, domain, tickCount), axis.timeZone)) {
       const v = toWorkingTime(wall, built);
       // Removed time, or the seam an earlier candidate already stands on: two
       // labels on one pixel are one too many.
@@ -250,7 +253,7 @@ function tickValuesFor(
     }
     return values;
   }
-  if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(domain, tickCount), axis.timeZone) : [];
+  if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(axis, domain, tickCount), axis.timeZone) : [];
   return ticksFor(domain[0], domain[1], tickCount);
 }
 
@@ -285,7 +288,7 @@ function labelsFor(
   const calendar = calendarOf(axis);
   if (axis.tickFormat !== undefined || (axis.time !== true && calendar === undefined)) return values.map(format);
   const wall = calendar === undefined ? values : values.map((v) => toWallClock(v, calendar));
-  return timeLabels(wall, stepOf(domain, tickCount), locale, axis.timeZone);
+  return timeLabels(wall, stepOf(axis, domain, tickCount), locale, axis.timeZone);
 }
 
 /** A label's left edge, moved inside a container of `width`. */

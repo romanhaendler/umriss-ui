@@ -48,7 +48,7 @@ export default function OlderRelease() {
   });
   return (
     <>
-      <Dashboard aria-label="Orders and utilisation">
+      <Dashboard headingLevel={4} aria-label="Orders and utilisation">
         <WidgetType
           name="figure"
           label="Figure"
