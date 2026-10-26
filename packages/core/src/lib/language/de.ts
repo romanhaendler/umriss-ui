@@ -80,6 +80,8 @@ export const GERMAN_WORDING: Wording = {
   datePlaceholder: "Datum wählen",
   datePanel: "Datum wählen",
   dateClear: "Datum leeren",
+  typeDate: "Datum eingeben",
+  notADate: "Kein gültiges Datum",
   dateTimePlaceholder: "Datum und Zeit wählen",
   dateTimePanel: "Datum und Zeit wählen",
   dateTimeClear: "Datum und Zeit leeren",
