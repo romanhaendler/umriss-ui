@@ -123,3 +123,19 @@ test("The marked stretch of a scenario under forced colours", async ({ page }, t
   await page.mouse.move(0, 0);
   await expect(target).toHaveScreenshot(`forced-scenario-mark-a-stretch-${testInfo.project.name}.png`);
 });
+
+test("A Stat's quality line under the figure stays under forced colours", async ({ page }) => {
+  await openExample(page, "stat", "say-how-far-the-source-vouches");
+  const lineOf = (name: RegExp) =>
+    page
+      .locator('[data-example="say-how-far-the-source-vouches"]')
+      .getByRole("group", { name })
+      .locator("[data-quality]")
+      .first()
+      .evaluate((el) => {
+        const style = getComputedStyle(el);
+        return `${style.textDecorationLine} ${style.textDecorationStyle}`;
+      });
+  expect(await lineOf(/Furnace 2.*Uncertain quality/)).toBe("underline dotted");
+  expect(await lineOf(/Furnace 3.*Bad quality/)).toBe("underline wavy");
+});
