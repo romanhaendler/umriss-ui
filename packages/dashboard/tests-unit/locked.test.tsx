@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { useDashboard } from "../src";
+import { HeadingType, useDashboard } from "../src";
 import type { DashboardView } from "../src";
 import { move, remove, resize, setOptions } from "../src/edit";
 
@@ -32,6 +32,26 @@ const press = (name: string) => fireEvent.click(screen.getByRole("button", { nam
 const menuOf = (title: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${title}` }));
 const item = (name: string | RegExp) => fireEvent.click(screen.getByRole("menuitem", { name }));
 const items = () => screen.getAllByRole("menuitem").map((el) => el.textContent);
+
+function HeadingOnly() {
+  const { Dashboard } = useDashboard({ defaultView: { widgets: [{ id: "h", type: "heading", size: "full", options: { text: "Top" }, locked: true }] } as DashboardView });
+  return (
+    <Dashboard aria-label="Start">
+      <HeadingType />
+    </Dashboard>
+  );
+}
+
+describe("a locked heading widget", () => {
+  it("shows the word for locked in the mode and none outside", () => {
+    render(<HeadingOnly />);
+    expect(screen.queryByText("Locked")).toBeNull();
+    press("Edit");
+    expect(screen.getAllByText("Locked")).toHaveLength(1);
+    press("Done");
+    expect(screen.queryByText("Locked")).toBeNull();
+  });
+});
 
 describe("a locked widget", () => {
   it("has the moves and a disabled line saying why, and no size, options or Remove", () => {

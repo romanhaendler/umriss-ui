@@ -195,7 +195,7 @@ const BAR_HATCH_H = 10;
 function ColourBar({ bar, mark }: { bar: LegendBar; mark: LegendMark | null }): ReactNode {
   const stepWidth = BAR_WIDTH / bar.colors.length;
   return (
-    <span className="uc-legend-bar" aria-hidden="true">
+    <span className="uc-legend-bar" aria-hidden="true" style={{ width: BAR_WIDTH }}>
       <span className="uc-legend-steps">
         {bar.colors.map((color, k) => {
           const swatch = mark?.swatches?.[k];
