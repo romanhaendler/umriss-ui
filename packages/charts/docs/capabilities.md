@@ -42,6 +42,14 @@ Screenshot pages carry their name in brackets.
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
 | `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves; zoom is not shared by it | Q21 | Interaction (cursor sync) |
 | `useChart(rows, { onSelect })`: a click or tap on a hit, and Enter on the Active point, report the hit the tooltip's `render` receives - once, not at the end of a drag, a double click on its first click only; the chart holds and draws no selection; DEV warning without a `<Tooltip>`; the summary names Enter only where it is given; the hit does not travel over `syncId` | ADR-0003, ADR-0023 | Unit (jsdom onSelect) |
+| `useChart(rows, { onRange })`: Alt with a drag where an x axis zooms, a plain drag where none does, marks a stretch; `onRange({ axisId, from, to })` once on release, `from` not after `to` whichever way the drag went; the ends are the pointer's x at press and release, clamped to the plot and not snapped; a press of 4 px or less stays a click and reaches `onSelect`, a range never does; a plain drag on a zoomable chart still pans; Escape and a pointer cancel report nothing; with several x axes one report per axis, each with its `axisId`; the chart keeps no range | ADR-0074 | Unit (jsdom range) |
+| The band while the pointer is down: the first series' colour, an outline in the system colour under forced colours, covering the stretch; gone on release; no tooltip while the drag runs | ADR-0074 | Unit (jsdom range: tooltip); Manual (demo, Zoom and pan) |
+| Without `onRange` nothing changes: no gesture, no cursor, no summary sentence; Alt with a drag still pans | ADR-0074 | Unit (jsdom range) |
+| A touch on a zoomable chart pans; where no x axis zooms and `onRange` is given the container takes `touch-action: pan-y`, so a horizontal finger makes a range and a vertical one scrolls the page | ADR-0074 | Unit (jsdom range: touch-action); Manual (touch) |
+| A category axis: `from` and `to` are the first and the last category the drag touches, as the strings the rows hold, in the axis' order; one place twice for a drag inside one place | ADR-0052, ADR-0074 | Unit (jsdom range axes) |
+| A time axis reports milliseconds; a calendar axis reports wall-clock instants through its mapping, so a range over a weekend holds the weekend's dates | ADR-0074 | Unit (jsdom range axes) |
+| Keyboard: Space sets the start at the Active point, the walk moves it, Space sets the end and reports once; Space twice on one point gives `from === to`; an end before the start is swapped; Escape cancels the start and a second Escape clears the point; blur cancels; Shift+Space and Space with a modifier are left alone; a DEV warning once without a `<Tooltip>`, the pointer still working | ADR-0030, ADR-0074 | Unit (jsdom range keys) |
+| A polite readout: the start ("Range from {x} started.") and the range ("Range from {a} to {b}.") in the axis' format, a cancel says nothing; the summary names Space only with `onRange` and a tooltip; German wording on `GERMAN_CHARTS_WORDING` | ADR-0074 | Unit (jsdom range keys) |
 | `useChart(rows).toPng()`: a PNG Blob of the plot with its grid, series, limits and bands and of the axes with ticks, labels and titles, on the chart's own ground in the scheme in use, at the chart's CSS size times max(`devicePixelRatio`, 2) - not the tooltip, the crosshair, "Show all", the data key, the screen-reader texts; rejects when the chart is not mounted or has no size | ADR-0075 | Unit (jsdom picture), Interaction (picture), Screenshot (`picture`) |
 | `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
@@ -491,13 +499,11 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 Wanted, not yet built (charts-review Q12). The entries pointing at a spec are no longer waiting for a caller (roadmap G1); the others still wait for one.
 
-* **A range a reader marks.** Specified, ready to build:
-  `.scratch/chart-range-selection-and-navigator/spec.md`.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 * **A navigator.** A small overview of the whole course under the plot, its
-  window the span in view. It waits for a design session of its own, after the
-  range: `.scratch/chart-navigator/spec.md`.
+  window the span in view. It waits for a design session of its own:
+  `.scratch/chart-navigator/spec.md`.
 * **Horizontal bars.** The next kind: a ranking with long names, read by name
   (ADR-0059).
 * **Sankey.** What flows where, from stage to stage (ADR-0059).
@@ -526,6 +532,10 @@ here.
   scale that the working-time axis relies on (ADR-0001).
 * **Smoothing.** A curve between samples invents values the plant never
   measured; `Line step` draws what was held.
+* **A kept range.** A `selectedRange` prop, an edge to drag after release, a
+  clear key: the chart reports a range and holds none (ADR-0074).
+* **A lasso or a box over two axes**, and **a range on y**: the y axis does not
+  zoom, and a range is a stretch of x (ADR-0074).
 * **Animation.** A chart that moves on every update is harder to read, and the
   chart redraws once per change, not per frame. The loading silhouette's band
   and its one fade into the course are no exception: neither moves the data.
@@ -542,6 +552,11 @@ here.
   asks (ADR-0059).
 
 ## Known limits
+
+* **Several ranges at once.** One stretch is marked at a time; a second
+  gesture reports a second range, and the chart keeps neither (ADR-0074).
+* **A touch range on a zoomable chart.** One finger pans there; a long press or
+  a mode for it may come with a caller (ADR-0074).
 
 * **Time zones.** umriss shows the reader's time; there is no other zone
   (ADR-0060).

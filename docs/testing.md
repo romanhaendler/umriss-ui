@@ -49,7 +49,10 @@ kind is for.
 * **Unit tests (vitest, jsdom)** prove logic and behaviour that needs no layout:
   the pure modules, model and hook behaviour, roles, focus and dismissal, the
   demo shell's tooling (props reader, generated text for agents, addresses).
-  They run per package.
+  They run per package. The charts' range is proved there: the pointer in
+  `tests-unit/range.jsdom.test.tsx`, the axes in `rangeAxes.jsdom.test.tsx`, the
+  keys and the readout in `rangeKeys.jsdom.test.tsx`; no Playwright test draws
+  its band yet, so the band is looked at in the demo.
 * **Smoke tests of a demo** open every page and every example in jsdom and check
   that each renders, and that the package is named in the source it shows.
 * **Guards** read the sources as text or walk the exports and fail on a rule,
