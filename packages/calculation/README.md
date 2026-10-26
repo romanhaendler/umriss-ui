@@ -121,6 +121,12 @@ in a tree - there it folds, and opens whole.
   that exist), a circle through references, a wrong operand count, a
   duplicate id, a component of your own wrapping `Given`, `emphasis` or `rule`
   on the Result. `.map` inside an operator works.
+- **A `Given` says where its number came from with `source`, when it was
+  true with `asOf`, and how far the source vouches for it with `quality`**
+  (`"good"`, `"uncertain"` or `"bad"`, core's type). The quality is carried up:
+  every line built on the given shows the worst of its operands, a folded line
+  too, and the figure is underlined dotted or wavy. Freshness is not carried
+  up; it stays beside the given.
 - **`emphasis="strong" | "muted"` and `rule="above"`** set a line apart
   without CSS: read first, receding (and still counted in full), or ruled off
   where a section starts that is no interim (ADR-0049).

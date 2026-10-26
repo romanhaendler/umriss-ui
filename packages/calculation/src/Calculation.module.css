@@ -99,7 +99,7 @@
     padding-bottom: 0;
   }
 
-  .frame[data-compact]:not([data-two-lines]) .assessment > :not(.target, .worst) {
+  .frame[data-compact]:not([data-two-lines]) .assessment > :not(.target, .worst, .quality) {
     margin-block: -1px;
   }
 
@@ -386,9 +386,26 @@
   }
 
   .target,
-  .worst {
+  .worst,
+  .quality {
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
+  }
+
+  .quality[data-quality="bad"] {
+    font-weight: var(--u-weight-medium);
+  }
+
+  /* The mark on the figure: a line style in the figure's own colour, never a
+     hue of its own, so that it stays in forced colours. */
+  .amount[data-quality="uncertain"] {
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  .amount[data-quality="bad"] {
+    text-decoration: underline wavy;
+    text-underline-offset: 0.2em;
   }
 
   /* The worst verdict inside a folded row: quiet, a dot and a word - the row
@@ -502,6 +519,16 @@
     text-underline-offset: 5px;
   }
 
+  /* The source's doubt replaces the double rule: one line under the number,
+     in its style. */
+  .line[data-kind="result"] > .amount[data-quality="uncertain"] {
+    text-decoration-style: dotted;
+  }
+
+  .line[data-kind="result"] > .amount[data-quality="bad"] {
+    text-decoration-style: wavy;
+  }
+
   /* A further metric keeps its distance from the one before: the columns read
      as columns, not as one number with a gap. */
   .amount[data-later] {
@@ -612,7 +639,7 @@
       padding-bottom: var(--_calculation-line-pad);
     }
 
-    .frame[data-compact]:not([data-two-lines]) .assessment:not(:empty) > :not(.target, .worst) {
+    .frame[data-compact]:not([data-two-lines]) .assessment:not(:empty) > :not(.target, .worst, .quality) {
       margin-block: 0;
     }
 
