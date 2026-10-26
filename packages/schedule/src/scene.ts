@@ -99,6 +99,9 @@ export interface ScheduleSnapshot {
     /** Whether the bar's colour is dark, so its label needs light text. */
     readonly dark: boolean;
   }[];
+  /** The plan's table, once a `DataTable` is declared: the id its panel
+      carries and whether it is open. */
+  readonly dataTable: { readonly id: string; readonly open: boolean } | null;
   /** What the live region reads, set once the keys rest. */
   readonly spoken: Spoken | null;
   /** What the plot is described by the plan's lanes and findings, the
@@ -133,6 +136,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   loading: false,
   now: null,
   bars: [],
+  dataTable: null,
   spoken: null,
   summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, violated: 0, blocked: 0, milestones: 0 },
 };
@@ -183,6 +187,7 @@ export class ScheduleScene {
   private domainFrame = 0;
   private unsubscribeTheme: (() => void) | null = null;
   private snapshot: ScheduleSnapshot = EMPTY_SNAPSHOT;
+  private dataTable: { id: string; open: boolean } | null = null;
   private readonly listeners = new Set<() => void>();
 
   constructor(initial: ScheduleView = {}) {
@@ -233,6 +238,24 @@ export class ScheduleScene {
   registerLayer = (config: LayerConfig): number => this.data.registerLayer(config);
   updateLayer = (id: number, config: LayerConfig): void => this.data.updateLayer(id, config);
   unregisterLayer = (id: number): void => this.data.unregisterLayer(id);
+
+  /** The plan's table (one per schedule) registers under its panel's id and
+      starts closed; opening it changes no pixel of the plot. */
+  registerDataTable(id: string): void {
+    this.dataTable = { id, open: false };
+    this.publish();
+  }
+
+  unregisterDataTable(): void {
+    this.dataTable = null;
+    this.publish();
+  }
+
+  toggleDataTable(): void {
+    if (this.dataTable === null) return;
+    this.dataTable = { ...this.dataTable, open: !this.dataTable.open };
+    this.publish();
+  }
 
   setOptions(options: SceneOptions): void {
     this.view.setOptions(options);
@@ -512,6 +535,7 @@ export class ScheduleScene {
       loading: this.gestures.loading,
       now: view.nowX(),
       bars: this.bars(),
+      dataTable: this.dataTable,
       spoken: this.keys.spoken,
       summary: this.summary(),
     };

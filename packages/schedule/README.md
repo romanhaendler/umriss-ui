@@ -144,6 +144,14 @@ overflow, the lane names scroll the page). The lane headers take at most 40 % of
 phone the plot keeps the larger part; `positionAt` and `clientPointOf`, on what
 `useSchedule` hands back, turn a client point into a time and a lane and back.
 
+`DataTable`, which `useSchedule` hands back, is opt-in: placed inside the
+`Schedule`, it adds a Show data key beside the bottom time band. The key opens a
+table over the lanes and the plot, one row per subtask whose time, lead-in and
+lead-out included, touches the span in view, in lane order, with the lane,
+task, subtask, from and to with their dates, the duration and the findings in
+words - a reader walks it with a screen reader's table keys instead of one
+subtask at a time. Without the part nothing changes.
+
 ## Its size
 
 The width is the host's. Without `height`, a schedule fills its frame - a stretched grid cell, a card the
