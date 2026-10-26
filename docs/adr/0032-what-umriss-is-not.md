@@ -56,6 +56,24 @@ is only "not yet" stands in each package's record and waits for a caller who nee
   stays among the "later" items.
   *Instead:* undo in the application's state, where the data lives; select
   rows, not ranges.
+- *Added 2026-10-26:* **Conditional formatting as rules.** A rule set would be
+  a second way to present a cell beside `children` (ADR-0017), and a class hook
+  is not offered either (ADR-0045). *Instead:* `children` in the column, which
+  draws a bar, a colour scale, an icon or a verdict, as the Conditional
+  formatting page shows; the colour is never the only sign.
+- *Added 2026-10-26:* **A sticky-head offset.** The head sticks inside the
+  table's own scroll area, which carries the horizontal scroll, the pinned
+  blocks and the virtual window, so no offset under an app bar can hold it.
+  *Instead:* the table's frame, the main area below the bar as a parent of
+  definite height, or `maxHeight="calc(100dvh - 64px)"`, as the Width and
+  pinning page shows.
+- *Added 2026-10-26:* **A column drag on the header.** The header cell already
+  takes the sort click, the resize grip, the pin blocks and, on touch, the pan.
+  *Instead:* the drag in the ColumnMenu's list, and its move buttons.
+- *Added 2026-10-26:* **Built-in median and standard deviation.** Each is four
+  lines, and an aggregate the table did not write is read out without a name.
+  *Instead:* an aggregate of one's own with its `aggregateLabel`, as the last
+  example of the Aggregate page shows.
 
 ## The charts
 
