@@ -528,8 +528,8 @@ here.
 * **Animation.** A chart that moves on every update is harder to read, and the
   chart redraws once per change, not per frame. The loading silhouette's band
   and its one fade into the course are no exception: neither moves the data.
-* **Export.** The canvas is a canvas; a picture of it is the caller's
-  `toDataURL`.
+* **Export.** Not a bare canvas: a chart hands over one PNG of what the reader
+  sees, decided in [ADR-0075](../../../docs/adr/0075-a-chart-draws-its-own-picture.md).
 * **WebGL.** Downsampling keeps a week of seconds under 25 ms in 2D; a second
   renderer would double every kind.
 * **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
