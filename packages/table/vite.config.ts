@@ -10,9 +10,13 @@ export default defineConfig({
   plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true, tsconfigPath: "./tsconfig.build.json" }), importOwnCss("table.js", "table.css"), clientDirective()],
   build: {
     lib: {
-      entry: "src/index.ts",
+      /* The main entry is called `index` so that the types come out as
+         `index.d.ts`; its JavaScript keeps the name `table.js`. The XLSX writer
+         is an entry of its own, so an application that never imports it never
+         pays for it (ADR-0019). */
+      entry: { index: "src/index.ts", xlsx: "src/xlsx/index.ts" },
       formats: ["es"],
-      fileName: "table",
+      fileName: (_format, entryName) => (entryName === "index" ? "table.js" : `${entryName}.js`),
     },
     /* The syntax the sources are written in (tsconfig `target`): no helper is
        shipped for what an application's own target decides. */

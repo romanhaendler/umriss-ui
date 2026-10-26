@@ -2,7 +2,9 @@
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
 import type { ExportSheet } from "../types";
-import { isDay } from "./day";
+/* Kept here and not imported from `./day`: the entry must import nothing, and a module shared with the
+   main entry would be split into a chunk it imports. `day.ts` holds the same test for the CSV. */
+const isDay = (d: Date): boolean => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
 import { escapeXml } from "./parts";
 
 const MAX_ROWS = 1048576;

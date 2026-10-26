@@ -43,7 +43,8 @@
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "styles.css": ["dist/styles.d.ts"]
+      "styles.css": ["dist/styles.d.ts"],
+      "xlsx": ["dist/xlsx.d.ts"]
     }
   },
   "exports": {
@@ -51,6 +52,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/table.js",
       "default": "./dist/table.js"
+    },
+    "./xlsx": {
+      "types": "./dist/xlsx.d.ts",
+      "import": "./dist/xlsx.js",
+      "default": "./dist/xlsx.js"
     },
     "./styles.css": {
       "types": "./dist/styles.d.ts",
