@@ -76,7 +76,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "No error state of its own: where the rows could not be loaded, show an `Alert` from @umriss-ui/core. Waiting for them is `loading`.",
-          "No pie, donut, radar or candlestick, no smoothing, animation or export, no WebGL (ADR-0032).",
+          "No pie, donut, radar or candlestick, no smoothing, animation or export, no WebGL (ADR-0032). The share of a whole is bars on a percent axis: the Pareto page, \"Shares, not counts\".",
         ],
         types: ["ChartProps"],
         exports: ["useChart"],
