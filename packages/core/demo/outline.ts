@@ -594,7 +594,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Enter", action: "Chooses the active row." },
           { key: "Escape", action: "Closes the list." },
         ],
-        limits: ["No free text as a value: only an option can be chosen.", "No loading of options from a server; filter your own list and pass it in."],
+        limits: ["No free text as a value: only an option can be chosen.", "No request of its own: `onSearch` reports the typed text and you fetch, debounce and cancel; `filter={false}` shows what you return."],
         types: ["ComboboxProps", "ComboboxOption"],
         exports: ["Combobox"],
       },
@@ -1162,7 +1162,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Under forced colours the lines between the steps take the system's text colour, and the current step's marker an outline in the selection colour.",
         ],
         limits: [
-          "The steps are read, not navigated: no keys, no clicks, and no next or back of its own. Moving on is your application's decision.",
+          "The steps are read, not navigated: no keys, no clicks, and no next or back of its own. Moving on is your application's decision, by a done step's label as a button or by buttons of its own.",
           "No branching or optional steps; pass the steps that apply.",
         ],
         types: ["StepperProps", "StepperStep"],
