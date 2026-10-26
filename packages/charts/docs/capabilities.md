@@ -286,6 +286,7 @@ axis with the map kept by the library: every promise above holds on it.
 | The tooltip carries the level, not the row number; a render prop reads it as `level`, the row as `yValue` | R-4.8 | Interaction, Unit (jsdom tooltip format) |
 | `labels`: each cell writes its level in the matrix' `format`, in the tick size, in the text colour over a halo of the ground colour; none where its width plus 4 px and its line height plus 2 px do not fit, none for a hole, dimmed with the cell; off by default | ADR-0011 | Unit (matrix labels), Screenshot (`correlation-read`) |
 | The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
+| A gradient's legend entry is a colour bar: its steps in a row (hatched under `encoding="marks"`), 160 px or the legend's width where narrower, the range's two ends written under it and the inner edges at every k-th where they fit, in the matrix' `format`; the values are hidden from assistive technology and the entry's name gains the range; an assessment keeps its chip | charts-matrix-reading 01 | Unit (colour bar, jsdom legend bar, picture), Screenshot (`gradient`) |
 
 ## `LimitLine` / `LimitBand`
 
@@ -377,7 +378,7 @@ axis with the map kept by the library: every promise above holds on it.
 |---|---|---|
 | `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `above-or-below`) |
 | `placement="left" \| "right"`: the entries in a column beside the plot, as wide as the longest up to a quarter of the chart, a longer name wrapping under its own text, as tall as the plot and scrolling; toggling, highlight, "Show data" and the Tab order as above; in a chart narrower than 480 px it stands above the plot as `top` | charts-small-additions 01 | Unit (jsdom legend side), Screenshot (`beside-the-plot`) |
-| A colour chip plus a name per series | R-4.11 | Unit (jsdom), Screenshot |
+| A colour chip plus a name per series; a gradient-coloured matrix' entry shows a colour bar instead, with the range's values (see `Matrix`) | R-4.11 | Unit (jsdom), Screenshot |
 | Hover highlights the series, the others at 0.25 alpha | R-4.11 | Manual |
 | Toggles by default: every entry of a named series is a button with `aria-pressed`, a click hides or shows it at once through the view; a state's entry hides every band showing it; a series without a name has no button | ADR-0047, component-view Q9, Q10 | Unit (scene, jsdom legend toggle), Screenshot (`hide-a-series`) |
 | Never every series hidden: hiding the last one visible - by a click or a setter - shows all; a view set with `setView` is taken as given | component-view, legend gestures | Unit (view, jsdom legend toggle) |
