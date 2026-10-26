@@ -539,7 +539,9 @@ here.
   and DEV says where they do not; a control chart's baseline is an index range
   of the rows as given. A category axis orders its rows itself.
 * **Log scale.** Plant values are read linearly; a log axis breaks the affine
-  scale that the working-time axis relies on (ADR-0001).
+  scale that the working-time axis relies on (ADR-0001). Values over decades
+  are the application's `log10`, with `ticks` at 1 to 9 per decade (the Axis
+  page, "Values over decades").
 * **Smoothing.** A curve between samples invents values the plant never
   measured; `Line step` draws what was held.
 * **A kept range.** A `selectedRange` prop, an edge to drag after release, a
