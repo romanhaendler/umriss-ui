@@ -168,6 +168,7 @@ export const GERMAN_WORDING: Wording = {
   exportLabel: "Exportieren",
   exportPageLabel: "Seite exportieren",
   exportFileName: "tabelle.csv",
+  exportSheetName: "Tabelle",
   tableSearchPlaceholder: "Suchen …",
   tableSearchLabel: "Tabelle durchsuchen",
   filterColumn: (column) => `${column} filtern`,
