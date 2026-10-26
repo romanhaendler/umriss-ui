@@ -663,6 +663,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
     late,
+    error: options.server && !late ? options.error : undefined,
+    retry: () => onRequestNow.current?.(request),
     totals: options.server ? options.totals : undefined,
     rowFilters,
   });

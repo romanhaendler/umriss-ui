@@ -627,6 +627,7 @@ interface AutomaticMode<Z> {
   exportRows?: never;
   filterOptions?: never;
   answers?: never;
+  error?: never;
   totals?: never;
 }
 
@@ -657,6 +658,13 @@ interface ServerMode<Z> {
       answer. In development the table warns once when it has matched none of
       the requests it reported. */
   answers?: TableRequest;
+  /** The failure of the fetch, a message the application wrote: it stands in
+      place of the rows, in the height of a page, with "Try again", which calls
+      `onRequest` with the current request once more. With `answers` it is the
+      failure of that request and shows only while it is the current one;
+      without, as soon as it is set. It wins over `loading`. The table clears
+      nothing - the application does, usually in `onRequest`. */
+  error?: string;
   /** By column id, the value of the column's declared `aggregate` over every
       match - handed in beside `rows` and current when `answers` is. The footer
       shows when this is passed and a column declares an `aggregate`; its cells
