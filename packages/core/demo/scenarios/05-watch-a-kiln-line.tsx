@@ -19,6 +19,9 @@ import {
   Stat,
   Text,
   useFormats,
+  useLanguage,
+  zoneFields,
+  zoneInstant,
 } from "../../src";
 import type { FreshnessAges, LimitSet } from "../../src";
 import { ControlChart, DataTable, LimitBand, LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
@@ -372,15 +375,8 @@ const PLANT_ZONE = "Europe/Berlin";
 
 /** Today's 06:00 in the plant's zone, as an instant. */
 function plantSix(): number {
-  const [year, month, day] = new Intl.DateTimeFormat("en-CA", { timeZone: PLANT_ZONE })
-    .format(new Date())
-    .split("-")
-    .map(Number) as [number, number, number];
-  const guess = Date.UTC(year, month - 1, day, 6);
-  const wall = new Intl.DateTimeFormat("en-GB", { timeZone: PLANT_ZONE, hourCycle: "h23", hour: "numeric", minute: "numeric" })
-    .formatToParts(guess)
-    .reduce((minutes, part) => (part.type === "hour" ? minutes + Number(part.value) * 60 : part.type === "minute" ? minutes + Number(part.value) : minutes), 0);
-  return guess - (wall - 6 * 60) * 60000;
+  const { year, month, day } = zoneFields(new Date(), PLANT_ZONE);
+  return zoneInstant({ year, month, day, hours: 6 }, PLANT_ZONE).getTime();
 }
 
 const START = plantSix();
@@ -544,7 +540,8 @@ const WORST_FIRST = [
    table, the schedule - follows at once. */
 export default function ControlRoom() {
   const [plantTime, setPlantTime] = useState(true);
-  const formats = useMemo(() => (plantTime ? { timeZone: PLANT_ZONE } : {}), [plantTime]);
+  const parent = useLanguage().formats;
+  const formats = useMemo(() => (plantTime ? { ...parent, timeZone: PLANT_ZONE } : parent), [parent, plantTime]);
   return (
     <LanguageProvider formats={formats}>
       <Stack gap={4}>

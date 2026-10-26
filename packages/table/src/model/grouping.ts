@@ -7,7 +7,7 @@
    arrives as a parameter. The form of a group follows its level and nothing
    else (ADR-0029). */
 
-import { DEFAULT_FORMATS, zoneFields, zoneInstant } from "@umriss-ui/core";
+import { DEFAULT_FORMATS, zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { filterKey, isAbsent } from "../values";
 import type { SortLevel } from "./tableModel";
@@ -216,7 +216,7 @@ export function livePaths<Z>(groups: readonly RowGroup<Z>[], folded: readonly st
 export type DatePeriod = "day" | "week" | "month" | "year";
 
 /** A point in time brought to the start of its day, ISO week (Monday), month
-    or year - in local time, as the formats show it. */
+    or year - in the zone the formats show it in. */
 export const periodStart =
   (kind: DatePeriod, timeZone?: string) =>
   (value: unknown): Date | undefined => {
@@ -225,7 +225,7 @@ export const periodStart =
     if (kind === "year") return zoneInstant({ year: y, month: 0, day: 1 }, timeZone);
     if (kind === "month") return zoneInstant({ year: y, month: m, day: 1 }, timeZone);
     if (kind === "week") return zoneInstant({ year: y, month: m, day: d - ((weekday + 6) % 7) }, timeZone);
-    return zoneInstant({ year: y, month: m, day: d }, timeZone);
+    return zoneDayStart(value, timeZone);
   };
 
 /** ISO week number of a Monday-started week. */

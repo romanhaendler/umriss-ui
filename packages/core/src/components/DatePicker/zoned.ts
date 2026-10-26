@@ -4,7 +4,7 @@
    picked day goes out as the zone's midnight, and a day shown through the
    formats (which write in the zone) is moved to the zone's noon first, so that
    a grid day never shows as its neighbour. `undefined` is the reader's zone,
-   where every function is the identity it was before. */
+   where every function is the identity. */
 
 import { zoneFields, zoneInstant } from "../../lib/zone";
 

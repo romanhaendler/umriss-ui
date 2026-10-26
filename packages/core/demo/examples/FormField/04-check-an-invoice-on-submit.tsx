@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Button, DatePicker, FormField, Grid, Input, NumberInput, Select, Stack, Text, announce } from "../../../src";
+import { Button, Combobox, DatePicker, FormField, Grid, Input, NumberInput, Stack, Text, announce } from "../../../src";
 
 export const title = "Check an invoice on submit";
 export const lead =
@@ -8,7 +8,7 @@ export const lead =
 
 interface Invoice {
   number: string;
-  centre: string;
+  centre: string | null;
   amount: number | null;
   due: Date | null;
 }
@@ -18,21 +18,27 @@ type Errors = Partial<Record<keyof Invoice, string>>;
 function check(invoice: Invoice): Errors {
   const errors: Errors = {};
   if (!/^INV-\d{4}$/.test(invoice.number)) errors.number = "An invoice number reads INV- and four digits.";
-  if (invoice.centre === "") errors.centre = "Choose the cost centre the invoice is booked on.";
+  if (invoice.centre === null) errors.centre = "Choose the cost centre the invoice is booked on.";
   if (invoice.amount === null || invoice.amount <= 0) errors.amount = "Give the net amount.";
   if (invoice.due === null) errors.due = "Give the due date from the invoice.";
   return errors;
 }
 
+const CENTRES = [
+  { value: "CC-1200", label: "CC-1200 Marketing" },
+  { value: "CC-2200", label: "CC-2200 Design" },
+  { value: "CC-4300", label: "CC-4300 IT" },
+];
+
 const KEYS = ["number", "centre", "amount", "due"] as const;
 
 export default function CheckAnInvoiceOnSubmit() {
-  const [invoice, setInvoice] = useState<Invoice>({ number: "INV-31", centre: "", amount: 4860, due: null });
+  const [invoice, setInvoice] = useState<Invoice>({ number: "INV-31", centre: null, amount: 4860, due: null });
   const [errors, setErrors] = useState<Errors>({});
   const [booked, setBooked] = useState(false);
   /* Every focus goes through the control's own ref; a DatePicker's is its trigger. */
   const numberRef = useRef<HTMLInputElement>(null);
-  const centreRef = useRef<HTMLSelectElement>(null);
+  const centreRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
   const dueRef = useRef<HTMLButtonElement>(null);
   const focus = (key: (typeof KEYS)[number]) => ({ number: numberRef, centre: centreRef, amount: amountRef, due: dueRef })[key].current?.focus();
@@ -82,14 +88,7 @@ export default function CheckAnInvoiceOnSubmit() {
             <Input ref={numberRef} numeric value={invoice.number} onChange={(event) => set({ number: event.target.value })} />
           </FormField>
           <FormField label="Cost centre" required error={errors.centre}>
-            <Select ref={centreRef} value={invoice.centre} onChange={(event) => set({ centre: event.target.value })}>
-              <option value="" disabled>
-                Choose a cost centre
-              </option>
-              <option value="CC-1200">CC-1200 Marketing</option>
-              <option value="CC-2200">CC-2200 Design</option>
-              <option value="CC-4300">CC-4300 IT</option>
-            </Select>
+            <Combobox ref={centreRef} options={CENTRES} value={invoice.centre} onChange={(centre) => set({ centre })} placeholder="Choose a cost centre" />
           </FormField>
           <FormField label="Net amount" required error={errors.amount}>
             <NumberInput ref={amountRef} value={invoice.amount} onChange={(amount) => set({ amount })} min={0} decimals={2} suffix="€" />

@@ -11,7 +11,7 @@
 
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { DEFAULT_FORMATS, formatsFor, INSTANT_ENTRIES } from "./formats";
+import { builtInInstants, DEFAULT_FORMATS, formatsFor, INSTANT_ENTRIES } from "./formats";
 import type { Formats } from "./formats";
 import { DEFAULT_WORDING } from "./wording";
 import type { Wording } from "./wording";
@@ -66,17 +66,16 @@ export function mergeLanguage(options: LanguageOptions | undefined): Language {
   };
 }
 
-/* Where the merged formats name a zone, every instant entry still identical to
-   the built-in one of the set's locale is replaced by the one built for the
-   zone; an entry the application replaced stays its own. */
+/* Where the merged formats name a zone, every instant entry that is a built-in
+   one - of any locale or zone - is replaced by the one built for this zone;
+   an entry the application wrote stays its own. */
 function mergeFormats(given: Partial<Formats>): Formats {
   const merged: Formats = { ...DEFAULT_FORMATS, ...given };
   if (merged.timeZone === undefined) return merged;
-  const plain = formatsFor(merged.locale);
   // An unknown zone throws Intl's RangeError here.
   const zoned = formatsFor(merged.locale, merged.timeZone);
   const entries = merged as unknown as Record<string, unknown>;
-  for (const name of INSTANT_ENTRIES) if (merged[name] === plain[name]) entries[name] = zoned[name];
+  for (const name of INSTANT_ENTRIES) if (builtInInstants.has(merged[name])) entries[name] = zoned[name];
   return merged;
 }
 
@@ -100,7 +99,7 @@ export const useLanguage = (): Language => useContext(LanguageContext) ?? DEFAUL
 
 /* Until the page has hydrated the instants are written empty: the reader's
    time zone is known only in the browser, and a server's text for an instant
-   would differ from the browser's (ADR-0060, amended). The server snapshot is
+   would differ from the browser's (ADR-0076). The server snapshot is
    false and the client snapshot true, so a hydration renders once more right
    after and a client-only render never sees the empty set. */
 const subscribeNever = () => () => {};
@@ -114,17 +113,8 @@ const withoutInstants = /* @__PURE__ */ new WeakMap<Formats, Formats>();
 function blankInstants(formats: Formats): Formats {
   let blank = withoutInstants.get(formats);
   if (!blank) {
-    blank = {
-      ...formats,
-      date: noInstant,
-      dateShort: noInstant,
-      month: noInstant,
-      dateLong: noInstant,
-      time: noInstant,
-      dateTime: noInstant,
-      offset: noInstant,
-      timeZoneName: noInstant,
-    };
+    blank = { ...formats };
+    for (const name of INSTANT_ENTRIES) (blank as unknown as Record<string, unknown>)[name] = noInstant;
     withoutInstants.set(formats, blank);
   }
   return blank;

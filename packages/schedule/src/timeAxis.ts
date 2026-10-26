@@ -6,7 +6,7 @@
    and nothing else. The stepping, the calendar mapping and the tick placement
    are @umriss-ui/charts' (ADR-0022); what is the schedule's own is the choice
    between them: a fine band from the quarter hour to the day, and a coarse band
-   of local days.
+   of the zone's days.
 
    Deliberately free of the DOM and of the scene. */
 
@@ -46,9 +46,13 @@ export function fineStep(msPerPx: number, spacing = TICK_SPACING): number {
   return Math.min(DAY, Math.max(15 * MINUTE, timeStep(msPerPx * spacing, 1)));
 }
 
-/** The ticks of the fine band within a domain: on local multiples of the step,
-    whatever lies in removed time dropped, each with where it stands on the
-    clock (the label) and where it lies on the axis. */
+/* The reader's zone by name, so that the reader's clock changes are ticked by
+   the same rule as a named zone's. */
+const readerZone = (): string => new Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+/** The ticks of the fine band within a domain: on multiples of the step in the
+    zone's real time, whatever lies in removed time dropped, each with where it
+    stands on the clock (the label) and where it lies on the axis. */
 export function fineTicks(
   domain: readonly [number, number],
   step: number,
@@ -56,14 +60,14 @@ export function fineTicks(
   timeZone?: string,
 ): WorkingTimeTick[] {
   const [from, to] = wallExtentWithin(domain, calendar);
-  return workingTimeTicks(calendar, from, to, step, localOffset(from, timeZone), timeZone).filter(
+  return workingTimeTicks(calendar, from, to, step, 0, timeZone ?? readerZone()).filter(
     (tick) => tick.workingTime >= domain[0] && tick.workingTime <= domain[1],
   );
 }
 
-/** One local day of the coarse band. */
+/** One day of the coarse band, in the zone. */
 export interface Day {
-  /** Local midnight at its start, on the wall clock. */
+  /** The zone's midnight at its start, on the wall clock. */
   readonly start: number;
   /** Where it begins on the axis, in working time. */
   readonly from: number;
@@ -71,7 +75,7 @@ export interface Day {
   readonly to: number;
 }
 
-/** The local days a domain touches, from the midnight before its start. */
+/** The days of the zone a domain touches, from the midnight before its start. */
 export function days(domain: readonly [number, number], calendar: CalendarInput = WALL_CLOCK, timeZone?: string): Day[] {
   const [from, to] = wallExtentWithin(domain, calendar);
   const found: Day[] = [];
@@ -102,12 +106,12 @@ export function dayRun(dayWidth: number, room: number): number {
   return DAY_RUNS.find((run) => run * dayWidth >= room) ?? (DAY_RUNS[DAY_RUNS.length - 1] as number);
 }
 
-/** Whether the local day that begins at `start` opens a run of `run` days.
+/** Whether the day that begins at `start` opens a run of `run` days.
     Counted from a Monday, so that a week's date stands on its first day - and
     counted on the calendar, not in the view, so that the dates hold still while
     the plot pans instead of hopping from day to day. */
 export function opensRun(start: number, run: number, timeZone?: string): boolean {
-  /* The local day's number since 1 January 1970; the 5th, day 4, was a Monday.
+  /* The day's number in the zone since 1 January 1970; the 5th, day 4, was a Monday.
      Rounded, because a grid laid on one offset is an hour off after a clock
      change (`localOffset`). */
   const day = Math.round((start - localOffset(start, timeZone)) / DAY);
@@ -118,7 +122,7 @@ export function opensRun(start: number, run: number, timeZone?: string): boolean
     carries its offset (`02:30 GMT+2`), so the two readings differ. */
 export function timeText(formats: Formats, instant: number): string {
   const text = formats.time(new Date(instant), false);
-  return formats.timeZone !== undefined && inDoubledHour(instant, formats.timeZone)
+  return inDoubledHour(instant, formats.timeZone)
     ? `${text} ${formats.offset(new Date(instant))}`
     : text;
 }

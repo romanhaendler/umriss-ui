@@ -89,19 +89,21 @@ export function DatePicker(
   useMidnightWarning([value]);
   // The grid works on the zone's calendar days; the value is one of them.
   const day = value && gridDay(value, timeZone);
+  const today = zoneToday(timeZone);
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Date>(() => startOfMonth(day ?? zoneToday(timeZone)));
-  const [active, setActive] = useState<Date>(() => day ?? zoneToday(timeZone));
+  const [view, setView] = useState<Date>(() => startOfMonth(day ?? today));
+  const [active, setActive] = useState<Date>(() => day ?? today);
   const [typed, setTyped] = useState("");
   const [notADate, setNotADate] = useState(false);
   const typedRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
   const panelId = useId();
+  const typedDate = readTypedDate(typed, formats, today);
 
   const openPanel = () => {
-    const start = clampDay(day ?? zoneToday(timeZone), bounds);
+    const start = clampDay(day ?? today, bounds);
     setView(startOfMonth(start));
     setActive(start);
     setTyped("");
@@ -117,7 +119,7 @@ export function DatePicker(
   const type = (text: string) => {
     setTyped(text);
     setNotADate(false);
-    const date = readTypedDate(text, formats, zoneToday(timeZone));
+    const date = readTypedDate(text, formats, today);
     if (date && !outside(date, bounds)) {
       setView(startOfMonth(date));
       setActive(date);
@@ -188,7 +190,6 @@ export function DatePicker(
                 className={styles.typed}
                 aria-label={wording.typeDate}
                 placeholder={sampleDate(formats)}
-                inputMode="numeric"
                 autoComplete="off"
                 invalid={notADate}
                 value={typed}
@@ -196,15 +197,14 @@ export function DatePicker(
                 onKeyDown={(event) => {
                   if (event.key !== "Enter") return;
                   event.preventDefault();
-                  const date = readTypedDate(typed, formats, zoneToday(timeZone));
-                  if (date && !outside(date, bounds)) choose(date);
+                  if (typedDate && !outside(typedDate, bounds)) choose(typedDate);
                   else setNotADate(true);
                 }}
               />
               {notADate && (
                 <VisuallyHidden>
                   <span role="alert">
-                    {readTypedDate(typed, formats, zoneToday(timeZone))
+                    {typedDate
                       ? wording.dateOutOfRange(
                           bounds.min && formats.date(dayShown(bounds.min, timeZone)),
                           bounds.max && formats.date(dayShown(bounds.max, timeZone)),
@@ -213,7 +213,7 @@ export function DatePicker(
                   </span>
                 </VisuallyHidden>
               )}
-              <Button size="sm" variant="ghost" disabled={outside(zoneToday(timeZone), bounds)} onClick={() => choose(zoneToday(timeZone))}>
+              <Button size="sm" variant="ghost" disabled={outside(today, bounds)} onClick={() => choose(today)}>
                 {wording.today}
               </Button>
               <ZoneNote />

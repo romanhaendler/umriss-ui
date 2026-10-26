@@ -19,8 +19,8 @@
    The data is the caller's and stays as it came (ADR-0023). */
 
 import type { ReactNode } from "react";
-import { DAY, HOUR, subscribeTheme, toWorkingTimeClamped } from "@umriss-ui/charts";
-import { zoneFields, zoneInstant } from "@umriss-ui/core";
+import { HOUR, subscribeTheme, toWorkingTimeClamped } from "@umriss-ui/charts";
+import { zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
 import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
 import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
@@ -339,9 +339,9 @@ export class ScheduleScene {
       return;
     }
     const zone = this.view.options.timeZone;
-    const { year, month, day } = zoneFields(Date.now(), zone);
-    const today = zoneInstant({ year, month, day }, zone).getTime();
-    this.view.showWall([today, today + DAY]);
+    const today = zoneDayStart(Date.now(), zone);
+    const { year, month, day } = zoneFields(today, zone);
+    this.view.showWall([today.getTime(), zoneInstant({ year, month, day: day + 1 }, zone).getTime()]);
   }
 
   /** `undefined`: the scene keeps the selection itself. */

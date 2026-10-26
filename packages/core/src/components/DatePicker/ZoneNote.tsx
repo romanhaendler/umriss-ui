@@ -1,6 +1,6 @@
 /* What the pickers say of the formats' time zone: its name once in the
    panel's foot (and in the trigger's description), and, in development, a
-   warning for a day value that is not on the zone's midnight. */
+   warning, where a zone is named, for a day value that is not on its midnight. */
 
 import { useEffect, useId } from "react";
 import { warnOnce } from "../../lib/dev";
@@ -19,14 +19,12 @@ export function ZoneNote() {
 export function useMidnightWarning(values: readonly (Date | null | undefined)[]) {
   const id = useId();
   const { timeZone } = useFormats();
-  const off = values.some((v) => v && !onMidnight(v, timeZone));
+  const off = timeZone !== undefined && values.some((v) => v && !onMidnight(v, timeZone));
   useEffect(() => {
     if (!off) return;
     warnOnce(
       `midnight:${id}`,
-      timeZone === undefined
-        ? "a date picker's value is a day: the instant of midnight in the formats' zone (the reader's, as no zone is named). This value is not on that midnight."
-        : `a date picker's value is a day: the instant of midnight in the formats' zone (${timeZone}). This value is not on that midnight.`,
+      `a date picker's value is a day: the instant of midnight in the formats' zone (${timeZone}). This value is not on that midnight.`,
     );
   }, [off, id, timeZone]);
 }
