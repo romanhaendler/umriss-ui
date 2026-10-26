@@ -55,7 +55,8 @@ export interface DateRangePickerProps
       as its longest value in the formats in use, so a date never truncates. */
   chars?: number;
   /** Shows a cross where a value is set, which fades in on hover/focus and
-      clears the value. */
+      clears the value, and the open panel offers Clear. Without it
+      no way to empty the value is offered. */
   clearable?: boolean;
   /**
    * The quick-select column in the panel. An empty array hides the column.
@@ -265,7 +266,7 @@ export function DateRangePicker(
                 {footText}
               </span>
               <ZoneNote />
-              {value && !draftFrom && (
+              {clearable && value && !draftFrom && (
                 <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}
                 </Button>
