@@ -174,7 +174,14 @@ stylesheets by hand.
   `Export` writes the page; with `exportRows(request)` it writes every match
   instead, in the table's own columns. The application caps and refuses: the
   table asks for what the request names, and a rejection's message shows beside
-  the button.
+  the button. `answers` names the request the rows answer, so a late answer
+  leaves the table loading and is never shown as current; `error` shows the
+  application's message in place of the rows, with "Try again"; with a full page
+  ticked the table offers all that match, and a bulk action then receives
+  `{ request, except }` instead of rows (the one type a caller may have to
+  answer); `totals` fill the footer over every match. What stays the
+  application's: the cap on an export, the sums and the clearing of `error`.
+  Groups from the server are the next piece, with a spec of their own.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
