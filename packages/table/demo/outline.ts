@@ -290,7 +290,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["first-table", core("Input")],
         limits: [
-          "No footer in [server mode](#/server-mode): a sum over one page would misstate the server's set.",
+          "In [server mode](#/server-mode) the footer shows the sums the server hands in as `totals`, and nothing without them: a sum over one page would misstate the server's set.",
         ],
         types: ["AggregateOptions"],
         exports: ["useTable"],
@@ -314,7 +314,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["first-table", core("Checkbox"), core("Input")],
         limits: [
-          "In [server mode](#/server-mode) “select all” selects the page the table holds.",
+          "In [server mode](#/server-mode) “select all” selects the page, and with the page ticked the table offers all that match: a state that a bulk action receives as `{ request, except }`, since the table holds no rows for it.",
         ],
         types: [],
         exports: ["useTable"],
@@ -431,7 +431,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A button that writes the rows the user sees into a CSV file for a spreadsheet (also called download or export to Excel). Hand the application the text instead where it wants the clipboard or a file of its own.",
         about: [
           "It writes the filtered set across all pages, in the visible columns, in the order and sorting on screen – and the values, not their presentation: numbers with the decimal mark of the formats, yes and no from the wording, a point in time as a timestamp, an absent value as an empty field. The separator follows the mark – a comma, or a semicolon where the mark is a comma – and a byte order mark tells the spreadsheet it is UTF-8. English gets commas and a point; the German wording and formats from `@umriss-ui/core/wording/de` get the file the table always wrote, and German wording with English formats gets German words with comma and point – take both halves (ADR-0061).",
-          "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so. The same text is `t.asCsv()`, without a button.",
+          "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so; with `exportRows` it asks the application for every match and writes those. The same text is `t.asCsv()`, without a button.",
           "Ctrl or Cmd with C copies the selected rows – the visible columns under a header line, tab-separated, with the same values and the formats' decimal mark – and in a grid with no selection the Active cell. What was copied flashes once in an accent tint (shown without the fade under reduced motion), and a screen reader is told how many rows were copied, or that the copy failed. Marked text and a focused field keep the browser's own copy; in an open cell editor with nothing marked the key copies the value that stands in the field. `t.selectionAsText()` is the same text for a button of your own, as in the last example.",
         ],
         keysOf: ["first-table", core("Input"), core("Button")],
@@ -499,15 +499,17 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A table over rows a server holds: the application hands in one page and the server's count, and the table reports what to fetch next (also called server-side paging, sorting and filtering).",
         about: [
           "`onRequest` reports the request whenever what decides the rows changes – search, conditions, sort, page, page size – complete, defaults included, since a server has no default of the table's.",
-          "Requests are the application's: the table shows whatever rows it is given, so an answer to a view the user has already left is the application's to drop.",
+          "`answers` names the request the rows answer: while it is not the table's current request the table is loading, so a late answer is never shown as current. Without it the rows are taken as current.",
+          "`error` shows the application's message in place of the rows, with “Try again”; `totals` fill the footer over every match; `exportRows` writes every match. What to cap, what to sum and when to clear `error` stay the application's.",
         ],
         alternatives: [
           { when: "Thousands of rows that are all in the browser", use: "virtualisation" },
         ],
         keysOf: ["first-table", core("Input"), "columnmenu", core("Select"), core("Button"), core("Checkbox")],
         limits: [
-          "The table sorts, filters and pages nothing itself, and it shows no groups and no footer: they would be made of one page.",
-          "“Select all” and the export act on the page the table holds, and the export button says so.",
+          "The table sorts, filters and pages nothing itself, and it shows no groups: they would be made of one page. Groups from the server are the next piece, with a spec of their own.",
+          "The footer shows only `totals` the application hands in.",
+          "Without `exportRows` the export acts on the page the table holds, and the export button says so.",
           "A list filter offers what `filterOptions` names; the table cannot count values it does not hold.",
           "No loading more rows while scrolling: paging and virtualisation do not combine.",
         ],

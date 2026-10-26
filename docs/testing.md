@@ -66,7 +66,8 @@ kind is for.
   and example, light and dark. They are derived, not listed (see above).
 * **Interaction tests (Playwright)** prove what jsdom cannot measure: layout,
   position, sticky and pinned parts, canvas pixels, keyboard walks through a
-  real plot, forced colours, server mode against the example's fake server. They
+  real plot, forced colours, server mode against the example's fake server (the footer's
+  skeleton and value, the error body, the offer to select all that match). They
   run in the light project only.
 * **The accessibility check (axe, WCAG 2.1 AA)** runs a sample of pages in both
   themes inside the same Playwright suite.
