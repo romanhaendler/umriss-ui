@@ -110,6 +110,9 @@ export interface HookSnapshot {
   /** Server mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
+  /** A row's box or key: toggles the row, or with `range` ticks or clears the
+      rows from the one toggled last to this one. */
+  pick: (key: string, range: boolean) => void;
   /** Server mode: the rows answer an older request than the current one. */
   late: boolean;
   /** Server mode: the message that stands in place of the rows, when it is the

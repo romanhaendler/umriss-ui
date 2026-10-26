@@ -438,9 +438,12 @@ export const handBuilt: import("../src").TableSelection<string> = {
   allMatching: false,
   except: new Set<string>(),
   selectMatching: () => {},
+  set: () => {},
 };
 // @ts-expect-error allMatching, except and selectMatching are required
 export const missing: import("../src").TableSelection<string> = base;
+// @ts-expect-error set is required
+export const missingSet: import("../src").TableSelection<string> = { ...handBuilt, set: undefined };
 
 /* A bulk action's argument: rows or "all that match" in server mode, rows only
    in an automatic table. */

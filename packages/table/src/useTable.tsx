@@ -20,7 +20,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, use
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
 import { declaredWidths, useTableState } from "./model/tableState";
-import { MOST_LEVELS, livePaths } from "./model/grouping";
+import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
@@ -606,6 +606,26 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     selectedRows = [...selection.selected].filter((key) => seenRows.has(key)).map((key) => seenRows.get(key));
   }
 
+  /* The anchor of a range: the row toggled last. It lives here and not in the
+     selection, which an application may hold. A range runs over the rows a
+     reader reaches by paging, in reading order: the lines of a grouping
+     without a folded group's rows, a tree's flattening, otherwise the
+     filtered set - in server mode the page held. */
+  const anchor = useRef<string | null>(null);
+  const emptied = !selection.allMatching && selection.selected.size === 0;
+  useEffect(() => {
+    if (emptied) anchor.current = null;
+  }, [emptied]);
+  const pick = (key: string, range: boolean) => {
+    const reach = (b.lines ? rowsOf(b.lines) : (b.shown ?? b.filtered)).map(rowKey);
+    const from = anchor.current === null ? -1 : reach.indexOf(anchor.current);
+    const to = reach.indexOf(key);
+    const take = !selection.isSelected(key);
+    anchor.current = key;
+    if (!range || from < 0 || to < 0) selection.toggle(key);
+    else selection.set(reach.slice(Math.min(from, to), Math.max(from, to) + 1), take);
+  };
+
   const exportAs = <R,>(format: ExportFormat<R>, given?: readonly unknown[]): R =>
     format.write(sheetOf(registry, wording.levelColumn, given), {
       formats,
@@ -687,6 +707,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     filterOptions: server ? options.filterOptions : undefined,
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
+    pick,
     late,
     error: options.server && !late ? options.error : undefined,
     retry: () => {

@@ -2,7 +2,7 @@ import { Stack, Text } from "@umriss-ui/core";
 import { Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Select rows";
-export const lead = "`selectable` adds the selection column; “select all” takes what the search leaves. Search “Oak”, select all, clear the search.";
+export const lead = "`selectable` adds the selection column; “select all” takes what the search leaves. Search “Oak”, select all, clear the search. Shift-click or Shift+Space on a second box selects the rows between.";
 
 interface Shipment {
   id: string;
