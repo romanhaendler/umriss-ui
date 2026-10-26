@@ -40,7 +40,7 @@ tooltip's `render` gets - no second shape.
 - **Reporting every click,** which reports a double click twice.
 - **Space as a second key,** a click on empty plot, a legend click, the data
   table's rows, and the selecting of a range with a navigator under the plot
-  (`.scratch/chart-range-selection-and-navigator/spec.md`). Not built.
+  (the range itself is ADR-0074; the navigator is not built).
 
 ## Consequences
 

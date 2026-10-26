@@ -36,6 +36,12 @@ export interface ChartsWording {
   walkHelp: string;
   /** The key that reports the Active point - only where `onSelect` is given. */
   selectHelp: string;
+  /** Said when the keyboard sets the start of a range; the x value is written in the axis' format. */
+  rangeStarted: (from: string) => string;
+  /** Said when the keyboard sets the end of a range. */
+  rangeMade: (from: string, to: string) => string;
+  /** The key that marks a range - only where `onRange` is given and a tooltip stands. */
+  rangeHelp: string;
   /** The keys that zoom and pan it - only where the chart can be zoomed. */
   zoomHelp: string;
   /** The keys of the legend's entries - only where it has one to press. */
@@ -93,6 +99,9 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   walkHelp:
     "Left and right arrows move through the values, up and down change the series, Home and End go to the first and the last, Escape clears.",
   selectHelp: "Enter chooses the point.",
+  rangeStarted: (from) => `Range from ${from} started.`,
+  rangeMade: (from, to) => `Range from ${from} to ${to}.`,
+  rangeHelp: "Space sets the start and the end of a range, Escape cancels it.",
   zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 goes back to the axis' own span.",
   legendHelp: "In the legend, Enter hides or shows a series, Shift+Enter shows only it.",
   allShown: "Nothing would be left to see, so every series is shown.",
