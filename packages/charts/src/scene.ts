@@ -40,6 +40,7 @@ import type {
   StateSeriesConfig,
   AxisOrientation,
   ChartPerf,
+  ChartRange,
   HoverState,
   LegendConfig,
   Padding,
@@ -711,6 +712,12 @@ export class ChartScene {
   get hasTooltip(): boolean {
     return this.tooltip !== null;
   }
+  /** Who hears the range the reader marked; `useChart` sets it. */
+  onRange: ((range: ChartRange) => void) | null = null;
+  /** The range being marked, in pixels, while the pointer is down: `live` once
+      the press became a drag, and the band is drawn.
+      @internal */
+  range: { from: number; to: number; live: boolean; pointerId: number } | null = null;
   /** Where the press that may become a click began; a click after the pointer
       travelled is the end of a drag, and selects nothing.
       @internal */

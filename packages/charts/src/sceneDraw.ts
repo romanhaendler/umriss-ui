@@ -279,6 +279,7 @@ export function paintOverlayLayer(s: ChartScene): void {
     theme,
     hover: s.hover,
     syncPx: s.syncedPx(),
+    band: s.range?.live === true ? [s.range.from, s.range.to] : null,
   });
   s.positionTooltip();
 }

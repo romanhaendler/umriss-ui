@@ -450,6 +450,16 @@ export interface TooltipPoint<T = unknown> {
     };
 }
 
+/** A stretch of an x axis the reader marked (`onRange`): `from` is not after
+    `to`, both in the axis' own values - numbers on a numeric or time axis
+    (milliseconds). A caller that reads numbers takes the default and needs no
+    cast; `V` is what a category axis widens it to. */
+export interface ChartRange<V extends number | string = number> {
+  axisId: string;
+  from: V;
+  to: V;
+}
+
 /** What the pointer hit: the x value under it and one point per series there.
     A custom tooltip's `render` receives it. */
 export interface TooltipHit<T = unknown> {
