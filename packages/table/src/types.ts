@@ -633,10 +633,11 @@ interface AutomaticMode<Z> {
 
 /** Server mode: the rows are the page a server answered for the request the
     table reported. The table searches, filters, sorts, groups and pages nothing of
-    its own; select all and the export would act on one page and call it the
-    whole, so "select all" says it selects the page, the export writes the
-    page and says so, and there is no grouping. The footer shows `totals` or
-    nothing. */
+    its own; there is no grouping. After a full page is ticked, select all
+    offers every row that matches, as a state a bulk action receives as
+    `AllMatching`; the export writes every match when `exportRows` is given and
+    the page, saying so, when it is not; the footer shows `totals` or nothing,
+    since a sum over one page would be called the sum. */
 interface ServerMode<Z> {
   /** Server mode: the rows are one page a server answered. */
   server: true;

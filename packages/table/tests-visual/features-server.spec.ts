@@ -50,3 +50,47 @@ test("'select all' selects the page and says so; a key from another page stays",
   await example.getByRole("checkbox", { name: "Select all on this page" }).check({ force: true });
   await expect(example.getByText("11 selected", { exact: true })).toBeVisible();
 });
+
+/* The pieces of the server-mode contract, each against its example's fake
+   server: the error body, the offer to select all that match, the footer's
+   skeleton and value. The baselines are made by the visual suite. */
+
+test("a failed fetch: the message in place of the rows, in the height of a page, then the page after Try again", async ({ page }, info) => {
+  await openExample(page, "server-mode", "a-failed-fetch");
+  const example = page.locator(`[data-example="a-failed-fetch"]`);
+  const table = example.locator("table");
+  const before = await table.boundingBox();
+  await example.getByRole("button", { name: "Next" }).click();
+  await expect(example.getByRole("alert")).toContainText("could not be loaded");
+  expect((await table.boundingBox())!.height).toBeGreaterThan(before!.height * 0.8);
+  await expect(example).toHaveScreenshot(`server-error-${info.project.name}.png`);
+  await example.getByRole("button", { name: "Try again" }).click();
+  await expect(example.getByRole("alert")).toHaveCount(0);
+  await expect(table.locator("tbody th").first()).toHaveText("ORD-0011");
+});
+
+test("select all that match: the offer line under a ticked page, then the state", async ({ page }, info) => {
+  await openExample(page, "server-mode", "select-all-that-match");
+  const example = page.locator(`[data-example="select-all-that-match"]`);
+  await example.getByRole("checkbox", { name: "Select all on this page" }).check({ force: true });
+  const offer = example.locator("[data-select-matching]");
+  await expect(offer).toContainText("12,400");
+  await expect(example).toHaveScreenshot(`server-offer-${info.project.name}.png`);
+  await offer.getByRole("button", { name: /12,400 that match/ }).click();
+  await expect(offer).toContainText("All 12,400 that match are selected");
+  await example.getByRole("button", { name: "Archive" }).click();
+  await expect(example.getByText("except 0 orders")).toBeVisible();
+});
+
+test("sums from the server: the value over every match, skeleton while the next answer is out", async ({ page }, info) => {
+  await openExample(page, "server-mode", "sums-from-the-server");
+  const example = page.locator(`[data-example="sums-from-the-server"]`);
+  const footer = example.locator("tfoot");
+  await expect(footer).toContainText("1,000");
+  await expect(example).toHaveScreenshot(`server-footer-value-${info.project.name}.png`);
+  await example.getByRole("button", { name: "Next" }).click();
+  await expect(example.locator("table")).toHaveAttribute("aria-busy", "true");
+  await expect(example).toHaveScreenshot(`server-footer-skeleton-${info.project.name}.png`);
+  await expect(example.locator("table")).not.toHaveAttribute("aria-busy", "true");
+  await expect(footer).toContainText("1,000");
+});
