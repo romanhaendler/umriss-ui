@@ -168,6 +168,10 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
     if (onSelect !== undefined && !scene.hasTooltip)
       warnOnce("select-without-tooltip", "`onSelect` needs a <Tooltip> - the hits it reports are the tooltip's.");
   }, [onSelect === undefined, scene]); // eslint-disable-line react-hooks/exhaustive-deps -- presence only
+  useEffect(() => {
+    if (onRange !== undefined && !scene.hasTooltip)
+      warnOnce("range-without-tooltip", "`onRange` needs a <Tooltip> for the keyboard - without one only the pointer marks a range.");
+  }, [onRange === undefined, scene]); // eslint-disable-line react-hooks/exhaustive-deps -- presence only
   // A new object only when the view changed: the parts keep their identity.
   return useMemo(() => ({ ...bound.parts, view, domains: view.domains ?? NO_DOMAINS, hidden: view.hidden ?? NO_NAMES }), [bound, view]);
 }
