@@ -461,6 +461,19 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
+  /* A page size without a bar shows every row. The check waits for the first
+     frame: a bar placed outside and after the table registers by then. */
+  const pageSizeGiven = options.pageSize !== undefined;
+  useEffect(() => {
+    if (!DEV || !pageSizeGiven || server || virtual || isTree) return;
+    const frame = requestAnimationFrame(() => {
+      if (!registry.paginates()) {
+        warnOnce("page-size-no-bar", "`pageSize` is passed, but no `Pagination` stands for this table, so every row is shown. `pageSize` holds as soon as a `Pagination` stands inside the table or gets it as `of`.");
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pageSizeGiven, server, virtual, isTree, registry]);
+
   /* Every change the reader makes, once and whole, after the commit
      (ADR-0047). The first render's view is where it starts, not a change; the
      key is compared, not the object, so a second render with the same view
