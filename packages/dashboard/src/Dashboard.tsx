@@ -170,7 +170,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   const optionsWidget = view.widgets.find((widget) => widget.id === optionsFor);
 
   /* The head of a widget in the editing mode: a tab stop, the grip of a drag, the arrow keys' target. */
-  const headOf = (widget: DashboardWidget, title: string, i: number, at: number): HTMLAttributes<HTMLDivElement> & { ref?: (el: HTMLDivElement | null) => void } =>
+  const headOf = (widget: DashboardWidget, title: string, i: number, at: number, locked: boolean): HTMLAttributes<HTMLDivElement> & { ref?: (el: HTMLDivElement | null) => void } =>
     editing
       ? {
           ref: track(heads, widget.id),
@@ -178,7 +178,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           ...handlers(widget.id, i),
           role: "group",
           tabIndex: 0,
-          "aria-label": (widget.locked === true ? wording.dashboardHeadLocked : wording.dashboardHead)(title, at + 1, total),
+          "aria-label": (locked ? wording.dashboardHeadLocked : wording.dashboardHead)(title, at + 1, total),
           onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
             if (event.target !== event.currentTarget) return;
             const to = { ArrowLeft: at - 1, ArrowUp: at - 1, ArrowRight: at + 1, ArrowDown: at + 1, Home: 0, End: total - 1 }[event.key];
@@ -190,9 +190,8 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
       : { className: styles.head };
 
   /* The menu of a widget's head: the moves, the sizes, the options, remove. */
-  const menuOf = (widget: DashboardWidget, type: AnyType, title: string, i: number, at: number) => {
+  const menuOf = (widget: DashboardWidget, type: AnyType, title: string, i: number, at: number, locked: boolean) => {
     const sizes = Object.entries(type.sizes).sort(([, a], [, b]) => area(a) - area(b));
-    const locked = widget.locked === true;
     return (
       <Menu
         align="end"
@@ -286,14 +285,16 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           const style = placeStyle(places[i]!, sequence.indexOf(i));
           const title = titleOf(type, widget.options);
           const at = view.widgets.findIndex((one) => one.id === widget.id);
-          const head = headOf(widget, title, i, at);
-          const menu = editing && menuOf(widget, type, title, i, at);
+          const locked = widget.locked === true;
+          const head = headOf(widget, title, i, at, locked);
+          const menu = editing && menuOf(widget, type, title, i, at, locked);
           if (type === builtin) {
             return (
               <div key={widget.id} ref={track(cards, widget.id)} className={cx(styles.item, styles.headingRow)} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined}>
                 <div {...head} className={cx(head.className, styles.headingHead)}>
                   {editing && <GripGlyph className={styles.grip} />}
                   <Heading level={headingLevel} size="lg" className={styles.heading}>{(widget.options as HeadingOptions).text}</Heading>
+                  {editing && locked && <span className={styles.size}>{wording.dashboardLocked}</span>}
                   {menu}
                 </div>
               </div>
@@ -305,7 +306,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 {editing && <GripGlyph className={styles.grip} />}
                 <Title className={styles.title}>{title}</Title>
                 {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
-                {editing && widget.locked === true && <span className={styles.size}>{wording.dashboardLocked}</span>}
+                {editing && locked && <span className={styles.size}>{wording.dashboardLocked}</span>}
                 {menu}
               </div>
               <Body title={title} editing={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></Body>
