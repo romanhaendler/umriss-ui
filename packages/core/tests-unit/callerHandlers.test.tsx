@@ -163,7 +163,7 @@ describe("A caller's handler runs beside the component's own", () => {
     function Case() {
       const tree = useTree(roots, { reader, defaultActive: "one" });
       return (
-        <TreeView tree={tree} ariaLabel="Files" onFocus={focused}>
+        <TreeView tree={tree} aria-label="Files" onFocus={focused}>
           {(e) => e.node.id}
         </TreeView>
       );

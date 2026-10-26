@@ -14,7 +14,7 @@ interface Row {
 function Probe({ rows, atId, nId, atFormat, nFormat }: { rows: Row[]; atId: string; nId: string; atFormat: unknown; nFormat: unknown }) {
   const { Table, Column } = useTable(rows, { rowKey: (r) => r.id });
   return (
-    <Table ariaLabel="Probe">
+    <Table aria-label="Probe">
       <Column value="id" label="Id" rowHeader />
       <Column id={atId} value={"at" as never} label="At" format={atFormat as never} />
       <Column id={nId} value={"n" as never} label="N" format={nFormat as never} />

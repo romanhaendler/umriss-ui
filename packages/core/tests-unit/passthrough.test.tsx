@@ -18,7 +18,7 @@
    The list of exports is read, not written: a new component that stands in
    neither the cases nor the exceptions fails the first test. */
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { ReactElement } from "react";
 import { fireEvent, render } from "@testing-library/react";
 import * as core from "../src";
@@ -310,17 +310,9 @@ describe("The name is aria-label", () => {
     );
   }
 
-  it("TreeView takes aria-label, and ariaLabel for one more minor with a warning", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  it("TreeView takes aria-label", () => {
     const named = render(<Tree name={{ "aria-label": "Files" }} />);
     expect(named.getByRole("tree").getAttribute("aria-label")).toBe("Files");
-    expect(warn).not.toHaveBeenCalled();
-    named.unmount();
-    const old = render(<Tree name={{ ariaLabel: "Old" }} />);
-    expect(old.getByRole("tree").getAttribute("aria-label")).toBe("Old");
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(String(warn.mock.calls[0]![0])).toContain("ariaLabel");
-    warn.mockRestore();
   });
 
   it("Popover and ContextMenu take aria-label", () => {
