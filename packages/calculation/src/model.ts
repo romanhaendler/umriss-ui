@@ -37,7 +37,7 @@ export interface Quantity extends Omit<QuantityProps, "id"> {
   key: string;
   id?: string;
   /** Given: the number and where it came from. */
-  given?: Pick<GivenProps, "value" | "source" | "asOf" | "ages">;
+  given?: Pick<GivenProps, "value" | "source" | "asOf" | "ages" | "quality">;
   /** Derived: how, and from what. */
   operator?: Operator;
   operands: readonly Operand[];
@@ -203,7 +203,7 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
         `${where}: ${nameOf(node)} is not an element of the calculation. A calculation reads its children's props and cannot look inside a component of your own; write ${QUANTITIES} or <Ref> directly, or return them from .map.`,
       );
     }
-    const { children: operandNodes, value, source, asOf, ages, ...rest } = node.props as GivenProps & OperatorProps;
+    const { children: operandNodes, value, source, asOf, ages, quality, ...rest } = node.props as GivenProps & OperatorProps;
     const here = `${where} › ${rest.label}`;
     if (metrics !== undefined && (operator === "product" || operator === "quotient")) {
       fail(`${here}: <${ELEMENT_NAMES[operator]}> - ${ONLY_ADDS}`);
@@ -211,7 +211,7 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
     const quantity = define(key, rest, here);
     if (operator === undefined) {
       checkValue(value, here);
-      quantity.given = { value, source, asOf, ages };
+      quantity.given = { value, source, asOf, ages, quality };
       return key;
     }
     quantity.operator = operator;
@@ -282,11 +282,11 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
         return;
       }
       if (given.label === undefined) wrong();
-      const { value, source, asOf, ages, ...quantityProps } = given;
+      const { value, source, asOf, ages, quality, ...quantityProps } = given;
       const at = `${here} › ${given.label}`;
       const quantity = define(nodeKey, { ...quantityProps, label: given.label! }, at);
       checkValue(value, at);
-      quantity.given = { value, source, asOf, ages };
+      quantity.given = { value, source, asOf, ages, quality };
       pending.push({ operand: { key: nodeKey, reference: false, negated: line.negated }, line });
     });
 

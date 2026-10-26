@@ -22,16 +22,20 @@ const build = (view: Date) =>
     />,
   );
 
+/* The left month is read from its two Selects: their shown values. */
+const leftMonth = () =>
+  ["Month", "Year"].map((name) => (screen.getByRole("combobox", { name }) as HTMLSelectElement).selectedOptions[0]?.text);
+
 describe("MonthPair", () => {
   it("shows the left month and the month following it", () => {
     build(new Date(2026, 5, 1));
-    expect(screen.getByText("June 2026")).toBeTruthy();
+    expect(leftMonth()).toEqual(["June", "2026"]);
     expect(screen.getByText("July 2026")).toBeTruthy();
   });
 
   it("gets across the turn of the year", () => {
     build(new Date(2026, 11, 1));
-    expect(screen.getByText("December 2026")).toBeTruthy();
+    expect(leftMonth()).toEqual(["December", "2026"]);
     expect(screen.getByText("January 2027")).toBeTruthy();
   });
 

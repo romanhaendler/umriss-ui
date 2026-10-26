@@ -36,6 +36,9 @@ export interface ListboxProps {
   onChoose: (index: number) => void;
   /** What stands in the list when it has no options. */
   emptyText: ReactNode;
+  /** A line that stands below the options - or in place of the empty text -
+      and marks the list busy: "Loading" while results are on their way. */
+  busyText?: ReactNode;
 }
 
 /** A list of more than this many options is drawn through a window. */
@@ -56,6 +59,7 @@ export function Listbox({
   onActivate,
   onChoose,
   emptyText,
+  busyText,
 }: ListboxProps) {
   /* The list's element as state: on the first opening the popover finds its
      portal only after this render, and the list arrives a render later than
@@ -159,10 +163,12 @@ export function Listbox({
           activeIndex={activeIndex}
           open={open}
           option={(index) => option(items[index]!, index)}
+          busyText={busyText}
         />
       ) : (
-        <div ref={setList} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
-          {items.length === 0 ? <div className={styles.empty}>{emptyText}</div> : rows}
+        <div ref={setList} role="listbox" id={id} className={styles.list} aria-label={ariaLabel} aria-busy={busyText ? true : undefined}>
+          {items.length === 0 ? <div className={styles.empty}>{busyText ?? emptyText}</div> : rows}
+          {items.length > 0 && busyText && <div className={styles.empty}>{busyText}</div>}
         </div>
       )}
     </Popover>
@@ -177,6 +183,7 @@ interface WindowedListProps {
   activeIndex: number;
   open: boolean;
   option: (index: number) => ReactNode;
+  busyText?: ReactNode;
 }
 
 /* The scroll element of a long list: it draws the options in view and filler
@@ -184,7 +191,7 @@ interface WindowedListProps {
    when it lies outside, so that aria-activedescendant names an element at
    once - and the hook brings it into view. Mounted inside the panel, so the
    hook finds the list when it measures. */
-function WindowedList({ listRef, id, ariaLabel, count, activeIndex, open, option }: WindowedListProps) {
+function WindowedList({ listRef, id, ariaLabel, count, activeIndex, open, option, busyText }: WindowedListProps) {
   const { scrollRef, from, to, fillerBefore, fillerAfter, showRow, onScroll } = useVirtual(count, { rowHeight: 32 });
 
   const ref = useCallback(
@@ -214,6 +221,7 @@ function WindowedList({ listRef, id, ariaLabel, count, activeIndex, open, option
       id={id}
       className={styles.list}
       aria-label={ariaLabel}
+      aria-busy={busyText ? true : undefined}
       onScroll={onScroll}
     >
       {apart && activeIndex < from ? (
@@ -235,6 +243,7 @@ function WindowedList({ listRef, id, ariaLabel, count, activeIndex, open, option
       ) : (
         filler(count - to)
       )}
+      {busyText && <div className={styles.empty}>{busyText}</div>}
     </div>
   );
 }

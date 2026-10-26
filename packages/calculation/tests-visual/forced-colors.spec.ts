@@ -19,3 +19,12 @@ test("The hover coupling under forced colours", async ({ page }, testInfo) => {
   await expect(target.locator("[data-mark='use']")).toHaveCount(1);
   await expect(target).toHaveScreenshot(`forced-hover-coupling-${testInfo.project.name}.png`);
 });
+
+test("The line under a doubtful figure stays under forced colours", async ({ page }) => {
+  await openExample(page, "given", "say-how-far-the-source-vouches");
+  const result = page
+    .locator('[data-example="say-how-far-the-source-vouches"]')
+    .locator("[data-kind='result'] > [data-quality]")
+    .first();
+  expect(await result.evaluate((el) => getComputedStyle(el).textDecorationStyle)).toBe("dotted");
+});
