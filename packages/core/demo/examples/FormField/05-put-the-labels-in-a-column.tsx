@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Checkbox, FormField, Input, NumberInput, Select, Stack, Switch } from "../../../src";
 
 export const title = "Put the labels in a column";
@@ -5,6 +6,7 @@ export const lead =
   "Set `labelPlacement=\"start\"` on each field of a property panel; the labels stand in a column as wide as `--u-label-width`, and a narrow place puts each field under its label.";
 
 export default function PutTheLabelsInAColumn() {
+  const [budget, setBudget] = useState<number | null>(0);
   return (
     <Stack gap={3} style={{ maxWidth: 560 }}>
       <FormField label="Name" labelPlacement="start" required>
@@ -14,7 +16,7 @@ export default function PutTheLabelsInAColumn() {
         <Input defaultValue="CC-2100" />
       </FormField>
       <FormField label="Budget" labelPlacement="start" error="The budget must be above zero.">
-        <NumberInput defaultValue={0} />
+        <NumberInput value={budget} onChange={setBudget} />
       </FormField>
       <FormField label="Owner" labelPlacement="start">
         <Select defaultValue="finance">
