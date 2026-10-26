@@ -2,6 +2,7 @@
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
 import type { ExportSheet } from "../types";
+import { isDay } from "./day";
 import { escapeXml } from "./parts";
 
 const MAX_ROWS = 1048576;
@@ -27,7 +28,6 @@ function letters(n: number): string {
 const serialOf = (d: Date) =>
   (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) - EPOCH) / DAY;
 
-const isDay = (d: Date) => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
 const hasSerial = (v: unknown): v is Date => v instanceof Date && serialOf(v) >= FIRST_SERIAL;
 
 function text(raw: string): string {
