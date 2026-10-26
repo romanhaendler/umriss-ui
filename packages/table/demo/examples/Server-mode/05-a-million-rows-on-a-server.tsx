@@ -73,6 +73,15 @@ function serve(view: TableRequest): { rows: Request[]; rowCount: number } {
   return { rows, rowCount };
 }
 
+/* The export asks the server for every match, the way a spreadsheet wants it;
+   the application caps the file and refuses what is too large. */
+const EXPORT_CAP = 5000;
+const everyMatch = async (view: TableRequest) => {
+  const { rows, rowCount } = serve({ ...view, page: 1, pageSize: EXPORT_CAP });
+  if (rowCount > EXPORT_CAP) throw new Error(`${rowCount.toLocaleString("en")} rows match; narrow the search to ${EXPORT_CAP.toLocaleString("en")} or fewer.`);
+  return rows;
+};
+
 const FIRST: TableRequest = { search: "", conditions: {}, sort: [BY_ID], page: 1, pageSize: 10 };
 const same = (a: TableRequest, b: TableRequest) =>
   JSON.stringify([a.search, a.conditions, a.sort, a.page, a.pageSize]) ===
@@ -108,6 +117,7 @@ export default function AMillionRowsOnAServer() {
       own.signal.addEventListener("abort", () => clearTimeout(timer));
     },
     filterOptions: (column) => (column === "service" ? SERVICES : []),
+    exportRows: everyMatch,
   });
   const { Table, Column } = t;
   const { search, sort, page, pageSize } = answer.view;

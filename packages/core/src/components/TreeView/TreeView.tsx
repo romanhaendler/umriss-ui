@@ -20,7 +20,6 @@
 import { useEffect, useId, useRef } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
-import { warnDeprecated } from "../../lib/dev";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import { AngleGlyph } from "../../lib/glyphs";
@@ -46,15 +45,14 @@ interface TreeViewBase<K, S extends Key = string>
   checkable?: boolean;
   /** What the node says. */
   children: (entry: FlatteningEntry<K, S>) => ReactNode;
-  /** The old spelling of `aria-label`; both work for one further minor.
-      @deprecated since 0.43 - use `aria-label`. */
-  ariaLabel?: string;
 }
 
 /** The props of `TreeView`. The tree is a structure of its own and needs a
-    name: `aria-label` is required (`ariaLabel` stands for one further minor). */
-export type TreeViewProps<K, S extends Key = string> = TreeViewBase<K, S> &
-  ({ "aria-label": string } | { ariaLabel: string });
+    name: `aria-label` is required. */
+export type TreeViewProps<K, S extends Key = string> = TreeViewBase<K, S> & {
+  /** Accessible name of the tree. */
+  "aria-label": string;
+};
 
 /** The tree as a control: draws the nodes of a `Tree` from `useTree` as a
     `tree` with keyboard navigation, typeahead and, with `checkable`, ticks.
@@ -62,7 +60,6 @@ export type TreeViewProps<K, S extends Key = string> = TreeViewBase<K, S> &
 export function TreeView<K, S extends Key = string>({
   ref,
   tree,
-  ariaLabel,
   "aria-label": name,
   checkable = false,
   children,
@@ -73,8 +70,6 @@ export function TreeView<K, S extends Key = string>({
   onScroll,
   ...rest
 }: TreeViewProps<K, S>) {
-  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
-
   const wording = useWording();
   // Namespace of the box ids: two trees with the same keys must not share one.
   const idBase = useId();
@@ -235,7 +230,7 @@ export function TreeView<K, S extends Key = string>({
          focus-follows-the-active-node rule hangs on, and an `onScroll` the
          row window. The role stands here too - it is what the element is. */
       role="tree"
-      aria-label={name ?? ariaLabel}
+      aria-label={name}
       onKeyDown={onKey}
       onScroll={(e) => {
         onScroll?.(e);

@@ -5,13 +5,12 @@
    `useSchedule` hands back are read from a harness, so that they stand among
    the exports the guard lists. */
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createRef } from "react";
 import type { ReactNode } from "react";
 import { render, renderHook } from "@testing-library/react";
 import * as schedule from "../src";
 import { useSchedule } from "../src";
-import type { ScheduleHandle } from "../src";
 import { passThroughGuard } from "../../demo/tests-support/passThroughGuard.tsx";
 import type { PassThroughCase, Probe } from "../../demo/tests-support/passThroughGuard.tsx";
 
@@ -79,39 +78,11 @@ describe("the root of the schedule", () => {
   });
 });
 
-describe("the deprecated name", () => {
-  it("ariaLabel still names the root and the plot, and warns once for two schedules", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { container } = render(
-      <>
-        <Harness through={{ "aria-label": undefined, ariaLabel: "Old" }} />
-        <Harness through={{ "aria-label": undefined, ariaLabel: "Old" }} />
-      </>,
-    );
-    expect(container.querySelectorAll('[aria-label="Old"]')).toHaveLength(4);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]![0]).toContain("ariaLabel is deprecated");
-    warn.mockRestore();
-  });
-});
-
 describe("the handle functions", () => {
   it("answer null before a schedule is mounted, and visibleDomain from the scene", () => {
     const { result: hook } = renderHook(() => useSchedule());
     expect(hook.current.positionAt(1, 1)).toBeNull();
     expect(hook.current.clientPointOf(0)).toBeNull();
     expect(hook.current.visibleDomain()).toHaveLength(2);
-  });
-
-  it("stay on the root element through a ref typed at the handle, and warn once on the first call", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const ref = createRef<ScheduleHandle>();
-    render(<Harness through={{ ref }} />);
-    expect(ref.current!.visibleDomain()).toHaveLength(2);
-    ref.current!.clientPointOf(0);
-    expect(ref.current).toBeInstanceOf(HTMLDivElement);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]![0]).toContain("useSchedule");
-    warn.mockRestore();
   });
 });

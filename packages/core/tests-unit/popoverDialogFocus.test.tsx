@@ -15,7 +15,7 @@ function Setup({ role, children }: { role?: "dialog" | "menu"; children: ReactNo
   return (
     <div>
       <button ref={anchorRef}>Trigger</button>
-      <Popover open={open} onOpenChange={setOpen} anchorRef={anchorRef} role={role} ariaLabel="Surface">
+      <Popover open={open} onOpenChange={setOpen} anchorRef={anchorRef} role={role} aria-label="Surface">
         {children}
       </Popover>
     </div>

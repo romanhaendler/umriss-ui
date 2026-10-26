@@ -492,9 +492,6 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       grid mode Enter on a cell with nothing to edit or enter. Without a
       `rowHeader` column the keyboard cannot choose a row. */
   onCurrentRowChange?: (key: string, row: Z) => void;
-  /** Accessible name of the table.
-      @deprecated since 0.43 - use `aria-label`. */
-  ariaLabel?: string;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
   groupable?: boolean;
@@ -616,6 +613,7 @@ interface AutomaticMode<Z> {
   defaultBranches?: readonly string[] | number;
   rowCount?: never;
   onRequest?: never;
+  exportRows?: never;
   filterOptions?: never;
   answers?: never;
 }
@@ -625,7 +623,7 @@ interface AutomaticMode<Z> {
     its own; select all, the export and the footer would act on one page and
     call it the whole, so "select all" says it selects the page, the export
     writes the page and says so, and there is no footer and no grouping. */
-interface ServerMode {
+interface ServerMode<Z> {
   /** Server mode: the rows are one page a server answered. */
   server: true;
   childRows?: never;
@@ -649,10 +647,16 @@ interface ServerMode {
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];
+  /** Every row of a request, for the export: `Export` hands over the current
+      request unchanged and writes what comes back in the visible columns. The
+      application ignores `page` and `pageSize`, keeps the sort, and caps or
+      refuses a set that is too large - a rejection's message shows beside the
+      button. Without it `Export` writes the page. */
+  exportRows?: (request: TableRequest) => Promise<readonly Z[]>;
 }
 
 /** The options of `useTable`: automatic, or in server mode over a server's rows. */
-export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode);
+export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode<Z>);
 
 /** What a format writes: the header labels, the widths the table holds, and
     the rows as typed cells. A tree's level is its first column, a number. */
@@ -767,8 +771,9 @@ export interface TableSnapshot<Z> {
       server mode the page. */
   asCsv: () => string;
   /** The same rows and columns written by a format: `csv` for text, a format
-      of one's own for anything else. `asCsv()` is `exportAs(csv)`. */
-  exportAs: <R>(format: ExportFormat<R>) => R;
+      of one's own for anything else. `asCsv()` is `exportAs(csv)`. With
+      `rows`, those rows instead of the filtered set. */
+  exportAs<R>(format: ExportFormat<R>, rows?: readonly Z[]): R;
   /** The selected rows within the filtered set as tab-separated text under a
       header line - the text Ctrl+C writes. `""` with nothing selected. */
   selectionAsText: () => string;
