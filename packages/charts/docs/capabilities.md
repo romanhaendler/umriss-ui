@@ -210,6 +210,8 @@ axis with the map kept by the library: every promise above holds on it.
 | The foot at 0, with 0 inside the Y axis' value range; negative values hang below it | R-4.13 | Unit (scene), Screenshot (`deviation`) |
 | `baseline`: a bar floating from one value to another, either way up, in the baseline channel; both edges enter the value range and zero only without a baseline; a gap in either edge leaves the bar out; in a stack it is not read | floating-bar 01 | Unit (floatingBar, materialisation), Type (floatingBar), Screenshot (`waterfall`) |
 | A waterfall from a running sum and one `Bar`; its tooltip, readout and data table name each step by both edges, no helper series | floating-bar 01 | Unit (jsdom floatingBar), Screenshot (`waterfall`) |
+| Error bars: a thin floating `Bar` for the interval (`baseline` the lower bound, `value` the upper) and a `Scatter` for the mean; the tooltip names the interval by both bounds and the mean by its value, and no text says "quartile" | floating-bar 02 | Unit (jsdom errorBars), Screenshot (`error-bars`) |
+| A range bar, a minimum to a maximum per hour, is the same floating `Bar` with a `baseline` | floating-bar 01 | Unit (jsdom floatingBar) |
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
