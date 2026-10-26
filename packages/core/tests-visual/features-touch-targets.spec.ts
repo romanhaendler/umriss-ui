@@ -4,7 +4,8 @@
    calls. And under a fine pointer the targets the floor changed keep their
    drawn size and layout. Chromium only; light only. */
 
-import { test, expect } from "@playwright/test";
+import { existsSync } from "node:fs";
+import { test, expect, webkit } from "@playwright/test";
 import { expectOnTheFloor } from "@umriss-ui/demo/checks/floor";
 import { openExample } from "./navigation";
 
@@ -41,7 +42,7 @@ test.describe("under a finger", () => {
     ["datetimepicker", "set-an-instant"],
     ["datetimerangepicker", "a-downtime-window"],
   ] as const) {
-    test(`the ${pageId} panel has no target under 24 px, bar the time fields'`, async ({ page }) => {
+    test(`the ${pageId} panel has no target under 24 px`, async ({ page }) => {
       await openExample(page, pageId, exampleId);
       await page.locator(`[data-example="${exampleId}"] .exampleStage button`).first().click();
       await expectOnTheFloor(page, page.getByRole("dialog"), "core", pageId, exampleId);
@@ -101,4 +102,26 @@ test.describe("under a fine pointer", () => {
     await openExample(page, "slider", "canary-traffic");
     expect((await size(page.locator('[data-example="canary-traffic"] input[type=range]'))).height).toBe(20);
   });
+});
+
+/* WebKit on an iPhone drops a typed digit when a touch has undone the selection
+   a time field relies on; and no arrows are drawn under a finger. Launched as
+   the calculation's density suite launches WebKit. */
+test("in WebKit under touch, 0930 typed into the time fields gives 09:30", async ({ baseURL }) => {
+  test.skip(!existsSync(webkit.executablePath()), "WebKit is not installed: npx playwright install webkit");
+  const browser = await webkit.launch();
+  try {
+    const context = await browser.newContext({ baseURL, hasTouch: true, isMobile: true, viewport: { width: 375, height: 667 } });
+    const page = await context.newPage();
+    await openExample(page, "datetimepicker", "set-an-instant");
+    await page.locator('[data-example="set-an-instant"] .exampleStage button').first().click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("button", { name: /^(Increase|Decrease) / }).first()).toBeHidden();
+    await dialog.getByLabel("Hour").tap();
+    await page.keyboard.type("0930");
+    await expect(dialog.getByLabel("Hour")).toHaveValue("09");
+    await expect(dialog.getByLabel("Minute")).toHaveValue("30");
+  } finally {
+    await browser.close();
+  }
 });
