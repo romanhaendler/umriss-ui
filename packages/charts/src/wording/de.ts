@@ -42,6 +42,7 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   notch: "Notch",
   count: "n",
   outlierList: (values, more) => `${values.length + more}: ${values.join(", ")}${more > 0 ? ` und ${more} weitere` : ""}`,
+  levelRange: (from, to) => `von ${from} bis ${to}`,
   downsampled: (readings) =>
     `Ausgedünnt aus ${readings.toLocaleString("de-DE")} Messwerten: erster, kleinster, größter und letzter Wert je Abschnitt.`,
 };

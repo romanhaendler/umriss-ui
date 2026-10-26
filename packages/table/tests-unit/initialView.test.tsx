@@ -193,3 +193,66 @@ describe("setView (ADR-0047)", () => {
     ]);
   });
 });
+
+describe("A view that went through JSON", () => {
+  interface Trip { id: string; day: Date; at: Date }
+  const TRIPS: Trip[] = [
+    { id: "a", day: new Date("2026-03-01T10:00:00.000Z"), at: new Date("2026-03-01T10:00:00.000Z") },
+    { id: "b", day: new Date("2026-03-10T10:00:00.000Z"), at: new Date("2026-03-10T10:00:00.000Z") },
+    { id: "c", day: new Date("2026-03-20T10:00:00.000Z"), at: new Date("2026-03-20T10:00:00.000Z") },
+  ];
+  let trips: Table<Trip> | null = null;
+  const captureTrips = (t: Table<Trip>) => {
+    trips = t;
+  };
+
+  function Trips({ start, report }: { start?: TableView; report?: (view: TableView) => void }) {
+    const t = useTable(TRIPS, { rowKey: (r) => r.id, initialView: start, onViewChange: report });
+    captureTrips(t);
+    const { Table: Frame, Column } = t;
+    return (
+      <Frame>
+        <Column value="id" label="Id" rowHeader />
+        <Column value="day" label="Day" filter="range" />
+        <Column value="at" label="At" filter="list" />
+      </Frame>
+    );
+  }
+
+  const original: TableView = {
+    conditions: {
+      day: { from: new Date("2026-03-05T00:00:00.000Z"), to: new Date("2026-03-25T00:00:00.000Z") },
+      at: [new Date("2026-03-10T10:00:00.000Z"), new Date("2026-03-20T10:00:00.000Z")],
+    },
+  };
+  const parsed = (): TableView => JSON.parse(JSON.stringify(original));
+  const ids = (t: Table<Trip>) => t.filtered.map((r) => r.id);
+
+  it("initialView: the same rows as the original, t.view holds Dates equal to it, no warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { unmount } = render(<Trips start={original} />);
+    const expected = ids(trips!);
+    unmount();
+    render(<Trips start={parsed()} />);
+    expect(expected).toEqual(["b", "c"]);
+    expect(ids(trips!)).toEqual(expected);
+    expect(trips!.view).toEqual(original);
+    expect((trips!.view.conditions!.day as { from: unknown }).from).toBeInstanceOf(Date);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("setView: the same, and the view shown set again reports nothing", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const report = vi.fn();
+    render(<Trips report={report} />);
+    act(() => trips!.setView(parsed()));
+    expect(ids(trips!)).toEqual(["b", "c"]);
+    expect(trips!.view).toEqual(original);
+    act(() => trips!.setView(JSON.parse(JSON.stringify(trips!.view))));
+    expect(report).not.toHaveBeenCalled();
+    expect(trips!.view).toEqual(original);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});

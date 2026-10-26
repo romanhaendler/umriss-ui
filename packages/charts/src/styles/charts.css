@@ -379,6 +379,52 @@
     padding-top: 8px;
   }
 
+  /* Beside the plot the root runs in a row and the legend is a column as tall
+     as the plot: as wide as its longest entry up to a quarter of the chart, a
+     longer name wrapping under its own text with the chip on its first line,
+     and entries that do not fit scrolling inside it. */
+  .uc-root:has(> .uc-legend-left, > .uc-legend-right) {
+    flex-direction: row;
+  }
+
+  .uc-legend-left,
+  .uc-legend-right {
+    box-sizing: border-box;
+    flex: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    width: max-content;
+    max-width: 25%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .uc-legend-left {
+    order: -1;
+    padding-right: 12px;
+  }
+
+  .uc-legend-right {
+    order: 1;
+    padding-left: 12px;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-legend-item {
+    align-items: flex-start;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-legend-item > :is(.uc-legend-chip, .uc-legend-mark) {
+    flex: none;
+    margin-top: 4px;
+  }
+
+  :is(.uc-legend-left, .uc-legend-right) > .uc-data-key {
+    margin-left: 0;
+  }
+
   .uc-legend-item {
     display: inline-flex;
     align-items: center;
@@ -401,6 +447,65 @@
     display: block;
     flex: none;
     forced-color-adjust: none;
+  }
+
+  /* A matrix' colour bar stands under its name: the steps in a row, 160 px or the legend's width where that is
+     narrower, the values under the edges they name. The step colours are the caller's own and stay as they are
+     under forced colours. */
+  .uc-legend-item[data-bar] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .uc-legend-bar {
+    display: block;
+    width: 160px;
+    max-width: 100%;
+  }
+
+  .uc-legend-steps {
+    display: flex;
+    height: 10px;
+    forced-color-adjust: none;
+  }
+
+  .uc-legend-step {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .uc-legend-step > .uc-legend-mark {
+    position: absolute;
+    inset: 0;
+  }
+
+  .uc-legend-values {
+    position: relative;
+    display: block;
+    height: 1.3em;
+    font-size: 0.85em;
+    text-decoration: none;
+  }
+
+  .uc-legend-edge {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .uc-legend-edge[data-end="start"] {
+    transform: none;
+  }
+
+  .uc-legend-edge[data-end="end"] {
+    transform: translateX(-100%);
+  }
+
+  .uc-legend-item[data-hidden] > .uc-legend-bar {
+    opacity: 0.3;
   }
 
   /* The entry of a named series is a button, and looks like the plain entry. */

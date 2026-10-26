@@ -161,7 +161,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "bar",
         name: "Bar",
         sentence: "Bars along the x axis (a bar or column chart): one per category, grouped side by side, stacked, or as shares of a whole.",
-        about: ["The x axis reads the category from the row - a cost centre, a weekday - and gives each a place, a tick and its name (ADR-0052); a number or an instant places a bar as well. A bar's foot is 0, so one series carries both signs. `bin()` counts values into the rows of a histogram: each bin's `from`, `to`, middle `x` and `count`, a value on an edge in the bin that edge starts, the last bin closed, values that are not numbers skipped; a `domain` is taken as given and what lies outside it is left out."],
+        about: ["The x axis reads the category from the row - a cost centre, a weekday - and gives each a place, a tick and its name (ADR-0052); a number or an instant places a bar as well. A bar's foot is 0, so one series carries both signs; a `baseline` floats it from one value to another, as in a waterfall. `bin()` counts values into the rows of a histogram: each bin's `from`, `to`, middle `x` and `count`, a value on an edge in the bin that edge starts, the last bin closed, values that are not numbers skipped; a `domain` is taken as given and what lies outside it is left out."],
         alternatives: [{ when: "Causes ranked by how much they contribute", use: "pareto" }],
         keysOf: ["chart"],
         limits: ["Horizontal bars are the next kind to come (ADR-0059); until then a `Matrix` or a `Table` ranks by name."],
