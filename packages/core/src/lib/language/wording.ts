@@ -400,6 +400,12 @@ export interface Wording {
   freshnessFresh: string;
   freshnessStale: string;
   freshnessDisconnected: string;
+  /** The three quality levels (ADR-0077) - the THIRD axis, beside the verdict
+      and the freshness: how far the value's source vouches for it. A bad value
+      keeps its verdict and its age. */
+  qualityGood: string;
+  qualityUncertain: string;
+  qualityBad: string;
   /** "As of: 3 minutes ago", where the duration comes from the formats. */
   asOfAgo: (duration: string) => string;
 
@@ -838,6 +844,9 @@ export const DEFAULT_WORDING: Wording = {
   freshnessFresh: "Fresh",
   freshnessStale: "Stale",
   freshnessDisconnected: "No connection",
+  qualityGood: "Good quality",
+  qualityUncertain: "Uncertain quality",
+  qualityBad: "Bad quality",
   asOfAgo: (duration) => `As of: ${duration}`,
 
   close: "Close",
