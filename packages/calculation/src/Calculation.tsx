@@ -28,6 +28,7 @@ import { AngleGlyph, Badge, Tooltip, VisuallyHidden, useDensityFor, useFormats, 
 import type { BadgeTone, FreshnessAges, Verdict } from "@umriss-ui/core";
 import { evaluate } from "./evaluate";
 import type { Evaluation } from "./evaluate";
+import { warnOnce } from "./dev";
 import { perMetric } from "./model";
 import type { CalculationModel, Quantity } from "./model";
 import { lineText, metricsSentence, operatorText, positionOf, verdictWord } from "./present";
@@ -103,6 +104,8 @@ export function CalculationView({
   "aria-describedby": describedBy,
   ...rest
 }: CalculationViewProps) {
+  if (label === undefined && labelledBy === undefined)
+    warnOnce("no-name", "A Calculation has no accessible name: give it aria-label or aria-labelledby.");
   const metrics = model.metrics;
   const compact = useDensityFor(density, "regular") === "compact";
   const formats = useFormats();
