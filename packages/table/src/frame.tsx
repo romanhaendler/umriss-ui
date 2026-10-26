@@ -31,6 +31,7 @@ import { newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
 import { FootRow, HeadRow } from "./headFoot";
+import { MatchOffer } from "./matchOffer";
 import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
 import { markBeyond, markStuck, markUnder } from "./scrollMarks";
 import styles from "./Table.module.css";
@@ -165,6 +166,7 @@ export function Frame({
 
   return (
     <>
+      {snapshot.server && selectable && <MatchOffer hook={hook} />}
       <div
         ref={virtual?.scrollRef}
         onScroll={(event) => {

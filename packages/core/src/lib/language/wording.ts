@@ -323,6 +323,12 @@ export interface Wording {
   entries: (count: number, formatted: string) => string;
   /** "3 selected" in the pagination bar and the table toolbar. */
   selectedCount: (count: number, formatted: string) => string;
+  /** The first sentence of the offer in a server-mode table, once the page is ticked: "All 50 on this page are selected." */
+  selectedOnPage: (count: number, formatted: string) => string;
+  /** The button after it, for the rows the server holds: "Select all 12,400 that match". */
+  selectAllMatching: (count: number, formatted: string) => string;
+  /** The line once they are selected: "All 12,400 that match are selected." */
+  allMatchingSelected: (count: number, formatted: string) => string;
   /** Said to a screen reader after Ctrl+C copied rows: "3 rows copied". */
   copiedRows: (count: number, formatted: string) => string;
   /** Said after Ctrl+C copied the active cell of a grid. */
@@ -775,6 +781,9 @@ export const DEFAULT_WORDING: Wording = {
   calendarWeek: (week, year) => `Week ${week}, ${year}`,
   entries: (count, formatted) => (count === 1 ? "1 entry" : `${formatted} entries`),
   selectedCount: (_count, formatted) => `${formatted} selected`,
+  selectedOnPage: (_count, formatted) => `All ${formatted} on this page are selected.`,
+  selectAllMatching: (_count, formatted) => `Select all ${formatted} that match`,
+  allMatchingSelected: (_count, formatted) => `All ${formatted} that match are selected.`,
   copiedRows: (count, formatted) => (count === 1 ? "1 row copied" : `${formatted} rows copied`),
   copiedCell: "Cell copied",
   copyFailed: "Could not copy",
