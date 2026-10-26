@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { Button } from "../Button";
@@ -8,6 +8,8 @@ import { Input } from "../Input";
 import { useFormField } from "../FormField";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
+import { WINDOW_ABOVE } from "../../lib/listbox";
+import { useVirtual } from "../../lib/useVirtual";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./MultiSelect.module.css";
 import { useControlSize } from "../../lib/controlSize";
@@ -123,6 +125,9 @@ export function MultiSelect<T extends string = string>(
      what decides where the focus goes when the panel opens. */
   const pointerType = useRef("mouse");
   const touchOpened = useRef(false);
+  /* The option the keys or a touch opening want focused in a windowed list:
+     the list draws it, brings it into view and takes the focus there. */
+  const [wanted, setWanted] = useState<number | null>(null);
 
   /* What the list says through the shared announcer:
      how many options the search and the scope leave - typing in the search
@@ -156,7 +161,13 @@ export function MultiSelect<T extends string = string>(
     setSelectedSnapshot(new Set(value));
     setSearch("");
     setOpen(true);
-    sayCount(targetScope, "", chosenNow(targetScope));
+    const shown = chosenNow(targetScope);
+    // A long list is drawn through a window: the list takes the focus to the option
+    if (touchOpened.current && shown.length > WINDOW_ABOVE) {
+      const first = shown.findIndex((option) => !option.disabled);
+      setWanted(first === -1 ? null : first);
+    }
+    sayCount(targetScope, "", shown);
   };
 
   const switchScope = (target: Scope) => {
@@ -175,7 +186,7 @@ export function MultiSelect<T extends string = string>(
      the trigger keeps it. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
-    if (touchOpened.current) {
+    if (touchOpened.current && !listRef.current?.dataset.windowed) {
       listRef.current?.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus();
     } else {
       searchRef.current?.focus();
@@ -219,7 +230,8 @@ export function MultiSelect<T extends string = string>(
     if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      optionInputs()[0]?.focus();
+      if (windowed) setWanted(enabled[0] ?? null);
+      else optionInputs()[0]?.focus();
       return;
     }
     if (event.key === "Enter") {
@@ -235,22 +247,25 @@ export function MultiSelect<T extends string = string>(
     }
   };
 
+  /* The indices of the options a key can reach: all but the disabled. */
+  const enabled = filtered.flatMap((option, index) => (option.disabled ? [] : [index]));
+  const windowed = filtered.length > WINDOW_ABOVE;
+
   const handleListKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const inputs = optionInputs();
-    const index = inputs.findIndex((input) => input === document.activeElement);
-    if (index === -1) return;
+    const row = document.activeElement?.closest<HTMLElement>("[data-index]");
+    const at = windowed ? enabled.indexOf(Number(row?.dataset.index)) : inputs.findIndex((input) => input === document.activeElement);
+    if (at === -1) return;
     event.preventDefault();
-    if (event.key === "ArrowDown") inputs[Math.min(index + 1, inputs.length - 1)]?.focus();
-    if (event.key === "ArrowUp") {
-      if (index === 0) {
-        searchRef.current?.focus();
-      } else {
-        inputs[index - 1]?.focus();
-      }
+    const last = enabled.length - 1;
+    if (event.key === "ArrowUp" && at === 0) {
+      searchRef.current?.focus();
+      return;
     }
-    if (event.key === "Home") inputs[0]?.focus();
-    if (event.key === "End") inputs[inputs.length - 1]?.focus();
+    const to = { ArrowDown: Math.min(at + 1, last), ArrowUp: at - 1, Home: 0, End: last }[event.key]!;
+    if (windowed) setWanted(enabled[to]!);
+    else inputs[to]?.focus();
   };
 
   /* ---- Roving tabindex in the field: only the main button lies in the tab
@@ -541,19 +556,37 @@ export function MultiSelect<T extends string = string>(
                   {wording.multiSelectSummary(value.length, options.length)}
                 </span>
               </div>
-              <div
-                ref={listRef}
-                className={styles.list}
-                role="group"
-                aria-label={wording.options}
-                onKeyDown={handleListKeyDown}
-              >
-                {filtered.length === 0 ? (
+              {filtered.length === 0 ? (
+                <div ref={listRef} className={styles.list} role="group" aria-label={wording.options} onKeyDown={handleListKeyDown}>
                   <div className={styles.empty}>
                     {scope === "selected" && base.length === 0 ? wording.nothingSelected : emptyMessage}
                   </div>
-                ) : (
-                  filtered.map((option) => (
+                </div>
+              ) : windowed ? (
+                <WindowedChecks
+                  listRef={listRef}
+                  count={filtered.length}
+                  wanted={wanted}
+                  onWanted={() => setWanted(null)}
+                  onKeyDown={handleListKeyDown}
+                  row={(index) => {
+                    const option = filtered[index]!;
+                    return (
+                      <div key={option.value} className={styles.row} data-row="" data-index={index}>
+                        <Checkbox
+                          className={styles.option}
+                          label={option.label}
+                          checked={value.includes(option.value)}
+                          disabled={option.disabled}
+                          onChange={() => toggle(option.value)}
+                        />
+                      </div>
+                    );
+                  }}
+                />
+              ) : (
+                <div ref={listRef} className={styles.list} role="group" aria-label={wording.options} onKeyDown={handleListKeyDown}>
+                  {filtered.map((option) => (
                     <Checkbox
                       key={option.value}
                       className={styles.option}
@@ -562,11 +595,79 @@ export function MultiSelect<T extends string = string>(
                       disabled={option.disabled}
                       onChange={() => toggle(option.value)}
                     />
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
           </div>
       </Popover>
     </>
+  );
+}
+
+interface WindowedChecksProps {
+  listRef: RefObject<HTMLDivElement | null>;
+  count: number;
+  /** An option to bring into view and focus; `onWanted` says it was done. */
+  wanted: number | null;
+  onWanted: () => void;
+  onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
+  row: (index: number) => ReactNode;
+}
+
+/* The list of a long MultiSelect: the checkboxes in view and filler rows for
+   the rest. The option holding the focus, or about to, is always drawn, so a
+   scroll never drops the focused element. Mounted inside the panel, so the
+   hook finds the list when it measures. */
+function WindowedChecks({ listRef, count, wanted, onWanted, onKeyDown, row }: WindowedChecksProps) {
+  const { scrollRef, from, to, fillerBefore, fillerAfter, showRow, onScroll } = useVirtual(count, { rowHeight: 36 });
+  const wording = useWording();
+  const [focused, setFocused] = useState<number | null>(null);
+  const extra = wanted ?? focused;
+
+  useEffect(() => {
+    if (wanted === null) return;
+    showRow(wanted);
+    listRef.current?.querySelector<HTMLInputElement>(`[data-index="${wanted}"] input`)?.focus();
+    onWanted();
+  }, [wanted, showRow, listRef, onWanted]);
+
+  const rowHeight = from > 0 ? fillerBefore / from : to < count ? fillerAfter / (count - to) : 36;
+  // The drawn stretches in order: the window, and the focused option beside it
+  const stretches: Array<[number, number]> = [[from, to]];
+  if (extra !== null && extra < count && (extra < from || extra >= to)) {
+    stretches.push([extra, extra + 1]);
+    stretches.sort((a, b) => a[0] - b[0]);
+  }
+  const content: ReactNode[] = [];
+  let next = 0;
+  const filler = (rows: number, key: string) =>
+    rows > 0 && content.push(<div key={key} aria-hidden="true" style={{ height: rows * rowHeight, flex: "none" }} />);
+  for (const [a, b] of stretches) {
+    filler(a - next, `filler-${a}`);
+    for (let index = a; index < b; index += 1) content.push(row(index));
+    next = b;
+  }
+  filler(count - next, "filler-end");
+
+  return (
+    <div
+      ref={(element) => {
+        scrollRef.current = element;
+        listRef.current = element;
+      }}
+      data-windowed=""
+      className={styles.list}
+      role="group"
+      aria-label={wording.options}
+      onScroll={onScroll}
+      onKeyDown={onKeyDown}
+      onFocus={(event) => {
+        const index = event.target.closest<HTMLElement>("[data-index]")?.dataset.index;
+        setFocused(index === undefined ? null : Number(index));
+      }}
+      onBlur={() => setFocused(null)}
+    >
+      {content}
+    </div>
   );
 }

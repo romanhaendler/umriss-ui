@@ -389,6 +389,14 @@
     transition: background-color var(--u-transition);
   }
 
+  /* A row of a windowed list is as tall as every other: the hook measures one
+     and the fillers stand for the rest. A label longer than the line is cut. */
+  .row {
+    flex: none;
+    height: 36px;
+    overflow: hidden;
+  }
+
   .option:hover {
     background: var(--u-color-surface-sunken);
   }
