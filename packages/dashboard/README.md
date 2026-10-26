@@ -90,7 +90,9 @@ const { Dashboard, WidgetType } = useDashboard({
   resize it, change its options or remove it, and the editing mode says so on
   its head and in its menu. The mark lives in the view, so it comes back through
   `initialView` and "Reset" brings back the default's. Only the application sets
-  it; the reader never can.
+  it; the reader never can. An arrangement a reader kept before the lock lacks
+  it: the application sets it before `initialView`, as the demo's "A widget every
+  reader keeps" shows.
 - **A kept arrangement is read leniently.** A widget of a type that is gone
   falls out, a size a type no longer offers falls back to its starting size.
   A widget whose content throws keeps its frame and says so in a sentence.
