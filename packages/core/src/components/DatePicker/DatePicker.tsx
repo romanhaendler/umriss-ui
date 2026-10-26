@@ -7,7 +7,8 @@ import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
-import { dayStart, gridDay, zoneToday } from "./zoned";
+import { dayStart, dayShown, gridDay, zoneToday } from "./zoned";
+import { clampDay, outside, useDayBounds } from "./bounds";
 import { ZoneNote, useMidnightWarning } from "./ZoneNote";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { RefProp } from "../../lib/refProp";
@@ -50,6 +51,10 @@ export interface DatePickerProps
   /** Shows a cross where a value is set, which fades in on hover/focus and
       clears the value. */
   clearable?: boolean;
+  /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
+  min?: Date;
+  /** The latest day the picker offers, inclusive; read as `min` is. */
+  max?: Date;
 }
 
 /** A date selection with a calendar panel; weeks begin on Monday. The panel's
@@ -65,6 +70,8 @@ export function DatePicker(
     size: ownSize,
     chars,
     clearable = false,
+    min,
+    max,
     className,
     ...rest
   }: DatePickerProps,
@@ -78,6 +85,7 @@ export function DatePicker(
   const placeholderText = placeholder ?? wording.datePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
   const { timeZone } = formats;
+  const bounds = useDayBounds(min, max);
   useMidnightWarning([value]);
   // The grid works on the zone's calendar days; the value is one of them.
   const day = value && gridDay(value, timeZone);
@@ -93,7 +101,7 @@ export function DatePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = day ?? zoneToday(timeZone);
+    const start = clampDay(day ?? zoneToday(timeZone), bounds);
     setView(startOfMonth(start));
     setActive(start);
     setTyped("");
@@ -110,7 +118,7 @@ export function DatePicker(
     setTyped(text);
     setNotADate(false);
     const date = readTypedDate(text, formats, zoneToday(timeZone));
-    if (date) {
+    if (date && !outside(date, bounds)) {
       setView(startOfMonth(date));
       setActive(date);
     }
@@ -166,6 +174,7 @@ export function DatePicker(
               active={active}
               onActive={setActive}
               value={day}
+              bounds={bounds}
               onPick={choose}
               onDigit={(digit) => {
                 type(digit);
@@ -188,16 +197,23 @@ export function DatePicker(
                   if (event.key !== "Enter") return;
                   event.preventDefault();
                   const date = readTypedDate(typed, formats, zoneToday(timeZone));
-                  if (date) choose(date);
+                  if (date && !outside(date, bounds)) choose(date);
                   else setNotADate(true);
                 }}
               />
               {notADate && (
                 <VisuallyHidden>
-                  <span role="alert">{wording.notADate}</span>
+                  <span role="alert">
+                    {readTypedDate(typed, formats, zoneToday(timeZone))
+                      ? wording.dateOutOfRange(
+                          bounds.min && formats.date(dayShown(bounds.min, timeZone)),
+                          bounds.max && formats.date(dayShown(bounds.max, timeZone)),
+                        )
+                      : wording.notADate}
+                  </span>
                 </VisuallyHidden>
               )}
-              <Button size="sm" variant="ghost" onClick={() => choose(zoneToday(timeZone))}>
+              <Button size="sm" variant="ghost" disabled={outside(zoneToday(timeZone), bounds)} onClick={() => choose(zoneToday(timeZone))}>
                 {wording.today}
               </Button>
               <ZoneNote />

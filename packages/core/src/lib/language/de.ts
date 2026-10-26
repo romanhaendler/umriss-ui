@@ -82,6 +82,8 @@ export const GERMAN_WORDING: Wording = {
   dateClear: "Datum leeren",
   typeDate: "Datum eingeben",
   notADate: "Kein gültiges Datum",
+  dateOutOfRange: (min, max) =>
+    min && max ? `Nicht zwischen ${min} und ${max}` : min ? `Nicht vor ${min}` : `Nicht nach ${max}`,
   dateTimePlaceholder: "Datum und Zeit wählen",
   dateTimePanel: "Datum und Zeit wählen",
   dateTimeClear: "Datum und Zeit leeren",

@@ -120,6 +120,8 @@ export interface Wording {
   typeDate: string;
   /** Announced when the typed text is no date. */
   notADate: string;
+  /** Announced when the typed date lies outside `min` and `max`; each bound is written in the formats in use, `null` where there is none. */
+  dateOutOfRange: (min: string | null, max: string | null) => string;
   dateTimePlaceholder: string;
   dateTimePanel: string;
   dateTimeClear: string;
@@ -668,6 +670,8 @@ export const DEFAULT_WORDING: Wording = {
   dateClear: "Clear date",
   typeDate: "Type a date",
   notADate: "Not a date",
+  dateOutOfRange: (min, max) =>
+    min && max ? `Not between ${min} and ${max}` : min ? `Not before ${min}` : `Not after ${max}`,
   dateTimePlaceholder: "Select date and time",
   dateTimePanel: "Select date and time",
   dateTimeClear: "Clear date and time",

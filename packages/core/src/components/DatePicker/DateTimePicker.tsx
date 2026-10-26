@@ -9,6 +9,7 @@ import type { DstStatus, DstChoice } from "./time";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
 import { gridDay, zoneToday } from "./zoned";
+import { clampDay, outside, useDayBounds } from "./bounds";
 import { ZoneNote } from "./ZoneNote";
 import { zoneFields } from "../../lib/zone";
 import type { RefProp } from "../../lib/refProp";
@@ -59,6 +60,10 @@ export interface DateTimePickerProps
   /** Shows a cross where a value is set, which fades in on hover/focus and
       clears the value. */
   clearable?: boolean;
+  /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
+  min?: Date;
+  /** The latest day the picker offers, inclusive; read as `min` is. */
+  max?: Date;
 }
 
 /** A date and a time of day in one field, with a calendar panel. The value is
@@ -77,6 +82,8 @@ export function DateTimePicker(
     chars,
     invalid,
     clearable = false,
+    min,
+    max,
     className,
     ...rest
   }: DateTimePickerProps,
@@ -90,6 +97,7 @@ export function DateTimePicker(
   const placeholderText = placeholder ?? wording.dateTimePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
   const { timeZone } = formats;
+  const bounds = useDayBounds(min, max);
 
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<Date>(() => startOfMonth(value ? gridDay(value, timeZone) : zoneToday(timeZone)));
@@ -109,9 +117,10 @@ export function DateTimePicker(
 
   const openPanel = () => {
     const start = value ? gridDay(value, timeZone) : zoneToday(timeZone);
+    const shownDay = clampDay(start, bounds);
     const clock = value ? zoneFields(value, timeZone) : null;
-    setView(startOfMonth(start));
-    setActive(start);
+    setView(startOfMonth(shownDay));
+    setActive(shownDay);
     setDay(value ? start : null);
     setHour(pad2(clock?.hours ?? 0));
     setMinute(pad2(clock?.minutes ?? 0));
@@ -198,6 +207,7 @@ export function DateTimePicker(
               active={active}
               onActive={setActive}
               value={day}
+              bounds={bounds}
               onPick={(chosen) => {
                 setDay(chosen);
                 setActive(chosen);
@@ -264,7 +274,7 @@ export function DateTimePicker(
 
             <div className={styles.foot}>
               <div className={styles.footLeft}>
-                <Button size="sm" variant="ghost" className={styles.hangStart} onClick={now}>
+                <Button size="sm" variant="ghost" className={styles.hangStart} disabled={outside(zoneToday(timeZone), bounds)} onClick={now}>
                   {wording.now}
                 </Button>
                 {value && (
