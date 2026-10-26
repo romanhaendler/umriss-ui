@@ -44,6 +44,13 @@ export interface LineProps<T> {
       and jumps there - a target, a digital signal. A gap ends the hold at
       its x. The tooltip reports the sample the hold began with. */
   step?: boolean;
+  /** The longest step between two readings that is still drawn through, in the
+      x axis' units: milliseconds on a time axis, working time on a calendar
+      axis, places on a category axis. A longer step is a gap: the line breaks
+      and a `step` hold ends `maxGap` after its reading. A pointer farther than
+      this from the nearest reading finds no hit on the series.
+      @default no limit, a stretch without rows is bridged */
+  maxGap?: number;
 }
 
 /** A series drawn as a line through its values; a gap breaks it. Renders
@@ -61,6 +68,7 @@ export function Line<T>(props: LineProps<T>): null {
     dash,
     markers = "auto",
     step,
+    maxGap,
   } = props;
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
@@ -80,8 +88,9 @@ export function Line<T>(props: LineProps<T>): null {
         dash,
         markers,
         step,
+        maxGap,
       }) as LineSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers, step],
+    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers, step, maxGap],
   );
 
   useSeries("Line", config);

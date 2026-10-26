@@ -29,6 +29,8 @@ export interface ColumnSpec {
   format?: Format;
   /** What the values come to - in the footer and in a group's header. */
   aggregate?: AggregateKind | ((values: readonly never[], rows: readonly never[]) => unknown);
+  /** The word of an aggregate of one's own in the footer. */
+  aggregateLabel?: string;
   /** The share bar under a sum in a group header; on unless `false`. */
   share?: boolean;
   rowHeader: boolean;

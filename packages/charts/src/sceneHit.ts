@@ -355,6 +355,9 @@ export function hitIn(
   const top = mat.y[index] as number;
   if (Number.isNaN(top)) return null; // gaps are no hits
   const xValue = mat.x[index] as number;
+  // A reading reaches no further than maxGap into a gap.
+  const reach = config.kind === "line" || (config.kind === "area" && entry.stacked === null) ? config.maxGap : undefined;
+  if (reach !== undefined && Math.abs(targetX - xValue) > reach) return null;
   // A stacked point is marked at its top and named by its own value. A bar or
   // an area outside a stack with a baseline of its own names that as well; a
   // bar with a gap in it is no hit, since it is not drawn.
