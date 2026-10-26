@@ -52,7 +52,7 @@ function Fixture({
     onChecked,
   });
   return (
-    <TreeView tree={tree} ariaLabel="Ablage" checkable={checkable}>
+    <TreeView tree={tree} aria-label="Ablage" checkable={checkable}>
       {(e) => e.node.name}
     </TreeView>
   );
@@ -366,7 +366,7 @@ function EdgeFixture({
     onActivate,
   });
   return (
-    <TreeView tree={tree} ariaLabel="Grenzen" checkable>
+    <TreeView tree={tree} aria-label="Grenzen" checkable>
       {(e) => e.node.name}
     </TreeView>
   );
@@ -376,7 +376,7 @@ describe("The anchor", () => {
   function AnchorFixture({ onAnchor = vi.fn() }) {
     const tree = useTree(TREE, { reader: READER, defaultActive: "a", onAnchor });
     return (
-      <TreeView tree={tree} ariaLabel="Anker" checkable>
+      <TreeView tree={tree} aria-label="Anker" checkable>
         {(e) => e.node.name}
       </TreeView>
     );
@@ -399,7 +399,7 @@ describe("The anchor", () => {
       // Without an anchor of its own the gesture would span from the active
       // node.
       return (
-        <TreeView tree={tree} ariaLabel="Gesteuert" checkable>
+        <TreeView tree={tree} aria-label="Gesteuert" checkable>
           {(e) => e.node.name}
         </TreeView>
       );
@@ -418,7 +418,7 @@ describe("Shift with an arrow key", () => {
       onChecked,
     });
     return (
-      <TreeView tree={tree} ariaLabel="Zaehlen" checkable>
+      <TreeView tree={tree} aria-label="Zaehlen" checkable>
         {(e) => e.node.name}
       </TreeView>
     );

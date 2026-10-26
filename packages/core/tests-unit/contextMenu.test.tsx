@@ -23,7 +23,7 @@ function Harness({ onFirst = vi.fn(), onThird = vi.fn() }) {
         open={at !== null}
         position={at ?? { x: 0, y: 0 }}
         onOpenChange={(open) => { if (!open) setAt(null); }}
-        ariaLabel="Actions for the surface"
+        aria-label="Actions for the surface"
       >
         <MenuItem onSelect={onFirst}>Split</MenuItem>
         <MenuItem disabled>Merge</MenuItem>

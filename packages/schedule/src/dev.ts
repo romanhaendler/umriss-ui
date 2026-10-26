@@ -23,7 +23,3 @@ export function warnOnce(reason: string, message: string): void {
   warned.add(reason);
   console.warn(`@umriss-ui/schedule: ${message}`);
 }
-
-/** The one wording of a renamed name that still works. */
-export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);

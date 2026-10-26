@@ -433,8 +433,7 @@ The table is not part of this package. It lives in
    a layer (ADR-0021; the guards in `tests-unit/stylesheets.test.ts` hold it).
 6. Everything is English – identifiers, props and prose (ADR-0018, which
    reversed ADR-0015). The accessible name is spelled `aria-label` everywhere
-   (ADR-0068). `ariaLabel` on `TreeView`, `Popover` and `ContextMenu` is a
-   deprecated alias for one further minor.
+   (ADR-0068).
 7. A field's root composes `extent` from `#own-styles`: it fills the place
    that gives it a width, is its natural width where the place asks, and is
    never wider than its place; what it shows never moves it (ADR-0041). A field

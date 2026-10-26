@@ -40,12 +40,10 @@ import {
   type HTMLAttributes,
   type ReactNode,
   type Ref,
-  type RefObject,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
-import { warnDeprecated, warnOnce } from "./dev";
 import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
@@ -58,27 +56,14 @@ import styles from "./Schedule.module.css";
     reads itself. `ref`, `className`, `style` and the rest reach the root; the
     name (`aria-label`, `aria-labelledby`) reaches the figure root and the plot,
     and a `aria-describedby` of yours is joined to the plot's summary. */
-export type ScheduleProps = ScheduleOwnProps &
-  (
-    | {
-        /** What the schedule shows, for a screen reader: "Plan of week 38". */
-        "aria-label": string;
-        /** @deprecated since 0.43 - use `aria-label`. */
-        ariaLabel?: string;
-      }
-    | {
-        "aria-label"?: undefined;
-        /** What the schedule shows, for a screen reader.
-            @deprecated since 0.43 - use `aria-label`. */
-        ariaLabel: string;
-      }
-  );
+export type ScheduleProps = ScheduleOwnProps & {
+  /** What the schedule shows, for a screen reader: "Plan of week 38". */
+  "aria-label": string;
+};
 
 interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "aria-label"> {
-  /** Receives the root element. A ref to the deprecated `ScheduleHandle` still
-      works for one more minor release: the element carries its three
-      functions. */
-  ref?: Ref<HTMLDivElement> | RefObject<ScheduleHandle | null> | undefined;
+  /** Receives the root element. */
+  ref?: Ref<HTMLDivElement> | undefined;
   /** Height in CSS pixels, both bands included, fixed. Left out, the schedule
       fills its frame - a stretched grid cell, a card the grid stretches, a
       container of definite height - and never goes below 400 px, which is also
@@ -204,19 +189,6 @@ const DATE_ROOM = 44;
 const DATE_ROOM_MEDIUM = 84;
 const DATE_ROOM_LONG = 200;
 
-/** What a schedule offers a caller imperatively: the arithmetic between a
-    point on the screen and a time on a lane. Everything else is props.
-    @deprecated since 0.43 - use the functions on `useSchedule`'s return. */
-export interface ScheduleHandle {
-  /** The time and the lane at a client point, or null outside the plot. */
-  positionAt: (clientX: number, clientY: number) => { time: number; lane: string | null } | null;
-  /** The client point of a time - on the middle of a lane where one is named -
-      or null while the schedule is not on screen. */
-  clientPointOf: (time: number, lane?: string) => { x: number; y: number } | null;
-  /** The visible span, as two wall-clock instants. */
-  visibleDomain: () => readonly [number, number];
-}
-
 /** A plan of subtasks on lanes over time - people, vehicles, rooms - with
     dependencies between them. The contents are declared as children (`Lane`,
     `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones`); the planner pans,
@@ -230,7 +202,6 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     "aria-label": nameLabel,
     "aria-labelledby": labelledBy,
     "aria-describedby": describedBy,
-    ariaLabel,
     height,
     laneHeight = DEFAULT_LANE_HEIGHT,
     headerWidth = 160,
@@ -256,8 +227,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     children,
     ...rest
   } = props;
-  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
-  const name = { "aria-label": nameLabel ?? ariaLabel, "aria-labelledby": labelledBy };
+  const name = { "aria-label": nameLabel, "aria-labelledby": labelledBy };
 
   /* One id per schedule, so that two on a page do not both claim
      `#…-group-presses` for their chevron's `aria-controls`. */
@@ -298,22 +268,6 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange });
   }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange]);
 
-  /* The bridge for a ref typed at the deprecated `ScheduleHandle`: the root
-     carries the three functions, and the first call of one says where they
-     live now. */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const through = <A extends unknown[], R>(name: string, call: (...args: A) => R) => (...args: A): R => {
-      warnOnce("handle", `a ref to the schedule's handle is deprecated and goes in the next minor release; call ${name} on useSchedule's return.`);
-      return call(...args);
-    };
-    Object.assign(root, {
-      positionAt: through("positionAt", (x: number, y: number) => scene.positionAt(x, y)),
-      clientPointOf: through("clientPointOf", (time: number, lane?: string) => scene.clientPointOf(time, lane)),
-      visibleDomain: through("visibleDomain", () => scene.visibleDomain()),
-    });
-  }, [scene]);
   useImperativeHandle(ref as Ref<HTMLDivElement | null>, () => rootRef.current as HTMLDivElement, []);
 
   useEffect(() => {

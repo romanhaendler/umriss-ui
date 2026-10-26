@@ -33,7 +33,7 @@ function Setup({
         insideRefs={withOutside ? [outsideRef] : undefined}
         restoreFocus={restoreFocus}
         role="dialog"
-        ariaLabel="Example surface"
+        aria-label="Example surface"
       >
         <p>Content</p>
       </Popover>
@@ -127,7 +127,7 @@ describe("Popover – field context", () => {
         <FormField label="Period">
           <Probe report={inField} />
           <button ref={anchorRef}>Trigger</button>
-          <Popover open onOpenChange={() => {}} anchorRef={anchorRef} ariaLabel="Surface">
+          <Popover open onOpenChange={() => {}} anchorRef={anchorRef} aria-label="Surface">
             <Probe report={inPanel} />
           </Popover>
         </FormField>
@@ -150,7 +150,7 @@ describe("Popover – portal target", () => {
       return (
         <dialog open data-testid="dialog">
           <button ref={anchorRef}>Trigger</button>
-          <Popover open onOpenChange={() => {}} anchorRef={anchorRef} role="menu" ariaLabel="Surface">
+          <Popover open onOpenChange={() => {}} anchorRef={anchorRef} role="menu" aria-label="Surface">
             <span>In the dialog</span>
           </Popover>
         </dialog>

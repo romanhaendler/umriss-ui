@@ -1,3 +1,3 @@
 {
-  "ScheduleProps.ref": "(a) pass-through: the root element, or - deprecated - a ref to the ScheduleHandle"
+  "ScheduleProps.ref": "(a) pass-through: the root element"
 }
