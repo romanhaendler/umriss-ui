@@ -280,7 +280,7 @@ export function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): bool
     }
     case "matrix": {
       const a = previous as MatrixSeriesConfig;
-      return coloringEqual(a.coloring, next.coloring);
+      return coloringEqual(a.coloring, next.coloring) && a.labels === next.labels;
     }
   }
 }
