@@ -27,7 +27,7 @@ function Report({ grouped = false }: { grouped?: boolean }) {
   });
   return (
     <LanguageProvider formats={GERMAN_FORMATS}>
-      <Table ariaLabel="Report">
+      <Table aria-label="Report">
         <Column value="id" label="Id" rowHeader />
         <Column value="year" label="Year" format={{ useGrouping: false }} filter="list" />
         <Column id="yearRange" value="year" label="Span" format={{ useGrouping: false }} filter="range" />

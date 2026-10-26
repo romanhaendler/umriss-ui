@@ -11,7 +11,7 @@
 import { useContext, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "./cx";
-import { DEV, warnDeprecated, warnOnce } from "./dev";
+import { DEV, warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
 import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
@@ -31,7 +31,7 @@ const OWN = [
 /* A prop that is neither listed above nor a div attribute, the ref, the
    children or a name taken out in `Table` would reach the frame's <div>; the
    compiler refuses it here. */
-type Unlisted = Exclude<keyof TableProps<unknown>, keyof HTMLAttributes<HTMLDivElement> | "ref" | "children" | "ariaLabel" | (typeof OWN)[number]>;
+type Unlisted = Exclude<keyof TableProps<unknown>, keyof HTMLAttributes<HTMLDivElement> | "ref" | "children" | (typeof OWN)[number]>;
 true satisfies [Unlisted] extends [never] ? true : Unlisted;
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -243,13 +243,11 @@ export function buildParts(registry: Registry): Parts {
     const {
       ref, className, style, children,
       "aria-label": label, "aria-labelledby": labelledBy, "aria-describedby": describedBy,
-      ariaLabel,
       ...others
     } = props;
     const rest: Record<string, unknown> = { ...others };
     for (const key of OWN) delete rest[key];
-    if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
-    const name = { "aria-label": label ?? ariaLabel, "aria-labelledby": labelledBy, "aria-describedby": describedBy };
+    const name = { "aria-label": label, "aria-labelledby": labelledBy, "aria-describedby": describedBy };
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
 

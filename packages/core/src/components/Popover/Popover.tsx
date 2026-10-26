@@ -10,7 +10,6 @@ import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
-import { warnDeprecated } from "../../lib/dev";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -51,9 +50,6 @@ export interface PopoverProps {
   /** Accessible name of the surface. Needed as soon as it carries a `role`:
       a named role without a name is a riddle for a screen reader. */
   "aria-label"?: string;
-  /** The old spelling of `aria-label`; both work for one further minor.
-      @deprecated since 0.43 - use `aria-label`. */
-  ariaLabel?: string;
   /** Fixed id of the surface – for `aria-controls` on the trigger. */
   id?: string;
   /** Additional class on the surface. */
@@ -90,14 +86,11 @@ export function Popover({
   restoreFocus = true,
   hideOnScroll = false,
   role,
-  ariaLabel,
   "aria-label": name,
   id,
   className,
   children,
 }: PopoverProps) {
-  if (ariaLabel !== undefined) warnDeprecated("ariaLabel", "aria-label");
-
   const panelRef = useRef<HTMLDivElement>(null);
   const insideRefsRef = useRef(insideRefs);
   useEffect(() => {
@@ -253,7 +246,7 @@ export function Popover({
       role={role}
       /* Focusable by script, so a dialog without a control can take the focus. */
       tabIndex={role === "dialog" ? -1 : undefined}
-      aria-label={name ?? ariaLabel}
+      aria-label={name}
       className={cx(styles.panel, className)}
       data-closing={closing || undefined}
       /* A panel that is leaving is gone for assistive technology at once: its
