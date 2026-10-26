@@ -104,7 +104,7 @@ export function CalculationView({
   "aria-describedby": describedBy,
   ...rest
 }: CalculationViewProps) {
-  if (label === undefined && labelledBy === undefined)
+  if (!label && !labelledBy)
     warnOnce("no-name", "A Calculation has no accessible name: give it aria-label or aria-labelledby.");
   const metrics = model.metrics;
   const compact = useDensityFor(density, "regular") === "compact";
