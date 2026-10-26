@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, useEffect } from "react";
-import { Tooltip, useChart, type ChartParts } from "../src";
+import { Legend, LimitLine, Tooltip, useChart, type ChartParts } from "../src";
 import { focusPlot, renderChart, sizePlot } from "./renderChart";
 
 const rows = [
@@ -27,6 +27,9 @@ function Probe() {
       <XAxis value="t" />
       <YAxis label="Speed" />
       <Line value="v" name="Speed" />
+      <Line value="v" name="Torque" />
+      <LimitLine value={2.5} severity="alarm" label="Too fast" />
+      <Legend />
       <Tooltip />
     </Chart>
   );
@@ -84,6 +87,17 @@ describe("toPng", () => {
     const tooltip = view.host.querySelector(".uc-tooltip")?.textContent ?? "";
     expect(texts.join("|")).not.toContain(tooltip);
     expect(texts).not.toContain("Summary for a screen reader");
+  });
+
+  it("paints the legend's names and a limit's label, not the data key", async () => {
+    const view = await renderChart(<Probe />);
+    unmount = view.unmount;
+    await act(async () => {
+      await parts!.toPng();
+    });
+    expect(texts).toContain("Torque");
+    expect(texts).toContain("Too fast");
+    expect(texts).not.toContain("Show data");
   });
 
   it("rejects on a chart that is not mounted", async () => {
