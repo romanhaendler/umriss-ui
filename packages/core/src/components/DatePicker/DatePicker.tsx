@@ -7,7 +7,8 @@ import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
-import { startOfDay } from "./contract";
+import { dayStart, gridDay, zoneToday } from "./zoned";
+import { ZoneNote, useMidnightWarning } from "./ZoneNote";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
@@ -17,17 +18,18 @@ import { CalendarGlyph } from "../../lib/glyphs";
 
 
 /**
- * The value contract: every way - the grid, "Today", clearing - hands out local
- * midnight (resolution "day"). There is no path that delivers a time of day
- * along with it.
+ * The value contract: every way - the grid, "Today", clearing - hands out
+ * midnight in the formats' zone (the reader's, unless the application names
+ * one; resolution "day"). There is no path that delivers a time of day along
+ * with it.
  */
 export interface DatePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
-  /** The day, as a `Date` on local midnight; `null` means none. */
+  /** The day, as a `Date` on midnight in the formats' zone (the reader's, unless the application names one); `null` means none. */
   value: Date | null;
   /** Runs as soon as a day is settled - on a click in the grid, on "Today" and
       on clearing (`null`). Every one of these ways hands out
-      local midnight; there is none that delivers a time along with it. */
+      midnight in the formats' zone; there is none that delivers a time along with it. */
   onChange: (date: Date | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
@@ -75,10 +77,14 @@ export function DatePicker(
   const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.datePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
+  const { timeZone } = formats;
+  useMidnightWarning([value]);
+  // The grid works on the zone's calendar days; the value is one of them.
+  const day = value && gridDay(value, timeZone);
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Date>(() => startOfMonth(value ?? new Date()));
-  const [active, setActive] = useState<Date>(() => value ?? new Date());
+  const [view, setView] = useState<Date>(() => startOfMonth(day ?? zoneToday(timeZone)));
+  const [active, setActive] = useState<Date>(() => day ?? zoneToday(timeZone));
   const [typed, setTyped] = useState("");
   const [notADate, setNotADate] = useState(false);
   const typedRef = useRef<HTMLInputElement>(null);
@@ -87,7 +93,7 @@ export function DatePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = value ?? new Date();
+    const start = day ?? zoneToday(timeZone);
     setView(startOfMonth(start));
     setActive(start);
     setTyped("");
@@ -103,15 +109,15 @@ export function DatePicker(
   const type = (text: string) => {
     setTyped(text);
     setNotADate(false);
-    const date = readTypedDate(text, formats);
+    const date = readTypedDate(text, formats, zoneToday(timeZone));
     if (date) {
       setView(startOfMonth(date));
       setActive(date);
     }
   };
 
-  const choose = (day: Date) => {
-    onChange(startOfDay(day));
+  const choose = (picked: Date) => {
+    onChange(dayStart(picked, timeZone));
     closePanel();
   };
 
@@ -159,7 +165,7 @@ export function DatePicker(
               onView={setView}
               active={active}
               onActive={setActive}
-              value={value}
+              value={day}
               onPick={choose}
               onDigit={(digit) => {
                 type(digit);
@@ -181,7 +187,7 @@ export function DatePicker(
                 onKeyDown={(event) => {
                   if (event.key !== "Enter") return;
                   event.preventDefault();
-                  const date = readTypedDate(typed, formats);
+                  const date = readTypedDate(typed, formats, zoneToday(timeZone));
                   if (date) choose(date);
                   else setNotADate(true);
                 }}
@@ -191,9 +197,10 @@ export function DatePicker(
                   <span role="alert">{wording.notADate}</span>
                 </VisuallyHidden>
               )}
-              <Button size="sm" variant="ghost" onClick={() => choose(new Date())}>
+              <Button size="sm" variant="ghost" onClick={() => choose(zoneToday(timeZone))}>
                 {wording.today}
               </Button>
+              <ZoneNote />
               {value && (
                 <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}

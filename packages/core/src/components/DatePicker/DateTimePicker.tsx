@@ -8,6 +8,9 @@ import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
+import { gridDay, zoneToday } from "./zoned";
+import { ZoneNote } from "./ZoneNote";
+import { zoneFields } from "../../lib/zone";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
@@ -28,7 +31,8 @@ import { ClockGlyph } from "../../lib/glyphs";
  */
 export interface DateTimePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
-  /** The instant; `null` means none. */
+  /** The instant; `null` means none. The panel reads and sets its day and
+      wall clock in the formats' zone (the reader's, unless the application names one). */
   value: Date | null;
   /** Runs only on completion - "Apply", "Now" or "Clear" - and not already on
       the click on a day: a day without a time would be a half-set value here,
@@ -85,11 +89,12 @@ export function DateTimePicker(
   const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.dateTimePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
+  const { timeZone } = formats;
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Date>(() => startOfMonth(value ?? new Date()));
-  const [active, setActive] = useState<Date>(() => value ?? new Date());
-  const [day, setDay] = useState<Date | null>(value);
+  const [view, setView] = useState<Date>(() => startOfMonth(value ? gridDay(value, timeZone) : zoneToday(timeZone)));
+  const [active, setActive] = useState<Date>(() => (value ? gridDay(value, timeZone) : zoneToday(timeZone)));
+  const [day, setDay] = useState<Date | null>(() => (value ? gridDay(value, timeZone) : null));
   const [hour, setHour] = useState("00");
   const [minute, setMinute] = useState("00");
   const [second, setSecond] = useState("00");
@@ -103,17 +108,18 @@ export function DateTimePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = value ?? new Date();
+    const start = value ? gridDay(value, timeZone) : zoneToday(timeZone);
+    const clock = value ? zoneFields(value, timeZone) : null;
     setView(startOfMonth(start));
     setActive(start);
     setDay(value ? start : null);
-    setHour(pad2(value ? start.getHours() : 0));
-    setMinute(pad2(value ? start.getMinutes() : 0));
-    setSecond(pad2(value && withSeconds ? start.getSeconds() : 0));
+    setHour(pad2(clock?.hours ?? 0));
+    setMinute(pad2(clock?.minutes ?? 0));
+    setSecond(pad2(withSeconds ? (clock?.seconds ?? 0) : 0));
     /* Not simply "earlier": a value that is the later occurrence of a doubled
        hour must remain so on reopening, otherwise the next "Apply" shifts it by
        an hour. */
-    setDstChoice(value ? dstChoiceFor(value) : "earlier");
+    setDstChoice(value ? dstChoiceFor(value, timeZone) : "earlier");
     setOpen(true);
   };
 
@@ -124,8 +130,8 @@ export function DateTimePicker(
 
   const status: DstStatus | null = useMemo(() => {
     if (!day) return null;
-    return resolveFields(day, { hour, minute, second }, withSeconds);
-  }, [day, hour, minute, second, withSeconds]);
+    return resolveFields(day, { hour, minute, second }, withSeconds, timeZone);
+  }, [day, hour, minute, second, withSeconds, timeZone]);
 
   const result: Date | null = useMemo(() => {
     if (!status) return null;
@@ -267,6 +273,7 @@ export function DateTimePicker(
                   </Button>
                 )}
               </div>
+              <ZoneNote />
               <Button size="sm" variant="primary" disabled={!result} onClick={apply}>
                 {wording.apply}
               </Button>
