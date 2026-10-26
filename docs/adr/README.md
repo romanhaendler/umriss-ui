@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-one decisions, each one written where it was made and kept afterwards. An
+Seventy-two decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -45,7 +45,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | Table row groups: header or span | accepted | table |
 | [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | Chart keyboard: one tab stop | accepted, amended by ADR-0047 (zoom by key wherever an x axis is zoomable) and on 2026-10-10 (the zoom keys without a tooltip) | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | Charts bring their own texts | accepted | charts, language |
-| [0032](0032-what-umriss-is-not.md) | What umriss is not | What umriss deliberately does not build | accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060 | scope |
+| [0032](0032-what-umriss-is-not.md) | What umriss is not | What umriss deliberately does not build | accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060; superseded in part by ADR-0075 (its "export" point) | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | Schedule keyboard walk continues outside the view | accepted | schedule |
 | [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | Table grid mode only when requested | accepted, amended by ADR-0036 (the first click edits) | table |
 | [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | Target audience: data-dense applications | accepted, superseded in part by ADR-0066 ("no deprecated aliases") | scope |
@@ -85,5 +85,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 | [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | accepted | components, core |
 | [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
+| [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
