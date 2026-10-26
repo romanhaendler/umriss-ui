@@ -207,6 +207,14 @@
      label above. It hangs out by its inset on that side, and its hover
      surface keeps a sliver of the panel's padding instead of touching the
      panel's edge. */
+  /* The typed field takes what the two keys leave; it may shrink to nothing
+     before the panel overflows. */
+  .typed {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-right: var(--u-space-2);
+  }
+
   .foot .hangStart {
     margin-left: calc(-1 * var(--u-button-padding-sm));
   }

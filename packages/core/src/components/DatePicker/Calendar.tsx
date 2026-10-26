@@ -52,6 +52,8 @@ export interface CalendarProps {
   /** The reference day for the "today" mark. Injectable, so that the grid is
       deterministically checkable; the default is the current day. */
   today?: Date;
+  /** A digit typed on the grid; the grid keeps the key from the page. */
+  onDigit?: (digit: string) => void;
 }
 
 /* The APG keys beyond the arrows: a month, a year (with Shift), the week's ends. */
@@ -80,6 +82,7 @@ export function Calendar({
   withoutNext = false,
   withoutOtherMonth = false,
   today,
+  onDigit,
 }: CalendarProps) {
   const wording = useWording();
   const formats = useFormats();
@@ -119,6 +122,11 @@ export function Calendar({
       event.preventDefault();
       onActive(moved);
       if (viewFollows(moved, view)) onView(startOfMonth(moved));
+      return;
+    }
+    if (onDigit && /^\d$/.test(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      onDigit(event.key);
       return;
     }
     if (event.key === "Enter" || event.key === " ") {
