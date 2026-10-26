@@ -43,7 +43,7 @@ export default function ControlsInAWidget() {
     defaultView: { widgets: [{ id: "o1", type: "orders", size: "wide", options: {} }] },
   });
   return (
-    <Dashboard aria-label="Orders, by period">
+    <Dashboard headingLevel={4} aria-label="Orders, by period">
       <WidgetType
         name="orders"
         label="Orders by period"

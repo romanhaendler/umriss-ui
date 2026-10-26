@@ -5,5 +5,5 @@ export const lead = "A dashboard that has no widgets says so, in the language of
 
 export default function Empty() {
   const { Dashboard } = useDashboard({ defaultView: { widgets: [] } });
-  return <Dashboard aria-label="Nothing yet" />;
+  return <Dashboard headingLevel={4} aria-label="Nothing yet" />;
 }
