@@ -43,6 +43,7 @@ interface RuntimeColumnProps {
   children?: unknown;
   format?: ColumnSpec["format"];
   aggregate?: ColumnSpec["aggregate"];
+  aggregateLabel?: string;
   share?: boolean;
   rowHeader?: boolean;
   numeric?: boolean;
@@ -96,6 +97,9 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
   if (props.children !== undefined && typeof props.children !== "function") {
     warnOnce(`children:${id}`, `The children of the column "${id}" are not a function and are passed over.`);
   }
+  if (props.aggregateLabel !== undefined && props.aggregate !== undefined && typeof props.aggregate !== "function") {
+    warnOnce(`aggregate-label:${id}`, `\`aggregateLabel\` of the column "${id}" is ignored: a built-in kind's word is the wording's.`);
+  }
   return {
     id,
     label: props.label,
@@ -103,6 +107,7 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     presentation: typeof props.children === "function" ? (props.children as ColumnSpec["presentation"]) : undefined,
     format: props.format,
     aggregate: props.aggregate,
+    aggregateLabel: typeof props.aggregate === "function" ? props.aggregateLabel : undefined,
     share: props.share,
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,
