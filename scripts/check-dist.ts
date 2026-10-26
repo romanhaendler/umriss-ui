@@ -94,19 +94,24 @@ if (clientFile) {
 /* Development mode is one literal expression every toolchain reads (Vite's dev
    server, Node, Jest): a package whose source asks it must still ask it in the
    build, or its warnings were compiled out. `import.meta` in a shipped file
-   stops Jest from loading it at all. */
+   stops Jest from loading it at all. The expression may stand in any shipped
+   file: a package with a client file builds its view, and so its warnings,
+   there. */
 const DEV_EXPRESSION = `process.env.NODE_ENV !== "production"`;
 const sources = readdirSync("src", { recursive: true, encoding: "utf8" })
   .filter((file) => /\.tsx?$/.test(file))
   .map((file) => [file, readFileSync(join("src", file), "utf8")] as const);
+const shipped = readdirSync("dist", { recursive: true, encoding: "utf8" })
+  .filter((file) => file.endsWith(".js"))
+  .map((file) => [file, readFileSync(join("dist", file), "utf8")] as const);
 /* The library build replaces `import.meta.env.*` and would compile a warning
    out without a trace in the build, so the source must not ask it either. */
 for (const [file, text] of sources) if (text.includes("import.meta")) problems.push(`src/${file} reads import.meta; ask ${DEV_EXPRESSION} instead`);
-if (sources.some(([, text]) => text.includes(DEV_EXPRESSION)) && !js.includes(DEV_EXPRESSION)) {
-  problems.push(`dist/${entry} does not contain the development-mode expression ${DEV_EXPRESSION}`);
+if (sources.some(([, text]) => text.includes(DEV_EXPRESSION)) && !shipped.some(([, text]) => text.includes(DEV_EXPRESSION))) {
+  problems.push(`no file in dist/ contains the development-mode expression ${DEV_EXPRESSION}`);
 }
-for (const file of readdirSync("dist", { recursive: true, encoding: "utf8" })) {
-  if (file.endsWith(".js") && readFileSync(join("dist", file), "utf8").includes("import.meta")) problems.push(`dist/${file} contains import.meta`);
+for (const [file, text] of shipped) {
+  if (text.includes("import.meta")) problems.push(`dist/${file} contains import.meta`);
 }
 
 /* A renamed name keeps its old form for one minor (ADR-0066): a marker names
