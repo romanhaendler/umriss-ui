@@ -557,6 +557,10 @@ here.
   kind of its own.
 * **Pie, donut, radar, candle.** None answers a question a data-dense screen
   asks (ADR-0059).
+* **A fit line or regression.** A fit is a model the analyst chooses: which
+  line, which band, which interval. The chart draws the rows it is given; the
+  least-squares line and its 95 % band are built from `Line` and `Area` in the
+  application (the Scatter page, "A fit line with its band").
 
 ## Known limits
 
