@@ -33,6 +33,12 @@ is only "not yet" stands in each package's record and waits for a caller who nee
   is a product of its own (Mantine wraps Tiptap for it), and a carousel hides
   all but one value at a time - the opposite of a data-dense screen, which
   shows everything at once. *Instead:* a dedicated editor; for a carousel, a list.
+- *Added 2026-10-26:* **A mimic or P&ID layer.** Symbols for pumps, valves and
+  tanks, the piping between them and a plant picture to place them on are the
+  operator interface itself, and screens, navigation and faceplates are the
+  application's (`docs/standards.md`). Every plant draws its own, to its own
+  norms. *Instead:* the application's own SVG, coloured with the verdict tokens,
+  with a `Stat` beside or over each value.
 
 ## The table
 
@@ -73,6 +79,15 @@ is only "not yet" stands in each package's record and waits for a caller who nee
   argued in the capability record's "Out". *Instead:* `Line step` for what was
   held, `canvas.toDataURL()` for a picture, a `Matrix` or bars on x for a
   ranking.
+
+## The calculation
+
+- *Added 2026-10-26:* **Uncertainty propagation.** Carrying an error through a
+  calculation needs a model of errors - whether two inputs are correlated, how
+  each is distributed - and operators the calculation does not have, such as a
+  root or a power. A calculation is written as it stands on paper (ADR-0027),
+  and it does no unit algebra either. *Instead:* an error the application
+  computed, shown as a `Given` of its own or in a line's `aside`.
 
 ## The schedule
 

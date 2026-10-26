@@ -688,7 +688,8 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         </div>
         {/* Beside the plot and out of the grid's flow (absolutely placed). */}
         <VisuallyHidden aria-live="polite">
-          {spoken !== null && (
+          {spoken?.span !== undefined && <span key={spoken.count}>{wording.scheduleVisibleRange(instant(spoken.span[0]), instant(spoken.span[1]))}</span>}
+          {spoken !== null && spoken.target !== null && (
             <ScheduleReadout
               key={spoken.count}
               target={spoken.target}

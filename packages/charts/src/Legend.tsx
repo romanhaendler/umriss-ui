@@ -8,7 +8,7 @@
    be hidden, so its entry stays text - a button that changes nothing is worse
    than none. */
 
-import { useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useChartScene, useLegend } from "./context";
 import { DataKey } from "./DataTable";
 import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
@@ -17,12 +17,34 @@ import type { Rect } from "./types";
 
 /** The props of `Legend`. */
 export interface LegendProps {
-  /** Which side of the plot area the legend stands on.
+  /** Which side of the plot area the legend stands on. `"left"` and `"right"` set the entries in a column beside
+      the plot, as wide as the longest name up to a quarter of the chart, scrolling where they do not fit; in a
+      chart narrower than 480 px they stand above the plot, as `"top"`.
       @default "top" */
-  placement?: "top" | "bottom";
+  placement?: "top" | "bottom" | "left" | "right";
 }
 
-function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top" | "bottom" }): ReactNode {
+/** The chart width below which a side legend would squeeze the plot, so it stands above it. */
+const SIDE_MIN_WIDTH = 480;
+
+function LegendInner({ scene, placement: asked }: { scene: ChartScene; placement: NonNullable<LegendProps["placement"]> }): ReactNode {
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
+  const [narrow, setNarrow] = useState(false);
+  const side = asked === "left" || asked === "right";
+  // The chart's width, not the plot's: the plot's own width depends on where the legend stands.
+  useLayoutEffect(() => {
+    const root = el?.closest<HTMLElement>(".uc-root");
+    if (!side || !root) return;
+    const read = (width: number): void => setNarrow(width < SIDE_MIN_WIDTH);
+    read(root.getBoundingClientRect().width);
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[entries.length - 1];
+      if (entry !== undefined) read(entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width);
+    });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [el, side]);
+  const placement = side && narrow ? "top" : asked;
   useLegend("Legend", { placement });
   /** The entry clicked first and the hidden series before that click. */
   const first = useRef<{ id: string; hidden: readonly string[] } | null>(null);
@@ -34,7 +56,7 @@ function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top"
   const table = snapshot.dataTable;
   if (snapshot.series.length === 0 && table === null) return null;
   return (
-    <div className={`uc-legend uc-legend-${placement}`}>
+    <div ref={setEl} className={`uc-legend uc-legend-${placement}`}>
       {snapshot.series.map((item) => {
         const shared = {
           className: "uc-legend-item",
