@@ -147,6 +147,34 @@
     font-weight: var(--u-weight-medium);
   }
 
+  /* Quality shares the freshness line, before the freshness word. */
+  .statusLine {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--u-space-2);
+  }
+
+  .quality {
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  .quality[data-quality="bad"] {
+    font-weight: var(--u-weight-medium);
+  }
+
+  /* The mark on the figure: a line style in the figure's own colour, never a
+     hue of its own, so that it stays in forced colours. */
+  .value[data-quality="uncertain"] {
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  .value[data-quality="bad"] {
+    text-decoration: underline wavy;
+    text-underline-offset: 0.2em;
+  }
+
   .age {
     color: var(--u-color-text-secondary);
   }
