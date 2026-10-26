@@ -13,6 +13,15 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.44.0 – Moves along (Oct. 2026)
+
+No change of its own; the dashboard is released with the other five under one number.
+
+### Changed
+
+- **The peer range on core moves to `^0.44.0`.**
+  - Migration: install the 0.44 version of `@umriss-ui/core` beside it.
+
 ## 0.43.0 – What fills a widget (Oct. 2026)
 
 ### Added

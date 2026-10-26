@@ -26,6 +26,29 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.44.0 – A server that answers late, and an Excel file (Oct. 2026)
+
+### Added
+
+- **Server mode, answered** (ADR-0072): `answers` names the request the rows answer, so a late answer leaves the table loading, and the snapshot carries `request`; `error` shows in place of the rows with Try again, which reports the current request again; `selection.allMatching`, `except` and `selectMatching` stand for all that match, offered as "Select all N that match" on a ticked page and counted by the toolbar as `rowCount` less the exceptions; `exportRows(request)` lets Export write every match in the visible columns (busy and announced while it runs, a rejection shown beside it); `totals` shows the server's sums over every match in the footer, a skeleton while busy, each cell reading "All matches".
+- **Excel through `@umriss-ui/table/xlsx`** (ADR-0073): a writer of the library's own - stored ZIP, typed cells, dates as local serials, limits that throw - in a second entry of under 4 kB gzipped that the main entry does not contain, with no runtime dependency. An export format is a value handed to `Export`: `format` and `label`; `csv` is one, `snapshot.exportAs(format)` writes any; the `ExportFormat`, `ExportSheet` and `ExportContext` types are exported.
+- **Development warnings,** once each: a column's `value`, `sortValue`, `groupValue` or the `rowKey` held for its source text that reads a changed outer value (the first 1,000 rows are probed; the way out is the value in the rows or a `key` on the column); a `pageSize` with no `Pagination`; `Toolbar`, `Search`, `ColumnMenu`, `Export` or `Pagination` in no table and without `of`; a virtual table that renders every row in a scroll area taller than the viewport (it needs `maxHeight` or a parent of definite height); a date format over a column without points in time and a number format over a column without numbers; rows that are not an array, which read as none, with the warning naming what arrived.
+
+### Changed
+
+- **In server mode a bulk action's `onSelect` receives `Z[] | AllMatching`** (`{ request, except }`) while all that match are selected; an automatic table's receives `Z[]` (was `readonly Z[]`).
+  - Migration: handle the second shape - `Array.isArray` tells the array; the `'except'` key tells `AllMatching`.
+- **`TableSelection` gains `allMatching`, `except` and `selectMatching`, all required.** In server mode a new search or condition clears the selection's keys and `allMatching`.
+  - Migration: a hand-built `TableSelection` adds the three.
+- **In server mode a typed search is reported after a pause of 300 ms** instead of one request per letter; Enter, an empty field, `setSearch` and any other change report at once. The field, `t.search` and the view still take each letter at once.
+  - Migration: nothing to change; a test that typed and expected a request per letter commits with Enter or waits.
+- **A column of days exports as its local day, `YYYY-MM-DD`,** in the CSV and the copy (ADR-0061, amended); other points in time stay ISO text.
+  - Migration: nothing to change; a test or a reader of the file that expected an ISO instant for a day column reads the day.
+- **`ariaLabel` on `Table` is removed;** 0.43.0 renamed it `aria-label`.
+  - Migration: write `aria-label` (TypeScript flags every use of `ariaLabel`).
+- **The peer range on core moves to `^0.44.0`.**
+  - Migration: install the 0.44 version of `@umriss-ui/core` beside it.
+
 ## 0.43.0 – A current row, and a table that stays in its frame (Oct. 2026)
 
 ### Added

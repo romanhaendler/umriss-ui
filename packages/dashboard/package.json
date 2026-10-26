@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/dashboard",
-  "version": "0.43.0",
+  "version": "0.44.0",
   "description": "React dashboard for data-dense applications - widgets a reader arranges, packed in order on twelve columns.",
   "license": "MIT",
   "author": "Roman Händler",
@@ -68,7 +68,7 @@
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts dashboard.js dashboard.css"
   },
   "peerDependencies": {
-    "@umriss-ui/core": "workspace:^0.43.0",
+    "@umriss-ui/core": "workspace:^0.44.0",
     "react": ">=19",
     "react-dom": ">=19"
   },

@@ -30,6 +30,22 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.44.0 – A range a reader marks, and a picture of the chart (Oct. 2026)
+
+### Added
+
+- **`onRange` on `useChart` reports a stretch the reader marks** (ADR-0074): `{ axisId, from, to }` once, on release - Alt with a drag where an x axis zooms, a plain drag where none does, and Space on the keyboard (start, then end; Escape or blur cancels). `from` is never after `to`; a category axis reports the first and last category covered (`ChartRange<string>`), a time axis milliseconds, a calendar axis wall-clock instants. A band shows while the pointer is down; a chart with `onRange` holds no range and draws none after release (the application hands it back as `initialView` or a filter). The polite region reads the start and the range; `onRange` without a `Tooltip` warns once in development. Two examples: Mark a range (Zoom and pan) and Mark a range of bars (Bar).
+- **`useChart` hands over `toPng()`** (ADR-0075): a PNG of the plot and its axes on the chart's ground, at least twice its CSS pixels, with the legend and its chips, the limits' labels and marks and the axis breaks.
+- **A chart prints at the width the printed page leaves it,** its axes where its marks are, and returns to its screen width afterwards.
+- **Development warnings,** once each: a series past the palette's last colour without `color` or `tone` repeats an earlier series' colour; a function held for its source text that reads a changed outer value is probed on the first 1,000 rows and warns, naming the series and the two ways out; rows that are not an array read as none, and the warning names what arrived.
+
+### Changed
+
+- **`ariaLabel` on `Chart` is removed;** 0.43.0 renamed it `aria-label`.
+  - Migration: write `aria-label` (TypeScript flags every use of `ariaLabel`).
+- **`ChartsWording` has three new required keys,** `rangeStarted`, `rangeMade` and `rangeHelp`, in English and German.
+  - Migration: a wording written out in full adds them, as it did for `selectHelp`; one built on the shipped wording needs nothing.
+
 ## 0.43.0 – A chart's root, and Intl's options for its numbers (Oct. 2026)
 
 ### Added

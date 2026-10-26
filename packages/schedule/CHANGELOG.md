@@ -18,6 +18,21 @@ moves from here under the rule above.
 
 ---
 
+## 0.44.0 – Malformed data says so, and the handle goes (Oct. 2026)
+
+### Added
+
+- **Malformed data warns once per cause in development:** a span that does not end after it starts, an item on an undeclared lane, an unknown task or dependency end, an id that stands twice. The checks run only in development.
+
+### Changed
+
+- **`ScheduleHandle` and the handle ref are removed;** 0.43.0 deprecated them. A `Schedule` ref is typed `HTMLDivElement`, and `positionAt`, `clientPointOf` and `visibleDomain` are on `useSchedule`'s return.
+  - Migration: replace `ref.current.positionAt(x, y)` with `positionAt(x, y)` from `const { positionAt } = useSchedule()`, and the same for `clientPointOf` and `visibleDomain`; type a ref as `HTMLDivElement`.
+- **`ariaLabel` on `Schedule` is removed;** 0.43.0 renamed it `aria-label`.
+  - Migration: write `aria-label` (TypeScript flags every use of `ariaLabel`).
+- **The peer ranges on core and charts move to `^0.44.0`.**
+  - Migration: install the 0.44 versions of `@umriss-ui/core` and `@umriss-ui/charts` beside it.
+
 ## 0.43.0 – A schedule that fills its frame, and takes a finger (Oct. 2026)
 
 ### Added

@@ -14,6 +14,17 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.44.0 – A calculation without a name says so (Oct. 2026)
+
+### Added
+
+- **A `Calculation` with neither `aria-label` nor `aria-labelledby` (or an empty label) warns once in development.**
+
+### Changed
+
+- **The peer range on core moves to `^0.44.0`.**
+  - Migration: install the 0.44 version of `@umriss-ui/core` beside it.
+
 ## 0.43.0 – Places that carry down, and a calculation's root (Oct. 2026)
 
 ### Added
