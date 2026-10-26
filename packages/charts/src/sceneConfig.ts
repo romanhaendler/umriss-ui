@@ -226,7 +226,7 @@ export function baselineOf(config: SeriesConfig): Baseline<unknown> | undefined 
       // In a stack the stack below is the foot, not a baseline of its own.
       return config.stack === undefined ? (config.baseline ?? 0) : 0;
     case "bar":
-      return 0;
+      return config.stack === undefined ? (config.baseline ?? 0) : 0;
     case "state":
     case "matrix":
       // Neither has a foot: a state is not a height, a cell not a column.
@@ -259,7 +259,7 @@ export function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): bool
     }
     case "bar": {
       const a = previous as BarSeriesConfig;
-      return a.barWidth === next.barWidth;
+      return fnEqual(a.baseline, next.baseline) && a.barWidth === next.barWidth;
     }
     case "box": {
       const a = previous as BoxSeriesConfig;
