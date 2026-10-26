@@ -31,6 +31,8 @@ export interface Formats {
   dateShort: (d: Date) => string;
   /** The calendar's month header: March 2026 */
   month: (d: Date) => string;
+  /** The month alone, in the calendar head's month list: March */
+  monthName: (d: Date) => string;
   /** Accessible name of a calendar cell: Tuesday, 17 March 2026 */
   dateLong: (d: Date) => string;
   /** Time of day, optionally with seconds: 09:05 or 09:05:03 */
@@ -133,6 +135,8 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
   const dateFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit", year: "numeric" });
   const dateShortFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit" });
   const monthFormat = new Intl.DateTimeFormat(locale, { timeZone, month: "long", year: "numeric" });
+  /* A calendar month, named from a calendar-day Date: no zone applies. */
+  const monthNameFormat = new Intl.DateTimeFormat(locale, { month: "long" });
   const dateLongFormat = new Intl.DateTimeFormat(locale, {
     timeZone,
     weekday: "long",
@@ -181,6 +185,7 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
     date: (d) => dateFormat.format(d),
     dateShort: (d) => dateShortFormat.format(d),
     month: (d) => monthFormat.format(d),
+    monthName: (d) => monthNameFormat.format(d),
     dateLong: (d) => dateLongFormat.format(d),
     time: (d, withSeconds) => (withSeconds ? timeFormats.with : timeFormats.without).format(d),
     dateTime: (d, withSeconds) => (withSeconds ? dateTimeFormats.with : dateTimeFormats.without).format(d),

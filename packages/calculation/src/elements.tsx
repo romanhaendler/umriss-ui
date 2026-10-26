@@ -10,7 +10,7 @@
    it says so. */
 
 import type { ReactNode } from "react";
-import type { FreshnessAges, Limit } from "@umriss-ui/core";
+import type { FreshnessAges, Limit, Quality } from "@umriss-ui/core";
 
 /** What every quantity - given or derived - can say about itself. */
 export interface QuantityProps {
@@ -88,6 +88,10 @@ export interface GivenProps extends QuantityProps {
   /** The ages at which `asOf` turns stale and lost. With both, the given
       carries a freshness through core; with `asOf` alone, only the time. */
   ages?: FreshnessAges;
+  /** How far the source vouches for the number. Carried up to every quantity
+      built on this given - the worst of its operands is a quantity's own - and
+      shown on their lines; its freshness is not. Absent counts as good. */
+  quality?: Quality;
 }
 
 /** The props of `Sum`, `Difference`, `Product` and `Quotient`: a quantity's,

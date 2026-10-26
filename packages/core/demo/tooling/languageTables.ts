@@ -38,6 +38,7 @@ function samples(at: Date): Record<keyof Formats, (formats: Formats) => string> 
     date: (f) => f.date(at),
     dateShort: (f) => f.dateShort(at),
     month: (f) => f.month(at),
+    monthName: (f) => f.monthName(at),
     dateLong: (f) => f.dateLong(at),
     time: (f) => f.time(at, false),
     dateTime: (f) => f.dateTime(at, false),

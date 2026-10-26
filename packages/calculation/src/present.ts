@@ -1,7 +1,7 @@
 /* What a line says, as text: its number, its two formulas, its target and its
    accessible sentence. Pure - formats and wording come in as values. */
 
-import type { Formats, Verdict, Wording } from "@umriss-ui/core";
+import type { Formats, Quality, Verdict, Wording } from "@umriss-ui/core";
 import type { Absence, Evaluation } from "./evaluate";
 import { shownOf } from "./evaluate";
 import type { Metric } from "./elements";
@@ -24,6 +24,8 @@ export interface LineText {
   target?: string;
   /** Why there is no number. */
   reason?: string;
+  /** "Uncertain quality" or "Bad quality"; absent where good. */
+  quality?: string;
   /** The line read as one sentence. */
   sentence: string;
   /** The formula in names as spoken, where the quantity is derived. */
@@ -83,6 +85,10 @@ const WORD: Record<Operator, keyof Wording> = {
   product: "calculationProductWord",
   quotient: "calculationQuotientWord",
 };
+
+export function qualityWord(quality: Quality, wording: Wording): string | undefined {
+  return quality === "bad" ? wording.qualityBad : quality === "uncertain" ? wording.qualityUncertain : undefined;
+}
 
 export function verdictWord(verdict: Verdict, wording: Wording): string {
   switch (verdict) {
@@ -180,6 +186,7 @@ export function lineText(
       ? shownNames
       : `= ${shownNames}`;
   const spoken = formula(true);
+  const quality = qualityWord(own.quality, wording);
   const reason = own.absence ? reasonText(own.absence, wording) : undefined;
   const equals = ` ${wording.calculationEquals} `;
   const result = own.approximate
@@ -189,6 +196,7 @@ export function lineText(
   const sentence = [
     prefix + quantity.label + equals + [spoken.names, spoken.numbers, result].filter(Boolean).join(`,${equals}`),
     own.verdict !== undefined && own.verdict !== "unknown" ? verdictWord(own.verdict, wording) : undefined,
+    quality,
     target(true),
     reason,
   ]
@@ -197,7 +205,7 @@ export function lineText(
 
   const unit = own.shown === null ? undefined : quantity.format === "percent" ? "%" : quantity.unit;
   const amountOf = (shown: number | null) => (shown === null ? wording.statAbsentValue : formats.number(shown, quantity.decimals));
-  return { amount: amountOf(shownAt(own, position)), ownAmount: amountOf(own.shown), unit, names, target: target(false), reason, sentence, spokenNames: spoken.names, spokenNumber: result };
+  return { amount: amountOf(shownAt(own, position)), ownAmount: amountOf(own.shown), unit, names, target: target(false), quality, reason, sentence, spokenNames: spoken.names, spokenNumber: result };
 }
 
 /** A line of a calculation with metrics, read as one sentence: its formula in
@@ -217,5 +225,6 @@ export function metricsSentence(
   const figures = metrics.map((metric, i) =>
     [`${metric.label} ${texts[i]!.spokenNumber}`, texts[i]!.reason].filter(Boolean).join(", "),
   );
-  return `${head}: ${figures.join("; ")}`;
+  const quality = texts[0]!.quality;
+  return `${head}: ${figures.join("; ")}${quality ? `, ${quality}` : ""}`;
 }
