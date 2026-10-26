@@ -10,6 +10,7 @@
 
    Deliberately free of the DOM and of the scene. */
 
+import { zoneFields, zoneInstant } from "@umriss-ui/core";
 import {
   calendarFrom,
   DAY,
@@ -69,15 +70,15 @@ export interface Day {
 }
 
 /** The local days a domain touches, from the midnight before its start. */
-export function days(domain: readonly [number, number], calendar: CalendarInput = WALL_CLOCK): Day[] {
+export function days(domain: readonly [number, number], calendar: CalendarInput = WALL_CLOCK, timeZone?: string): Day[] {
   const [from, to] = wallExtentWithin(domain, calendar);
   const found: Day[] = [];
-  const cursor = new Date(from);
-  cursor.setHours(0, 0, 0, 0);
-  while (cursor.getTime() < to && found.length < 400) {
-    const start = cursor.getTime();
-    cursor.setDate(cursor.getDate() + 1);
-    const end = cursor.getTime();
+  const { year, month, day } = zoneFields(from, timeZone);
+  let date = day;
+  let end = zoneInstant({ year, month, day: date }, timeZone).getTime();
+  while (end < to && found.length < 400) {
+    const start = end;
+    end = zoneInstant({ year, month, day: ++date }, timeZone).getTime();
     found.push({
       start,
       from: toWorkingTimeClamped(start, calendar),
