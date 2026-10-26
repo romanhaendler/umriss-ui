@@ -69,3 +69,6 @@ export const dayStep = (key: string): number | undefined => STEPS[key];
 /** Must the view follow the step because it leaves the month? */
 export const viewFollows = (next: Date, view: Date) =>
   next.getMonth() !== view.getMonth() || next.getFullYear() !== view.getFullYear();
+
+/** Monday of the week the day falls into. */
+export const startOfWeek = (d: Date) => addDays(d, -((d.getDay() + 6) % 7));
