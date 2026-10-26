@@ -240,6 +240,8 @@ export interface Wording {
   exportFailed: string;
   /** The export's file name, where the application names none. */
   exportFileName: string;
+  /** The name of the sheet an XLSX export holds. */
+  exportSheetName: string;
   /** Placeholder and accessible name of the search field. */
   tableSearchPlaceholder: string;
   tableSearchLabel: string;
@@ -738,6 +740,7 @@ export const DEFAULT_WORDING: Wording = {
   exporting: "Preparing the export",
   exportFailed: "The export failed",
   exportFileName: "table.csv",
+  exportSheetName: "Table",
   tableSearchPlaceholder: "Search …",
   tableSearchLabel: "Search table",
   filterColumn: (column) => `Filter ${column}`,
