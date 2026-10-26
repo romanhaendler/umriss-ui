@@ -27,6 +27,11 @@ export interface DashboardProps extends HTMLAttributes<HTMLDivElement>, RefProp<
   /** The `name`s of the widget types the catalogue lists.
       @default every declared type */
   catalogue?: ReadonlyArray<string>;
+  /** The level of the heading the heading widgets stand in - the one that fits the
+      page's outline. A widget's title stands one level below it when the dashboard
+      holds a heading widget, and at this level when not; never deeper than 6.
+      @default 2 */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 /* The content is called inside its own component, so that a throw lands in its boundary. */
@@ -84,7 +89,7 @@ const track = (map: Map<string, HTMLElement>, id: string) => (el: HTMLElement | 
 };
 
 /** The Dashboard of `useDashboard`, drawing a view. */
-export function DashboardOf({ view: given, editor, className, children, catalogue, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
+export function DashboardOf({ view: given, editor, className, children, catalogue, headingLevel = 2, ...rest }: DashboardProps & { view: DashboardView; editor: Editor }) {
   const wording = useWording();
   const builtin = useMemo(() => headingTypeOf(wording), [wording]);
   const types = new Map<string, AnyType>();
@@ -100,6 +105,10 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
     const span = type?.sizes[widget.size];
     return type && span ? [{ widget, type, span }] : [];
   });
+
+  /* A title is one level below the heading widgets when the drawn view holds one, and no deeper than 6. */
+  const titleLevel = Math.min(6, headingLevel + (shown.some(({ type }) => type === builtin) ? 1 : 0)) as 2 | 3 | 4 | 5 | 6;
+  const Title = `h${titleLevel}` as const;
 
   const grid = useRef<HTMLDivElement>(null);
   const [cards] = useState(() => new Map<string, HTMLElement>());
@@ -284,7 +293,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
               <div key={widget.id} ref={track(cards, widget.id)} className={cx(styles.item, styles.headingRow)} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined}>
                 <div {...head} className={cx(head.className, styles.headingHead)}>
                   {editing && <GripGlyph className={styles.grip} />}
-                  <Heading level={2} size="lg" className={styles.heading}>{(widget.options as HeadingOptions).text}</Heading>
+                  <Heading level={headingLevel} size="lg" className={styles.heading}>{(widget.options as HeadingOptions).text}</Heading>
                   {menu}
                 </div>
               </div>
@@ -294,7 +303,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             <Card key={widget.id} ref={track(cards, widget.id)} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={title}>
               <div {...head}>
                 {editing && <GripGlyph className={styles.grip} />}
-                <h2 className={styles.title}>{title}</h2>
+                <Title className={styles.title}>{title}</Title>
                 {editing && <span className={styles.size}>{wording.dashboardSizes[widget.size]}</span>}
                 {editing && widget.locked === true && <span className={styles.size}>{wording.dashboardLocked}</span>}
                 {menu}

@@ -18,7 +18,7 @@ const VIEW: DashboardView = {
 export default function Sections() {
   const { Dashboard, WidgetType } = useDashboard({ defaultView: VIEW });
   return (
-    <Dashboard aria-label="Sections">
+    <Dashboard headingLevel={4} aria-label="Sections">
       <HeadingType />
       <WidgetType name="note" label="Note" sentence="A line of text." sizes={{ wide: { columns: 6, rows: 3 } }} start="wide" defaultOptions={{}}>
         {() => <Text size="sm">Whatever the application puts in a widget.</Text>}
