@@ -822,7 +822,7 @@ export class SceneGestures {
       on to the seam, where time counts again. An intent never asks for a time
       nobody works. */
   private snapInside(time: number, step: SnapRaster): number {
-    const snapped = snapTime(time, step);
+    const snapped = snapTime(time, step, this.host.view.options.timeZone);
     const calendar = calendarFrom(this.host.view.options.calendar);
     if (calendar.intervals.length === 0) return snapped;
     return toWallClock(toWorkingTimeClamped(snapped, calendar), calendar);

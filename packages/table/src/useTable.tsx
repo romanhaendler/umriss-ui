@@ -17,7 +17,7 @@
    set. */
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { allBranches, duplicateKey, useFormats, useWording } from "@umriss-ui/core";
+import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
 import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
@@ -594,7 +594,11 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   }
 
   const exportAs = <R,>(format: ExportFormat<R>, given?: readonly unknown[]): R =>
-    format.write(sheetOf(registry, wording.levelColumn, given), { formats, wording });
+    format.write(sheetOf(registry, wording.levelColumn, given), {
+      formats,
+      wording,
+      ...(formats.timeZone && { wallClock: (d: Date) => zoneFields(d, formats.timeZone) }),
+    });
 
   const snapshot: TableSnapshot<Z> = {
     rows,
