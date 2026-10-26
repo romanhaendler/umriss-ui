@@ -42,6 +42,8 @@ export interface ResolvedTheme {
   colorOk: string;
   font: string;
   fontMono: string;
+  /** The tick label's size in pixels (`--uc-size-tick`). */
+  sizeTick: number;
   series: readonly string[];
   /** The page is in forced colours: every colour above is a system colour, and
       the chart encodes by marks whatever its `encoding`. */
@@ -58,6 +60,7 @@ export const FALLBACK_THEME: ResolvedTheme = {
   colorOk: "#217a4b",
   font: "system-ui, sans-serif",
   fontMono: "ui-monospace, monospace",
+  sizeTick: 11.5,
   series: ["#2563eb", "#db2777", "#059669", "#d97706", "#7c3aed", "#0891b2"],
   forced: false,
 };
@@ -81,6 +84,11 @@ let observer: MutationObserver | null = null;
 function readVar(style: CSSStyleDeclaration, name: string, fallback: string): string {
   const v = style.getPropertyValue(name).trim();
   return v === "" ? fallback : v;
+}
+
+function readSize(style: CSSStyleDeclaration): number {
+  const px = Number.parseFloat(readVar(style, "--uc-size-tick", ""));
+  return px > 0 ? px : FALLBACK_THEME.sizeTick;
 }
 
 /** Runs `read` with a hidden probe inside `root` that resolves a CSS colour to
@@ -127,6 +135,7 @@ function forcedTheme(root: Element, style: CSSStyleDeclaration): ResolvedTheme {
         colorOk: text,
         font: readVar(style, "--uc-font", FALLBACK_THEME.font),
         fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
+        sizeTick: readSize(style),
         series: FALLBACK_THEME.series.map(() => text),
         forced: true,
       };
@@ -160,6 +169,7 @@ function readTheme(root: Element): ResolvedTheme {
       colorOk: readColour("--uc-color-ok", FALLBACK_THEME.colorOk),
       font: readVar(style, "--uc-font", FALLBACK_THEME.font),
       fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
+      sizeTick: readSize(style),
       series,
       forced: false,
     };
