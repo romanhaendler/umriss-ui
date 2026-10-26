@@ -37,6 +37,118 @@
     white-space: nowrap;
   }
 
+  /* Every cell of the grid is placed by hand: the table's key and panel stand
+     in cells of their own, and cells left to the flow would be pushed aside by
+     them. */
+  .dayBand {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .headers {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .plot {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .cornerBottom {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .tickBand {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  /* The plan's table key stands in the bottom corner, beside the time band. */
+  .dataKey {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+    align-self: center;
+    margin: 0 var(--u-space-2);
+    padding: 0 var(--u-space-2);
+    max-width: calc(100% - 2 * var(--u-space-2));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: inherit;
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: var(--u-radius-sm);
+    cursor: pointer;
+  }
+
+  .dataKey:hover {
+    color: var(--u-color-text);
+  }
+
+  .dataKey:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* The table lies over the lane headers and the plot, and scrolls there; the
+     bands stay, since they show the span it lists. */
+  .dataPanel {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    z-index: 3;
+    overflow: auto;
+    background: var(--u-color-surface);
+    font-size: var(--u-text-sm);
+    user-select: text;
+  }
+
+  .dataPanel:focus {
+    outline: none;
+  }
+
+  .dataPanel:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: inset var(--u-focus-ring);
+  }
+
+  .dataTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .dataTable > caption {
+    padding: var(--u-space-2) var(--u-space-3);
+    text-align: left;
+    color: var(--u-color-text-muted);
+  }
+
+  .dataTable th,
+  .dataTable td {
+    padding: var(--u-space-1) var(--u-space-3);
+    border-bottom: 1px solid var(--u-hairline);
+    white-space: nowrap;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  /* The heading row stays while the rows scroll beneath it. */
+  .dataTable > thead th {
+    position: sticky;
+    top: 0;
+    background: var(--u-color-surface);
+    border-bottom-color: var(--u-hairline-strong);
+    font-weight: var(--u-weight-medium);
+  }
+
+  .dataTable > tbody th {
+    font-weight: var(--u-weight-medium);
+  }
+
   .dayBand,
   .tickBand {
     position: relative;
