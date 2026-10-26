@@ -1,6 +1,6 @@
 # Form validation and a dashboard a user arranges are never built, and time zones are not yet
 
-Status: accepted, extends ADR-0032; superseded in one point by ADR-0064 (a dashboard a user arranges is built)
+Status: accepted, extends ADR-0032; superseded in one point by ADR-0064 (a dashboard a user arranges is built) and in one point by ADR-0076 (time zones)
 Date:   2026-10
 
 Three questions had no document. `FormField` says in one comment that
@@ -34,6 +34,8 @@ arrangement of tiles.
 
 ## Not yet: time zones
 
+*Superseded in this point by ADR-0076: an application names a zone, and the server then writes the instants.* The text below stays as history.
+
 **umriss shows the reader's time.** Every instant is shown, ticked, snapped and
 parsed in the browser's zone: axes, the schedule's raster, date fields,
 formats, the working-time calendar.
@@ -59,7 +61,7 @@ browser, so a time written on the server is a guess. Under a server in another z
 from the browser's and raises React's hydration error #418. Core's formats therefore write an instant
 once the page has hydrated, and an empty text before; an app that renders only in the browser sees no
 difference. A zone the application names would let the server write instants again. That is the "not
-yet" above.
+yet" above. Taken by ADR-0076: with a named zone, the server writes the instants.
 
 ## Considered Options
 
