@@ -85,6 +85,12 @@ const { Dashboard, WidgetType } = useDashboard({
 - **Every action without a drag.** One menu on every widget's head moves,
   sizes, sets the options and removes; the head is also the grip for a pointer
   and takes the arrow keys. Every change is announced.
+- **A locked widget moves and nothing else changes it.** The application sets
+  `locked: true` on a widget of the view; the reader can move it, but not
+  resize it, change its options or remove it, and the editing mode says so on
+  its head and in its menu. The mark lives in the view, so it comes back through
+  `initialView` and "Reset" brings back the default's. Only the application sets
+  it; the reader never can.
 - **A kept arrangement is read leniently.** A widget of a type that is gone
   falls out, a size a type no longer offers falls back to its starting size.
   A widget whose content throws keeps its frame and says so in a sentence.

@@ -85,12 +85,23 @@ would need a hand-built inert under a head that is a drag grip. A cut line and a
 warning for content taller than its size are not built: a scroll is an intended
 outcome, not a fault.
 
+*Amended 2026-10-26:* locking one widget is built. The application marks a widget of a view as locked, and the
+reader can never set or clear the mark. A locked widget cannot be removed, resized or have its options
+changed, and it moves with the others. It is a place in the sequence like any other, so "earlier",
+"later", the arrow keys and a drag move it, and it shifts when another widget is moved before it.
+Keeping its place while the others move past it was not taken: in a sequence a place is "after the
+one before", a widget that held its place would make "earlier" skip it, and the packing would move it
+at another width anyway. In the editing mode its head says that it is locked, and its menu has the
+moves and a line saying why the rest is missing. The lock lives in the view, is stored with it, and
+"Reset" brings back the default's locks. An application that locks a widget in arrangements readers
+already kept sets the mark before it hands the kept view over.
+
 ## Not yet, and never
 
 - *Not yet:* sections that wrap as a whole (the arrangement is an object, so
   a level of groups can join it without breaking what was kept); a height that
   follows the content in the list form; hiding a widget that has nothing to
-  show; locking one widget.
+  show.
 - *Never:* stacks of widgets that share one place. They hide all but one value
   at a time, as the carousel does (ADR-0032).
   - *Added 2026-10-26:* dragging from the catalogue to a chosen place. The

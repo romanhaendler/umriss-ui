@@ -5,6 +5,9 @@
 
 import type { DashboardView, DashboardWidget, WidgetSize } from "./model";
 
+/** A locked widget is changed by nothing but a move; the application's `locked: true` is the only lock. */
+const free = (view: DashboardView, id: string) => view.widgets.some((widget) => widget.id === id && widget.locked !== true);
+
 /** One step of a draft. */
 export type Edit = (view: DashboardView) => DashboardView;
 
@@ -24,7 +27,7 @@ export const move =
 export const resize =
   (id: string, size: WidgetSize): Edit =>
   (view) =>
-    view.widgets.some((widget) => widget.id === id && widget.size !== size)
+    view.widgets.some((widget) => widget.id === id && widget.locked !== true && widget.size !== size)
       ? { ...view, widgets: view.widgets.map((widget) => (widget.id === id ? { ...widget, size } : widget)) }
       : view;
 
@@ -32,7 +35,7 @@ export const resize =
 export const remove =
   (id: string): Edit =>
   (view) =>
-    view.widgets.some((widget) => widget.id === id) ? { ...view, widgets: view.widgets.filter((widget) => widget.id !== id) } : view;
+    free(view, id) ? { ...view, widgets: view.widgets.filter((widget) => widget.id !== id) } : view;
 
 /** An id no widget of the view has: the type's name and the first free number. */
 export const newId = (view: DashboardView, type: string): string => {
@@ -49,4 +52,4 @@ export const add =
 /** Gives a widget other options. */
 export const setOptions =
   (id: string, options: unknown): Edit =>
-  (view) => ({ ...view, widgets: view.widgets.map((widget) => (widget.id === id ? { ...widget, options } : widget)) });
+  (view) => (free(view, id) ? { ...view, widgets: view.widgets.map((widget) => (widget.id === id ? { ...widget, options } : widget)) } : view);
