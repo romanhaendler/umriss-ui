@@ -133,6 +133,11 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **A chart that is loading says so**, as the table does: `loading` keeps
   and dims a course already drawn, and where there is nothing yet a
   silhouette of the chart to come shimmers in the plot (ADR-0042).
+* **A chart follows the printed page**: when the page goes to print, the chart
+  measures its plot as the print layout gives it and draws there, its axes
+  included, and returns to its screen width afterwards. Proved in Chromium
+  (`page.pdf()`); hiding controls and page breaks stay with your print
+  stylesheet.
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
   rule violations, `pareto()` with a collected remainder, `bin()` for a
   histogram, and a working-time axis that takes the empty hours out and marks
