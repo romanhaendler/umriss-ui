@@ -414,13 +414,13 @@ export const OUTLINE: readonly Rubric[] = [
         name: "ColumnMenu",
         sentence: "A menu in which the user shows, hides, reorders and pins the table's columns and picks a grouping (also called a column chooser). Offer it where the table has more columns than everyone needs.",
         about: [
-          "Every change applies to header, body and footer together. The row header cannot be hidden. A column moves only within its block – pinned at the start, unpinned, pinned at the end – and after a move the focus stays on the button that was pressed.",
+          "Every change applies to header, body and footer together. The row header cannot be hidden. A column moves only within its block – pinned at the start, unpinned, pinned at the end – and after a move the focus stays on the button that was pressed. With a mouse, a pen or a finger an entry is dragged by its grip at the start of its line; the move buttons are the keyboard's route.",
           "Where the table can be grouped, the menu offers its groupable columns too, up to three levels ([Grouping](#/grouping)).",
         ],
         keys: [
           { key: "Enter / Space", action: "On “Columns”: open or close the menu. Inside: tick a column, move it or pin it." },
           { key: "Tab", action: "Move through the columns' boxes and buttons." },
-          { key: "Escape", action: "Close the menu; the focus returns to “Columns”." },
+          { key: "Escape", action: "Close the menu; the focus returns to “Columns”. While an entry is dragged, cancel the drag only." },
         ],
         types: ["ColumnMenuProps"],
         exports: ["ColumnMenu"],

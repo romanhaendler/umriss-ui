@@ -5,8 +5,8 @@
    Empty and loading are props of the table (`empty`, `loading`), not parts:
    they are states of the one body. */
 
-import { useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
-import type { HTMLAttributes, ReactNode } from "react";
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
+import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button, Checkbox, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
@@ -18,6 +18,7 @@ import { useToolbarSize } from "./toolbarSize";
 import type { ToolbarSize } from "./toolbarSize";
 import { GroupingChoice, TreeChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
+import { dropPlace } from "./columnDrag";
 import { orderColumns } from "./model/tableModel";
 import type { ExportFormat, TableRef } from "./types";
 import { csv } from "./export";
@@ -157,7 +158,8 @@ export interface ColumnMenuProps extends Omit<ButtonProps, "size" | "children" |
 
 /** Show and hide columns and arrange them. Every control is a real control -
     a box or a button -, so it is reachable without a pointer; after a move the
-    focus stays on the button that was pressed. */
+    focus stays on the button that was pressed. A pointer also drags an entry
+    by its grip; the buttons stay the keyboard's route. */
 export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
   const connection = useConnection(of, "ColumnMenu");
   const size = useToolbarSize(own);
@@ -186,6 +188,40 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
     (wanted && !wanted.disabled ? wanted : other)?.focus();
   }, [focusAfter]);
 
+  /* The drag of one entry by its grip. `dy` is the pointer's travel in the
+     scroller's content coordinates, so that scrolling while held moves the
+     entry with the list; `step` is the room one entry makes for another. */
+  const [drag, setDrag] = useState<{ from: number; place: number; dy: number; step: number } | null>(null);
+  const dragging = useRef<{
+    from: number;
+    lo: number;
+    hi: number;
+    boxes: { top: number; bottom: number }[];
+    start: number;
+    clientY: number;
+    scroller: HTMLElement;
+    timer?: number;
+  } | null>(null);
+  const cancelDrag = () => {
+    window.clearInterval(dragging.current?.timer);
+    dragging.current = null;
+    setDrag(null);
+  };
+  const isDragging = drag !== null;
+  /* While a drag runs, Escape cancels it and goes no further: the popover
+     would close the menu. */
+  useEffect(() => {
+    if (!isDragging) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      cancelDrag();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [isDragging]);
+  useEffect(() => () => window.clearInterval(dragging.current?.timer), []);
+
   if (!connection) return null;
   const { registry, snapshot } = connection;
   const hook = registry.hook!;
@@ -206,6 +242,71 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
     snapshot.setOrder(ids);
     const [key, otherwise] = step < 0 ? ["forward", "backward"] : ["backward", "forward"];
     setFocusAfter({ id: ordered[index]!.id, key: `[data-direction="${key}"]`, otherwise: `[data-direction="${otherwise}"]` });
+  };
+
+  const pointerAt = (d: NonNullable<typeof dragging.current>) =>
+    d.clientY - d.scroller.getBoundingClientRect().top + d.scroller.scrollTop;
+
+  const track = () => {
+    const d = dragging.current!;
+    const at = pointerAt(d);
+    const step = d.boxes.length > 1 ? d.boxes[1]!.top - d.boxes[0]!.top : 0;
+    setDrag({ from: d.from, place: dropPlace(d.boxes, at, d.from, d.lo, d.hi), dy: at - d.start, step });
+  };
+
+  const gripDown = (event: ReactPointerEvent<HTMLElement>, index: number) => {
+    if (event.button !== 0 || dragging.current || !list.current) return;
+    const scroller = list.current.parentElement!;
+    const origin = scroller.getBoundingClientRect().top - scroller.scrollTop;
+    const boxes = Array.from(list.current.children).map((child) => {
+      const box = child.getBoundingClientRect();
+      return { top: box.top - origin, bottom: box.bottom - origin };
+    });
+    const block = ordered.map((s) => pins[s.id]);
+    let lo = index;
+    let hi = index;
+    while (lo > 0 && block[lo - 1] === block[index]) lo--;
+    while (hi < block.length - 1 && block[hi + 1] === block[index]) hi++;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    const d = { from: index, lo, hi, boxes, start: event.clientY - origin, clientY: event.clientY, scroller, timer: 0 };
+    dragging.current = d;
+    /* Held within the edge of the scroller, the list scrolls. */
+    d.timer = window.setInterval(() => {
+      const rect = scroller.getBoundingClientRect();
+      const edge = 24;
+      const speed = d.clientY < rect.top + edge ? -8 : d.clientY > rect.bottom - edge ? 8 : 0;
+      const before = scroller.scrollTop;
+      scroller.scrollTop += speed;
+      if (scroller.scrollTop !== before) track();
+    }, 16);
+    track();
+  };
+
+  const gripMove = (event: ReactPointerEvent<HTMLElement>) => {
+    if (!dragging.current) return;
+    dragging.current.clientY = event.clientY;
+    track();
+  };
+
+  const gripUp = () => {
+    const d = dragging.current;
+    if (!d) return;
+    const to = dropPlace(d.boxes, pointerAt(d), d.from, d.lo, d.hi);
+    cancelDrag();
+    if (to === d.from) return;
+    const ids = ordered.map((s) => s.id);
+    ids.splice(to, 0, ids.splice(d.from, 1)[0]!);
+    snapshot.setOrder(ids);
+  };
+
+  /* Where an entry stands while the drag runs: the dragged one follows the
+     pointer, the others between its place and the drop place make room. */
+  const shift = (index: number) => {
+    if (!drag) return 0;
+    if (index === drag.from) return drag.dy;
+    if (drag.place > drag.from && index > drag.from && index <= drag.place) return -drag.step;
+    if (drag.place < drag.from && index < drag.from && index >= drag.place) return drag.step;
+    return 0;
   };
 
   /* A pin key pins to its side, or unpins where the column is pinned there
@@ -265,11 +366,32 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
         id={panelId}
         className={styles.columnsPanel}
       >
-        <ul ref={list} className={styles.columnsList} aria-label={wording.arrangeColumns}>
+        <ul ref={list} className={styles.columnsList} data-dragging={isDragging || undefined} aria-label={wording.arrangeColumns}>
           {ordered.map((column, index) => {
             const label = column.label ?? column.id;
+            const offset = shift(index);
             return (
-              <li key={column.id} className={styles.columnsEntry} data-column={column.id}>
+              <li
+                key={column.id}
+                className={styles.columnsEntry}
+                data-column={column.id}
+                data-lifted={drag?.from === index || undefined}
+                style={offset ? { transform: `translateY(${offset}px)` } : undefined}
+              >
+                <span
+                  className={styles.columnGrip}
+                  data-grip=""
+                  aria-hidden="true"
+                  onPointerDown={(event) => gripDown(event, index)}
+                  onPointerMove={gripMove}
+                  onPointerUp={gripUp}
+                  onPointerCancel={cancelDrag}
+                  onLostPointerCapture={cancelDrag}
+                >
+                  <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+                    <path d="M3.5 2h.01M6.5 2h.01M3.5 5h.01M6.5 5h.01M3.5 8h.01M6.5 8h.01" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                </span>
                 <Checkbox
                   label={label}
                   checked={!snapshot.hidden.includes(column.id)}

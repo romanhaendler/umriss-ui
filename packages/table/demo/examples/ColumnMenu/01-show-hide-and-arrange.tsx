@@ -2,7 +2,7 @@ import { ColumnMenu, Toolbar, useTable } from "../../../src";
 
 export const title = "Show, hide and arrange";
 
-export const lead = "Put a `ColumnMenu` into the toolbar; hiding or moving a column changes header, body and footer together.";
+export const lead = "Put a `ColumnMenu` into the toolbar; hiding or moving a column changes header, body and footer together. An entry is dragged by its grip; the move buttons are the keyboard's route.";
 
 interface CostCentre {
   name: string;
