@@ -30,12 +30,12 @@ import type { ModelColumn } from "./model/tableModel";
 import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
-import { csvOf, selectionText } from "./export";
+import { csv, selectionText, sheetOf } from "./export";
 import { warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { SetFilter, Table, TableOptions, TableSnapshot } from "./types";
+import type { ExportFormat, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
 /** The conditions per column or row filter, in the order in which they were set. */
 type ConditionList = readonly (readonly [string, unknown])[];
@@ -520,6 +520,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     selectedRows = [...selection.selected].filter((key) => seenRows.has(key)).map((key) => seenRows.get(key));
   }
 
+  const exportAs = <R,>(format: ExportFormat<R>): R =>
+    format.write(sheetOf(registry, wording.levelColumn), { formats, wording });
+
   const snapshot: TableSnapshot<Z> = {
     rows,
     filtered: b.filtered as Z[],
@@ -568,7 +571,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     },
     unfoldAllBranches: () => setBranchesState([...liveBranches]),
     foldAllBranches: () => setBranchesState([]),
-    asCsv: () => csvOf(registry, wording.levelColumn, formats, wording),
+    asCsv: () => exportAs(csv),
+    exportAs,
     selectionAsText: () => selectionText(registry, formats, wording),
     virtual,
     rowCount: server ? rowCount : b.filtered.length,

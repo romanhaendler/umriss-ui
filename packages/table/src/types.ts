@@ -5,14 +5,14 @@
    compile and what must not. */
 
 import type { HTMLAttributes, ReactNode } from "react";
-import type { LimitSet, RefProp } from "@umriss-ui/core";
+import type { Formats, LimitSet, RefProp, Wording } from "@umriss-ui/core";
 import type { TableRequest, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
 import type { NumberOptions } from "@umriss-ui/core";
-import type { DateFormat } from "./values";
+import type { DateFormat, ExportCell } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
 
@@ -645,6 +645,27 @@ interface ServerMode {
 /** The options of `useTable`: automatic, or in server mode over a server's rows. */
 export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode);
 
+/** What a format writes: the header labels, the widths the table holds, and
+    the rows as typed cells. A tree's level is its first column, a number. */
+export interface ExportSheet {
+  columns: readonly { label: string; width?: number }[];
+  rows: readonly (readonly ExportCell[])[];
+}
+
+/** What the language in use hands a format. */
+export interface ExportContext {
+  formats: Formats;
+  wording: Wording;
+}
+
+/** A way to write the export: the file's extension and MIME type, and the
+    function that turns the sheet into `R` - text or bytes. */
+export interface ExportFormat<R = string> {
+  extension: string;
+  mime: string;
+  write: (sheet: ExportSheet, context: ExportContext) => R;
+}
+
 /** The state of a table, as everything outside the columns reads it. */
 export interface TableSnapshot<Z> {
   /** All the rows passed in, including those the pre-filter does not admit. */
@@ -736,6 +757,9 @@ export interface TableSnapshot<Z> {
   /** The filtered set in the visible columns as text for a spreadsheet - in
       server mode the page. */
   asCsv: () => string;
+  /** The same rows and columns written by a format: `csv` for text, a format
+      of one's own for anything else. `asCsv()` is `exportAs(csv)`. */
+  exportAs: <R>(format: ExportFormat<R>) => R;
   /** The selected rows within the filtered set as tab-separated text under a
       header line - the text Ctrl+C writes. `""` with nothing selected. */
   selectionAsText: () => string;
