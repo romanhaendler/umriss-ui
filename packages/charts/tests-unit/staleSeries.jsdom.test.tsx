@@ -107,6 +107,19 @@ describe("A stale series", () => {
     expect(stale(warn, "Spread")).toHaveLength(1);
   });
 
+  it("tells unnamed series apart by their place", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const scene = new ChartScene();
+    scene.setData(rows);
+    axes(scene);
+    const unnamed = (accessor: LineSeriesConfig["accessor"]): LineSeriesConfig => ({ ...line("", accessor), name: undefined });
+    const a = scene.registerSeries(unnamed(scaled(1)));
+    const b = scene.registerSeries(unnamed(scaled(1)));
+    scene.updateSeries(a, unnamed(scaled(2)));
+    scene.updateSeries(b, unnamed(scaled(2)));
+    expect(warn.mock.calls.filter(([text]) => String(text).includes("A series without a name"))).toHaveLength(2);
+  });
+
   it("stays silent for an unchanged closure, a native function and a field", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const scene = new ChartScene();

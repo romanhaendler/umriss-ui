@@ -61,4 +61,21 @@ describe("error", () => {
     expect(reports).toHaveLength(2);
     expect(reports[1]).toEqual(reports[0]);
   });
+
+  it("shows no totals footer under an error", () => {
+    const totals = { id: 100 };
+    function Totals({ error }: { error?: string }) {
+      const t = useTable<Row>([{ id: "r1" }], { rowKey: (r) => r.id, server: true, rowCount: 1, onRequest: () => {}, totals, error });
+      const { Table: Frame, Column } = t;
+      return (
+        <Frame aria-label="Orders">
+          <Column value="id" label="Id" rowHeader aggregate="count" />
+        </Frame>
+      );
+    }
+    const { rerender } = render(<Totals />);
+    expect(document.querySelector("tfoot")).not.toBeNull();
+    rerender(<Totals error="Boom" />);
+    expect(document.querySelector("tfoot")).toBeNull();
+  });
 });

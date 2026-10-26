@@ -9,9 +9,6 @@ export { useTable } from "./useTable";
 export { column } from "./column";
 export { columnFilter } from "./columnFilter";
 export type { FilterInputProps, ColumnFilter } from "./columnFilter";
-export { csv } from "./export";
-export type { ExportContext, ExportFormat, ExportSheet } from "./types";
-export type { ExportCell } from "./values";
 export { ColumnMenu, Export, Pagination, Search, Toolbar } from "./rowlessParts";
 export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, ToolbarProps } from "./rowlessParts";
 /* The types a caller names by name - for a wrapper with `of`, a preset, props
@@ -19,7 +16,6 @@ export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, Toolba
    declarations carry them along anyway. */
 export type {
   ActionProps,
-  AllMatching,
   RangeCondition,
   Field,
   FieldCondition,
@@ -85,3 +81,9 @@ export type { DatePeriod, RowGroup } from "./model/grouping";
 export type { Computed, NumberField } from "./types";
 export type { ModelColumn, TableInput, TreeInput } from "./model/tableModel";
 export type { AggregateColumn, AggregateKind, GroupLevel, OwnAggregate } from "./model/grouping";
+
+/* New exports, at the end by the workspace's rule: the order decides the order
+   of the module styles in the bundle. */
+export { csv } from "./export";
+export type { AllMatching, ExportContext, ExportFormat, ExportSheet } from "./types";
+export type { ExportCell } from "./values";

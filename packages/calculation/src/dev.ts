@@ -1,7 +1,7 @@
 /* Warnings in development, silent in a production build.
 
    Development mode by the rule in `@umriss-ui/core`'s `lib/dev.ts`. A warning
-   appears once per reason - a table renders often, and nobody reads a console
+   appears once per reason - a calculation renders often, and nobody reads a console
    full of repetitions. */
 
 declare const process: { env: Record<string, string | undefined> };
@@ -23,4 +23,3 @@ export function warnOnce(reason: string, message: string): void {
   warned.add(reason);
   console.warn(`@umriss-ui/calculation: ${message}`);
 }
-

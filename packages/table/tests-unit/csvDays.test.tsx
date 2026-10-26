@@ -32,6 +32,12 @@ describe("the CSV writes a day as its day", () => {
     expect(write([[new Date(2026, 2, 17)], [undefined]])).toEqual(["2026-03-17", ""]);
   });
 
+  it("writes a column's own exportValue as it comes, as ISO", () => {
+    const day = new Date(2026, 2, 17);
+    const text = csv.write({ columns: [{ label: "Day", own: true }], rows: [[day]] }, english) as string;
+    expect(text.split("\r\n")[1]).toBe(day.toISOString());
+  });
+
   it("writes the same day in German and in English", () => {
     const rows = [[new Date(2026, 2, 17)]];
     expect(write(rows, german)).toEqual(write(rows));

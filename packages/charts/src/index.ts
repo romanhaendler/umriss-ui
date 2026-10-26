@@ -95,7 +95,6 @@ export type {
   SeriesKind,
   TooltipConfig,
   TooltipHit,
-  ChartRange,
   TooltipPoint,
 } from "./types";
 
@@ -155,3 +154,6 @@ export type { NumberOptions, ValueFormat } from "./format";
    `StateBandProps`, which stays an interface (ADR-0052). At the end, by the
    workspace's rule for new exports. */
 export type { OneLane } from "./StateBand";
+
+/* The range a chart reports; at the end, by the workspace's rule for new exports. */
+export type { ChartRange } from "./types";

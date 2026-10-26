@@ -80,5 +80,7 @@ A column whose dates all fall at local midnight is written as the local day,
 time writes every date as ISO text, so that a column never mixes two forms.
 Absent values do not count. The copy follows the same rule. A day written as an
 instant lands a day off east of UTC (`2026-03-16T23:00:00.000Z` for the 17th in
-Berlin) and a spreadsheet reads it as text. The XLSX writer's own test of a
-column of days is the same function.
+Berlin) and a spreadsheet reads it as text. The XLSX writer applies the same
+column-wise rule; its entry imports nothing, so it holds a copy of the function
+(`allDays`, kept identical by a comment in both places). A value from a
+column's own `exportValue` is written as it comes.

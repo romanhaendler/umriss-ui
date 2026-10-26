@@ -146,6 +146,35 @@ function paintSvg(ctx: CanvasRenderingContext2D, svg: Element, frame: Frame, alp
   });
 }
 
+/** The words of each line box of a text node, in the order of the boxes: the
+    text's own lines where they match the boxes, else each character goes to
+    the box that holds it, so that a label the browser soft-wrapped paints each
+    line once. A space the wrap swallowed has no box and goes with the
+    character before it. Where no split can be made, the whole text. */
+export function lineTexts(node: Text, boxes: readonly DOMRect[]): string[] {
+  const text = node.data;
+  const lines = text.split("\n");
+  if (boxes.length === lines.length) return lines;
+  if (boxes.length < 2) return [text];
+  const parts = boxes.map(() => "");
+  const range = document.createRange();
+  let at = 0;
+  for (let i = 0; i < text.length; i++) {
+    range.setStart(node, i);
+    range.setEnd(node, i + 1);
+    const r = range.getClientRects()[0];
+    if (r !== undefined) {
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      const found = boxes.findIndex((b) => x >= b.left - 1 && x <= b.right + 1 && y >= b.top - 1 && y <= b.bottom + 1);
+      if (found >= 0) at = found;
+    }
+    parts[at] = (parts[at] ?? "") + text[i];
+  }
+  const words = parts.map((part) => part.trim());
+  return words.every((w) => w !== "") ? words : [text];
+}
+
 /** A text node in its element's font, colour and letter-spacing, line by line
     where the browser broke it. A vertical title is turned as on screen: the
     writing mode's quarter turn and the element's own rotation. */
@@ -157,8 +186,7 @@ function paintText(ctx: CanvasRenderingContext2D, node: Text, el: HTMLElement, f
   range.selectNodeContents(node);
   const boxes = Array.from(range.getClientRects());
   if (boxes.length === 0) return;
-  const lines = text.split("\n");
-  const own = boxes.length === lines.length ? lines : [text];
+  const own = lineTexts(node, boxes);
   // A computed 2D transform is "matrix(a, b, c, d, e, f)".
   const [a = 1, b = 0] = (/^matrix\(([^)]*)\)/.exec(style.transform)?.[1] ?? "").split(",").map(Number);
   const turn = (style.writingMode.startsWith("vertical") ? Math.PI / 2 : 0) + Math.atan2(b, a);
@@ -169,7 +197,7 @@ function paintText(ctx: CanvasRenderingContext2D, node: Text, el: HTMLElement, f
   ctx.textBaseline = "middle";
   ctx.globalAlpha = alpha;
   boxes.forEach((box, i) => {
-    const line = own[i % own.length] as string;
+    const line = own[i] ?? (own[0] as string);
     const cx = (box.left + box.width / 2 - frame.left) / frame.scale;
     const cy = (box.top + box.height / 2 - frame.top) / frame.scale;
     ctx.save();
