@@ -6,12 +6,15 @@
    At first only the two range pickers used it, and the other two drew the same
    trigger by hand - exactly the drift the popover seam had described. */
 
+import { useId } from "react";
 import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { extentStyle } from "../../lib/extent";
 import styles from "./DatePicker.module.css";
 import { CrossGlyph } from "../../lib/glyphs";
+import { useTimeZoneLabel } from "../../lib/language";
+import { VisuallyHidden } from "../VisuallyHidden";
 
 /* The props came in one by one at first - seventeen of them. Three of those were
    bundles that always travel together anyway; named, they read better and the
@@ -99,6 +102,9 @@ export function RangeTrigger({
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
   const { style, id, onClick, ...rest } = root ?? {};
+  const zone = useTimeZoneLabel();
+  const zoneId = useId();
+  const describedBy = [rest["aria-describedby"] ?? field?.describedBy, zone ? zoneId : undefined].filter(Boolean).join(" ");
   return (
     <span
       ref={wrapRef}
@@ -115,7 +121,7 @@ export function RangeTrigger({
         aria-haspopup="dialog"
         aria-expanded={panel.open}
         aria-controls={panel.open ? panel.id : undefined}
-        aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
+        aria-describedby={describedBy || undefined}
         aria-invalid={invalid || undefined}
         className={cx(
           styles.trigger,
@@ -133,6 +139,11 @@ export function RangeTrigger({
         </span>
         {icon}
       </button>
+      {zone && (
+        <VisuallyHidden>
+          <span id={zoneId}>{zone}</span>
+        </VisuallyHidden>
+      )}
       {clearable && hasValue && !disabled && (
         <button
           type="button"

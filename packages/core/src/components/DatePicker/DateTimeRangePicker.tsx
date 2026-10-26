@@ -13,6 +13,9 @@ import type { DateRange, RangePreset } from "./range";
 import { dstChoiceFor, resolveFields, pad2 } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { TimeField } from "./TimeField";
+import { dayShown, gridDay, zoneToday } from "./zoned";
+import { ZoneNote } from "./ZoneNote";
+import { zoneFields } from "../../lib/zone";
 import { rangeFromDays, order, orderByDay } from "./contract";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
@@ -33,19 +36,23 @@ const allDayEnd = (withSeconds: boolean): TimeValues => ({
   second: withSeconds ? "59" : "00",
 });
 
-const isAllDay = (from: Date, to: Date, withSeconds: boolean): boolean =>
-  from.getHours() === 0 &&
-  from.getMinutes() === 0 &&
-  from.getSeconds() === 0 &&
-  to.getHours() === 23 &&
-  to.getMinutes() === 59 &&
-  (withSeconds ? to.getSeconds() === 59 : to.getSeconds() === 0);
+const isAllDay = (from: Date, to: Date, withSeconds: boolean, timeZone: string | undefined): boolean => {
+  const a = zoneFields(from, timeZone);
+  const b = zoneFields(to, timeZone);
+  return (
+    a.hours === 0 &&
+    a.minutes === 0 &&
+    a.seconds === 0 &&
+    b.hours === 23 &&
+    b.minutes === 59 &&
+    (withSeconds ? b.seconds === 59 : b.seconds === 0)
+  );
+};
 
-const timeValuesOf = (d: Date, withSeconds: boolean): TimeValues => ({
-  hour: pad2(d.getHours()),
-  minute: pad2(d.getMinutes()),
-  second: pad2(withSeconds ? d.getSeconds() : 0),
-});
+const timeValuesOf = (d: Date, withSeconds: boolean, timeZone: string | undefined): TimeValues => {
+  const f = zoneFields(d, timeZone);
+  return { hour: pad2(f.hours), minute: pad2(f.minutes), second: pad2(withSeconds ? f.seconds : 0) };
+};
 
 const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null => {
   if (!status) return null;
@@ -66,7 +73,9 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  */
 export interface DateTimeRangePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
-  /** The time span with times at both ends; `null` means none. */
+  /** The time span with times at both ends; `null` means none. The panel reads
+      and sets days and wall clocks in the formats' zone (the reader's, unless
+      the application names one). */
   value: DateRange | null;
   /** Runs only on "Apply" and on clearing (`null`), never between the two
       clicks. If the end lies before the start, both swap on applying - there is
@@ -145,11 +154,12 @@ export function DateTimeRangePicker(
   const isInvalid = invalid ?? field?.invalid ?? false;
   /* Out of the wording as in the DateRangePicker - the constant knew only
      German, and an overridden label reached only one of the two pickers. */
-  const presetList = useMemo(() => presets ?? defaultPresets(wording), [presets, wording]);
+  const { timeZone } = formats;
+  const presetList = useMemo(() => presets ?? defaultPresets(wording, formats.timeZone), [presets, wording, formats.timeZone]);
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Date>(() => startOfMonth(value?.from ?? new Date()));
-  const [active, setActive] = useState<Date>(() => value?.from ?? new Date());
+  const [view, setView] = useState<Date>(() => startOfMonth(value ? gridDay(value.from, timeZone) : zoneToday(timeZone)));
+  const [active, setActive] = useState<Date>(() => (value ? gridDay(value.from, timeZone) : zoneToday(timeZone)));
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [hoverDay, setHoverDay] = useState<Date | null>(null);
@@ -172,17 +182,17 @@ export function DateTimeRangePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = value?.from ?? new Date();
+    const start = value ? gridDay(value.from, timeZone) : zoneToday(timeZone);
     setView(startOfMonth(start));
     setActive(start);
-    setDateFrom(value ? dayOnly(value.from) : null);
-    setDateTo(value ? dayOnly(value.to) : null);
-    setTimeFrom(value ? timeValuesOf(value.from, withSeconds) : ALL_DAY_START);
-    setTimeTo(value ? timeValuesOf(value.to, withSeconds) : allDayEnd(withSeconds));
-    setAllDay(value ? isAllDay(value.from, value.to, withSeconds) : true);
+    setDateFrom(value ? gridDay(value.from, timeZone) : null);
+    setDateTo(value ? gridDay(value.to, timeZone) : null);
+    setTimeFrom(value ? timeValuesOf(value.from, withSeconds, timeZone) : ALL_DAY_START);
+    setTimeTo(value ? timeValuesOf(value.to, withSeconds, timeZone) : allDayEnd(withSeconds));
+    setAllDay(value ? isAllDay(value.from, value.to, withSeconds, timeZone) : true);
     // A value keeps its occurrence on reopening, per end.
-    setChoiceFrom(value ? dstChoiceFor(value.from) : "earlier");
-    setChoiceTo(value ? dstChoiceFor(value.to) : "earlier");
+    setChoiceFrom(value ? dstChoiceFor(value.from, timeZone) : "earlier");
+    setChoiceTo(value ? dstChoiceFor(value.to, timeZone) : "earlier");
     setHoverDay(null);
     setOpen(true);
   };
@@ -240,8 +250,8 @@ export function DateTimeRangePicker(
     [allDay, withSeconds, timeTo],
   );
 
-  const statusFrom = useMemo(() => resolveFields(dateFrom, effectiveFrom, withSeconds), [dateFrom, effectiveFrom, withSeconds]);
-  const statusTo = useMemo(() => resolveFields(dateTo, effectiveToTime, withSeconds), [dateTo, effectiveToTime, withSeconds]);
+  const statusFrom = useMemo(() => resolveFields(dateFrom, effectiveFrom, withSeconds, timeZone), [dateFrom, effectiveFrom, withSeconds, timeZone]);
+  const statusTo = useMemo(() => resolveFields(dateTo, effectiveToTime, withSeconds, timeZone), [dateTo, effectiveToTime, withSeconds, timeZone]);
 
   const resultFrom = useMemo(() => resolveChoice(statusFrom, choiceFrom), [statusFrom, choiceFrom]);
   const resultTo = useMemo(() => resolveChoice(statusTo, choiceTo), [statusTo, choiceTo]);
@@ -283,8 +293,7 @@ export function DateTimeRangePicker(
       if (hoverDay) {
         const [a, b] =
           dayOnly(hoverDay).getTime() < dayOnly(dateFrom).getTime() ? [hoverDay, dateFrom] : [dateFrom, hoverDay];
-        const days = rangeDays(a, b);
-        return wording.rangePreview(formats.dateShort(a), formats.dateShort(b), days);
+        return wording.rangePreview(formats.dateShort(dayShown(a, timeZone)), formats.dateShort(dayShown(b, timeZone)), rangeDays(a, b));
       }
       return wording.chooseEndDate;
     }
@@ -294,7 +303,7 @@ export function DateTimeRangePicker(
   const presetIsActive = (preset: RangePreset): boolean => {
     if (!dateFrom || !dateTo || !allDay) return false;
     const range = preset.range();
-    return sameDay(range.from, dateFrom) && sameDay(range.to, dateTo);
+    return sameDay(gridDay(range.from, timeZone), dateFrom) && sameDay(gridDay(range.to, timeZone), dateTo);
   };
 
 
@@ -312,7 +321,7 @@ export function DateTimeRangePicker(
         <span className={styles.timeHalfHead}>
           <span className={styles.timeLabel}>{side === "from" ? wording.sideFrom : wording.sideTo}</span>
           <span className={cx(styles.timeDate, !date && styles.placeholder)}>
-            {date ? formats.dateShort(date) : "–"}
+            {date ? formats.dateShort(dayShown(date, timeZone)) : "–"}
           </span>
         </span>
         <div className={styles.timeGroup}>
@@ -392,7 +401,7 @@ export function DateTimeRangePicker(
         hasValue={!!value}
         display={
           value &&
-          (sameDay(value.from, value.to) ? (
+          (sameDay(gridDay(value.from, timeZone), gridDay(value.to, timeZone)) ? (
             <>
               {formats.date(value.from)}, {formats.time(value.from, withSeconds)}
               <span className={styles.rangeDash}>–</span>
@@ -437,7 +446,7 @@ export function DateTimeRangePicker(
                 isActive={presetIsActive}
                 onChoose={(preset) => {
                   const range = preset.range();
-                  onChange(rangeFromDays(range.from, range.to, "instant", withSeconds));
+                  onChange(rangeFromDays(gridDay(range.from, timeZone), gridDay(range.to, timeZone), "instant", withSeconds, timeZone));
                   closePanel();
                 }}
               />
@@ -492,6 +501,7 @@ export function DateTimeRangePicker(
                 {footText}
               </span>
               <div className={styles.footLeft}>
+                <ZoneNote />
                 {value && (
                   <Button size="sm" variant="ghost" onClick={() => { onChange(null); closePanel(); }}>
                     {wording.clear}
