@@ -65,6 +65,19 @@ export function useLaneGroupRegistration(config: GroupConfig): void {
   useRegistration("LaneGroup", config, (s, c) => s.registerGroup(c), (s, id, c) => s.updateGroup(id, c), (s, id) => s.unregisterGroup(id));
 }
 
+/** Registration of the plan's table (exactly one per schedule), under the id
+    its panel carries. Outside a `Schedule` there is no scene and it does
+    nothing. */
+export function useDataTable(id: string): ScheduleScene | null {
+  const scene = useContext(ScheduleContext);
+  useEffect(() => {
+    if (scene === null) return;
+    scene.registerDataTable(id);
+    return () => scene.unregisterDataTable();
+  }, [scene, id]);
+  return scene;
+}
+
 export function useLayer(componentName: string, config: LayerConfig): void {
   useRegistration(componentName, config, (s, c) => s.registerLayer(c), (s, id, c) => s.updateLayer(id, c), (s, id) => s.unregisterLayer(id));
 }

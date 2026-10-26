@@ -47,6 +47,17 @@ test("Example schedule--loading reloading", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`example-schedule--loading--reloading-${testInfo.project.name}.png`);
 });
 
+/* The plan opened as a table, to be compared by eye with the chart's open data table. */
+test("Example tooltip--read-the-plan-as-a-table open", async ({ page }, testInfo) => {
+  await openExample(page, "tooltip", "read-the-plan-as-a-table");
+  const target = page.locator('[data-example="read-the-plan-as-a-table"]');
+  await target.scrollIntoViewIfNeeded();
+  await target.getByRole("button", { name: "Show data" }).click();
+  await expect(target.getByRole("table")).toBeVisible();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-tooltip--read-the-plan-as-a-table--open-${testInfo.project.name}.png`);
+});
+
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
