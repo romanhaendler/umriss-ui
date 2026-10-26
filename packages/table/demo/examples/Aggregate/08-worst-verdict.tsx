@@ -47,7 +47,7 @@ export default function WorstVerdict() {
       <Column value="zone" label="Zone" />
       <Column value="kiln" label="Kiln" />
       <Column value="at" label="Hour" rowHeader />
-      <VerdictColumn value="temperature" label="Temperature (°C)" limits={KILN_LIMITS} format={{ decimals: 1 }} aggregate="worst" />
+      <VerdictColumn value="temperature" label="Temperature (°C)" limits={KILN_LIMITS} format={{ decimals: 1 }} aggregate="worst" aggregateLabel="Worst reading" />
     </Table>
   );
 }
