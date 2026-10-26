@@ -53,6 +53,8 @@ commit.
   - Migration: a NumberInput without `min` now shows the text keyboard on a phone; add `min={0}`, or the caller's own `inputMode`, to keep the pad.
 - **The DateTimePicker's time fields draw no arrows under a coarse pointer**; the digits are typed.
   - Migration: none needed; a fine pointer keeps the arrows.
+- **`clearable` governs clearing as a whole** on the four date pickers: without it the open panel shows no Clear either, so a field without `clearable` offers no way to empty its value.
+  - Migration: an application that wants the panel's Clear passes `clearable`, which also shows the cross in the field.
 - **Lists above 500 options are windowed** (see Added): an option outside the view is not in the document.
   - Migration: none for a list of up to 500 options; a test that looks for an option far down a longer list scrolls to it or types to filter first.
 
