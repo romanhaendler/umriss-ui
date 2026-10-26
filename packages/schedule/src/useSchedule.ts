@@ -9,6 +9,7 @@
 import { createElement, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { Schedule as ScheduleOn, type ScheduleProps } from "./Schedule";
+import { DataTable } from "./DataTable";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Milestones, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
 import { viewKey, type ScheduleView } from "./view";
@@ -39,6 +40,13 @@ export interface ScheduleParts {
   Dependencies: typeof Dependencies;
   BlockedTimes: typeof BlockedTimes;
   Milestones: typeof Milestones;
+  /** The plan as a table, on demand: placed inside the `Schedule`, it gives the
+      schedule a "Show data" key beside the bottom time band, and the key opens
+      a table of the subtasks in view - lane, task, subtask, from and to with
+      their dates, duration and findings in words. For a reader who wants every
+      value at once. It takes no props and renders nothing outside a
+      `Schedule`. */
+  DataTable: typeof DataTable;
   /** How the planner is looking at the plan: the span and the folded groups. */
   view: ScheduleView;
   /** Goes to a whole view; what it leaves out is shown whole again. Not
@@ -78,7 +86,7 @@ export interface ScheduleParts {
 }
 
 /** Declares a schedule: hands back `Schedule` and the parts declared inside it
-    - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones` -, its
+    - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones`, `DataTable` -, its
     `view` and the setters `setView`, `setDomain`, `toggleGroup`, `foldAll` and
     `unfoldAll`, `positionAt`, `clientPointOf` and `visibleDomain`, and `scrollToLane`, `scrollToSubtask` and
     `focusSubtask`. */
@@ -99,6 +107,7 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
       Dependencies,
       BlockedTimes,
       Milestones,
+      DataTable,
       setView: (next: ScheduleView) => {
         scene.applyView(next);
         reported.current = viewKey(scene.getView());
