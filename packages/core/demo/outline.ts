@@ -594,7 +594,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Enter", action: "Chooses the active row." },
           { key: "Escape", action: "Closes the list." },
         ],
-        limits: ["No free text as a value: only an option can be chosen.", "No loading of options from a server; filter your own list and pass it in."],
+        limits: ["No free text as a value: only an option can be chosen.", "No request of its own: `onSearch` reports the typed text and you fetch, debounce and cancel; `filter={false}` shows what you return."],
         types: ["ComboboxProps", "ComboboxOption"],
         exports: ["Combobox"],
       },
