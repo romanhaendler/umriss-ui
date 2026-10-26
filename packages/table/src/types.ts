@@ -614,6 +614,7 @@ interface AutomaticMode<Z> {
   rowCount?: never;
   onRequest?: never;
   filterOptions?: never;
+  answers?: never;
 }
 
 /** Server mode: the rows are the page a server answered for the request the
@@ -634,6 +635,14 @@ interface ServerMode {
       the five present - a width, an order, a pin, a fold or a hidden column
       asks the server nothing; `onViewChange` hears those. */
   onRequest: (request: TableRequest) => void;
+  /** The request the rows answer. While it is not the table's current request
+      (compared by key) the table is busy as `loading` makes it: the rows dim,
+      take no pointer and `aria-busy` is set, while the search, the conditions
+      and the page already show the new request - so an answer that comes late
+      never stands as current. Without it the rows are taken as the current
+      answer. In development the table warns once when it has matched none of
+      the requests it reported. */
+  answers?: TableRequest;
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];
@@ -742,6 +751,9 @@ export interface TableSnapshot<Z> {
   rowCount: number;
   /** Whether it is in server mode: the rows are one page of a server's. */
   server: boolean;
+  /** Server mode: the request `onRequest` last received, or is about to;
+      `null` outside it. */
+  request: TableRequest | null;
 }
 
 /** What a part without a row type needs from a table – for `of`. */

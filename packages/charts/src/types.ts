@@ -9,8 +9,8 @@ import type { ValueFormat } from "./format";
 /** A **value** computed from the row - the function form of `Value`.
     Compared by its source text, not its identity - an inline function is new
     on every render. Known limit: one that reads a
-    changed closure variable under the same text is not run again; pass a new
-    data reference then. A native or bound function is compared by identity. */
+    changed closure variable under the same text is not run again, and DEV warns;
+    carry the value in the rows, or give the series a `key` that changes with it. A native or bound function is compared by identity. */
 export type ValueFunction<T> = (d: T, index: number) => number | null | undefined;
 
 /** A list computed from the row - a box's outliers (ADR-0040), the

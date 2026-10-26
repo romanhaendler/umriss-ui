@@ -133,7 +133,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "line",
         name: "Line",
         sentence: "Joins the readings of a series into a course (a line chart, a trend). Reach for it for anything measured over time: latency, a balance, hours left.",
-        about: ["A missing reading breaks the line; nothing is drawn across a gap. With `step` a value holds until the next one, for things logged only when they change."],
+        about: ["A missing reading breaks the line; nothing is drawn across a gap. With `step` a value holds until the next one, for things logged only when they change.", "A `value` given as a function is compared by its source text, so one that reads something outside its row (`(d) => d.duration * factor`) keeps its old course when that changes, and the development build warns once. Carry the value in the rows, or give the series a `key` that changes with it."],
         alternatives: [
           { when: "A quantity read from its foot", use: "area" },
           { when: "Single samples with nothing measured between them", use: "scatter" },
