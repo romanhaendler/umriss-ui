@@ -136,6 +136,23 @@ describe("onRange", () => {
     expect(onRange).not.toHaveBeenCalled();
   });
 
+  it("lets go of the pointer on Escape and stops listening once the chart unmounts mid-drag", async () => {
+    const onRange = vi.fn();
+    const r = await renderChart(<Course onRange={onRange} />);
+    const host = r.host;
+    const capture = vi.fn(() => true);
+    const release = vi.fn();
+    Object.assign(plotOf(host), { hasPointerCapture: capture, releasePointerCapture: release, setPointerCapture: () => undefined });
+    await fire(host, pointer("pointerdown", 150), pointer("pointermove", 250));
+    await act(async () => void document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
+    expect(release).toHaveBeenCalledWith(1);
+    await fire(host, pointer("pointerdown", 150), pointer("pointermove", 250));
+    const remove = vi.spyOn(document, "removeEventListener");
+    r.unmount();
+    expect(remove).toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(onRange).not.toHaveBeenCalled();
+  });
+
   it("shows no tooltip while the pointer is down", async () => {
     const host = await mount({ onRange: () => undefined });
     await fire(host, pointer("pointermove", 200, { buttons: 0 }));

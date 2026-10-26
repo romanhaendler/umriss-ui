@@ -61,4 +61,14 @@ describe("Printing", () => {
     unmount();
     expect(listeners.get("print")?.size).toBe(0);
   });
+
+  it("mounts and unmounts against a media query that only has addListener", async () => {
+    vi.stubGlobal("matchMedia", () => ({ matches: false, media: "print", addListener: () => undefined, removeListener: () => undefined }));
+    const ctx = new Proxy({}, { get: () => () => ({ width: 0 }), set: () => true });
+    vi.stubGlobal("Path2D", function () { return ctx; });
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(ctx as never);
+    sizePlot(400, 200);
+    const { unmount } = await renderChart(<Plain />);
+    expect(() => unmount()).not.toThrow();
+  });
 });

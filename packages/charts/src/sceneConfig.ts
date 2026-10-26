@@ -123,7 +123,7 @@ export function listEqual(a: readonly number[] | undefined, b: readonly number[]
     baseline and the series kind - the kind, because it decides about the
     baseline and the step. If any of that changes, the channels are stale and
     have to come into being anew; a field comparison alone is not enough. */
-export function materialEqual(previous: SeriesConfig, next: SeriesConfig, rows?: unknown): boolean {
+export function materialEqual(previous: SeriesConfig, next: SeriesConfig, rows?: unknown, order?: number): boolean {
   const equal = (
     previous.kind === next.kind &&
     stackOf(previous) === stackOf(next) &&
@@ -146,7 +146,7 @@ export function materialEqual(previous: SeriesConfig, next: SeriesConfig, rows?:
         ? []
         : [...BOX_KEYS, ...BOX_EXTRA_KEYS].map((key): [unknown, unknown] => [a[key], b[key]])),
     ];
-    for (const [held, kept] of pairs) probeStale(next.name, held, kept, rows);
+    for (const [held, kept] of pairs) probeStale(next.name, held, kept, rows, order);
   }
   return equal;
 }
