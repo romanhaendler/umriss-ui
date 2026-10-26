@@ -31,7 +31,7 @@ import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csvOf, selectionText } from "./export";
-import { DEV, warnOnce } from "./dev";
+import { DEV, asRows, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
@@ -186,7 +186,8 @@ function effectiveWidths(
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z> {
+export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z> {
+  const rows = asRows(given, "the rows of useTable");
   const [registry] = useState(() => new Registry());
   const [parts] = useState(() => {
     const bound = buildParts(registry);
