@@ -60,6 +60,8 @@ export function Plan() {
 }
 ```
 
+Malformed data - a subtask that does not end after it starts, an item on a lane no `Lane` declares, a dependency naming no subtask, an id that stands twice - warns in development, once per cause, and is left out in production. An application with imported data checks it where it imports it.
+
 ## Editing is controlled
 
 The schedule draws the data it is given and changes none of it (ADR-0023). A
