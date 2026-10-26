@@ -19,3 +19,11 @@ test("A Combobox of 5,000 options draws a window and scrolls to its last option"
   await expect(last).toHaveAttribute("aria-posinset", "5000");
   expect(await options.count()).toBeLessThan(100);
 });
+
+test("A MultiSelect of 3,000 options draws a window of checkboxes", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "multiselect", "thousands-of-assets");
+  await page.locator('[data-example="thousands-of-assets"]').getByRole("button", { name: "Choose assets" }).click();
+  const boxes = page.getByRole("checkbox");
+  await expect(boxes.first()).toBeVisible();
+  expect(await boxes.count()).toBeLessThan(100);
+});
