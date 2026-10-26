@@ -42,7 +42,13 @@ function Server({ pass = true }: { pass?: boolean }) {
 
 const busy = () => screen.getByRole("table", { hidden: true }).getAttribute("aria-busy");
 const ids = () => screen.queryAllByRole("rowheader").map((c) => c.textContent);
-const type = (value: string) => fireEvent.change(screen.getByLabelText("Search"), { target: { value } });
+/* A search the server hears at once: typed, then Enter - without it the table
+   waits for a pause in typing. */
+const type = (value: string) => {
+  const field = screen.getByLabelText("Search");
+  fireEvent.change(field, { target: { value } });
+  fireEvent.keyDown(field, { key: "Enter" });
+};
 
 beforeEach(() => {
   reports = [];
