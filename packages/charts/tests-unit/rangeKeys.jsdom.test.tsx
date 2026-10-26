@@ -146,3 +146,32 @@ describe("onRange by key", () => {
     expect(await press(host, " ", { metaKey: true })).toBe(false);
   });
 });
+
+describe("onRange by key across x axes", () => {
+  it("starts anew when the Active point is on another x axis", async () => {
+    const onRange = vi.fn();
+    function Two() {
+      const { Chart, XAxis, YAxis, Line } = useChart(ROWS, { onRange });
+      return (
+        <Chart aria-label="Two">
+          <XAxis value="t" />
+          <XAxis id="other" value="t" />
+          <YAxis />
+          <Line value="a" name="A" />
+          <Line value="a" name="B" xAxisId="other" />
+          <Tooltip />
+        </Chart>
+      );
+    }
+    const r = await renderChart(<Two />);
+    unmount = r.unmount;
+    await focusPlot(r.host);
+    await press(r.host, " ");
+    await press(r.host, "ArrowDown");
+    await press(r.host, " ");
+    expect(onRange).not.toHaveBeenCalled();
+    await press(r.host, " ");
+    expect(onRange).toHaveBeenCalledTimes(1);
+    expect(onRange.mock.calls[0]?.[0]).toMatchObject({ axisId: "other" });
+  });
+});

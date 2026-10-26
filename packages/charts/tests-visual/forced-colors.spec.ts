@@ -5,7 +5,7 @@
    its `encoding`. Light and dark through the projects, as everywhere. */
 
 import { test, expect, type Page } from "@playwright/test";
-import { drawn, openExample } from "./navigation";
+import { altDragHalfway, drawn, openExample } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -73,6 +73,18 @@ test("a chart without encoding draws in system colours and by marks", async ({ p
   await page.emulateMedia({ forcedColors: "none" });
   await drawn(page);
   expect(await palettePixels(page, "told-apart-without-colour", 0)).toBeGreaterThan(100);
+});
+
+/* The band of a range being marked is an outline under forced colours (ADR-0074): one baseline of it mid-drag. */
+test("Under forced colours: a range being marked", async ({ page }, testInfo) => {
+  await openExample(page, "zoom-and-pan", "mark-a-range");
+  const target = page.locator('[data-example="mark-a-range"]');
+  await target.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await drawn(page);
+  const drag = await altDragHalfway(page, target.locator(".uc-plot").first());
+  await expect(target).toHaveScreenshot(`forced-range-mid-drag-${testInfo.project.name}.png`);
+  await drag.release();
 });
 
 for (const [pageId, exampleId] of [

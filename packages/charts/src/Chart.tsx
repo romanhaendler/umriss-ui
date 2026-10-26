@@ -212,7 +212,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
       scene.requestResize(box.width, box.height);
       flushSync(() => scene.frameNow());
     };
-    printMedia?.addEventListener("change", onPrint);
+    printMedia?.addEventListener?.("change", onPrint);
 
     // Leaving the window ends the hover just as pointerleave does.
     const onBlur = (): void => scene.pointerLeave();
@@ -231,7 +231,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
       window.removeEventListener("blur", onBlur);
       document.removeEventListener("pointerdown", onTapOutside);
       observer.disconnect();
-      printMedia?.removeEventListener("change", onPrint);
+      printMedia?.removeEventListener?.("change", onPrint);
       scene.unbind();
     };
   }, [scene]);

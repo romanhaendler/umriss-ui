@@ -10,6 +10,7 @@ import { pointerMove } from "./sceneHit";
 import { reapplyKey } from "./sceneKeys";
 import { updateLayout } from "./sceneLayout";
 import { materialize } from "./sceneMaterial";
+import { endRange } from "./sceneView";
 import { scheduleSummary } from "./sceneSpeech";
 import { resolveTheme, subscribeTheme } from "./theme";
 import { type ChartsWording } from "./wording";
@@ -70,11 +71,12 @@ export function setWording(s: ChartScene, wording: ChartsWording): void {
 }
 
 export function unbind(s: ChartScene): void {
+  endRange(s);
   if (s.frameHandle !== null && typeof cancelAnimationFrame === "function") {
     cancelAnimationFrame(s.frameHandle);
     s.frameHandle = null;
   }
-  s.dprMedia?.removeEventListener("change", s.onDprChange);
+  s.dprMedia?.removeEventListener?.("change", s.onDprChange);
   s.dprMedia = null;
   s.unsubscribeTheme?.();
   s.unsubscribeTheme = null;
@@ -101,10 +103,10 @@ export function unbind(s: ChartScene): void {
 /** Detect a change of DPR (a change of monitor): rebind matchMedia. */
 export function rebindDprWatch(s: ChartScene): void {
   if (typeof matchMedia !== "function") return;
-  s.dprMedia?.removeEventListener("change", s.onDprChange);
+  s.dprMedia?.removeEventListener?.("change", s.onDprChange);
   s.dpr = typeof devicePixelRatio === "number" ? devicePixelRatio : 1;
   s.dprMedia = matchMedia(`(resolution: ${s.dpr}dppx)`);
-  s.dprMedia.addEventListener("change", s.onDprChange);
+  s.dprMedia.addEventListener?.("change", s.onDprChange);
 }
 
 /** Called by the ResizeObserver; coalesced onto one rAF. */

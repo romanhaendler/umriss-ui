@@ -37,9 +37,9 @@ const differs = (a: unknown, b: unknown): boolean => {
     outside its row that has changed. Calls both on the first 1,000 rows and warns once per series name on
     the first difference; primitives compare by `Object.is`, Dates by time, anything else is not compared.
     Never changes which function is held. */
-export function probeStale(name: string | undefined, held: unknown, next: unknown, rows: unknown): void {
+export function probeStale(name: string | undefined, held: unknown, next: unknown, rows: unknown, order?: number): void {
   if (!DEV || held === next || typeof held !== "function" || typeof next !== "function" || !Array.isArray(rows)) return;
-  const key = `stale:${name ?? ""}`;
+  const key = `stale:${name ?? order ?? ""}`;
   if (warned.has(key)) return;
   try {
     for (let i = 0; i < Math.min(rows.length, 1000); i++) {

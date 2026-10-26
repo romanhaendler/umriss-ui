@@ -232,14 +232,22 @@ const clampToPlot = (s: ChartScene, px: number): number => {
 export function endRange(s: ChartScene): void {
   if (s.range === null) return;
   s.range = null;
+  if (ranging === s) ranging = null;
   if (typeof document !== "undefined") document.removeEventListener("keydown", cancelOnEscape);
   s.markOverlayDirty();
 }
 
 // One range is under the pointer at a time, so one listener, aimed at its scene.
 let ranging: ChartScene | null = null;
+/** Escape ends the range unreported: the pointer is let go and the press that
+    began it no longer counts as one. */
 function cancelOnEscape(event: KeyboardEvent): void {
-  if (event.key === "Escape" && ranging !== null) endRange(ranging);
+  const s = ranging;
+  if (event.key !== "Escape" || s === null) return;
+  const id = s.range?.pointerId;
+  if (id !== undefined && s.container?.hasPointerCapture?.(id)) s.container.releasePointerCapture(id);
+  s.downAt = null;
+  endRange(s);
 }
 
 /** A stretch of an x axis in the axis' own values, from what its channel holds
