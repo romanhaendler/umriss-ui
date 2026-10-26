@@ -297,6 +297,14 @@
     padding-right: 3px;
   }
 
+  /* Under a finger the arrows are no target the floor allows, and the digits
+     are typed: they are not drawn. */
+  @media (pointer: coarse) {
+    .timeStepper {
+      display: none;
+    }
+  }
+
   .timeStepper button {
     display: inline-flex;
     align-items: center;
