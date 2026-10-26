@@ -143,6 +143,7 @@ export type {
   HoverSnapshot,
   LayoutSnapshot,
   LegendItem,
+  LegendBar,
   LegendMark,
   LimitLabel,
   LimitText,

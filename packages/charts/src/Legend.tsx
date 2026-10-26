@@ -12,7 +12,8 @@ import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode
 import { useChartScene, useLegend } from "./context";
 import { DataKey } from "./DataTable";
 import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
-import type { ChartScene, LegendMark } from "./scene";
+import { BAR_WIDTH } from "./colourBar";
+import type { ChartScene, LegendBar, LegendMark } from "./scene";
 import type { Rect } from "./types";
 
 /** The props of `Legend`. */
@@ -61,17 +62,28 @@ function LegendInner({ scene, placement: asked }: { scene: ChartScene; placement
         const shared = {
           className: "uc-legend-item",
           "data-hidden": item.hidden ? "" : undefined,
+          "data-bar": item.bar === null ? undefined : "",
           onPointerEnter: () => scene.setHighlight(item.seriesIds),
           onPointerLeave: () => scene.setHighlight(null),
         };
         const content = (
           <>
-            {item.mark === null ? (
-              <span className="uc-legend-chip" style={{ background: item.color }} />
+            {item.bar !== null ? (
+              <>
+                {item.name}
+                <span className="uc-sr"> {item.bar.range}</span>
+                <ColourBar bar={item.bar} mark={item.mark} />
+              </>
             ) : (
-              <MarkChip color={item.color} mark={item.mark} />
+              <>
+                {item.mark === null ? (
+                  <span className="uc-legend-chip" style={{ background: item.color }} />
+                ) : (
+                  <MarkChip color={item.color} mark={item.mark} />
+                )}
+                {item.name}
+              </>
             )}
-            {item.name}
           </>
         );
         return item.names.length === 0 ? (
@@ -169,6 +181,49 @@ export function MarkChip({ color, mark }: { color: string; mark: LegendMark }): 
       )}
       {mark.marker !== null && <path d={markerD(mark.marker, 9, 5, 3)} fill={color} />}
     </svg>
+  );
+}
+
+/* ---------------- The colour bar of a gradient-coloured matrix ----------------
+
+   Boxes with a background colour and text nodes, the parts the picture paints. Under encoding by marks each step
+   also carries its hatch, drawn over the box in the ground colour. The values stand under the edges they name;
+   the entry's accessible name carries the range instead. */
+
+const BAR_HATCH_H = 10;
+
+function ColourBar({ bar, mark }: { bar: LegendBar; mark: LegendMark | null }): ReactNode {
+  const stepWidth = BAR_WIDTH / bar.colors.length;
+  return (
+    <span className="uc-legend-bar" aria-hidden="true">
+      <span className="uc-legend-steps">
+        {bar.colors.map((color, k) => {
+          const swatch = mark?.swatches?.[k];
+          return (
+            <span key={k} className="uc-legend-step" style={{ background: color }}>
+              {swatch !== undefined && mark !== null && (
+                <svg className="uc-legend-mark" width="100%" height="100%" viewBox={`0 0 ${stepWidth} ${BAR_HATCH_H}`} preserveAspectRatio="none">
+                  <rect width={stepWidth} height={BAR_HATCH_H} fill={swatch.color} />
+                  <path d={linesD({ x: 0, y: 0, width: stepWidth, height: BAR_HATCH_H }, swatch.hatch)} stroke={mark.ground} strokeWidth={1} />
+                </svg>
+              )}
+            </span>
+          );
+        })}
+      </span>
+      <span className="uc-legend-values">
+        {bar.edges.map((edge) => (
+          <span
+            key={edge.at}
+            className="uc-legend-edge"
+            data-end={edge.at === 0 ? "start" : edge.at === 1 ? "end" : undefined}
+            style={{ left: `${edge.at * 100}%` }}
+          >
+            {edge.text}
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }
 
