@@ -146,6 +146,10 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         alternatives: [{ when: "A measured value read against its limits, as ok, warning or alarm", use: "verdictcolumn" }],
         keysOf: ["first-table"],
+        accessibility: [
+          "A `Meter` in a cell is a `meter` with its value and the `label` it was given, “Utilisation, Checkout” for one, so a screen reader says what the bar measures and how much, row by row. Give each its own label: a bar named only by its column says the same words in every row.",
+          "The colour is never the only sign: the bar, the icon or the verdict stands beside the value as a number or a word, so the cell reads the same to a reader who cannot see the colours.",
+        ],
         types: [],
         exports: ["useTable"],
       },
