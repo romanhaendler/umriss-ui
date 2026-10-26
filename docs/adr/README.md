@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-five decisions, each one written where it was made and kept afterwards. An
+Seventy-six decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -23,7 +23,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0007](0007-a-state-is-a-number.md) | A state is a number | Machine states drawn as numeric codes | accepted | charts |
 | [0008](0008-control-limits-are-not-specification-limits.md) | A control limit is not a specification limit, and is never computed from the window | Control limits versus specification limits | accepted | charts |
 | [0009](0009-the-library-owns-a-lifecycle-not-a-generation.md) | The library owns an alarm's lifecycle, not its generation | Alarm lifecycle ownership (withdrawn) | withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
-| [0010](0010-a-stale-value-keeps-its-verdict.md) | A stale value keeps its verdict | Old readings keep their verdict | accepted | limits and alarms |
+| [0010](0010-a-stale-value-keeps-its-verdict.md) | A stale value keeps its verdict | Old readings keep their verdict | accepted, extended by ADR-0077 (a bad value keeps its verdict too) | limits and alarms |
 | [0011](0011-named-channels-never-overloaded.md) | A channel is named, never overloaded | Each data channel has one meaning | accepted | charts |
 | [0012](0012-a-translucent-material-needs-a-floor.md) | A translucent material needs a floor | Contrast of translucent surfaces | accepted | surface and motion |
 | [0013](0013-a-dock-snaps-it-does-not-follow.md) | A dock snaps, it does not follow | Dock snapping behaviour (withdrawn) | withdrawn. The Dock was removed from `@umriss-ui/core`, so this decision no longer applies to any code. | surface and motion |
@@ -90,5 +90,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0074](0074-a-chart-reports-a-range-as-it-reports-a-hit-and-keeps-none.md) | A chart reports a range as it reports a hit, and keeps none | Chart reports a range, keeps none; Alt-drag on a zoomable chart, plain drag elsewhere | accepted | charts |
 | [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
 | [0076](0076-an-application-names-the-time-zone-its-instants-are-shown-in.md) | An application names the time zone its instants are shown in | An application names a time zone; every package shows its instants in it | accepted, supersedes ADR-0060 in one point (time zones) | core, packages, scope |
+| [0077](0077-a-bad-value-keeps-its-verdict.md) | A bad value keeps its verdict | A source's quality is a third axis beside the verdict and the freshness | accepted, extends ADR-0010 | limits and alarms |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
