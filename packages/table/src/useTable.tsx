@@ -513,6 +513,22 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
   }, [reportKey, answersKey]);
 
+  /* "All that match" is relative to the search and the conditions it was chosen
+     under: when either changes, the state ends after the commit (a selection
+     held outside is cleared the same way). Sort, page and page size leave the
+     set as it is. Automatic mode has no such state; it is ignored. */
+  const matchKey = JSON.stringify([request.search, request.conditions]);
+  const matchSeen = useRef(matchKey);
+  useEffect(() => {
+    if (selection.allMatching && !server) {
+      warnOnce("selection-all-matching", "`allMatching` is ignored without `server`: the table holds every row, and \"select all\" selects them by key.");
+    }
+    if (matchSeen.current === matchKey) return;
+    matchSeen.current = matchKey;
+    if (server && selection.allMatching) selection.clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
+  }, [matchKey, selection.allMatching]);
+
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never

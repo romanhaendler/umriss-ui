@@ -16,6 +16,15 @@ export interface TableSelection<T extends string | number> {
   allSelected: boolean;
   /** true when some - but not all - are selected. */
   someSelected: boolean;
+  /** Every row that matches is selected, those on no page held included. While
+      it stands `selected` is empty and `count` is 0, and `isSelected(id)` is
+      `!except.has(id)`. Store it with the keys when the selection is held
+      outside. */
+  allMatching: boolean;
+  /** While `allMatching`: the keys unticked since. */
+  except: ReadonlySet<T>;
+  /** Selects all that match; the keys selected before are dropped. */
+  selectMatching: () => void;
   count: number;
 }
 
@@ -26,32 +35,54 @@ export interface TableSelection<T extends string | number> {
  */
 export function useTableSelection<T extends string | number>(ids: readonly T[]): TableSelection<T> {
   const [selected, setSelected] = useState<ReadonlySet<T>>(new Set());
+  const [allMatching, setAllMatching] = useState(false);
+  const [except, setExcept] = useState<ReadonlySet<T>>(new Set());
 
-  const isSelected = useCallback((id: T) => selected.has(id), [selected]);
+  const isSelected = useCallback(
+    (id: T) => (allMatching ? !except.has(id) : selected.has(id)),
+    [selected, allMatching, except],
+  );
 
-  const toggle = useCallback((id: T) => {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(
+    (id: T) => {
+      const flip = (current: ReadonlySet<T>) => {
+        const next = new Set(current);
+        if (!next.delete(id)) next.add(id);
+        return next;
+      };
+      if (allMatching) setExcept(flip);
+      else setSelected(flip);
+    },
+    [allMatching],
+  );
 
   const allSelected = useMemo(
-    () => ids.length > 0 && ids.every((id) => selected.has(id)),
-    [ids, selected],
+    () => (allMatching ? except.size === 0 : ids.length > 0 && ids.every((id) => selected.has(id))),
+    [ids, selected, allMatching, except],
   );
 
   const someSelected = useMemo(
-    () => !allSelected && ids.some((id) => selected.has(id)),
-    [ids, selected, allSelected],
+    () => (allMatching ? except.size > 0 : !allSelected && ids.some((id) => selected.has(id))),
+    [ids, selected, allSelected, allMatching, except],
   );
 
+  const clear = useCallback(() => {
+    setSelected(new Set());
+    setAllMatching(false);
+    setExcept(new Set());
+  }, []);
+
+  const selectMatching = useCallback(() => {
+    setSelected(new Set());
+    setExcept(new Set());
+    setAllMatching(true);
+  }, []);
+
   const toggleAll = useCallback(() => {
+    if (allMatching) {
+      clear();
+      return;
+    }
     setSelected((current) => {
       const next = new Set(current);
       const everySelected = ids.length > 0 && ids.every((id) => next.has(id));
@@ -62,9 +93,19 @@ export function useTableSelection<T extends string | number>(ids: readonly T[]):
       }
       return next;
     });
-  }, [ids]);
+  }, [ids, allMatching, clear]);
 
-  const clear = useCallback(() => setSelected(new Set()), []);
-
-  return { selected, isSelected, toggle, toggleAll, clear, allSelected, someSelected, count: selected.size };
+  return {
+    selected,
+    isSelected,
+    toggle,
+    toggleAll,
+    clear,
+    allSelected,
+    someSelected,
+    allMatching,
+    except,
+    selectMatching,
+    count: selected.size,
+  };
 }
