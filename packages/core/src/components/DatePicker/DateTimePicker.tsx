@@ -58,7 +58,8 @@ export interface DateTimePickerProps
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
   /** Shows a cross where a value is set, which fades in on hover/focus and
-      clears the value. */
+      clears the value, and the open panel offers Clear. Without it
+      no way to empty the value is offered. */
   clearable?: boolean;
   /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
   min?: Date;
@@ -277,7 +278,7 @@ export function DateTimePicker(
                 <Button size="sm" variant="ghost" className={styles.hangStart} disabled={outside(zoneToday(timeZone), bounds)} onClick={now}>
                   {wording.now}
                 </Button>
-                {value && (
+                {clearable && value && (
                   <Button size="sm" variant="ghost" onClick={() => { onChange(null); closePanel(); }}>
                     {wording.clear}
                   </Button>
