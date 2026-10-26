@@ -245,6 +245,7 @@ export const GERMAN_WORDING: Wording = {
   rangeTo: (to) => `bis ${to}`,
   rangeInvalid: "„Von“ liegt hinter „Bis“.",
   resetAll: "Zurücksetzen",
+  tryAgain: "Erneut versuchen",
   filteredOfTotal: (matches, total) => `${matches} von ${total}`,
 
   verdictOk: "In Ordnung",
