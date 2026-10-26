@@ -101,6 +101,7 @@ import {
   unbind,
   rebindDprWatch,
   requestResize,
+  frameNow,
   markSeriesDirty,
   markOverlayDirty,
   markLayoutDirty,
@@ -565,6 +566,11 @@ export class ChartScene {
   /** Called by the ResizeObserver; coalesced onto one rAF. */
   requestResize(cssWidth: number, cssHeight: number): void {
     requestResize(this, cssWidth, cssHeight);
+  }
+
+  /** Draws what is due now. @internal */
+  frameNow(): void {
+    frameNow(this);
   }
 
   /* ================= Scheduling ================= */
