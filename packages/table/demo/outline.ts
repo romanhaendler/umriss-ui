@@ -137,6 +137,19 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["useTable"],
       },
       {
+        id: "conditional-formatting",
+        name: "Conditional formatting",
+        sentence: "A cell drawn by its value: a bar, a colour scale, an icon or a verdict against a limit, each made of the library's components. Reach for it when a value should stand out by its size or by where it sits against a limit.",
+        about: [
+          "A rule set would be a second way to present a cell beside `children` (ADR-0017), so a presentation is written in its column, where the value and its row arrive typed. A class hook is not offered either: colours come from the tokens (ADR-0045), and a `color-mix` over them gives a scale.",
+          "The colour is never the only sign. Each column says the value as well, in a word or a number, so a reader who cannot tell the colours apart reads the same thing.",
+        ],
+        alternatives: [{ when: "A measured value read against its limits, as ok, warning or alarm", use: "verdictcolumn" }],
+        keysOf: ["first-table"],
+        types: [],
+        exports: ["useTable"],
+      },
+      {
         id: "width-and-pinning",
         name: "Width and pinning",
         sentence: "How wide a column stands, which columns stay in view while the table scrolls sideways (frozen or sticky columns), and a header that stays while it scrolls down.",
