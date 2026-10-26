@@ -570,6 +570,92 @@ describe("useCommandPaletteShortcut", () => {
   });
 });
 
+describe("useCommandPaletteShortcut – the slash switch and its guard", () => {
+  function Shortcut({ onOpen, slash }: { onOpen: () => void; slash?: boolean }) {
+    useCommandPaletteShortcut(onOpen, slash === undefined ? undefined : { slash });
+    return (
+      <div>
+        <button>Knopf</button>
+        <select aria-label="Auswahl">
+          <option>a</option>
+        </select>
+        <div role="textbox" aria-label="Box">
+          <span data-testid="box-child">x</span>
+        </div>
+        <div role="searchbox" aria-label="Suche" />
+        <div role="combobox" aria-label="Kombi" aria-expanded="false" />
+        <div aria-modal="true">
+          <button>Im Dialog</button>
+        </div>
+      </div>
+    );
+  }
+
+  it("opens on / from the body, and not with slash: false, while Ctrl+K and Cmd+K still do", () => {
+    const onOpen = vi.fn();
+    const { rerender } = render(<Shortcut onOpen={onOpen} />);
+    fireEvent.keyDown(document.body, { key: "/" });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    rerender(<Shortcut onOpen={onOpen} slash={false} />);
+    fireEvent.keyDown(document.body, { key: "/" });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(document.body, { key: "k", ctrlKey: true });
+    fireEvent.keyDown(document.body, { key: "k", metaKey: true });
+    expect(onOpen).toHaveBeenCalledTimes(3);
+    rerender(<Shortcut onOpen={onOpen} slash />);
+    fireEvent.keyDown(document.body, { key: "/" });
+    expect(onOpen).toHaveBeenCalledTimes(4);
+  });
+
+  it("keeps / out of a select, a textbox, a searchbox, a combobox and their children", () => {
+    const onOpen = vi.fn();
+    render(<Shortcut onOpen={onOpen} />);
+    fireEvent.keyDown(screen.getByLabelText("Auswahl"), { key: "/" });
+    fireEvent.keyDown(screen.getByRole("textbox"), { key: "/" });
+    fireEvent.keyDown(screen.getByTestId("box-child"), { key: "/" });
+    fireEvent.keyDown(screen.getByRole("searchbox"), { key: "/" });
+    fireEvent.keyDown(screen.getByRole("combobox", { name: "Kombi" }), { key: "/" });
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+
+  it("opens with neither key inside aria-modal", () => {
+    const onOpen = vi.fn();
+    render(<Shortcut onOpen={onOpen} />);
+    const inside = screen.getByRole("button", { name: "Im Dialog" });
+    fireEvent.keyDown(inside, { key: "/" });
+    fireEvent.keyDown(inside, { key: "k", ctrlKey: true });
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+
+  it("opens with neither key inside a dialog shown as modal", () => {
+    const onOpen = vi.fn();
+    render(<Shortcut onOpen={onOpen} />);
+    const dialog = document.createElement("dialog");
+    const button = document.createElement("button");
+    dialog.append(button);
+    document.body.append(dialog);
+    // jsdom has no showModal; :modal is what a browser answers for one.
+    const real = dialog.matches.bind(dialog);
+    dialog.matches = (selector: string) => (selector === ":modal" ? true : real(selector));
+    fireEvent.keyDown(button, { key: "/" });
+    fireEvent.keyDown(button, { key: "k", ctrlKey: true });
+    expect(onOpen).not.toHaveBeenCalled();
+    dialog.remove();
+  });
+
+  it("opens beside a dialog in an engine that does not know :modal", () => {
+    const onOpen = vi.fn();
+    render(<Shortcut onOpen={onOpen} />);
+    const dialog = document.createElement("dialog");
+    const button = document.createElement("button");
+    dialog.append(button);
+    document.body.append(dialog);
+    fireEvent.keyDown(button, { key: "k", ctrlKey: true });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    dialog.remove();
+  });
+});
+
 /* An input method (Japanese, Chinese, Korean) ends its composition with Enter.
    That Enter belongs to the input method: the palette used to take it as a
    choice, before the word typed had even arrived. */
