@@ -34,7 +34,7 @@ import type { Formats } from "@umriss-ui/core";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
 import { windowed } from "./model/tableState";
-import { warnOnce } from "./dev";
+import { probeStale, warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
 import type { ValueKind } from "./values";
 import type { AggregateColumn, GroupLevel } from "./model/grouping";
@@ -97,8 +97,9 @@ const columnEntry = (key: string, spec: ColumnSpec): ColumnEntry => {
 /** Two accessors are the same when they are one function or have the same
     source text; a native or bound function reads "[native code]" whatever it
     does, so only identity counts for it. A closure over a changed outer
-    variable reads as unchanged: a new function text, or the variable carried
-    in the row data, is the way out. */
+    variable reads as unchanged: the variable carried in the row data, or a
+    `key` on the column that changes with it, is the way out; development
+    warns (probeStale in dev.ts). */
 export function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
@@ -110,9 +111,14 @@ export function fnEqual(a: unknown, b: unknown): boolean {
 /** The spec with the accessors it already held, where the new ones are equal to
     them: the identity the aggregate caches and the model's columns key on stays
     as it was through a re-render with inline accessors. */
-function holdEqual(old: ColumnSpec, next: ColumnSpec): ColumnSpec {
+function holdEqual(old: ColumnSpec, next: ColumnSpec, rows: readonly unknown[]): ColumnSpec {
   // Another id is another column under the same React key: its accessors are its own.
   if (old.id !== next.id) return next;
+  const who = `Column "${next.id}"`;
+  const read = (row: unknown) => (typeof old.value === "string" ? readField(row, old.value) : (old.value as (z: unknown) => unknown)(row));
+  if (fnEqual(old.value, next.value)) probeStale(who, old.value, next.value, rows);
+  if (fnEqual(old.ownSortValue, next.ownSortValue)) probeStale(who, old.ownSortValue, next.ownSortValue, rows, read);
+  if (fnEqual(old.ownGroupValue, next.ownGroupValue)) probeStale(who, old.ownGroupValue, next.ownGroupValue, rows, read);
   const value = fnEqual(old.value, next.value) ? old.value : next.value;
   const ownSortValue = fnEqual(old.ownSortValue, next.ownSortValue) ? old.ownSortValue : next.ownSortValue;
   const ownGroupValue = fnEqual(old.ownGroupValue, next.ownGroupValue) ? old.ownGroupValue : next.ownGroupValue;
@@ -126,6 +132,11 @@ export class Registry {
   /** The group keys: values to group by that are no column. */
   readonly groupKeys = new List<ColumnEntry>("data-umriss-groupkey");
   private signatures = new Map<string, string>();
+  /** The hook's rows, which the development probe of a held accessor calls it on. */
+  private rows: readonly unknown[] = [];
+  setRows(rows: readonly unknown[]) {
+    this.rows = rows;
+  }
 
   /** The row detail: the presentation of the `RowDetail` that registered last. */
   detail: { key: string; presentation: (row: never) => ReactNode } | null = null;
@@ -211,7 +222,7 @@ export class Registry {
       this.structure++;
     } else {
       const old = existing.spec;
-      spec = holdEqual(old, spec);
+      spec = holdEqual(old, spec, this.rows);
       if (this.signatures.get(key) !== signature) this.structure++;
       if (old.value !== spec.value || old.ownSortValue !== spec.ownSortValue || old.ownGroupValue !== spec.ownGroupValue) {
         this.values++;
@@ -314,7 +325,7 @@ export class Registry {
       this.groupKeys.entries.set(key, entry);
       this.structure++;
     } else {
-      spec = holdEqual(existing.spec, spec);
+      spec = holdEqual(existing.spec, spec, this.rows);
       if (this.signatures.get(key) !== signature) this.structure++;
       if (existing.spec.value !== spec.value || existing.spec.ownGroupValue !== spec.ownGroupValue) this.values++;
       existing.spec = spec;
