@@ -561,6 +561,10 @@ here.
   line, which band, which interval. The chart draws the rows it is given; the
   least-squares line and its 95 % band are built from `Line` and `Area` in the
   application (the Scatter page, "A fit line with its band").
+* **Point opacity.** A scatter is one path and one fill, so translucent points
+  do not add up where they crowd, and a fill per point breaks the
+  million-point budget. Density is the application's count into cells, drawn as
+  a `Matrix` with its colour bar (the Scatter page, "Where the points crowd").
 
 ## Known limits
 
