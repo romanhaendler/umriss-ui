@@ -235,7 +235,7 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
 
 /** The instance shipped by default: English notation on a 24-hour clock
     (ADR-0024). German is `GERMAN_FORMATS` in `@umriss-ui/core/wording/de`. */
-export const DEFAULT_FORMATS: Formats = formatsFor("en-GB");
+export const DEFAULT_FORMATS: Formats = /* @__PURE__ */ formatsFor("en-GB");
 
 /** The two characters a notation separates with. */
 export interface Separators {
@@ -259,4 +259,4 @@ export function separatorsOf(formats: Formats): Separators {
 }
 
 /** The separators of the default notation. */
-export const DEFAULT_SEPARATORS: Separators = separatorsOf(DEFAULT_FORMATS);
+export const DEFAULT_SEPARATORS: Separators = /* @__PURE__ */ separatorsOf(DEFAULT_FORMATS);

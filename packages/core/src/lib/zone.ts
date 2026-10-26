@@ -80,7 +80,7 @@ function offsetAt(ms: number, timeZone: string): number {
   return whole;
 }
 
-const recent = Array.from({ length: 8 }, () => ({ day: NaN, zone: "", offset: 0 }));
+const recent = /* @__PURE__ */ Array.from({ length: 8 }, () => ({ day: NaN, zone: "", offset: 0 }));
 
 function quarterOffset(ms: number, zone: ReturnType<typeof zoneOf>): number {
   const key = Math.floor(ms / QUARTER);
