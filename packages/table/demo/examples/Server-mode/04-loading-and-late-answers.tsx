@@ -154,43 +154,40 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
   }),
 );
 
-export const title = "Show loading, and drop a late answer";
-export const lead = "`loading` marks the table while a request runs: the page it has stays, dimmed after a moment, and nothing below it moves. An answer to a view the user has already left is the application's to drop; the table shows whatever rows it is given.";
+export const title = "Show loading, and hold a late answer";
+export const lead = "`answers` names the request the rows answer. While it is not the table's current request the table is busy as `loading` makes it: the page it has stays, dimmed after a moment, and nothing below it moves. Here every answer takes a different time, so they arrive out of order on purpose - page on quickly and the table stays busy until the answer to the page you are on has come; the others are never shown as current.";
 
-/* Every answer takes 600 ms. Page on quickly: only the last request lands. */
-const LATENCY = 600;
-
+/* Every second request is slow, so an answer is overtaken by the next one:
+   page on quickly to see it hold. */
 const serve = (view: TableRequest) => {
   const start = (view.page - 1) * view.pageSize;
-  return { rows: SHIPMENTS.slice(start, start + view.pageSize), rowCount: SHIPMENTS.length };
+  return { rows: SHIPMENTS.slice(start, start + view.pageSize), rowCount: SHIPMENTS.length, answers: view };
 };
 
 export default function LoadingAndLateAnswers() {
   const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }));
-  const [loading, setLoading] = useState(false);
-  const latest = useRef<TableRequest | null>(null);
+  const asked = useRef(0);
 
-  const { Table, Column } = useTable(answer.rows, {
+  const { Table, Column, request } = useTable(answer.rows, {
     rowKey: (s) => s.id,
     server: true,
     rowCount: answer.rowCount,
+    answers: answer.answers,
     onRequest: (view) => {
-      latest.current = view;
-      setLoading(true);
-      setTimeout(() => {
-        if (latest.current !== view) return;
-        setAnswer(serve(view));
-        setLoading(false);
-      }, LATENCY);
+      asked.current += 1;
+      setTimeout(() => setAnswer(serve(view)), asked.current % 2 === 0 ? 1200 : 300);
     },
   });
 
   return (
-    <Table aria-label="Shipments on the server" loading={loading}>
+    <>
+    <p>Asked for page {request?.page}, showing page {answer.answers.page}.</p>
+    <Table aria-label="Shipments on the server">
       <Column value="id" label="Shipment" rowHeader sortable={false} />
       <Column value="customer" label="Customer" sortable={false} />
       <Column value="weight" label="Weight (kg)" sortable={false} />
       <Pagination />
     </Table>
+    </>
   );
 }

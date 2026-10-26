@@ -507,12 +507,24 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
   const reportKey = server ? requestKey(request) : "";
   const reported = useRef<string | null>(null);
+  /* In development, every key reported, so that `answers` can be told from
+     one that can never be equal. ponytail: one string per request, never
+     pruned; a cap if a session types for hours. */
+  const reportedKeys = useRef(new Set<string>());
+  const answersKey = options.server && options.answers ? requestKey(options.answers) : null;
+  const late = answersKey !== null && answersKey !== reportKey;
   useEffect(() => {
-    if (!server || reported.current === reportKey) return;
-    reported.current = reportKey;
-    options.onRequest?.(request);
+    if (!server) return;
+    if (reported.current !== reportKey) {
+      reported.current = reportKey;
+      if (DEV) reportedKeys.current.add(reportKey);
+      options.onRequest?.(request);
+    }
+    if (DEV && answersKey !== null && !reportedKeys.current.has(answersKey)) {
+      warnOnce("server-answers", "`answers` matches none of the requests `onRequest` received; the table stays busy. Hand back the request object you were given, or one with the same search, conditions, sort, page and page size.");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
-  }, [reportKey]);
+  }, [reportKey, answersKey]);
 
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
@@ -586,6 +598,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     virtual,
     rowCount: server ? rowCount : b.filtered.length,
     server,
+    request: server ? request : null,
   };
 
   // Idempotent for the same snapshot (registry.ts, guarantee 1).
@@ -604,6 +617,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     pins: pinsChosen,
     filterOptions: server ? options.filterOptions : undefined,
     selectedRows,
+    late,
     rowFilters,
   });
 
