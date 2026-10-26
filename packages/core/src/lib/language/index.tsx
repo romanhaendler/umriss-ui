@@ -11,7 +11,7 @@
 
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { DEFAULT_FORMATS } from "./formats";
+import { DEFAULT_FORMATS, formatsFor, INSTANT_ENTRIES } from "./formats";
 import type { Formats } from "./formats";
 import { DEFAULT_WORDING } from "./wording";
 import type { Wording } from "./wording";
@@ -55,7 +55,7 @@ export function mergeLanguage(options: LanguageOptions | undefined): Language {
   if (!options) return DEFAULT_LANGUAGE;
   const { presets, ...wordingRest } = options.wording ?? {};
   return {
-    formats: options.formats ? { ...DEFAULT_FORMATS, ...options.formats } : DEFAULT_FORMATS,
+    formats: options.formats ? mergeFormats(options.formats) : DEFAULT_FORMATS,
     wording: options.wording
       ? {
           ...DEFAULT_WORDING,
@@ -64,6 +64,20 @@ export function mergeLanguage(options: LanguageOptions | undefined): Language {
         }
       : DEFAULT_WORDING,
   };
+}
+
+/* Where the merged formats name a zone, every instant entry still identical to
+   the built-in one of the set's locale is replaced by the one built for the
+   zone; an entry the application replaced stays its own. */
+function mergeFormats(given: Partial<Formats>): Formats {
+  const merged: Formats = { ...DEFAULT_FORMATS, ...given };
+  if (merged.timeZone === undefined) return merged;
+  const plain = formatsFor(merged.locale);
+  // An unknown zone throws Intl's RangeError here.
+  const zoned = formatsFor(merged.locale, merged.timeZone);
+  const entries = merged as unknown as Record<string, unknown>;
+  for (const name of INSTANT_ENTRIES) if (merged[name] === plain[name]) entries[name] = zoned[name];
+  return merged;
 }
 
 /** The props of `LanguageProvider`: the parts of the formats and the wording
@@ -109,16 +123,40 @@ function blankInstants(formats: Formats): Formats {
       time: noInstant,
       dateTime: noInstant,
       offset: noInstant,
+      timeZoneName: noInstant,
     };
     withoutInstants.set(formats, blank);
   }
   return blank;
 }
 
-/** Only the formatting. Dates and times are empty until the page has hydrated. */
+/** Only the formatting. Without a named zone, dates and times are empty until
+    the page has hydrated. A named zone does not depend on the reader, so the
+    server writes every instant with it. */
 export function useFormats(): Formats {
   const formats = useLanguage().formats;
-  return useHydrated() ? formats : blankInstants(formats);
+  const hydrated = useHydrated();
+  return hydrated || formats.timeZone !== undefined ? formats : blankInstants(formats);
+}
+
+/* A zone's name as Intl spells it, so that an alias compares equal. */
+const canonical = (timeZone: string): string =>
+  new Intl.DateTimeFormat("en", { timeZone }).resolvedOptions().timeZone;
+
+/**
+ * The name of the formats' time zone, for a view that shows instants: set when
+ * the formats name a zone, the page has hydrated, and the reader's own zone is
+ * another; `null` otherwise. The reader's zone is known only in the browser,
+ * so the server never writes it.
+ */
+export function useTimeZoneLabel(): string | null {
+  const { timeZone, timeZoneName } = useLanguage().formats;
+  const hydrated = useHydrated();
+  return useMemo(() => {
+    if (!hydrated || timeZone === undefined) return null;
+    const reader = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return canonical(reader) === canonical(timeZone) ? null : timeZoneName(new Date());
+  }, [hydrated, timeZone, timeZoneName]);
 }
 
 /** Only the wording. */

@@ -17,6 +17,14 @@
 
 /** Everything the library knows about formatting. */
 export interface Formats {
+  /** The language tag the set was built in: "en-GB". */
+  locale: string;
+  /** The IANA name of the time zone instants are written in, or `undefined`
+      for the reader's own. */
+  timeZone: string | undefined;
+  /** The zone's generic name in the set's locale: "Central European Time".
+      Empty until the page has hydrated where no zone is named. */
+  timeZoneName: (d: Date) => string;
   /** Date as displayed: 17/03/2026 */
   date: (d: Date) => string;
   /** Short form without the year, in the range footer: 17/03 */
@@ -104,12 +112,33 @@ const RELATIVE_STEPS: readonly (readonly [Intl.RelativeTimeFormatUnit, number])[
     decimals. What the locale decides is the order of the parts and the
     separators - 17/03/2026 against 17.03.2026 - and the words of the month,
     the weekday and "3 minutes ago". */
-export function formatsFor(locale: string): Formats {
-  const dateFormat = new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric" });
-  const dateShortFormat = new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit" });
-  const monthFormat = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+export function formatsFor(locale: string, timeZone?: string): Formats {
+  const key = `${locale}|${timeZone ?? ""}`;
+  let set = sets.get(key);
+  if (!set) {
+    set = buildFormats(locale, timeZone);
+    sets.set(key, set);
+  }
+  return set;
+}
+
+/* One set per locale and zone, so that `DEFAULT_FORMATS` and `GERMAN_FORMATS`
+   keep their identity and a zone's set is built once. */
+const sets = new Map<string, Formats>();
+
+/** The entries that write an instant: a named zone replaces those an
+    application left as the built-in set has them. */
+export const INSTANT_ENTRIES = ["date", "dateShort", "month", "dateLong", "time", "dateTime", "offset", "timeZoneName"] as const;
+
+function buildFormats(locale: string, timeZone: string | undefined): Formats {
+  // An unknown zone throws Intl's RangeError, naming it, in the first formatter.
+  const dateFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit", year: "numeric" });
+  const dateShortFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit" });
+  const monthFormat = new Intl.DateTimeFormat(locale, { timeZone, month: "long", year: "numeric" });
+  /* A calendar month, named from a calendar-day Date: no zone applies. */
   const monthNameFormat = new Intl.DateTimeFormat(locale, { month: "long" });
   const dateLongFormat = new Intl.DateTimeFormat(locale, {
+    timeZone,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -118,7 +147,7 @@ export function formatsFor(locale: string): Formats {
   /* `hour12: false` and not the locale's habit: the clock is the product's
      decision, and `en-GB` would write "24:00" for midnight without
      `hourCycle`. */
-  const clock = { hour: "2-digit", minute: "2-digit", hour12: false, hourCycle: "h23" } as const;
+  const clock = { timeZone, hour: "2-digit", minute: "2-digit", hour12: false, hourCycle: "h23" } as const;
   const timeFormats = {
     without: new Intl.DateTimeFormat(locale, clock),
     with: new Intl.DateTimeFormat(locale, { ...clock, second: "2-digit" }),
@@ -136,7 +165,8 @@ export function formatsFor(locale: string): Formats {
   /* The offset label is the one place where a formatter does not format but
      decompose: only the zone name is read out of the parts. The
      daylight-saving logic hangs on it (DatePicker/time.ts). */
-  const offsetFormat = new Intl.DateTimeFormat(locale, { timeZoneName: "shortOffset" });
+  const offsetFormat = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: "shortOffset" });
+  const nameFormat = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: "shortGeneric" });
   const numberFormats = new Map<number | undefined, Intl.NumberFormat>();
   /* A negative that rounds to zero reads "0", never "-0". The compiler's Intl
      typings do not list "negative" yet; every engine since 2023 has it. */
@@ -149,6 +179,9 @@ export function formatsFor(locale: string): Formats {
   const relativeFormat = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
   return {
+    locale,
+    timeZone,
+    timeZoneName: (d) => nameFormat.formatToParts(d).find((part) => part.type === "timeZoneName")?.value ?? "",
     date: (d) => dateFormat.format(d),
     dateShort: (d) => dateShortFormat.format(d),
     month: (d) => monthFormat.format(d),

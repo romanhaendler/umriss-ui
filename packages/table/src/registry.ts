@@ -421,8 +421,8 @@ export class Registry {
 
   /** The levels and aggregates for the model - the same identity as long as
       nothing changed that they read. */
-  groupingModel(ids: readonly string[], rows: readonly unknown[]): { levels: GroupLevel<unknown>[]; aggregates: AggregateColumn<unknown>[] } {
-    const key = [ids.join("|"), this.structure, this.values].join(":");
+  groupingModel(ids: readonly string[], rows: readonly unknown[], timeZone?: string): { levels: GroupLevel<unknown>[]; aggregates: AggregateColumn<unknown>[] } {
+    const key = [ids.join("|"), this.structure, this.values, timeZone ?? ""].join(":");
     if (this.groupingCache?.key === key) return this.groupingCache;
     const entries = this.groupingEntries(rows);
     const levels = ids
@@ -435,7 +435,7 @@ export class Registry {
           if (value === null || value === undefined) return undefined;
           const { ownGroupValue, group } = entry.spec;
           if (ownGroupValue) return ownGroupValue(value as never);
-          if (group) return periodStart(group)(value);
+          if (group) return periodStart(group, timeZone)(value);
           return value;
         },
         /* A value of one's own is a name; its groups stand by what they hold. */
@@ -464,7 +464,7 @@ export class Registry {
   private groupingFor(hook: HookSnapshot): TableInput<unknown>["grouping"] {
     const ids = this.effectiveGrouping(hook.publicSnapshot.grouping, hook.rows);
     if (ids.length === 0) return undefined;
-    const model = this.groupingModel(ids, hook.rows);
+    const model = this.groupingModel(ids, hook.rows, hook.formats.timeZone);
     if (hook.grouping?.levels === model.levels) return hook.grouping;
     return { ...model, folded: hook.folded, compareText: hook.formats.compareText };
   }

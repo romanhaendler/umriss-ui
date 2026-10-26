@@ -139,6 +139,9 @@ stylesheets by hand.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
+* **A time zone named in the formats** (core's Time zone): the dates, the day
+  groups and the date filter follow it, and the head of a `"date"`, `"time"` or
+  `"dateTime"` column names it, in muted text, where the reader's own is another.
 * **Export and copy follow the language** (ADR-0061): the CSV takes its decimal
   mark from the formats, yes/no from the wording and its separator from the
   mark - English gets commas and a point, `@umriss-ui/core/wording/de` the file

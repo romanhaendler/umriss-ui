@@ -43,6 +43,9 @@ function samples(at: Date): Record<keyof Formats, (formats: Formats) => string> 
     time: (f) => f.time(at, false),
     dateTime: (f) => f.dateTime(at, false),
     offset: (f) => f.offset(at),
+    locale: (f) => f.locale,
+    timeZone: () => "none: the reader's own",
+    timeZoneName: (f) => f.timeZoneName(at),
     number: (f) => f.number(1204.5, 1),
     numberWith: (f) => f.numberWith(1204.5, { style: "currency", currency: "EUR" }),
     count: (f) => f.count(1204),
@@ -74,7 +77,7 @@ function formatTexts(locale: string): Map<string, WordingText> {
   const zone = process.env.TZ;
   process.env.TZ = ZONE;
   try {
-    const formats = formatsFor(locale);
+    const formats = formatsFor(locale, ZONE);
     return new Map(Object.entries(samples(new Date(2026, 2, 17, 9, 5, 3))).map(([key, write]) => [key, { kind: "text", text: write(formats) }]));
   } finally {
     if (zone === undefined) delete process.env.TZ;

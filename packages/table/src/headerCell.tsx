@@ -2,6 +2,7 @@
    that drags or fits the column's width. */
 
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
+import { useTimeZoneLabel } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { ColumnFilterButton } from "./filter";
 import { filterOf } from "./columnFilter";
@@ -113,13 +114,25 @@ export function HeaderCell({
     snapshot.setWidth(id, Math.max(MIN, now + (wider ? step : -step)));
   };
 
+  /* The zone's name after the text of a column that writes instants, where the
+     reader's zone is another: part of the head's accessible name. */
+  const zone = useTimeZoneLabel();
+  const text = (
+    <>
+      {spec.label}
+      {zone !== null && (spec.format === "date" || spec.format === "time" || spec.format === "dateTime") && (
+        <span className={styles.zoneLabel}> {zone}</span>
+      )}
+    </>
+  );
+
   const label = sortable ? (
     <button
       type="button"
       className={cx(styles.sortButton, styles.headLine)}
       onClick={(event: ReactMouseEvent) => snapshot.toggleSort(id, event.shiftKey || event.metaKey)}
     >
-      <span className={styles.headLabel}>{spec.label}</span>
+      <span className={styles.headLabel}>{text}</span>
       {rank !== undefined && (
         <span className={styles.sortRank} aria-hidden="true">
           {rank}
@@ -141,7 +154,7 @@ export function HeaderCell({
     </button>
   ) : (
     <span className={styles.headLine}>
-      <span className={styles.headLabel}>{spec.label}</span>
+      <span className={styles.headLabel}>{text}</span>
     </span>
   );
 
