@@ -128,6 +128,7 @@ stylesheets by hand.
   export writes the level, and a leaf's detail opens from its own fold.
 * **Restricting a column**: the values that occur, two bounds, or a filter the
   application writes itself — plus conditions set from outside and read back.
+  A view survives JSON: the dates of a stored condition come back as `Date`s.
 * **Restricting by the whole row**: a row filter asks any question of a row
   ("overdue" = past its window and not delivered) through a control of the
   application's own, and counts, resets and travels in the view like any

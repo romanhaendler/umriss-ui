@@ -85,8 +85,17 @@ const { Dashboard, WidgetType } = useDashboard({
 - **Every action without a drag.** One menu on every widget's head moves,
   sizes, sets the options and removes; the head is also the grip for a pointer
   and takes the arrow keys. Every change is announced.
-- **A kept arrangement is read leniently.** A widget of a type that is gone
-  falls out, a size a type no longer offers falls back to its starting size.
+- **A locked widget moves and nothing else changes it.** The application sets
+  `locked: true` on a widget of the view; the reader can move it, but not
+  resize it, change its options or remove it, and the editing mode says so on
+  its head and in its menu. The mark lives in the view, so it comes back through
+  `initialView` and "Reset" brings back the default's. Only the application sets
+  it; the reader never can.
+- **A kept arrangement is read leniently.** A widget of a type not declared is
+  not drawn and stays in the stored arrangement: "Done" keeps it after the
+  widgets that are drawn, so a widget behind a role, a flag or a plugin loaded
+  late is never lost. A size a type no longer offers falls back to its starting
+  size, and options a stored widget lacks come from its type's default options.
   A widget whose content throws keeps its frame and says so in a sentence.
 - **A failed widget is reported and may be retried.** React's `onCaughtError`,
   given to `createRoot` or to the application's root, receives the error of a
