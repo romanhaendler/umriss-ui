@@ -356,6 +356,9 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
   const daysPerDate = dayRun(widestDay, dateRoom);
   const daysPerTick = snapshot.step >= DAY ? daysPerDate : 1;
 
+  /* While the plan's table lies over them, the headers and the plot are out of
+     the picture, the tab order and the accessibility tree. */
+  const covered = snapshot.dataTable?.open === true;
   const ghost = snapshot.ghost;
   const spoken = snapshot.spoken;
   const summary = snapshot.summary;
@@ -510,7 +513,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
             );
           })}
         </div>
-        <div ref={headersRef} className={styles.headers} data-schedule-headers="">
+        <div ref={headersRef} className={styles.headers} data-schedule-headers="" inert={covered || undefined}>
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
             {/* Over no lanes, as many lines as the plot holds. */}
             {loading &&
@@ -568,6 +571,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
           data-schedule-clip="plot"
           style={{ cursor: snapshot.cursor }}
           aria-busy={loading || undefined}
+          inert={covered || undefined}
           data-stale={(snapshot.loading && snapshot.headers.length > 0) || undefined}
           /* One tab stop for the whole plot, with the application role: in
              browse mode a screen reader keeps the arrow keys for itself
@@ -669,7 +673,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
               cut away. */}
           <span className={styles.focusRing} aria-hidden="true" />
         </div>
-        <div className={styles.corner} />
+        <div className={`${styles.corner} ${styles.cornerBottom}`} />
         <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="" data-schedule-clip="time band">
           {snapshot.now !== null && <span className={styles.now} data-now="" data-schedule-overlay="now mark" style={{ left: `${snapshot.now}px` }} />}
           {snapshot.ticks.map((tick) => (
@@ -704,8 +708,11 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
             ? wording.scheduleKeyHelp
             : `${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })}${zoneLabel === null ? "" : ` ${zoneLabel}.`} ${wording.scheduleKeyHelp}`}
         </VisuallyHidden>
+        {/* After the plot, so that the table's key follows it in the tab
+            order; the parts that declare render nothing, the table lays
+            itself over the grid. */}
+        {children}
       </div>
-      {children}
     </ScheduleContext>
   );
 }

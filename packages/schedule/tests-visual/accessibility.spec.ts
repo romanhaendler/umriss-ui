@@ -42,3 +42,14 @@ test("the scenario's context menu is accessible", async ({ page }, testInfo) => 
   const result = await new AxeBuilder({ page }).include('[role="menu"]').withTags(STANDARDS).analyze();
   expect(findings(result), `Context menu (${testInfo.project.name})`).toEqual([]);
 });
+
+/* The plan opened as a table: the page is checked with the panel over the plot. */
+test("the plan's table is accessible while open", async ({ page }, testInfo) => {
+  await open(page, "tooltip");
+  const example = page.locator('[data-example="read-the-plan-as-a-table"]');
+  await example.scrollIntoViewIfNeeded();
+  await example.getByRole("button", { name: "Show data" }).click();
+  await expect(example.getByRole("table")).toBeVisible();
+  const result = await new AxeBuilder({ page }).include('[data-example="read-the-plan-as-a-table"]').withTags(STANDARDS).analyze();
+  expect(findings(result), `Open table (${testInfo.project.name})`).toEqual([]);
+});
