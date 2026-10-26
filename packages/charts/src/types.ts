@@ -208,6 +208,8 @@ export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
       The base accessor yields the row position, not this level. */
   level: ValueFunction<T>;
   coloring: MatrixColoring;
+  /** Each cell writes its level. */
+  labels?: boolean;
 }
 
 /** Any registered series, told apart by `kind`. */

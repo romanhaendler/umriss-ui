@@ -116,6 +116,9 @@ export interface MatrixDrawItem extends DrawBase {
   height: number;
   /** A hatch per bucket, across its colour; null draws colour alone. */
   hatches?: readonly Hatch[] | null;
+  /** The text each cell writes, by point, and how: the font and one line's
+      height. Without it no cell carries text. */
+  labels?: { texts: readonly string[]; font: string; lineHeight: number } | null;
 }
 
 /** Mirrors the union of the series configuration (types.ts). */
@@ -686,7 +689,8 @@ function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem, plot:
    path per bucket: the same batched move as with the state band, and for the same
    reason - the number of colours is small, the number of cells is not. */
 
-function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: Rect, ground: string): void {
+function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: Rect, theme: ResolvedTheme): void {
+  const ground = theme.colorBg;
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -726,6 +730,40 @@ function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: R
     ctx.fillStyle = item.colors[k] as string;
     ctx.fill(paths[k] as Path2D);
     drawHatch(ctx, paths[k] as Path2D, plot, item.hatches?.[k] ?? "none", ground);
+  }
+  if (item.labels != null) drawCellLabels(ctx, item, plot, theme);
+}
+
+/** Each cell's text, centred, where its width plus 4 px and the line's height
+    plus 2 px fit in the part of the cell the plot shows; elsewhere none, never
+    cut. The text stands in the text colour over a halo of the ground, which
+    keeps it legible on every stop without a colour parser. */
+function drawCellLabels(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: Rect, theme: ResolvedTheme): void {
+  const { texts, font, lineHeight } = item.labels as NonNullable<MatrixDrawItem["labels"]>;
+  const widthPx = item.width * item.xScale.m;
+  const heightPx = Math.abs(item.height * item.yScale.m);
+  // Cells lower than a line: nothing to measure.
+  if (heightPx < lineHeight + 2) return;
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = theme.colorBg;
+  ctx.fillStyle = theme.colorText;
+  for (let i = 0; i < item.length; i++) {
+    if ((item.buckets[i] as number) < 0) continue;
+    const left = Math.max((item.x[i] as number) * item.xScale.m + item.xScale.b - widthPx / 2, plot.x);
+    const right = Math.min((item.x[i] as number) * item.xScale.m + item.xScale.b + widthPx / 2, plot.x + plot.width);
+    const top = Math.max((item.y[i] as number) * item.yScale.m + item.yScale.b - heightPx / 2, plot.y);
+    const bottom = Math.min((item.y[i] as number) * item.yScale.m + item.yScale.b + heightPx / 2, plot.y + plot.height);
+    if (bottom - top < lineHeight + 2) continue;
+    const text = texts[i] as string;
+    if (ctx.measureText(text).width + 4 > right - left) continue;
+    const cx = (left + right) / 2;
+    const cy = (top + bottom) / 2;
+    ctx.strokeText(text, cx, cy);
+    ctx.fillText(text, cx, cy);
   }
 }
 
@@ -829,7 +867,7 @@ export function drawSeriesLayer(
         drawStateBand(ctx, item, plot, input.theme.colorBg);
         break;
       case "matrix":
-        drawMatrix(ctx, item, plot, input.theme.colorBg);
+        drawMatrix(ctx, item, plot, input.theme);
         break;
     }
   }
