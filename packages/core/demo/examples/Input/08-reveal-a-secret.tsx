@@ -25,7 +25,7 @@ export default function RevealASecret() {
       <FormField label="API token" style={{ flex: 1 }}>
         <Input type={shown ? "text" : "password"} autoComplete="off" value={token} onChange={(event) => setToken(event.target.value)} />
       </FormField>
-      <IconButton aria-label={shown ? "Hide the token" : "Show the token"} aria-pressed={shown} onClick={() => setShown(!shown)}>
+      <IconButton aria-label="Show the token" aria-pressed={shown} onClick={() => setShown(!shown)}>
         <Eye crossed={shown} />
       </IconButton>
     </Stack>
