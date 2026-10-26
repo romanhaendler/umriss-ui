@@ -6,6 +6,7 @@ import { partsOf } from "./parts";
 import { sheetXml } from "./sheet";
 import { zip } from "./zip";
 
+/** The Excel workbook format for `Export`: one sheet, a header line, numbers, dates, booleans and text as what they are, and the table's column widths. `onExport` gets the bytes. */
 export const xlsx: ExportFormat<Uint8Array> = {
   extension: "xlsx",
   mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
