@@ -4,7 +4,7 @@
 
 import { measureStep } from "./bars";
 import { measureSpacing } from "./cells";
-import { DEV, warnOnce } from "./dev";
+import { DEV, asRows, warnOnce } from "./dev";
 import {
   categoriesOf,
   categoryPlaces,
@@ -43,7 +43,12 @@ export const ISO_WITH_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
 /** The rows of each series, in the series' order. */
 export function rowsOf(s: ChartScene, entries: readonly SeriesEntry[]): (readonly unknown[])[] {
-  return entries.map((e) => e.config.data ?? s.data);
+  return entries.map((e) => rowsOfSeries(s, e.config));
+}
+
+/** The rows of one series: its own `data` as an array (anything else is no rows, and warns), or the chart's. */
+export function rowsOfSeries(s: ChartScene, config: SeriesConfig): readonly unknown[] {
+  return config.data === undefined || config.data === null ? s.data : asRows(config.data, `the data of the series "${config.name}"`);
 }
 
 /** Reads the categories of every axis anew. Where an axis' list changed,
@@ -141,7 +146,7 @@ export function broughtAlongY(s: ChartScene, bound: readonly SeriesEntry[]): str
   for (const { config } of bound) {
     if (config.kind === "state" && config.lane !== undefined) names.add(config.lane);
     if (config.kind !== "matrix") continue;
-    for (const name of categoriesOf([config.data ?? s.data], config.accessor) ?? []) names.add(name);
+    for (const name of categoriesOf([rowsOfSeries(s, config)], config.accessor) ?? []) names.add(name);
   }
   return names.size === 0 ? null : [...names];
 }
@@ -156,7 +161,7 @@ export function materialize(s: ChartScene): void {
       continue;
     }
     const config = entry.config;
-    const data = config.data ?? s.data;
+    const data = rowsOfSeries(s, config);
     const xAxis = s.findAxisConfig("x", config.xAxisId);
     if (xAxis?.accessor === undefined) continue; // validate() reports a missing axis in DEV
     const categories = s.categoriesAt("x", xAxis.id);

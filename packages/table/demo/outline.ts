@@ -56,7 +56,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "First table",
         sentence: "Rows of records to scan, sort, search and select (also called a data table or data grid). Reach for it when people compare many records by the same fields; from a few rows to a million on a server.",
         about: [
-          "`useTable` takes the rows and hands back the `Table` and the `Column` that belong to them, so a column can only name a field the row has. The parts that touch no row, such as `Toolbar` or `Search`, are ordinary imports.",
+          "`useTable` takes the rows and hands back the `Table` and the `Column` that belong to them, so a column can only name a field the row has. The rows are one object per row in an array; anything else (an object of columns, an Arrow table, a typed array) is read as no rows, shows the empty state and warns once in development, and `Array.from` makes rows of an Arrow table or a typed array. The parts that touch no row, such as `Toolbar` or `Search`, are ordinary imports.",
           "Every option of the hook and every prop of the table stands in the tables below; each feature has a page of its own in the sidebar.",
         ],
         alternatives: [
