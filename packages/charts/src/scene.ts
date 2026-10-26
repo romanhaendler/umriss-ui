@@ -720,7 +720,7 @@ export class ChartScene {
     return this.tooltip !== null;
   }
   /** Who hears the range the reader marked; `useChart` sets it. */
-  onRange: ((range: ChartRange) => void) | null = null;
+  onRange: ((range: ChartRange<number | string>) => void) | null = null;
   /** The range being marked, in pixels, while the pointer is down: `live` once
       the press became a drag, and the band is drawn.
       @internal */

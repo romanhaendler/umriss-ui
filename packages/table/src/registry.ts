@@ -34,7 +34,7 @@ import type { Formats } from "@umriss-ui/core";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
 import { windowed } from "./model/tableState";
-import { probeStale, warnOnce } from "./dev";
+import { DEV, probeStale, warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
 import type { ValueKind } from "./values";
 import type { AggregateColumn, GroupLevel } from "./model/grouping";
@@ -479,7 +479,21 @@ export class Registry {
     if (remembered && remembered.rows === rows && remembered.value === entry.spec.value) return remembered.kind;
     const kind = columnKind(rows, entry.read);
     this.kinds.set(entry.key, { rows, value: entry.spec.value, kind });
+    if (DEV) this.warnFormat(entry, kind);
     return kind;
+  }
+
+  /** A format whose kind the column's first value does not have: the cells print
+      raw. An empty column says nothing yet. */
+  private warnFormat(entry: ColumnEntry, kind: ValueKind) {
+    const { format, id } = entry.spec;
+    if (format === undefined || kind === "empty") return;
+    const dated = format === "date" || format === "time" || format === "dateTime";
+    if (dated && kind !== "date") {
+      warnOnce(`format-date:${id}`, `The column "${id}" has the date format "${format}", but its first value is ${kind === "other" ? "not a point in time" : `a ${kind}`}: the cells show it raw. A point in time is a \`Date\` in the row; convert an epoch number or an ISO string there.`);
+    } else if (!dated && kind !== "number") {
+      warnOnce(`format-number:${id}`, `The column "${id}" has a number format, but its first value is ${kind === "other" ? "not a number" : `a ${kind}`}: the cells show it raw. Convert the value to a number in the row.`);
+    }
   }
 
   /** Can it be sorted by this column? Without a statement: when its value is

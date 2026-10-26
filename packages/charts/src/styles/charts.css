@@ -797,9 +797,7 @@
     color: var(--uc-color-text);
   }
 
-  .uc-break::before,
-  .uc-break::after {
-    content: "";
+  .uc-break > i {
     position: absolute;
     top: 0;
     width: 1px;
@@ -809,11 +807,11 @@
     transform: skewX(-20deg);
   }
 
-  .uc-break::before {
+  .uc-break > i:first-child {
     left: 1px;
   }
 
-  .uc-break::after {
+  .uc-break > i:last-child {
     left: 4px;
   }
 }
