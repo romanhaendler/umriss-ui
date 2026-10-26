@@ -85,5 +85,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 | [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | accepted | components, core |
 | [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
+| [0074](0074-a-chart-reports-a-range-as-it-reports-a-hit-and-keeps-none.md) | A chart reports a range as it reports a hit, and keeps none | Chart reports a range, keeps none; Alt-drag on a zoomable chart, plain drag elsewhere | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
