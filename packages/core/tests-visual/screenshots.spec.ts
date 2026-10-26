@@ -70,6 +70,20 @@ test("Scenario trace-a-batch with a current batch", async ({ page }, testInfo) =
   await expect(target).toHaveScreenshot(`scenario-trace-a-batch-chosen-${testInfo.project.name}.png`);
 });
 
+/* "Mark a stretch" with a stretch marked by the keyboard: Space, a walk, Space - the band in the trend and the alarms of the stretch in the table. */
+test("Scenario mark-a-stretch with a stretch", async ({ page }, testInfo) => {
+  await openScenario(page, "mark-a-stretch");
+  const target = await aloneStage(page, "mark-a-stretch");
+  await target.getByRole("application").focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+  for (let i = 0; i < 12; i++) await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+  await expect(target.getByRole("button", { name: "Clear the stretch" })).toBeEnabled();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`scenario-mark-a-stretch-marked-${testInfo.project.name}.png`);
+});
+
 for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   test(`Example ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
