@@ -119,6 +119,10 @@ export function MultiSelect<T extends string = string>(
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  /* The pointer of the gesture last made on the field, or "key" for a key -
+     what decides where the focus goes when the panel opens. */
+  const pointerType = useRef("mouse");
+  const touchOpened = useRef(false);
 
   /* What the list says through the shared announcer:
      how many options the search and the scope leave - typing in the search
@@ -147,6 +151,7 @@ export function MultiSelect<T extends string = string>(
   const sayRemoved = (optionValue: T) => announce(wording.optionRemoved(labelOf(optionValue)), fieldRef.current);
 
   const openPanel = (targetScope: Scope = "all") => {
+    touchOpened.current = pointerType.current === "touch";
     setScope(targetScope);
     setSelectedSnapshot(new Set(value));
     setSearch("");
@@ -165,9 +170,16 @@ export function MultiSelect<T extends string = string>(
 
   /* Into the search as soon as the panel stands. An effect on `open` runs
      before the popover has found its portal target, so the first opening
-     would leave the focus on the trigger. */
+     would leave the focus on the trigger. A touch takes no search, and so no
+     keyboard over the list: the first enabled option takes the focus, or
+     the trigger keeps it. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
-    if (node) searchRef.current?.focus();
+    if (!node) return;
+    if (touchOpened.current) {
+      listRef.current?.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus();
+    } else {
+      searchRef.current?.focus();
+    }
   }, []);
 
   /* ---- Base of the list: natural order, never re-sorted ---- */
@@ -361,7 +373,13 @@ export function MultiSelect<T extends string = string>(
             openPanel("all");
           }
         }}
-        onKeyDown={handleFieldKeyDown}
+        onPointerDown={(event) => {
+          pointerType.current = event.pointerType;
+        }}
+        onKeyDown={(event) => {
+          pointerType.current = "key";
+          handleFieldKeyDown(event);
+        }}
       >
         {value.length > 0 && (
           <>
@@ -465,12 +483,11 @@ export function MultiSelect<T extends string = string>(
         focusRef={mainRef}
         width="anchor"
         minWidth={260}
-        role="dialog"
-        aria-label={placeholderText}
-        id={panelId}
         className={styles.panel}
       >
-          <div ref={attachPanel}>
+          {/* The role sits here, not on the popover: a dialog the popover
+              names would take the focus for itself on opening. */}
+          <div ref={attachPanel} role="dialog" aria-label={placeholderText} id={panelId}>
               <Input
                 ref={searchRef}
                 size="sm"
