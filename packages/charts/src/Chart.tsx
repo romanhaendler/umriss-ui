@@ -33,7 +33,7 @@ import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
 import { useSilhouette } from "./Silhouette";
 import { TooltipHtml } from "./TooltipHtml";
-import { warnDeprecated, warnOnce } from "./dev";
+import { asRows, warnDeprecated, warnOnce } from "./dev";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
@@ -229,7 +229,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
 
   // Taking over data and configuration: only a scene entry plus a dirty flag.
   useEffect(() => {
-    scene.setData(data);
+    scene.setData(asRows(data, "the rows of useChart"));
   }, [scene, data]);
 
   useEffect(() => {

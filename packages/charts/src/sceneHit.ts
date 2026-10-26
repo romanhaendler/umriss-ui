@@ -12,6 +12,7 @@ import { boxAt } from "./sceneConfig";
 import { placements, lastEnd, lanePx } from "./sceneDraw";
 import { centreOf, releaseKey } from "./sceneKeys";
 import { type SeriesEntry, type Candidate } from "./sceneModel";
+import { rowsOfSeries } from "./sceneMaterial";
 import { limitTexts, totalsOf } from "./sceneSpeech";
 import { isHidden } from "./sceneView";
 import { segmentEnd, segmentIndex } from "./state";
@@ -216,7 +217,7 @@ export function hitTest(
       color: k.color,
       xValue: k.xValue,
       yValue: k.yValue,
-      datum: (k.entry.config.data ?? s.data)[row],
+      datum: rowsOfSeries(s, k.entry.config)[row],
       index: row,
       level: k.level,
       segment: k.segment,
