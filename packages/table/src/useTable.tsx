@@ -31,7 +31,7 @@ import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csv, selectionText, sheetOf } from "./export";
-import { DEV, asRows, warnOnce } from "./dev";
+import { DEV, asRows, probeStale, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
@@ -100,10 +100,13 @@ function combineConditions(
 
 /** An accessor written in the call, held while the next one is equal to it
     (fnEqual): its identity keys the memos below. */
-function useAccessor<F>(fn: F): F {
+function useAccessor<F>(fn: F, rows: readonly unknown[]): F {
   // Boxed: useState would call a function as its initialiser.
   const [held, setHeld] = useState({ fn });
-  if (fnEqual(held.fn, fn)) return held.fn;
+  if (fnEqual(held.fn, fn)) {
+    probeStale("The rowKey", held.fn, fn, rows);
+    return held.fn;
+  }
   setHeld({ fn });
   return fn;
 }
@@ -189,6 +192,7 @@ function effectiveWidths(
 export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z> {
   const rows = asRows(given, "the rows of useTable");
   const [registry] = useState(() => new Registry());
+  registry.setRows(rows);
   const [parts] = useState(() => {
     const bound = buildParts(registry);
     return { ...bound, VerdictColumn: buildVerdictColumn(bound.Column) };
@@ -263,7 +267,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
-  const rowKey = useAccessor(options.rowKey) as (row: unknown) => string;
+  const rowKey = useAccessor(options.rowKey, rowsUnknown) as (row: unknown) => string;
   /* Tree rows: the rows are the roots, and their levels
      come from their children. A grouping would build levels a second way, and
      pages would tear rows from their parents - both are passed over. The
