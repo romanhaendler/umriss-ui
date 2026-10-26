@@ -13,6 +13,7 @@ import { yTickFormat } from "./sceneSpeech";
 import { publishView, isHidden, zooms, domainOf, hasZoom } from "./sceneView";
 import type { AxisConfig, LimitConfig, AxisOrientation } from "./types";
 import { sameSpan } from "./view";
+import { differsFromReader, zoneName } from "./zone";
 import { inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 
 
@@ -168,7 +169,7 @@ export function updateLayout(s: ChartScene): void {
       id: c.id,
       orientation: c.orientation,
       position: c.position,
-      label: c.label,
+      label: titleOf(s, c, categories === undefined && inTime(s, c)),
       grid: grid.get(id) ?? false,
       extent: extentFor(s, c),
       domainMode: domainOf(s, c),
@@ -180,6 +181,7 @@ export function updateLayout(s: ChartScene): void {
           : labelled(categories, c.categoryLabel),
       tickValues: categories?.ticks ?? c.ticks,
       time: categories === undefined && inTime(s, c) ? true : undefined,
+      timeZone: categories === undefined && inTime(s, c) ? s.timeZone : undefined,
       calendar: categories === undefined ? c.calendar : undefined,
       alignTicks: c.alignTicks,
       limitLabels:
@@ -213,6 +215,15 @@ export function updateLayout(s: ChartScene): void {
   // A gesture's span goes out with the frame that draws it, and an axis
   // declared or gone may take a span out of the view or give it back.
   publishView(s);
+}
+
+/** A time axis' title: its own, then the zone's generic name where the
+    reader's zone is another - alone where it has none. The Picture paints the
+    title, so it paints the zone with it. */
+function titleOf(s: ChartScene, c: AxisConfig, timed: boolean): string | undefined {
+  if (!timed || s.timeZone === undefined || !differsFromReader(s.timeZone)) return c.label;
+  const name = zoneName(s.timeZone, s.wording.locale);
+  return c.label === undefined || c.label === "" ? name : `${c.label} · ${name}`;
 }
 
 export function findAxis(s: ChartScene, orientation: "x" | "y", id: string): AxisLayout | null {

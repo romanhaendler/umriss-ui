@@ -185,6 +185,32 @@ and across all five packages in
 them: bars and areas stack (`stack`, `normalize`). Horizontal bars are the
 next kind to come (ADR-0059).
 
+## Time zone
+
+`<Chart timeZone="Europe/Berlin">` draws every time axis of the chart, a
+working-time axis included, in that IANA zone for a reader anywhere; without
+it the reader's zone holds, as before. An unknown name throws Intl's
+`RangeError`. The chart needs no other package for it, so a charts-only app can
+show a trend in UTC with `timeZone="UTC"`.
+
+* **The texts** - tick labels, tooltip, readout, data table and summary - are
+  written with Intl's `timeZone` in the wording's `locale`.
+* **The label**: where the reader's zone, canonicalised through Intl, is
+  another, the zone's generic name stands after the time axis's own title (or
+  alone, where it has none), once the page has mounted. The picture paints it
+  with the title.
+* **The tick rule**, for a named zone and the reader's alike: steps of a day or
+  longer stand on the zone's midnights, months and years; steps below a day on
+  the zone's whole multiples in real time, so a two-hour grid stays on even
+  hours after a clock change. The hour a change removes has no tick; the hour
+  it doubles is ticked twice, and each label, the tooltip and the readout carry
+  the offset (`01:00 GMT-4`, `01:00 GMT-5`).
+* `localOffset(instant, timeZone?)` and `workingTimeTicks(…, offset, timeZone?)`
+  take the zone as an optional last argument.
+
+An application on `@umriss-ui/core` names the zone once in its formats and
+passes `useFormats().timeZone` to the chart; see core's README on formats.
+
 ## More
 
 * The demo, in a checkout: `pnpm dev:charts` (port 4174). It is the documentation — every page

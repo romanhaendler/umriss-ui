@@ -63,6 +63,9 @@ export interface AxisInput {
   tickValues?: readonly number[];
   /** The values are instants: ticks on local boundaries, labels by level. */
   time?: boolean;
+  /** The IANA zone the instants are ticked and written in; the reader's
+      where it is left out. */
+  timeZone?: string;
   /** Working calendar; the axis then stands in working time, and carries
       time. The module behind it builds a calendar out of the list once and
       keeps it. */
@@ -212,7 +215,7 @@ function domainOf(
     // be cut in half.
     if (!readable([min, max])) return dataDomain(min, max);
     const step = stepOf([min, max], tickCount);
-    return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n });
+    return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n }, axis.timeZone);
   }
   return niceDomain(min, max, tickCount);
 }
@@ -238,7 +241,7 @@ function tickValuesFor(
     const built = calendarFrom(calendar);
     const inside = (v: number) => toWallClock(Math.min(Math.max(v, 0), built.total), built);
     const values: number[] = [];
-    for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(domain, tickCount))) {
+    for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(domain, tickCount), axis.timeZone)) {
       const v = toWorkingTime(wall, built);
       // Removed time, or the seam an earlier candidate already stands on: two
       // labels on one pixel are one too many.
@@ -247,7 +250,7 @@ function tickValuesFor(
     }
     return values;
   }
-  if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(domain, tickCount)) : [];
+  if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(domain, tickCount), axis.timeZone) : [];
   return ticksFor(domain[0], domain[1], tickCount);
 }
 
@@ -260,9 +263,9 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
     // same route labels the tooltip later.
     return own !== undefined
       ? ((f) => (v: number) => f(toWallClock(v, calendar)))(tickFn(own, locale, 1))
-      : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds, locale);
+      : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds, locale, axis.timeZone);
   }
-  if (axis.time === true && own === undefined) return (v: number, seconds?: boolean) => timeText(v, seconds, locale);
+  if (axis.time === true && own === undefined) return (v: number, seconds?: boolean) => timeText(v, seconds, locale, axis.timeZone);
   const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
   if (own !== undefined) return tickFn(own, locale, step);
   return (v: number) => formatTick(v, step, locale);
@@ -282,7 +285,7 @@ function labelsFor(
   const calendar = calendarOf(axis);
   if (axis.tickFormat !== undefined || (axis.time !== true && calendar === undefined)) return values.map(format);
   const wall = calendar === undefined ? values : values.map((v) => toWallClock(v, calendar));
-  return timeLabels(wall, stepOf(domain, tickCount), locale);
+  return timeLabels(wall, stepOf(domain, tickCount), locale, axis.timeZone);
 }
 
 /** A label's left edge, moved inside a container of `width`. */

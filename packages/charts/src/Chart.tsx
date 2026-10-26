@@ -36,6 +36,7 @@ import { useSilhouette } from "./Silhouette";
 import { TooltipHtml } from "./TooltipHtml";
 import { asRows, warnOnce } from "./dev";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
+import { checkZone } from "./zone";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
 
@@ -82,6 +83,16 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
       axis or series. German: `GERMAN_CHARTS_WORDING` from `@umriss-ui/charts/wording/de`.
       @default DEFAULT_CHARTS_WORDING */
   wording?: Partial<ChartsWording>;
+  /** An IANA time zone (`"Europe/Berlin"`) for every time axis of the chart, a
+      calendar axis included: ticks stand on its hours and midnights, and the
+      labels, tooltip, readout, data table and summary write its time, in the
+      wording's `locale`. Where the reader's zone is another, the axis title
+      ends in the zone's name (after mount). An hour a clock change doubles is
+      ticked twice and its labels carry the offset; the hour it removes has
+      no tick. A name Intl does not know throws its `RangeError`. An
+      application on `@umriss-ui/core` passes `useFormats().timeZone`.
+      @default the reader's zone */
+  timeZone?: string;
   /** How series are told apart. `"color"`: by their colour.
       `"marks"`: by a dash and a marker shape as well - a line, an area and a
       scatter -, and by a hatch - a bar, a state, a matrix cell, a limit band -,
@@ -127,12 +138,14 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     empty: emptyProp,
     loading = false,
     wording: wordingProp,
+    timeZone,
     encoding = "color",
     children,
     ...rest
   } = props;
 
   const wording = useMemo<ChartsWording>(() => ({ ...DEFAULT_CHARTS_WORDING, ...wordingProp }), [wordingProp]);
+  if (timeZone !== undefined) checkZone(timeZone);
   const empty = emptyProp ?? wording.empty;
 
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -253,6 +266,10 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   useEffect(() => {
     scene.setWording(wording);
   }, [scene, wording]);
+
+  useEffect(() => {
+    scene.setTimeZone(timeZone);
+  }, [scene, timeZone]);
 
   useEffect(() => {
     scene.setEncoding(encoding);
