@@ -114,6 +114,9 @@
     /* The size of a FormField's label. The controls keep their own text size
        (--u-text-sm), so a label can be set apart from the field's text. */
     --u-label-size: var(--u-text-sm);
+    /* The width of the label column of a FormField with
+       `labelPlacement="start"`; the field takes the rest of the row. */
+    --u-label-width: 10rem;
 
     /* A box as tall as its type: a badge, a tag, a count, a glyph. The height
        comes from the control or the padding, and the line adds no leading. */
