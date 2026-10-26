@@ -132,3 +132,27 @@ above; 2026-10-12, one run of the page per row.
 A scroll step, a page, a fold, a hidden column and a re-render of the caller no
 longer grow with the rows. The first render, a sort and a search still do: they
 are the work of reading, ordering and matching every row.
+
+## The XLSX file
+
+`@umriss-ui/table/xlsx` writes a workbook of its own, with no foreign
+dependency (ADR-0073).
+
+**It holds** one sheet, named by the wording's `exportSheetName`; a header line;
+cells typed as number, date, boolean or text; the table's column widths
+(7 px a character); the rows and columns of the CSV. A date is the reader's local
+wall-clock time as a serial number, `yyyy-mm-dd` where a column's dates are all
+at midnight and `yyyy-mm-dd hh:mm:ss` otherwise; one before 1900-03-01 is ISO
+text. A text is an inline string, so `=1+1` is not a formula.
+
+**It does not hold** styling, formulas, group rows, footers, a frozen header,
+filters, several sheets or compression.
+
+**Limits.** Over 1,048,576 rows or 16,384 columns the writer throws a
+`RangeError`; a text over 32,767 characters is cut; characters XML 1.0 forbids
+are dropped. `dist/xlsx.js` stays under 4 kB minified and gzipped and imports
+nothing (`check:dist`). The ZIP is stored, so a file is about the size of its
+XML: 100,000 rows of ten columns are tens of megabytes.
+
+**Import.** Excel, Numbers, LibreOffice and Google Sheets open it; to read it in
+code, unzip it and read `xl/worksheets/sheet1.xml`.
