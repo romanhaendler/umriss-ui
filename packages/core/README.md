@@ -342,6 +342,15 @@ plant in Berlin, read from Chicago - names that zone in the formats, an IANA nam
 <UmrissProvider language={{ formats: { ...GERMAN_FORMATS, timeZone: "Europe/Berlin" } }}>…</UmrissProvider>;
 ```
 
+A switch between the plant's time and the reader's is a provider whose formats name the zone or not;
+[the control room scenario](demo/scenarios/05-watch-a-kiln-line.tsx) shows it, with its charts, table and
+schedule following:
+
+```tsx
+const formats = useMemo(() => (plantTime ? { timeZone: "Europe/Berlin" } : {}), [plantTime]);
+<LanguageProvider formats={formats}>…</LanguageProvider>;
+```
+
 `useFormats().timeZone` tells the zone in use. A section in another zone is a nested `LanguageProvider`
 that names it. A misspelled name throws Intl's `RangeError` where the formats are merged, so a screen never
 shows the reader's time while claiming the plant's.
