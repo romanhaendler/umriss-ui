@@ -37,7 +37,7 @@ import styles from "./Table.module.css";
 
 export function Frame({
   registry,
-  props,
+  props: given,
   name,
 }: {
   registry: Registry;
@@ -45,6 +45,8 @@ export function Frame({
   /** The three names of the table, for the <table> (ADR-0068). */
   name: { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string };
 }) {
+  /* A late answer makes the table busy as `loading` does. */
+  const props = registry.hook?.late ? { ...given, loading: true } : given;
   const {
     selectable = false,
     stickyHeader = false,
