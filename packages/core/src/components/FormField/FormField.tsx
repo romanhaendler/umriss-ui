@@ -56,28 +56,26 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement>, RefProp<
   /** Optional: a fixed id for the input element (instead of a generated
       one). */
   fieldId?: string;
+  /** Where the label stands: `"top"` above the field (the default) or
+      `"start"` beside it, in a column as wide as `--u-label-width`, level on
+      the first baseline. `"start"` is for a column of fields and fills its
+      place; where the row cannot hold the label and 12rem of field, the
+      field wraps under the label. A `Grid` of fields keeps `"top"`. */
+  labelPlacement?: "top" | "start";
 }
 
 /** A label, a hint or error and the control they belong to. The control
     inside takes the field's id, description, required and invalid state by
     itself - no wiring by hand. */
-export function FormField({ ref, label, hint, error, required = false, fieldId, className, children, ...rest }: FormFieldProps) {
+export function FormField({ ref, label, hint, error, required = false, fieldId, labelPlacement = "top", className, children, ...rest }: FormFieldProps) {
   const generatedId = useId();
   const id = fieldId ?? generatedId;
   const messageId = `${id}-message`;
   const labelId = `${id}-label`;
   const hasMessage = Boolean(error ?? hint);
 
-  return (
-    <div ref={ref} className={cx(styles.field, className)} {...rest}>
-      <label id={labelId} className={styles.label} htmlFor={id}>
-        {label}
-        {required && (
-          <span className={styles.required} aria-hidden="true">
-            *
-          </span>
-        )}
-      </label>
+  const control = (
+    <>
       <FormFieldContext
         value={{ id, labelId, describedBy: hasMessage ? messageId : undefined, invalid: Boolean(error), required }}
       >
@@ -88,6 +86,20 @@ export function FormField({ ref, label, hint, error, required = false, fieldId, 
           {error ?? hint}
         </p>
       )}
+    </>
+  );
+
+  return (
+    <div ref={ref} className={cx(styles.field, labelPlacement === "start" && styles.start, className)} {...rest}>
+      <label id={labelId} className={styles.label} htmlFor={id}>
+        {label}
+        {required && (
+          <span className={styles.required} aria-hidden="true">
+            *
+          </span>
+        )}
+      </label>
+      {labelPlacement === "start" ? <div className={styles.fieldPart}>{control}</div> : control}
     </div>
   );
 }
