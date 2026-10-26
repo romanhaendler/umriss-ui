@@ -93,8 +93,11 @@ const { Dashboard, WidgetType } = useDashboard({
   it; the reader never can. An arrangement a reader kept before the lock lacks
   it: the application sets it before `initialView`, as the demo's "A widget every
   reader keeps" shows.
-- **A kept arrangement is read leniently.** A widget of a type that is gone
-  falls out, a size a type no longer offers falls back to its starting size.
+- **A kept arrangement is read leniently.** A widget of a type not declared is
+  not drawn and stays in the stored arrangement: "Done" keeps it after the
+  widgets that are drawn, so a widget behind a role, a flag or a plugin loaded
+  late is never lost. A size a type no longer offers falls back to its starting
+  size, and options a stored widget lacks come from its type's default options.
   A widget whose content throws keeps its frame and says so in a sentence.
 - **A failed widget is reported and may be retried.** React's `onCaughtError`,
   given to `createRoot` or to the application's root, receives the error of a
