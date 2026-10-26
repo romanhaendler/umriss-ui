@@ -30,7 +30,8 @@ closed.**
   unreadable, and spreadsheets apply the same rule. No new format entry.
 
 Unchanged: the byte order mark, CRLF, quoting (now of the separator in use),
-dates as ISO text, numbers without thousands groups, the filtered set and the
+a column of days as its local day and other points in time as ISO text
+(amended 2026-10-26), numbers without thousands groups, the filtered set and the
 visible columns.
 
 ## The mixed case
@@ -71,3 +72,13 @@ the user's own act and the apostrophe would show up in the cell.
   the formats' decimal mark) and a later XLSX writer.
 - A separator, BOM or line-break option on `Export` is not offered: the
   application can process the text it is handed.
+
+## Amended 2026-10-26: a day is written as its day
+
+A column whose dates all fall at local midnight is written as the local day,
+`YYYY-MM-DD`, from the wall-clock fields; a column with one date at another
+time writes every date as ISO text, so that a column never mixes two forms.
+Absent values do not count. The copy follows the same rule. A day written as an
+instant lands a day off east of UTC (`2026-03-16T23:00:00.000Z` for the 17th in
+Berlin) and a spreadsheet reads it as text. The XLSX writer's own test of a
+column of days is the same function.

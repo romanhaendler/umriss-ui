@@ -107,11 +107,11 @@ describe("a format handed to Export", () => {
 });
 
 describe("exportAs", () => {
-  it("agrees with asCsv, writes dates as ISO text, and types a custom format", () => {
+  it("agrees with asCsv, writes a column of days as its day, and types a custom format", () => {
     render(<Parts>{null}</Parts>);
     const t = current!;
     expect(t.exportAs(csv)).toBe(t.asCsv());
-    expect(t.asCsv()).toContain(new Date(2026, 2, 17).toISOString());
+    expect(t.asCsv()).toContain("2026-03-17");
     expect(t.exportAs(count)).toBe(2);
     expectTypeOf(t.exportAs(count)).toEqualTypeOf<number>();
     expectTypeOf(t.exportAs(csv)).toEqualTypeOf<string>();
