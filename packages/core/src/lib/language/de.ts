@@ -90,6 +90,8 @@ export const GERMAN_WORDING: Wording = {
   dateTimeRangeClear: "Zeitraum mit Uhrzeit leeren",
   previousMonth: "Voriger Monat",
   nextMonth: "Nächster Monat",
+  monthSelect: "Monat",
+  yearSelect: "Jahr",
   quickSelect: "Schnellwahl",
   today: "Heute",
   now: "Jetzt",

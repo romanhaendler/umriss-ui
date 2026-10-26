@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
@@ -58,9 +58,25 @@ export interface ComboboxProps<T extends string = string>
   emptyText?: string;
   /** Shows a cross on selection or input that clears field and selection. */
   clearable?: boolean;
+  /** Runs on every change of the typed text - the clearing cross's too, with
+      `""` - and not on opening or closing. For an application that fetches the
+      matches itself: debounce and cancelling stale requests are yours. */
+  onSearch?: (text: string) => void;
+  /** With `false` the field filters nothing: `options` are shown as given, in
+      their order - the server's ranking. The active option returns to the first
+      when they change while the panel is open.
+      @default true */
+  filter?: boolean;
+  /** Results are on their way: the list shows the wording's "Loading" line
+      where it would show the empty text, below any `options` given, and is
+      `aria-busy`. */
+  loading?: boolean;
 }
 
-/** A searchable select field (the combobox pattern with a listbox panel). */
+/** A searchable select field (the combobox pattern with a listbox panel).
+    The label of the chosen `value` is kept from the last `options` that held
+    it, so a search that replaces the options does not empty the field - an
+    initial `value` must stand among the first `options`. */
 export function Combobox<T extends string = string>(
   {
     ref,
@@ -74,6 +90,9 @@ export function Combobox<T extends string = string>(
     invalid,
     emptyText,
     clearable = false,
+    onSearch,
+    filter = true,
+    loading = false,
     className,
     style,
     id,
@@ -99,7 +118,14 @@ export function Combobox<T extends string = string>(
 
   const selected = useMemo(() => options.find((option) => option.value === value) ?? null, [options, value]);
 
-  const filtered = useMemo(() => filterOptions(options, query ?? ""), [options, query]);
+  const filtered = useMemo(() => (filter ? filterOptions(options, query ?? "") : options), [options, query, filter]);
+
+  // The label of the chosen value survives options that no longer hold it.
+  const [kept, setKept] = useState<{ value: T; label: string } | null>(null);
+  if (selected && (kept?.value !== selected.value || kept.label !== selected.label)) {
+    setKept({ value: selected.value, label: selected.label });
+  }
+  const chosenLabel = selected?.label ?? (value !== null && kept?.value === value ? kept.label : "");
 
   /* What VoiceOver does not read of an active descendant - how many options
      stand, and an option's state - the field says itself. The count on every
@@ -107,11 +133,24 @@ export function Combobox<T extends string = string>(
   const sayCount = (count: number) =>
     announce(count === 0 ? emptyLabel : wording.optionCount(count), inputRef.current);
 
-  const openPanel = () => {
+  const openPanel = (quiet = false) => {
     setActiveIndex(startIndex(filtered, value));
     setOpen(true);
-    sayCount(filtered.length);
+    if (!quiet) sayCount(filtered.length);
   };
+
+  /* Options the application hands over: the count is theirs to announce (not
+     the keystroke's), and the cursor starts again at the first. Not while
+     results are on their way. */
+  const seen = useRef({ options, loading });
+  useEffect(() => {
+    const before = seen.current;
+    seen.current = { options, loading };
+    if (filter || !open || loading || (before.options === options && before.loading === loading)) return;
+    setActiveIndex(0);
+    sayCount(options.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the options and loading are triggers
+  }, [options, loading]);
 
   const closePanel = () => {
     // A count still waiting would be spoken after the choice or the Escape.
@@ -173,7 +212,7 @@ export function Combobox<T extends string = string>(
     }
   };
 
-  const display = query ?? selected?.label ?? "";
+  const display = query ?? chosenLabel;
 
   return (
     <>
@@ -211,9 +250,10 @@ export function Combobox<T extends string = string>(
           onChange={(event) => {
             setQuery(event.target.value);
             setActiveIndex(0);
-            if (!open) openPanel();
+            onSearch?.(event.target.value);
+            if (!open) openPanel(!filter);
             // After the opening's count, which is the old query's: the later wins.
-            sayCount(filterOptions(options, event.target.value).length);
+            if (filter) sayCount(filterOptions(options, event.target.value).length);
           }}
           onClick={(event) => {
             onClick?.(event);
@@ -235,6 +275,7 @@ export function Combobox<T extends string = string>(
             onClick={() => {
               onChange(null);
               setQuery(null);
+              onSearch?.("");
               inputRef.current?.focus();
             }}
           >
@@ -273,6 +314,7 @@ export function Combobox<T extends string = string>(
         onActivate={setActiveIndex}
         onChoose={(index) => choose(filtered[index]!)}
         emptyText={emptyLabel}
+        busyText={loading ? wording.loading : undefined}
       />
     </>
   );
