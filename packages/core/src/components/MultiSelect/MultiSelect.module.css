@@ -390,11 +390,13 @@
   }
 
   /* A row of a windowed list is as tall as every other: the hook measures one
-     and the fillers stand for the rest. A label longer than the line is cut. */
+     and the fillers stand for the rest. Its label keeps to one line, which is
+     cut where it is longer; the height stays the option's own, so it grows
+     with the checkbox under a finger. */
   .row {
     flex: none;
-    height: 36px;
     overflow: hidden;
+    white-space: nowrap;
   }
 
   .option:hover {
