@@ -205,6 +205,9 @@ export class ChartScene {
   summaryTimer: ReturnType<typeof setTimeout> | null = null;
   /** @internal */
   wording: ChartsWording = DEFAULT_CHARTS_WORDING;
+  /** The IANA zone of the chart's instants; set after mount, so that the label
+      naming it waits for the page to hydrate. @internal */
+  timeZone: string | undefined = undefined;
   /** @internal */
   measurer: TextMeasurer | null = null;
 
@@ -556,6 +559,12 @@ export class ChartScene {
 
   setWording(wording: ChartsWording): void {
     setWording(this, wording);
+  }
+
+  setTimeZone(timeZone: string | undefined): void {
+    if (timeZone === this.timeZone) return;
+    this.timeZone = timeZone;
+    markLayoutDirty(this);
   }
 
   /** @internal */
