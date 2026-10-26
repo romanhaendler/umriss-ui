@@ -14,6 +14,7 @@ import { dstChoiceFor, resolveFields, pad2 } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { TimeField } from "./TimeField";
 import { dayShown, gridDay, zoneToday } from "./zoned";
+import { clampDay, presetDays, useDayBounds } from "./bounds";
 import { ZoneNote } from "./ZoneNote";
 import { zoneFields } from "../../lib/zone";
 import { rangeFromDays, order, orderByDay } from "./contract";
@@ -109,6 +110,10 @@ export interface DateTimeRangePickerProps
    * @default `DEFAULT_PRESETS`, in the wording's labels
    */
   presets?: RangePreset[];
+  /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
+  min?: Date;
+  /** The latest day the picker offers, inclusive; read as `min` is. */
+  max?: Date;
 }
 
 /**
@@ -140,6 +145,8 @@ export function DateTimeRangePicker(
     chars,
     clearable = false,
     presets,
+    min,
+    max,
     className,
     ...rest
   }: DateTimeRangePickerProps,
@@ -155,6 +162,7 @@ export function DateTimeRangePicker(
   /* Out of the wording as in the DateRangePicker - the constant knew only
      German, and an overridden label reached only one of the two pickers. */
   const { timeZone } = formats;
+  const bounds = useDayBounds(min, max);
   const presetList = useMemo(() => presets ?? defaultPresets(wording, formats.timeZone), [presets, wording, formats.timeZone]);
 
   const [open, setOpen] = useState(false);
@@ -182,7 +190,7 @@ export function DateTimeRangePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = value ? gridDay(value.from, timeZone) : zoneToday(timeZone);
+    const start = clampDay(value ? gridDay(value.from, timeZone) : zoneToday(timeZone), bounds);
     setView(startOfMonth(start));
     setActive(start);
     setDateFrom(value ? gridDay(value.from, timeZone) : null);
@@ -302,8 +310,8 @@ export function DateTimeRangePicker(
 
   const presetIsActive = (preset: RangePreset): boolean => {
     if (!dateFrom || !dateTo || !allDay) return false;
-    const range = preset.range();
-    return sameDay(gridDay(range.from, timeZone), dateFrom) && sameDay(gridDay(range.to, timeZone), dateTo);
+    const cut = presetDays(preset, bounds, timeZone);
+    return !!cut && sameDay(cut[0], dateFrom) && sameDay(cut[1], dateTo);
   };
 
 
@@ -444,9 +452,11 @@ export function DateTimeRangePicker(
               <PresetColumn
                 presets={presetList}
                 isActive={presetIsActive}
+                isDisabled={(preset) => !presetDays(preset, bounds, timeZone)}
                 onChoose={(preset) => {
-                  const range = preset.range();
-                  onChange(rangeFromDays(gridDay(range.from, timeZone), gridDay(range.to, timeZone), "instant", withSeconds, timeZone));
+                  const cut = presetDays(preset, bounds, timeZone);
+                  if (!cut) return;
+                  onChange(rangeFromDays(cut[0], cut[1], "instant", withSeconds, timeZone));
                   closePanel();
                 }}
               />
@@ -461,6 +471,7 @@ export function DateTimeRangePicker(
                   bandTo={bandTo}
                   previewTo={previewTo}
                   onHoverDay={setHoverDay}
+                  bounds={bounds}
                 />
                 <div
                   className={styles.timeRangeRow}

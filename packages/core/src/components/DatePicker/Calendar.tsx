@@ -18,6 +18,8 @@ import styles from "./DatePicker.module.css";
 import { IconButton } from "../Button";
 import { Select } from "../Select";
 import { dayShown, zoneToday } from "./zoned";
+import { NO_BOUNDS, clampDay, monthOutside, outside } from "./bounds";
+import type { DayBounds } from "./bounds";
 import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
 
 /* A pass-through of the wording's weekday heads; part of the calendar
@@ -55,6 +57,8 @@ export interface CalendarProps {
   today?: Date;
   /** A digit typed on the grid; the grid keeps the key from the page. */
   onDigit?: (digit: string) => void;
+  /** The days the picker allows; a day outside is drawn quiet and cannot be picked. */
+  bounds?: DayBounds;
 }
 
 /* The APG keys beyond the arrows: a month, a year (with Shift), the week's ends. */
@@ -84,6 +88,7 @@ export function Calendar({
   withoutOtherMonth = false,
   today,
   onDigit,
+  bounds = NO_BOUNDS,
 }: CalendarProps) {
   const wording = useWording();
   const formats = useFormats();
@@ -114,13 +119,14 @@ export function Calendar({
     const step = dayStep(event.key);
     if (step !== undefined) {
       event.preventDefault();
-      const next = addDays(active, step);
+      const next = clampDay(addDays(active, step), bounds);
       onActive(next);
       if (viewFollows(next, view)) onView(startOfMonth(next));
       return;
     }
-    const moved = jumpKey(event.key, event.shiftKey, active);
-    if (moved) {
+    const jumped = jumpKey(event.key, event.shiftKey, active);
+    if (jumped) {
+      const moved = clampDay(jumped, bounds);
       event.preventDefault();
       onActive(moved);
       if (viewFollows(moved, view)) onView(startOfMonth(moved));
@@ -133,7 +139,7 @@ export function Calendar({
     }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      onPick(active);
+      if (!outside(active, bounds)) onPick(active);
     }
   };
 
@@ -141,14 +147,16 @@ export function Calendar({
      and left behind in the month paged away from it took that stop with it:
      after the arrow buttons, Tab went past the grid. */
   const page = (months: number) => {
-    onView(addMonths(view, months));
-    onActive(shiftMonth(active, months));
+    onView(startOfMonth(clampDay(addMonths(view, months), bounds)));
+    onActive(clampDay(shiftMonth(active, months), bounds));
   };
 
   const year = view.getFullYear();
   const thisYear = (today ?? zoneToday(timeZone)).getFullYear();
-  const firstYear = Math.min(thisYear - 100, year);
-  const years = Array.from({ length: Math.max(thisYear + 100, year) - firstYear + 1 }, (_, i) => firstYear + i);
+  // The years within ±100 of today that the range allows, and always the one in view.
+  const firstYear = Math.min(Math.max(thisYear - 100, bounds.min?.getFullYear() ?? -Infinity), year);
+  const lastYear = Math.max(Math.min(thisYear + 100, bounds.max?.getFullYear() ?? Infinity), year);
+  const years = Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i);
 
   const days = monthGrid(view);
   const referenceDay = today ?? zoneToday(timeZone);
@@ -162,7 +170,7 @@ export function Calendar({
         {withoutPrevious ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <IconButton size="sm" aria-label={wording.previousMonth} onClick={() => page(-1)}>
+          <IconButton size="sm" aria-label={wording.previousMonth} disabled={monthOutside(addMonths(view, -1), bounds)} onClick={() => page(-1)}>
             <svg viewBox="0 0 10 10" aria-hidden="true">
               <path d="M6.4 1.8 3.2 5l3.2 3.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -180,7 +188,7 @@ export function Calendar({
               onChange={(event) => page(Number(event.target.value) - view.getMonth())}
             >
               {Array.from({ length: 12 }, (_, month) => (
-                <option key={month} value={month}>
+                <option key={month} value={month} disabled={monthOutside(new Date(year, month, 1), bounds) && month !== view.getMonth()}>
                   {formats.monthName(new Date(year, month, 1))}
                 </option>
               ))}
@@ -203,7 +211,7 @@ export function Calendar({
         {withoutNext ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <IconButton size="sm" aria-label={wording.nextMonth} onClick={() => page(1)}>
+          <IconButton size="sm" aria-label={wording.nextMonth} disabled={monthOutside(addMonths(view, 1), bounds)} onClick={() => page(1)}>
             <svg viewBox="0 0 10 10" aria-hidden="true">
               <path d="M3.6 1.8 6.8 5 3.6 8.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -232,6 +240,7 @@ export function Calendar({
           const isSingle = isBandFrom && isBandTo;
           const inBand =
             !!bandFrom && !!bandTo && !isBandFrom && !isBandTo && beforeDay(bandFrom, day) && beforeDay(day, bandTo);
+          const isOut = outside(day, bounds);
           const isStartWithoutEnd = !bandTo && sameDay(day, rangeFrom);
           return (
             <button
@@ -242,9 +251,11 @@ export function Calendar({
               aria-label={formats.dateLong(dayShown(day, timeZone))}
               aria-pressed={sameDay(day, value) || isBandFrom || isBandTo || isStartWithoutEnd}
               aria-current={sameDay(day, referenceDay) ? "date" : undefined}
+              aria-disabled={isOut || undefined}
               className={cx(
                 styles.day,
                 !inMonth && styles.otherMonth,
+                isOut && styles.outside,
                 sameDay(day, value) && styles.selected,
                 sameDay(day, referenceDay) && styles.today,
                 inBand && styles.inRange,
@@ -254,7 +265,7 @@ export function Calendar({
                 isSingle && styles.rangeSingle,
                 isBandTo && isPreview && styles.previewEnd,
               )}
-              onClick={() => onPick(day)}
+              onClick={isOut ? undefined : () => onPick(day)}
               onMouseEnter={onHoverDay ? () => onHoverDay(day) : undefined}
             >
               {day.getDate()}
