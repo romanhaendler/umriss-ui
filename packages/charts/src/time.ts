@@ -35,9 +35,12 @@ const STEPS: readonly TimeStep[] = [
 ];
 
 /** The smallest readable step that yields no more ticks than `count` over
-    `span`; above half a year whole years on the 1-2-5 grid. */
-export function timeStepFor(span: number, count: number): TimeStep {
-  const raw = span / Math.max(1, Math.floor(count));
+    `span`; above half a year whole years on the 1-2-5 grid. Not shorter than
+    `atLeast` where that is given: the shortest real distance of a unit is
+    never longer than its nominal length, so a nominal comparison needs no
+    tolerance. */
+export function timeStepFor(span: number, count: number, atLeast = 0): TimeStep {
+  const raw = Math.max(span / Math.max(1, Math.floor(count)), atLeast);
   for (const step of STEPS) if (step.ms >= raw) return step;
   const n = Math.max(1, tickStep(raw / YEAR, 1));
   return { unit: "year", n, ms: n * YEAR };
