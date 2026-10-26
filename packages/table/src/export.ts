@@ -5,6 +5,7 @@
 
 import { separatorsOf } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
+import { allDays, dayText } from "./xlsx/day";
 import { asCsv, asTabbed, plain } from "./model/csv";
 import type { CsvColumn, CsvConventions } from "./model/csv";
 import type { Registry, ColumnEntry } from "./registry";
@@ -59,11 +60,21 @@ function exportColumns(registry: Registry, rows: readonly unknown[]): ColumnEntr
   );
 }
 
-const csvColumn = (e: ColumnEntry): CsvColumn<unknown> => ({
-  id: e.spec.id,
-  label: e.spec.label,
-  value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
-});
+/** A date as the CSV writes it: the local day when the whole column is days,
+    ISO text otherwise. */
+const dateText = (d: Date, days: boolean) => (days ? dayText(d) : d.toISOString());
+
+const csvColumn = (e: ColumnEntry, rows: readonly unknown[]): CsvColumn<unknown> => {
+  const days = allDays(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)));
+  return {
+    id: e.spec.id,
+    label: e.spec.label,
+    value: (row) => {
+      const cell = exportCell(e.read(row), e.spec.ownExportValue);
+      return cell instanceof Date ? dateText(cell, days) : cell;
+    },
+  };
+};
 
 /** The filtered set in the visible columns as typed cells, with the widths the
     table holds. A tree writes every row of its filtered tree, open or not, with
@@ -89,23 +100,25 @@ export function sheetOf(registry: Registry, levelLabel: string, given?: readonly
   };
 }
 
-/** The CSV: the language's conventions, a point in time as ISO text. */
+/** The CSV: the language's conventions; a column of days as its local day,
+    other points in time as ISO text. */
 export const csv: ExportFormat = {
   extension: "csv",
   mime: "text/csv;charset=utf-8",
   write: (sheet, { formats, wording }) =>
     asCsv(
       sheet.rows,
-      sheet.columns.map(
-        (c, i): CsvColumn<readonly ExportCell[]> => ({
+      sheet.columns.map((c, i): CsvColumn<readonly ExportCell[]> => {
+        const days = allDays(sheet.rows.map((row) => row[i]));
+        return {
           id: String(i),
           label: c.label,
           value: (row) => {
             const cell = row[i];
-            return cell instanceof Date ? cell.toISOString() : cell;
+            return cell instanceof Date ? dateText(cell, days) : cell;
           },
-        }),
-      ),
+        };
+      }),
       conventionsOf(formats, wording),
     ),
 };
@@ -127,7 +140,7 @@ export function selectionText(registry: Registry, formats: Formats, wording: Wor
   const hook = registry.hook;
   const rows = selectedInOrder(registry);
   if (!hook || rows.length === 0) return "";
-  return asTabbed(rows, exportColumns(registry, hook.rows).map(csvColumn), conventionsOf(formats, wording));
+  return asTabbed(rows, exportColumns(registry, hook.rows).map((e) => csvColumn(e, rows)), conventionsOf(formats, wording));
 }
 
 /** One cell as the copy writes it: the export's value in the language's notation. */

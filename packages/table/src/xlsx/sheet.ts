@@ -2,6 +2,9 @@
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
 import type { ExportSheet } from "../types";
+/* Kept here and not imported from `./day`: the entry must import nothing, and a module shared with the
+   main entry would be split into a chunk it imports. `day.ts` holds the same test for the CSV. */
+const isDay = (d: Date): boolean => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
 import { escapeXml } from "./parts";
 
 const MAX_ROWS = 1048576;
@@ -27,7 +30,6 @@ function letters(n: number): string {
 const serialOf = (d: Date) =>
   (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) - EPOCH) / DAY;
 
-const isDay = (d: Date) => d.getHours() + d.getMinutes() + d.getSeconds() + d.getMilliseconds() === 0;
 const hasSerial = (v: unknown): v is Date => v instanceof Date && serialOf(v) >= FIRST_SERIAL;
 
 function text(raw: string): string {
