@@ -42,6 +42,7 @@ Screenshot pages carry their name in brackets.
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
 | `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves; zoom is not shared by it | Q21 | Interaction (cursor sync) |
 | `useChart(rows, { onSelect })`: a click or tap on a hit, and Enter on the Active point, report the hit the tooltip's `render` receives - once, not at the end of a drag, a double click on its first click only; the chart holds and draws no selection; DEV warning without a `<Tooltip>`; the summary names Enter only where it is given; the hit does not travel over `syncId` | ADR-0003, ADR-0023 | Unit (jsdom onSelect) |
+| `useChart(rows).toPng()`: a PNG Blob of the plot with its grid, series, limits and bands and of the axes with ticks, labels and titles, on the chart's own ground in the scheme in use, at the chart's CSS size times max(`devicePixelRatio`, 2) - not the tooltip, the crosshair, "Show all", the data key, the screen-reader texts; rejects when the chart is not mounted or has no size | ADR-0075 | Unit (jsdom picture), Interaction (picture), Screenshot (`picture`) |
 | `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
 ## Registration, data, materialisation
@@ -528,8 +529,6 @@ here.
 * **Animation.** A chart that moves on every update is harder to read, and the
   chart redraws once per change, not per frame. The loading silhouette's band
   and its one fade into the course are no exception: neither moves the data.
-* **Export.** Not a bare canvas: a chart hands over one PNG of what the reader
-  sees, decided in [ADR-0075](../../../docs/adr/0075-a-chart-draws-its-own-picture.md).
 * **WebGL.** Downsampling keeps a week of seconds under 25 ms in 2D; a second
   renderer would double every kind.
 * **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
