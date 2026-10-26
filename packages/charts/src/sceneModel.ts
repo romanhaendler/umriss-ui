@@ -2,6 +2,7 @@
    hit, the snapshots the HTML layer reads, and the data table's groups. */
 
 import type { SilhouetteKind } from "./Silhouette";
+import type { BarEdge } from "./colourBar";
 import { EMPTY_LAYOUT, type LayoutResult } from "./layout";
 import { type Hatch, type MarkerShape } from "./marks";
 import { type Extent } from "./materialize";
@@ -125,6 +126,16 @@ export interface LegendItem {
   /** Under encoding by marks, what the chip shows
       besides the colour; null where the colour stands alone. */
   mark: LegendMark | null;
+  /** A gradient-coloured matrix' colour bar; null for every other entry. */
+  bar: LegendBar | null;
+}
+
+/** A colour bar: the gradient's steps in order, the values written under their edges, and the range as words for
+    the entry's accessible name. */
+export interface LegendBar {
+  colors: readonly string[];
+  edges: readonly BarEdge[];
+  range: string;
 }
 
 /** A legend chip's marks: a line with its dash and marker (a scatter: the

@@ -80,6 +80,9 @@ export interface ChartsWording {
   /** Added to the caption where the table shows the downsampled course:
       how many readings its rows stand for. */
   downsampled: (readings: number) => string;
+  /** Added to the name of a matrix' legend entry that has a colour bar: the range its colours span, both ends
+      written in the matrix' format. The bar's own values are hidden from assistive technology. */
+  levelRange: (from: string, to: string) => string;
 }
 
 /** The instance shipped by default. English; German is
@@ -121,6 +124,7 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   notch: "Notch",
   count: "n",
   outlierList: (values, more) => `${values.length + more}: ${values.join(", ")}${more > 0 ? ` and ${more} more` : ""}`,
+  levelRange: (from, to) => `from ${from} to ${to}`,
   downsampled: (readings) =>
     `Downsampled from ${readings.toLocaleString("en-GB")} readings: the first, lowest, highest and last value of each stretch.`,
 };

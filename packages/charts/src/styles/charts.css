@@ -449,6 +449,65 @@
     forced-color-adjust: none;
   }
 
+  /* A matrix' colour bar stands under its name: the steps in a row, 160 px or the legend's width where that is
+     narrower, the values under the edges they name. The step colours are the caller's own and stay as they are
+     under forced colours. */
+  .uc-legend-item[data-bar] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .uc-legend-bar {
+    display: block;
+    width: 160px;
+    max-width: 100%;
+  }
+
+  .uc-legend-steps {
+    display: flex;
+    height: 10px;
+    forced-color-adjust: none;
+  }
+
+  .uc-legend-step {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .uc-legend-step > .uc-legend-mark {
+    position: absolute;
+    inset: 0;
+  }
+
+  .uc-legend-values {
+    position: relative;
+    display: block;
+    height: 1.3em;
+    font-size: 0.85em;
+    text-decoration: none;
+  }
+
+  .uc-legend-edge {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .uc-legend-edge[data-end="start"] {
+    transform: none;
+  }
+
+  .uc-legend-edge[data-end="end"] {
+    transform: translateX(-100%);
+  }
+
+  .uc-legend-item[data-hidden] > .uc-legend-bar {
+    opacity: 0.3;
+  }
+
   /* The entry of a named series is a button, and looks like the plain entry. */
   button.uc-legend-item {
     padding: 0;
