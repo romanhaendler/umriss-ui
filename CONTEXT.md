@@ -811,8 +811,10 @@ A table over rows a server holds: the rows passed in are one page, the
 server's count stands beside them, and the **Request** goes out whenever it
 changes — complete, defaults included, since a server has no default of the
 table's. The **Filtered set** is then the server's; what would
-act on it here — select all, the export — acts on the page and says so, and
-what would misstate it — a footer, a grouping — is not there.
+act on it — select all, the export — reaches every match where the
+application gives the means (**All that match**, `exportRows`) and otherwise
+acts on the page and says so, and what would misstate it — a footer, a
+grouping — is there only as the server's **Totals**, or not at all.
 _Avoid_: manual mode, server-side model, data source, remote table
 
 **Request**:
@@ -821,6 +823,12 @@ server answers: search, conditions, sort levels, page and page size. A width,
 an order or a pin changes the view but not the request, and asks the server
 nothing.
 _Avoid_: query (that is the search), fetch, server view
+
+**Answers**:
+The **Request** a table in **Server mode** is told its rows are the answer to,
+by the application. It is compared with the table's current request by key;
+unequal, the rows are a **Late answer**.
+_Avoid_: request id, response id
 
 **Late answer**:
 Rows that answer a **Request** older than the one a table in **Server mode**
@@ -835,6 +843,17 @@ the server's **Filtered set** for the request it was made under, except the
 rows the reader unticked since. The table holds no rows for it; an action on
 it is the server's to carry out.
 _Avoid_: select all pages, global selection, select everything
+
+**Exceptions**:
+The keys of the rows unticked while **All that match** is selected; a bulk
+action receives them with the request.
+_Avoid_: exclusions, deselected rows
+
+**Totals**:
+The aggregates of a **Server mode** table's columns over every match, by
+column id, handed in beside the rows. They are the server's to compute; the
+table formats them and shows skeleton while they are not current.
+_Avoid_: server sums, summary row
 
 **Pinned column**:
 A column that stays in view while the table scrolls sideways, in a block at the
