@@ -105,6 +105,8 @@ export interface HookSnapshot {
   /** Server mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
+  /** Server mode: the rows answer an older request than the current one. */
+  late: boolean;
   /** The row filters the table was given, by id - their chips read them. */
   rowFilters: ReadonlyMap<string, RowFilter<unknown, unknown>>;
 }
