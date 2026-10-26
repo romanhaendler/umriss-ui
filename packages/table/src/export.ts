@@ -67,18 +67,21 @@ const csvColumn = (e: ColumnEntry): CsvColumn<unknown> => ({
 
 /** The filtered set in the visible columns as typed cells, with the widths the
     table holds. A tree writes every row of its filtered tree, open or not, with
-    its level first: a consumer filtering by level gets a whole level. */
-export function sheetOf(registry: Registry, levelLabel: string): ExportSheet {
+    its level first: a consumer filtering by level gets a whole level. With
+    `given` rows, those instead of the filtered set. */
+export function sheetOf(registry: Registry, levelLabel: string, given?: readonly unknown[]): ExportSheet {
   const hook = registry.hook;
   if (!hook) return { columns: [], rows: [] };
-  const entries = exportColumns(registry, hook.rows);
+  const entries = exportColumns(registry, given ?? hook.rows);
   const { widths } = hook.publicSnapshot;
   const columns: { label: string; width?: number }[] = entries.map((e) => ({
     label: e.spec.label ?? e.spec.id,
     width: widths[e.spec.id],
   }));
-  const { exported, filtered } = registry.projection();
   const cells = (row: unknown) => entries.map((e) => exportCell(e.read(row), e.spec.ownExportValue));
+  /* Rows handed in (every match of a server) are written as they are. */
+  if (given) return { columns, rows: given.map(cells) };
+  const { exported, filtered } = registry.projection();
   if (!exported) return { columns, rows: filtered.map(cells) };
   return {
     columns: [{ label: levelLabel }, ...columns],
