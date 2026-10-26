@@ -17,6 +17,7 @@
 import { DEFAULT_WORDING } from "../../lib/language";
 import type { Wording } from "../../lib/language";
 import { startOfMonth, dayOnly, addMonths, addDays } from "./grid";
+import { dayStart, zoneToday } from "./zoned";
 
 /** A span between two dates, both ends included - the value of
     `DateRangePicker` and `DateTimeRangePicker`. */
@@ -86,10 +87,14 @@ export function presetRange(label: PresetLabel, reference: Date): DateRange {
 
 
 /** The time spans most often asked for in evaluations. */
-export const defaultPresets = (wording: Wording): RangePreset[] =>
+export const defaultPresets = (wording: Wording, timeZone?: string): RangePreset[] =>
   PRESET_LABELS.map((label) => ({
     label: wording.presets[label],
-    range: () => presetRange(label, new Date()),
+    range: () => {
+      // The zone's days, as the instants of their midnights.
+      const { from, to } = presetRange(label, zoneToday(timeZone));
+      return { from: dayStart(from, timeZone), to: dayStart(to, timeZone) };
+    },
   }));
 
 /** The same time spans with the preset labels. */

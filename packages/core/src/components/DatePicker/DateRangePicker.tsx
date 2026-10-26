@@ -10,6 +10,8 @@ import { MonthPair, PresetColumn } from "./RangePanel";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { DateRange, RangePreset } from "./range";
 import { rangeFromDays } from "./contract";
+import { dayShown, gridDay, zoneToday } from "./zoned";
+import { ZoneNote, useMidnightWarning } from "./ZoneNote";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
@@ -22,13 +24,13 @@ export { rangeDays, DEFAULT_PRESETS } from "./range";
 export type { DateRange, RangePreset } from "./range";
 
 /**
- * The value contract: both ends on local midnight (resolution "day"), and `from`
+ * The value contract: both ends on midnight in the formats' zone (resolution "day"), and `from`
  * never lies after `to` - a range dragged backwards is silently turned around.
  * Both ends count inclusively. There is no error state.
  */
 export interface DateRangePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
-  /** The time span, both ends on local midnight and both inclusive; `null`
+  /** The time span, both ends on midnight in the formats' zone (the reader's, unless the application names one) and both inclusive; `null`
       means none. */
   value: DateRange | null;
   /** Runs as soon as both ends are settled - after the second click, on a
@@ -102,11 +104,15 @@ export function DateRangePicker(
   const measure = useLanguage().formats;
   const placeholderText = placeholder ?? wording.dateRangePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
-  const presetList = useMemo(() => presets ?? defaultPresets(wording), [presets, wording]);
+  const { timeZone } = formats;
+  useMidnightWarning([value?.from, value?.to]);
+  // The grid works on the zone's calendar days; the value's ends are two of them.
+  const days = value && { from: gridDay(value.from, timeZone), to: gridDay(value.to, timeZone) };
+  const presetList = useMemo(() => presets ?? defaultPresets(wording, formats.timeZone), [presets, wording, formats.timeZone]);
 
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<Date>(() => startOfMonth(value?.from ?? new Date()));
-  const [active, setActive] = useState<Date>(() => value?.from ?? new Date());
+  const [view, setView] = useState<Date>(() => startOfMonth(days?.from ?? zoneToday(timeZone)));
+  const [active, setActive] = useState<Date>(() => days?.from ?? zoneToday(timeZone));
   const [draftFrom, setDraftFrom] = useState<Date | null>(null);
   const [hoverDay, setHoverDay] = useState<Date | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -115,7 +121,7 @@ export function DateRangePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = value?.from ?? new Date();
+    const start = days?.from ?? zoneToday(timeZone);
     setView(startOfMonth(start));
     setActive(start);
     setDraftFrom(null);
@@ -131,7 +137,7 @@ export function DateRangePicker(
   };
 
   const applyRange = (a: Date, b: Date) => {
-    onChange(rangeFromDays(a, b, "day", false));
+    onChange(rangeFromDays(a, b, "day", false, timeZone));
     closePanel();
   };
 
@@ -155,8 +161,8 @@ export function DateRangePicker(
   }, [active, open]);
 
   // The range presentation in the calendar: the settled value OR the running draft.
-  const bandFrom = draftFrom ?? value?.from ?? null;
-  const bandTo = draftFrom ? null : (value?.to ?? null);
+  const bandFrom = draftFrom ?? days?.from ?? null;
+  const bandTo = draftFrom ? null : (days?.to ?? null);
   const previewTo = draftFrom ? hoverDay : null;
 
   // The foot line: it always says what happens next - or counts along live.
@@ -164,21 +170,17 @@ export function DateRangePicker(
     if (draftFrom && hoverDay) {
       const [a, b] =
         dayOnly(hoverDay).getTime() < dayOnly(draftFrom).getTime() ? [hoverDay, draftFrom] : [draftFrom, hoverDay];
-      const days = rangeDays(a, b);
-      return wording.rangePreview(formats.dateShort(a), formats.dateShort(b), days);
+      return wording.rangePreview(formats.dateShort(dayShown(a, timeZone)), formats.dateShort(dayShown(b, timeZone)), rangeDays(a, b));
     }
     if (draftFrom) return wording.chooseEndDate;
-    if (value) {
-      const days = rangeDays(value.from, value.to);
-      return wording.daysSelected(days);
-    }
+    if (days) return wording.daysSelected(rangeDays(days.from, days.to));
     return wording.chooseStartDate;
   })();
 
   const presetIsActive = (preset: RangePreset): boolean => {
-    if (!value || draftFrom) return false;
+    if (!days || draftFrom) return false;
     const range = preset.range();
-    return sameDay(range.from, value.from) && sameDay(range.to, value.to);
+    return sameDay(gridDay(range.from, timeZone), days.from) && sameDay(gridDay(range.to, timeZone), days.to);
   };
 
   return (
@@ -233,7 +235,7 @@ export function DateRangePicker(
                 isActive={presetIsActive}
                 onChoose={(preset) => {
                   const range = preset.range();
-                  applyRange(range.from, range.to);
+                  applyRange(gridDay(range.from, timeZone), gridDay(range.to, timeZone));
                 }}
               />
               <MonthPair
@@ -252,6 +254,7 @@ export function DateRangePicker(
               <span className={styles.footNote} aria-live="polite">
                 {footText}
               </span>
+              <ZoneNote />
               {value && !draftFrom && (
                 <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}

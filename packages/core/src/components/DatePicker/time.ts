@@ -64,15 +64,9 @@ export type DstChoice = "earlier" | "later";
  * "later" only for the later occurrence of a doubled hour; every unambiguous
  * time is "earlier", the pickers' default.
  */
-export function dstChoiceFor(instant: Date): DstChoice {
-  const status = resolveLocalTime(
-    instant.getFullYear(),
-    instant.getMonth(),
-    instant.getDate(),
-    instant.getHours(),
-    instant.getMinutes(),
-    instant.getSeconds(),
-  );
+export function dstChoiceFor(instant: Date, timeZone?: string): DstChoice {
+  const f = zoneFields(instant, timeZone);
+  const status = resolveLocalTime(f.year, f.month, f.day, f.hours, f.minutes, f.seconds, timeZone);
   /* Greater-or-equal instead of equal: the milliseconds of the value stand in
      no field, and a whole hour lies between the two occurrences. */
   return status.kind === "ambiguous" && instant.getTime() >= status.later.getTime() ? "later" : "earlier";
@@ -107,6 +101,7 @@ export const resolveFields = (
   day: Date | null,
   time: { hour: string; minute: string; second: string },
   withSeconds: boolean,
+  timeZone?: string,
 ): DstStatus | null => {
   if (!day) return null;
   return resolveLocalTime(
@@ -116,5 +111,6 @@ export const resolveFields = (
     Math.min(23, Number.parseInt(time.hour, 10) || 0),
     Math.min(59, Number.parseInt(time.minute, 10) || 0),
     withSeconds ? Math.min(59, Number.parseInt(time.second, 10) || 0) : 0,
+    timeZone,
   );
 };
