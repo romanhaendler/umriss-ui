@@ -154,6 +154,10 @@ stylesheets by hand.
   the rows are one page a server answered; the table reports the request -
   search, conditions, sort, page, page size - through `onRequest` once per
   change and keeps the previous page, dimmed, while the next is on its way.
+  `Export` writes the page; with `exportRows(request)` it writes every match
+  instead, in the table's own columns. The application caps and refuses: the
+  table asks for what the request names, and a rejection's message shows beside
+  the button.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.

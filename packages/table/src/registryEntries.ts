@@ -11,6 +11,7 @@ import type { TableSnapshot } from "./types";
 import type { Format } from "./values";
 import type { AggregateKind, DatePeriod } from "./model/grouping";
 import type { Pin, Pins } from "./model/pinning";
+import type { TableRequest } from "./model/view";
 import type { FilterSpec } from "./columnFilter";
 
 /* --- Specs ------------------------------------------------------------------- */
@@ -102,6 +103,8 @@ export interface HookSnapshot {
   pins: Pins | null;
   /** Server mode: the values a list filter offers, from the application. */
   filterOptions?: (column: string) => readonly unknown[];
+  /** Server mode: every row of a request, for the export. */
+  exportRows?: (request: TableRequest) => Promise<readonly unknown[]>;
   /** Server mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
