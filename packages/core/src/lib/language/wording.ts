@@ -517,6 +517,8 @@ export interface Wording {
     /** Milestones of the plan; said only where there are any. */
     milestones: number;
   }) => string;
+  /** The span in view, said after a zoom key. */
+  scheduleVisibleRange: (from: string, to: string) => string;
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
 
@@ -907,8 +909,9 @@ export const DEFAULT_WORDING: Wording = {
     `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}` +
     (blocked === 0 ? "." : `, ${blocked === 1 ? "1 subtask" : `${blocked} subtasks`} in blocked time.`) +
     (milestones === 0 ? "" : ` ${milestones === 1 ? "1 milestone" : `${milestones} milestones`}.`),
+  scheduleVisibleRange: (from, to) => `From ${from} to ${to}.`,
   scheduleKeyHelp:
-    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Plus zooms in, minus zooms out, zero fits all the work. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   dashboardEdit: "Edit",
   dashboardEditing: "Editing the dashboard",
   dashboardCancel: "Cancel",
