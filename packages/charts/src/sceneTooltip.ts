@@ -52,7 +52,10 @@ export function subMinute(hit: Candidate): boolean {
 export function tooltipRow(s: ChartScene, k: Candidate, headerXAxisId: string): TooltipRow {
   const config = k.entry.config;
   const label = k.segment?.label;
-  const value = label !== undefined && label !== "" ? label : formatY(s, k.entry, k.level ?? k.yValue);
+  const written = formatY(s, k.entry, k.level ?? k.yValue);
+  // A series with a baseline of its own reads "baseline – value", as its table does.
+  const edges = k.baseline === undefined ? written : `${formatY(s, k.entry, k.baseline)} – ${written}`;
+  const value = label !== undefined && label !== "" ? label : edges;
   const ownX = config.xAxisId === headerXAxisId ? "" : s.xLabel(config.xAxisId, k.xValue);
   // A cell in a named row says which: its level alone would not.
   const named = config.kind === "matrix" && s.categoriesAt("y", config.yAxisId) !== undefined;
