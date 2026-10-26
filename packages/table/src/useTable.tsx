@@ -31,7 +31,7 @@ import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csv, selectionText, sheetOf } from "./export";
-import { warnOnce } from "./dev";
+import { DEV, asRows, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
@@ -186,7 +186,8 @@ function effectiveWidths(
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z> {
+export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z> {
+  const rows = asRows(given, "the rows of useTable");
   const [registry] = useState(() => new Registry());
   const [parts] = useState(() => {
     const bound = buildParts(registry);
@@ -461,6 +462,19 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
+  /* A page size without a bar shows every row. The check waits for the first
+     frame: a bar placed outside and after the table registers by then. */
+  const pageSizeGiven = options.pageSize !== undefined;
+  useEffect(() => {
+    if (!DEV || !pageSizeGiven || server || virtual || isTree) return;
+    const frame = requestAnimationFrame(() => {
+      if (!registry.paginates()) {
+        warnOnce("page-size-no-bar", "`pageSize` is passed, but no `Pagination` stands for this table, so every row is shown. `pageSize` holds as soon as a `Pagination` stands inside the table or gets it as `of`.");
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pageSizeGiven, server, virtual, isTree, registry]);
+
   /* Every change the reader makes, once and whole, after the commit
      (ADR-0047). The first render's view is where it starts, not a change; the
      key is compared, not the object, so a second render with the same view
@@ -494,12 +508,40 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
   const reportKey = server ? requestKey(request) : "";
   const reported = useRef<string | null>(null);
+  /* In development, every key reported, so that `answers` can be told from
+     one that can never be equal. ponytail: one string per request, never
+     pruned; a cap if a session types for hours. */
+  const reportedKeys = useRef(new Set<string>());
+  const answersKey = options.server && options.answers ? requestKey(options.answers) : null;
+  const late = answersKey !== null && answersKey !== reportKey;
   useEffect(() => {
-    if (!server || reported.current === reportKey) return;
-    reported.current = reportKey;
-    options.onRequest?.(request);
+    if (!server) return;
+    if (reported.current !== reportKey) {
+      reported.current = reportKey;
+      if (DEV) reportedKeys.current.add(reportKey);
+      options.onRequest?.(request);
+    }
+    if (DEV && answersKey !== null && !reportedKeys.current.has(answersKey)) {
+      warnOnce("server-answers", "`answers` matches none of the requests `onRequest` received; the table stays busy. Hand back the request object you were given, or one with the same search, conditions, sort, page and page size.");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
-  }, [reportKey]);
+  }, [reportKey, answersKey]);
+
+  /* "All that match" is relative to the search and the conditions it was chosen
+     under: when either changes, the state ends after the commit (a selection
+     held outside is cleared the same way). Sort, page and page size leave the
+     set as it is. Automatic mode has no such state; it is ignored. */
+  const matchKey = JSON.stringify([request.search, request.conditions]);
+  const matchSeen = useRef(matchKey);
+  useEffect(() => {
+    if (selection.allMatching && !server) {
+      warnOnce("selection-all-matching", "`allMatching` is ignored without `server`: the table holds every row, and \"select all\" selects them by key.");
+    }
+    if (matchSeen.current === matchKey) return;
+    matchSeen.current = matchKey;
+    if (server && selection.allMatching) selection.clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
+  }, [matchKey, selection.allMatching]);
 
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
@@ -577,6 +619,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     virtual,
     rowCount: server ? rowCount : b.filtered.length,
     server,
+    request: server ? request : null,
   };
 
   // Idempotent for the same snapshot (registry.ts, guarantee 1).
@@ -595,6 +638,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     pins: pinsChosen,
     filterOptions: server ? options.filterOptions : undefined,
     selectedRows,
+    late,
     rowFilters,
   });
 

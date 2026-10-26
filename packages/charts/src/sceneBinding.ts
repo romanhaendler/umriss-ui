@@ -167,6 +167,16 @@ export function requestFrame(s: ChartScene): void {
   });
 }
 
+/** The frame now, not on the next animation frame: a print layout is taken
+    right after the media query's change, and a frame waited for lands after it. */
+export function frameNow(s: ChartScene): void {
+  if (s.frameHandle !== null && typeof cancelAnimationFrame === "function") {
+    cancelAnimationFrame(s.frameHandle);
+    s.frameHandle = null;
+  }
+  frame(s);
+}
+
 export function frame(s: ChartScene): void {
   applyPendingSize(s);
   if (s.theme === null && s.themeRoot !== null) {

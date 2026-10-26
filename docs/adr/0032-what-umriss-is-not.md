@@ -1,6 +1,6 @@
 # What umriss is not
 
-Status: accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060
+Status: accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060; superseded in part by ADR-0075 (its "export" point)
 Date:   2026-09
 
 The library comparison of September 2026 (`docs/research/library-comparison-2026-09/`)

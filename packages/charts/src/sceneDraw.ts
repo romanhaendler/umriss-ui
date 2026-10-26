@@ -5,7 +5,7 @@
 import { barGroups, barPlacement, type BarPlacement, effectiveStep } from "./bars";
 import { cellSize } from "./cells";
 import { downsample, type Course } from "./downsample";
-import { drawOverlayLayer, drawSeriesLayer, type DrawBase, type SeriesDrawItem } from "./draw";
+import { drawOverlayLayer, drawSeriesLayer, type DrawBase, type SeriesDrawItem, type SeriesLayerInput } from "./draw";
 import { visibleWindow } from "./hit";
 import { type AxisLayout } from "./layout";
 import { firstUnsortedIndex } from "./materialize";
@@ -16,7 +16,7 @@ import { LANE_WIDTH, widthOf, stackOf } from "./sceneConfig";
 import { type SeriesEntry } from "./sceneModel";
 import { isHidden } from "./sceneView";
 import { lastSegmentEnd } from "./state";
-import { FALLBACK_THEME } from "./theme";
+import { FALLBACK_THEME, type ResolvedTheme } from "./theme";
 import type { StateSeriesConfig, BoxChannels, MaterializedSeries } from "./types";
 
 export function drawItems(s: ChartScene): SeriesDrawItem[] {
@@ -248,12 +248,10 @@ export function lanePx(s: ChartScene, config: StateSeriesConfig, yAxis: AxisLayo
   return { top: Math.min(a, b), bottom: Math.max(a, b) };
 }
 
-export function paintSeriesLayer(s: ChartScene): void {
-  const ctx = s.seriesCtx;
-  const theme = s.theme;
-  if (!ctx || !theme) return;
-  const start = typeof performance === "undefined" ? 0 : performance.now();
-  drawSeriesLayer(ctx, {
+/** What the series layer draws, as the scene stands: the screen's canvas and
+    the picture (picture.ts) are both drawn from it. */
+export function seriesInput(s: ChartScene, theme: ResolvedTheme): SeriesLayerInput {
+  return {
     width: s.cssWidth,
     height: s.cssHeight,
     plot: s.layout.plot,
@@ -262,7 +260,15 @@ export function paintSeriesLayer(s: ChartScene): void {
     series: drawItems(s),
     limitBands: limitItems(s, true),
     limitLines: limitItems(s, false),
-  });
+  };
+}
+
+export function paintSeriesLayer(s: ChartScene): void {
+  const ctx = s.seriesCtx;
+  const theme = s.theme;
+  if (!ctx || !theme) return;
+  const start = typeof performance === "undefined" ? 0 : performance.now();
+  drawSeriesLayer(ctx, seriesInput(s, theme));
   s.perf.seriesDrawMs =
     (typeof performance === "undefined" ? 0 : performance.now()) - start;
   s.onPerf?.({ ...s.perf });
@@ -279,6 +285,7 @@ export function paintOverlayLayer(s: ChartScene): void {
     theme,
     hover: s.hover,
     syncPx: s.syncedPx(),
+    band: s.range?.live === true ? [s.range.from, s.range.to] : null,
   });
   s.positionTooltip();
 }
