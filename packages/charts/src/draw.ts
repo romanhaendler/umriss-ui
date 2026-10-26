@@ -34,6 +34,8 @@ export interface LineDrawItem extends DrawBase {
   dash?: readonly number[];
   markers: "auto" | "always" | "never";
   step?: boolean;
+  /** A step in x longer than this breaks the course; off without it. */
+  maxGap?: number;
   /** The markers' shape; a circle without one. */
   marker?: MarkerShape;
 }
@@ -52,6 +54,8 @@ export interface AreaDrawItem extends DrawBase {
   /** A stacked member: a line in the ground's colour parts it from the
       member above. */
   edges?: boolean;
+  /** A step in x longer than this closes the section; off without it. */
+  maxGap?: number;
 }
 
 export interface BarDrawItem extends DrawBase {
@@ -234,11 +238,17 @@ const MARKER_LIMIT = 60;
 /** Is the value at i present, with a gap or the edge on either side? Such a
     point is a lone moveTo in the path - no stroke, no pixel - and only a marker
     shows it. */
-function isolated(ys: Float64Array, n: number, i: number): boolean {
+function isolated(xs: Float64Array, ys: Float64Array, n: number, i: number, maxGap: number | undefined): boolean {
   return (
-    (i === 0 || Number.isNaN(ys[i - 1] as number)) &&
-    (i === n - 1 || Number.isNaN(ys[i + 1] as number))
+    (i === 0 || Number.isNaN(ys[i - 1] as number) || longStep(xs, i, maxGap)) &&
+    (i === n - 1 || Number.isNaN(ys[i + 1] as number) || longStep(xs, i + 1, maxGap))
   );
+}
+
+/** Is the step from reading i - 1 to reading i longer than maxGap? Equal to it
+    is not: a gap is a silence longer than the threshold. */
+function longStep(xs: Float64Array, i: number, maxGap: number | undefined): boolean {
+  return maxGap !== undefined && i > 0 && (xs[i] as number) - (xs[i - 1] as number) > maxGap;
 }
 
 /** Markers, filled after the plot's clip is lifted: a point on the plot's
@@ -273,6 +283,12 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect,
   for (let i = 0; i < n; i++) {
     const value = ys[i] as number;
     const px = (xs[i] as number) * xm + xb;
+    if (penDown && longStep(xs, i, item.maxGap)) {
+      // A reading is good for maxGap: the hold ends there, not at the next
+      // reading across the silence.
+      if (step) path.lineTo(((xs[i - 1] as number) + (item.maxGap as number)) * xm + xb, held);
+      penDown = false;
+    }
     if (Number.isNaN(value)) {
       // A held value holds until the gap's x: that sample says it is no longer
       // known from there, not that it never was.
@@ -309,7 +325,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect,
     for (let i = 0; i < n; i++) {
       const value = ys[i] as number;
       if (Number.isNaN(value)) continue;
-      if (!every && !isolated(ys, n, i)) continue;
+      if (!every && !isolated(xs, ys, n, i, item.maxGap)) continue;
       const px = (xs[i] as number) * xm + xb;
       const py = value * ym + yb;
       if (inPlot(plot, px, py)) markerPath(points, shape, px, py, r);
@@ -356,7 +372,8 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect,
     while (
       i < n &&
       !Number.isNaN(ys[i] as number) &&
-      (us === null || !Number.isNaN(us[i] as number))
+      (us === null || !Number.isNaN(us[i] as number)) &&
+      (i === start || !longStep(xs, i, item.maxGap))
     ) {
       i++;
     }
