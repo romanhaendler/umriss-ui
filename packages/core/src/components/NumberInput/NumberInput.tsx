@@ -6,6 +6,7 @@ import {
   clampNumber,
   decimalsAllowed,
   filterInput,
+  negativeAllowed,
   parseNumber,
   stepNumber,
 } from "./number";
@@ -229,7 +230,9 @@ export function NumberInput(
       <input
         ref={ref}
         type="text"
-        inputMode={decimalsAllowed(decimals) ? "decimal" : "numeric"}
+        /* A minus key only the text keyboard has, where a negative value is
+           allowed; `min={0}` brings back the number pad. */
+        inputMode={negativeAllowed(min) ? "text" : decimalsAllowed(decimals) ? "decimal" : "numeric"}
         id={id ?? field?.id}
         disabled={disabled}
         aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
