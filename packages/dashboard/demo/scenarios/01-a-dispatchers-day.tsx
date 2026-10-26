@@ -275,7 +275,7 @@ function Stage({ shown }: { shown: Case }) {
       </Button>,
     ],
     governs: [
-      <Button key="old" onClick={() => { parts.cancel(); parts.setView(OLD); setSaid("The stored value named a weather widget that is gone and a trend in a size it no longer offers: the one fell out, the other stands at its starting size, and the room beside it is free. Nothing broke."); }}>Load an old arrangement</Button>,
+      <Button key="old" onClick={() => { parts.cancel(); parts.setView(OLD); setSaid("The stored value named a weather widget whose type is not declared and a trend in a size it no longer offers: the weather widget is not drawn and stays in the stored value, the trend stands at its starting size, and the room beside it is free. Nothing broke."); }}>Load an old arrangement</Button>,
       <Button key="crash" onClick={() => { setBroken(true); setSaid("A trend threw while drawing. Its frame, head and menu stand; everything else keeps working."); }}>Let a widget fail</Button>,
       <Button key="reset" onClick={() => { parts.edit(); parts.reset(); setSaid("Back to the application's arrangement for this role - one more step of the draft: Undo brings yours back."); }} disabled={locked}>Reset to the default</Button>,
       <Button key="lock" onClick={() => { parts.cancel(); setLocked(!locked); setSaid(locked ? "Editing is allowed." : "Without editing the dashboard is complete as it is: the same arrangement, no button, no mode."); }}>{locked ? "Allow editing" : "Lock editing"}</Button>,
