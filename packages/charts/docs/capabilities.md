@@ -543,7 +543,9 @@ here.
   and DEV says where they do not; a control chart's baseline is an index range
   of the rows as given. A category axis orders its rows itself.
 * **Log scale.** Plant values are read linearly; a log axis breaks the affine
-  scale that the working-time axis relies on (ADR-0001).
+  scale that the working-time axis relies on (ADR-0001). Values over decades
+  are the application's `log10`, with `ticks` at 1 to 9 per decade (the Axis
+  page, "Values over decades").
 * **Smoothing.** A curve between samples invents values the plant never
   measured; `Line step` draws what was held.
 * **A kept range.** A `selectedRange` prop, an edge to drag after release, a
@@ -568,6 +570,10 @@ here.
   line, which band, which interval. The chart draws the rows it is given; the
   least-squares line and its 95 % band are built from `Line` and `Area` in the
   application (the Scatter page, "A fit line with its band").
+* **A pen trend component.** A pen is a tag of the application's historian,
+  which the chart does not know; the scales, the pen list and the second
+  period are a `YAxis` per pen, core's `Checkbox` bound to `hidden` and
+  `toggleSeries`, and one more `Line` (the Axis page, "A trend with pens").
 * **Point opacity.** A scatter is one path and one fill, so translucent points
   do not add up where they crowd, and a fill per point breaks the
   million-point budget. Density is the application's count into cells, drawn as
