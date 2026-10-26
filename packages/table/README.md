@@ -162,7 +162,10 @@ stylesheets by hand.
   The sort stays and the rows stand in its order; a row keeps its place in the
   markup by its `rowKey`; the selection holds by key (the count follows the rows
   there are, and a key whose row is gone waits in the set and ticks again if the
-  row returns); an open Row draft stays open with what was typed and shows its
+  row returns; an application that holds the selection outside, with
+  `useTableSelection`, stores `allMatching` and `except` with the keys - in
+  server mode a change of search or conditions clears them through `clear()`);
+  an open Row draft stays open with what was typed and shows its
   other fields as they were when it opened, and closes only when its row is gone
   from `rows`; the Active cell stays on its row by key when a re-sort moves it,
   and where its row is gone the cell now at its index takes over; the scroll
