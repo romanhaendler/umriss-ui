@@ -342,6 +342,7 @@ axis with the map kept by the library: every promise above holds on it.
 | Nice edges on the 1-2-5 grid for a width or a count; none for no values | — | Unit (bin) |
 | A value on an edge falls into the bin the edge starts; the last bin is closed | — | Unit (bin) |
 | A given domain is taken as it is; values outside it and values that are not finite are left out | — | Unit (bin) |
+| The values may be a typed array (`Float64Array`, `Int32Array`), read by index | — | Unit (binTyped), Type (`binTyped.test-d`) |
 
 ## `Tooltip`
 
