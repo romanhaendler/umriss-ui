@@ -260,6 +260,28 @@ test("reordering in the column menu moves head, body and foot on the screen", as
   expect(Math.abs((await x(sum)) - (await x(amountHeader)))).toBeLessThan(1);
 });
 
+test("dragging an entry by its grip in the column menu reorders the header", async ({ page }) => {
+  await openExample(page, "columnmenu", "show-hide-and-arrange");
+  const table = example(page, "show-hide-and-arrange");
+  const amountHeader = table.getByRole("columnheader", { name: "Actual (k€)" });
+  const lineHeader = table.getByRole("columnheader", { name: "Budget (k€)" });
+  expect(await x(amountHeader)).toBeGreaterThan(await x(lineHeader));
+
+  await table.getByRole("button", { name: "Columns" }).click();
+  const entries = page.getByRole("dialog").locator("li[data-column]");
+  const grip = entries.filter({ hasText: "Actual (k€)" }).locator("[data-grip]");
+  const target = entries.filter({ hasText: "Budget (k€)" });
+  const from = (await grip.boundingBox())!;
+  const to = (await target.boundingBox())!;
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2, to.y + 2, { steps: 8 });
+  await page.mouse.up();
+
+  expect(await x(amountHeader)).toBeLessThan(await x(lineHeader));
+  await expect(page.getByRole("dialog")).toBeVisible();
+});
+
 test("a date filter kept in the URL stands, with its rows, after a reload", async ({ page }) => {
   await openExample(page, "view", "keep-the-view-in-the-url");
   const table = example(page, "keep-the-view-in-the-url");

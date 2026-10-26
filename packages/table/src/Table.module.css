@@ -889,9 +889,49 @@
     padding: var(--u-space-1) var(--u-space-1);
   }
 
-  .columnsEntry > :first-child {
+  .columnsEntry > .columnGrip + * {
     flex: 1;
     min-width: 0;
+  }
+
+  /* The grip takes the pointer, whatever its type: a finger on it drags, a
+     swipe elsewhere in the list scrolls. */
+  .columnGrip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 16px;
+    align-self: stretch;
+    color: var(--u-color-text-secondary);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  @media (pointer: coarse) {
+    .columnGrip {
+      width: 24px;
+      min-height: 24px;
+    }
+  }
+
+  /* The others of the dragged entry's block make room by the motion tokens;
+     the entry itself follows the pointer without delay. */
+  .columnsList[data-dragging] > .columnsEntry:not([data-lifted]) {
+    transition: transform var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  .columnsEntry[data-lifted] {
+    position: relative;
+    z-index: 1;
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-xs);
+    box-shadow: var(--u-shadow-overlay);
+  }
+
+  .columnsEntry[data-lifted] .columnGrip {
+    cursor: grabbing;
   }
 
   .move {
