@@ -15,7 +15,7 @@
 
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Checkbox, DateRangePicker, FormField, NumberInput, useFormats, useWording } from "@umriss-ui/core";
+import { Checkbox, DateRangePicker, FormField, NumberInput, useFormats, useWording, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import type { Present } from "./types";
 import { asText, ABSENT_KEY, filterKey, isAbsent } from "./values";
@@ -291,9 +291,14 @@ export interface Range {
   to?: number | Date;
 }
 
-const dayStart = (day: Date): number => new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime();
-const nextDay = (day: Date): number =>
-  new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1).getTime();
+const dayStart = (day: Date, timeZone?: string): number => {
+  const { year, month, day: d } = zoneFields(day, timeZone);
+  return zoneInstant({ year, month, day: d }, timeZone).getTime();
+};
+const nextDay = (day: Date, timeZone?: string): number => {
+  const { year, month, day: d } = zoneFields(day, timeZone);
+  return zoneInstant({ year, month, day: d + 1 }, timeZone).getTime();
+};
 
 const isNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 const isDate = (value: unknown): value is Date => value instanceof Date && !Number.isNaN(value.getTime());
@@ -406,7 +411,7 @@ const RANGE = /* @__PURE__ */ builtIn<Range>(
       const { from, to } = condition;
       if (from !== undefined && to !== undefined) {
         /* Two days of the same year name it once: "01.09.–30.09.2026". */
-        const oneYear = isDate(from) && isDate(to) && from.getFullYear() === to.getFullYear();
+        const oneYear = isDate(from) && isDate(to) && zoneFields(from, undefined).year === zoneFields(to, undefined).year;
         return env.wording.rangeFromTo(
           oneYear ? env.formats.dateShort(from as Date) : boundText(from, env),
           boundText(to, env),
