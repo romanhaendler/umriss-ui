@@ -7,7 +7,8 @@ import { type AxisLayout } from "./layout";
 import type { ChartScene } from "./scene";
 import { stackOf } from "./sceneConfig";
 import { say } from "./sceneSpeech";
-import type { AxisConfig, MaterializedSeries, SeriesConfig } from "./types";
+import { calendarFrom, toWallClock } from "./workingTime";
+import type { AxisConfig, ChartRange, MaterializedSeries, SeriesConfig } from "./types";
 import {
   defaultLimits,
   hidesAll,
@@ -241,6 +242,26 @@ function cancelOnEscape(event: KeyboardEvent): void {
   if (event.key === "Escape" && ranging !== null) endRange(ranging);
 }
 
+/** A stretch of an x axis in the axis' own values, from what its channel holds
+    (a place, working time, a number): a category axis names the first and the
+    last place the stretch touches - half a step either side of a place counts
+    - and a calendar axis gives wall-clock instants, the ends of the plot
+    holding the first and the last. */
+export function rangeOf(s: ChartScene, axisId: string, a: number, b: number): ChartRange<number | string> {
+  const [lo = 0, hi = 0] = [a, b].sort((u, v) => u - v);
+  const categories = s.categoriesAt("x", axisId);
+  if (categories !== undefined) {
+    const last = categories.names.length - 1;
+    const at = (place: number) => categories.names[Math.min(last, Math.max(0, place))] ?? "";
+    return { axisId, from: at(Math.ceil(lo - 0.5)), to: at(Math.floor(hi + 0.5)) };
+  }
+  const calendar = s.axesInOrder().find(({ config }) => config.orientation === "x" && config.id === axisId)?.config.calendar;
+  if (calendar === undefined || calendar.length === 0) return { axisId, from: lo, to: hi };
+  const built = calendarFrom(calendar);
+  const wall = (v: number) => toWallClock(Math.min(Math.max(v, 0), built.total), built);
+  return { axisId, from: wall(lo), to: wall(hi) };
+}
+
 /** Reports the range once per x axis, in registration order, `from` first. */
 function reportRange(s: ChartScene, a: number, b: number): void {
   const report = s.onRange;
@@ -249,8 +270,7 @@ function reportRange(s: ChartScene, a: number, b: number): void {
     if (config.orientation !== "x") continue;
     const layout = s.findAxis("x", config.id);
     if (layout === null) continue;
-    const [from, to] = [layout.scale.fromPx(a), layout.scale.fromPx(b)].sort((u, v) => u - v);
-    report({ axisId: config.id, from: from ?? 0, to: to ?? 0 });
+    report(rangeOf(s, config.id, layout.scale.fromPx(a) ?? 0, layout.scale.fromPx(b) ?? 0));
   }
 }
 
