@@ -319,8 +319,9 @@ export const GERMAN_WORDING: Wording = {
     `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${violated === 1 ? "1 verletzte Abhängigkeit" : `${violated} verletzte Abhängigkeiten`}` +
     (blocked === 0 ? "." : `, ${blocked === 1 ? "1 Teilaufgabe in einer Sperrzeit" : `${blocked} Teilaufgaben in Sperrzeiten`}.`) +
     (milestones === 0 ? "" : ` ${milestones === 1 ? "1 Meilenstein" : `${milestones} Meilensteine`}.`),
+  scheduleVisibleRange: (from, to) => `Von ${from} bis ${to}.`,
   scheduleKeyHelp:
-    "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zur ersten und letzten Teilaufgabe, Bild auf und Bild ab springen ein Zehntel der Ansicht. Schließende eckige Klammer oder T folgt einer Abhängigkeit hinaus, öffnende eckige Klammer oder Umschalt und T geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape lässt die aktive Teilaufgabe los.",
+    "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zur ersten und letzten Teilaufgabe, Bild auf und Bild ab springen ein Zehntel der Ansicht. Plus zoomt hinein, Minus zoomt heraus, Null zeigt die gesamte Arbeit. Schließende eckige Klammer oder T folgt einer Abhängigkeit hinaus, öffnende eckige Klammer oder Umschalt und T geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape lässt die aktive Teilaufgabe los.",
   dashboardEdit: "Bearbeiten",
   dashboardEditing: "Dashboard wird bearbeitet",
   dashboardCancel: "Abbrechen",
