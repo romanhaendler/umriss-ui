@@ -332,7 +332,7 @@ depends on it. One new ADR supersedes ADR-0009 and ADR-0057, keeps their boundar
   - the "diagnostic" level.
 - **Offering out-of-service or enable from the list** (ADR-0057's line). They are shown, not offered.
 - **Data quality** (good, uncertain, bad) on an alarm's value, in this first version. It is core's, specified
-  in `.scratch/data-quality/` with an ADR of its own; freshness (ADR-0010) is what the list shows. When the
+  in ADR-0077; freshness (ADR-0010) is what the list shows. When the
   list takes it later: the alarms package declares neither the `Quality` type nor its words, an alarm on a
   bad value keeps its state and count, and the list and banner say the quality beside the freshness. The
   alarms ADR names the quality ADR among its related decisions.

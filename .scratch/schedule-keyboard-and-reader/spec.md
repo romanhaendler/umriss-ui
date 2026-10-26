@@ -124,7 +124,7 @@ application's, and the demo shows how in a few lines each.
     props and renders nothing of its own outside a `Schedule`.
   - **The key.** It is a disclosure button with the chart's words, "Show data" and "Hide data", in core's
     wording. It stands in the corner cell beside the time band at the bottom *(agent)*. The top corner is
-    where `.scratch/plant-time-zone/` (06) puts the zone label. The key follows the plot in the tab order.
+    where the schedule puts the zone label (ADR-0076). The key follows the plot in the tab order.
     It is in the server's markup, closed.
   - **The panel.** It covers the middle row, the lane headers and the plot together *(agent)*: the lane
     headers are part of the picture, and the plot's width alone is too narrow for seven columns on a
@@ -222,7 +222,7 @@ application's, and the demo shows how in a few lines each.
 - The table writes one row per subtask in view, with no downsampling. A plan of thousands of subtasks in
   view writes thousands of rows. That is accepted, because the table is opened on demand. If it ever
   stalls a screen, the chart's downsampled caption is the precedent.
-- `.scratch/plant-time-zone/` (06) changes how instants are written, and the table follows by itself
+- The plant time zone (ADR-0076) changes how instants are written, and the table follows by itself
   through core's formats. Where 06 has landed, an instant in the doubled hour carries its offset, as in the
   tooltip.
 - `.scratch/under-a-finger/`'s floor check measures the table's key under a finger. The corner cell is
