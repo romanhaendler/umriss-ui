@@ -104,7 +104,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "Without a presentation the value type decides: text on the left, numbers right-aligned with tabular figures, points in time as date and time, truth values as a word.",
           "A computed value needs an `id`. One column is the row header: it names the row, cannot be hidden, and the row's checkbox and actions are read out with it.",
-          "A computed `value` (like `sortValue`, `groupValue` and `rowKey`) may be written inline: a new function with the same source text counts as the same one, and nothing is recomputed. A closure that reads an outer variable which has changed reads as unchanged; give the function a new text, or carry the variable in the row data.",
+          "A computed `value` (like `sortValue`, `groupValue` and `rowKey`) may be written inline: a new function with the same source text counts as the same one, and nothing is recomputed. A closure that reads an outer variable which has changed reads as unchanged; carry the variable in the row data, or give the column a `key` that changes with it. Development warns once per column.",
         ],
         alternatives: [
           { when: "Restricting a column to some of its values", use: "filter" },
