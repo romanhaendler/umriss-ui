@@ -16,7 +16,7 @@ const FEED_IN: readonly Reading[] = Array.from({ length: 18 }, (_, hour) => ({
 }));
 
 export const title = "Name the time zone of the instants";
-export const lead = "`timeZone` draws the trend in that zone for a reader anywhere: ticks on its hours, labels, tooltip and data table in its time. Berlin's hour of 25 October is ticked twice, each with its offset.";
+export const lead = "`timeZone` draws the trend in that zone for a reader anywhere: ticks on its hours, labels, tooltip and data table in its time. On 25 October Berlin's clocks go back, and the doubled hour takes its real room on the axis.";
 
 function Trend({ timeZone, name }: { timeZone: string; name: string }) {
   const { Chart, XAxis, YAxis, Line } = useChart(FEED_IN);
