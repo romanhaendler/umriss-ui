@@ -566,6 +566,10 @@ here.
   line, which band, which interval. The chart draws the rows it is given; the
   least-squares line and its 95 % band are built from `Line` and `Area` in the
   application (the Scatter page, "A fit line with its band").
+* **A pen trend component.** A pen is a tag of the application's historian,
+  which the chart does not know; the scales, the pen list and the second
+  period are a `YAxis` per pen, core's `Checkbox` bound to `hidden` and
+  `toggleSeries`, and one more `Line` (the Axis page, "A trend with pens").
 * **Point opacity.** A scatter is one path and one fill, so translucent points
   do not add up where they crowd, and a fill per point breaks the
   million-point budget. Density is the application's count into cells, drawn as
