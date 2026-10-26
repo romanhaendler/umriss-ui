@@ -50,10 +50,8 @@ export * from "./lib/glyphs";
    the module styles land in the bundle, and two rules of equal specificity are
    decided by it. */
 export * from "./components/Stat";
-export * from "./lib/zone";
 export * from "./lib/limit";
 export * from "./lib/freshness";
-export * from "./lib/quality";
 export * from "./lib/useFreshness";
 export * from "./lib/useContextMenuTrigger";
 export { createLongPress } from "./lib/longPress";
@@ -95,3 +93,7 @@ export * from "./components/SegmentedControl";
    imported. They bring no stylesheet. */
 export type { TextTracking, TextLeading } from "./components/Typography/Typography";
 export type { Align } from "./components/Popover/position";
+
+/* Pure arithmetic and types, no stylesheet: they stand at the end. */
+export * from "./lib/zone";
+export * from "./lib/quality";

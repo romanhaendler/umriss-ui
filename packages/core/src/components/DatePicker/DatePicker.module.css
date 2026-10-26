@@ -204,6 +204,7 @@
 
   .foot {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     margin-top: var(--u-space-2);
@@ -216,11 +217,12 @@
      label above. It hangs out by its inset on that side, and its hover
      surface keeps a sliver of the panel's padding instead of touching the
      panel's edge. */
-  /* The typed field takes what the two keys leave; it may shrink to nothing
-     before the panel overflows. */
+  /* The typed field takes what the two keys leave, but never less than a
+     sample date needs: below that the row wraps instead of the field
+     collapsing. */
   .typed {
     flex: 1 1 0;
-    min-width: 0;
+    min-width: 11ch;
     margin-right: var(--u-space-2);
   }
 

@@ -1,8 +1,8 @@
 /* A time zone's arithmetic, charts' own (ADR-0031: charts import nothing, so
    core's seam is built here a second time).
 
-   Without a zone every function reads the Date's local methods, so the reader's
-   zone keeps today's path; with an IANA name, Intl's wall clock stands in for
+   Without a zone every function reads the Date's local methods, which is the
+   reader's zone; with an IANA name, Intl's wall clock stands in for
    them. The offset of a zone is cached per quarter hour: no zone changes its
    offset inside one.
 
