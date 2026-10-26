@@ -87,6 +87,31 @@ describe("Enter in the time field", () => {
   });
 });
 
+describe("Typing into the time fields", () => {
+  it("takes each digit itself, whatever the caret: 0930 gives 09:30", () => {
+    const onChange = vi.fn();
+    render(<DateTimePicker value={new Date(2026, 5, 15, 10, 15)} onChange={onChange} />);
+    openPanel("15/06/2026, 10:15");
+    const field = (label: string) => screen.getByLabelText(label) as HTMLInputElement;
+    const type = (label: string, value: string) => {
+      fireEvent.focus(field(label));
+      // A touch has undone the selection: the caret stands at the end.
+      field(label).setSelectionRange(2, 2);
+      fireEvent.change(field(label), { target: { value } });
+    };
+    type("Hour", "100");
+    expect(field("Hour").value).toBe("0");
+    fireEvent.change(field("Hour"), { target: { value: "09" } });
+    expect(field("Hour").value).toBe("09");
+    type("Minute", "153");
+    expect(field("Minute").value).toBe("3");
+    fireEvent.change(field("Minute"), { target: { value: "30" } });
+    fireEvent.keyDown(field("Minute"), { key: "Enter" });
+    expect((lastValue(onChange) as Date).getHours()).toBe(9);
+    expect((lastValue(onChange) as Date).getMinutes()).toBe(30);
+  });
+});
+
 describe("An overridden preset", () => {
   const WORDING = { presets: { today: "Today" } };
 

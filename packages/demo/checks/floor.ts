@@ -242,14 +242,4 @@ export const OPEN: readonly Open[] = [
     reason: "two open group heads stand directly above each other, 24 px apart: the chevron's 24 px square overlaps the next chevron's by under a pixel",
     fix: "schedule: an open group's head is 25 px under a finger (`GROUP_HEAD_HEIGHT`, which the plot's rows share)",
   },
-  {
-    demo: "core",
-    panel: true,
-    page: "datetimepicker",
-    examples: ["set-an-instant"],
-    element: "button",
-    label: /^(Increase|Decrease) /,
-    reason: "the time fields' arrows are 18 x 12.5 px; a pad would lie on the neighbouring field's arrow",
-    fix: "the native-picker spec, .scratch/date-jump-and-typed-entry/, which replaces the arrows",
-  },
 ];
