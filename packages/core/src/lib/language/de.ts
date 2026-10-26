@@ -170,6 +170,7 @@ export const GERMAN_WORDING: Wording = {
   exporting: "Export wird vorbereitet",
   exportFailed: "Der Export ist fehlgeschlagen",
   exportFileName: "tabelle.csv",
+  exportSheetName: "Tabelle",
   tableSearchPlaceholder: "Suchen …",
   tableSearchLabel: "Tabelle durchsuchen",
   filterColumn: (column) => `${column} filtern`,
