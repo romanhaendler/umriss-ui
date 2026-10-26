@@ -203,6 +203,7 @@ export function CalculationView({
         className={styles.amount}
         aria-hidden="true"
         data-verdict={own.verdict}
+        data-quality={own.quality === "good" ? undefined : own.quality}
         data-later={i > 0 ? "" : undefined}
         style={metrics ? ({ "--_calculation-column": amountLine(i) } as CSSProperties) : undefined}
       >
@@ -364,6 +365,11 @@ export function CalculationView({
             own.verdict !== undefined && <Badge tone={TONE[own.verdict]}>{verdictWord(own.verdict, wording)}</Badge>
           )}
           {text.target !== undefined && <span className={styles.target}>{text.target}</span>}
+          {text.quality !== undefined && (
+            <span className={styles.quality} data-quality={own.quality}>
+              {text.quality}
+            </span>
+          )}
           {worst !== undefined && (
             <span className={styles.worst} data-verdict={worst}>
               {wording.calculationWorstInside(verdictWord(worst, wording))}
