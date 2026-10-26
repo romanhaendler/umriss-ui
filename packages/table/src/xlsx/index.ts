@@ -10,5 +10,5 @@ import { zip } from "./zip";
 export const xlsx: ExportFormat<Uint8Array> = {
   extension: "xlsx",
   mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  write: (sheet, { wording }) => zip(partsOf(wording.exportSheetName, sheetXml(sheet))),
+  write: (sheet, { wording, wallClock }) => zip(partsOf(wording.exportSheetName, sheetXml(sheet, wallClock))),
 };
