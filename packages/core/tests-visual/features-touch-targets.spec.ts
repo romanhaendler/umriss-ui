@@ -118,7 +118,9 @@ test("in WebKit under touch, 0930 typed into the time fields gives 09:30", async
     const dialog = page.getByRole("dialog", { name: "Select date and time" });
     await expect(dialog.getByRole("button", { name: /^(Increase|Decrease) / }).first()).toBeHidden();
     await dialog.getByRole("textbox", { name: "Hour", exact: true }).tap();
-    await page.keyboard.type("0930");
+    /* At a finger's pace: a burst within one frame would reach the hour before
+       the focus has moved on to the minute, which no hand types. */
+    await page.keyboard.type("0930", { delay: 50 });
     await expect(dialog.getByRole("textbox", { name: "Hour", exact: true })).toHaveValue("09");
     await expect(dialog.getByRole("textbox", { name: "Minute", exact: true })).toHaveValue("30");
   } finally {
