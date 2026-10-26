@@ -852,14 +852,15 @@
   }
 
   /* The tag clips its content; a focus ring on the button would be invisible. It
-     therefore stands on the tag. */
+     therefore stands on the tag - drawn inside it, so that the step from the tag
+     (a stop of its own, ringed outside) to the button shows. */
   .conditionButton:focus-visible {
     outline: none;
   }
 
   .condition:has(.conditionButton:focus-visible) {
     outline: 2px solid transparent;
-    box-shadow: var(--u-focus-ring);
+    box-shadow: inset var(--u-focus-ring);
   }
 
   /* ---- Column menu ----------------------------------------------------- */
