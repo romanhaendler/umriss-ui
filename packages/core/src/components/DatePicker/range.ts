@@ -18,6 +18,7 @@ import { DEFAULT_WORDING } from "../../lib/language";
 import type { Wording } from "../../lib/language";
 import { startOfMonth, dayOnly, addMonths, addDays } from "./grid";
 import { dayStart, zoneToday } from "./zoned";
+import type { DayBounds } from "./bounds";
 
 /** A span between two dates, both ends included - the value of
     `DateRangePicker` and `DateTimeRangePicker`. */
@@ -127,6 +128,7 @@ export interface CalendarPairInput {
   /** The preview end while sweeping over, as long as no end is settled. */
   previewTo: Date | null;
   onHoverDay: (day: Date | null) => void;
+  bounds?: DayBounds;
 }
 
 /**
@@ -137,7 +139,7 @@ export interface CalendarPairInput {
  * appears twice in the pair.
  */
 export function calendarPairProps(input: CalendarPairInput) {
-  const { active, onActive, onPick, bandFrom, bandTo, previewTo, onHoverDay } = input;
+  const { active, onActive, onPick, bandFrom, bandTo, previewTo, onHoverDay, bounds } = input;
   return {
     active,
     onActive,
@@ -147,6 +149,7 @@ export function calendarPairProps(input: CalendarPairInput) {
     rangeTo: bandTo,
     previewTo,
     onHoverDay,
+    bounds,
     withoutOtherMonth: true,
   } as const;
 }

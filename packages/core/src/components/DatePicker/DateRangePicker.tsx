@@ -11,6 +11,7 @@ import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { DateRange, RangePreset } from "./range";
 import { rangeFromDays } from "./contract";
 import { dayShown, gridDay, zoneToday } from "./zoned";
+import { clampDay, presetDays, useDayBounds } from "./bounds";
 import { ZoneNote, useMidnightWarning } from "./ZoneNote";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
@@ -62,6 +63,10 @@ export interface DateRangePickerProps
    * @default `DEFAULT_PRESETS`, in the wording's labels
    */
   presets?: RangePreset[];
+  /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
+  min?: Date;
+  /** The latest day the picker offers, inclusive; read as `min` is. */
+  max?: Date;
 }
 
 /**
@@ -92,6 +97,8 @@ export function DateRangePicker(
     chars,
     clearable = false,
     presets,
+    min,
+    max,
     className,
     ...rest
   }: DateRangePickerProps,
@@ -105,6 +112,7 @@ export function DateRangePicker(
   const placeholderText = placeholder ?? wording.dateRangePlaceholder;
   const isInvalid = invalid ?? field?.invalid ?? false;
   const { timeZone } = formats;
+  const bounds = useDayBounds(min, max);
   useMidnightWarning([value?.from, value?.to]);
   // The grid works on the zone's calendar days; the value's ends are two of them.
   const days = value && { from: gridDay(value.from, timeZone), to: gridDay(value.to, timeZone) };
@@ -121,7 +129,7 @@ export function DateRangePicker(
   const panelId = useId();
 
   const openPanel = () => {
-    const start = days?.from ?? zoneToday(timeZone);
+    const start = clampDay(days?.from ?? zoneToday(timeZone), bounds);
     setView(startOfMonth(start));
     setActive(start);
     setDraftFrom(null);
@@ -179,8 +187,8 @@ export function DateRangePicker(
 
   const presetIsActive = (preset: RangePreset): boolean => {
     if (!days || draftFrom) return false;
-    const range = preset.range();
-    return sameDay(gridDay(range.from, timeZone), days.from) && sameDay(gridDay(range.to, timeZone), days.to);
+    const cut = presetDays(preset, bounds, timeZone);
+    return !!cut && sameDay(cut[0], days.from) && sameDay(cut[1], days.to);
   };
 
   return (
@@ -233,9 +241,10 @@ export function DateRangePicker(
               <PresetColumn
                 presets={presetList}
                 isActive={presetIsActive}
+                isDisabled={(preset) => !presetDays(preset, bounds, timeZone)}
                 onChoose={(preset) => {
-                  const range = preset.range();
-                  applyRange(gridDay(range.from, timeZone), gridDay(range.to, timeZone));
+                  const cut = presetDays(preset, bounds, timeZone);
+                  if (cut) applyRange(cut[0], cut[1]);
                 }}
               />
               <MonthPair
@@ -248,6 +257,7 @@ export function DateRangePicker(
                 bandTo={bandTo}
                 previewTo={previewTo}
                 onHoverDay={setHoverDay}
+                bounds={bounds}
               />
             </div>
             <div className={styles.foot}>
