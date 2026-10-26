@@ -60,6 +60,13 @@ export interface MatrixProps<T> {
       row, not the level.
       @default the built-in number format */
   format?: ValueFormat;
+  /** Each cell writes its level in `format`, in the tick size, in the text
+      colour over a halo of the ground colour - legible on every stop, in both
+      themes and in forced colours. A cell too small for its text is left
+      without one, never truncated; a hole has none. Off by default: a dense
+      heat map would be all clipped text.
+      @default false */
+  labels?: boolean;
 }
 
 /** A series drawn as a grid of coloured cells: `value` gives the row,
@@ -76,6 +83,7 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     data,
     name,
     format,
+    labels = false,
   } = props;
 
   const effectiveColoring = useMemo<MatrixColoring>(
@@ -96,8 +104,9 @@ export function Matrix<T>(props: MatrixProps<T>): null {
         data,
         name,
         format,
+        labels,
       }) as MatrixSeriesConfig,
-    [value, level, effectiveColoring, xAxisId, yAxisId, data, name, format],
+    [value, level, effectiveColoring, xAxisId, yAxisId, data, name, format, labels],
   );
 
   useSeries("Matrix", config);

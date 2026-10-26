@@ -115,6 +115,27 @@ export function checkCondition(filter: Filter, condition: unknown): "effective" 
   return more.isEmpty(condition) ? "empty" : "effective";
 }
 
+/* The form `JSON.stringify` writes for a `Date`. A day-only "2026-03-17" is not
+   it: `Date` reads that as UTC midnight, which is another day in most zones. */
+const JSON_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const revived = (value: unknown): unknown => {
+  if (typeof value !== "string" || !JSON_DATE.test(value)) return value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date;
+};
+
+/** A condition that went through JSON, read back: a bound of a range is a
+    `Date` again whatever the column, a value of a list only where the column's
+    values are points in time. Anything else, and a filter of one's own, stays
+    as it is. */
+export function reviveCondition(filter: Filter, condition: unknown, kind: ValueKind): unknown {
+  if (filter === RANGE && typeof condition === "object" && condition !== null && !Array.isArray(condition)) {
+    return Object.fromEntries(Object.entries(condition).map(([name, bound]) => [name, revived(bound)]));
+  }
+  if (filter === LIST && kind === "date" && Array.isArray(condition)) return condition.map(revived);
+  return condition;
+}
+
 /** Whether a value satisfies an effective condition. */
 export function satisfies(filter: Filter, value: unknown, condition: unknown, timeZone?: string): boolean {
   const more = BUILT_IN.get(filter);
