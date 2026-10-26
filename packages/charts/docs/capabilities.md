@@ -106,6 +106,7 @@ Screenshot pages carry their name in brackets.
 | `zoomable`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click goes back to the axis' own `domain`; without it nothing zooms and the plain wheel stays the page's | Q19, ADR-0047 | Unit (jsdom zoom keys), Interaction (zoom and pan) |
 | The span shown is the chart's view (`domains`, by axis id, `"x"` for a lone axis): `useChart(rows, { initialView, onViewChange })`, `initialView` read once, changes the reader makes reported whole once per change and at most once per frame, never for the start; `setView(view)`, `domains` and `setDomain(axisId, span \| null)` on the hook; an id that names no zoomable x axis falls out | ADR-0047, component-view Q5, Q6, Q10, Q22 | Unit (view), Unit (jsdom zoom keys) |
 | `setView(view)` goes to a whole view and is not reported through `onViewChange` - two charts linked both ways by `onViewChange: (v) => other.setView(v)` stay in step and do not answer each other; a view with the content already shown changes nothing | ADR-0047 | Unit (jsdom useChart, jsdom zoom keys) |
+| Following the live edge (the last hour kept in view while readings arrive, stopped by the reader's zoom or pan, resumed by a button) is the application's: `setView` on each arrival, which is not reported, and `onViewChange` as the stop - the Zoom and pan page, "Follow the live edge, with pause" | ADR-0047 | Unit (jsdom follow the live edge) |
 | `zoomLimits: { min, max }` keeps a zoom's span between the two; without them at most the data's extent and at least three data steps (the smallest distance between neighbouring points); no zoom reaches a span of no width | component-view Q12 | Unit (view), Unit (jsdom zoom keys, scene frame) |
 | 'Show all': once a zoomable x axis shows a span of its own, a quiet button over the plot area's corner (top right; bottom right under a legend or data key above) brings every zoomed axis back, reported once, and goes - a tab stop beside the plot's application role, handing its focus to the plot as it goes; label `showAll` in the wording; tokens only, forced colours and reduced motion as the legend's entries | component-view Q13, 04 | Unit (jsdom show all), Interaction (show all), Screenshot (`show-all`) |
 | Charts in step: each chart's `onViewChange` calls the others' `setView` | component-view Q14 | Unit (jsdom zoom keys), Interaction (cursor sync) |
@@ -538,12 +539,19 @@ here.
 * **Series derived from a field of the rows.** One element per series; long
   rows are grouped before the chart (`series-from-long-rows`).
 * **Aggregation.** Sums, counts and means are the application's, computed
-  before the chart: what changes the number shown is not the chart's to decide.
+  before the chart: what changes the number shown is not the chart's to decide
+  (the Bar page, "Per month").
+* **Column input.** `useChart` takes rows, not columns: a hit, `onSelect`, the
+  tooltip and the data table are per row (ADR-0048). A typed column is read
+  through an index array, `(_, i) => column[i]` (the Chart page, "Columns
+  instead of rows"); Arrow's `getChild(name).toArray()` gives such a column.
 * **Sorting rows along a numeric or time axis.** They come ascending (R-2.6),
   and DEV says where they do not; a control chart's baseline is an index range
   of the rows as given. A category axis orders its rows itself.
 * **Log scale.** Plant values are read linearly; a log axis breaks the affine
-  scale that the working-time axis relies on (ADR-0001).
+  scale that the working-time axis relies on (ADR-0001). Values over decades
+  are the application's `log10`, with `ticks` at 1 to 9 per decade (the Axis
+  page, "Values over decades").
 * **Smoothing.** A curve between samples invents values the plant never
   measured; `Line step` draws what was held.
 * **A kept range.** A `selectedRange` prop, an edge to drag after release, a
@@ -563,11 +571,16 @@ here.
   not repeat from one render to the next; a deterministic beeswarm would be a
   kind of its own.
 * **Pie, donut, radar, candle.** None answers a question a data-dense screen
-  asks (ADR-0059).
+  asks (ADR-0059). The share of a whole is bars on a percent axis: the Pareto
+  page, "Shares, not counts".
 * **A fit line or regression.** A fit is a model the analyst chooses: which
   line, which band, which interval. The chart draws the rows it is given; the
   least-squares line and its 95 % band are built from `Line` and `Area` in the
   application (the Scatter page, "A fit line with its band").
+* **A pen trend component.** A pen is a tag of the application's historian,
+  which the chart does not know; the scales, the pen list and the second
+  period are a `YAxis` per pen, core's `Checkbox` bound to `hidden` and
+  `toggleSeries`, and one more `Line` (the Axis page, "A trend with pens").
 * **Point opacity.** A scatter is one path and one fill, so translucent points
   do not add up where they crowd, and a fill per point breaks the
   million-point budget. Density is the application's count into cells, drawn as

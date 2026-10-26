@@ -33,6 +33,9 @@ export interface SeriesEntry {
       it has changed. */
   lastSlot: number | null;
   materialized: MaterializedSeries | null;
+  /** The chart's rows at this series' last registration or update: an update
+      that meets other rows meets a new course, which is read anew. */
+  seenData: readonly unknown[];
   /** Which of the caller's rows each point came from, where the series is
       not held row by row: a category axis holds it by place (ADR-0052). */
   rows: Uint32Array | null;

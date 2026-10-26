@@ -73,6 +73,7 @@ export function registerSeries(s: ChartScene, config: SeriesConfig): number {
     slot: takesPalette(config) ? slotFor(s, config.name) : -1,
     lastSlot: null,
     materialized: null,
+    seenData: s.data,
     rows: null,
     extent: null,
     step: null,
@@ -92,7 +93,12 @@ export function updateSeries(s: ChartScene, id: number, config: SeriesConfig): v
   const entry = s.series.get(id);
   if (entry === undefined) return;
   const previous = entry.config;
-  const dataEqual = materialEqual(previous, config, config.data ?? s.data, entry.order);
+  // New rows of the chart's are read anew with the function given here, so a
+  // function that changed with them is no stale one: the probe waits for the
+  // next update on the same rows.
+  const probed = config.data ?? (entry.seenData === s.data ? s.data : undefined);
+  entry.seenData = s.data;
+  const dataEqual = materialEqual(previous, config, probed, entry.order);
   const equal =
     dataEqual &&
     previous.xAxisId === config.xAxisId &&
