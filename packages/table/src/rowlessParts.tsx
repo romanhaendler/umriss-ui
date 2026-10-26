@@ -104,7 +104,9 @@ export interface SearchProps
 
 /** The table's search field: one text over every column that searches, in
     the table toolbar. With a search the table puts up a toolbar of its own
-    where none stands. Outside the table it needs `of`. */
+    where none stands. Outside the table it needs `of`. In server mode typing is
+    reported to `onRequest` after a pause of 300 ms without a keystroke; Enter,
+    an emptied field, `setSearch` and any other change of the request report at once. */
 export function Search({ placeholder, "aria-label": name, className, size: own, grow, of, ...rest }: SearchProps) {
   const connection = useConnection(of, "Search");
   const size = useToolbarSize(own);
@@ -123,7 +125,14 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
       type="search"
       className={cx(grow && styles.searchGrow, className)}
       value={snapshot.search}
-      onChange={(event) => snapshot.setSearch(event.target.value)}
+      onChange={(event) => {
+        connection.registry.markTyped(event.target.value !== "");
+        snapshot.setSearch(event.target.value);
+      }}
+      onKeyDown={(event) => {
+        rest.onKeyDown?.(event);
+        if (event.key === "Enter") connection.registry.settleSearch(true);
+      }}
       clearable
       onClear={() => snapshot.setSearch("")}
       placeholder={placeholder ?? wording.tableSearchPlaceholder}

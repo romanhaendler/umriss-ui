@@ -54,6 +54,9 @@ const warnForeign = (column: string) =>
 /** Does the condition apply at the registered column? Not when the column does
     not exist, has no filter, or the condition is not of its kind or requires
     nothing. */
+/** The pause without a keystroke after which a typed search is reported in server mode. */
+const PAUSE_MS = 300;
+
 function appliesTo(registry: Registry, column: string, condition: unknown): boolean {
   const entry = registry.columnById(column);
   const filter = entry ? filterOf(entry.spec.filter) : undefined;
@@ -518,12 +521,26 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   const reportedKeys = useRef(new Set<string>());
   const answersKey = options.server && options.answers ? requestKey(options.answers) : null;
   const late = answersKey !== null && answersKey !== reportKey;
+  /* A typed search is reported after a pause of PAUSE_MS without a keystroke;
+     anything else that changes the request reports it - with the text typed so
+     far - at once and takes the held report with it. */
+  const onRequestNow = useRef(options.onRequest);
+  useEffect(() => {
+    onRequestNow.current = options.onRequest;
+  });
+  useEffect(() => () => registry.settleSearch(false), [registry]);
   useEffect(() => {
     if (!server) return;
+    const typed = registry.takeTyped();
     if (reported.current !== reportKey) {
       reported.current = reportKey;
       if (DEV) reportedKeys.current.add(reportKey);
-      options.onRequest?.(request);
+      if (typed) {
+        registry.holdSearch(() => onRequestNow.current?.(request), PAUSE_MS);
+      } else {
+        registry.settleSearch(false);
+        options.onRequest?.(request);
+      }
     }
     if (DEV && answersKey !== null && !reportedKeys.current.has(answersKey)) {
       warnOnce("server-answers", "`answers` matches none of the requests `onRequest` received; the table stays busy. Hand back the request object you were given, or one with the same search, conditions, sort, page and page size.");

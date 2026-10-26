@@ -299,3 +299,84 @@ describe("Server mode - grid mode", () => {
     expect(stop.textContent).toBe("A-013");
   });
 });
+
+describe("Server mode - the search waits for a pause in typing", () => {
+  const field = () => screen.getByPlaceholderText("Search orders") as HTMLInputElement;
+  const type = (text: string) => fireEvent.change(field(), { target: { value: text } });
+  const searches = () => reports.map((r) => r.search);
+  const PAUSE = 300;
+  const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
+
+  it("reports one request 300 ms after the last of four letters, the field showing each at once", () => {
+    render(<Server />);
+    for (const text of ["p", "pu", "pum", "pump"]) {
+      type(text);
+      expect(field().value).toBe(text);
+      expect(current!.search).toBe(text);
+      wait(100);
+    }
+    expect(searches()).toEqual([""]);
+    wait(PAUSE - 100);
+    expect(searches()).toEqual(["", "pump"]);
+    wait(1000);
+    expect(searches()).toEqual(["", "pump"]);
+  });
+
+  it("reports at once on Enter, and nothing follows", () => {
+    render(<Server />);
+    type("pump");
+    fireEvent.keyDown(field(), { key: "Enter" });
+    expect(searches()).toEqual(["", "pump"]);
+    wait(1000);
+    expect(searches()).toEqual(["", "pump"]);
+  });
+
+  it("reports at once when the field is emptied", () => {
+    render(<Server />);
+    type("pump");
+    wait(PAUSE);
+    type("");
+    expect(searches()).toEqual(["", "pump", ""]);
+  });
+
+  it("reports at once on setSearch, and nothing follows", () => {
+    render(<Server />);
+    type("pu");
+    act(() => current!.setSearch("pump"));
+    expect(searches()).toEqual(["", "pump"]);
+    wait(1000);
+    expect(searches()).toEqual(["", "pump"]);
+  });
+
+  it("reports the typed text at once with a page change during the pause, and nothing follows", () => {
+    render(<Server />);
+    type("A-");
+    wait(PAUSE);
+    wait(LATENCY);
+    type("A-0");
+    act(() => current!.setPage(2));
+    expect(reports.at(-1)).toMatchObject({ search: "A-0", page: 2 });
+    const count = reports.length;
+    wait(1000);
+    expect(reports.length).toBe(count);
+  });
+
+  it("reports nothing when unmounted during the pause", () => {
+    const { unmount } = render(<Server />);
+    type("pump");
+    unmount();
+    wait(1000);
+    expect(searches()).toEqual([""]);
+  });
+
+  it("reports a typed search once under Strict Mode", () => {
+    render(
+      <StrictMode>
+        <Server />
+      </StrictMode>,
+    );
+    type("pump");
+    wait(1000);
+    expect(searches()).toEqual(["", "pump"]);
+  });
+});

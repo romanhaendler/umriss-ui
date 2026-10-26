@@ -4,7 +4,7 @@ import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../..
 import type { TableRequest } from "../../../src";
 
 export const title = "Load pages from a server";
-export const lead = "`server` hands the table one page and the server's `rowCount`; `onRequest` reports search, conditions, sort and page to fetch the next.";
+export const lead = "`server` hands the table one page and the server's `rowCount`; `onRequest` reports search, conditions, sort and page to fetch the next. A typed search is reported after a pause of 300 ms, so the server is asked once for \"pump\", not four times; Enter, an emptied field, `setSearch` and any other change report at once. The table has no cancel token: the application aborts the previous fetch itself, with an `AbortController`.";
 
 /* The server below is a fake: a million requests computed from their index,
    every answer delayed by 400 ms. Dropping a late answer to an older view is
@@ -83,6 +83,7 @@ export default function AMillionRowsOnAServer() {
   const [answer, setAnswer] = useState(() => ({ view: FIRST, ...serve(FIRST) }));
   const [loading, setLoading] = useState(false);
   const latest = useRef(FIRST);
+  const controller = useRef<AbortController | null>(null);
 
   const t = useTable(answer.rows, {
     rowKey: (r) => r.id,
@@ -91,15 +92,20 @@ export default function AMillionRowsOnAServer() {
     rowCount: answer.rowCount,
     onRequest: (view) => {
       latest.current = view;
+      /* The previous fetch is the application's to abort; here it is a timer. */
+      controller.current?.abort();
+      const own = new AbortController();
+      controller.current = own;
       /* Back to the view on screen before its successor was answered: the
          pending answer is dropped, so nothing is loading any more. */
       if (same(view, answer.view)) return setLoading(false);
       setLoading(true);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (latest.current !== view) return;
         setAnswer({ view, ...serve(view) });
         setLoading(false);
       }, LATENCY);
+      own.signal.addEventListener("abort", () => clearTimeout(timer));
     },
     filterOptions: (column) => (column === "service" ? SERVICES : []),
   });
