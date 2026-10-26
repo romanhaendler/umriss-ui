@@ -30,12 +30,6 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
-
-### Fixed
-
-- **A chart prints at the width the printed page leaves it**, with its axes where its marks are, and is back at its screen width afterwards. It was cut off on paper: the ResizeObserver does not fire for print. Proved in Chromium.
-
 ## 0.43.0 – A chart's root, and Intl's options for its numbers (Oct. 2026)
 
 ### Added
