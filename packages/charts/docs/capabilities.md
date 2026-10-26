@@ -537,6 +537,10 @@ here.
   rows are grouped before the chart (`series-from-long-rows`).
 * **Aggregation.** Sums, counts and means are the application's, computed
   before the chart: what changes the number shown is not the chart's to decide.
+* **Column input.** `useChart` takes rows, not columns: a hit, `onSelect`, the
+  tooltip and the data table are per row (ADR-0048). A typed column is read
+  through an index array, `(_, i) => column[i]` (the Chart page, "Columns
+  instead of rows"); Arrow's `getChild(name).toArray()` gives such a column.
 * **Sorting rows along a numeric or time axis.** They come ascending (R-2.6),
   and DEV says where they do not; a control chart's baseline is an index range
   of the rows as given. A category axis orders its rows itself.
