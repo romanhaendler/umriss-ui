@@ -211,6 +211,11 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
       const box = plot.getBoundingClientRect();
       scene.requestResize(box.width, box.height);
       flushSync(() => scene.frameNow());
+      // The page may still be settling here (the way back from print can
+      // measure a transient width) and the observer saw no print layout, so it
+      // would report no change: observing anew has it report the settled size.
+      observer.unobserve(plot);
+      observer.observe(plot);
     };
     printMedia?.addEventListener?.("change", onPrint);
 

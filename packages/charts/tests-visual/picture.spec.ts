@@ -34,7 +34,7 @@ async function inked(page: Page, name: string, ground: string, rect: { x: number
       probe.fillStyle = color as string;
       probe.fillRect(0, 0, 1, 1);
       const [gr, gg, gb] = probe.getImageData(0, 0, 1, 1).data;
-      const k = data.width / (r as { scale: number }).scale;
+      const k = data.width / (document.querySelector('[data-example="picture"] .uc-root') as HTMLElement).clientWidth;
       const box = r as { x: number; y: number; width: number; height: number };
       let count = 0;
       for (let y = Math.floor(box.y * k); y < Math.ceil((box.y + box.height) * k); y++) {
@@ -45,7 +45,7 @@ async function inked(page: Page, name: string, ground: string, rect: { x: number
       }
       return count;
     },
-    [name, ground, { ...rect, scale: 1 }] as const,
+    [name, ground, rect] as const,
   );
 }
 
@@ -123,9 +123,12 @@ test("a hidden series' chip is fainter in the picture", async ({ page }) => {
   await example.locator("[data-encoding]").click();
   const entry = example.locator(".uc-legend-item").nth(1);
   const strongest = async (name: string) => {
-    await example.locator("[data-picture]").click();
     const image = example.locator('[data-role="picture"]');
+    // A second picture replaces the first: wait for its source to change.
+    const before = (await image.count()) === 0 ? null : await image.getAttribute("src");
+    await example.locator("[data-picture]").click();
     await expect(image).toBeVisible();
+    if (before !== null) await expect(image).not.toHaveAttribute("src", before);
     await keep(image, name);
     const box = await frameOf(example);
     const r = await entry.locator(".uc-legend-chip").boundingBox();
