@@ -18,8 +18,9 @@
    count as equal when their source text is equal - a native or bound function,
    whose text is "[native code]", by identity. Known limit, not solved: an
    accessor that reads a changed closure variable without its source text or its
-   data reference changing is not re-materialised - in that case the app must
-   pass a new data reference. The same holds for `tickFormat` and the tooltip's
+   data reference changing is not re-materialised, and DEV warns once per series
+   (dev.ts, `probeStale`) - the app carries the value in the rows (a new data
+   reference) or gives the series a `key` that changes with it. The same holds for `tickFormat` and the tooltip's
    `render`. A `value` given as a field name has none of it: it comes to one
    reader per name and is compared by that name (value.ts, ADR-0048). */
 

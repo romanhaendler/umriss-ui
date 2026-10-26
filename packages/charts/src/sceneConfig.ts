@@ -19,6 +19,7 @@ import type {
   SeriesConfig,
   TooltipPoint,
 } from "./types";
+import { DEV, probeStale } from "./dev";
 import { isFieldReader } from "./value";
 import { optionsEqual } from "./format";
 
@@ -122,8 +123,8 @@ export function listEqual(a: readonly number[] | undefined, b: readonly number[]
     baseline and the series kind - the kind, because it decides about the
     baseline and the step. If any of that changes, the channels are stale and
     have to come into being anew; a field comparison alone is not enough. */
-export function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
-  return (
+export function materialEqual(previous: SeriesConfig, next: SeriesConfig, rows?: unknown): boolean {
+  const equal = (
     previous.kind === next.kind &&
     stackOf(previous) === stackOf(next) &&
     normalizes(previous) === normalizes(next) &&
@@ -133,6 +134,21 @@ export function materialEqual(previous: SeriesConfig, next: SeriesConfig): boole
     fnEqual(valueChannelOf(previous), valueChannelOf(next)) &&
     boxChannelsEqual(boxChannelsOf(previous), boxChannelsOf(next))
   );
+  // Held by their text: the old functions stay, so a changed outer value shows only in the probe.
+  if (equal && DEV) {
+    const a = boxChannelsOf(previous);
+    const b = boxChannelsOf(next);
+    const pairs: Array<[unknown, unknown]> = [
+      [previous.accessor, next.accessor],
+      [baselineOf(previous), baselineOf(next)],
+      [valueChannelOf(previous), valueChannelOf(next)],
+      ...(a === undefined || b === undefined
+        ? []
+        : [...BOX_KEYS, ...BOX_EXTRA_KEYS].map((key): [unknown, unknown] => [a[key], b[key]])),
+    ];
+    for (const [held, kept] of pairs) probeStale(next.name, held, kept, rows);
+  }
+  return equal;
 }
 
 /** A box's further accessors (ADR-0011); undefined for every other kind. */
