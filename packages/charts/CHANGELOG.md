@@ -30,6 +30,12 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`useChart` returns `toPng()`**, a PNG Blob of the plot and its axes on the chart's own ground, in the colour scheme in use, at least twice its CSS pixels; the tooltip, the crosshair and the controls are not in it (ADR-0075). The README shows the download and the clipboard.
+
 ## 0.43.0 – A chart's root, and Intl's options for its numbers (Oct. 2026)
 
 ### Added
