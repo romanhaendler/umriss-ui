@@ -56,7 +56,8 @@ function Body({
   const wording = useWording();
   const formats = useFormats();
   const rows = view.filtered.filter(waiting);
-  const worst = rows[0];
+  /* The most urgent by rank, whatever order the host sorted the view in; on a tie the view's order decides. */
+  const worst = rows.reduce<AlarmRow | undefined>((a, b) => (a === undefined || b.rank < a.rank ? b : a), undefined);
   const lost = reading?.freshness === "lost";
 
   /* The ids and the best rank of the previous projection; null until the first one has been seen, so that the first render says and fires nothing. */
