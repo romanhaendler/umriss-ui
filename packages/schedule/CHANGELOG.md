@@ -18,6 +18,21 @@ moves from here under the rule above.
 
 ---
 
+## 0.46.0 – Zoom keys, and the plan as a table (Oct. 2026)
+
+### Added
+
+- **On the focused plot `+` and `=` zoom in, `-` and `_` zoom out and `0` fits the work**, about the active subtask, each reported once through `onViewChange`; the live region says the new span.
+- **`useSchedule` hands back `DataTable`:** placed inside a `Schedule` it adds a "Show data" key that opens a table of the subtasks in view - lane, task, subtask, from and to with their dates, duration, findings - while the plot and the lane headers are hidden.
+- **The demo shows what the application writes itself:** zoom and fit buttons, undo of the applied intents, a critical path and a highlighted lane.
+
+### Changed
+
+- **A `Schedule`'s children render inside its root element** instead of after it; the parts that declare render nothing, so nothing visible moves.
+  - Migration: nothing changes unless a child of `Schedule` renders an element of its own, which now lands in the grid inside the root.
+- **The peer ranges on core and charts move to `^0.46.0`.**
+  - Migration: install the 0.46 versions of `@umriss-ui/core` and `@umriss-ui/charts` beside it.
+
 ## 0.45.0 – A plan in the plant's time (Oct. 2026)
 
 ### Added

@@ -27,6 +27,13 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.46.0 – Words for a locked widget and the plan's table (Oct. 2026)
+
+### Added
+
+- **Wording for the schedule:** `scheduleVisibleRange(from, to)`, the span the schedule says after a zoom key, and the plan's table - `scheduleShowData`, `scheduleHideData`, `scheduleTableCaption` and the column names `scheduleColumnLane`, `…Task`, `…Subtask`, `…From`, `…To`, `…Duration` and `…Findings`; the schedule's key help names the zoom keys. English and German.
+- **Wording for the dashboard's lock:** `dashboardHeadLocked`, `dashboardLocked` and `dashboardLockedLine`, English and German.
+
 ## 0.45.0 – A plant's time, and dates a finger reaches (Oct. 2026)
 
 ### Added

@@ -14,6 +14,15 @@ From 0.34.0 the packages share one number - five, and six from 0.40.0, when the 
 
 ---
 
+## 0.46.0 – Moves along (Oct. 2026)
+
+No change of its own; the calculation is released with the other five under one number.
+
+### Changed
+
+- **The peer range on core moves to `^0.46.0`.**
+  - Migration: install the 0.46 version of `@umriss-ui/core` beside it.
+
 ## 0.45.0 – A given says how far its source vouches for it (Oct. 2026)
 
 ### Added
