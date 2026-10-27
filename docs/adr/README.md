@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-seven decisions, each one written where it was made and kept afterwards. An
+Seventy-eight decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -22,7 +22,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0006](0006-the-limit-model-lives-in-both-packages.md) | The limit model lives in both packages, on purpose | Limit rule kept in both packages | accepted | limits and alarms |
 | [0007](0007-a-state-is-a-number.md) | A state is a number | Machine states drawn as numeric codes | accepted | charts |
 | [0008](0008-control-limits-are-not-specification-limits.md) | A control limit is not a specification limit, and is never computed from the window | Control limits versus specification limits | accepted | charts |
-| [0009](0009-the-library-owns-a-lifecycle-not-a-generation.md) | The library owns an alarm's lifecycle, not its generation | Alarm lifecycle ownership (withdrawn) | withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
+| [0009](0009-the-library-owns-a-lifecycle-not-a-generation.md) | The library owns an alarm's lifecycle, not its generation | Alarm lifecycle ownership | superseded by ADR-0078. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
 | [0010](0010-a-stale-value-keeps-its-verdict.md) | A stale value keeps its verdict | Old readings keep their verdict | accepted, extended by ADR-0077 (a bad value keeps its verdict too) | limits and alarms |
 | [0011](0011-named-channels-never-overloaded.md) | A channel is named, never overloaded | Each data channel has one meaning | accepted | charts |
 | [0012](0012-a-translucent-material-needs-a-floor.md) | A translucent material needs a floor | Contrast of translucent surfaces | accepted | surface and motion |
@@ -48,7 +48,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0032](0032-what-umriss-is-not.md) | What umriss is not | What umriss deliberately does not build | accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060; superseded in part by ADR-0075 (its "export" point) | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | Schedule keyboard walk continues outside the view | accepted | schedule |
 | [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | Table grid mode only when requested | accepted, amended by ADR-0036 (the first click edits) | table |
-| [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | Target audience: data-dense applications | accepted, superseded in part by ADR-0066 ("no deprecated aliases") | scope |
+| [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | Target audience: data-dense applications | accepted, superseded in part by ADR-0066 ("no deprecated aliases"); amended by ADR-0078 (the alarms package's wording) | scope |
 | [0036](0036-a-grid-edits-on-the-first-click-and-saves-rows-on-purpose.md) | A grid edits on the first click, and saves rows on purpose | Grid cells edit on first click | accepted | table |
 | [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | Demo pages get paths and prerendering | accepted, superseded in part by ADR-0065 | demo |
 | [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | Calculations with several parallel metrics | accepted | calculation |
@@ -70,7 +70,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0054](0054-a-histogram-is-a-helper-for-bar-not-a-chart-kind.md) | A histogram is a helper for Bar, not a chart kind, and its last bin is closed | Histogram helper for bars | accepted | charts |
 | [0055](0055-the-summary-names-labelled-limits-the-tooltip-only-on-request.md) | The summary always names labelled limits, and the tooltip only on request | Chart summary and tooltip name limits | accepted | charts |
 | [0056](0056-a-chart-reports-a-chosen-hit-and-holds-no-selection.md) | A chart reports a chosen hit and holds no selection | Chart reports a hit, keeps no selection | accepted | charts |
-| [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | Alarm snoozing (withdrawn) | withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
+| [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | Alarm snoozing | superseded by ADR-0078. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code. | limits and alarms |
 | [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | Agent skill instead of an MCP server | accepted, superseded in part by ADR-0065 | architecture |
 | [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | Chart kinds are an open set | accepted, supersedes ADR-0032 in two points | charts |
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | Never built: form validation, layout editor, time zones | accepted, extends ADR-0032; superseded in one point by ADR-0064 | scope |
@@ -91,5 +91,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
 | [0076](0076-an-application-names-the-time-zone-its-instants-are-shown-in.md) | An application names the time zone its instants are shown in | An application names a time zone; every package shows its instants in it | accepted, supersedes ADR-0060 in one point (time zones) | core, packages, scope |
 | [0077](0077-a-bad-value-keeps-its-verdict.md) | A bad value keeps its verdict | A source's quality is a third axis beside the verdict and the freshness | accepted, extends ADR-0010 | limits and alarms |
+| [0078](0078-alarm-management-is-a-package-that-owns-a-lifecycle-never-a-generation.md) | Alarm management is a package on core and table; it owns an alarm's lifecycle, never its generation | Alarms are a package of their own, after the alarm list was removed; supersedes ADR-0009 and ADR-0057 | accepted, supersedes ADR-0009 and ADR-0057, amends ADR-0035 | limits and alarms, architecture |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
