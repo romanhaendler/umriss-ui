@@ -21,6 +21,11 @@ describe("AlarmBanner", () => {
     expect(screen.getByRole("group", { name: "Priority 2, high: 2" })).toBeTruthy();
   });
 
+  it("shows the worst alarm in a view the host left in input order", () => {
+    render(<AlarmBanner view={alarmModel({ alarms: [alarm("1", "l"), alarm("2", "h"), alarm("3", "c")], types: TYPES, asOf: NOW }, { sort: null })} />);
+    expect(screen.getByRole("region", { name: "Alarms" }).textContent).toContain("Reactor trip");
+  });
+
   it("says what holds without unacknowledged alarms", () => {
     const { rerender } = render(<AlarmBanner view={view([alarm("1", "c", "active-acknowledged")])} />);
     expect(screen.getByText("No unacknowledged alarms")).toBeTruthy();
