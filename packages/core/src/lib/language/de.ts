@@ -409,6 +409,12 @@ export const GERMAN_WORDING: Wording = {
   alarmAcknowledge: "Quittieren",
   alarmAcknowledgeMany: (count) =>
     count === 1 ? "1 Alarm quittieren" : `${count} Alarme quittieren`,
+  alarmAcknowledgeInView: (count) =>
+    count === 1 ? "1 Alarm in der Ansicht quittieren" : `${count} Alarme in der Ansicht quittieren`,
+  alarmAcknowledgeSelected: (count) =>
+    count === 1 ? "1 ausgewählten Alarm quittieren" : `${count} ausgewählte Alarme quittieren`,
+  alarmAcknowledgeConfirm: "Quittieren",
+  alarmAcknowledgeCancel: "Abbrechen",
   alarmSnooze: "Zurückstellen",
   alarmSnoozeMany: (count) => (count === 1 ? "1 Alarm zurückstellen" : `${count} Alarme zurückstellen`),
   alarmSnoozeDuration: "Dauer",

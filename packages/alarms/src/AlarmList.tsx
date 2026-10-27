@@ -34,8 +34,8 @@
    absent, only deliberately hidden." */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { HTMLAttributes } from "react";
-import { Badge, Button, Checkbox, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import type { HTMLAttributes, KeyboardEvent } from "react";
+import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
@@ -55,7 +55,14 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       there. */
   selection?: TableSelection<string>;
   /** Gets the ids that are to be acknowledged. The component does not
-      acknowledge itself – it does not own the alarms. */
+      acknowledge itself – it does not own the alarms. Called by the bar's
+      button and by the keys A (the focused alarm) and Shift+A (acknowledge
+      all, after a question). Acknowledge all acts on the selection; without
+      one it acts on the rows rendered inside the list's visible area - the
+      rows whose box meets both its scroll area and the window, read when the
+      question opens - never the filtered set as such. That is umriss's own
+      rule, no standard's. The single keys act only while the focus is in the
+      list's grid, never in a field, and cannot be remapped. */
   onAcknowledge?: (ids: readonly string[]) => void;
   /** Gets the ids the operator wants to snooze and the end they chose
       (`asOf` of the view plus a duration of `snoozeDurations`). The component
@@ -115,11 +122,14 @@ function SnoozePanel({
   durations,
   reasons,
   required,
+  askReason,
   onConfirm,
 }: {
   durations: readonly number[];
   reasons: readonly string[];
   required: boolean;
+  /** False when only the durations are asked for (the key S without a reason rule). */
+  askReason: boolean;
   onConfirm: (ms: number, reason: string) => void;
 }) {
   const wording = useWording();
@@ -159,7 +169,7 @@ function SnoozePanel({
           />
         </FormField>
       )}
-      <FormField label={reasons.length > 0 ? wording.alarmSnoozeOtherReason : wording.alarmSnoozeReason} required={required && reasons.length === 0}>
+      {askReason && <FormField label={reasons.length > 0 ? wording.alarmSnoozeOtherReason : wording.alarmSnoozeReason} required={required && reasons.length === 0}>
         <Input
           value={reason}
           onChange={(event) => {
@@ -167,7 +177,7 @@ function SnoozePanel({
             setChosen(null);
           }}
         />
-      </FormField>
+      </FormField>}
       <Button type="submit" variant="primary" size="sm" disabled={blocked}>
         {wording.alarmSnooze}
       </Button>
@@ -232,6 +242,8 @@ function durationWord(ms: number, wording: Wording): string {
     The cadence lives in a wrapper of its own: without an as-of time and ages
     the list shows no freshness, and then no timer should run that re-renders
     the whole table every minute. */
+const LIVE_INTERVAL_MS = 2000;
+
 type BodyProps = Omit<AlarmListProps, "asOf" | "freshness">;
 
 /** The list of alarms, operable: a table over the rows of `alarmModel`, with
@@ -270,6 +282,7 @@ function Body({
   freshness,
   hiddenOnly = false,
   onHiddenOnlyChange,
+  onKeyDown,
   ...rest
 }: BodyProps & { freshness: FreshnessReading | null }) {
   const wording = useWording();
@@ -277,6 +290,7 @@ function Body({
   const showsAsOf = freshness !== null;
   const disconnected = freshness?.freshness === "lost";
 
+  const [keyedId, setKeyedId] = useState<string | null>(null);
   const { Table, Column } = useTable(projection.visible, { rowKey: (row) => row.id, selection });
 
   const alarms = useMemo(() => projection.filtered.map((row) => row.alarm), [projection.filtered]);
@@ -297,18 +311,41 @@ function Body({
   const first = projection.filtered[0];
   const viewAsOf = first === undefined ? 0 : first.alarm.raised + first.age;
   const acknowledgeable = useMemo(() => countAcknowledgeable(alarms, affected, viewAsOf), [alarms, affected, viewAsOf]);
+  const allIds = useMemo(() => projection.filtered.map((row) => row.id), [projection.filtered]);
+  const anyAcknowledgeable = useMemo(() => countAcknowledgeable(alarms, allIds, viewAsOf), [alarms, allIds, viewAsOf]);
+
+  /* The selection if there is one; else the rows rendered inside the list's
+     scroll area and the window - umriss's own rule, never the filtered set as
+     such. Read from the DOM when the question opens. */
+  const openAsk = () => {
+    const selected = affected.length > 0;
+    let ids = affected;
+    if (!selected) {
+      const area = tableBox.current?.querySelector("table")?.parentElement?.getBoundingClientRect();
+      ids = Array.from(tableBox.current?.querySelectorAll<HTMLElement>("tr[data-alarm-id]") ?? [])
+        .filter((tr) => {
+          const box = tr.getBoundingClientRect();
+          return area !== undefined && box.bottom > area.top && box.top < area.bottom && box.bottom > 0 && box.top < window.innerHeight;
+        })
+        .map((tr) => tr.dataset.alarmId!);
+    }
+    const count = countAcknowledgeable(alarms, ids, viewAsOf);
+    if (count > 0) setAsk({ ids, count, selected });
+  };
 
   /* The same cut feeds both actions. Only an alarm in service or already
      snoozed can be snoozed (`snooze()` leaves the others alone); only a
      snoozed one can be unsnoozed. The end is counted from the view's own
      as-of time, which every row carries as raised + age. */
   const chosen = useMemo(() => projection.filtered.filter((row) => selection?.selected.has(row.id)), [projection.filtered, selection]);
-  const snoozable = chosen.filter((row) => row.availability === "in-service" || row.availability === "snoozed");
+  const shelved = chosen.length > 0 || keyedId === null ? chosen : projection.filtered.filter((row) => row.id === keyedId);
+  const snoozable = shelved.filter((row) => row.availability === "in-service" || row.availability === "snoozed");
   const snoozed = chosen.filter((row) => row.availability === "snoozed");
 
   /* Compact of its own accord; a provider that sets a density has a say. */
   const density = useDensityFor(ownDensity, "compact");
 
+  const canShelve = onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0;
   const asksReason = snoozeReason !== undefined || (snoozeReasons?.length ?? 0) > 0;
   const hiddenCount = wording.alarmHidden(projection.hiddenAlarms);
 
@@ -316,9 +353,56 @@ function Body({
   const snoozeButton = useRef<HTMLButtonElement>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [openings, setOpenings] = useState(0);
+  /* The alarm the key S was pressed on, when nothing is selected, and the cell
+     the focus goes back to when the panel closes. */
+  const returnTo = useRef<HTMLElement | null>(null);
+  /* What "Acknowledge all" will report, fixed when its question opens: an alarm
+     that arrives before the answer is not acknowledged. */
+  const [ask, setAsk] = useState<{ ids: string[]; count: number; selected: boolean } | null>(null);
+  const tableBox = useRef<HTMLDivElement>(null);
+
+  /* The live region speaks one number and changes at most once per two seconds
+     of the view's as-of time; the host's next tick delivers the last change.
+     There is no timer: a host that stops ticking also stops the speech, which
+     is right for a list whose data has stopped. */
+  const [spoken, setSpoken] = useState({ at: viewAsOf, count: projection.activeUnacknowledged });
+  if (spoken.count !== projection.activeUnacknowledged && viewAsOf - spoken.at >= LIVE_INTERVAL_MS) {
+    setSpoken({ at: viewAsOf, count: projection.activeUnacknowledged });
+  }
+
+  /* The single keys act only while the focus is in the list's grid and not in
+     a field (WCAG 2.1.4); a portal's panel or dialog is outside the table and
+     so is not the grid. The focused alarm is the one whose row the cell is in. */
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) return;
+    const target = event.target as HTMLElement;
+    const id = target.closest<HTMLElement>("table tr[data-alarm-id]")?.dataset.alarmId;
+    if (id === undefined || target.closest('input:not([type="checkbox"]), textarea, select, [contenteditable="true"]')) return;
+    const key = event.key.toLowerCase();
+    if (key === "a" && onAcknowledge !== undefined) {
+      event.preventDefault();
+      if (event.shiftKey) openAsk();
+      else if (countAcknowledgeable(alarms, [id], viewAsOf) > 0) onAcknowledge([id]);
+    } else if (key === "s" && !event.shiftKey && selection !== undefined && canShelve) {
+      const row = projection.filtered.find((r) => r.id === id);
+      const rows = chosen.length > 0 ? chosen : row === undefined ? [] : [row];
+      if (!rows.some((r) => r.availability === "in-service" || r.availability === "snoozed")) return;
+      event.preventDefault();
+      returnTo.current = target.closest<HTMLElement>("td, th");
+      setKeyedId(chosen.length > 0 ? null : id);
+      setOpenings((n) => n + 1);
+      setPanelOpen(true);
+    }
+  };
+  const closePanel = () => {
+    setPanelOpen(false);
+    setKeyedId(null);
+    returnTo.current?.focus();
+  };
 
   return (
-    <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest}>
+    <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest} onKeyDown={handleKeyDown}>
       <div className={styles.bar}>
         <span className={styles.heading}>{wording.alarmList}</span>
         {projection.flood !== null && <Badge tone="warning">{wording.alarmFloodHint(projection.rate, RATE_WINDOW_MS / 60_000)}</Badge>}
@@ -352,25 +436,46 @@ function Body({
             {snoozed.length === 0 ? wording.alarmUnsnooze : wording.alarmUnsnoozeMany(snoozed.length)}
           </Button>
         )}
-        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && asksReason && (
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && canShelve && (
           <>
-            <Button
-              ref={snoozeButton}
-              size="sm"
-              disabled={snoozable.length === 0}
-              aria-haspopup="dialog"
-              aria-expanded={panelOpen}
-              onClick={() => {
-                setOpenings((n) => n + 1);
-                setPanelOpen(true);
-              }}
-            >
-              {snoozable.length === 0 ? wording.alarmSnooze : wording.alarmSnoozeMany(snoozable.length)}
-            </Button>
+            {asksReason ? (
+              <Button
+                ref={snoozeButton}
+                size="sm"
+                disabled={snoozable.length === 0}
+                aria-haspopup="dialog"
+                aria-expanded={panelOpen}
+                onClick={() => {
+                  returnTo.current = snoozeButton.current;
+                  setOpenings((n) => n + 1);
+                  setPanelOpen(true);
+                }}
+              >
+                {snoozable.length === 0 ? wording.alarmSnooze : wording.alarmSnoozeMany(snoozable.length)}
+              </Button>
+            ) : (
+              <Menu
+                align="end"
+                trigger={
+                  <Button ref={snoozeButton} size="sm" disabled={snoozable.length === 0}>
+                    {snoozable.length === 0 ? wording.alarmSnooze : wording.alarmSnoozeMany(snoozable.length)}
+                  </Button>
+                }
+              >
+                {snoozeDurations.map((ms) => (
+                  <MenuItem key={ms} onSelect={() => onSnooze(snoozable.map((row) => row.id), viewAsOf + ms)}>
+                    {durationWord(ms, wording)}
+                  </MenuItem>
+                ))}
+              </Menu>
+            )}
+            {/* The key S opens this panel in both cases; without a rule for
+                reasons it asks for the duration only. */}
             <Popover
               open={panelOpen}
-              onOpenChange={setPanelOpen}
+              onOpenChange={(open) => (open ? setPanelOpen(true) : closePanel())}
               anchorRef={snoozeButton}
+              focusRef={returnTo}
               align="end"
               role="dialog"
               aria-label={wording.alarmSnoozeMany(snoozable.length)}
@@ -381,35 +486,25 @@ function Body({
                 durations={snoozeDurations}
                 reasons={snoozeReasons ?? []}
                 required={snoozeReason === "required"}
+                askReason={asksReason}
                 onConfirm={(ms, reason) => {
-                  setPanelOpen(false);
-                  snoozeButton.current?.focus();
-                  onSnooze(snoozable.map((row) => row.id), viewAsOf + ms, reason === "" ? undefined : reason);
+                  const ids = snoozable.map((row) => row.id);
+                  closePanel();
+                  onSnooze(ids, viewAsOf + ms, reason === "" ? undefined : reason);
                 }}
               />
             </Popover>
           </>
         )}
-        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && !asksReason && (
-          <Menu
-            align="end"
-            trigger={
-              <Button size="sm" disabled={snoozable.length === 0}>
-                {snoozable.length === 0 ? wording.alarmSnooze : wording.alarmSnoozeMany(snoozable.length)}
-              </Button>
-            }
-          >
-            {snoozeDurations.map((ms) => (
-              <MenuItem key={ms} onSelect={() => onSnooze(snoozable.map((row) => row.id), viewAsOf + ms)}>
-                {durationWord(ms, wording)}
-              </MenuItem>
-            ))}
-          </Menu>
-        )}
         {selection !== undefined && onAcknowledge !== undefined && (
-          <Button variant="primary" size="sm" disabled={acknowledgeable === 0} onClick={() => onAcknowledge(affected)}>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={affected.length > 0 ? acknowledgeable === 0 : anyAcknowledgeable === 0}
+            onClick={() => (affected.length > 0 ? onAcknowledge(affected) : openAsk())}
+          >
             {/* Without a selection it does not say "acknowledge 0 alarms" but
-                what the button does. */}
+                what the button does - and then asks about the rows in view. */}
             {acknowledgeable === 0 ? wording.alarmAcknowledge : wording.alarmAcknowledgeMany(acknowledgeable)}
           </Button>
         )}
@@ -417,10 +512,12 @@ function Body({
 
       {/* Polite, and exactly one number. */}
       <div aria-live="polite" aria-atomic="true" className={styles.live}>
-        {wording.alarmActiveUnacknowledged(projection.activeUnacknowledged)}
+        {wording.alarmActiveUnacknowledged(spoken.count)}
       </div>
 
+      <div ref={tableBox}>
       <Table
+        grid
         aria-label={wording.alarmList}
         selectable={selection !== undefined}
         density={density}
@@ -428,6 +525,7 @@ function Body({
         stickyHeader
         rowProps={(row) => ({
           className: styles.row,
+          "data-alarm-id": row.id,
           "data-lifecycle": row.lifecycle,
           "data-priority": row.priority,
           "data-availability": row.availability,
@@ -501,6 +599,19 @@ function Body({
         </Column>
         <Column value="frequency" label={wording.alarmColumnFrequency} format="count" sortable={false} />
       </Table>
+      </div>
+
+      <ConfirmDialog
+        open={ask !== null}
+        onClose={() => setAsk(null)}
+        onConfirm={() => {
+          if (ask !== null) onAcknowledge?.(ask.ids);
+          setAsk(null);
+        }}
+        title={ask === null ? "" : ask.selected ? wording.alarmAcknowledgeSelected(ask.count) : wording.alarmAcknowledgeInView(ask.count)}
+        confirmLabel={wording.alarmAcknowledgeConfirm}
+        cancelLabel={wording.alarmAcknowledgeCancel}
+      />
     </div>
   );
 }

@@ -56,3 +56,11 @@ and the list stays quiet in a flood.
       tick at 4 s with no change, changes at 0, 2 and 4 s only, and at 4 s says the count of 3 s.
 - [ ] `pnpm check alarms`, `pnpm check core`, `pnpm check:site` and `pnpm test:visual:quick alarms` pass, and
       the shell's accessibility check passes on the AlarmList page.
+
+## Comments
+
+- The grid does not swallow A, Shift+A or S: `gridKeys.ts` handles arrows, Home/End, Page keys, Space, Enter, F2, and typing only on an editable cell, and calls `preventDefault` for none of the three. The list reads them on its root through the row's `data-alarm-id` (via `rowProps`); no table change is needed.
+- Behaviour changes in two existing tests, both named by this ticket: the live region now changes at most once per two seconds of as-of time (the "follows the number" test advances the view's as-of by two seconds), and the bar's Acknowledge is no longer disabled without a selection while an acknowledgeable alarm exists (it asks about the rows in view).
+- The bar's button with a selection still reports at once (no dialog); Shift+A and the button without a selection ask first. The button's label is the plain word without a selection: the in-view count is read from layout when the question opens, so it cannot stand on the button.
+- S opens the panel in both cases; without `snoozeReason`/`snoozeReasons` it asks for the duration only (the reason field is left out).
+- Not run (shared ports): `acknowledge-in-view.spec.ts`, `pnpm test:visual:quick alarms`, the shell's accessibility and silent-pages checks.
