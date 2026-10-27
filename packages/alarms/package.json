@@ -1,0 +1,93 @@
+{
+  "name": "@umriss-ui/alarms",
+  "version": "0.46.0",
+  "description": "React alarm management for data-dense applications - the lifecycle of an alarm after it is raised: a model and a list.",
+  "license": "MIT",
+  "author": "Roman Händler",
+  "homepage": "https://github.com/romanhaendler/umriss-ui/tree/main/packages/alarms#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanhaendler/umriss-ui.git",
+    "directory": "packages/alarms"
+  },
+  "bugs": {
+    "url": "https://github.com/romanhaendler/umriss-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "react-components",
+    "alarms",
+    "alarm-management",
+    "isa-18.2",
+    "typescript",
+    "umriss"
+  ],
+  "type": "module",
+  "files": [
+    "dist",
+    "docs/llms-full.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/alarms.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "styles.css": ["dist/styles.d.ts"]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/alarms.js",
+      "default": "./dist/alarms.js"
+    },
+    "./styles.css": {
+      "types": "./dist/styles.d.ts",
+      "default": "./dist/alarms.css"
+    }
+  },
+  "scripts": {
+    "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "prepack": "pnpm run props",
+    "predev": "pnpm run props",
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "vite build",
+    "prebuild:demo": "pnpm run props",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:demo": "pnpm run props && tsc --noEmit -p tsconfig.demo.json",
+    "check:site": "pnpm run props -- --check",
+    "preview:demo": "vite preview --config vite.demo.config.ts --port 4179 --strictPort",
+    "test:unit": "vitest run",
+    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
+    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts alarms.js alarms.css"
+  },
+  "peerDependencies": {
+    "@umriss-ui/core": "workspace:^0.46.0",
+    "@umriss-ui/table": "workspace:^0.46.0",
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@fontsource/geist-mono": "^5.3.0",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@umriss-ui/core": "workspace:*",
+    "@umriss-ui/demo": "workspace:*",
+    "@umriss-ui/table": "workspace:*",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

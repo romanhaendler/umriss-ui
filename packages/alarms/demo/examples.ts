@@ -1,0 +1,27 @@
+/* This demo, as the shell receives it.
+
+   The globs stand here and not in the shell: `import.meta.glob` resolves
+   relative to the file that calls it, and the directory belongs to this demo.
+   What they find goes unchanged to `@umriss-ui/demo`.
+
+   The title export is `title`, the same word `@umriss-ui/core`'s examples use;
+   the shell accepts that one spelling and no other. */
+
+import { buildDemo } from "@umriss-ui/demo";
+import manifest from "../package.json";
+import adrs from "./.generated/adrs.json";
+import apiIndex from "./.generated/api-index.json";
+import props from "./.generated/props.json";
+import { ADDRESSES } from "./outline";
+
+export const DEMO = buildDemo({
+  manifest,
+  adrs,
+  addresses: ADDRESSES,
+  scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
+  examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
+  sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
+  props,
+  search: () => import("./.generated/search.json"),
+  apiIndex,
+});

@@ -4,8 +4,8 @@ import { spawnSync } from "node:child_process";
 
 const pkg = process.argv[2];
 const project = { core: "ui-light" }[pkg] ?? `${pkg}-light`;
-if (!["core", "charts", "table", "schedule", "calculation", "dashboard"].includes(pkg)) {
-  console.error("usage: pnpm test:visual:quick <core|charts|table|schedule|calculation|dashboard> [playwright args]");
+if (!["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms"].includes(pkg)) {
+  console.error("usage: pnpm test:visual:quick <core|charts|table|schedule|calculation|dashboard|alarms> [playwright args]");
   process.exit(2);
 }
 const run = spawnSync(

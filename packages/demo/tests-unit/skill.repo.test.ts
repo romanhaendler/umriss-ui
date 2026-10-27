@@ -9,7 +9,7 @@ import ts from "typescript";
 import { expect, it } from "vitest";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const ENTRIES = ["core/src/index.ts", "core/src/lib/language/de.ts", "charts/src/index.ts", "charts/src/wording/de.ts", "table/src/index.ts", "schedule/src/index.ts", "calculation/src/index.ts", "dashboard/src/index.ts"].map((f) => join(ROOT, "packages", f));
+const ENTRIES = ["core/src/index.ts", "core/src/lib/language/de.ts", "charts/src/index.ts", "charts/src/wording/de.ts", "table/src/index.ts", "schedule/src/index.ts", "calculation/src/index.ts", "dashboard/src/index.ts", "alarms/src/index.ts"].map((f) => join(ROOT, "packages", f));
 
 it("names no export that no package has", () => {
   const program = ts.createProgram(ENTRIES, { jsx: ts.JsxEmit.ReactJSX, allowImportingTsExtensions: true, noEmit: true });

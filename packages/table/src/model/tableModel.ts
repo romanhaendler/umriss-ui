@@ -102,6 +102,7 @@ export interface TreeInput<Z> {
   admit?: (row: Z) => boolean;
 }
 
+/** The table's pipeline as a pure function - filter, sort, page over rows and model columns. */
 export interface TableProjection<Z, K extends string = string> {
   /** The visible columns in their order – the basis for the header row, the
       column menu and the CSV export. */
@@ -328,6 +329,7 @@ const visibleOf = <Z, K extends string>(
   return hidden?.length ? ordered.filter((s) => s.hideable === false || !hidden.includes(s.id)) : ordered;
 };
 
+/** The table's pipeline as a pure function - filter, sort, page over rows and model columns. */
 export function tableModel<Z, K extends string = string>(
   rows: readonly Z[],
   columns: readonly ModelColumn<Z, K>[],
