@@ -14,6 +14,8 @@
 import { writeNumber } from "@umriss-ui/core";
 import type { Formats, NumberFormat, Wording } from "@umriss-ui/core";
 
+const DATE_FORMATS = ["date", "time", "dateTime", "timeWithSeconds", "dateTimeWithSeconds"] as const;
+
 /** The names of the standard presentations of a point in time, with the English
     text of 17 March 2026 at 09:05:03 for each:
     - `"date"`: "17/03/2026"
@@ -22,12 +24,12 @@ import type { Formats, NumberFormat, Wording } from "@umriss-ui/core";
     - `"timeWithSeconds"`: "09:05:03"
     - `"dateTimeWithSeconds"`: "17/03/2026, 09:05:03"
     German formats write the same with "17.03.2026". */
-export type DateFormat = "date" | "time" | "dateTime" | "timeWithSeconds" | "dateTimeWithSeconds";
+export type DateFormat = (typeof DATE_FORMATS)[number];
 export type Format = NumberFormat | DateFormat;
 
-const DATE_FORMATS: ReadonlySet<unknown> = new Set<unknown>(["date", "time", "dateTime", "timeWithSeconds", "dateTimeWithSeconds"]);
+const DATE_FORMAT_SET: ReadonlySet<unknown> = new Set<unknown>(DATE_FORMATS);
 /** Whether a format names a point in time. */
-export const isDateFormat = (format: unknown): format is DateFormat => DATE_FORMATS.has(format);
+export const isDateFormat = (format: unknown): format is DateFormat => DATE_FORMAT_SET.has(format);
 
 /** The kinds the table tells apart. `other` needs a presentation from the
     caller; `empty` means: not a single value present. */

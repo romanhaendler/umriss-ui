@@ -74,7 +74,7 @@ function Body({
     const best = added.reduce<AlarmRow | undefined>((a, b) => (a === undefined || b.rank < a.rank ? b : a), undefined);
     if (best !== undefined) {
       onAnnunciate?.({ kind: "new", priority: best.priority });
-      if (best.rank < previous.rank) setAlert(wording.alarmBannerAlert(priorityWord(best.priority, wording).toLowerCase(), best.type.label));
+      if (best.rank < previous.rank) setAlert(`${wording.alarmBannerAlert(priorityWord(best.priority, wording).toLowerCase(), best.type.label)} ${formats.time(new Date(best.alarm.raised), true)}`);
     } else if (previous.ids.size > 0 && ids.size === 0) {
       onAnnunciate?.({ kind: "cleared" });
     }
@@ -82,7 +82,7 @@ function Body({
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <section {...rest} ref={ref} aria-label={wording.alarmBanner} className={className ? `${styles.banner} ${className}` : styles.banner}>
+    <section aria-label={wording.alarmBanner} {...rest} ref={ref} className={className ? `${styles.banner} ${className}` : styles.banner}>
       {worst === undefined ? (
         <span className={styles.none} data-lost={lost ? "" : undefined}>
           {lost ? wording.alarmBannerDisconnected : wording.alarmBannerNone}

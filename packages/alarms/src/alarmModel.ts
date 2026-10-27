@@ -5,7 +5,7 @@
    value into an alarm decides about bounds, sampling rates, suppression and a
    clock - all of them the application's decisions, with the application's
    consequences. The tree draws the same line when it reports that a branch
-   was opened instead of fetching its children (ADR-0009).
+   was opened instead of fetching its children (ADR-0078).
 
    The lifecycle state is ONE field with FOUR values, not two booleans. A pair
    of booleans invites `if (active)`, and precisely that filter is the error:

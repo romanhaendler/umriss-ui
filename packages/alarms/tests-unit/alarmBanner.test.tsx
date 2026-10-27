@@ -46,6 +46,25 @@ describe("AlarmBanner", () => {
     expect(onOpen).toHaveBeenCalledOnce();
   });
 
+  it("changes the alert text for each arrival of the same type, so a screen reader says it again", () => {
+    const alert = () => screen.getByRole("alert").textContent;
+    const { rerender } = render(<AlarmBanner view={view([alarm("1", "l")])} />);
+    rerender(<AlarmBanner view={view([alarm("1", "l"), alarm("2", "h", "active-unacknowledged", NOW - 30_000)])} />);
+    const first = alert();
+    rerender(<AlarmBanner view={view([alarm("1", "l")])} />);
+    rerender(<AlarmBanner view={view([alarm("1", "l"), alarm("3", "h", "active-unacknowledged", NOW - 10_000)])} />);
+    expect(alert()).toContain("Furnace hot");
+    expect(alert()).not.toBe(first);
+  });
+
+  it("takes the root contract: rest props, a ref and its own aria-label", () => {
+    let node: HTMLElement | null = null;
+    render(<AlarmBanner view={view([])} aria-label="Plant 2" data-x="1" ref={(n) => void (node = n)} />);
+    const region = screen.getByRole("region", { name: "Plant 2" });
+    expect(region.getAttribute("data-x")).toBe("1");
+    expect(node).toBe(region);
+  });
+
   it("alerts only for a new alarm of higher priority than the one shown", () => {
     const alert = () => screen.getByRole("alert");
     const { rerender } = render(<AlarmBanner view={view([alarm("1", "h")])} />);
