@@ -679,9 +679,12 @@ export interface Wording {
   alarmLifecycleActiveAcknowledged: string;
   alarmLifecycleResolvedUnacknowledged: string;
   alarmLifecycleResolvedAcknowledged: string;
-  /** "Alarm flood: 12 in quick succession" - a flood is marked, never
+  /** "Alarm flood: 40 in 10 min" - a flood is marked, never
       suppressed. */
-  alarmFloodHint: (count: number) => string;
+  alarmFloodHint: (count: number, minutes: number) => string;
+  /** The badge on the first alarm of a group or trip (ISA-18.2 first-out), and the badge on the first alarm of a flood - umriss's own mark, worded apart. */
+  alarmFirstOut: string;
+  alarmFirstInFlood: string;
   /** "40×" on a chattering alarm type. */
   alarmChatterHint: (count: number) => string;
   /** The text of the live region: the number of active unacknowledged alarms. */
@@ -1113,7 +1116,9 @@ export const DEFAULT_WORDING: Wording = {
   alarmLifecycleActiveAcknowledged: "In alarm, acknowledged",
   alarmLifecycleResolvedUnacknowledged: "Returned, unacknowledged",
   alarmLifecycleResolvedAcknowledged: "Returned, acknowledged",
-  alarmFloodHint: (count) => `Alarm flood: ${count} in quick succession`,
+  alarmFloodHint: (count, minutes) => `Alarm flood: ${count} in ${minutes} min`,
+  alarmFirstOut: "First out",
+  alarmFirstInFlood: "First in flood",
   alarmChatterHint: (count) => `${count}×`,
   alarmActiveUnacknowledged: (count) =>
     count === 1

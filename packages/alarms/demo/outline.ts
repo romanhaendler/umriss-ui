@@ -67,6 +67,23 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["AlarmBannerProps"],
         exports: ["AlarmBanner"],
       },
+      {
+        id: "trips-and-floods",
+        name: "Trips and floods",
+        sentence: "The first alarm of a trip, the first of a flood and the flood's rate, with the times to the second. Reach for it when one cause raises dozens of alarms and the operator has to start from the first.",
+        about: [
+          "Give alarms a `group` (the application's trip or unit) and the earliest of each group is marked “First out” - the standards' sense: the first of a group or a trip. Alarms whose `raised` collide go by the application's `sequence`, then by input order; an alarm without a group is never first-out. Done alarms count for the choice, so a trip's first alarm stays the first once it is gone.",
+          "The flood stays your rule, with no default. ISA-18.2's reference is more than 10 alarms in 10 minutes per operating position: `{ windowMs: 600000, atLeast: 11 }`, over the alarms of one position. The flood's earliest alarm, `flood.first`, is marked “First in flood”, umriss's own mark and not first-out. The projection's `rate` counts the alarms raised in the ten minutes before the as-of time, and the flood mark in the list and in the banner names it: “Alarm flood: 40 in 10 min”.",
+          "A list of a thousand rows ticking once a second keeps focus and the ticked rows; give the list a `maxHeight` and it scrolls inside the page.",
+        ],
+        keysOf: ["alarmlist"],
+        limits: ["Every alarm of a flood stays in the list; the marks help the operator start, they hide nothing."],
+        accessibility: [
+          "“First out” and “First in flood” are words in the row, never a colour alone, in the wording's language.",
+        ],
+        types: ["AlarmListProps"],
+        exports: ["AlarmList", "alarmModel"],
+      },
     ],
   },
   {
