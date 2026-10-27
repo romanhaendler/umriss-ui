@@ -30,7 +30,7 @@ jobs:
         # A new package is added here.
         run: |
           dirs=""
-          for dir in core charts table schedule calculation dashboard; do
+          for dir in core charts table alarms schedule calculation dashboard; do
             name="$(node -p "require('./packages/$dir/package.json').name")"
             version="$(node -p "require('./packages/$dir/package.json').version")"
             if npm view "$name@$version" version > /dev/null 2>&1; then

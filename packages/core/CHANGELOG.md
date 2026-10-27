@@ -4,14 +4,14 @@ This document describes what changes for **callers** of the package: exports,
 props, behaviour.
 
 **The numbers.** The middle digit rises when something is added; the last one
-when something is repaired. The six packages are released in step, and a rename
+when something is repaired. The seven packages are released in step, and a rename
 keeps its old name for one further minor, with a warning, before the minor after
 it removes the name ([the upgrade promise, ADR-0066](../../docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
 **Whatever changes existing behaviour stands under a heading "Changed" of its
 own**, no matter which digit rose, with a `Migration:` line. Whoever reads only
 one section before an upgrade reads that one.
 
-From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
+From 0.34.0 the packages share one number - five, six from 0.40.0, when the dashboard joined, and seven from 0.47.0, when alarms joined: they are released together, and a package without a change of its own still gets a heading for it.
 
 **Names read forwards.** Where an entry below describes a name that has since
 been renamed, it is named here as it is called today; string literals, and
@@ -26,6 +26,14 @@ Of those, `internal 0.1.0` to `internal 0.3.0` were reconstructed afterwards —
 package stood at `0.1.0` the whole time, because it had exactly one caller and that
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
+
+## 0.47.0 – Words, tokens and a date for the alarm package (Oct. 2026)
+
+### Added
+
+- **Wording for `@umriss-ui/alarms`:** the keys prefixed `alarm` in `Wording`, `DEFAULT_WORDING` and `GERMAN_WORDING` - the list, its actions, the priorities, the lifecycle and availability states in ISA-18.2's words (Shelved, Suppressed by design, Out of service, In alarm / Returned; German Gekommen / Gegangen), the columns, the flood and chatter hints (`alarmFloodHint` takes the count and the window in minutes), "First out" and "First in flood", the banner (`alarmBanner`, `alarmBannerNone`, `alarmBannerDisconnected`, `alarmBannerMore`, `alarmBannerOpen`, `alarmBannerAlert`), the acknowledge-in-view confirmation (`alarmAcknowledgeInView`, `alarmAcknowledgeSelected`, `alarmAcknowledgeConfirm`, `alarmAcknowledgeCancel`) and the shelve reasons. English and German.
+- **Tokens for alarm priorities:** `--u-color-priority-critical`, `-high`, `-medium`, `-low`, `--u-color-on-priority` and `--u-duration-alarm-flash` (1 s; `none` turns the flash off).
+- **Wording `tableSelectedCount`**, the count a grid announces after its selection changed. English and German.
 
 ## 0.46.0 – Words for a locked widget and the plan's table (Oct. 2026)
 

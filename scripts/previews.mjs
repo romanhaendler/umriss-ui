@@ -1,5 +1,5 @@
 /* The front page's tile previews: each package's
-   first scenario, light and dark, 1200 x 750 - ten PNGs in
+   first scenario, light and dark, 1200 x 750 - fourteen PNGs in
    `scripts/previews/`, checked in, which `build-site.mjs` copies into the
    site and its guard holds to being there and under 300 kB.
 
