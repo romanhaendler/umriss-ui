@@ -44,7 +44,8 @@ export const priorityRank = (priority: Priority): number =>
 
 /* --- Lifecycle state ---------------------------------------------------- */
 
-/** One field, four values. `resolved-unacknowledged` is the fleeting alarm and the
+/** One field, four values. On screen: "In alarm" or "Returned", unacknowledged
+    or acknowledged. `resolved-unacknowledged` is the fleeting alarm and the
     reason why no pair of booleans stands here. */
 export type LifecycleState =
   | "active-unacknowledged"
@@ -87,7 +88,9 @@ export function nextLifecycleState(state: LifecycleState, transition: Transition
 
 /* --- Availability ------------------------------------------------------- */
 
-/** Whether an alarm is in front of the people watching the list - the second
+/** Whether an alarm is in front of the people watching the list. On screen
+    `"snoozed"` reads "Shelved", `"suppressed"` "Suppressed by design" and
+    `"disabled"` "Out of service" - the second
     field beside the lifecycle (ISA-18.2's special states).
 
     A second field and never a fifth value of the lifecycle, by the same rule
@@ -112,8 +115,8 @@ export const AVAILABILITIES: readonly Availability[] = [
   "disabled",
 ];
 
-/** A snooze: a person's own, time-limited decision to take an alarm out of
-    the way. */
+/** A shelve - the screen's word for a snooze: a person's own, time-limited
+    decision to take an alarm out of the way. */
 export interface Snooze {
   /** When it ends, in milliseconds. Reaching it is enough. */
   until: number;
@@ -124,7 +127,7 @@ export interface Snooze {
 }
 
 /** Everything but in service: still in the list, drawn neutrally and counted,
-    never removed. "Not absent, only deliberately hidden." */
+    never removed. The screen counts these as "Suppressed or shelved". "Not absent, only deliberately hidden." */
 export const isHidden = (availability: Availability): boolean =>
   availability !== "in-service";
 
@@ -139,12 +142,31 @@ export function availabilityAt(alarm: Alarm, asOf: number): Availability {
   return alarm.availability ?? "in-service";
 }
 
+/** The lifecycle at a time: the stored one, except that an alarm whose shelve
+    has ended and which is still active is in alarm and unacknowledged again.
+
+    A shelve exists so that the alarm is not forgotten: one that ends on a
+    condition still present must call somebody once more, whatever was
+    acknowledged before it. ISA-18.2 does not settle what an expired shelve
+    does; one vendor (Elipse) returns it this way, and so does this model.
+    One reading serves the projection, `countAcknowledgeable` and
+    `acknowledge`, so the number named and the action cannot drift.
+
+    A shelve ended by hand (`unsnooze`) leaves no record and keeps the
+    lifecycle underneath. A resolved alarm keeps its lifecycle too: there is
+    nothing to see again. */
+export function lifecycleAt(alarm: Alarm, asOf: number): LifecycleState {
+  return alarm.availability === "snoozed" && asOf >= alarm.snooze.until && isActive(alarm.lifecycle)
+    ? "active-unacknowledged"
+    : alarm.lifecycle;
+}
+
 /* The four transitions. Pure, one alarm in and one out; the application
    performs them, the model never does - as with acknowledging. A transition
    that does not apply returns the same object, so that a caller can see that
    nothing happened. */
 
-/** Snoozes an alarm in service, or snoozes anew what is snoozed. A disabled
+/** Shelves ("Shelve" on screen) an alarm in service, or snoozes anew what is snoozed. A disabled
     or suppressed alarm stays as it is: the stronger removal is not
     overwritten by the weaker one, or the end of the snooze would put an alarm
     disabled for maintenance back in service. */
@@ -153,13 +175,14 @@ export function snooze(alarm: Alarm, until: number, by: string, reason?: string)
   return { ...alarm, availability: "snoozed", snooze: reason === undefined ? { until, by } : { until, by, reason } };
 }
 
-/** Ends a snooze before its time. */
+/** Ends a shelve before its time ("Unshelve" on screen). The lifecycle
+    underneath is kept as it was. */
 export function unsnooze(alarm: Alarm): Alarm {
   if (alarm.availability !== "snoozed") return alarm;
   return { ...alarm, availability: "in-service", snooze: undefined };
 }
 
-/** Disables an alarm - from service or from a snooze. A suppressed alarm
+/** Takes an alarm out of service ("Out of service" on screen) - from service or from a snooze. A suppressed alarm
     stays as it is: that field is the application's logic's, and `enable`
     would otherwise hand it back in service with the suppression lost. */
 export function disable(alarm: Alarm): Alarm {
@@ -366,10 +389,11 @@ export function detectFlood(
 export function countAcknowledgeable(
   alarms: readonly Alarm[],
   ids: Iterable<string>,
+  asOf: number = Number.NEGATIVE_INFINITY,
 ): number {
   const set = new Set(ids);
   return alarms.reduce(
-    (total, m) => total + (set.has(m.id) && !isAcknowledged(m.lifecycle) ? 1 : 0),
+    (total, m) => total + (set.has(m.id) && !isAcknowledged(lifecycleAt(m, asOf)) ? 1 : 0),
     0,
   );
 }
@@ -384,7 +408,9 @@ export interface Acknowledgement {
 }
 
 /** Acknowledges the named alarms at the named time. Unknown ids are passed
-    over, what is already acknowledged stays as it is. */
+    over, what is already acknowledged stays as it is. An alarm whose shelve
+    ended at or before `time` is acknowledged as the unacknowledged alarm it
+    has become, and loses the ended shelve record. */
 export function acknowledge(
   alarms: readonly Alarm[],
   ids: Iterable<string>,
@@ -393,9 +419,12 @@ export function acknowledge(
   const set = new Set(ids);
   let count = 0;
   const next = alarms.map((m) => {
-    if (!set.has(m.id) || isAcknowledged(m.lifecycle)) return m;
+    const state = lifecycleAt(m, time);
+    if (!set.has(m.id) || isAcknowledged(state)) return m;
     count += 1;
-    return { ...m, lifecycle: nextLifecycleState(m.lifecycle, "acknowledged"), acknowledgedAt: time };
+    const ended = m.availability === "snoozed" && time >= m.snooze.until;
+    const base = ended ? { ...m, availability: "in-service" as const, snooze: undefined } : m;
+    return { ...base, lifecycle: nextLifecycleState(state, "acknowledged"), acknowledgedAt: time };
   });
   return { alarms: next, count };
 }
@@ -409,6 +438,7 @@ export interface AlarmRow {
   id: string;
   alarm: Alarm;
   type: AlarmType;
+  /** At the as-of time: an alarm back from an ended shelve is unacknowledged here. */
   lifecycle: LifecycleState;
   /** At the as-of time: an expired snooze is already back in service here. */
   availability: Availability;
@@ -579,7 +609,7 @@ export function alarmModel(
         id: alarm.id,
         alarm,
         type,
-        lifecycle: alarm.lifecycle,
+        lifecycle: lifecycleAt(alarm, asOf),
         availability: availabilityAt(alarm, asOf),
         priority: type.priority,
         rank: priorityRank(type.priority),

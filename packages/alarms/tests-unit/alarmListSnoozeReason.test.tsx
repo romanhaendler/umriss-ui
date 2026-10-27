@@ -29,7 +29,7 @@ async function open(reason?: "optional" | "required") {
   render(<List reason={reason} onSnooze={onSnooze} />);
   fireEvent.click(screen.getByText("tick"));
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Snooze 1 alarm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Shelve 1 alarm" }));
   });
   return onSnooze;
 }
@@ -40,7 +40,7 @@ describe("snoozeReason", () => {
     render(<List onSnooze={onSnooze} />);
     fireEvent.click(screen.getByText("tick"));
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Snooze 1 alarm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Shelve 1 alarm" }));
     });
     fireEvent.click(await screen.findByRole("menuitem", { name: "15 min" }));
     expect(onSnooze).toHaveBeenCalledWith(["m1"], NOW + 15 * MIN);
@@ -50,11 +50,11 @@ describe("snoozeReason", () => {
   it("optional: an empty reason is undefined, a typed one is trimmed", async () => {
     const onSnooze = await open("optional");
     const dialog = await screen.findByRole("dialog");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Snooze" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Shelve" }));
     expect(onSnooze).toHaveBeenLastCalledWith(["m1"], NOW + 15 * MIN, undefined);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Snooze 1 alarm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Shelve 1 alarm" }));
     });
     const again = await screen.findByRole("dialog");
     fireEvent.click(within(again).getByLabelText("1 hr"));
@@ -66,7 +66,7 @@ describe("snoozeReason", () => {
   it("required: the button is disabled until there is text", async () => {
     const onSnooze = await open("required");
     const dialog = await screen.findByRole("dialog");
-    const confirm = within(dialog).getByRole("button", { name: "Snooze" }) as HTMLButtonElement;
+    const confirm = within(dialog).getByRole("button", { name: "Shelve" }) as HTMLButtonElement;
     expect(confirm.disabled).toBe(true);
     fireEvent.change(within(dialog).getByLabelText(/Reason/), { target: { value: "   " } });
     expect(confirm.disabled).toBe(true);
@@ -82,7 +82,7 @@ describe("snoozeReason", () => {
     expect(dialog.contains(document.activeElement)).toBe(true);
     fireEvent.keyDown(document.activeElement ?? document, { key: "Escape" });
     expect(onSnooze).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Snooze 1 alarm" }));
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Shelve 1 alarm" }));
   });
 });
 

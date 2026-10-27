@@ -39,7 +39,7 @@ import { Badge, Button, Checkbox, FormField, Input, Menu, MenuItem, Popover, Rad
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
-import { countAcknowledgeable } from "./alarmModel";
+import { countAcknowledgeable, isActive } from "./alarmModel";
 import { PriorityMark, priorityWord } from "./PriorityMark";
 import type { AlarmProjection, AlarmRow, LifecycleState } from "./alarmModel";
 import styles from "./AlarmList.module.css";
@@ -67,12 +67,18 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       the reason is shown after the end and the name in the snoozed badge's
       tip and in what is spoken. */
   onSnooze?: (ids: readonly string[], until: number, reason?: string) => void;
-  /** Asks for a reason when snoozing: "Snooze" then opens a small panel with
+  /** Asks for a reason when shelving: "Shelve" then opens a small panel with
       the durations and a field for the reason, and its button reports. With
-      `"required"` the button waits for text. Without this prop "Snooze" is the
-      menu of durations and reports at once. The list keeps no draft once the
+      `"required"` the button waits for a reason, chosen or typed. Without this
+      prop and `snoozeReasons`, "Shelve" is the menu of durations and reports
+      at once. The list keeps no draft once the
       panel closes; Escape and a click outside close it without reporting. */
   snoozeReason?: "optional" | "required";
+  /** The reasons the application offers when shelving, shown as choices above
+      a free-text field for a reason not on the list. Opens the same panel as
+      `snoozeReason`; choosing one clears the typed text and typing clears the
+      choice, so exactly one reason is reported. */
+  snoozeReasons?: readonly string[];
   /** The durations on offer, in milliseconds. Which are permitted is the
       application's rule, so there is no default list; empty or missing, there is no
       snooze action.
@@ -103,20 +109,23 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
     and goes with it: the panel is mounted afresh for every opening. */
 function SnoozePanel({
   durations,
+  reasons,
   required,
   onConfirm,
 }: {
   durations: readonly number[];
+  reasons: readonly string[];
   required: boolean;
   onConfirm: (ms: number, reason: string) => void;
 }) {
   const wording = useWording();
   const [ms, setMs] = useState(String(durations[0]));
   const [reason, setReason] = useState("");
+  const [chosen, setChosen] = useState<string | null>(null);
   const group = useRef<HTMLDivElement>(null);
   /* A popover does not take the focus in by itself. */
   useEffect(() => group.current?.querySelector<HTMLInputElement>("input:checked")?.focus(), []);
-  const text = reason.trim();
+  const text = chosen ?? reason.trim();
   const blocked = required && text === "";
   return (
     <form
@@ -134,8 +143,26 @@ function SnoozePanel({
           options={durations.map((d) => ({ value: String(d), label: durationWord(d, wording) }))}
         />
       </FormField>
-      <FormField label={wording.alarmSnoozeReason} required={required}>
-        <Input value={reason} onChange={(event) => setReason(event.currentTarget.value)} />
+      {reasons.length > 0 && (
+        <FormField label={wording.alarmSnoozeReason} required={required}>
+          <RadioGroup
+            value={chosen}
+            onChange={(value) => {
+              setChosen(value);
+              setReason("");
+            }}
+            options={reasons.map((value) => ({ value, label: value }))}
+          />
+        </FormField>
+      )}
+      <FormField label={reasons.length > 0 ? wording.alarmSnoozeOtherReason : wording.alarmSnoozeReason} required={required && reasons.length === 0}>
+        <Input
+          value={reason}
+          onChange={(event) => {
+            setReason(event.currentTarget.value);
+            setChosen(null);
+          }}
+        />
       </FormField>
       <Button type="submit" variant="primary" size="sm" disabled={blocked}>
         {wording.alarmSnooze}
@@ -170,7 +197,10 @@ function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): {
       const asOf = new Date(row.alarm.raised + row.age);
       const sameDay = until.toDateString() === asOf.toDateString();
       const end = sameDay ? formats.time(until, false) : formats.dateTime(until, false);
-      return { short: wording.alarmAvailabilitySnoozedShort, full: wording.alarmAvailabilitySnoozed(end, snooze.by, snooze.reason?.trim() || undefined) };
+      /* While the alarm is still in alarm, the return time stands in the row,
+         not only in the tip: it is the moment the alarm calls again. */
+      const short = isActive(row.lifecycle) ? wording.alarmAvailabilitySnoozedUntil(end) : wording.alarmAvailabilitySnoozedShort;
+      return { short, full: wording.alarmAvailabilitySnoozed(end, snooze.by, snooze.reason?.trim() || undefined) };
     }
     case "suppressed":
       return { short: wording.alarmAvailabilitySuppressed, full: wording.alarmAvailabilitySuppressed };
@@ -228,6 +258,7 @@ function Body({
   onSnooze,
   snoozeDurations,
   snoozeReason,
+  snoozeReasons,
   onUnsnooze,
   density: ownDensity,
   className,
@@ -258,7 +289,9 @@ function Body({
     return projection.filtered.map((row) => row.id).filter((id) => selection.selected.has(id));
   }, [projection.filtered, selection]);
 
-  const acknowledgeable = useMemo(() => countAcknowledgeable(alarms, affected), [alarms, affected]);
+  const first = projection.filtered[0];
+  const viewAsOf = first === undefined ? 0 : first.alarm.raised + first.age;
+  const acknowledgeable = useMemo(() => countAcknowledgeable(alarms, affected, viewAsOf), [alarms, affected, viewAsOf]);
 
   /* The same cut feeds both actions. Only an alarm in service or already
      snoozed can be snoozed (`snooze()` leaves the others alone); only a
@@ -267,12 +300,11 @@ function Body({
   const chosen = useMemo(() => projection.filtered.filter((row) => selection?.selected.has(row.id)), [projection.filtered, selection]);
   const snoozable = chosen.filter((row) => row.availability === "in-service" || row.availability === "snoozed");
   const snoozed = chosen.filter((row) => row.availability === "snoozed");
-  const first = projection.filtered[0];
-  const viewAsOf = first === undefined ? 0 : first.alarm.raised + first.age;
 
   /* Compact of its own accord; a provider that sets a density has a say. */
   const density = useDensityFor(ownDensity, "compact");
 
+  const asksReason = snoozeReason !== undefined || (snoozeReasons?.length ?? 0) > 0;
   const hiddenCount = wording.alarmHidden(projection.hiddenAlarms);
 
   /* The panel's anchor, and a counter so that each opening starts empty. */
@@ -315,7 +347,7 @@ function Body({
             {snoozed.length === 0 ? wording.alarmUnsnooze : wording.alarmUnsnoozeMany(snoozed.length)}
           </Button>
         )}
-        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && snoozeReason !== undefined && (
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && asksReason && (
           <>
             <Button
               ref={snoozeButton}
@@ -342,6 +374,7 @@ function Body({
               <SnoozePanel
                 key={openings}
                 durations={snoozeDurations}
+                reasons={snoozeReasons ?? []}
                 required={snoozeReason === "required"}
                 onConfirm={(ms, reason) => {
                   setPanelOpen(false);
@@ -352,7 +385,7 @@ function Body({
             </Popover>
           </>
         )}
-        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && snoozeReason === undefined && (
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && !asksReason && (
           <Menu
             align="end"
             trigger={
