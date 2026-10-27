@@ -26,6 +26,27 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.46.0 – Row ranges, a column drag, and a view that survives JSON (Oct. 2026)
+
+### Added
+
+- **Shift+click or Shift+Space on a row's checkbox, and Shift+Space on a cell in grid mode, tick or clear a range** - the rows from the one toggled last to the one chosen, in the order shown and across pages; a Shift press in the selection column marks no text.
+- **A ColumnMenu entry is dragged by a grip at its start** with a mouse, a pen or a finger; the move buttons stay the keyboard's route.
+- **`aggregateLabel` names an `aggregate` function of one's own** on a column or a `VerdictColumn`: the footer shows it before the value and a screen reader reads it; a group header shows no word, and a built-in kind keeps its own.
+- **The demo:** a head below an app bar on the Width and pinning page, and a Conditional formatting page - a bar, a colour scale, an icon and a verdict in a column. ADR-0032 names a rule set, a sticky-head offset, a drag on the header and a built-in median and standard deviation as never, each with its *Instead*.
+
+### Changed
+
+- **`TableSelection` gains the required member `set(ids, selected)`**, which `useTableSelection` builds.
+  - Migration: a hand-built `TableSelection` adds `set`, which gives every key in `ids` the state `selected` in one update (in "all that match" it moves the keys in or out of `except`); nothing else changes.
+- **The peer range on core moves to `^0.46.0`.**
+  - Migration: install the 0.46 version of `@umriss-ui/core` beside it.
+
+### Fixed
+
+- **A view stored as JSON and handed back to `initialView` or `setView` keeps its date conditions** - `t.view` holds `Date`s again and the same rows are filtered. A condition `setFilter` gives is taken as given.
+- **Tabbing from a condition tag to the button in it moves the focus ring** from outside the tag to inside it; before, the ring did not change.
+
 ## 0.45.0 – A table in the plant's time (Oct. 2026)
 
 ### Added

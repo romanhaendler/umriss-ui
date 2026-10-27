@@ -13,6 +13,21 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.46.0 – A locked widget, a heading level, and stored options (Oct. 2026)
+
+### Added
+
+- **`DashboardWidget` takes `locked`**, set by the application: the reader can move a locked widget but not resize it, change its options or remove it, and the editing mode says so on its head and in its menu. The lock lives in the view; an example shows how an application brings it into arrangements kept before it.
+- **`headingLevel` on `Dashboard`** sets the level of its heading widgets (2 to 6, default 2); a dashboard that holds a heading widget has its widget titles one level below them.
+- **The demo:** a widget for one role that survives "Done" by another, an arrangement migrated from an older release, and a row of the widget's own controls above its chart. ADR-0032 and ADR-0064 name a mimic layer, uncertainty propagation and dragging from the catalogue as never.
+
+### Changed
+
+- **A kept arrangement's widgets are read with their options spread over the type's `defaultOptions`**, one level deep, so a key a later update adds is never `undefined`; absent, `null`, array or primitive options read as the defaults, and a widget of an undeclared type keeps its options as stored.
+  - Migration: an application that merged the defaults into stored options itself may drop that code.
+- **The peer range on core moves to `^0.46.0`.**
+  - Migration: install the 0.46 version of `@umriss-ui/core` beside it.
+
 ## 0.45.0 – Moves along (Oct. 2026)
 
 No change of its own; the dashboard is released with the other five under one number.

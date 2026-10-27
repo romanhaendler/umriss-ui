@@ -30,6 +30,30 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.46.0 – A floating bar, a legend beside the plot, and recipes (Oct. 2026)
+
+### Added
+
+- **`Bar` takes `baseline`** and floats from it to its value, either way up, so a waterfall is a running sum and one `Bar`, and error bars are a thin `Bar` beside a `Scatter`. In a stack the stack below stays the foot. **`TooltipPoint.baseline`** carries the lower edge of a `Bar` or an `Area` outside a stack.
+- **`Legend placement` takes `"left"` and `"right"`:** the names stand in a column beside the plot, at most a quarter of the chart wide, long names wrapping, scrolling where they do not fit; in a chart narrower than 480 px the legend stands above the plot.
+- **`Line` and `Area` take `maxGap`**, the longest step between two readings still drawn through (milliseconds on a time axis): a longer step breaks the line or closes the area, a step hold ends `maxGap` after its reading, and a pointer farther than `maxGap` from the nearest reading finds no hit. A stack does not read it.
+- **A gradient-coloured `Matrix` shows a colour bar in its legend** - the gradient's steps (hatched under `encoding="marks"`), the range's ends and the inner edges where they fit, in the matrix' `format`; the entry's accessible name gains the range through the new wording entry `levelRange(from, to)`. An assessment colouring keeps its chip.
+- **`Matrix` takes `labels`**: each cell writes its level in the tick size, in the text colour over a halo of the ground colour, legible on every stop in both themes and in forced colours; a cell too small for its text, and a hole, stay bare.
+- **Recipes in the demo** for what the parts already answer: follow the live edge with a pause (Zoom and pan), a fit line with its band and density instead of opacity (Scatter), columns instead of rows (Chart), small multiples on one y domain, minor ticks on a log axis and a trend with pens (Axis), sums per month and error bars (Bar), shares instead of counts (Pareto). The capability record's "Out" entries point at them.
+
+### Changed
+
+- **On a time axis that carries a `Bar` or `BoxPlot`, the tick step is never shorter than the bars' step**, so monthly bars are labelled by month instead of by weeks no bar stands on.
+  - Migration: explicit `ticks` restore the old ticks.
+- **The tooltip and the readout of an area corridor name both edges**, "baseline – value", as its data table does.
+  - Migration: nothing changes unless a tooltip `render` wants the old text; it reads `yValue`.
+- **`bin(values)` accepts any `ArrayLike<number | null | undefined>`**, so a `Float64Array` compiles and counts as a plain array does.
+  - Migration: nothing changes.
+
+### Fixed
+
+- **A series whose function changes together with the chart's rows** (new rows memoised on outer columns) no longer gets the development warning about a function that reads a changed outer value.
+
 ## 0.45.0 – A chart in a named time zone (Oct. 2026)
 
 ### Added
