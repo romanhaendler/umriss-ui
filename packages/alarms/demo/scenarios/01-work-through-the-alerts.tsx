@@ -94,13 +94,13 @@ const ALERTS: readonly Alarm[] = [
 export const title = "Work through the alerts";
 
 export const lead =
-  "The on-call engineer at Quillmere opens the alert list, takes the worst first, acknowledges what they have seen and snoozes what can wait.";
+  "The on-call engineer at Quillmere opens the alert list, takes the worst first, acknowledges what they have seen and shelves what can wait.";
 
 export const callouts = [
   "Who carries the pager right now, and how many alerts still wait for someone to see them.",
   "The list sorts by priority, then acknowledgement, then time: the unacknowledged search latency stands above the older checkout alert. A resolved alert nobody acknowledged stays until someone does.",
-  "Snoozed and disabled alerts stay in the list, drawn neutral with their state; the switch shows only them.",
-  "Tick rows and acknowledge them in one go, or snooze them for an hour under the engineer's name.",
+  "Shelved and out-of-service alerts stay in the list, drawn neutral with their state; the switch shows only them.",
+  "Tick rows and acknowledge them in one go, or shelve them for an hour under the engineer's name.",
 ];
 
 export const builtFrom = [
@@ -182,11 +182,11 @@ export default function WorkThroughTheAlerts() {
               selection.clear();
             }}
           >
-            Snooze for an hour
+            Shelve for an hour
           </Button>
         </span>
         <Text size="xs" tone="muted">
-          A snooze ends by the clock and comes back with its lifecycle.
+          A shelve ends by the clock and comes back with its lifecycle.
         </Text>
       </Stack>
     </Stack>

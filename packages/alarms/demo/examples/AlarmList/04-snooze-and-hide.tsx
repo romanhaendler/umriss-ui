@@ -30,9 +30,9 @@ const ALERTS: readonly Alarm[] = [
   { id: "a-7", type: "reports-job", lifecycle: "active-unacknowledged", raised: at(17, 4, 30), availability: "disabled" },
 ];
 
-export const title = "Snooze and hide";
+export const title = "Shelve and hide";
 
-export const lead = "Snoozed, suppressed and disabled alerts stay in the list, drawn neutral; with `onHiddenOnlyChange` their count becomes a switch.";
+export const lead = "Shelved, suppressed and out-of-service alerts stay in the list, drawn neutral; with `onHiddenOnlyChange` their count becomes a switch.";
 
 const MIN = 60_000;
 
@@ -79,7 +79,7 @@ export default function SnoozeAndHide() {
             selection.clear();
           }}
         >
-          Snooze for an hour
+          Shelve for an hour
         </Button>
       </div>
     </Stack>

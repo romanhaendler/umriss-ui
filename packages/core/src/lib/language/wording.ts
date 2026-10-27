@@ -663,6 +663,8 @@ export interface Wording {
       choose and the reason to give. The panel's own button is `snoozeAlarm`. */
   alarmSnoozeDuration: string;
   alarmSnoozeReason: string;
+  /** The free-text field beside the application's reasons: a reason not on the list. */
+  alarmSnoozeOtherReason: string;
   /** Ends the snooze of the ticked alarms before its time. */
   alarmUnsnooze: string;
   alarmUnsnoozeMany: (count: number) => string;
@@ -702,6 +704,8 @@ export interface Wording {
   /** A snooze as one word - the alarm list's badge; the sentence above stands
       in its tooltip and in what is spoken. */
   alarmAvailabilitySnoozedShort: string;
+  /** The shelve badge of an alarm still in alarm: the word and its return time. */
+  alarmAvailabilitySnoozedUntil: (until: string) => string;
   alarmAvailabilitySuppressed: string;
   alarmAvailabilityDisabled: string;
   /** "Hidden: 3" - the count of the view of snoozed, suppressed and disabled
@@ -1086,21 +1090,22 @@ export const DEFAULT_WORDING: Wording = {
   alarmAcknowledge: "Acknowledge",
   alarmAcknowledgeMany: (count) =>
     count === 1 ? "Acknowledge 1 alarm" : `Acknowledge ${count} alarms`,
-  alarmSnooze: "Snooze",
-  alarmSnoozeMany: (count) => (count === 1 ? "Snooze 1 alarm" : `Snooze ${count} alarms`),
+  alarmSnooze: "Shelve",
+  alarmSnoozeMany: (count) => (count === 1 ? "Shelve 1 alarm" : `Shelve ${count} alarms`),
   alarmSnoozeDuration: "Duration",
   alarmSnoozeReason: "Reason",
-  alarmUnsnooze: "Unsnooze",
-  alarmUnsnoozeMany: (count) => (count === 1 ? "Unsnooze 1 alarm" : `Unsnooze ${count} alarms`),
+  alarmSnoozeOtherReason: "Other reason",
+  alarmUnsnooze: "Unshelve",
+  alarmUnsnoozeMany: (count) => (count === 1 ? "Unshelve 1 alarm" : `Unshelve ${count} alarms`),
   alarmPriorityCritical: "Critical",
   alarmPriorityHigh: "High",
   alarmPriorityMedium: "Medium",
   alarmPriorityLow: "Low",
   alarmPriorityName: (level, word) => `Priority ${level}, ${word.toLowerCase()}`,
-  alarmLifecycleActiveUnacknowledged: "Active, unacknowledged",
-  alarmLifecycleActiveAcknowledged: "Active, acknowledged",
-  alarmLifecycleResolvedUnacknowledged: "Resolved, unacknowledged",
-  alarmLifecycleResolvedAcknowledged: "Resolved, acknowledged",
+  alarmLifecycleActiveUnacknowledged: "In alarm, unacknowledged",
+  alarmLifecycleActiveAcknowledged: "In alarm, acknowledged",
+  alarmLifecycleResolvedUnacknowledged: "Returned, unacknowledged",
+  alarmLifecycleResolvedAcknowledged: "Returned, acknowledged",
   alarmFloodHint: (count) => `Alarm flood: ${count} in quick succession`,
   alarmChatterHint: (count) => `${count}×`,
   alarmActiveUnacknowledged: (count) =>
@@ -1115,10 +1120,11 @@ export const DEFAULT_WORDING: Wording = {
   alarmColumnFrequency: "Frequency",
   alarmColumnAcknowledgement: "Acknowledgement",
   alarmColumnAge: "Age",
-  alarmAvailabilitySnoozed: (until, by, reason) => `Snoozed until ${until} by ${by}${reason ? `: ${reason}` : ""}`,
-  alarmAvailabilitySnoozedShort: "Snoozed",
-  alarmAvailabilitySuppressed: "Suppressed",
-  alarmAvailabilityDisabled: "Disabled",
-  alarmHidden: (count) => `Hidden: ${count}`,
+  alarmAvailabilitySnoozed: (until, by, reason) => `Shelved until ${until} by ${by}${reason ? `: ${reason}` : ""}`,
+  alarmAvailabilitySnoozedShort: "Shelved",
+  alarmAvailabilitySnoozedUntil: (until) => `Shelved until ${until}`,
+  alarmAvailabilitySuppressed: "Suppressed by design",
+  alarmAvailabilityDisabled: "Out of service",
+  alarmHidden: (count) => `Suppressed or shelved: ${count}`,
   alarmColumnAvailability: "Availability",
 };

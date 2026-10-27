@@ -13,7 +13,7 @@ export function App() {
     <Shell
       demo={DEMO}
       german={GERMAN}
-      sentence="Alarm management for control rooms: the lifecycle of an alarm after it is raised - acknowledged, returned, snoozed - and the list an operator works through, worst first."
+      sentence="Alarm management for control rooms: the lifecycle of an alarm after it is raised - acknowledged, returned, shelved - and the list an operator works through, worst first."
     />
   );
 }

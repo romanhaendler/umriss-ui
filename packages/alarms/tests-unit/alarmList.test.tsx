@@ -364,16 +364,16 @@ describe("Hidden", () => {
 
   it("keeps each hidden alarm in the list with its state as a word", () => {
     render(<AlarmList view={withHidden()} />);
-    expect(screen.getByText("Snoozed until 12:00 by M. Keller")).toBeTruthy();
-    expect(screen.getByText("Disabled")).toBeTruthy();
-    expect(screen.getByText("Suppressed")).toBeTruthy();
+    expect(screen.getByText("Shelved until 12:00 by M. Keller")).toBeTruthy();
+    expect(screen.getByText("Out of service")).toBeTruthy();
+    expect(screen.getByText("Suppressed by design")).toBeTruthy();
     // The lifecycle still stands beside it: snoozing does not change it.
     expect(screen.getAllByText(DEFAULT_WORDING.alarmLifecycleActiveUnacknowledged)).toHaveLength(3);
   });
 
   it("draws a hidden row neutrally: its priority is a word without its colour", () => {
     render(<AlarmList view={withHidden()} />);
-    const snoozed = rowWith("Snoozed until 12:00 by M. Keller");
+    const snoozed = rowWith("Shelved until 12:00 by M. Keller");
     const active = screen.getAllByText(DEFAULT_WORDING.alarmLifecycleActiveUnacknowledged)[0]!.closest("tr");
     expect(snoozed?.getAttribute("data-availability")).toBe("snoozed");
     expect(active?.getAttribute("data-availability")).toBe("in-service");
@@ -412,7 +412,7 @@ describe("Hidden", () => {
     expect((toggle as HTMLInputElement).checked).toBe(true);
     // The header row and the three hidden ones.
     expect(screen.getAllByRole("row")).toHaveLength(4);
-    expect(screen.getByText("Disabled")).toBeTruthy();
+    expect(screen.getByText("Out of service")).toBeTruthy();
   });
 
   it("keeps the switch while the view is on, even when nothing is hidden any more", () => {
@@ -428,9 +428,9 @@ describe("Hidden", () => {
       </LanguageProvider>,
     );
     expect(screen.getByText("Zurückgestellt bis 12:00 von M. Keller")).toBeTruthy();
-    expect(screen.getByText("Deaktiviert")).toBeTruthy();
-    expect(screen.getByText("Unterdrückt")).toBeTruthy();
-    expect(screen.getByText("Ausgeblendet: 3")).toBeTruthy();
+    expect(screen.getByText("Außer Betrieb")).toBeTruthy();
+    expect(screen.getByText("Durch Auslegung unterdrückt")).toBeTruthy();
+    expect(screen.getByText("Unterdrückt oder zurückgestellt: 3")).toBeTruthy();
   });
 
   /* alarm-standards 05: the availability is a small badge before the
@@ -440,15 +440,15 @@ describe("Hidden", () => {
     vi.useFakeTimers();
     try {
       render(<AlarmList view={withHidden()} />);
-      const word = screen.getByText(DEFAULT_WORDING.alarmAvailabilitySnoozedShort);
+      const word = screen.getByText("Shelved until 12:00");
       expect(word.getAttribute("aria-hidden")).toBe("true");
       const badge = word.closest("[class*='badge']")!;
       expect(badge.className).toMatch(/neutral/);
       // Spoken: the whole sentence, in the same badge.
-      expect(badge.textContent).toContain("Snoozed until 12:00 by M. Keller");
+      expect(badge.textContent).toContain("Shelved until 12:00 by M. Keller");
       fireEvent.pointerEnter(badge);
       await act(() => vi.advanceTimersByTimeAsync(400));
-      expect(screen.getByRole("tooltip").textContent).toBe("Snoozed until 12:00 by M. Keller");
+      expect(screen.getByRole("tooltip").textContent).toBe("Shelved until 12:00 by M. Keller");
     } finally {
       vi.useRealTimers();
     }
@@ -473,13 +473,13 @@ describe("Hidden", () => {
       vi.useFakeTimers();
       try {
         render(<AlarmList view={withReason("valve being replaced")} />);
-        const word = screen.getByText(DEFAULT_WORDING.alarmAvailabilitySnoozedShort);
+        const word = screen.getByText("Shelved until 12:00");
         const badge = word.closest("[class*='badge']")!;
-        expect(word.textContent).toBe("Snoozed");
-        expect(badge.textContent).toContain("Snoozed until 12:00 by M. Keller: valve being replaced");
+        expect(word.textContent).toBe("Shelved until 12:00");
+        expect(badge.textContent).toContain("Shelved until 12:00 by M. Keller: valve being replaced");
         fireEvent.pointerEnter(badge);
         await act(() => vi.advanceTimersByTimeAsync(400));
-        expect(screen.getByRole("tooltip").textContent).toBe("Snoozed until 12:00 by M. Keller: valve being replaced");
+        expect(screen.getByRole("tooltip").textContent).toBe("Shelved until 12:00 by M. Keller: valve being replaced");
       } finally {
         vi.useRealTimers();
       }
@@ -487,11 +487,11 @@ describe("Hidden", () => {
 
     it("is trimmed, and a blank one leaves the sentence as it was", () => {
       const { unmount } = render(<AlarmList view={withReason("  valve  ")} />);
-      expect(screen.getByText("Snoozed until 12:00 by M. Keller: valve")).toBeTruthy();
+      expect(screen.getByText("Shelved until 12:00 by M. Keller: valve")).toBeTruthy();
       unmount();
       for (const reason of [undefined, "", "   "]) {
         const again = render(<AlarmList view={withReason(reason)} />);
-        expect(screen.getByText("Snoozed until 12:00 by M. Keller")).toBeTruthy();
+        expect(screen.getByText("Shelved until 12:00 by M. Keller")).toBeTruthy();
         again.unmount();
       }
     });
@@ -521,6 +521,6 @@ describe("Hidden", () => {
     const view = alarmModel({ alarms: [alarm], types: TYPES, asOf: NOW });
     render(<AlarmList view={view} />);
     // 18 March, 13:30 in Berlin - the day after the as-of time (11:30 there).
-    expect(screen.getByText("Snoozed until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
+    expect(screen.getByText("Shelved until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
   });
 });

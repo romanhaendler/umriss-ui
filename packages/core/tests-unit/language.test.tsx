@@ -134,9 +134,9 @@ describe("A snooze's sentence takes a reason", () => {
   it("appends it after a colon in both languages, and only when there is one", () => {
     expect(DEFAULT_WORDING.alarmPriorityName(1, DEFAULT_WORDING.alarmPriorityCritical)).toBe("Priority 1, critical");
     expect(GERMAN_WORDING.alarmPriorityName(4, GERMAN_WORDING.alarmPriorityLow)).toBe("Priorität 4, niedrig");
-    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller", "valve")).toBe("Snoozed until 12:00 by M. Keller: valve");
-    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller")).toBe("Snoozed until 12:00 by M. Keller");
-    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller", "")).toBe("Snoozed until 12:00 by M. Keller");
+    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller", "valve")).toBe("Shelved until 12:00 by M. Keller: valve");
+    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller")).toBe("Shelved until 12:00 by M. Keller");
+    expect(DEFAULT_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller", "")).toBe("Shelved until 12:00 by M. Keller");
     expect(GERMAN_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller", "Ventil")).toBe("Zurückgestellt bis 12:00 von M. Keller: Ventil");
     expect(GERMAN_WORDING.alarmAvailabilitySnoozed("12:00", "M. Keller")).toBe("Zurückgestellt bis 12:00 von M. Keller");
   });

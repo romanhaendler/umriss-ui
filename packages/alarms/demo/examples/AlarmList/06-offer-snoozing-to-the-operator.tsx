@@ -25,7 +25,7 @@ const ALERTS: readonly Alarm[] = [
   { id: "a-5", type: "reports-job", lifecycle: "active-unacknowledged", raised: at(17, 4, 30), availability: "disabled" },
 ];
 
-export const title = "Offer snoozing to the operator";
+export const title = "Offer shelving to the operator";
 
 export const lead = "Pass `onSnooze` with `snoozeDurations`, and `onUnsnooze`: the list reports which alerts and until when; your application calls `snooze()` or `unsnooze()` on its own state, or refuses.";
 
