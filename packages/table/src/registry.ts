@@ -35,7 +35,7 @@ import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
 import { windowed } from "./model/tableState";
 import { DEV, probeStale, warnOnce } from "./dev";
-import { columnKind, sortValue } from "./values";
+import { columnKind, isDateFormat, sortValue } from "./values";
 import type { ValueKind } from "./values";
 import type { AggregateColumn, GroupLevel } from "./model/grouping";
 import { MOST_LEVELS, periodStart } from "./model/grouping";
@@ -490,7 +490,7 @@ export class Registry {
   private warnFormat(entry: ColumnEntry, kind: ValueKind) {
     const { format, id } = entry.spec;
     if (format === undefined || kind === "empty") return;
-    const dated = format === "date" || format === "time" || format === "dateTime";
+    const dated = isDateFormat(format);
     if (dated && kind !== "date") {
       warnOnce(`format-date:${id}`, `The column "${id}" has the date format "${format}", but its first value is ${kind === "other" ? "not a point in time" : `a ${kind}`}: the cells show it raw. A point in time is a \`Date\` in the row; convert an epoch number or an ISO string there.`);
     } else if (!dated && kind !== "number") {

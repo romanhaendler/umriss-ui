@@ -8,7 +8,7 @@ import { ColumnFilterButton } from "./filter";
 import { filterOf } from "./columnFilter";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
 import type { PinnedCell } from "./pinned";
-import { isRightAligned } from "./values";
+import { isDateFormat, isRightAligned } from "./values";
 import styles from "./Table.module.css";
 
 export function HeaderCell({
@@ -120,7 +120,7 @@ export function HeaderCell({
   const text = (
     <>
       {spec.label}
-      {zone !== null && (spec.format === "date" || spec.format === "time" || spec.format === "dateTime") && (
+      {zone !== null && isDateFormat(spec.format) && (
         <span className={styles.zoneLabel}> {zone}</span>
       )}
     </>
