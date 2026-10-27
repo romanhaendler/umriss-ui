@@ -44,9 +44,6 @@ import { PriorityMark, priorityWord } from "./PriorityMark";
 import type { AlarmProjection, AlarmRow, LifecycleState } from "./alarmModel";
 import styles from "./AlarmList.module.css";
 
-/* The props carry the names from library-audit 09. With ADR-0018 the
-   identifiers behind them are English too, so there is no longer a seam at the
-   destructuring pattern. */
 /** The props of `AlarmList`: a div's attributes, the projection to show, and
     the hooks for selection, acknowledgement and freshness. */
 export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
@@ -273,8 +270,7 @@ function Body({
   const first = projection.filtered[0];
   const viewAsOf = first === undefined ? 0 : first.alarm.raised + first.age;
 
-  /* Compact of its own accord; a provider that sets a density has a say
-     (library-audit 07). */
+  /* Compact of its own accord; a provider that sets a density has a say. */
   const density = useDensityFor(ownDensity, "compact");
 
   const hiddenCount = wording.alarmHidden(projection.hiddenAlarms);
