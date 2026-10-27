@@ -1,6 +1,6 @@
 # The library owns an alarm's lifecycle, not its generation
 
-Status: withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code.
+Status: superseded by ADR-0078. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code.
 Date:   2026-08
 
 The alarm model takes alarms. It does not make them.

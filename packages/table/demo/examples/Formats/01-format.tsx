@@ -14,9 +14,9 @@ interface Service {
 }
 
 const SERVICES: Service[] = [
-  { name: "Checkout", availability: 0.99921, requests: 1_284_310, p95: 412.37, since: 2019, monthly: 18400.5, deployed: new Date(2026, 2, 17, 9, 5) },
-  { name: "Billing", availability: 0.99958, requests: 402_118, p95: 238.9, since: 2021, monthly: 9250, deployed: new Date(2026, 2, 16, 16, 40) },
-  { name: "Search", availability: 0.99803, requests: 2_910_455, p95: 186.02, since: 2024, monthly: 31200.75, deployed: new Date(2026, 2, 12, 11, 15) },
+  { name: "Checkout", availability: 0.99921, requests: 1_284_310, p95: 412.37, since: 2019, monthly: 18400.5, deployed: new Date(2026, 2, 17, 9, 5, 3) },
+  { name: "Billing", availability: 0.99958, requests: 402_118, p95: 238.9, since: 2021, monthly: 9250, deployed: new Date(2026, 2, 16, 16, 40, 27) },
+  { name: "Search", availability: 0.99803, requests: 2_910_455, p95: 186.02, since: 2024, monthly: 31200.75, deployed: new Date(2026, 2, 12, 11, 15, 48) },
 ];
 
 export default function Format() {
@@ -33,6 +33,8 @@ export default function Format() {
       <Column value="deployed" label="Deployed" format="date" />
       {/* A second column over the same field names its own id. */}
       <Column id="deployedAt" value="deployed" label="At" format="time" />
+      {/* The two names with seconds: the seconds are shown, the export keeps the timestamp. */}
+      <Column id="deployedSeconds" value="deployed" label="Deployed, to the second" format="dateTimeWithSeconds" />
     </Table>
   );
 }
