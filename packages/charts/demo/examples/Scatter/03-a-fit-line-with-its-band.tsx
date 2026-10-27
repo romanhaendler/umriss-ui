@@ -62,7 +62,7 @@ export default function FitLineWithBand() {
       <YAxis label="y" />
       <Area data={GRID} value="upper" baseline="lower" name="95 % band" />
       <Scatter value="y" name="Measurement" radius={2.5} />
-      <Line data={GRID} value="fit" name="Fit" strokeWidth={1.75} />
+      <Line data={GRID} value="fit" name="Fit" strokeWidth={1.75} markers="never" />
       <Legend placement="top" />
       <Tooltip mode="nearest" />
     </Chart>
