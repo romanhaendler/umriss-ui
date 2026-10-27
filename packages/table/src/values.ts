@@ -14,9 +14,20 @@
 import { writeNumber } from "@umriss-ui/core";
 import type { Formats, NumberFormat, Wording } from "@umriss-ui/core";
 
-/** The names of the standard presentations of a point in time. */
-export type DateFormat = "date" | "time" | "dateTime";
+/** The names of the standard presentations of a point in time, with the English
+    text of 17 March 2026 at 09:05:03 for each:
+    - `"date"`: "17/03/2026"
+    - `"time"`: "09:05"
+    - `"dateTime"`: "17/03/2026, 09:05"
+    - `"timeWithSeconds"`: "09:05:03"
+    - `"dateTimeWithSeconds"`: "17/03/2026, 09:05:03"
+    German formats write the same with "17.03.2026". */
+export type DateFormat = "date" | "time" | "dateTime" | "timeWithSeconds" | "dateTimeWithSeconds";
 export type Format = NumberFormat | DateFormat;
+
+const DATE_FORMATS: ReadonlySet<unknown> = new Set<unknown>(["date", "time", "dateTime", "timeWithSeconds", "dateTimeWithSeconds"]);
+/** Whether a format names a point in time. */
+export const isDateFormat = (format: unknown): format is DateFormat => DATE_FORMATS.has(format);
 
 /** The kinds the table tells apart. `other` needs a presentation from the
     caller; `empty` means: not a single value present. */
@@ -66,14 +77,24 @@ export function asText(
     case "number": {
       const number = value as number;
       // A date name on a number writes as no format does.
-      const own = format === "date" || format === "time" || format === "dateTime" ? undefined : format;
+      const own = isDateFormat(format) ? undefined : format;
       return writeNumber(formats, number, own);
     }
     case "date": {
+      // The one mapping from a date format's name to its text; every writer of a date column reads it here.
       const date = value as Date;
-      if (format === "date") return formats.date(date);
-      if (format === "time") return formats.time(date, false);
-      return formats.dateTime(date, false);
+      switch (format) {
+        case "date":
+          return formats.date(date);
+        case "time":
+          return formats.time(date, false);
+        case "timeWithSeconds":
+          return formats.time(date, true);
+        case "dateTimeWithSeconds":
+          return formats.dateTime(date, true);
+        default:
+          return formats.dateTime(date, false);
+      }
     }
     case "boolean":
       return value ? wording.booleanYes : wording.booleanNo;
