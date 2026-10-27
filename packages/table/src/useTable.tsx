@@ -621,7 +621,12 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   useEffect(() => {
     if (emptied) anchor.current = null;
   }, [emptied]);
+  const pickAll = () => {
+    registry.markPicked();
+    selection.toggleAll();
+  };
   const pick = (key: string, range: boolean) => {
+    registry.markPicked();
     const reach = (b.lines ? rowsOf(b.lines) : (b.shown ?? b.filtered)).map(rowKey);
     const from = anchor.current === null ? -1 : reach.indexOf(anchor.current);
     const to = reach.indexOf(key);
@@ -713,6 +718,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
     pick,
+    pickAll,
     late,
     error: options.server && !late ? options.error : undefined,
     retry: () => {
