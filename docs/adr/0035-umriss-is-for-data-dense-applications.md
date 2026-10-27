@@ -69,3 +69,7 @@ its package and npm (`checks/ownData`), and the code view has no tabs any more.
 The plant check finds the plant world by that line instead of by the import.
 
 `packages/demo/src/worlds` and the plant-words check were removed later; the examples keep the data they carry.
+
+## Amended
+
+The alarms package states ISA's words on its screen and in its speech, in English and German, while its API keeps the general names; that is a partial exception to this decision, for that package only (ADR-0078).
