@@ -605,6 +605,17 @@ export class Registry {
 
   /** The hook deposits its snapshot during the render. Idempotent for the same
       snapshot; a new one counts for the body. */
+  /** Set when the user changes the selection; the frame announces it once. */
+  private picked = false;
+  markPicked() {
+    this.picked = true;
+  }
+  takePicked() {
+    const was = this.picked;
+    this.picked = false;
+    return was;
+  }
+
   setHook(hook: HookSnapshot) {
     if (this.hook === hook) return;
     this.hook = hook;

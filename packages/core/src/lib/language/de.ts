@@ -182,6 +182,7 @@ export const GERMAN_WORDING: Wording = {
   filterColumn: (column) => `${column} filtern`,
   filterHint: "Filtern",
   selectRow: (row) => `${row} auswählen`,
+  tableSelectedCount: (count) => `${count} ausgewählt`,
   selectAllRows: "Alle auswählen",
   selectAllOnPage: "Alle auf dieser Seite auswählen",
   expandRowNamed: (row) => `${row} aufklappen`,

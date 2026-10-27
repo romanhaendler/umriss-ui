@@ -123,6 +123,7 @@ export function Row({
       <tr
         {...data}
         ref={current.report && !fresh ? (el) => void (el && rowOfElement.set(el, row)) : undefined}
+        aria-selected={grid && selectable && !fresh ? snapshot.selection.isSelected(key) : undefined}
         aria-current={!fresh && current.key === key ? "true" : undefined}
         data-current={!fresh && current.key === key ? "" : undefined}
         className={cx(

@@ -261,6 +261,8 @@ export interface Wording {
   filterHint: string;
   /** The selection of one row, named after its row header. */
   selectRow: (row: string) => string;
+  /** Said after the user changes the selection of a table in grid mode: the count. */
+  tableSelectedCount: (count: number) => string;
   /** The selection of every row in the filtered set. */
   selectAllRows: string;
   /** The same checkbox in server mode, where the table holds one page of a server's. */
@@ -791,6 +793,7 @@ export const DEFAULT_WORDING: Wording = {
   filterColumn: (column) => `Filter ${column}`,
   filterHint: "Filter",
   selectRow: (row) => `Select ${row}`,
+  tableSelectedCount: (count) => `${count} selected`,
   selectAllRows: "Select all",
   selectAllOnPage: "Select all on this page",
   expandRowNamed: (row) => `Expand ${row}`,

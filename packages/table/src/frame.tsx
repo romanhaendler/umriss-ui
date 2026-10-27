@@ -2,9 +2,9 @@
    every render, works out the layout (frameLayout.ts), wires the grid, and
    hands the body, the head and the foot their parts. */
 
-import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { CSSProperties } from "react";
-import { ControlSizeProvider, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { ControlSizeProvider, announce, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { NewRowButton } from "./toolbar";
 import type { Registry } from "./registry";
@@ -101,6 +101,14 @@ export function Frame({
   const moving = registry.hook && !registry.hook.tableState.virtual ? registry.hook.publicSnapshot : null;
   useLineMotion(tableRef, moving ? `${moving.grouping.join("|")}#${moving.folded.join("|")}` : "");
 
+  /* A selection the user changed is said as a count; one handed in and changed
+     by the application is not. */
+  const chosen = registry.hook?.publicSnapshot.selection;
+  useEffect(() => {
+    if (registry.takePicked() && gridMode && selectable && chosen && !chosen.allMatching) announce(wording.tableSelectedCount(chosen.count), tableRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of the selection is said
+  }, [chosen?.selected, chosen?.except]);
+
   const hook = registry.hook;
   if (!hook) return null;
 
@@ -189,6 +197,7 @@ export function Frame({
         <table
           ref={tableRef}
           role={lines || entries ? "treegrid" : gridMode ? "grid" : undefined}
+          aria-multiselectable={gridMode && selectable ? true : undefined}
           aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
           onKeyDown={gridEvents?.onKeyDown}
           onFocus={gridEvents?.onFocus}
