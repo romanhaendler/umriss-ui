@@ -1,4 +1,6 @@
-import { AlarmList, alarmModel } from "../../../src";
+import { useMemo, useState } from "react";
+import { useTableSelection } from "@umriss-ui/table";
+import { AlarmList, acknowledge, alarmModel } from "../../../src";
 import type { Alarm, AlarmType } from "../../../src";
 
 export const title = "A trip of forty alarms";
@@ -26,14 +28,30 @@ const TRIP: readonly Alarm[] = Array.from({ length: 40 }, (_, i) => ({
   sequence: i,
 }));
 
-const view = alarmModel({
-  alarms: TRIP,
-  types: TYPES,
-  asOf: NOW,
-  // ISA-18.2's reference: more than 10 alarms in 10 minutes per operating position.
-  flood: { windowMs: 600_000, atLeast: 11 },
-});
-
 export default function ATripOfFortyAlarms() {
-  return <AlarmList view={view} density="compact" maxHeight="360px" />;
+  const [alarms, setAlarms] = useState(TRIP);
+  const view = useMemo(
+    () =>
+      alarmModel({
+        alarms,
+        types: TYPES,
+        asOf: NOW,
+        // ISA-18.2's reference: more than 10 alarms in 10 minutes per operating position.
+        flood: { windowMs: 600_000, atLeast: 11 },
+      }),
+    [alarms],
+  );
+  const selection = useTableSelection(view.filtered.map((row) => row.id));
+  return (
+    <AlarmList
+      view={view}
+      density="compact"
+      maxHeight="360px"
+      selection={selection}
+      onAcknowledge={(ids) => {
+        setAlarms((current) => acknowledge(current, ids, NOW).alarms);
+        selection.clear();
+      }}
+    />
+  );
 }
