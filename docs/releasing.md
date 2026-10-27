@@ -1,7 +1,7 @@
 # Releasing
 
 How a version of `@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
-`@umriss-ui/schedule`, `@umriss-ui/calculation` or `@umriss-ui/dashboard`
+`@umriss-ui/alarms`, `@umriss-ui/schedule`, `@umriss-ui/calculation` or `@umriss-ui/dashboard`
 reaches npm, and that the demos are not hosted (ADR-0065). What a version *means* for a
 caller stands in the package's own `CHANGELOG.md`; this page is only the
 mechanics.
@@ -42,7 +42,7 @@ lint, types (`typecheck` and `typecheck:demo`), `check:site`, unit tests, build
 and `check:dist`. A version with a hyphen
 (`0.3.0-rc.1`) goes to `next`, every other to `latest`. A push that raises no
 version publishes nothing, and the same version is never published twice.
-The six packages move together under one number, and what a version promises
+The seven packages move together under one number, and what a version promises
 callers is in [ADR-0066](adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md).
 
 After each package the workflow sets its tag, `<dir>-v<version>` — one per
@@ -60,7 +60,7 @@ that bypass it. The workflow packs with pnpm — only pnpm rewrites the
 do Trusted Publishing.
 
 1. **One number for all packages.** From `0.34.0` on, `core`, `charts`,
-   `table`, `schedule` and `calculation` - and from `0.40.0` `dashboard` - are
+   `table`, `schedule` and `calculation` - from `0.40.0` `dashboard` and from `0.47.0` `alarms` - are
    released together under one number, even where a package has no change of its own. The peer ranges
    between them are `workspace:^0.<minor>.0` of that number, which pnpm packs
    as `^0.<minor>.0`: a patch release leaves them, a minor release moves them

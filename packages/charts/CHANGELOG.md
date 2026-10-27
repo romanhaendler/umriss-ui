@@ -4,14 +4,14 @@ This document describes what changes for **callers** of the package: exports,
 props, behaviour.
 
 **The numbers.** The middle digit rises when something is added; the last one
-when something is repaired. The six packages are released in step, and a rename
+when something is repaired. The seven packages are released in step, and a rename
 keeps its old name for one further minor, with a warning, before the minor after
 it removes the name ([the upgrade promise, ADR-0066](../../docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
 **Whatever changes existing behaviour stands under a heading "Changed" of its
 own**, no matter which digit rose, with a `Migration:` line. Whoever reads only
 one section before an upgrade reads that one.
 
-From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
+From 0.34.0 the packages share one number - five, six from 0.40.0, when the dashboard joined, and seven from 0.47.0, when alarms joined: they are released together, and a package without a change of its own still gets a heading for it.
 
 **Names read forwards.** Where an entry describes a name that has since been
 renamed, it is named here as it is called today; names that were removed stand
@@ -29,6 +29,10 @@ promised nothing a `0.x` does not already fail to promise; it said the
 interface was still expected to move before `0.3.0`.
 
 ---
+
+## 0.47.0 – Released in step with alarms (Oct. 2026)
+
+No change of its own; the number moves with the new package `@umriss-ui/alarms`.
 
 ## 0.46.0 – A floating bar, a legend beside the plot, and recipes (Oct. 2026)
 

@@ -5,13 +5,13 @@ props, behaviour.
 
 **The numbers** follow the rule of `@umriss-ui/core` and `@umriss-ui/charts`: the
 middle digit rises when something is added, the last one when something is
-repaired. The six packages are released in step, and a rename keeps its old name
+repaired. The seven packages are released in step, and a rename keeps its old name
 for one further minor, with a warning, before the minor after it removes the name
 ([the upgrade promise, ADR-0066](../../docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md)).
 **Whatever changes existing behaviour stands under a heading "Changed" of its
 own**, no matter which digit rose, with a `Migration:` line.
 
-From 0.34.0 the packages share one number - five, and six from 0.40.0, when the dashboard joined: they are released together, and a package without a change of its own still gets a heading for it.
+From 0.34.0 the packages share one number - five, six from 0.40.0, when the dashboard joined, and seven from 0.47.0, when alarms joined: they are released together, and a package without a change of its own still gets a heading for it.
 
 **Names read forwards.** Where an entry describes a name that has since been
 renamed, it is named here as it is called today; names that were removed stand
@@ -25,6 +25,19 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 (see core's changelog).
 
 ---
+
+## 0.47.0 – The alarm package's table, seconds, and a selection a grid announces (Oct. 2026)
+
+### Added
+
+- **`tableModel`**, the table's pipeline as a pure function - filter, sort, page over rows and model columns; the types `TableProjection` and `Line` join the main entry.
+- **`format="timeWithSeconds"` and `format="dateTimeWithSeconds"`** write a point in time with its seconds, in the cell, the list filter, the group line and the aggregate, in the formats' own notation (German included). The CSV and the XLSX keep the timestamp.
+- **A grid with `selectable` announces its selection:** the grid carries `aria-multiselectable` and every body row `aria-selected`; a click on a box, Space on a row and "select all" announce the count ("3 selected"). A selection changed from outside is not announced; a native table keeps its checkboxes as the carrier.
+
+### Changed
+
+- **The peer range on core moves to `^0.47.0`.**
+  - Migration: install the 0.47 version of `@umriss-ui/core` beside it.
 
 ## 0.46.0 – Row ranges, a column drag, and a view that survives JSON (Oct. 2026)
 

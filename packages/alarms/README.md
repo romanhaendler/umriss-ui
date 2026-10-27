@@ -11,11 +11,6 @@ unfiltered `alarmModel` view; keep it on screen with one line of the host's CSS,
 `position: sticky; top: 0`. Its `onAnnunciate` is the cue for the application's
 horn.
 
-What it follows of ISA-18.2 and where it departs stands in
-[`docs/standards.md`](../../docs/standards.md); no conformance claimed.
-
-Not published yet.
-
 ## Install
 
 ```bash
@@ -23,7 +18,23 @@ pnpm add @umriss-ui/alarms @umriss-ui/core @umriss-ui/table
 ```
 
 `@umriss-ui/core` and `@umriss-ui/table` are **peer dependencies**, and React 19
-or newer as well.
+or newer as well; TypeScript 5.4 or newer.
+
+The package ships ES2022 syntax; an application that serves older browsers
+transpiles it itself.
+
+The entry begins with `"use client"`, the directive a framework with Server
+Components reads to treat a module as client code. The list and the banner
+are used from a Client Component file; both render to a string on the server and
+in a test.
+
+## The boundary
+
+The application generates its alarms, applies every transition and keeps the
+result; the package derives a view from them and reports what the operator asked
+for. It raises no alarm, sounds no horn - `onAnnunciate` is the cue - and keeps no
+record. What it follows of ISA-18.2 and where it departs is in
+[`docs/standards.md`](../../docs/standards.md#isa-182---alarm-management).
 
 ## Documentation
 
