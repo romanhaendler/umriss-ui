@@ -94,6 +94,13 @@
     margin-right: var(--u-space-2);
   }
 
+  /* The mark and its word, on one line. */
+  .priority {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+  }
+
   .empty {
     color: var(--u-color-text-secondary);
   }

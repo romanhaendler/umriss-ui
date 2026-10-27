@@ -666,9 +666,12 @@ export interface Wording {
   /** Ends the snooze of the ticked alarms before its time. */
   alarmUnsnooze: string;
   alarmUnsnoozeMany: (count: number) => string;
+  alarmPriorityCritical: string;
   alarmPriorityHigh: string;
   alarmPriorityMedium: string;
   alarmPriorityLow: string;
+  /** The name of a priority mark: its number, 1 for the most urgent, and its word. */
+  alarmPriorityName: (level: number, word: string) => string;
   /** The four lifecycle states, written out. */
   alarmLifecycleActiveUnacknowledged: string;
   alarmLifecycleActiveAcknowledged: string;
@@ -1089,9 +1092,11 @@ export const DEFAULT_WORDING: Wording = {
   alarmSnoozeReason: "Reason",
   alarmUnsnooze: "Unsnooze",
   alarmUnsnoozeMany: (count) => (count === 1 ? "Unsnooze 1 alarm" : `Unsnooze ${count} alarms`),
+  alarmPriorityCritical: "Critical",
   alarmPriorityHigh: "High",
   alarmPriorityMedium: "Medium",
   alarmPriorityLow: "Low",
+  alarmPriorityName: (level, word) => `Priority ${level}, ${word.toLowerCase()}`,
   alarmLifecycleActiveUnacknowledged: "Active, unacknowledged",
   alarmLifecycleActiveAcknowledged: "Active, acknowledged",
   alarmLifecycleResolvedUnacknowledged: "Resolved, unacknowledged",

@@ -26,17 +26,17 @@ import type { ModelColumn, SortLevel, TableProjection, TableInput } from "@umris
 
 /* --- Priority ----------------------------------------------------------- */
 
-/** Three levels. Not two, because an alarm system orders the urgency of acting
+/** Four levels. Not two, because an alarm system orders the urgency of acting
     more finely than a limit does; not seven, because every level above about
     four gets used as a synonym of the one below it.
 
     This is a DIFFERENT scale from the severity of a limit (which has two), on a
     different object. The mapping between the two is the caller's, in his code,
     where the application's convention stands. */
-export type Priority = "high" | "medium" | "low";
+export type Priority = "critical" | "high" | "medium" | "low";
 
 /** From the most urgent to the last - the order of the scale. */
-export const PRIORITIES: readonly Priority[] = ["high", "medium", "low"];
+export const PRIORITIES: readonly Priority[] = ["critical", "high", "medium", "low"];
 
 /** 0 is the most urgent. Sorted ascending it stands on top. */
 export const priorityRank = (priority: Priority): number =>
@@ -535,7 +535,8 @@ export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> 
 }
 
 /** For an alarm without an entry in the catalogue. Classified high: an alarm
-    whose condition we do not know must not slide downwards. */
+    whose condition we do not know must not slide downwards, and "critical" is
+    kept for what the application has rationalised as such. */
 const unknownType = (id: string): AlarmType => ({
   id,
   label: id,

@@ -10,7 +10,7 @@ const at = (day: number, hours: number, minutes = 0) => new Date(2026, 2, day, h
 const NOW = at(17, 10, 30);
 
 const ALERT_TYPES: readonly AlarmType[] = [
-  { id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "high" },
+  { id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "critical" },
   { id: "checkout-errors", label: "Checkout · error rate above 2 %", priority: "high" },
   { id: "webhooks-queue", label: "Webhooks · queue older than 5 min", priority: "medium" },
   { id: "search-latency", label: "Search · p95 latency above 250 ms", priority: "medium" },
@@ -51,6 +51,7 @@ export default function FilterByStateAndPriority() {
       </Select>
       <Select size="sm" aria-label="Priority" value={priority} onChange={(event) => setPriority(event.target.value as Priority | "")}>
         <option value="">Any priority</option>
+        <option value="critical">Critical</option>
         <option value="high">High</option>
         <option value="medium">Medium</option>
         <option value="low">Low</option>

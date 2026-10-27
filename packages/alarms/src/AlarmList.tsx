@@ -39,8 +39,9 @@ import { Badge, Button, Checkbox, FormField, Input, Menu, MenuItem, Popover, Rad
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
-import { countAcknowledgeable, isHidden } from "./alarmModel";
-import type { AlarmProjection, AlarmRow, LifecycleState, Priority } from "./alarmModel";
+import { countAcknowledgeable } from "./alarmModel";
+import { PriorityMark, priorityWord } from "./PriorityMark";
+import type { AlarmProjection, AlarmRow, LifecycleState } from "./alarmModel";
 import styles from "./AlarmList.module.css";
 
 /* The props carry the names from library-audit 09. With ADR-0018 the
@@ -181,14 +182,6 @@ function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): {
     default:
       return null;
   }
-}
-
-function priorityWord(p: Priority, wording: Wording): string {
-  return p === "high" ? wording.alarmPriorityHigh : p === "medium" ? wording.alarmPriorityMedium : wording.alarmPriorityLow;
-}
-
-function priorityTone(p: Priority): "danger" | "warning" | "neutral" {
-  return p === "high" ? "danger" : p === "medium" ? "warning" : "neutral";
 }
 
 /** The duration as a word; the sentence structure comes from the wording, not
@@ -451,9 +444,10 @@ function Body({
         </Column>
         <Column value="priority" label={wording.alarmColumnPriority} sortable={false}>
           {(p, row) => (
-            <Badge tone={isHidden(row.availability) ? "neutral" : priorityTone(p)}>
-              {priorityWord(p, wording)}
-            </Badge>
+            <span className={styles.priority}>
+              <PriorityMark priority={p} lifecycle={row.lifecycle} availability={row.availability} />
+              <span aria-hidden="true">{priorityWord(p, wording)}</span>
+            </span>
           )}
         </Column>
         <Column

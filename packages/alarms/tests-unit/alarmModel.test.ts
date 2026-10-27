@@ -6,6 +6,8 @@
 import { describe, expect, it } from "vitest";
 import {
   detectFlood,
+  PRIORITIES,
+  priorityRank,
   frequencyByType,
   isActive,
   hasReturned,
@@ -83,6 +85,7 @@ const TYPES: AlarmType[] = [
     returnBand: { direction: "lower", limit: 20, returnTo: 25 },
   },
   { id: "filter-change", label: "Change filter", priority: "low" },
+  { id: "reactor-trip", label: "Reactor tripped", priority: "critical" },
 ];
 
 const alarm = (
@@ -191,6 +194,7 @@ describe("alarmModel – the default order", () => {
      hand from the rule - priority, then acknowledgement, then time (newest
      first) -, not read off a run. */
   const TYPE_PER_PRIORITY: Record<Priority, string> = {
+    critical: "reactor-trip",
     high: "boiler-pressure",
     medium: "flow-temp",
     low: "filter-change",
@@ -231,6 +235,24 @@ describe("alarmModel – the default order", () => {
       "low-aq",
       "low-gq",
     ]);
+  });
+
+  it("lists four priorities, most urgent first", () => {
+    expect(PRIORITIES).toEqual(["critical", "high", "medium", "low"]);
+    expect(priorityRank("critical")).toBe(0);
+    expect(priorityRank("low")).toBe(3);
+  });
+
+  it("puts a critical alarm above a high one, even an older one above a newer", () => {
+    const projection = alarmModel({
+      alarms: [
+        alarm("h", "boiler-pressure", "active-unacknowledged", T0 - 1_000),
+        alarm("c", "reactor-trip", "active-unacknowledged", T0 - 90_000),
+      ],
+      types: TYPES,
+      asOf: T0,
+    });
+    expect(ids(projection.filtered)).toEqual(["c", "h"]);
   });
 
   it("can be replaced by another value, not merely shouted over", () => {

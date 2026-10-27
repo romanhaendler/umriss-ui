@@ -87,6 +87,15 @@ describe("The fleeting alarm stays visible", () => {
   });
 });
 
+describe("Priority stands there as a mark with a name", () => {
+  it("shows the mark of each level, named", () => {
+    render(<AlarmList view={projectionOf()} />);
+    expect(screen.getAllByRole("img", { name: "Priority 2, high" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("img", { name: "Priority 3, medium" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("img", { name: "Priority 4, low" }).length).toBeGreaterThan(0);
+  });
+});
+
 describe("Priority stands there as a word, not only as a colour", () => {
   it("names each of the three levels in the text", () => {
     render(<AlarmList view={projectionOf()} />);
@@ -368,10 +377,9 @@ describe("Hidden", () => {
     const active = screen.getAllByText(DEFAULT_WORDING.alarmLifecycleActiveUnacknowledged)[0]!.closest("tr");
     expect(snoozed?.getAttribute("data-availability")).toBe("snoozed");
     expect(active?.getAttribute("data-availability")).toBe("in-service");
-    const badge = (row: Element | null | undefined) =>
-      [...(row?.querySelectorAll("span") ?? [])].find((span) => span.textContent === DEFAULT_WORDING.alarmPriorityHigh);
-    expect(badge(snoozed)?.className).toMatch(/neutral/);
-    expect(badge(active)?.className).toMatch(/danger/);
+    const mark = (row: Element | null | undefined) => row?.querySelector('[role="img"][data-priority="high"]');
+    expect(mark(snoozed)?.hasAttribute("data-neutral")).toBe(true);
+    expect(mark(active)?.hasAttribute("data-neutral")).toBe(false);
   });
 
   it("counts them, and says nothing where there are none", () => {

@@ -89,6 +89,17 @@
        every ground (tone-contrast). Light: the surface value already passes. */
     --u-color-danger-text: light-dark(#b13636, #d86f66);
 
+    /* ---- Alarm priority: red, amber, yellow, blue ----
+       One fill per level, for the alarm package's priority mark; the shape
+       carries the level too, so the colour is never alone. Each holds 3:1
+       against the surface and 4.5:1 under the number, which is
+       --u-color-on-priority (the polarity turns in the dark theme). */
+    --u-color-priority-critical: light-dark(#c62828, #ef6b6b);
+    --u-color-priority-high: light-dark(#b45309, #f59e0b);
+    --u-color-priority-medium: light-dark(#8a6d00, #facc15);
+    --u-color-priority-low: light-dark(#1d5fbf, #5b9cf5);
+    --u-color-on-priority: light-dark(#ffffff, #111113);
+
     /* ---- Focus: a crisp accent edge, two pixels, no glow ----
        One look for every component. A soft glow would read as a second, shadowy
        border. On a field the ring lies where its edge lies, so the edge seems
@@ -290,6 +301,10 @@
     --u-transition-path: var(--u-duration-fast) var(--u-ease-out); /* a chevron turns, a thumb slides */
     --u-duration-medium: 240ms;              /* entry of a sheet; a layout change */
     --u-duration-draw: 320ms;                /* a stroke drawn slowly enough to watch: the tick */
+    /* One cycle of the flash of an unacknowledged alarm's priority mark. 1 s
+       (1 Hz) is umriss's choice; no source gives a rate. `none` turns the flash
+       off, and reduced motion replaces it with a steady ring. */
+    --u-duration-alarm-flash: 1s;
     --u-delay-draw: 60ms;                    /* the box fills first, then the tick is drawn */
     --u-delay-stale: 200ms;                  /* content being reloaded dims only after this: a quick answer never flickers */
 
