@@ -7,6 +7,8 @@ import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
 import { open, openExample } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
+  // The flood example renders a thousand rows; axe needs longer than the default for them.
+  test.slow();
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
