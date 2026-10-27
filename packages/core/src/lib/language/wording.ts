@@ -642,6 +642,69 @@ export interface Wording {
   /** On the line of a sum with no operands, where its formula would stand
       (ADR-0049). */
   calculationNoOperands: string;
+
+  /* -------- @umriss-ui/alarms -------------------------------------- */
+  /* The alarm package's entries stand here for the table's reason: one provider
+     switches every package with one value. */
+  alarmList: string;
+  alarmNone: string;
+  /** Empty, but the line is down - that is something other than quiet. */
+  alarmNoneDisconnected: string;
+  alarmAcknowledge: string;
+  /** Bulk acknowledgement; the number stands in the text on purpose. */
+  alarmAcknowledgeMany: (count: number) => string;
+  /** The alarm list's snooze menu, beside "Acknowledge": the word on its
+      button, and the sentence with the number of alarms it acts on. */
+  alarmSnooze: string;
+  alarmSnoozeMany: (count: number) => string;
+  /** The labels in the panel that opens with `snoozeReason`: the duration to
+      choose and the reason to give. The panel's own button is `snoozeAlarm`. */
+  alarmSnoozeDuration: string;
+  alarmSnoozeReason: string;
+  /** Ends the snooze of the ticked alarms before its time. */
+  alarmUnsnooze: string;
+  alarmUnsnoozeMany: (count: number) => string;
+  alarmPriorityHigh: string;
+  alarmPriorityMedium: string;
+  alarmPriorityLow: string;
+  /** The four lifecycle states, written out. */
+  alarmLifecycleActiveUnacknowledged: string;
+  alarmLifecycleActiveAcknowledged: string;
+  alarmLifecycleResolvedUnacknowledged: string;
+  alarmLifecycleResolvedAcknowledged: string;
+  /** "Alarm flood: 12 in quick succession" - a flood is marked, never
+      suppressed. */
+  alarmFloodHint: (count: number) => string;
+  /** "40×" on a chattering alarm type. */
+  alarmChatterHint: (count: number) => string;
+  /** The text of the live region: the number of active unacknowledged alarms. */
+  alarmActiveUnacknowledged: (count: number) => string;
+  alarmColumnAlarm: string;
+  alarmColumnLifecycleState: string;
+  alarmColumnPriority: string;
+  alarmColumnRaised: string;
+  alarmColumnDuration: string;
+  alarmColumnFrequency: string;
+  /** The two columns of the alarm model the list does not show, but which do
+      land in the column menu and the CSV header (`alarmColumns`). */
+  alarmColumnAcknowledgement: string;
+  alarmColumnAge: string;
+  /** The availability of an alarm (ISA-18.2's special states), written out.
+      A snooze names its end and who snoozed it - a snooze is tracked, not
+      anonymous; the time comes from the formats. The reason, when the snooze
+      has one, comes last and is optional: a wording of two parameters fits. */
+  alarmAvailabilitySnoozed: (until: string, by: string, reason?: string) => string;
+  /** A snooze as one word - the alarm list's badge; the sentence above stands
+      in its tooltip and in what is spoken. */
+  alarmAvailabilitySnoozedShort: string;
+  alarmAvailabilitySuppressed: string;
+  alarmAvailabilityDisabled: string;
+  /** "Hidden: 3" - the count of the view of snoozed, suppressed and disabled
+      alarms, and its name where the list offers the view as a switch. */
+  alarmHidden: (count: number) => string;
+  /** The availability column of the alarm model: the column menu and the CSV
+      header, like the two above. */
+  alarmColumnAvailability: string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -1010,4 +1073,44 @@ export const DEFAULT_WORDING: Wording = {
   calculationHideDerivation: (label) => `Hide how ${label} is derived`,
   calculationOperandCount: (count) => `${count} operands`,
   calculationNoOperands: "no entries",
+
+  alarmList: "Alarms",
+  alarmNone: "No alarms",
+  alarmNoneDisconnected: "No alarms – the connection is down",
+  alarmAcknowledge: "Acknowledge",
+  alarmAcknowledgeMany: (count) =>
+    count === 1 ? "Acknowledge 1 alarm" : `Acknowledge ${count} alarms`,
+  alarmSnooze: "Snooze",
+  alarmSnoozeMany: (count) => (count === 1 ? "Snooze 1 alarm" : `Snooze ${count} alarms`),
+  alarmSnoozeDuration: "Duration",
+  alarmSnoozeReason: "Reason",
+  alarmUnsnooze: "Unsnooze",
+  alarmUnsnoozeMany: (count) => (count === 1 ? "Unsnooze 1 alarm" : `Unsnooze ${count} alarms`),
+  alarmPriorityHigh: "High",
+  alarmPriorityMedium: "Medium",
+  alarmPriorityLow: "Low",
+  alarmLifecycleActiveUnacknowledged: "Active, unacknowledged",
+  alarmLifecycleActiveAcknowledged: "Active, acknowledged",
+  alarmLifecycleResolvedUnacknowledged: "Resolved, unacknowledged",
+  alarmLifecycleResolvedAcknowledged: "Resolved, acknowledged",
+  alarmFloodHint: (count) => `Alarm flood: ${count} in quick succession`,
+  alarmChatterHint: (count) => `${count}×`,
+  alarmActiveUnacknowledged: (count) =>
+    count === 1
+      ? "1 active alarm, unacknowledged"
+      : `${count} active alarms, unacknowledged`,
+  alarmColumnAlarm: "Alarm",
+  alarmColumnLifecycleState: "State",
+  alarmColumnPriority: "Priority",
+  alarmColumnRaised: "Raised",
+  alarmColumnDuration: "Duration",
+  alarmColumnFrequency: "Frequency",
+  alarmColumnAcknowledgement: "Acknowledgement",
+  alarmColumnAge: "Age",
+  alarmAvailabilitySnoozed: (until, by, reason) => `Snoozed until ${until} by ${by}${reason ? `: ${reason}` : ""}`,
+  alarmAvailabilitySnoozedShort: "Snoozed",
+  alarmAvailabilitySuppressed: "Suppressed",
+  alarmAvailabilityDisabled: "Disabled",
+  alarmHidden: (count) => `Hidden: ${count}`,
+  alarmColumnAvailability: "Availability",
 };

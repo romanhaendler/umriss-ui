@@ -6,7 +6,7 @@ what a reader has — the filename is what they are looking for.
 | I want to know | Read |
 |---|---|
 | what umriss is and how to install it | [`../README.md`](../README.md) |
-| how a component is used, with running code | the demo of its package — `pnpm start` for all of them at the version checked out, or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard` |
+| how a component is used, with running code | the demo of its package — `pnpm start` for all of them at the version checked out, or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard`, `pnpm dev:alarms` |
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |

@@ -104,7 +104,7 @@ describe("a changelog's version heading", () => {
 
   it("each package's changelog is a page in its package's directory", () => {
     expect(DOCUMENTS.filter((document) => document.changelogOf !== undefined).map((document) => [document.source, document.path, document.title])).toEqual(
-      ["core", "charts", "table", "schedule", "calculation", "dashboard"].map((id) => [`packages/${id}/CHANGELOG.md`, `${id}/changelog/`, `Changelog – @umriss-ui/${id}`]),
+      ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms"].map((id) => [`packages/${id}/CHANGELOG.md`, `${id}/changelog/`, `Changelog – @umriss-ui/${id}`]),
     );
   });
 });

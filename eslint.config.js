@@ -5,7 +5,8 @@
 // demo runs in the shared shell and may - the table depends on
 // @umriss-ui/core, never the other way round (ADR-0016), and the schedule on
 // @umriss-ui/core and @umriss-ui/charts, and nothing on it (ADR-0022); the
-// calculation and the dashboard on @umriss-ui/core only, and nothing on them.
+// calculation and the dashboard on @umriss-ui/core only, and nothing on them;
+// the alarms on @umriss-ui/core and @umriss-ui/table, and nothing on it.
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
@@ -19,6 +20,7 @@ const PACKAGES = [
   "packages/schedule/**/*.{ts,tsx}",
   "packages/calculation/**/*.{ts,tsx}",
   "packages/dashboard/**/*.{ts,tsx}",
+  "packages/alarms/**/*.{ts,tsx}",
   "packages/demo/**/*.{ts,tsx}",
 ];
 
@@ -51,6 +53,12 @@ const NO_CALCULATION = {
 const NO_DASHBOARD = {
   group: ["@umriss-ui/dashboard", "@umriss-ui/dashboard/*"],
   message: "@umriss-ui/dashboard depends on @umriss-ui/core, not the other way round.",
+};
+
+/* Nor the alarms: they sit on core and the table. */
+const NO_ALARMS = {
+  group: ["@umriss-ui/alarms", "@umriss-ui/alarms/*"],
+  message: "@umriss-ui/alarms depends on @umriss-ui/core and @umriss-ui/table, not the other way round.",
 };
 
 export default [
@@ -87,6 +95,7 @@ export default [
             NO_SCHEDULE,
             NO_CALCULATION,
             NO_DASHBOARD,
+            NO_ALARMS,
           ],
         },
       ],
@@ -97,7 +106,7 @@ export default [
     files: ["packages/charts/**/*.{ts,tsx}"],
     ignores: ["packages/charts/src/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD, NO_ALARMS] }],
     },
   },
   {
@@ -107,7 +116,7 @@ export default [
     files: ["packages/core/**/*.{ts,tsx}"],
     ignores: ["packages/core/demo/scenarios/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION, NO_DASHBOARD, NO_ALARMS] }],
     },
   },
   {
@@ -145,6 +154,7 @@ export default [
             NO_SCHEDULE,
             NO_CALCULATION,
             NO_DASHBOARD,
+            NO_ALARMS,
           ],
         },
       ],
@@ -180,6 +190,7 @@ export default [
             NO_TABLE,
             NO_CALCULATION,
             NO_DASHBOARD,
+            NO_ALARMS,
           ],
         },
       ],
@@ -214,6 +225,7 @@ export default [
             NO_TABLE,
             NO_SCHEDULE,
             NO_DASHBOARD,
+            NO_ALARMS,
           ],
         },
       ],
@@ -244,6 +256,7 @@ export default [
             NO_TABLE,
             NO_SCHEDULE,
             NO_CALCULATION,
+            NO_ALARMS,
           ],
         },
       ],
@@ -257,6 +270,44 @@ export default [
       "@typescript-eslint/no-restricted-imports": [
         "error",
         { patterns: [{ group: ["@umriss-ui/charts", "@umriss-ui/charts/*"], message: "@umriss-ui/dashboard depends on @umriss-ui/core only." }] },
+      ],
+    },
+  },
+  {
+    /* The alarms take @umriss-ui/core and @umriss-ui/table through their public
+       entries only (ADR-0016), and no other package. */
+    files: ["packages/alarms/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@umriss-ui/core/*",
+                "!@umriss-ui/core/styles.css",
+                "!@umriss-ui/core/wording",
+                "!@umriss-ui/core/wording/de",
+              ],
+              message: "@umriss-ui/alarms imports only the public entry of @umriss-ui/core.",
+            },
+            {
+              group: ["@umriss-ui/table/*", "!@umriss-ui/table/styles.css"],
+              message: "@umriss-ui/alarms imports only the public entry of @umriss-ui/table.",
+            },
+            {
+              group: ["**/core/src/**", "**/packages/core/**", "../../core/**", "../core/**", "**/table/src/**", "**/packages/table/**", "../../table/**", "../table/**"],
+              message: "@umriss-ui/alarms does not reach into @umriss-ui/core or @umriss-ui/table by path.",
+            },
+            {
+              group: ["@umriss-ui/charts", "@umriss-ui/charts/*"],
+              message: "@umriss-ui/alarms depends on @umriss-ui/core and @umriss-ui/table only.",
+            },
+            NO_SCHEDULE,
+            NO_CALCULATION,
+            NO_DASHBOARD,
+          ],
+        },
       ],
     },
   },
@@ -291,6 +342,7 @@ export default [
             NO_SCHEDULE,
             NO_CALCULATION,
             NO_DASHBOARD,
+            NO_ALARMS,
           ],
         },
       ],

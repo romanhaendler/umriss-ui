@@ -87,3 +87,6 @@ export type { AggregateColumn, AggregateKind, GroupLevel, OwnAggregate } from ".
 export { csv } from "./export";
 export type { AllMatching, ExportContext, ExportFormat, ExportSheet } from "./types";
 export type { ExportCell } from "./values";
+export { tableModel } from "./model/tableModel";
+export type { TableProjection } from "./model/tableModel";
+export type { Line } from "./model/grouping";

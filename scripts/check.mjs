@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const all = ["core", "charts", "table", "schedule", "calculation", "dashboard", "demo"];
+const all = ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms", "demo"];
 const args = process.argv.slice(2);
 const allowed = args.flatMap((value, i) => (args[i - 1] === "--allow" ? ["--allow", value] : []));
 const arg = args.find((value, i) => value !== "--allow" && args[i - 1] !== "--allow");

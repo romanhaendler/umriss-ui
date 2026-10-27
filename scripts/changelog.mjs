@@ -2,7 +2,7 @@
 // commits since the last "Release:" commit, per package. Prints only.
 import { execFileSync } from 'node:child_process'
 
-const PACKAGES = ['core', 'charts', 'table', 'schedule', 'calculation', 'dashboard']
+const PACKAGES = ['core', 'charts', 'table', 'schedule', 'calculation', 'dashboard', 'alarms']
 const want = process.argv[2]
 if (want && !PACKAGES.includes(want)) {
   console.error(`unknown package "${want}"; one of ${PACKAGES.join(', ')}`)

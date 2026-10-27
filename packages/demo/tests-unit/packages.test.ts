@@ -19,6 +19,6 @@ it("loads in Node without a bundler, the five in their fixed order", () => {
     ],
     { encoding: "utf8" },
   );
-  expect(ids.trim()).toBe("core,charts,table,schedule,calculation,dashboard");
+  expect(ids.trim()).toBe("core,charts,table,schedule,calculation,dashboard,alarms");
 });
 

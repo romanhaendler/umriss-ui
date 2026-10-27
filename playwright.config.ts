@@ -1,6 +1,6 @@
 /* Shared Playwright setup of the monorepo (R-1.3).
    - Five demos, five servers: core on 4173, charts on 4174, table on 4175,
-     schedule on 4176, calculation on 4177, dashboard on 4178.
+     schedule on 4176, calculation on 4177, dashboard on 4178, alarms on 4179.
    - Screenshot comparisons run against the real demo build (vite preview),
      not against the dev server.
    - Light/dark via colorScheme emulation: with nothing stored, the shell's
@@ -12,12 +12,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /* DEMOS=table,charts limits servers and projects to those packages (unset = all). */
-const ALL = ["core", "charts", "table", "schedule", "calculation", "dashboard"];
+const ALL = ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms"];
 const asked = process.env.DEMOS?.split(",").map((d) => d.trim()).filter(Boolean);
 const wanted = asked?.length ? asked : ALL;
 const unknown = wanted.filter((d) => !ALL.includes(d));
 if (unknown.length) throw new Error(`DEMOS: unknown ${unknown.join(", ")}; known: ${ALL.join(", ")}`);
-const PKG_OF_PORT: Record<number, string> = { 4173: "core", 4174: "charts", 4175: "table", 4176: "schedule", 4177: "calculation", 4178: "dashboard" };
+const PKG_OF_PORT: Record<number, string> = { 4173: "core", 4174: "charts", 4175: "table", 4176: "schedule", 4177: "calculation", 4178: "dashboard", 4179: "alarms" };
 const has = (pkg: string) => wanted.includes(pkg);
 
 export default defineConfig({
@@ -77,6 +77,13 @@ export default defineConfig({
       command:
         "pnpm --filter @umriss-ui/dashboard build:demo && pnpm --filter @umriss-ui/dashboard preview:demo",
       port: 4178,
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "pnpm --filter @umriss-ui/alarms build:demo && pnpm --filter @umriss-ui/alarms preview:demo",
+      port: 4179,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
@@ -141,6 +148,16 @@ export default defineConfig({
       name: "dashboard-dark",
       testDir: "packages/dashboard/tests-visual",
       use: { baseURL: "http://localhost:4178", colorScheme: "dark" },
+    },
+    {
+      name: "alarms-light",
+      testDir: "packages/alarms/tests-visual",
+      use: { baseURL: "http://localhost:4179", colorScheme: "light" },
+    },
+    {
+      name: "alarms-dark",
+      testDir: "packages/alarms/tests-visual",
+      use: { baseURL: "http://localhost:4179", colorScheme: "dark" },
     },
   ]).filter((project) => has(project.testDir.split("/")[1])),
 });
