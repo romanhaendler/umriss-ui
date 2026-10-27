@@ -1,5 +1,5 @@
 /* Shared Playwright setup of the monorepo (R-1.3).
-   - Five demos, five servers: core on 4173, charts on 4174, table on 4175,
+   - One demo, one server per package: core on 4173, charts on 4174, table on 4175,
      schedule on 4176, calculation on 4177, dashboard on 4178, alarms on 4179.
    - Screenshot comparisons run against the real demo build (vite preview),
      not against the dev server.

@@ -34,7 +34,7 @@
    absent, only deliberately hidden." */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { HTMLAttributes, KeyboardEvent } from "react";
+import type { ComponentPropsWithRef, KeyboardEvent } from "react";
 import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "@umriss-ui/table";
@@ -46,7 +46,7 @@ import styles from "./AlarmList.module.css";
 
 /** The props of `AlarmList`: a div's attributes, the projection to show, and
     the hooks for selection, acknowledgement and freshness. */
-export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "children"> {
   /** The projection from `alarmModel`. */
   view: AlarmProjection;
   /** The caller's selection helper; without it there is no bulk
@@ -366,7 +366,8 @@ function Body({
      There is no timer: a host that stops ticking also stops the speech, which
      is right for a list whose data has stopped. */
   const [spoken, setSpoken] = useState({ at: viewAsOf, count: projection.activeUnacknowledged });
-  if (spoken.count !== projection.activeUnacknowledged && viewAsOf - spoken.at >= LIVE_INTERVAL_MS) {
+  /* With no row shown there is no time to read, so the change is spoken at once. */
+  if (spoken.count !== projection.activeUnacknowledged && (first === undefined || viewAsOf - spoken.at >= LIVE_INTERVAL_MS)) {
     setSpoken({ at: viewAsOf, count: projection.activeUnacknowledged });
   }
 

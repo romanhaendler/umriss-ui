@@ -137,6 +137,20 @@ describe("The live region", () => {
       DEFAULT_WORDING.alarmActiveUnacknowledged(2),
     );
   });
+
+  it("says at once that nothing is left when no row is shown", () => {
+    const { container, rerender } = render(<AlarmList view={projectionOf()} />);
+    rerender(<AlarmList view={projectionOf([])} />);
+    expect(container.querySelector("[aria-live]")?.textContent).toBe(DEFAULT_WORDING.alarmActiveUnacknowledged(0));
+  });
+
+  it("takes the root contract: rest props, a ref and its own aria-label", () => {
+    let node: HTMLElement | null = null;
+    const { container } = render(<AlarmList view={projectionOf()} aria-label="Plant 2" data-x="1" ref={(n) => void (node = n)} />);
+    const root = container.querySelector("[data-x]");
+    expect(root?.getAttribute("aria-label")).toBe("Plant 2");
+    expect(node).toBe(root);
+  });
 });
 
 describe("Acknowledging", () => {
