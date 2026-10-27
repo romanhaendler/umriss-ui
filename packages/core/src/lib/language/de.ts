@@ -432,6 +432,12 @@ export const GERMAN_WORDING: Wording = {
     count === 1
       ? "1 aktiver Alarm, unquittiert"
       : `${count} aktive Alarme, unquittiert`,
+  alarmBanner: "Alarme",
+  alarmBannerNone: "Keine unquittierten Alarme",
+  alarmBannerDisconnected: "Keine Verbindung – die Alarme sind nicht zu sehen",
+  alarmBannerMore: (count) => `${count} weitere`,
+  alarmBannerOpen: "Liste öffnen",
+  alarmBannerAlert: (priority, label) => `Neuer Alarm, ${priority}: ${label}`,
   alarmColumnAlarm: "Alarm",
   alarmColumnLifecycleState: "Zustand",
   alarmColumnPriority: "Priorität",

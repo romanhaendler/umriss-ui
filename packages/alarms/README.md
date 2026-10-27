@@ -6,6 +6,11 @@ view - lifecycle, acknowledgement, snoozing, flood and chatter - and
 `AlarmList` shows it, worst first. The application generates the alarms and
 applies every transition; the package reports what the operator asked for.
 
+`AlarmBanner` shows the worst unacknowledged alarm on every screen, from an
+unfiltered `alarmModel` view; keep it on screen with one line of the host's CSS,
+`position: sticky; top: 0`. Its `onAnnunciate` is the cue for the application's
+horn.
+
 Not published yet.
 
 ## Install

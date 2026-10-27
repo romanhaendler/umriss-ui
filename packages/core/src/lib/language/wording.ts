@@ -686,6 +686,13 @@ export interface Wording {
   alarmChatterHint: (count: number) => string;
   /** The text of the live region: the number of active unacknowledged alarms. */
   alarmActiveUnacknowledged: (count: number) => string;
+  /** The banner's name as a landmark, its sentence for no unacknowledged alarm and for a lost source, the "n more" after the worst alarm, the button that opens the list, and the text of its alert: the new alarm's priority and label. */
+  alarmBanner: string;
+  alarmBannerNone: string;
+  alarmBannerDisconnected: string;
+  alarmBannerMore: (count: number) => string;
+  alarmBannerOpen: string;
+  alarmBannerAlert: (priority: string, label: string) => string;
   alarmColumnAlarm: string;
   alarmColumnLifecycleState: string;
   alarmColumnPriority: string;
@@ -1112,6 +1119,12 @@ export const DEFAULT_WORDING: Wording = {
     count === 1
       ? "1 active alarm, unacknowledged"
       : `${count} active alarms, unacknowledged`,
+  alarmBanner: "Alarms",
+  alarmBannerNone: "No unacknowledged alarms",
+  alarmBannerDisconnected: "No connection – the alarms cannot be seen",
+  alarmBannerMore: (count) => `${count} more`,
+  alarmBannerOpen: "Open list",
+  alarmBannerAlert: (priority, label) => `New alarm, ${priority}: ${label}`,
   alarmColumnAlarm: "Alarm",
   alarmColumnLifecycleState: "State",
   alarmColumnPriority: "Priority",

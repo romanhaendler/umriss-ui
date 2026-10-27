@@ -1,5 +1,7 @@
 export { AlarmList } from "./AlarmList";
 export type { AlarmListProps } from "./AlarmList";
+export { AlarmBanner } from "./AlarmBanner";
+export type { AlarmBannerProps, AlarmAnnunciation } from "./AlarmBanner";
 export { PriorityMark } from "./PriorityMark";
 export type { PriorityMarkProps } from "./PriorityMark";
 export {
