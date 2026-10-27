@@ -1,0 +1,104 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  /* The root is the box the ring is drawn around; the shape inside is clipped,
+     so it could not carry a ring itself. Sizes are in rem, so a doubled root
+     font size scales the mark with its row. */
+  .mark {
+    --_alarms-fill: var(--u-color-priority-low);
+    display: inline-flex;
+    flex: none;
+    vertical-align: middle;
+    border-radius: var(--u-radius-sm);
+  }
+
+  .mark[data-priority="critical"] {
+    --_alarms-fill: var(--u-color-priority-critical);
+  }
+
+  .mark[data-priority="high"] {
+    --_alarms-fill: var(--u-color-priority-high);
+  }
+
+  .mark[data-priority="medium"] {
+    --_alarms-fill: var(--u-color-priority-medium);
+  }
+
+  /* Not in service: the neutral tone, the number kept. */
+  .mark[data-neutral] {
+    --_alarms-fill: var(--u-color-text-secondary);
+  }
+
+  .shape {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: var(--_alarms-fill);
+    color: var(--u-color-on-priority);
+    font-size: 0.75rem;
+    font-weight: var(--u-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--u-leading-none);
+  }
+
+  /* The outlines differ by level: a diamond, a triangle, a square, a circle. */
+  .mark[data-priority="critical"] .shape {
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  /* The triangle's number sits in its wide lower part. */
+  .mark[data-priority="high"] .shape {
+    clip-path: polygon(50% 4%, 100% 94%, 0 94%);
+    align-items: flex-end;
+    padding-block-end: 0.2rem;
+  }
+
+  .mark[data-priority="medium"] .shape {
+    clip-path: inset(0.125rem);
+  }
+
+  .mark[data-priority="low"] .shape {
+    clip-path: circle(50%);
+  }
+
+  /* One second a cycle: the token's value is umriss's choice, no source gives a
+     rate. `none` is not a duration, so the declaration drops and nothing flashes. */
+  .mark[data-flashing] .shape {
+    animation: flash var(--u-duration-alarm-flash) steps(1, end) infinite;
+  }
+
+  @keyframes flash {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  /* Reduced motion: no animation. The unacknowledged mark keeps a steady ring. */
+  @media (prefers-reduced-motion: reduce) {
+    .mark[data-flashing] .shape {
+      animation: none;
+    }
+
+    .mark[data-flashing] {
+      outline: 2px solid var(--_alarms-fill);
+      outline-offset: 1px;
+    }
+  }
+
+  /* Forced colours repaint backgrounds with the canvas; the shape is the mark,
+     so it keeps a system colour as its fill. */
+  @media (forced-colors: active) {
+    .shape {
+      forced-color-adjust: none;
+      background: CanvasText;
+      color: Canvas;
+    }
+
+    .mark[data-neutral] .shape {
+      background: GrayText;
+    }
+  }
+}

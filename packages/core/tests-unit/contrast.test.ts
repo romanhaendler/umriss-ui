@@ -186,6 +186,30 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   })),
 
+  /* The alarm priority mark: the number at the full bound against its fill,
+     and the shape at the non-text bound against both grounds, in both themes.
+     The neutral mark (not in service) fills with the secondary text colour. */
+  ...(["critical", "high", "medium", "low"] as const).flatMap((level) => [
+    {
+      name: `The number on the ${level} priority fill`,
+      fg: "--u-color-on-priority",
+      bg: `--u-color-priority-${level}`,
+      minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+    },
+    ...(["--u-color-surface", "--u-color-bg"] as const).map((ground) => ({
+      name: `The ${level} priority shape on ${ground}`,
+      fg: `--u-color-priority-${level}`,
+      bg: ground,
+      minimum: { light: LARGE_TEXT, dark: LARGE_TEXT },
+    })),
+  ]),
+  {
+    name: "The number on the neutral priority fill",
+    fg: "--u-color-on-priority",
+    bg: "--u-color-text-secondary",
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+  },
+
   /* The pressed surfaces of the interaction-state canon (visuelle-wertigkeit
      04), each under the type that stands on it while it is pressed. An optical
      upgrade must not cost legibility: the full bound, in both themes. */

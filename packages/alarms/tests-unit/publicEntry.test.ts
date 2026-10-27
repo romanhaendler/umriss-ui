@@ -10,7 +10,7 @@ const importsOf = (source: string) => [...source.matchAll(/from "([^"]+)"/g)].ma
 describe("AlarmList", () => {
   it("imports only the public entries of core and table", () => {
     for (const target of importsOf(alarmList)) {
-      expect(["react", "@umriss-ui/core", "@umriss-ui/table", "./alarmModel", "./AlarmList.module.css"]).toContain(target);
+      expect(["react", "@umriss-ui/core", "@umriss-ui/table", "./alarmModel", "./PriorityMark", "./AlarmList.module.css"]).toContain(target);
     }
   });
 });

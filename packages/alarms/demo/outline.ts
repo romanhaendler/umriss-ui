@@ -51,6 +51,28 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  {
+    id: "marks",
+    name: "Marks",
+    sentence: "The small signs an operator reads at a glance.",
+    pages: [
+      {
+        id: "prioritymark",
+        name: "PriorityMark",
+        sentence: "The mark of an alarm's priority: a shape, a number and a colour per level, so that four priorities are told apart in a dark room, in forced colours and by a colour-blind reader. Reach for it wherever an alarm's priority is shown; the list uses it.",
+        about: [
+          "Level 1 is a diamond, 2 a triangle, 3 a square, 4 a circle, each with its number inside; the outlines differ, so they hold in greyscale and in forced colours. The colours come from one token per level (`--u-color-priority-critical`, `-high`, `-medium`, `-low`), each holding AA under the number and 3:1 against the surface.",
+          "Hand it the alarm's `lifecycle` and `availability` as the list knows them. The mark of an active, unacknowledged alarm in service flashes at 1 Hz and is steady once acknowledged; a returned, unacknowledged one is steady. A shelved, suppressed or out-of-service alarm's mark is neutral and keeps its number. The rate is umriss's choice, no source gives one; `--u-duration-alarm-flash` sets it, and `none` turns the flash off.",
+        ],
+        limits: ["It raises nothing and decides nothing: the application says which level an alarm has."],
+        accessibility: [
+          "Its name is “Priority 1, critical”, in the wording's language. Under `prefers-reduced-motion: reduce` nothing animates and an unacknowledged mark carries a steady ring.",
+        ],
+        types: ["PriorityMarkProps"],
+        exports: ["PriorityMark"],
+      },
+    ],
+  },
   apiIndexRubric("@umriss-ui/alarms"),
 ];
 

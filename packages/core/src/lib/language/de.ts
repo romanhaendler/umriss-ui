@@ -416,9 +416,11 @@ export const GERMAN_WORDING: Wording = {
   alarmUnsnooze: "Zurückstellung aufheben",
   alarmUnsnoozeMany: (count) =>
     count === 1 ? "Zurückstellung von 1 Meldung aufheben" : `Zurückstellung von ${count} Meldungen aufheben`,
+  alarmPriorityCritical: "Kritisch",
   alarmPriorityHigh: "Hoch",
   alarmPriorityMedium: "Mittel",
   alarmPriorityLow: "Niedrig",
+  alarmPriorityName: (level, word) => `Priorität ${level}, ${word.toLowerCase()}`,
   alarmLifecycleActiveUnacknowledged: "Aktiv, unquittiert",
   alarmLifecycleActiveAcknowledged: "Aktiv, quittiert",
   alarmLifecycleResolvedUnacknowledged: "Behoben, unquittiert",

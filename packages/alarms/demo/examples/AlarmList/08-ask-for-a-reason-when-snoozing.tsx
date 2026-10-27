@@ -10,7 +10,7 @@ const at = (day: number, hours: number, minutes = 0) => new Date(2026, 2, day, h
 const NOW = at(17, 10, 30);
 
 const ALERT_TYPES: readonly AlarmType[] = [
-  { id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "high" },
+  { id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "critical" },
   { id: "webhooks-queue", label: "Webhooks · queue older than 5 min", priority: "medium" },
   { id: "images-disk", label: "Image service · disk 85 % full", priority: "low" },
 ];

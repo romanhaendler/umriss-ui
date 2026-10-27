@@ -10,7 +10,7 @@ export const lead = "Pass `asOf` and `freshness`: an empty list on a live feed s
 const NOW = Date.now();
 const MIN = 60_000;
 
-const TYPES: AlarmType[] = [{ id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "high" }];
+const TYPES: AlarmType[] = [{ id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "critical" }];
 const EMPTY = alarmModel({ alarms: [], types: TYPES, asOf: NOW });
 const FRESHNESS = { stale: 5 * MIN, lost: 30 * MIN };
 

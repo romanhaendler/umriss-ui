@@ -1,5 +1,7 @@
 export { AlarmList } from "./AlarmList";
 export type { AlarmListProps } from "./AlarmList";
+export { PriorityMark } from "./PriorityMark";
+export type { PriorityMarkProps } from "./PriorityMark";
 export {
   alarmModel,
   acknowledge,
