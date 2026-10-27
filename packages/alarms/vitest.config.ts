@@ -36,5 +36,9 @@ export default defineConfig({
     include: ["tests-unit/**/*.test.{ts,tsx}"],
     setupFiles: ["../demo/tests-support/setup.ts"],
     css: true,
+    /* The flood example renders a thousand rows without virtualising them, on
+       purpose; in jsdom that takes about two seconds alone and more than
+       vitest's five while every package's suite runs at once. */
+    testTimeout: 20_000,
   },
 });
