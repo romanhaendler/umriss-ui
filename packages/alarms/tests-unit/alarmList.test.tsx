@@ -131,7 +131,8 @@ describe("The live region", () => {
     expect(container.querySelector("[aria-live]")?.textContent).toBe(
       DEFAULT_WORDING.alarmActiveUnacknowledged(1),
     );
-    rerender(<AlarmList view={projectionOf(two)} />);
+    // The region changes at most once per two seconds of the view's time.
+    rerender(<AlarmList view={alarmModel({ alarms: two, types: TYPES, asOf: NOW + 2000 })} />);
     expect(container.querySelector("[aria-live]")?.textContent).toBe(
       DEFAULT_WORDING.alarmActiveUnacknowledged(2),
     );
@@ -213,10 +214,18 @@ describe("Acknowledging", () => {
     expect(onAcknowledge.mock.calls[0]?.[0]).toHaveLength(1);
   });
 
-  it("disables the button without a selection", () => {
-    render(<WithSelection onAcknowledge={vi.fn()} />);
-    const button = screen.getByRole("button", { name: /acknowledge/i }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+  it("acts on the rows in view without a selection, and is disabled when nothing can be acknowledged", () => {
+    const { unmount } = render(<WithSelection onAcknowledge={vi.fn()} />);
+    expect((screen.getByRole("button", { name: /acknowledge/i }) as HTMLButtonElement).disabled).toBe(false);
+    unmount();
+    const done = ALARMS.map((m) => ({ ...m, lifecycle: "active-acknowledged" as const }));
+    function Quiet() {
+      const view = projectionOf(done);
+      const selection = useTableSelection(view.filtered.map((row) => row.id));
+      return <AlarmList view={view} selection={selection} onAcknowledge={vi.fn()} />;
+    }
+    render(<Quiet />);
+    expect((screen.getByRole("button", { name: /acknowledge/i }) as HTMLButtonElement).disabled).toBe(true);
   });
 });
 

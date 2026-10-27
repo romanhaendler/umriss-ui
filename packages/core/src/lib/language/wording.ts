@@ -655,6 +655,11 @@ export interface Wording {
   alarmAcknowledge: string;
   /** Bulk acknowledgement; the number stands in the text on purpose. */
   alarmAcknowledgeMany: (count: number) => string;
+  /** The question of the acknowledge-all dialog: what the list sees (umriss's own rule - the rows in its visible area) or what is selected, and its two buttons. */
+  alarmAcknowledgeInView: (count: number) => string;
+  alarmAcknowledgeSelected: (count: number) => string;
+  alarmAcknowledgeConfirm: string;
+  alarmAcknowledgeCancel: string;
   /** The alarm list's snooze menu, beside "Acknowledge": the word on its
       button, and the sentence with the number of alarms it acts on. */
   alarmSnooze: string;
@@ -1100,6 +1105,12 @@ export const DEFAULT_WORDING: Wording = {
   alarmAcknowledge: "Acknowledge",
   alarmAcknowledgeMany: (count) =>
     count === 1 ? "Acknowledge 1 alarm" : `Acknowledge ${count} alarms`,
+  alarmAcknowledgeInView: (count) =>
+    count === 1 ? "Acknowledge 1 alarm in view" : `Acknowledge ${count} alarms in view`,
+  alarmAcknowledgeSelected: (count) =>
+    count === 1 ? "Acknowledge 1 selected alarm" : `Acknowledge ${count} selected alarms`,
+  alarmAcknowledgeConfirm: "Acknowledge",
+  alarmAcknowledgeCancel: "Cancel",
   alarmSnooze: "Shelve",
   alarmSnoozeMany: (count) => (count === 1 ? "Shelve 1 alarm" : `Shelve ${count} alarms`),
   alarmSnoozeDuration: "Duration",
