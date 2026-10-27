@@ -603,8 +603,6 @@ export class Registry {
 
   /* --- The hook's snapshot ---------------------------------------------------------- */
 
-  /** The hook deposits its snapshot during the render. Idempotent for the same
-      snapshot; a new one counts for the body. */
   /** Set when the user changes the selection; the frame announces it once. */
   private picked = false;
   markPicked() {
@@ -616,6 +614,8 @@ export class Registry {
     return was;
   }
 
+  /** The hook deposits its snapshot during the render. Idempotent for the same
+      snapshot; a new one counts for the body. */
   setHook(hook: HookSnapshot) {
     if (this.hook === hook) return;
     this.hook = hook;
