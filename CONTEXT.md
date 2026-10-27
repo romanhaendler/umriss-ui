@@ -499,8 +499,8 @@ _Avoid_: Trefferspanne, range, Markierung, highlight
 
 **Rank**:
 How well a candidate matches, deciding the order among finds. A different scale
-from a limit's **Severity** and a value's **Verdict** — two scales already live
-in this glossary and neither of them is this one.
+from a limit's **Severity**, an alarm's **Priority** and a value's **Verdict** —
+three scales already live in this glossary and none of them is this one.
 _Avoid_: Bewertung, Punktzahl, score, Relevanz
 
 ### Judging a value
@@ -525,8 +525,9 @@ _Avoid_: range, Bereich, corridor, Korridor
 
 **Severity**:
 How serious a limit is. Exactly two: advisory and actionable. It belongs to a
-**Limit**.
-_Avoid_: Priorität, level, Dringlichkeit
+**Limit**. An alarm's **Priority** is a different scale on a different object and is
+not the same word — see ADR-0078.
+_Avoid_: Priorität (which belongs to an alarm), level, Dringlichkeit
 
 **Verdict**:
 What a value is, given a set of limits. Four outcomes, ordered: ok, unknown,
@@ -611,6 +612,85 @@ One value of a matrix, centred on its pair of axis values. Its edges come from
 the grid spacing of both axes — ADR-0002 in two dimensions. A missing level is a
 hole, not a zero.
 _Avoid_: tile, Kachel, bucket
+
+### Alarms
+
+**Alarm**:
+One occurrence of a condition becoming true. The alarms package receives them and
+owns what happens next; it never generates them (ADR-0078).
+_Avoid_: Ereignis, event, notification, Fehler
+
+**Alarm type**:
+The condition that can become true. Many alarms share one type. Repeat counts,
+chatter and floods are statements about a *type* over a window and cannot be
+expressed without it.
+_Avoid_: category, Kategorie, kind
+
+**Lifecycle state**:
+One field with four values: active/unacknowledged, active/acknowledged,
+resolved/unacknowledged, resolved/acknowledged. **Active** and **Resolved** are the
+first half of it, and acknowledgement the second. One field and not two booleans,
+because a boolean pair invites `if (active)` and that filter loses the third — the
+fleeting alarm, which came and went unseen. The screen says ISA-18.2's **in alarm** for active and **returned** for
+resolved (ADR-0035 and ADR-0078); the API keeps the general names.
+_Avoid_: two flags, open/closed, standing, cleared
+
+**Priority**:
+How urgent an alarm is. Four fixed levels: `critical`, `high`, `medium` and `low`,
+not a type parameter. A different scale from a limit's **Severity**, on a different
+object; mapping between them is the caller's. A non-annunciated level may come later,
+named "diagnostic".
+_Avoid_: Stufe, severity, Schweregrad
+
+**Flood**:
+A run of alarms exceeding a rate over a window. It is **marked**, never suppressed:
+deciding a human should not see an alarm is a safety decision. The earliest alarm of
+a flood is shown as "first in the flood".
+_Avoid_: burst, storm, Schwall
+
+**First-out**:
+The first alarm of a group the application names, such as a trip. It is marked, not a
+state: by the earliest raise, ties broken by the application's sequence number.
+_Avoid_: root cause, trip cause, first alarm, Ursache
+
+**Annunciation**:
+The announcement of an alarm to the people watching: the banner's assertive speech,
+and the `onAnnunciate` callback that the application answers with sound. The library
+never makes sound.
+_Avoid_: sound, beep, horn, alert, Signalton
+
+**In view**:
+An alarm whose row the list renders in its visible area. "Acknowledge all" takes the
+rows in view, with their ids fixed when the confirmation opens, and never the filtered
+set as such.
+_Avoid_: visible, filtered, on screen, shown
+
+**Availability**:
+Whether an alarm is in front of the people watching it: one field with four
+values — in service, **Snoozed**, **Suppressed**, **Disabled**. A second field beside the
+**Lifecycle state** and never merged into it, because the two answer different questions
+and a hidden alarm keeps its lifecycle underneath. Everything but in service is *hidden*:
+still in the list, drawn neutrally with its state as a word, and counted — never removed.
+_Avoid_: enabled, active, muted, inhibited, hidden from operation, Sperre
+
+**Snoozed**:
+Taken out of the way by a person, for a time and under a name: a snooze has an end
+(`until`) and a person (`by`), and an alarm snoozed without either cannot be written
+down. It returns to service when the as-of time reaches the end — by the model's clock,
+not by a timer. An alarm still in alarm when its snooze runs out returns unacknowledged.
+ISA-18.2 and the screen say *shelved*.
+_Avoid_: silenced, parked, muted
+
+**Suppressed**:
+Hidden by the application's own logic — a service that is switched off raises no
+error-rate alarm. The application writes it from that logic; the model has no transition
+for it. ISA-18.2 and the screen say *suppressed by design*.
+_Avoid_: filtered, masked
+
+**Disabled**:
+Taken out of service for maintenance or repair, until enabled again. The strongest of
+the three: a snooze does not overwrite it. ISA-18.2 and the screen say *out of service*.
+_Avoid_: offline, deactivated
 
 ### Working time
 
