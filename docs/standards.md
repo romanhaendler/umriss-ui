@@ -69,7 +69,9 @@ words.
 - **No latched states.** IEC 62682 dropped them from the state diagram; the
   lifecycle has four values.
 - **"Acknowledge all" takes the selection, or the alarms in view** without a
-  selection, and the button names the number first. That is umriss's own
+  selection, and the number is named before anything is acknowledged: on the
+  button for a selection, in a confirmation for the alarms in view, whose ids
+  are fixed when it opens. That is umriss's own
   reading of "confirms recognition": what the operator is shown
   (`alarmList.test.tsx`: "Acknowledging").
 - **The 1 Hz flash and its reduced-motion ring** are umriss's choice. The mark
