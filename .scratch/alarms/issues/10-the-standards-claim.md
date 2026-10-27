@@ -55,3 +55,9 @@ behind it is left out, and its absence is noted under `## Comments`.
 - [ ] The words "conform", "comply" and "certified" appear only in the denial.
 - [ ] The Tatsoft link is the live one.
 - [ ] `pnpm check:site` passes, and the built site renders the page (ADR-0046).
+
+## Comments
+
+- Left out for want of a test: the 1 Hz figure itself (the tests hold that the mark runs on `--u-duration-alarm-flash`, 1 s in core's tokens, not the value), "no latched states" as a negative (held only by the four-value `lifecycle` type and the transition tests), and the exact wording of "acknowledge all" beyond the list's button tests. The page words these as umriss's own choices, not as ISA facts.
+- The OPC UA Part 9 representation is cited as a source, not as a test.
+- `pnpm check:site` passes; the built-site render (ADR-0046) was not opened in a browser.

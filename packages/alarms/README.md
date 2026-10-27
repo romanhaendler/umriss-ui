@@ -11,6 +11,9 @@ unfiltered `alarmModel` view; keep it on screen with one line of the host's CSS,
 `position: sticky; top: 0`. Its `onAnnunciate` is the cue for the application's
 horn.
 
+What it follows of ISA-18.2 and where it departs stands in
+[`docs/standards.md`](../../docs/standards.md); no conformance claimed.
+
 Not published yet.
 
 ## Install
