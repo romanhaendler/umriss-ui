@@ -247,8 +247,8 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
     /** An id of one's own instead of the field name – for two columns over the same field. */
     id?: string;
     /** A standard presentation by name: `"percent"`, `"count"` or
-        `{ decimals }` for numbers, `"date"`, `"time"` or `"dateTime"` for
-        points in time. Alignment, sorting, export and footer stay with the value. */
+        `{ decimals }` for numbers, `"date"`, `"time"`, `"dateTime"`,
+        `"timeWithSeconds"` or `"dateTimeWithSeconds"` for points in time. Alignment, sorting, export and footer stay with the value. */
     format?: FormatFor<Z[K]>;
     /** A filter in the column header: `"list"` offers the values that occur,
         `"range"` two bounds (numbers or points in time), a filter from
