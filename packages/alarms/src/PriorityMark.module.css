@@ -29,16 +29,18 @@
     --_alarms-fill: var(--u-color-text-secondary);
   }
 
+  /* A badge's height, so the mark fits a compact row. */
   .shape {
+    composes: text from "#own-styles";
     display: inline-flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
     background: var(--_alarms-fill);
     color: var(--u-color-on-priority);
-    font-size: 0.75rem;
+    font-size: var(--u-text-xs);
     font-weight: var(--u-weight-semibold);
     font-variant-numeric: tabular-nums;
     line-height: var(--u-leading-none);
@@ -53,7 +55,7 @@
   .mark[data-priority="high"] .shape {
     clip-path: polygon(50% 4%, 100% 94%, 0 94%);
     align-items: flex-end;
-    padding-block-end: 0.2rem;
+    padding-block-end: 0.05rem;
   }
 
   .mark[data-priority="medium"] .shape {
