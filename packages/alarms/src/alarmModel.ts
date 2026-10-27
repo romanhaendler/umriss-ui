@@ -270,6 +270,13 @@ export interface AlarmBase {
   resolved?: number;
   /** The moment of the acknowledgement, as long as unacknowledged: none. */
   acknowledgedAt?: number;
+  /** The application's trip or unit: the set of alarms one cause raises. The
+      earliest alarm of a group is its first-out, in the standards' sense - the
+      first of a group or a trip. An alarm without a group is never first-out. */
+  group?: string;
+  /** The application's own order, for alarms whose `raised` collide: the lower
+      one is first. */
+  sequence?: number;
 }
 
 /** Whether an alarm is in service, and while it is snoozed until when and by
@@ -325,7 +332,10 @@ export interface ChatterRule {
   atLeast: number;
 }
 
-/** From when a set of alarms is a flood. */
+/** From when a set of alarms is a flood. ISA-18.2's reference is more than 10
+    alarms in 10 minutes per operating position, which is
+    `{ windowMs: 600000, atLeast: 11 }` over one position's alarms. There is no
+    default: which alarms make up a position is the application's. */
 export interface FloodRule {
   windowMs: number;
   /** From how many alarms within the window - across all types, because one
@@ -343,6 +353,24 @@ export interface Flood {
   count: number;
   /** Ids of the alarms involved. */
   alarms: readonly string[];
+  /** Id of the flood's earliest alarm, by the same rule as first-out. The list
+      shows it as "first in flood", umriss's own mark, not as first-out. */
+  first: string;
+}
+
+/** The window of the flood rate: ten minutes, ISA-18.2's reference. */
+export const RATE_WINDOW_MS = 600_000;
+
+/** Whether `a` comes before `b`: the earlier `raised`, then the lower
+    `sequence`. Equal on both, `a` does not come before, so a scan that
+    replaces only on "before" keeps the first of the input. */
+const before = (a: Alarm, b: Alarm): boolean =>
+  a.raised !== b.raised ? a.raised < b.raised : (a.sequence ?? Infinity) < (b.sequence ?? Infinity);
+
+function earliest(alarms: readonly Alarm[]): Alarm {
+  let best = alarms[0]!;
+  for (const alarm of alarms) if (before(alarm, best)) best = alarm;
+  return best;
 }
 
 function smallest(values: readonly number[]): number {
@@ -378,6 +406,7 @@ export function detectFlood(
     to: largest(times),
     count: involved.length,
     alarms: involved.map((m) => m.id),
+    first: earliest(involved).id,
   };
 }
 
@@ -457,6 +486,8 @@ export interface AlarmRow {
   chatters: boolean;
   /** This alarm belongs to the flood that was detected. */
   inFlood: boolean;
+  /** The first alarm of its group, done ones included. */
+  firstOut: boolean;
 }
 
 /** Ids of the columns that are sorted, searched and ordered in. */
@@ -553,6 +584,9 @@ export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> 
   /** The flood that was detected, when a rule was given and it applies. A
       marking beside the complete list, not a replacement for it. */
   flood: Flood | null;
+  /** The alarms raised in the ten minutes before the as-of time, whatever
+      their state: the figure the flood mark names. */
+  rate: number;
   /** Active and unacknowledged within the filtered set - the number for the
       polite screen reader. From the filtered set, not from the visible page,
       like every figure in this house. Only alarms in service count: the
@@ -601,6 +635,12 @@ export function alarmModel(
   const frequency = frequencyByType(alarms, chatter?.windowMs ?? Infinity, asOf);
   const detectedFlood = flood ? detectFlood(alarms, flood, asOf) : null;
   const inFlood = new Set(detectedFlood?.alarms ?? []);
+  const firstOfGroup = new Map<string, Alarm>();
+  for (const alarm of alarms) {
+    if (alarm.group === undefined) continue;
+    const best = firstOfGroup.get(alarm.group);
+    if (best === undefined || before(alarm, best)) firstOfGroup.set(alarm.group, alarm);
+  }
 
   const rows: AlarmRow[] = alarms
     .filter((alarm) => keepDone || !isDone(alarm.lifecycle))
@@ -620,6 +660,7 @@ export function alarmModel(
         frequency: count,
         chatters: chatter !== undefined && count >= chatter.atLeast,
         inFlood: inFlood.has(alarm.id),
+        firstOut: alarm.group !== undefined && firstOfGroup.get(alarm.group) === alarm,
       };
     });
 
@@ -631,6 +672,7 @@ export function alarmModel(
   return {
     ...projection,
     flood: detectedFlood,
+    rate: countInWindow(alarms.map((alarm) => alarm.raised), RATE_WINDOW_MS, asOf),
     activeUnacknowledged: projection.filtered.reduce(
       (total, row) =>
         total + (row.lifecycle === "active-unacknowledged" && !isHidden(row.availability) ? 1 : 0),

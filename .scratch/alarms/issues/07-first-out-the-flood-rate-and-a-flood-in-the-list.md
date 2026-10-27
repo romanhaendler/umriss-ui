@@ -62,3 +62,21 @@ rows without losing what the operator holds.
       scrolls the list half way and finds the same rows in view after ten ticks (jsdom has no layout).
 - [ ] The measured update time stands under `## Comments`.
 - [ ] `pnpm check alarms`, `pnpm check core`, `pnpm check:site` and `pnpm test:visual:quick alarms` pass.
+
+## Comments
+
+Render budget, measured 2026-10-27. Production build of the alarms demo (`build:demo`, `vite preview`), headless
+Chromium (Playwright's), the "A flood that ticks" example: 1,000 standing alarms of 100 types, 5 arrivals per
+tick, so 1,000 to 1,200 rows over the 40 ticks; the "Tick" button clicked 20 times per run, a frame between
+clicks. The time runs from the click to the commit (`alarmModel` plus React's render and commit) and to the next
+painted frame.
+
+| CPU     | click to commit, median (max) | click to next frame, median (max) |
+| ------- | ----------------------------- | --------------------------------- |
+| 1x      | 78 ms (84 ms)                 | 94 ms (115 ms)                    |
+| 4x slow | 367 ms (399 ms)               | 457 ms (513 ms)                   |
+
+**An update takes more than 50 ms** (78 ms at 1x, the model included). Virtual rows, and the virtual grid's focus
+drop (`audit-family.md` 2), become a ticket of their own; this ticket does not make the list virtual. Focus and
+selection are held at this cost (`alarmListFlood.test.tsx`); the scroll position is held by
+`tests-visual/flood-scroll.spec.ts`, written and not run in this job.

@@ -426,7 +426,9 @@ export const GERMAN_WORDING: Wording = {
   alarmLifecycleActiveAcknowledged: "Gekommen, quittiert",
   alarmLifecycleResolvedUnacknowledged: "Gegangen, unquittiert",
   alarmLifecycleResolvedAcknowledged: "Gegangen, quittiert",
-  alarmFloodHint: (count) => `Alarmflut: ${count} in kurzer Folge`,
+  alarmFloodHint: (count, minutes) => `Alarmflut: ${count} in ${minutes} min`,
+  alarmFirstOut: "Erstalarm",
+  alarmFirstInFlood: "Erster der Alarmflut",
   alarmChatterHint: (count) => `${count}×`,
   alarmActiveUnacknowledged: (count) =>
     count === 1

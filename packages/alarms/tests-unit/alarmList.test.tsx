@@ -261,7 +261,7 @@ describe("A flood is marked, not suppressed", () => {
     );
     // Twelve rows, not fewer: nothing is hidden.
     expect(screen.getAllByText("Furnace temperature too high")).toHaveLength(12);
-    expect(screen.getAllByText(DEFAULT_WORDING.alarmFloodHint(12)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(DEFAULT_WORDING.alarmFloodHint(12, 10)).length).toBeGreaterThan(0);
   });
 });
 

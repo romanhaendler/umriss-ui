@@ -39,7 +39,7 @@ import { Badge, Button, Checkbox, FormField, Input, Menu, MenuItem, Popover, Rad
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
-import { countAcknowledgeable, isActive } from "./alarmModel";
+import { RATE_WINDOW_MS, countAcknowledgeable, isActive } from "./alarmModel";
 import { PriorityMark, priorityWord } from "./PriorityMark";
 import type { AlarmProjection, AlarmRow, LifecycleState } from "./alarmModel";
 import styles from "./AlarmList.module.css";
@@ -96,6 +96,10 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
   /** "compact" reduces the row height for very dense views.
       @default the density of the `UmrissProvider`, else `"compact"` */
   density?: "regular" | "compact";
+  /** Height of the list's scroll area, e.g. `"480px"`: a list of hundreds of
+      rows scrolls inside it, under its sticky header, instead of stretching the
+      page. */
+  maxHeight?: string;
   /** The view of hidden alarms is on. The list does not filter - the
       projection does, with the table's own `filter` and `isHidden`; this
       only says what the switch shows. */
@@ -261,6 +265,7 @@ function Body({
   snoozeReasons,
   onUnsnooze,
   density: ownDensity,
+  maxHeight,
   className,
   freshness,
   hiddenOnly = false,
@@ -316,7 +321,7 @@ function Body({
     <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest}>
       <div className={styles.bar}>
         <span className={styles.heading}>{wording.alarmList}</span>
-        {projection.flood !== null && <Badge tone="warning">{wording.alarmFloodHint(projection.flood.count)}</Badge>}
+        {projection.flood !== null && <Badge tone="warning">{wording.alarmFloodHint(projection.rate, RATE_WINDOW_MS / 60_000)}</Badge>}
         {showsAsOf && freshness !== null && (
           <span className={styles.asOf} data-freshness={freshness.freshness}>
             {freshness.freshness === "lost"
@@ -419,6 +424,7 @@ function Body({
         aria-label={wording.alarmList}
         selectable={selection !== undefined}
         density={density}
+        maxHeight={maxHeight}
         stickyHeader
         rowProps={(row) => ({
           className: styles.row,
@@ -434,6 +440,9 @@ function Body({
           {(label, row) => (
             <span className={styles.alarm}>
               <span className={styles.label}>{label}</span>
+              {/* Words, not colour: the first of a trip, and the first of a flood. */}
+              {row.firstOut && <Badge className={styles.counter}>{wording.alarmFirstOut}</Badge>}
+              {projection.flood?.first === row.id && <Badge className={styles.counter}>{wording.alarmFirstInFlood}</Badge>}
               {/* A chattering type occupies one row of attention, not forty. */}
               {row.chatters && (
                 <Badge tone="warning" pill className={styles.counter}>
@@ -483,6 +492,7 @@ function Body({
           id="raised"
           label={wording.alarmColumnRaised}
           value={(row) => new Date(row.alarm.raised)}
+          format="dateTimeWithSeconds"
           numeric
           sortable={false}
         />

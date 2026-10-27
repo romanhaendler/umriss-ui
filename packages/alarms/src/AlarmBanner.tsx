@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ComponentPropsWithRef } from "react";
 import { Badge, Button, VisuallyHidden, useFormats, useFreshness, useWording } from "@umriss-ui/core";
 import type { FreshnessAges, FreshnessReading } from "@umriss-ui/core";
-import { PRIORITIES, isHidden } from "./alarmModel";
+import { PRIORITIES, RATE_WINDOW_MS, isHidden } from "./alarmModel";
 import type { AlarmProjection, AlarmRow, Priority } from "./alarmModel";
 import { PriorityMark, priorityWord } from "./PriorityMark";
 import styles from "./AlarmBanner.module.css";
@@ -105,7 +105,7 @@ function Body({
           </span>
         </>
       )}
-      {view.flood !== null && <Badge tone="warning">{wording.alarmFloodHint(view.flood.count)}</Badge>}
+      {view.flood !== null && <Badge tone="warning">{wording.alarmFloodHint(view.rate, RATE_WINDOW_MS / 60_000)}</Badge>}
       {reading !== null && (
         <span className={styles.asOf} data-freshness={reading.freshness}>
           {reading.freshness === "lost" ? wording.freshnessDisconnected : reading.freshness === "stale" ? wording.freshnessStale : wording.freshnessFresh}
