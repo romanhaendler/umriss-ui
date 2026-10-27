@@ -1,6 +1,6 @@
 # The alarm list offers snoozing and reports it, and the application decides
 
-Status: withdrawn. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code.
+Status: superseded by ADR-0078. The alarm list was removed from `@umriss-ui/table`, so this decision no longer applies to any code.
 Date:   2026-10
 
 `alarmModel` has `snooze`, `unsnooze`, `disable` and `enable`, but the
