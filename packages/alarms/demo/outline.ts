@@ -50,6 +50,23 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["AlarmListProps"],
         exports: ["AlarmList", "alarmModel"],
       },
+      {
+        id: "alarmbanner",
+        name: "AlarmBanner",
+        sentence: "The worst unacknowledged alert on every screen, the count per priority, and one tap to the list or to acknowledge (also called an alarm banner or annunciator bar). Reach for it in the frame of an application that has an alert list.",
+        about: [
+          "Give it the view of an `alarmModel` call without a filter, so that a filter on the list never hides the worst alert from the banner. It shows the worst active, unacknowledged alert in service - mark, label and time to the second -, how many more there are, the count per priority and a marked flood. Without such an alert it says so, and with a lost source it says the connection is down, never that there are no alerts. Every alert stays shown and counted when the data is stale.",
+          "It reports and applies nothing: “Acknowledge” hands `[id]` of the shown alert to `onAcknowledge`, “Open list” calls `onOpen`, each button stands only with its handler. `onAnnunciate` is the cue for sound: `{ kind: \"new\", priority }` when alerts in service join the unacknowledged ones (a shelve that ran out counts), `{ kind: \"cleared\" }` when the last one is gone. The horn, its repetition and a silence button are your application's. To keep the banner on every screen, make it sticky in your layout: `position: sticky; top: 0`.",
+        ],
+        keys: [{ key: "Tab", action: "Move to “Acknowledge” and “Open list”." }],
+        limits: ["No sound, no repetition and no silence button: `onAnnunciate` is the cue, the horn is yours."],
+        accessibility: [
+          "One region named “Alarms”. A hidden element with `role=\"alert\"` gets its text only when a new alert has a higher priority than the one shown, and then says its priority and label; a count change, an acknowledgement or a re-sort never speaks, and the first render says nothing.",
+          "Each count carries its priority's mark and is named “Priority 2, high: 3”; the state never stands as a colour alone.",
+        ],
+        types: ["AlarmBannerProps"],
+        exports: ["AlarmBanner"],
+      },
     ],
   },
   {

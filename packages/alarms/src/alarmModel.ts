@@ -559,6 +559,8 @@ export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> 
       number calls somebody over, and a hidden alarm is one it must not call
       to. */
   activeUnacknowledged: number;
+  /** The same alarms as `activeUnacknowledged`, counted per priority. */
+  unacknowledgedByPriority: Record<Priority, number>;
   /** Hidden within the filtered set: snoozed, suppressed, disabled. They are
       in the list; this is how many. */
   hiddenAlarms: number;
@@ -633,6 +635,13 @@ export function alarmModel(
       (total, row) =>
         total + (row.lifecycle === "active-unacknowledged" && !isHidden(row.availability) ? 1 : 0),
       0,
+    ),
+    unacknowledgedByPriority: projection.filtered.reduce(
+      (counts, row) => {
+        if (row.lifecycle === "active-unacknowledged" && !isHidden(row.availability)) counts[row.priority] += 1;
+        return counts;
+      },
+      { critical: 0, high: 0, medium: 0, low: 0 } as Record<Priority, number>,
     ),
     hiddenAlarms: projection.filtered.reduce(
       (total, row) => total + (isHidden(row.availability) ? 1 : 0),
