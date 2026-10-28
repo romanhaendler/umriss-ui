@@ -213,7 +213,7 @@ export function Frame({
           {...name}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */
-          aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
+          aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + layout.headRows + (footerShown ? 1 : 0) : undefined}
           aria-busy={loading || undefined}
           data-stale={stale || undefined}
           className={cx(
