@@ -31,3 +31,11 @@ jobs:
       - run: pnpm build
       - run: pnpm -r check:dist
 
+  # The image is pinned by digest inside the script; the rule sets are vendored in
+  # .semgrep/. Nothing is sent to the Semgrep app and the job holds no secrets.
+  semgrep:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: scripts/semgrep.sh
+
