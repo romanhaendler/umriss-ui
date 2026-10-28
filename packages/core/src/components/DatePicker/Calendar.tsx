@@ -62,11 +62,11 @@ export interface CalendarProps {
 }
 
 /* The APG keys beyond the arrows: a month, a year (with Shift), the week's ends. */
-function jumpKey(key: string, shift: boolean, active: Date): Date | undefined {
+function jumpKey(key: string, shift: boolean, active: Date, weekStart: number): Date | undefined {
   if (key === "PageUp") return shiftMonth(active, shift ? -12 : -1);
   if (key === "PageDown") return shiftMonth(active, shift ? 12 : 1);
-  if (key === "Home") return startOfWeek(active);
-  if (key === "End") return addDays(startOfWeek(active), 6);
+  if (key === "Home") return startOfWeek(active, weekStart);
+  if (key === "End") return addDays(startOfWeek(active, weekStart), 6);
   return undefined;
 }
 
@@ -124,7 +124,7 @@ export function Calendar({
       if (viewFollows(next, view)) onView(startOfMonth(next));
       return;
     }
-    const jumped = jumpKey(event.key, event.shiftKey, active);
+    const jumped = jumpKey(event.key, event.shiftKey, active, formats.weekStart);
     if (jumped) {
       const moved = clampDay(jumped, bounds);
       event.preventDefault();
@@ -158,7 +158,7 @@ export function Calendar({
   const lastYear = Math.max(Math.min(thisYear + 100, bounds.max?.getFullYear() ?? Infinity), year);
   const years = Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i);
 
-  const days = monthGrid(view);
+  const days = monthGrid(view, formats.weekStart);
   const referenceDay = today ?? zoneToday(timeZone);
 
   // A settled end or - as long as only the start is there - the preview.
@@ -219,7 +219,8 @@ export function Calendar({
         )}
       </div>
       <div className={styles.weekdays} aria-hidden="true">
-        {wording.weekdays.map((day) => (
+        {/* The wording is Monday-first by definition; the heads rotate to the week's start. */}
+        {[...wording.weekdays.slice(formats.weekStart - 1), ...wording.weekdays.slice(0, formats.weekStart - 1)].map((day) => (
           <span key={day}>{day}</span>
         ))}
       </div>
