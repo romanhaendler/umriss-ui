@@ -77,3 +77,10 @@ that shows German collation files Ä with A checks nothing in English.
   is visible as a diff rather than as a surprise in some component's test.
 - A German application now depends on the subpath for its notation as well. It
   was already depending on it for its words.
+
+## Amendment 2026-10-28
+
+`Formats` gains `weekStart` (ISO: 1 = Monday ... 7 = Sunday). `formatsFor` reads it from the locale's week
+info (`getWeekInfo()`, or the older `weekInfo`) where the runtime offers it, else Monday; the English and
+German sets carry Monday. The month grid, its Home/End keys and the weekday heads of DatePicker,
+DateRangePicker and DateTimePicker follow it. The table's "week" grouping stays ISO. `formatsFor` is public.

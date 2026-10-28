@@ -221,6 +221,24 @@ test("searching shrinks the set and the scrollbar", async ({ page }) => {
   await expect(example(page)).toContainText("REQ-00001");
 });
 
+test("a table scrolled to the end still shows rows once a search shrinks it", { tag: "@quick" }, async ({ page }) => {
+  const area = scrollArea(page);
+  await area.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect(row(page, 19_999)).toBeVisible();
+  const before = await area.evaluate((el) => el.scrollHeight);
+  await example(page).getByPlaceholder("Request or service").fill("REQ-0001");
+  await expect.poll(() => example(page).locator("[data-row]").count()).toBeGreaterThan(0);
+  await expect.poll(() => area.evaluate((el) => el.scrollHeight)).toBeLessThan(before / 10);
+  const { scrollHeight, rowHeight } = await area.evaluate((el) => ({
+    scrollHeight: el.scrollHeight,
+    rowHeight: el.querySelector("[data-row]")!.getBoundingClientRect().height,
+  }));
+  /* Ten requests match; the scroll height is theirs plus the header, not the old one. */
+  expect(scrollHeight).toBeLessThan(200 * rowHeight);
+});
+
 test("there is no paging beside virtualisation", async ({ page }) => {
   await expect(example(page).getByRole("navigation", { name: "Pagination" })).toHaveCount(0);
 });
