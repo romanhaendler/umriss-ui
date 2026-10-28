@@ -25,7 +25,7 @@ it("draws a lane with a bar and describes it", async () => {
   render(<Plan />);
   expect(await screen.findByText("Saw")).toBeTruthy();
 
-  const plot = await screen.findByRole("application", { name: "Plan of Tuesday" });
+  const plot = await screen.findByRole("application", { name: "Plan of Tuesday, plot" });
   const summary = document.getElementById(plot.getAttribute("aria-describedby")).textContent;
   expect(summary).toContain("1 lane, 1 subtask in view");
 });
