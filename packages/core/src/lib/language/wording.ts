@@ -523,6 +523,9 @@ export interface Wording {
   /** What a screen reader calls the plot that takes the keys
       (`aria-roledescription`, schedule-a11y S1). */
   scheduleRoleDescription: string;
+  /** The plot's own name, beside the figure that carries the caller's
+      `aria-label`, so the caller's name is not heard twice. */
+  schedulePlotName: (label: string) => string;
   /** The plot's description (S6): the lanes, the subtasks in view, the
       visible span with both ends formatted, and the findings of the plan by
       kind. */
@@ -1043,6 +1046,7 @@ export const DEFAULT_WORDING: Wording = {
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
   scheduleRoleDescription: "schedule",
+  schedulePlotName: (label) => `${label}, plot`,
   scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked, milestones }) =>
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
     `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}` +
