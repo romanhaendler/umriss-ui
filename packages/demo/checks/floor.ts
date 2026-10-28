@@ -20,6 +20,7 @@
 
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import type { ExampleAddress } from "./pages.ts";
+import { turnOnTouchScale } from "./touchScale.ts";
 
 const FLOOR = 24;
 
@@ -211,20 +212,25 @@ export function checkTargetFloor({ demo, open, examples }: TargetFloorSuite): vo
   test.use({ hasTouch: true, viewport: { width: 375, height: 667 } });
   const pages = [...new Set(examples.map((e) => e.pageId))];
 
-  for (const pageId of pages) {
-    test(`Page ${pageId} has no target under 24 px under a finger`, async ({ page }) => {
-      await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-      await open(page, pageId);
-      await page.evaluate(() => document.fonts.ready);
-      // A control that fades in (the input's clear key) is measured at rest; a
-      // spinner never rests, so the wait is capped.
-      await page.waitForTimeout(300);
-      const raw = await page.locator(".exampleStage").evaluateAll(probe, FLOOR);
-      expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches), "touch emulation").toBe(true);
-      const { found, stale } = judge(demo, pageId, raw, false);
-      expect(found, `${pageId} under a finger`).toEqual([]);
-      expect(stale, `${pageId}`).toEqual([]);
-    });
+  /* Twice: as the library ships, and with `touch-scale.css` on (ADR-0079), where
+     the controls are larger and the floor must hold all the same. */
+  for (const scaled of [false, true]) {
+    for (const pageId of pages) {
+      test(`Page ${pageId} has no target under 24 px under a finger${scaled ? " with touch-scale.css" : ""}`, async ({ page }) => {
+        await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
+        await open(page, pageId);
+        if (scaled) await turnOnTouchScale(page);
+        await page.evaluate(() => document.fonts.ready);
+        // A control that fades in (the input's clear key) is measured at rest; a
+        // spinner never rests, so the wait is capped.
+        await page.waitForTimeout(300);
+        const raw = await page.locator(".exampleStage").evaluateAll(probe, FLOOR);
+        expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches), "touch emulation").toBe(true);
+        const { found, stale } = judge(demo, pageId, raw, false);
+        expect(found, `${pageId} under a finger`).toEqual([]);
+        expect(stale, `${pageId}`).toEqual([]);
+      });
+    }
   }
 }
 
