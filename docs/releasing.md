@@ -37,9 +37,11 @@ otherwise published as private, and the org would refuse it.
 A version is released by raising it. On every push to `main`,
 `.github/workflows/publish.yml` asks npm for each package whether the version
 in its `package.json` stands there already; whatever is missing is published,
-in dependency order (`core` and `charts` before what depends on them), after
-lint, types (`typecheck` and `typecheck:demo`), `check:site`, unit tests, build
-and `check:dist`. A version with a hyphen
+in dependency order (`core` and `charts` before what depends on them). The
+`build` job, without the token, installs, runs lint, types (`typecheck` and
+`typecheck:demo`), `check:site`, unit tests, build and `check:dist`, and packs
+each package; the `publish` job, the only one with the token, installs nothing,
+runs no package script and hands the tarballs to npm. A version with a hyphen
 (`0.3.0-rc.1`) goes to `next`, every other to `latest`. A push that raises no
 version publishes nothing, and the same version is never published twice.
 The seven packages move together under one number, and what a version promises
@@ -54,9 +56,9 @@ Publishing (package settings → *Trusted Publisher*: owner `romanhaendler`,
 repository `umriss-ui`, workflow `publish.yml`, environment `npm`, *Allow npm
 publish* ticked), and npm attaches the provenance itself. Under *Publishing
 access* every package requires two-factor authentication and refuses tokens
-that bypass it. The workflow packs with pnpm — only pnpm rewrites the
+that bypass it. The `build` job packs with pnpm — only pnpm rewrites the
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
-`workspace:^0.<minor>.0`) — and uploads the tarball with npm, because pnpm 9.14.4 cannot
+`workspace:^0.<minor>.0`) — and the `publish` job uploads the tarball with npm, because pnpm 9.14.4 cannot
 do Trusted Publishing.
 
 1. **One number for all packages.** From `0.34.0` on, `core`, `charts`,
