@@ -156,3 +156,16 @@ describe("stepNumber – counting with the arrow keys", () => {
     expect(stepNumber(0, -1, 0.25)).toBe(-0.25);
   });
 });
+
+describe("a typed dot by the notation's separators", () => {
+  const FR_CH = { group: " ", decimal: "," };
+  it("is the decimal separator where the group separator is not the dot", () => {
+    expect(parseNumber("1234.5", FR_CH)).toBe(1234.5);
+    expect(parseNumber("1 234,5", FR_CH)).toBe(1234.5);
+    expect(filterInput("1234.5", { decimals: 2 }, FR_CH)).toBe("1234,5");
+  });
+  it("stays a group separator in German and a decimal in English", () => {
+    expect(parseNumber("1.234", GERMAN)).toBe(1234);
+    expect(parseNumber("1,234.5")).toBe(1234.5);
+  });
+});
