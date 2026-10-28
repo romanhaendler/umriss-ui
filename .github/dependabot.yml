@@ -1,0 +1,11 @@
+# Proposes updates to the action pins in .github/workflows and nothing else:
+# the workspace's npm packages are not on this list.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
