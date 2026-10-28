@@ -23,13 +23,14 @@
     --_dashboard-gap: var(--u-dashboard-gap, 12px);
   }
 
-  /* The mode: a frame of the accent just outside the dashboard's edge, so the
-     cards stay where they stand at rest and nothing moves when it appears. */
+  /* The mode: a frame of the accent drawn inside the dashboard's edge, over
+     the cards' outer 2px. An outline paints above the content and takes no
+     room, so the cards stay where they stand at rest, and a host with
+     `overflow: hidden` has nothing outside the edge to clip. Forced colours
+     keep an outline. */
   .root[data-editing] {
-    box-shadow: 0 0 0 2px var(--u-color-accent);
-    /* Forced colours drop the shadow; the transparent outline is drawn then. */
-    outline: 2px solid transparent;
-    outline-offset: 0;
+    outline: 2px solid var(--u-color-accent);
+    outline-offset: -2px;
   }
 
   .bar {

@@ -32,7 +32,7 @@ test("the group cell stands over its columns and a cell's headers include it", {
 test("pinning one column of a group shows the label over the pinned part and the rest", async ({ page }) => {
   const table = page.locator(EXAMPLE);
   await table.getByRole("button", { name: "Columns" }).click();
-  await page.getByRole("button", { name: "Pin Feb to the start" }).click();
+  await page.getByRole("button", { name: "Pin Feb to start" }).click();
   await page.keyboard.press("Escape");
   await expect(table.getByRole("columnheader", { name: "Q1" })).toHaveCount(2);
 });

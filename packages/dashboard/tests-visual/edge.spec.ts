@@ -1,6 +1,6 @@
 /* The dashboard's cards stand flush with its own edge - and so with whatever
    block stands above it - while not editing; and stay put in the mode,
-   where the accent frame stands outside them. Chromium only; light only. */
+   where the accent frame is drawn inside the edge. Chromium only; light only. */
 
 import { test, expect } from "@playwright/test";
 import { openExample } from "./navigation";
@@ -17,7 +17,7 @@ test("@quick The first card starts at the dashboard's edge, and stays there in t
   const rest = await left();
   expect(rest.card).toBeCloseTo(rest.root, 0);
   await root.getByRole("button", { name: "Edit" }).click();
-  await expect(root).toHaveAttribute("data-editing", "");
+  await expect(root).toHaveAttribute("data-editing");
   const editing = await left();
   expect(editing).toEqual(rest);
 });

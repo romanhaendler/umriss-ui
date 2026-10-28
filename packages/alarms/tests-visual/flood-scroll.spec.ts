@@ -20,21 +20,23 @@ test("Ten ticks leave the same rows in view of a list scrolled half way", async 
     node.scrollTop = (node.scrollHeight - node.clientHeight) / 2;
   });
 
-  /* The index of the first row that stands fully in view, and how many do. */
+  /* The alarm of the first row that stands fully in view, and how many rows do:
+     the list renders a window, so a row's place is its alarm, not its index. */
   const inView = () =>
     area.evaluate((node) => {
       const top = node.getBoundingClientRect().top;
       const bottom = node.getBoundingClientRect().bottom;
-      const rows = [...node.querySelectorAll("tbody tr")];
-      const visible = rows.flatMap((row, index) => {
+      const rows = [...node.querySelectorAll<HTMLElement>("tbody tr[data-alarm-id]")];
+      const visible = rows.flatMap((row) => {
         const box = row.getBoundingClientRect();
-        return box.top >= top && box.bottom <= bottom ? [index] : [];
+        return box.top >= top && box.bottom <= bottom ? [row.dataset.alarmId!] : [];
       });
       return { first: visible[0], count: visible.length, scrollTop: node.scrollTop };
     });
 
+  /* The window follows the scroll on the next frame. */
+  await expect.poll(async () => Number((await inView()).first?.slice(2))).toBeGreaterThan(100);
   const before = await inView();
-  expect(before.first).toBeGreaterThan(100);
   for (let tick = 0; tick < 10; tick += 1) await stage.getByRole("button", { name: "Tick" }).click();
   const after = await inView();
   expect(after).toEqual(before);
