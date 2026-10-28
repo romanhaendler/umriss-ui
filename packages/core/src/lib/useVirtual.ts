@@ -112,6 +112,13 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
     }
   }, [count, viewportHeight, rowHeight]);
 
+  /* A changed count moves the container's own scroll position (the browser
+     clamps it to the new height), so it is read again. */
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) setScrollTop(el.scrollTop);
+  }, [count]);
+
   const rowWindow: RowWindow = visibleWindow({ count, rowHeight, scrollTop, viewportHeight, overscan });
 
   /**
