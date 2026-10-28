@@ -2,7 +2,7 @@
    typed. Nothing here reads the table - it gets the sheet the export built. */
 
 import type { ExportContext, ExportSheet } from "../types";
-import { escapeXml } from "./parts";
+import { escapeXml, FORBIDDEN } from "./parts";
 
 /* The same rule as `allDays` in `../model/day`, written twice on purpose: a module both entries import becomes a
    chunk that `xlsx.js` would import, and this entry must import nothing. Change both together. */
@@ -38,9 +38,6 @@ const EPOCH = Date.UTC(1899, 11, 30);
 /* Excel's calendar has a 29 February 1900 that never was; from 1900-03-01 on,
    the serial counted from 1899-12-30 is the one it shows. Before, it cannot. */
 const FIRST_SERIAL = 61;
-
-/* Characters XML 1.0 allows; a lone surrogate is none. */
-const FORBIDDEN = /[^\t\n\r -퟿-�\u{10000}-\u{10FFFF}]/gu;
 
 /** "A" ... "XFD" for a zero-based column. */
 function letters(n: number): string {

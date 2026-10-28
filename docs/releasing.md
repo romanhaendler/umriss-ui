@@ -22,8 +22,7 @@ mechanics.
 * **`next`** carries release candidates (`0.3.0-rc.1`); at the moment it
   carries nothing, because every package is released. A candidate is published
   with `--tag next` written out — the workflow does so for every version with
-  a hyphen. `publishConfig.tag` in a manifest does not help, because **pnpm
-  9.14.4 does not pass it on** — a dry run announced `latest` regardless. The very first version of a package gets `latest` as
+  a hyphen. `publishConfig.tag` in a manifest is not relied on: the tag is written out where npm publishes. The very first version of a package gets `latest` as
   well, because a package without `latest` does not exist, and it stays there
   when the next candidate goes to `next` — so as long as no released version
   exists, `latest` is moved to each new candidate by hand (step 5), or a plain
@@ -58,8 +57,9 @@ publish* ticked), and npm attaches the provenance itself. Under *Publishing
 access* every package requires two-factor authentication and refuses tokens
 that bypass it. The `build` job packs with pnpm — only pnpm rewrites the
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
-`workspace:^0.<minor>.0`) — and the `publish` job uploads the tarball with npm, because pnpm 9.14.4 cannot
-do Trusted Publishing.
+`workspace:^0.<minor>.0`) — and the `publish` job uploads the tarball with npm: npm
+publishes the tarball, and the job that holds the token has no pnpm at all
+(`.github/workflows/publish.yml`).
 
 1. **One number for all packages.** From `0.34.0` on, `core`, `charts`,
    `table`, `schedule` and `calculation` - from `0.40.0` `dashboard` and from `0.47.0` `alarms` - are

@@ -32,8 +32,6 @@ canvases; the lanes, the subtasks and the summary arrive on the client after mou
 time is empty until the page has hydrated, because only the browser knows the reader's zone. No test
 runs inside such a framework: the schedule is rendered to a string in a test.
 
-umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
-
 ## The smallest schedule that runs
 
 ```tsx

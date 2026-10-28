@@ -50,10 +50,10 @@ export const plain = (value: string | number | boolean, c: Pick<CsvConventions, 
 const field = (raw: string, separator: string): string =>
   raw.includes(separator) || /["\r\n]/.test(raw) ? `"${raw.replace(/"/g, '""')}"` : raw;
 
-/* A spreadsheet runs text that starts with one of these, after any spaces, as a formula. A leading
+/* A spreadsheet runs text that starts with one of these, after any whitespace, as a formula. A leading
    apostrophe makes it text again; the file no longer reads back exactly. Only
    text is touched - a number or boolean is written by `plain`, so -3 stays. */
-const neutral = (raw: string, guard: boolean): string => (guard && /^ *[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw);
+const neutral = (raw: string, guard: boolean): string => (guard && /^\s*[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw);
 
 const cell = <Z,>(row: Z, column: CsvColumn<Z>, c: CsvConventions, guard: boolean): string => {
   const value = column.value?.(row);

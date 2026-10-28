@@ -42,7 +42,10 @@ const TRAIL: BreadcrumbEntry[] = [
 ];
 
 describe("Breadcrumb", () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
 
   it("is a navigation landmark with an ordered list, the last level the current page", () => {
     render(<Breadcrumb items={TRAIL} />);
@@ -164,6 +167,5 @@ describe("Breadcrumb", () => {
     for (const href of ["https://a.example/x", "mailto:a@b.c", "tel:+491", "../up", "/abs", "#frag"]) {
       expect(followed(href), href).toBe(true);
     }
-    vi.unstubAllGlobals();
   });
 });

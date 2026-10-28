@@ -62,6 +62,18 @@ export function checkTrustedTypes(p: TrustedTypesProbes): void {
         });
         await Promise.race([p.open(page, pageId), firstViolation]);
         expect(faults.map((fault) => `${pageId}: ${fault}`)).toEqual([]);
+        /* Proof that the policy was in force: a document the route missed would
+           pass the check without it. Last, since the probe's own refusal is a
+           violation event too. */
+        const refused = await page.evaluate(() => {
+          try {
+            document.createElement("div").innerHTML = "<b></b>";
+            return false;
+          } catch (error) {
+            return error instanceof TypeError;
+          }
+        });
+        expect(refused, `${pageId}: an HTML sink was not refused - the policy is not in force`).toBe(true);
       });
     }
   });

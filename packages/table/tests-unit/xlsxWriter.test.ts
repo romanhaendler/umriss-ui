@@ -166,4 +166,8 @@ describe("the XLSX writer", () => {
   it("does not cut a surrogate pair at the 31st character", () => {
     expect(sheetName(`${"x".repeat(30)}\u{1F600}`)).toBe("x".repeat(30));
   });
+
+  it("drops U+FFFE and U+FFFF", () => {
+    expect(sheetName("Report\uFFFF\uFFFE")).toBe("Report");
+  });
 });

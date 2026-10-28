@@ -30,8 +30,6 @@ written in a Server Component through React's Flight renderer, with the view as 
 reference. No test runs inside a framework (`next build`): the calculation is rendered to a string
 in a test.
 
-umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
-
 ## Two forms, written as they are shown
 
 A **tree** suits a figure put together from factors. Operators are elements,
