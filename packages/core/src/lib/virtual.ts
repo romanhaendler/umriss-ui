@@ -66,10 +66,14 @@ export function visibleWindow({
   if (count <= 0 || rowHeight <= 0) return EMPTY;
 
   const top = Math.max(0, scrollTop);
-  const firstVisible = Math.floor(top / rowHeight);
   /* Plus one for the row cut off at the bottom: it is visible, even where it
      does not fit entirely. */
   const fit = Math.ceil(Math.max(0, viewportHeight) / rowHeight) + 1;
+  /* A scroll position left over from a longer list lies past the end. The
+     first visible row stops at the last full window, so the rows that remain
+     are drawn and the filler above never outgrows the list - the container
+     can then clamp its own scroll position. */
+  const firstVisible = Math.min(Math.floor(top / rowHeight), Math.max(0, count - fit));
 
   const from = Math.max(0, firstVisible - overscan);
   const to = Math.min(count, firstVisible + fit + overscan);

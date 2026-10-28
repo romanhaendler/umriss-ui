@@ -119,3 +119,14 @@ describe("NumberInput without grouping", () => {
     expect((screen.getByLabelText("Year") as HTMLInputElement).value).toBe("2.024");
   });
 });
+
+describe("NumberInput refuses a character it cannot read", () => {
+  it("keeps text and value as they were", () => {
+    const seen: Array<number | null> = [];
+    render(<NumberInput aria-label="n" value={12} onChange={(v) => seen.push(v)} />);
+    const input = screen.getByLabelText("n") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "12a" } });
+    expect(input.value).toBe("12");
+    expect(seen).toEqual([]);
+  });
+});

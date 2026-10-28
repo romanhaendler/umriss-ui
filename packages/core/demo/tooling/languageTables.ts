@@ -44,6 +44,7 @@ function samples(at: Date): Record<keyof Formats, (formats: Formats) => string> 
     dateTime: (f) => f.dateTime(at, false),
     offset: (f) => f.offset(at),
     locale: (f) => f.locale,
+    weekStart: (f) => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][f.weekStart - 1] ?? String(f.weekStart),
     timeZone: () => "none: the reader's own",
     timeZoneName: (f) => f.timeZoneName(at),
     number: (f) => f.number(1204.5, 1),
