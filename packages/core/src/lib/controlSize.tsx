@@ -12,8 +12,9 @@
    no reset: its region stands where the `ToastProvider` stands, at the
    application's root, and the command palette takes no children. */
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import type { ReactNode } from "react";
+import { warnLoweredLightDark } from "./dev";
 
 /** The two heights of a control: `sm` for a toolbar and dense forms, `md`
     otherwise. */
@@ -42,8 +43,10 @@ export function SurfaceSizeReset({ children }: { children: ReactNode }) {
   return <ControlSizeContext value={null}>{children}</ControlSizeContext>;
 }
 
-/** A control's size: its own, else the provider's around it, else `md`. */
+/** A control's size: its own, else the provider's around it, else `md`. Every control mounts through it, so
+    it is also where a lowered light-dark() is checked once (development). */
 export function useControlSize(own: ControlSize | undefined): ControlSize {
   const around = useContext(ControlSizeContext);
+  useEffect(warnLoweredLightDark, []);
   return own ?? around ?? "md";
 }
