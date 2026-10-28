@@ -494,11 +494,11 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
             /* A day that opens its run carries the date, and so does the first
                day in view, whose run began before it. The run's width is the
                label's room, up to the next date or the end of the view. */
-            const labelled = daysPerDate === 1 || index === 0 || opensRun(day.start, daysPerDate, timeZone);
+            const labelled = daysPerDate === 1 || index === 0 || opensRun(day.start, daysPerDate, timeZone, formats.weekStart);
             const end =
               daysPerDate === 1
                 ? day.x + day.width
-                : (snapshot.days.slice(index + 1).find((next) => opensRun(next.start, daysPerDate, timeZone))?.x ?? snapshot.width);
+                : (snapshot.days.slice(index + 1).find((next) => opensRun(next.start, daysPerDate, timeZone, formats.weekStart))?.x ?? snapshot.width);
             /* The label stands at the visible start of its day: a day that began
                before the view still says which day it is. */
             const hidden = Math.max(0, -day.x);
@@ -683,7 +683,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                   so is a date inside another date's run; the line stays. */}
               {tick.x >= LABEL_MARGIN &&
                 tick.x <= snapshot.width - LABEL_MARGIN &&
-                (daysPerTick === 1 || opensRun(tick.wallClock, daysPerTick, timeZone)) && (
+                (daysPerTick === 1 || opensRun(tick.wallClock, daysPerTick, timeZone, formats.weekStart)) && (
                 <span className={styles.tickLabel} data-schedule-overlay="time label">
                   {snapshot.step >= DAY ? formats.dateShort(new Date(tick.wallClock)) : timeText(formats, tick.wallClock)}
                 </span>
