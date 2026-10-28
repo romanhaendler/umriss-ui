@@ -6,7 +6,7 @@ in [`docs/testing.md`](docs/testing.md); the map of every other document is
 
 ## Prerequisites
 
-* **pnpm 9.14.4** — pinned by the `packageManager` field in the root
+* **pnpm 12.15.0** — pinned by the `packageManager` field in the root
   `package.json`; corepack picks it up.
 * **Node 22.** `jsdom` is deliberately held at `^26`: jsdom 30 pulls a pure ESM
   package in through `require()`, which does not load on Node 22.11 and

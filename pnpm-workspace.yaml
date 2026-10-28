@@ -1,2 +1,9 @@
 packages:
   - "packages/*"
+minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - baseline-browser-mapping@2.11.33
+allowBuilds:
+  "@parcel/watcher": false
+  esbuild: false
+  unrs-resolver: false
