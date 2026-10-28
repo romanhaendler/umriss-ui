@@ -162,4 +162,8 @@ describe("the XLSX writer", () => {
     const only = unzip(xlsx.write(sheet, { formats: {} as never, wording: { ...DEFAULT_WORDING, exportSheetName: "[]\\/" } }));
     expect(doc(only[2]!.text).getElementsByTagName("sheet")[0]!.getAttribute("name")).toBe("Sheet1");
   });
+
+  it("does not cut a surrogate pair at the 31st character", () => {
+    expect(sheetName(`${"x".repeat(30)}\u{1F600}`)).toBe("x".repeat(30));
+  });
 });
