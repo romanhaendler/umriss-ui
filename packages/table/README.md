@@ -140,6 +140,10 @@ stylesheets by hand.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
+* **Columns that fill the frame**: `flex` on a column takes a share of the width
+  the others leave (with `minWidth` as its floor); a width dragged by hand ends
+  the flex of that column and stands in the view. "Fit all columns" in the column
+  menu, or `autoSizeColumns()`, sets every column to its content.
 * **A time zone named in the formats** (core's Time zone): the dates, the day
   groups and the date filter follow it, and the head of a `"date"`, `"time"` or
   `"dateTime"` column names it, in muted text, where the reader's own is another.

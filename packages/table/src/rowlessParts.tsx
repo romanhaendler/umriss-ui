@@ -431,6 +431,9 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
             );
           })}
         </ul>
+        <Button size="sm" className={styles.fitAll} onClick={snapshot.autoSizeColumns}>
+          {wording.fitAllColumns}
+        </Button>
         <GroupingChoice registry={registry} hook={hook} />
         <TreeChoice registry={registry} hook={hook} />
       </Popover>

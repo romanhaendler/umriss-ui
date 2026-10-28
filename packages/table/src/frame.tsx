@@ -7,6 +7,7 @@ import type { CSSProperties } from "react";
 import { ControlSizeProvider, announce, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { NewRowButton } from "./toolbar";
+import { useFlexWidths } from "./flexWidths";
 import type { Registry } from "./registry";
 import type { TableProps } from "./types";
 import { useLineMotion } from "./motion";
@@ -90,6 +91,7 @@ export function Frame({
   useStickyHeaderHeights(tableRef, stickyHeader);
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
+  useFlexWidths(tableRef);
   useCutValueWarnings(tableRef);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
