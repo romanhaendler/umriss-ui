@@ -1,13 +1,13 @@
 /* The dashboard's cards stand flush with its own edge - and so with whatever
-   block stands above it - while not editing; in the mode they keep room for
-   the accent frame. Chromium only; light only. */
+   block stands above it - while not editing; and stay put in the mode,
+   where the accent frame stands outside them. Chromium only; light only. */
 
 import { test, expect } from "@playwright/test";
 import { openExample } from "./navigation";
 
 test.skip(({ colorScheme, browserName }) => colorScheme === "dark" || browserName !== "chromium", "Behaviour tests only once (light, Chromium)");
 
-test("@quick The first card starts at the dashboard's edge, and clear of the frame in the mode", async ({ page }) => {
+test("@quick The first card starts at the dashboard's edge, and stays there in the mode", async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 900 });
   await openExample(page, "dashboard", "dispatcher");
   const root = page.locator('[data-example="dispatcher"] [role="group"]').first();
@@ -19,5 +19,5 @@ test("@quick The first card starts at the dashboard's edge, and clear of the fra
   await root.getByRole("button", { name: "Edit" }).click();
   await expect(root).toHaveAttribute("data-editing", "");
   const editing = await left();
-  expect(editing.card - editing.root).toBeGreaterThanOrEqual(16);
+  expect(editing).toEqual(rest);
 });

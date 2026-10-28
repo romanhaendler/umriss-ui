@@ -31,16 +31,21 @@ function Values({ kind }: { kind: "bar" | "line" }) {
   );
 }
 
-async function top(kind: "bar" | "line"): Promise<number> {
+async function ticks(kind: "bar" | "line"): Promise<number[]> {
   const r = await renderChart(<Values kind={kind} />);
   unmount = r.unmount;
-  const labels = [...r.host.querySelectorAll(".uc-axis-y .uc-tick")].map((t) => Number.parseFloat((t.textContent ?? "").replace(/[^\d.-]/g, "")));
-  return Math.max(...labels);
+  return [...r.host.querySelectorAll(".uc-axis-y .uc-tick")].map((t) => Number.parseFloat((t.textContent ?? "").replace(/[^\d.-]/g, "")));
 }
+
+const top = async (kind: "bar" | "line") => Math.max(...(await ticks(kind)));
 
 describe("The value axis of bars", () => {
   it("ends above a maximum that is a round number", async () => {
     expect(await top("bar")).toBeGreaterThan(100);
+  });
+
+  it("keeps the step the data gave and adds one", async () => {
+    expect(await ticks("bar")).toEqual([0, 20, 40, 60, 80, 100, 120]);
   });
 
   it("is left to end on the maximum for a line", async () => {
