@@ -91,7 +91,7 @@ the built `dist/core.js` with Rollup - the peers external, the stylesheet
 resolved to nothing - then minifying with esbuild and gzipping. `check:dist`
 holds the first of them under 1.5 kB in every package.
 
-umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
+umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: the visual suite opens every demo page of every package under that policy, and an HTML sink reached while a page renders fails it.
 
 ## Styles
 

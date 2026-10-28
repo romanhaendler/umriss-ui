@@ -28,8 +28,6 @@ Components reads to treat a module as client code. A dashboard is declared by it
 file and hands it the data its widgets show. The dashboard renders to a string on the server and in
 a test, without a layout engine.
 
-umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
-
 ## Declared like a table
 
 `useDashboard` takes the arrangement the application gives a reader and hands

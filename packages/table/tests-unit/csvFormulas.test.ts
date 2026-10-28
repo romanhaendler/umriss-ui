@@ -20,6 +20,11 @@ describe("CSV formulas", () => {
     expect(one('=HYPERLINK("x")')[1]).toBe(`"'=HYPERLINK(""x"")"`);
   });
 
+  it("neutralises a formula after leading whitespace", () => {
+    expect(one('\u00A0=HYPERLINK("x")')[1]).toBe(`"'\u00A0=HYPERLINK(""x"")"`);
+    expect(one(' =HYPERLINK("x")')[1]).toBe(`"' =HYPERLINK(""x"")"`);
+  });
+
   it("neutralises a label", () => {
     expect(one("a", "=evil")[0]).toBe("'=evil");
   });

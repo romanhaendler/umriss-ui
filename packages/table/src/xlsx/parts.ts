@@ -7,13 +7,16 @@ const MAIN = `${NS}spreadsheetml/2006/main`;
 const REL = `${NS}package/2006/relationships`;
 const DOC_REL = `${NS}officeDocument/2006/relationships`;
 
+/* Characters XML 1.0 allows; a lone surrogate is none. */
+export const FORBIDDEN = /[^\t\n\r -퟿-�\u{10000}-\u{10FFFF}]/gu;
+
 export const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** A sheet name as Excel takes it: without `[]:*?/\`, control characters and
-    lone surrogates (not XML), at most 31 characters, `Sheet1` where nothing is left. */
+/** A sheet name as Excel takes it: without `[]:*?/\`, control characters, lone
+    surrogates and whatever else XML 1.0 forbids, at most 31 characters, `Sheet1` where nothing is left. */
 export function sheetName(name: string): string {
   // Cut first, then drop lone surrogates: the cut can split a pair.
-  return name.replace(/[[\]:*?/\\\u0000-\u001f]/g, "").slice(0, 31).replace(/[\ud800-\udfff]/gu, "") || "Sheet1";
+  return name.replace(/[[\]:*?/\\\u0000-\u001f]/g, "").slice(0, 31).replace(FORBIDDEN, "") || "Sheet1";
 }
 
 /** The six parts in the order the file holds them. `sheet` is `sheet1.xml`. */

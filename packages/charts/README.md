@@ -30,8 +30,6 @@ file and hands it the rows. On a server a chart gives its labelled frame and an 
 drawing arrives after mount. No test runs inside such a framework: the charts are rendered to a
 string in a test.
 
-umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
-
 ## The smallest chart that runs
 
 ```tsx
