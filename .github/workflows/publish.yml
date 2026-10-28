@@ -3,6 +3,11 @@
 # package.json; the tag <dir>-v<version> is set here afterwards and triggers
 # nothing. No token: npm trusts this workflow through OIDC (Trusted
 # Publishing) and attaches the provenance itself.
+#
+# The rule: the job with the token runs no third-party code. `build` installs
+# the dependencies and runs every check and script, but cannot mint a token;
+# `publish` holds the token and only downloads the tarballs `build` packed and
+# hands them to npm - no install, no package script.
 name: Publish
 
 on:
@@ -42,23 +47,18 @@ jobs:
           done
           echo "dirs=${dirs# }" >> "$GITHUB_OUTPUT"
 
-  publish:
+  # No token and outside the environment: everything foreign runs here.
+  build:
     needs: find
     if: needs.find.outputs.dirs != ''
     runs-on: ubuntu-24.04
-    environment: npm
-    permissions:
-      contents: write
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      # Node 24 brings npm 11, which Trusted Publishing needs (>= 11.5.1).
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -66,25 +66,63 @@ jobs:
       - run: pnpm test:unit
       - run: pnpm build
 
-      # pnpm packs (it rewrites the workspace: ranges), npm uploads (pnpm 9
-      # cannot do Trusted Publishing). npm runs no lifecycle scripts on a
-      # tarball, so prepublishOnly's work is the steps above and check:dist.
+      # pnpm packs because only pnpm rewrites the workspace: ranges. npm runs
+      # no lifecycle scripts on a tarball, so prepublishOnly's work is the
+      # steps above and check:dist. All tarballs land in one directory, named
+      # <scope>-<name>-<version>.tgz by pnpm.
+      - name: Check and pack
+        env:
+          DIRS: ${{ needs.find.outputs.dirs }}
+        run: |
+          mkdir "$GITHUB_WORKSPACE/tarballs"
+          for dir in $DIRS; do
+            cd "$GITHUB_WORKSPACE/packages/$dir"
+            pnpm run check:dist
+            pnpm pack --pack-destination "$GITHUB_WORKSPACE/tarballs"
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tarballs
+          path: tarballs/*.tgz
+          if-no-files-found: error
+
+  # Holds the token: installs nothing and runs no package script.
+  publish:
+    needs: [find, build]
+    runs-on: ubuntu-24.04
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Node 24 brings npm 11, which Trusted Publishing needs (>= 11.5.1).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tarballs
+          path: tarballs
+
       # One package failing stops the rest; the next push picks them up.
       # `npm view` in `find` reports a version published minutes ago as
       # missing, so a push right after a release asks again; npm's refusal to
       # publish over an existing version is then the answer that it stands
       # there, and the package is tagged as if it had just gone out.
+      # The tarball is named from the package's name and version, in the
+      # order `find` gave, so the dependency order holds.
       - name: Publish and tag
         env:
           DIRS: ${{ needs.find.outputs.dirs }}
         run: |
           for dir in $DIRS; do
-            cd "$GITHUB_WORKSPACE/packages/$dir"
-            version="$(node -p "require('./package.json').version")"
+            name="$(node -p "require('./packages/$dir/package.json').name")"
+            version="$(node -p "require('./packages/$dir/package.json').version")"
+            tarball="tarballs/$(echo "${name#@}" | tr / -)-$version.tgz"
             case "$version" in *-*) dist_tag=next ;; *) dist_tag=latest ;; esac
-            pnpm run check:dist
-            pnpm pack
-            if npm publish ./*.tgz --tag "$dist_tag" 2> publish.log; then
+            if npm publish "./$tarball" --tag "$dist_tag" 2> publish.log; then
               cat publish.log >&2
             else
               cat publish.log >&2
