@@ -68,11 +68,19 @@
      column takes the width it needs from the ones that wrap. A duration
      too: "3 hrs 18" over "min" tore the unit from its number. */
   .state {
+    display: flex;
+    align-items: center;
     white-space: nowrap;
+    max-width: 20rem;
   }
 
+  /* A state wider than its cell ends in an ellipsis; the full word is the
+     title, and the text itself stays whole for a screen reader. */
   .lifecycle {
     font-size: var(--u-text-xs);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* The count of hidden alarms, as quiet as the live figure:

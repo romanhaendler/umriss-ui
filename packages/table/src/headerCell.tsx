@@ -28,7 +28,7 @@ export function contentWidth(cell: HTMLTableCellElement): number {
   table.style.width = "auto";
   let widest = 0;
   for (const tableRow of Array.from(table.rows)) {
-    if (tableRow.cells.length !== count) continue;
+    if (tableRow.cells.length !== count || tableRow.dataset.headGroup !== undefined) continue;
     const c = tableRow.cells[index];
     if (!c) continue;
     /* A value cut at the cap is wider than its box: its whole width, and

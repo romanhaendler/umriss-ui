@@ -283,6 +283,8 @@ function Body({
   hiddenOnly = false,
   onHiddenOnlyChange,
   onKeyDown,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...rest
 }: BodyProps & { freshness: FreshnessReading | null }) {
   const wording = useWording();
@@ -521,7 +523,8 @@ function Body({
       <div ref={tableBox}>
       <Table
         grid
-        aria-label={wording.alarmList}
+        aria-label={ariaLabelledBy === undefined ? (ariaLabel ?? wording.alarmList) : undefined}
+        aria-labelledby={ariaLabelledBy}
         selectable={selection !== undefined}
         density={density}
         maxHeight={maxHeight}
@@ -576,7 +579,7 @@ function Body({
             return (
               <span className={styles.state}>
                 {badge}
-                <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>
+                <span className={styles.lifecycle} title={lifecycleWord(state, wording)}>{lifecycleWord(state, wording)}</span>
               </span>
             );
           }}
