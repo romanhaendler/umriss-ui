@@ -16,6 +16,7 @@ import { Fragment, useCallback, useMemo, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom";
 import { Tooltip } from "@umriss-ui/core";
 import { Example } from "./Example";
+import { trustedHtml } from "./trustedHtml";
 import { useContents, type ContentsEntry } from "./Contents";
 import { Configurator } from "./Configurator";
 import { configuratorAnchor } from "./tooling/configurator";
@@ -122,7 +123,7 @@ function ApiTables({ api }: { api: ApiSection }) {
   /* React 19 writes the HTML anew whenever the object is a new one - which
      would put the plain links back over the previews on every render. */
   const html = apiHtml(api);
-  const inner = useMemo(() => ({ __html: html }), [html]);
+  const inner = useMemo(() => ({ __html: trustedHtml(html) }), [html]);
   return (
     <>
       <div ref={found} className="apiTables" dangerouslySetInnerHTML={inner} />
@@ -286,7 +287,7 @@ export function Page({ demo, page }: PageProps) {
         {/* Written, not drawn, as the API section is: the HTML the
             prerendered page carries (`tooling/apiIndex.ts`). Its sections
             stand as the page's own. */}
-        <div className="apiIndex" dangerouslySetInnerHTML={{ __html: apiIndexHtml(index) }} />
+        <div className="apiIndex" dangerouslySetInnerHTML={{ __html: trustedHtml(apiIndexHtml(index)) }} />
         <PageTurn demo={demo} pageId={page.id} />
         {contents.column}
       </article>
@@ -331,7 +332,7 @@ export function Page({ demo, page }: PageProps) {
         <Section key={table.anchor} id={table.anchor} title={table.title}>
           {/* Written like the API section, from one model
               (`tooling/referenceTable.ts`); every row is an anchor. */}
-          <div className="apiTables" dangerouslySetInnerHTML={{ __html: referenceHtml(table) }} />
+          <div className="apiTables" dangerouslySetInnerHTML={{ __html: trustedHtml(referenceHtml(table)) }} />
         </Section>
       ))}
 

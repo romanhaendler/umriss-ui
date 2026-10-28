@@ -32,6 +32,7 @@
     "./checks/largeText": "./checks/largeText.ts",
     "./checks/floor": "./checks/floor.ts",
     "./checks/silentPages": "./checks/silentPages.ts",
+    "./checks/trustedTypes": "./checks/trustedTypes.ts",
     "./tests-support/setup": "./tests-support/setup.ts",
     "./tests-support/styleGuard": "./tests-support/styleGuard.ts",
     "./tests-support/wordingGuard": "./tests-support/wordingGuard.ts",
