@@ -212,7 +212,10 @@ function effectiveWidths(
 export function useTable<Z>(rows: readonly Z[], options: Extract<TableOptions<Z>, { server: true }>): Table<Z, true>;
 export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z>;
 export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z, boolean> {
-  const rows = asRows(given, "the rows of useTable");
+  /* A rowKey that is not a function would crash in the first row read: the table shows no rows instead. */
+  const keyed = typeof options.rowKey === "function";
+  if (!keyed) warnOnce(`rowkey:${typeof options.rowKey}`, "rowKey must be a function (row) => string, e.g. `rowKey: (row) => row.id`; the table shows no rows.");
+  const rows = keyed ? asRows(given, "the rows of useTable") : asRows([], "");
   const [registry] = useState(() => new Registry());
   registry.setRows(rows);
   const [parts] = useState(() => {
@@ -289,7 +292,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
-  const rowKey = useAccessor(options.rowKey, rowsUnknown) as (row: unknown) => string;
+  const rowKey = useAccessor(keyed ? options.rowKey : (): string => "", rowsUnknown) as (row: unknown) => string;
   /* Tree rows: the rows are the roots, and their levels
      come from their children. A grouping would build levels a second way, and
      pages would tear rows from their parents - both are passed over. The
@@ -502,6 +505,22 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     });
     return () => cancelAnimationFrame(frame);
   }, [pageSizeGiven, server, virtual, isTree, registry]);
+
+  /* A column whose field no row of the first page has is a typo, not data: it would show "No value" throughout.
+     The check waits for the first frame, when the columns have registered. */
+  useEffect(() => {
+    if (!DEV || rows.length === 0) return;
+    const frame = requestAnimationFrame(() => {
+      const page = rows.slice(0, options.pageSize ?? 10);
+      for (const { spec } of registry.orderedColumns()) {
+        const field = spec.value;
+        if (typeof field === "string" && !page.some((row) => typeof row === "object" && row !== null && field in row)) {
+          warnOnce(`field:${spec.id}:${field}`, `Column "${spec.id}" reads the field "${field}", which no row of the first page has; every cell shows no value.`);
+        }
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [rows, options.pageSize, registry]);
 
   /* Every change the reader makes, once and whole, after the commit
      (ADR-0047). The first render's view is where it starts, not a change; the
