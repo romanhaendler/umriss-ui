@@ -27,7 +27,7 @@ with Server Components reads to treat a module as client code. A table is declar
 `useTable`, so the declaration lives in a Client Component file: a Server Component renders that
 file and hands it the rows, with its `rowKey` and columns kept there. On a server, and until the
 page has hydrated, a date or time is empty, because only the browser knows the reader's zone
-([ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md)). No test runs inside such a framework: the
+([ADR-0067](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md)). No test runs inside such a framework: the
 table is rendered to a string in a test.
 
 ## The smallest table that runs
@@ -229,6 +229,8 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   on purpose (`onRowSave`); `onRowAdd` and `onRowDelete` add and delete rows
   by the table's own buttons. Without `grid` the table stays a native table.
 
+The speeds in [`docs/capabilities.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/table/docs/capabilities.md#performance-reference-run) are a production build's. `vite dev` runs the same work about ten times slower (a 100,000-row sort takes 3.5 s there against 0.33 s in production), so judge the table in a production build.
+
 ## More
 
 * The demo, in a checkout: `pnpm dev:table` (port 4175). It is the documentation — one page per
@@ -241,14 +243,14 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
   and an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm start`.
-* [`../../docs/design-language.md`](../../docs/design-language.md) — the design
+* [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
   language all five packages share.
-* [`../core/README.md`](../core/README.md) — the component library underneath.
+* [`../core/README.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/README.md) — the component library underneath.
 
 ## Testing
 
 Tested under Vitest 5 and Jest 30 on jsdom. The runner lines and the setup file are in
-[`@umriss-ui/core`'s Testing section](../core/README.md#testing); `check:dist` runs a test of the
+[`@umriss-ui/core`'s Testing section](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/README.md#testing); `check:dist` runs a test of the
 installed table (a column sorted) with exactly those files.
 
 ## Licence
