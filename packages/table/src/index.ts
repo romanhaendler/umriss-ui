@@ -17,6 +17,9 @@ export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, Toolba
 export type {
   ActionProps,
   RangeCondition,
+  TextCondition,
+  TextOperator,
+  TextTerm,
   Field,
   FieldCondition,
   SetFilter,
