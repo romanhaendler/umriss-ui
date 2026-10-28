@@ -199,6 +199,13 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
+* **A selection the application hears** (`onSelectionChange`): `useTable`
+  calls it with the selected keys after each change - a tick, "select all", a
+  shift-click range, a clear, `selection.toggle()` - from an effect, never at
+  mount or during render, so `onSelectionChange: setKeys` cannot loop. It works
+  with the table's own selection, with one handed in as `selection`, and in
+  server mode (there, under "all that match", `selection.allMatching` and
+  `selection.except` tell the rest).
 * **Rows that change every second** (`tests-unit/rowsThatKeepArriving.test.tsx`):
   `rows` may be a new array each second - values move, a row appears, one goes.
   The sort stays and the rows stand in its order; a row keeps its place in the
