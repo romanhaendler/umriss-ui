@@ -72,10 +72,11 @@ export interface AggregateOptions<W, Z> {
 }
 
 /** What a column accepts as `filter`: `"list"` for every value with a text
-    form, `"range"` for numbers and points in time, a filter from `columnFilter`
-    only where its value type fits. */
+    form, `"range"` for numbers and points in time, `"text"` for text, a filter
+    from `columnFilter` only where its value type fits. */
 export type FilterFor<W> =
   | (IsDisplayable<W> extends true ? "list" : never)
+  | ([Present<W>] extends [string] ? "text" : never)
   | ([Present<W>] extends [number] ? "range" : [Present<W>] extends [Date] ? "range" : never)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the condition belongs to the filter; at the column only the value counts
   | ColumnFilter<Present<W>, any>;
@@ -251,7 +252,8 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
         `"timeWithSeconds"` or `"dateTimeWithSeconds"` for points in time. Alignment, sorting, export and footer stay with the value. */
     format?: FormatFor<Z[K]>;
     /** A filter in the column header: `"list"` offers the values that occur,
-        `"range"` two bounds (numbers or points in time), a filter from
+        `"range"` two bounds (numbers or points in time), `"text"` operators over
+        a text, a filter from
         `columnFilter` asks whatever it asks itself. Its condition stands in the
         table toolbar. */
     filter?: FilterFor<Z[K]>;
@@ -279,10 +281,11 @@ export type Computed<Z, W> = ColumnBase &
        chosen - `filter="range"` would then leave the whole column untyped. A
        filter of one's own is still checked against the value. */
     /** A filter in the column header: `"list"` offers the values that occur,
-        `"range"` two bounds (meaningful only for numbers and points in time), a
-        filter from `columnFilter` asks whatever it asks itself. */
+        `"range"` two bounds (meaningful only for numbers and points in time),
+        `"text"` operators over a text, a filter from `columnFilter` asks
+        whatever it asks itself. */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the condition belongs to the filter
-    filter?: "list" | "range" | ColumnFilter<Present<W>, any>;
+    filter?: "list" | "range" | "text" | ColumnFilter<Present<W>, any>;
     /** Edits the column's cells in place in grid mode - see a field column's `edit`. */
     edit?: "text" | "number" | "select" | "date" | ((editor: CellEditorProps<W, Z>) => ReactNode);
     /** What `edit="select"` offers.
@@ -560,10 +563,30 @@ export interface RangeCondition<W> {
   to?: W;
 }
 
-/** What can be set as a condition on a field: a list of its values, and for
-    numbers and points in time a range as well. */
+/** How a text filter compares: without regard to case, with the formats' locale.
+    `isEmpty` takes no value and holds for an absent text and for "". */
+export type TextOperator = "contains" | "notContains" | "startsWith" | "endsWith" | "equals" | "isEmpty";
+
+/** One term of a text condition. A term whose operator needs a value and has
+    none (or "") requires nothing and is left out. */
+export interface TextTerm {
+  operator: TextOperator;
+  value?: string;
+}
+
+/** The condition of a text filter: one or two terms, joined by `join`
+    (`"and"` unless given). Plain JSON - the view keeps it and a server request
+    carries it as it is, under the column's id. */
+export interface TextCondition {
+  join?: "and" | "or";
+  terms: readonly [TextTerm] | readonly [TextTerm, TextTerm];
+}
+
+/** What can be set as a condition on a field: a list of its values, for
+    numbers and points in time a range, and for text a text condition. */
 export type FieldCondition<W> =
   | ListCondition<W>
+  | ([Present<W>] extends [string] ? TextCondition : never)
   | ([Present<W>] extends [number] ? RangeCondition<number> : [Present<W>] extends [Date] ? RangeCondition<Date> : never);
 
 /** Sets a condition from outside. Typed at the field of the row, not at the
