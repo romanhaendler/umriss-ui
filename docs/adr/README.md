@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-eight decisions, each one written where it was made and kept afterwards. An
+Seventy-nine decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -83,7 +83,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0067](0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md) | A Server Component hands umriss its data, and writes only a calculation itself | Server Components: data crosses, views are client, calculation reads its tree | accepted, amends ADR-0060 | core, packages, calculation |
 | [0068](0068-every-component-has-one-of-four-shapes-its-ref-is-an-element-and-its-name-is-aria-label.md) | Every component has one of four shapes, its ref is an element, and its name is `aria-label` | Four shapes; ref is an element; `aria-label` everywhere | accepted, supersedes ADR-0018 in part (its section "What stands from ADR-0015") | components, packages |
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
-| [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | accepted | components, core |
+| [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | amended by ADR-0079 (the 44 px decision and its first consequence) | components, core |
 | [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
 | [0072](0072-the-server-mode-asks-and-is-answered-the-application-names-the-answer.md) | The server mode asks and is answered; the application names the answer | `answers` names the request the rows answer; error, select-all, export and totals follow | accepted | table |
 | [0073](0073-no-package-takes-a-foreign-runtime-dependency.md) | No package takes a foreign runtime dependency | No runtime dependency; XLSX is written by hand | accepted | packages, table |
@@ -92,5 +92,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0076](0076-an-application-names-the-time-zone-its-instants-are-shown-in.md) | An application names the time zone its instants are shown in | An application names a time zone; every package shows its instants in it | accepted, supersedes ADR-0060 in one point (time zones) | core, packages, scope |
 | [0077](0077-a-bad-value-keeps-its-verdict.md) | A bad value keeps its verdict | A source's quality is a third axis beside the verdict and the freshness | accepted, extends ADR-0010 | limits and alarms |
 | [0078](0078-alarm-management-is-a-package-that-owns-a-lifecycle-never-a-generation.md) | Alarm management is a package on core and table; it owns an alarm's lifecycle, never its generation | Alarms are a package of their own, after the alarm list was removed; supersedes ADR-0009 and ADR-0057 | accepted, supersedes ADR-0009 and ADR-0057, amends ADR-0035 | limits and alarms, architecture |
+| [0079](0079-the-size-is-the-applications-the-hit-area-the-librarys.md) | The size is the application's, the hit area the library's | A `md` control is 32 px under any pointer; `touch-scale.css` opts into 44 px under a finger; amends ADR-0070 | accepted, amends ADR-0070 | components, core |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
