@@ -54,6 +54,7 @@ import { useRoute } from "./useRoute";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
+import { TouchScaleSwitch } from "./TouchScaleSwitch";
 import { LanguageSwitch, ShownGerman, useLanguage, type German } from "./Language";
 import { EDIT_LINK, editHref } from "./tooling/edit";
 
@@ -238,6 +239,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
           <div className="shellActions">
             {german !== undefined && <LanguageSwitch language={language} onChoose={chooseLanguage} />}
             <ThemeSwitch />
+            <TouchScaleSwitch />
             <OutLinks npm={demo.packageName} where="head" />
           </div>
         </header>
