@@ -11,6 +11,7 @@
     "check": "node scripts/check.mjs",
     "changelog": "node scripts/changelog.mjs",
     "check:site": "pnpm -r --if-present check:site",
+    "semgrep": "scripts/semgrep.sh",
     "typecheck": "pnpm -r typecheck && pnpm -r --if-present typecheck:demo",
     "lint": "eslint --max-warnings 0 packages/charts packages/core packages/table packages/schedule packages/calculation packages/dashboard packages/alarms packages/demo",
     "dev:core": "pnpm --filter @umriss-ui/core dev",

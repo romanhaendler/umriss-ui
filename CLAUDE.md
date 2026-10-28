@@ -30,6 +30,7 @@ Generated and checked in; do not edit it, and do not infer absence from `types.t
 
 - `pnpm check <package>`: shrink guard, eslint, `typecheck` and `test:unit` of one package (`core`, `charts`, `table`, `schedule`, `calculation`, `dashboard`, `alarms`, `demo`); without a name, all of them. Stops at the first failure.
 - `pnpm check:site`: the demo gates (props, core's README table, and that each `packages/<pkg>/API.md` is current; `pnpm --filter @umriss-ui/<pkg> props` rewrites it).
+- `pnpm semgrep`: Semgrep over the packages' `src` and the workflows (needs Docker; CI runs it too).
 - `pnpm typecheck`: `typecheck` and `typecheck:demo` of every package.
 - `pnpm test:visual:quick <package>`: the cheap layout checks (tests tagged `@quick`) of one demo, light only, about a minute after the build.
 - `pnpm test:visual`: the full visual suite; `DEMOS=table,charts` limits servers and projects to those packages.
