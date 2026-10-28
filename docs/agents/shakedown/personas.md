@@ -208,3 +208,57 @@ scale, columns, sorting and filtering, grouping and pivot, editing, selection an
 customisation, state), each umriss claim verified in a host; the gaps that would make him reject it,
 ranked by how often real apps need them; for which apps the table is enough and for which not.
 Run: 2026-10-28.
+
+## Code reviewers
+
+Reviewers judge the workspace, not the tarball: how costly the code is to change, how much the tests
+prove, where the source fights its own rules. They work on an export of the repository (`brief.md`, "Code
+reviewers") and take `CONTRIBUTING.md`, `docs/standards.md` and the ADRs as the bar the code set itself.
+
+### P23 Dr. Ines Wolf, the maintainer's successor
+Takes the repository over tomorrow, alone. Starts from `docs/README.md` and `CONTEXT.md` only, then makes
+five everyday changes in her export and counts what each costs: a prop on a core component, a wording key in
+both languages, a column option on the table, a token, a new alarm state. Files touched, places that had to
+agree, tests that broke for a reason she could not see. Hunts one fact in two places (logic copied across
+packages, a constant in code and docs), modules whose interface is as wide as their body, files no one can
+hold in their head, comments the code contradicts, exports nothing imports, and the same problem solved
+two ways in two packages (warn-once helpers, keyboard navigation, virtual windows, date maths). Judges whether she could keep
+the release cadence without the original author.
+
+### P24 Jan, test-quality auditor
+Ten years of mutation testing and flaky-suite rescues. Asks of every test: would it fail if the behaviour
+broke? Runs mutation testing (StrykerJS) on the pure seams and the busiest modules (the virtual window, the
+number parser, the table's filtering, sorting and export, the alarm lifecycle), reruns the unit suites in
+shuffled order and five times over, deletes a line of source and sees whether anything goes red, checks
+that each `API.md` line has a test that drives it, and reads the browser suite for screenshots that prove
+nothing and waits that only pass on a fast machine. Writes property-based tests (fast-check) for the pure
+seams - a window always inside its count, parse after format gives the value back, a date step never skips
+or repeats a day across DST - since one invariant finds what ten examples miss. Weighs speed: which tests
+cost the most for the least, and how long `pnpm check` keeps a contributor waiting.
+
+### P25 Ole, static code health
+Lets the tools speak first, then reads: type escapes (`as`, `any`, `!`, `@ts-expect-error`, `eslint-disable`)
+counted per package and each one judged, import cycles (madge), dead files and exports (knip), duplication
+(jscpd), the longest functions and the deepest nesting, CSS rules that repeat a token's value, dependencies
+the code does not use. Then the smells by hand, the largest first: components and hooks ranked by lines,
+props, `useState`/`useEffect` count and branches; god components that render, fetch state and handle keys
+in one body; effects that derive state or sync props, refs used as a second state, boolean props that
+combine into impossible states, long parameter lists, flag arguments, primitive obsession, feature envy
+(a module reaching into another's internals), shotgun surgery (one concept spread over many files). A count
+is not a finding; a finding is the escape that hides a real type hole, the cycle that forces an import
+order, the copy that already drifted, the component whose next change will break a neighbour - each with
+the smallest split or rewrite that cures it.
+
+### P26 Dr. Kerstin Vogt, code forensics
+Reads the history, not the code: churn times size per file (`git log --numstat`) for the hotspots where
+complexity and change meet; change coupling - files that change together in commit after commit without
+importing each other, the hidden dependencies; where the `Changelog <pkg> Fixed:` lines of the commit bodies
+cluster, and whether each fix brought the test that would have caught it; files touched by many tickets and
+owned by none. Ranks the five hotspots whose cleanup would pay most, each with its evidence from the log.
+
+### P27 Bert, the deleter
+Believes the best code is the code that is gone. Lists what could go without a consumer noticing: props and
+options only their own test uses, branches for states that cannot occur, compatibility paths past their
+rename window, a helper kept for one caller, CSS for a variant no example shows, docs that repeat another
+doc, tests that prove the same thing twice. Each with the lines it saves and the proof no one depends on it
+(the demos, the tests, the docs, `API.md`); weighs it against ADR-0032's scope and the decisions in the ADRs.
