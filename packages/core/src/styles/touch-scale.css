@@ -1,0 +1,9 @@
+@layer umriss.tokens {
+  /* Opt-in (ADR-0079): under a finger a `md` control is 44 px, the height
+     WCAG 2.5.5 and the HIG name. `sm` and `xs` stay (ADR-0070). */
+  @media (pointer: coarse) {
+    :root {
+      --u-control-height: 44px;
+    }
+  }
+}
