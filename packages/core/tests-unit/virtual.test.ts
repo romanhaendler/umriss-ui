@@ -174,3 +174,41 @@ describe("useVirtual – scrolling renders only when the window moves", () => {
     expect(renders).toBe(before + 1);
   });
 });
+
+/* A list that shrinks under a scroll position now past its end. */
+describe("visibleWindow – a scroll position past the end of the count", () => {
+  it("returns the last rows and a leading filler no taller than the list", () => {
+    const w = visibleWindow({ ...BASE, count: 100, scrollTop: 3_580_000 });
+    expect(w.to).toBe(100);
+    expect(w.to - w.from).toBeGreaterThan(0);
+    expect(w.after).toBe(0);
+    expect(w.before).toBeLessThanOrEqual(100 * BASE.rowHeight);
+    expect(w.before + (w.to - w.from) * BASE.rowHeight + w.after).toBe(100 * BASE.rowHeight);
+  });
+
+  it("shows all rows of a list shorter than the viewport", () => {
+    const w = visibleWindow({ ...BASE, count: 3, scrollTop: 50_000 });
+    expect(w).toEqual({ from: 0, to: 3, before: 0, after: 0 });
+  });
+});
+
+describe("useVirtual – the count shrinks while scrolled deep", () => {
+  it("shows the last rows although the scroll position is still past the end", async () => {
+    const { renderHook, act } = await import("@testing-library/react");
+    const frame = document.createElement("div");
+    Object.defineProperty(frame, "clientHeight", { value: 400 });
+    const { result, rerender } = renderHook(({ count }) => {
+      const rows = useVirtual(count, { rowHeight: 40, overscan: 0 });
+      rows.scrollRef.current = frame as HTMLDivElement;
+      return rows;
+    }, { initialProps: { count: 100_000 } });
+    await act(async () => {
+      frame.scrollTop = 3_900_000;
+      result.current.onScroll();
+    });
+    await act(async () => rerender({ count: 1_000 }));
+    expect(result.current.to).toBe(1_000);
+    expect(result.current.to).toBeGreaterThan(result.current.from);
+    expect(result.current.fillerBefore).toBeLessThanOrEqual(1_000 * 40);
+  });
+});
