@@ -130,4 +130,36 @@ describe("the XLSX writer", () => {
       }
     }
   });
+
+  it("keeps hostile text as text and the XML valid", () => {
+    const hostile = 'a<b>&"\']]>c';
+    const cells = cellMap(
+      sheetOf({
+        columns: [{ label: hostile }],
+        rows: [["=1+1"], ["@SUM(1)"], [hostile], ["x\u0000\u0008\u000b\u001fy\tz\nw"], ["lone\ud800high \udc00low"], ["pair \u{1F600}"]],
+      }),
+    );
+    expect(cells.get("A1")!.textContent).toBe(hostile);
+    for (const ref of ["A2", "A3"]) {
+      expect(cells.get(ref)!.getAttribute("t")).toBe("inlineStr");
+      expect(cells.get(ref)!.getElementsByTagName("f").length).toBe(0);
+    }
+    expect(cells.get("A2")!.textContent).toBe("=1+1");
+    expect(cells.get("A3")!.textContent).toBe("@SUM(1)");
+    expect(cells.get("A4")!.textContent).toBe(hostile);
+    expect(cells.get("A5")!.textContent).toBe("xy\tz\nw");
+    expect(cells.get("A6")!.textContent).toBe("lonehigh low");
+    expect(cells.get("A7")!.textContent).toBe("pair \u{1F600}");
+  });
+
+  it("falls back to the default sheet name for forbidden characters only, and keeps the workbook valid", () => {
+    expect(sheetName("[]:*?/\\")).toBe("Sheet1");
+    const wording = { ...DEFAULT_WORDING, exportSheetName: '<&">\u0000\u0001' };
+    const parts = unzip(xlsx.write(sheet, { formats: {} as never, wording }));
+    const workbook = parts[2]!.text;
+    expect(doc(workbook).getElementsByTagName("parsererror").length).toBe(0);
+    expect(doc(workbook).getElementsByTagName("sheet")[0]!.getAttribute("name")).toBe('<&">');
+    const only = unzip(xlsx.write(sheet, { formats: {} as never, wording: { ...DEFAULT_WORDING, exportSheetName: "[]\\/" } }));
+    expect(doc(only[2]!.text).getElementsByTagName("sheet")[0]!.getAttribute("name")).toBe("Sheet1");
+  });
 });
