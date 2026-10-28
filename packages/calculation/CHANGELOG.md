@@ -14,6 +14,10 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.47.1 – Released in step with the table (Oct. 2026)
+
+No change of its own; the number moves with the table's repaired exports.
+
 ## 0.47.0 – Released in step with alarms (Oct. 2026)
 
 No change of its own; the number moves with the new package `@umriss-ui/alarms`.

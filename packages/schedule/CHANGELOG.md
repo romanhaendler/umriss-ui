@@ -18,6 +18,10 @@ moves from here under the rule above.
 
 ---
 
+## 0.47.1 – Released in step with the table (Oct. 2026)
+
+No change of its own; the number moves with the table's repaired exports.
+
 ## 0.47.0 – Released in step with alarms (Oct. 2026)
 
 No change of its own; the number moves with the new package `@umriss-ui/alarms`.

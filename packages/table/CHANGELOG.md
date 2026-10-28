@@ -26,6 +26,13 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.47.1 – Exports that hostile text cannot turn into a formula or a broken file (Oct. 2026)
+
+### Fixed
+
+- **A CSV text that starts with whitespace and then `=`, `+`, `-` or `@`** - spaces, a non-breaking space - is written with the leading apostrophe too, in a cell and in a column label, so a spreadsheet that trims the whitespace does not run it as a formula.
+- **The XLSX sheet name** (`wording.exportSheetName`) drops control characters, lone surrogates, U+FFFE and U+FFFF, which made the workbook unreadable, and a name cut at 31 characters keeps no half of an emoji.
+
 ## 0.47.0 – The alarm package's table, seconds, and a selection a grid announces (Oct. 2026)
 
 ### Added
