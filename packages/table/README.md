@@ -100,6 +100,68 @@ column; the customers stand beside their orders as a span (ADR-0029). Without
 `avg`, `min`, `max`, `range`, `count`, `distinct` or a function of one's own, and
 is the footer over the filtered set as well.
 
+## Undo and redo, in the application
+
+The table reports an edit and applies none (ADR-0032), so the history is the
+application's. Keep each reported edit with the value it replaced, and write
+that value back on Ctrl+Z:
+
+```tsx
+interface Step { rowKey: string; columnId: string; before: unknown; after: unknown }
+
+const [tasks, setTasks] = useState(TASKS);
+const [undo, setUndo] = useState<Step[]>([]);
+const [redo, setRedo] = useState<Step[]>([]);
+const { Table, Column } = useTable(tasks, { rowKey: (t) => t.id });
+
+const set = (rowKey: string, columnId: string, value: unknown) =>
+  setTasks((all) => all.map((t) => (t.id === rowKey ? { ...t, [columnId]: value } : t)));
+
+const onCellEdit = (edit: CellEdit<Task>) => {
+  const before = (edit.row as unknown as Record<string, unknown>)[edit.columnId];
+  set(edit.rowKey, edit.columnId, edit.value);
+  setUndo((steps) => [...steps, { rowKey: edit.rowKey, columnId: edit.columnId, before, after: edit.value }]);
+  setRedo([]);
+};
+
+const undoLast = () => {
+  const step = undo.at(-1);
+  if (!step) return;
+  setUndo(undo.slice(0, -1));
+  setRedo([...redo, step]);
+  set(step.rowKey, step.columnId, step.before);
+};
+
+const redoLast = () => {
+  const step = redo.at(-1);
+  if (!step) return;
+  setRedo(redo.slice(0, -1));
+  setUndo([...undo, step]);
+  set(step.rowKey, step.columnId, step.after);
+};
+
+useEffect(() => {
+  const onKey = (event: KeyboardEvent) => {
+    if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "z") return;
+    const target = event.target as Element;
+    if (!target.closest('[role="grid"]') || target.closest("input, textarea, select")) return;
+    event.preventDefault();
+    if (event.shiftKey) redoLast();
+    else undoLast();
+  };
+  window.addEventListener("keydown", onKey);
+  return () => window.removeEventListener("keydown", onKey);
+});
+
+<Table grid aria-label="Tasks" onCellEdit={onCellEdit}>
+  {/* columns, with edit="number" and so on */}
+</Table>;
+```
+
+Ctrl+Shift+Z (Cmd on a Mac) is the redo. The keys of an open editor stay the field's,
+so Ctrl+Z there undoes the typing. A new edit clears the redo history. The
+recipe is the last example of the Edits page, with two buttons beside the table.
+
 ## Styles
 
 Nothing to import. `dist/table.js` loads its own stylesheet, and
