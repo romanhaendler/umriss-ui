@@ -40,6 +40,10 @@ export interface PassThroughCase {
   /** Composite: a second element that carries `aria-label` and `aria-labelledby`
       beside the named one (the schedule names its figure root and its plot). */
   alsoLabelled?: (frame: Element) => Element | null;
+  /** Composite with `alsoLabelled`: the named element's `aria-label` is its
+      own, derived from the caller's (the schedule's plot: "<label>, plot"), so
+      the caller's `aria-label` stands on the second element alone. */
+  ownLabel?: boolean;
   /** Which element the ref has to reach, where the contract names one. */
   root?: (element: Element) => boolean;
 }
@@ -88,7 +92,7 @@ export function passThroughGuard(
     });
 
     it.each(Object.keys(cases).sort())("%s", (name) => {
-      const { render: draw, shape = "element", root, named, alsoLabelled } = cases[name]!;
+      const { render: draw, shape = "element", root, named, alsoLabelled, ownLabel } = cases[name]!;
       const ref = createRef<Element>();
       const { container } = render(
         draw({
@@ -123,7 +127,7 @@ export function passThroughGuard(
         /* `~=`: a caller's `aria-describedby` may stand in a list beside the component's own. */
         const carriers = Array.from(container.ownerDocument.querySelectorAll(`[${attribute}~="${value}"]`));
         const second = attribute === "aria-describedby" || !element || !alsoLabelled ? null : alsoLabelled(element);
-        const expected = second && second !== target ? [target, second] : [target];
+        const expected = second && ownLabel && attribute === "aria-label" ? [second] : second && second !== target ? [target, second] : [target];
         expect({ attribute, carriers: carriers.length === expected.length && expected.every((e) => carriers.includes(e!)) }).toEqual({ attribute, carriers: true });
       }
     });
