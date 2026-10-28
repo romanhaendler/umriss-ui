@@ -4,6 +4,8 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
+import { LanguageProvider } from "@umriss-ui/core";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import { useSchedule } from "../src";
 import type { BlockedTime, Dependency, Milestone, Subtask, Task } from "../src";
 
@@ -105,5 +107,50 @@ describe("malformed data", () => {
     render(<Plan subtasks={[sub("ok2"), sub("ok3", { lane: "later" })]} lanes={[]} tasks={[]} />);
     render(<Plan subtasks={[sub("ok4")]} tasks={[]} />);
     expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("is silent for the README's order, Dependencies before Subtasks", () => {
+    const warn = warnings();
+    function Early() {
+      const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
+      return (
+        <Schedule aria-label="Plan">
+          <Lane id="l" label="l" />
+          <Dependencies data={[{ id: "dearly1", from: "early1", to: "early1b", lag: 0 }]} />
+          <Subtasks data={[sub("early1"), sub("early1b")]} tasks={TASKS} />
+        </Schedule>
+      );
+    }
+    render(<Early />);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("names the plot after the label, in the wording's language", () => {
+    const { container, unmount } = render(<Plan />);
+    expect(container.firstElementChild!.getAttribute("aria-label")).toBe("Plan");
+    expect(container.querySelector('[role="application"]')!.getAttribute("aria-label")).toBe("Plan, plot");
+    unmount();
+    const german = render(
+      <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
+        <Plan />
+      </LanguageProvider>,
+    );
+    expect(german.container.querySelector('[role="application"]')!.getAttribute("aria-label")).toBe("Plan, Diagramm");
+  });
+
+  it("warns once about from and to that are not milliseconds", () => {
+    const warn = warnings();
+    const bad = (id: string, from: unknown, to: unknown) => sub(id, { from: from as number, to: to as number });
+    render(
+      <Plan
+        subtasks={[
+          bad("str1", "2026-03-17T08:00:00Z", "2026-03-17T10:00:00Z"),
+          bad("date1", new Date(2026, 2, 17, 8), new Date(2026, 2, 17, 10)),
+          bad("sec1", 1773734400, 1773741600),
+        ]}
+      />,
+    );
+    expect(warn).toHaveBeenCalledTimes(3);
+    for (const word of ["str1", "date1", "sec1", "milliseconds"]) expect(textOf(warn)).toContain(word);
   });
 });

@@ -613,6 +613,18 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
   }, [matchKey, selection.allMatching]);
 
+  /* The application hears the selected keys after a change, from an effect and
+     never at mount; a new function each render does not repeat the report. A change of "all that match" or of its
+     exceptions counts as one too. */
+  const selectedKeys = JSON.stringify([[...selection.selected], selection.allMatching, [...selection.except]]);
+  const keysSeen = useRef(selectedKeys);
+  useEffect(() => {
+    if (keysSeen.current === selectedKeys) return;
+    keysSeen.current = selectedKeys;
+    options.onSelectionChange?.([...selection.selected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the selection, with that render's callback
+  }, [selectedKeys]);
+
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never

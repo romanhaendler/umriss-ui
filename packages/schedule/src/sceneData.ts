@@ -176,6 +176,10 @@ export class SceneData {
     twice("dependency", this.dependencies.map((d) => d.id));
     twice("lane", this.lanes.map((l) => l.id));
     for (const s of this.subtasks) {
+      /* Seconds since 1970 stay under 1e11 until the year 5138; milliseconds pass it in 1973. */
+      const notMs = (v: unknown) => typeof v !== "number" || (v !== 0 && Math.abs(v) < 1e11);
+      if (notMs(s.from) || notMs(s.to))
+        warnOnce(`ms:${s.id}`, `subtask "${s.id}" has from: ${String(s.from)}, to: ${String(s.to)}, which are not times in milliseconds since 1970 (as Date.getTime() gives); a string, a Date or seconds are not drawn. Pass date.getTime().`);
       if (!(s.to > s.from))
         warnOnce(`span:${s.id}`, `subtask "${s.id}" does not end after it starts (from ${s.from}, to ${s.to}); a point in time is a Milestone, and a span with no length is drawn as a hairline.`);
     }
@@ -186,9 +190,12 @@ export class SceneData {
         if (!known.has(s.task))
           warnOnce(`task:${s.id}`, `subtask "${s.id}" names the task "${s.task}", which is not among the tasks of its Subtasks layer; it is drawn muted. Add the task, or correct the subtask's task.`);
     }
-    for (const d of this.dependencies)
-      for (const end of [d.from, d.to])
-        if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
+    /* Dependencies may register before the Subtasks they join; with no subtask
+       yet the layers are still on their way. */
+    if (this.subtasks.length > 0)
+      for (const d of this.dependencies)
+        for (const end of [d.from, d.to])
+          if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
     if (this.lanes.length === 0) return;
     const declared = new Set(this.lanes.map((l) => l.id));
     const onLane = (kind: string, items: readonly { id: string; lane: string }[]) => {

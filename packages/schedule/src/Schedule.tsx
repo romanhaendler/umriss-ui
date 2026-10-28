@@ -581,6 +581,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
           role="application"
           aria-roledescription={wording.scheduleRoleDescription}
           {...name}
+          aria-label={nameLabel === undefined ? undefined : wording.schedulePlotName(nameLabel)}
           aria-describedby={describedBy ? `${summaryId} ${describedBy}` : summaryId}
           onKeyDown={(event) => {
             if (scene.key(event.nativeEvent)) event.preventDefault();
