@@ -5,7 +5,7 @@ Status: needs-triage
 Procedure: `docs/agents/shakedown/`. The seven packages packed at 0.48.0, eight personas on Sonnet, each in
 its own Vite host: P1 beginner, P3 staff engineer, P4 vibe coder, P6 operator screens, P7 field service
 (touch), P13 third language (first run), P16 migration from MUI/AG Grid/Highcharts (first run), P22 data-grid
-specialist (new). The reports are in `reports/`, the table feature matrix in `table-feature-matrix.md`.
+specialist (new). The reports are in `personas/`, the table feature matrix in `table-feature-matrix.md`.
 ✓ = confirmed by the coordinating session in the source or by rerunning the host's repro. The hosts were
 throwaway (session scratch).
 
