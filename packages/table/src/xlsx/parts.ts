@@ -9,10 +9,10 @@ const DOC_REL = `${NS}officeDocument/2006/relationships`;
 
 export const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** A sheet name as Excel takes it: without `[]:*?/\`, at most 31 characters,
-    `Sheet1` where nothing is left. */
+/** A sheet name as Excel takes it: without `[]:*?/\`, control characters and
+    lone surrogates (not XML), at most 31 characters, `Sheet1` where nothing is left. */
 export function sheetName(name: string): string {
-  return name.replace(/[[\]:*?/\\]/g, "").slice(0, 31) || "Sheet1";
+  return name.replace(/[[\]:*?/\\\u0000-\u001f]|[\ud800-\udfff]/gu, "").slice(0, 31) || "Sheet1";
 }
 
 /** The six parts in the order the file holds them. `sheet` is `sheet1.xml`. */
