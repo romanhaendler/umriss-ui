@@ -1,3 +1,4 @@
+import { useShapeWarning } from "../../lib/useShapeWarning";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
@@ -83,7 +84,7 @@ const adornmentChars = (adornment: ReactNode) =>
 export function NumberInput(
   {
     ref,
-    value,
+    value: valueGiven,
     onChange,
     min,
     max,
@@ -105,6 +106,8 @@ export function NumberInput(
     ...rest
   }: NumberInputProps,
 ) {
+  const value = typeof valueGiven === "number" ? valueGiven : null;
+  useShapeWarning("NumberInput", "value", valueGiven != null && typeof valueGiven !== "number", "a number or null");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
@@ -242,6 +245,10 @@ export function NumberInput(
         value={text}
         onChange={(event) => {
           const raw = filterInput(event.target.value, constraints, separators);
+          /* A character the field cannot read refuses the whole edit: the
+             field keeps its text instead of reading the rest as another
+             value. */
+          if (raw.length !== event.target.value.length) return;
           setText(raw);
           /* One contract for every route: what goes out is clamped. The
              text stays local so that typing does not stutter over it. */

@@ -49,6 +49,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The command installs the package alone: React 19 or newer is its only peer and stays the application's own. Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
           "Colours, sizes, fonts and light and dark are tokens, `--u-…` custom properties you override with ordinary CSS: [Theming](#/theming) lists them. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
+          "**Touch.** Under a finger (a coarse primary pointer) hit areas are at least 24 × 24 px, a field's text is 16 px and behaviours follow the gesture; a `md` control stays 32 px and a `sm` one 26 px. To grow them to 44 px, the height WCAG 2.5.5 names, import `@umriss-ui/core/touch-scale.css` once, anywhere in the entry file: before or after core's own styles makes no difference. Every `md` and `sm` control grows with it - buttons, fields, selects, Tabs, and the table's toolbar, pagination and row actions and the alarms' Acknowledge and Shelve buttons. What does not grow: `xs`, menu rows, calendar days, checkboxes, switches and radios; they keep their size and their 24 × 24 px hit areas (ADR-0079).",
         ],
         limits: [
           "No font is loaded or bundled.",

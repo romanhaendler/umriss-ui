@@ -1,9 +1,13 @@
 @layer umriss.tokens {
-  /* Opt-in (ADR-0079): under a finger a `md` control is 44 px, the height
-     WCAG 2.5.5 and the HIG name. `sm` and `xs` stay (ADR-0070). */
+  /* Opt-in (ADR-0079): under a finger a `md` and a `sm` control are 44 px, the
+     height WCAG 2.5.5 and the HIG name. `xs` stays (ADR-0070). The doubled
+     `:root` outranks the token rule in `tokens.css` by specificity, so the
+     import order of the two files does not decide; the rule is still on
+     `:root` inside the tokens layer (ADR-0021). */
   @media (pointer: coarse) {
-    :root {
+    :root:root {
       --u-control-height: 44px;
+      --u-control-height-sm: 44px;
     }
   }
 }

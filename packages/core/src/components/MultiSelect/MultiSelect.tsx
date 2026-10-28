@@ -1,3 +1,4 @@
+import { useShapeWarning, areOptions, NONE } from "../../lib/useShapeWarning";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
@@ -85,8 +86,8 @@ type Scope = "all" | "selected";
 export function MultiSelect<T extends string = string>(
   {
     ref,
-    options,
-    value,
+    options: optionsGiven,
+    value: valueGiven,
     onChange,
     placeholder,
     searchPlaceholder,
@@ -103,6 +104,11 @@ export function MultiSelect<T extends string = string>(
     ...rest
   }: MultiSelectProps<T>,
 ) {
+  const optionsOk = areOptions(optionsGiven);
+  const options = optionsOk ? optionsGiven : (NONE as readonly MultiSelectOption<T>[]);
+  useShapeWarning("MultiSelect", "options", !optionsOk, "an array of { value, label } objects, not strings");
+  const value = Array.isArray(valueGiven) ? valueGiven : (NONE as readonly T[]);
+  useShapeWarning("MultiSelect", "value", !Array.isArray(valueGiven), "an array of the chosen values");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
