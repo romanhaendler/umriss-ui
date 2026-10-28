@@ -521,7 +521,8 @@ function Body({
       <div ref={tableBox}>
       <Table
         grid
-        aria-label={wording.alarmList}
+        aria-label={rest["aria-labelledby"] === undefined ? (rest["aria-label"] ?? wording.alarmList) : undefined}
+        aria-labelledby={rest["aria-labelledby"]}
         selectable={selection !== undefined}
         density={density}
         maxHeight={maxHeight}
@@ -576,7 +577,7 @@ function Body({
             return (
               <span className={styles.state}>
                 {badge}
-                <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>
+                <span className={styles.lifecycle} title={lifecycleWord(state, wording)}>{lifecycleWord(state, wording)}</span>
               </span>
             );
           }}
