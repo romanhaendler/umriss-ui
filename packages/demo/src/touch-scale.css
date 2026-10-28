@@ -2,5 +2,5 @@
    file exists only once it has been built, and a demo must start on a fresh
    clone. The one place where the shell reaches into core by path, as a demo's
    `ui-styles.css` does (docs/testing.md, Conventions); the lint cannot see it in
-   CSS. `ThemeSwitch.tsx` takes it as text. */
+   CSS. `TouchScaleSwitch.tsx` takes it as text. */
 @import "../../core/src/styles/touch-scale.css";
