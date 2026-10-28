@@ -1,3 +1,4 @@
+import { useShapeWarning, isDate } from "../../lib/useShapeWarning";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
@@ -89,7 +90,7 @@ export interface DateRangePickerProps
 export function DateRangePicker(
   {
     ref,
-    value,
+    value: valueGiven,
     onChange,
     placeholder,
     disabled = false,
@@ -104,6 +105,9 @@ export function DateRangePicker(
     ...rest
   }: DateRangePickerProps,
 ) {
+  const rangeOk = valueGiven != null && isDate(valueGiven.from) && isDate(valueGiven.to);
+  const value = rangeOk ? valueGiven : null;
+  useShapeWarning("DateRangePicker", "value", valueGiven != null && !rangeOk, "{ from: Date, to: Date } or null");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
