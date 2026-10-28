@@ -13,6 +13,7 @@ import type { AggregateKind, DatePeriod } from "./model/grouping";
 import type { Pin, Pins } from "./model/pinning";
 import type { TableRequest } from "./model/view";
 import type { FilterSpec } from "./columnFilter";
+import type { Heading } from "./columnGroup";
 
 /* --- Specs ------------------------------------------------------------------- */
 
@@ -33,6 +34,8 @@ export interface ColumnSpec {
   aggregateLabel?: string;
   /** The share bar under a sum in a group header; on unless `false`. */
   share?: boolean;
+  /** The `ColumnGroup` the column stands in. */
+  heading?: Heading;
   rowHeader: boolean;
   rightAligned?: boolean;
   width?: number;

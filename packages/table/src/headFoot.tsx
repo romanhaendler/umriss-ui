@@ -10,6 +10,7 @@ import { NOT_PINNED, pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { HeaderCell } from "./headerCell";
+import type { Heading } from "./columnGroup";
 import { lineKey } from "./frameLayout";
 import type { FrameLayout } from "./frameLayout";
 import styles from "./Table.module.css";
@@ -30,8 +31,36 @@ export function HeadRow({
   const { selectable = false, grid: gridMode = false } = props;
   const { snapshot, virtual, spanEntry, dataColumns, expanderColumn, controlColumns, leading, rowMode, rowTools, trailing, columnCount, blocks } = layout;
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
+  /* The cells of a `ColumnGroup`: a run of neighbouring columns of one group
+     and one pin side is one cell, so a group split by pinning shows its label
+     over each part. The cells before and after the columns stand empty. */
+  const runs: { heading?: Heading; side?: string; from: number; to: number }[] = [];
+  dataColumns.forEach((e, i) => {
+    const side = layout.pins[e.spec.id];
+    const last = runs.at(-1);
+    if (last && last.heading?.id === e.spec.heading?.id && last.side === side) last.to = i;
+    else runs.push({ heading: e.spec.heading, side, from: i, to: i });
+  });
+  const grouped = dataColumns.some((e) => e.spec.heading);
   return (
     <thead>
+      {grouped && (
+        <tr data-head-group="">
+          {leading > 0 && <td colSpan={leading} className={cx(styles.th, pinAt(0, leading - 1).className)} style={pinAt(0, leading - 1).style} />}
+          {runs.map(({ heading, from, to }) => {
+            const pin = pinAt(leading + from, leading + to);
+            const cell = cx(styles.th, heading && styles.headGroup, pin.className);
+            return heading ? (
+              <th key={from} scope="colgroup" colSpan={to - from + 1} className={cell} style={pin.style}>
+                {heading.label}
+              </th>
+            ) : (
+              <td key={from} colSpan={to - from + 1} className={cell} style={pin.style} />
+            );
+          })}
+          {trailing && <td className={cx(styles.th, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />}
+        </tr>
+      )}
       <tr aria-rowindex={virtual ? 1 : undefined} data-grid-line={lineKey(gridMode, "head")}>
         {selectable && (
           <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
