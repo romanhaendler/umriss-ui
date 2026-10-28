@@ -1,3 +1,4 @@
+import { useShapeWarning, isDate } from "../../lib/useShapeWarning";
 import { useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
@@ -74,7 +75,7 @@ export interface DateTimePickerProps
 export function DateTimePicker(
   {
     ref,
-    value,
+    value: valueGiven,
     onChange,
     withSeconds = false,
     placeholder,
@@ -89,6 +90,8 @@ export function DateTimePicker(
     ...rest
   }: DateTimePickerProps,
 ) {
+  const value = isDate(valueGiven) ? valueGiven : null;
+  useShapeWarning("DateTimePicker", "value", valueGiven != null && !isDate(valueGiven), "a Date or null");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
