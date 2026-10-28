@@ -48,8 +48,17 @@ test("with touch-scale.css a md control is 44 px under a finger", async ({ page 
   expect(await heights(page, true)).toEqual({ button: 44, input: 44, select: 44, segmentedcontrol: 44 });
 });
 
-test("the address ?touch-scale has the stylesheet on from the first paint", async ({ page }) => {
+test("the address ?touch-scale turns the switch and the stylesheet on", async ({ page }) => {
   await openScaled(page, "button", "one-action", true);
   await expect(page.getByRole("button", { name: "Touch scale", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator('[data-example="one-action"] .exampleStage').getByRole("button").first()).toHaveCSS("height", "44px");
+});
+
+test.describe("from a desk", () => {
+  test.use({ hasTouch: false, viewport: { width: 1280, height: 900 } });
+
+  test("the switch shows the grown state under a mouse as well", async ({ page }) => {
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(false);
+    expect(await heights(page, true)).toEqual({ button: 44, input: 44, select: 44, segmentedcontrol: 44 });
+  });
 });
