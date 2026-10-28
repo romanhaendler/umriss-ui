@@ -154,10 +154,6 @@ function DialogFrame({
          `onCancel` or `onMouseDown` cannot take Escape's exit or the
          backdrop's closing away. */
       data-side={side}
-      /* Between the render that opens it and the browser's `showModal()`, the
-         dialog is already laid out (invisible), so that a field with
-         `autoFocus` can take the focus. */
-      data-pending={(open && !closing) || undefined}
       data-closing={closing || undefined}
       onClose={handleDialogClose}
       onCancel={(event) => {
