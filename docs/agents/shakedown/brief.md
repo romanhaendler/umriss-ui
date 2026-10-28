@@ -10,8 +10,9 @@ look wrong, set traps or fall short. The maintainer then decides whether the lib
 ## Ground rules
 
 - The packages under test are packed tarballs, `<scratch>/umriss-ui-<pkg>-<version>.tgz` for core, charts,
-  table, schedule, calculation and dashboard. Install the ones you need from those files (`npm i <tgz> …`;
-  table, calculation and dashboard need core as a peer, schedule needs core and charts). Never link the
+  table, schedule, calculation, dashboard and alarms. Install the ones you need from those files
+  (`npm i <tgz> …`; table, calculation and dashboard need core as a peer, schedule needs core and charts,
+  alarms needs core and table). Never link the
   workspace source.
 - Build your host only inside your own directory, given in your task. Never edit anything under
   `/Users/romanhaendler/cc/umriss` - it is read-only for you. You may read it: `packages/<pkg>/README.md`

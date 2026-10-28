@@ -78,7 +78,8 @@ A React tutorial last week; the Vite **JavaScript** template, no TypeScript. Rea
 onChange, wrong argument shapes, strings for numbers and dates, options as strings, a forgotten provider,
 misspelt props, missing peers, a stale stored dashboard - and judges whether each one gets a message that
 tells her what to do. Time to the first working screen; 375 px. Runs: 2026-10-24 (a plant tracker on core;
-a household budget on core, table, charts, dashboard, calculation).
+a household budget on core, table, charts, dashboard, calculation); 2026-10-28 (a club app on core, table,
+schedule).
 
 ### P2 Kai, junior under deadline
 One year of React, `as any` when in doubt, a demo by tomorrow. Copies examples, adapts them carelessly, feeds
@@ -90,12 +91,14 @@ real backend shapes (numbers as strings, ISO and epoch timestamps, nulls, ids ch
 Evaluates for a five-year commitment, trusts no README claim until measured: every concrete promise checked,
 an axe and keyboard audit against the WAI-ARIA APG patterns, scale (10k options, 5k tree nodes, 100k rows),
 API consistency across components and packages, escape hatches for month 3, upgrade risk from the
-CHANGELOGs. Credits what beats MUI, AG Grid, Highcharts, Bryntum. Runs: 2026-10-24 (core; the five others).
+CHANGELOGs. Credits what beats MUI, AG Grid, Highcharts, Bryntum. Runs: 2026-10-24 (core; the five others); 2026-10-28 (alarms,
+dashboard, the root contract on all seven).
 
 ### P4 Jonas, vibe coder
 A product owner whose coding agent may read only `llms-full.md`, the README and the d.ts. Seven plain-word
 requests (login, a customer list with row menus, an edit dialog, German and dark, a toast with undo, a
-drawer on the phone, Ctrl+K); for each, where the doc was wrong, missing or misleading. Run: 2026-10-24 (core).
+drawer on the phone, Ctrl+K); for each, where the doc was wrong, missing or misleading. Runs: 2026-10-24
+(core); 2026-10-28 (the seven plus a chart, an alarm list and a dashboard).
 
 ### P5 Mara, senior product designer
 Specimen pages of every component in every state, sizes, both themes, forced colours, viewports from 320 to
@@ -108,12 +111,13 @@ Fifteen years of SCADA/HMI front ends, ISA-101, alarm management per ISA-18.2. B
 list and banner (priorities, states, acknowledge, shelve, floods), a trend screen, a faceplate with
 setpoints and value quality, a shift log, a daily report; judges a week without reload, a 4K wall display, a
 dark control room, a touch panel, no internet. Knows what Ignition, AVEVA, WinCC Unified and Grafana ship.
-Run: 2026-10-24.
+Runs: 2026-10-24; 2026-10-28 (on the alarms package, with `touch-scale.css`).
 
 ### P7 Mira, field-service app developer
 A tablet and phone app for technicians with gloves, in sunlight, offline: hit areas against 44 px, safe
 areas, overlays and the on-screen keyboard, mobile input attributes, `prefers-contrast`, a 6× slower CPU;
-what a mobile app reaches for (bottom sheet, breakpoint hook, signature, photo capture). Run: 2026-10-24.
+what a mobile app reaches for (bottom sheet, breakpoint hook, signature, photo capture). Runs: 2026-10-24;
+2026-10-28 (every control of core, table and alarms with and without `touch-scale.css`).
 
 ### P8 Jule, mobile UX researcher
 Every interactive component of every package on iPhone and Pixel, beside the platform's native control,
@@ -186,13 +190,21 @@ A Raspberry Pi 4 class device or an old industrial panel PC (Playwright CPU thro
 an Electron or Tauri shell, an old WebView at the browser floor: start-up time, memory over a week, fonts
 missing, touch-only without a keyboard. Run: 2026-10-24.
 
-## Proposed, not yet run
-
 ### P13 Third-language team
 Brings French or Finnish as a third wording (ADR-0019 says any typed object will do): long translations that
 break layouts, Swiss and French number formats, a 12-hour clock, week starting on Sunday; does every visible
-string come from the wording, or does English leak through?
+string come from the wording, or does English leak through? Run: 2026-10-28 (fr-CH, a pseudo-localised
+wording on all seven packages).
 
 ### P16 Migrating team
 Moves a working screen from MUI plus AG Grid plus Highcharts to umriss: the effort per component, what has
-no counterpart, which habits break (prop names, event shapes, controlled patterns).
+no counterpart, which habits break (prop names, event shapes, controlled patterns). Builds the "before"
+screen for real first. Run: 2026-10-28 (an orders admin page to core, table, charts).
+
+### P22 Tobias, data-grid specialist
+Ten years of AG Grid Enterprise, MUI X Premium, TanStack Table, Handsontable, Glide, DevExtreme and Bryntum
+Grid in production; judges the table on its feature set alone. A matrix of 50-90 grid features (data and
+scale, columns, sorting and filtering, grouping and pivot, editing, selection and keyboard, export,
+customisation, state), each umriss claim verified in a host; the gaps that would make him reject it,
+ranked by how often real apps need them; for which apps the table is enough and for which not.
+Run: 2026-10-28.
