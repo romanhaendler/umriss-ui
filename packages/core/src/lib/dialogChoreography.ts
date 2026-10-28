@@ -87,7 +87,13 @@ export function useDialogChoreography(
          the exit choreography has to be reset before showModal() runs. */
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setClosing(false);
-      if (!dialog.open) dialog.showModal();
+      if (!dialog.open) {
+        /* The dialog's focusing steps move the focus to its first tab stop.
+           A field inside that React focused for `autoFocus` keeps it. */
+        const held = document.activeElement;
+        dialog.showModal();
+        if (held instanceof HTMLElement && held !== dialog && dialog.contains(held)) held.focus();
+      }
       return;
     }
 
