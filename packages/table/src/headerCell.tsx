@@ -11,6 +11,50 @@ import type { PinnedCell } from "./pinned";
 import { isDateFormat, isRightAligned } from "./values";
 import styles from "./Table.module.css";
 
+/* "Fit to content" measures the widest cell of the column; rows with a
+   different number of cells (detail rows) stay out of it. */
+export function contentWidth(cell: HTMLTableCellElement): number {
+  const headerRow = cell.parentElement;
+  const table = cell.closest("table");
+  if (!headerRow || !table) return 0;
+  const index = Array.from(headerRow.children).indexOf(cell);
+  const count = headerRow.children.length;
+  /* Measured without the width it has now, and without the surplus a full
+     width table hands its columns: a cell is never narrower than its width,
+     so a widened column would only ever grow. */
+  const before = { cell: cell.style.width, min: cell.style.minWidth, table: table.style.width };
+  cell.style.width = "";
+  cell.style.minWidth = "";
+  table.style.width = "auto";
+  let widest = 0;
+  for (const tableRow of Array.from(table.rows)) {
+    if (tableRow.cells.length !== count) continue;
+    const c = tableRow.cells[index];
+    if (!c) continue;
+    /* A value cut at the cap is wider than its box: its whole width, and
+       the cell's padding beside it. */
+    const box = c.querySelector<HTMLElement>(`.${styles.value}`);
+    const style = getComputedStyle(c);
+    const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    /* A head's label gives way with an ellipsis: what it hides counts. */
+    const label = c.querySelector<HTMLElement>(`.${styles.headLabel}`);
+    const hidden = label ? label.scrollWidth - label.clientWidth : 0;
+    widest = Math.max(widest, c.scrollWidth + hidden, box ? box.scrollWidth + padding : 0);
+  }
+  cell.style.width = before.cell;
+  cell.style.minWidth = before.min;
+  table.style.width = before.table;
+  return widest;
+}
+
+/** Sets every column of the table to the width of its content. */
+export function fitAllColumns(table: HTMLTableElement | null, setWidth: (column: string, width: number) => void) {
+  for (const cell of Array.from(table?.tHead?.querySelectorAll<HTMLTableCellElement>("th[data-column]") ?? [])) {
+    const widest = contentWidth(cell);
+    if (widest > 0) setWidth(cell.dataset.column!, Math.max(48, widest + 1));
+  }
+}
+
 export function HeaderCell({
   entry,
   registry,
@@ -33,6 +77,8 @@ export function HeaderCell({
   const rank = snapshot.sort.length > 1 && levelIndex !== -1 ? levelIndex + 1 : undefined;
   const width = snapshot.widths[id];
   const MIN = 48;
+  /* A width, declared or dragged, ends the flex. */
+  const flexing = spec.flex !== undefined && width === undefined;
 
   /* The pointer gesture runs at the grip, not over React state - taken over
      from Th in @umriss-ui/core, with the same two guarantees: a drag does not
@@ -63,37 +109,8 @@ export function HeaderCell({
     grip.addEventListener("pointercancel", onEnd);
   };
 
-  /* "Fit to content" measures the widest cell of the column; rows with a
-     different number of cells (detail rows) stay out of it. */
   const measureAndSet = (cell: HTMLTableCellElement | null) => {
-    const headerRow = cell?.parentElement;
-    const table = cell?.closest("table");
-    if (!cell || !headerRow || !table) return;
-    const index = Array.from(headerRow.children).indexOf(cell);
-    const count = headerRow.children.length;
-    /* Measured without the width it has now, and without the surplus a full
-       width table hands its columns: a cell is never narrower than its width,
-       so a widened column would only ever grow. */
-    const before = { cell: cell.style.width, table: table.style.width };
-    cell.style.width = "";
-    table.style.width = "auto";
-    let widest = 0;
-    for (const tableRow of Array.from(table.rows)) {
-      if (tableRow.cells.length !== count) continue;
-      const c = tableRow.cells[index];
-      if (!c) continue;
-      /* A value cut at the cap is wider than its box: its whole width, and
-         the cell's padding beside it. */
-      const box = c.querySelector<HTMLElement>(`.${styles.value}`);
-      const style = getComputedStyle(c);
-      const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-      /* A head's label gives way with an ellipsis: what it hides counts. */
-      const label = c.querySelector<HTMLElement>(`.${styles.headLabel}`);
-      const hidden = label ? label.scrollWidth - label.clientWidth : 0;
-      widest = Math.max(widest, c.scrollWidth + hidden, box ? box.scrollWidth + padding : 0);
-    }
-    cell.style.width = before.cell;
-    table.style.width = before.table;
+    const widest = cell ? contentWidth(cell) : 0;
     if (widest > 0) snapshot.setWidth(id, Math.max(MIN, widest + 1));
   };
 
@@ -170,9 +187,11 @@ export function HeaderCell({
       aria-sort={sortable ? ariaSort : undefined}
       tabIndex={spec.resizable && !sortable ? 0 : undefined}
       onKeyDown={handleKeyDown}
+      data-flex={flexing ? spec.flex : undefined}
       className={cx(styles.th, rightAligned && styles.numeric, width !== undefined && styles.sized, pin.className)}
       style={{
         ...(width !== undefined ? { width } : {}),
+        ...(flexing && spec.minWidth !== undefined ? { minWidth: spec.minWidth } : {}),
         ...pin.style,
       }}
     >

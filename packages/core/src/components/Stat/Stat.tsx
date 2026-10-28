@@ -13,6 +13,7 @@
    under the figure, never in a verdict colour. */
 
 import type { HTMLAttributes } from "react";
+import { useShapeWarning } from "../../lib/useShapeWarning";
 import { cx } from "../../lib/cx";
 import type { RefProp } from "../../lib/refProp";
 import { assess, type LimitSet, type Verdict } from "../../lib/limit";
@@ -105,7 +106,9 @@ function FreshnessLine({
 }
 
 /** Metric tile: one value, read against its limits. */
-export function Stat({ ref, label, value, unit, decimals, limits, history, asOf, ages, quality, className, ...rest }: StatProps) {
+export function Stat({ ref, label, value: valueGiven, unit, decimals, limits, history, asOf, ages, quality, className, ...rest }: StatProps) {
+  const value = typeof valueGiven === "string" ? undefined : valueGiven;
+  useShapeWarning("Stat", "value", typeof valueGiven === "string", "a number, null or undefined");
   const formats = useFormats();
   const wording = useWording();
 

@@ -28,6 +28,10 @@ Components reads to treat a module as client code. The list and the banner
 are used from a Client Component file; both render to a string on the server and
 in a test.
 
+Under a finger Acknowledge, Shelve and Unshelve are 26 px;
+`@umriss-ui/core/touch-scale.css` makes them 44 px, in any import order (core's
+README, **Touch**).
+
 ## The boundary
 
 The application generates its alarms, applies every transition and keeps the

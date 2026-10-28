@@ -225,6 +225,8 @@ export interface Wording {
   columns: string;
   /** Accessible name of the list in the column menu. */
   arrangeColumns: string;
+  /** The column menu's button that sets every column to the width of its content. */
+  fitAllColumns: string;
   /** The two buttons that move a column in the column menu. */
   columnForward: (column: string) => string;
   columnBackward: (column: string) => string;
@@ -380,6 +382,23 @@ export interface Wording {
   rangeTo: (to: string) => string;
   /** When "From" lies behind "To". The condition stays the last valid one. */
   rangeInvalid: string;
+  /** The text filter: its operators, as the choice and in the condition. */
+  textContains: string;
+  textNotContains: string;
+  textStartsWith: string;
+  textEndsWith: string;
+  textEquals: string;
+  textIsEmpty: string;
+  /** What joins the two terms of a text condition: the choice and the word between them. */
+  textAnd: string;
+  textOr: string;
+  /** The labels of the operator and the value fields of a term. */
+  filterOperator: string;
+  filterValue: string;
+  /** The name of the choice between AND and OR. */
+  filterJoin: string;
+  /** A term with a value in the toolbar: `starts with “foo”`. */
+  textTerm: (operator: string, value: string) => string;
   /** Clears search and conditions - in the table toolbar and in the empty body. */
   resetAll: string;
   /** The button under a server-mode table's error that sends the request once more. */
@@ -857,6 +876,7 @@ export const DEFAULT_WORDING: Wording = {
 
   columns: "Columns",
   arrangeColumns: "Show, hide and arrange columns",
+  fitAllColumns: "Fit all columns",
   columnForward: (column) => `Move ${column} forward`,
   columnBackward: (column) => `Move ${column} backward`,
   pinColumnToStart: (column) => `Pin ${column} to start`,
@@ -947,6 +967,18 @@ export const DEFAULT_WORDING: Wording = {
   rangeFrom: (from) => `from ${from}`,
   rangeTo: (to) => `to ${to}`,
   rangeInvalid: "“From” lies after “To”.",
+  textContains: "contains",
+  textNotContains: "does not contain",
+  textStartsWith: "starts with",
+  textEndsWith: "ends with",
+  textEquals: "equals",
+  textIsEmpty: "is empty",
+  textAnd: "and",
+  textOr: "or",
+  filterOperator: "Operator",
+  filterValue: "Value",
+  filterJoin: "Join",
+  textTerm: (operator, value) => `${operator} “${value}”`,
   resetAll: "Reset",
   tryAgain: "Try again",
   filteredOfTotal: (matches, total) => `${matches} of ${total}`,
