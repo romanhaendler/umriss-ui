@@ -43,3 +43,7 @@ export function pinnedCell(blocks: PinBlocks, first: number, last = first): Pinn
         },
   };
 }
+
+/** The head row that holds the columns' cells: the last one, under the row of a
+    `ColumnGroup`'s cells when there is one. */
+export const columnRow = (table: HTMLTableElement | null | undefined) => table?.tHead?.rows?.[table.tHead.rows.length - 1];
