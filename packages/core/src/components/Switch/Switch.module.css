@@ -51,11 +51,21 @@
     --_control: var(--u-control-height-sm);
   }
 
+  /* The input covers the whole control, invisible and full size: a test
+     runner's click lands on it, and the drawn parts take no pointer. */
   .input {
     position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
     opacity: 0;
-    width: 1px;
-    height: 1px;
+    cursor: inherit;
+  }
+
+  .track,
+  .label {
+    pointer-events: none;
   }
 
   .track {
