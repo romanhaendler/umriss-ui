@@ -5,7 +5,8 @@
 
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { DataTable, Legend, useChart } from "@umriss-ui/charts";
+import { ChartsWordingProvider, DataTable, Legend, useChart } from "@umriss-ui/charts";
+import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
 
 const ROWS = [
   { t: 0, a: 12, b: 3 },
@@ -38,4 +39,13 @@ it("hides a series from the legend and lists the values in a table", async () =>
   expect(await screen.findAllByRole("row")).toHaveLength(ROWS.length + 1);
   expect(screen.queryByRole("columnheader", { name: "Series A" })).toBeNull();
   expect(screen.getByRole("columnheader", { name: "Series B" })).toBeTruthy();
+});
+
+it("takes its wording from the provider the package exports", async () => {
+  render(
+    <ChartsWordingProvider wording={GERMAN_CHARTS_WORDING}>
+      <Course />
+    </ChartsWordingProvider>,
+  );
+  expect(await screen.findByRole("button", { name: "Daten zeigen" })).toBeTruthy();
 });

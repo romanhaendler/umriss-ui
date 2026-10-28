@@ -13,6 +13,8 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "./cx";
 import { DEV, warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
+import { HeadingContext } from "./columnGroup";
+import type { Heading } from "./columnGroup";
 import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
 import type { Registry, ColumnSpec } from "./registry";
@@ -89,7 +91,7 @@ export interface Parts {
   GroupBy: (props: RuntimeGroupByProps) => ReactNode;
 }
 
-function specFrom(props: RuntimeColumnProps): ColumnSpec {
+function specFrom(props: RuntimeColumnProps, heading: Heading | null): ColumnSpec {
   const field = typeof props.value === "string" ? props.value : undefined;
   let id = props.id ?? field;
   if (id === undefined) {
@@ -105,6 +107,7 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
   return {
     id,
     label: props.label,
+    heading: heading ?? undefined,
     value: props.value,
     presentation: typeof props.children === "function" ? (props.children as ColumnSpec["presentation"]) : undefined,
     format: props.format,
@@ -158,7 +161,7 @@ export function buildParts(registry: Registry): Parts {
   function Column(props: RuntimeColumnProps): ReactNode {
     const key = useId();
     const surrounding = useContext(TableContext);
-    const spec = specFrom(props);
+    const spec = specFrom(props, useContext(HeadingContext));
     // Writes idempotently (registry.ts, guarantee 1).
     registry.registerColumn(key, spec);
 
