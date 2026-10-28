@@ -12,6 +12,22 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
+
+### Changed
+
+- **AlarmList's `aria-label` and `aria-labelledby` name its grid**, not the role-less root; two lists on one screen read their own names, and the wording's "Alarms" stays the default.
+  - Migration: nothing to change in an application; a test that read the name off the root reads it from the grid (role "grid").
+- **Under `touch-scale.css` Acknowledge, Shelve and Unshelve are 44 px** with core's `sm` controls.
+  - Migration: to keep them at 26 px under the opt-in, set `--u-control-height-sm` after the import (see core's changelog).
+
+### Fixed
+
+- **An AlarmList with a `maxHeight` renders only the rows in view**: a flood of thousands of standing alarms no longer costs seconds and 100,000 nodes; Shift+A and S still reach the whole list. Without a `maxHeight` every row is rendered, as before.
+- **A lifecycle state wider than its cell** ends in an ellipsis with the full text as its title.
+- **The AlarmBanner's time** no longer wraps its "AM" at 375 px.
+- **README links resolve on npm**: links to files the package does not ship point to the repository on GitHub.
+
 ## 0.48.0 – Released in step with core (Oct. 2026)
 
 No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.

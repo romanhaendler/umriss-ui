@@ -27,6 +27,34 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
+
+### Changed
+
+- **`touch-scale.css` works in any import order and grows `sm` with `md`** (both 44 px under a finger; ADR-0079 amended); Tabs read `--u-control-height` like every `md` control. `xs`, menu rows, calendar days, checkboxes, switches and radios keep their size and 24 px hit areas.
+  - Migration: under the opt-in, `sm` buttons (toolbars, pagination, row actions, alarm buttons) are 44 px; to keep 26 px, set `--u-control-height-sm` after the import with `:root:root`, or leave the import out.
+- **Control heights are written in `rem`** (2rem, 1.625rem, 1.125rem; the opt-in 2.75rem): controls and table rows grow with the root font size. Nothing moves at a 16 px root.
+  - Migration: a host that raised its root font size (or whose user did) sees larger controls; set `--u-control-height`, `--u-control-height-sm` and `--u-control-height-xs` in px to keep the old size.
+- **`Formats.weekStart`** (ISO: 1 = Monday … 7 = Sunday): DatePicker, DateRangePicker and DateTimePicker start the month grid, Home/End and the weekday heads there; the `weekdays` wording stays Monday-first (ADR-0019, ADR-0024 amended).
+  - Migration: a hand-written complete `Formats` object needs `weekStart: 1` for the previous behaviour; a set from `formatsFor` or spread over a built-in one has it.
+
+### Added
+
+- **`formatsFor(locale, timeZone?)`** is exported: a third language derives all its formats from a locale in one line, zoned when given a time zone; it takes `weekStart` from the locale's week info where the runtime offers it, else Monday.
+- **DEV warnings for wrong shapes** (once per instance, silent in production): a non-`Date` value on the date pickers, a non-array value on MultiSelect, strings in `options` of Combobox and MultiSelect, a string `value` on NumberInput and Stat - the control renders empty instead of throwing; a Modal or Drawer without `onClose`.
+- **A DEV warning when a lowered build keeps a JavaScript dark mode light**, naming both fixes (a `color-scheme` rule, or the CSS target at the browser floor); the Theming page and `llms-full.md` state the rule (ADR-0021 note).
+- Wording, English and German: the text filter's operators, join and description, `fitAllColumns`, `schedulePlotName`.
+
+### Fixed
+
+- **A virtual list scrolled deep no longer goes blank when its count shrinks** (search, filter, live feed): TreeView, MultiSelect, listboxes and the table show the last rows, and the scroll height follows the shorter list.
+- **NumberInput reads a typed "." by the language**: the decimal wherever "." is not the group separator (fr-CH 1234.5 stays 1234.5; German 1.234 stays a thousand); a character the field cannot read leaves text and value as they were instead of being dropped.
+- **`autoFocus` inside a Modal or Drawer** keeps the focus when the dialog opens; before, it went to the close button.
+- **A Modal or Drawer without `onClose`** (a JavaScript host) no longer throws on Escape, the cross or the backdrop.
+- **Playwright's `check()` and `uncheck()`** work without `force` on Checkbox, Switch, RadioGroup radios, the table's selection boxes and MultiSelect options; a click on the label still toggles once.
+- **The date pickers' placeholder** reaches 4.5:1 (it was 3.4:1).
+- **README links resolve on npm**: links to files the package does not ship point to the repository on GitHub.
+
 ## 0.48.0 – One size on every device, and a dialog's focus where Tab would put it (Oct. 2026)
 
 ### Changed
