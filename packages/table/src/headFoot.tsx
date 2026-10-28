@@ -6,10 +6,11 @@ import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
 import type { TableProps } from "./types";
-import { NOT_PINNED, pinnedCell } from "./pinned";
+import { NOT_PINNED, pinnedCell, withEdge } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { HeaderCell } from "./headerCell";
+import { groupEdges } from "./columnGroup";
 import type { Heading } from "./columnGroup";
 import { lineKey } from "./frameLayout";
 import type { FrameLayout } from "./frameLayout";
@@ -42,13 +43,14 @@ export function HeadRow({
     else runs.push({ heading: e.spec.heading, side, from: i, to: i });
   });
   const grouped = dataColumns.some((e) => e.spec.heading);
+  const edges = groupEdges(dataColumns);
   return (
     <thead>
       {grouped && (
-        <tr data-head-group="">
+        <tr data-head-group="" aria-rowindex={virtual ? 1 : undefined}>
           {leading > 0 && <td colSpan={leading} className={cx(styles.th, pinAt(0, leading - 1).className)} style={pinAt(0, leading - 1).style} />}
           {runs.map(({ heading, from, to }) => {
-            const pin = pinAt(leading + from, leading + to);
+            const pin = withEdge(pinAt(leading + from, leading + to), edges.has(dataColumns[from]!));
             const cell = cx(styles.th, heading && styles.headGroup, pin.className);
             return heading ? (
               <th key={from} scope="colgroup" colSpan={to - from + 1} className={cell} style={pin.style}>
@@ -61,7 +63,7 @@ export function HeadRow({
           {trailing && <td className={cx(styles.th, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />}
         </tr>
       )}
-      <tr aria-rowindex={virtual ? 1 : undefined} data-grid-line={lineKey(gridMode, "head")}>
+      <tr aria-rowindex={virtual ? (grouped ? 2 : 1) : undefined} data-grid-line={lineKey(gridMode, "head")}>
         {selectable && (
           <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
             <Checkbox
@@ -87,7 +89,7 @@ export function HeadRow({
             </th>
           ))}
         {dataColumns.map((e, i) => (
-          <HeaderCell key={e.key} entry={e} registry={registry} hook={hook} pin={pinAt(leading + i)} />
+          <HeaderCell key={e.key} entry={e} registry={registry} hook={hook} pin={withEdge(pinAt(leading + i), edges.has(e))} />
         ))}
         {trailing && (
           <th
@@ -133,9 +135,10 @@ export function FootRow({
 }) {
   const { projection, virtual, spanEntry, dataColumns, controlColumns, leading, trailing, columnCount, blocks } = layout;
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
+  const edges = groupEdges(dataColumns);
   return (
     <tfoot>
-      <tr aria-rowindex={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey(gridMode, "foot")}>
+      <tr aria-rowindex={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + layout.headRows : undefined} data-grid-line={lineKey(gridMode, "foot")}>
         {Array.from({ length: controlColumns }, (_, i) => (
           <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
         ))}
@@ -149,7 +152,7 @@ export function FootRow({
             topLevel={projection.roots !== undefined}
             formats={formats}
             wording={wording}
-            pin={pinAt(leading + i)}
+            pin={withEdge(pinAt(leading + i), edges.has(e))}
             totals={layout.totals}
             busy={layout.busy}
           />

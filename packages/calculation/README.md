@@ -163,7 +163,7 @@ and makes absent only its own metric.
 ## Testing
 
 Tested under Vitest 5 and Jest 30 on jsdom. The runner lines and the setup file are in
-[`@umriss-ui/core`'s Testing section](../core/README.md#testing); `check:dist` runs a test of the
+[`@umriss-ui/core`'s Testing section](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/README.md#testing); `check:dist` runs a test of the
 installed calculation (an input changed, the result read) with exactly those files.
 
 ## Documentation
