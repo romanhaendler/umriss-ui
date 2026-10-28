@@ -161,6 +161,7 @@ export const GERMAN_WORDING: Wording = {
 
   columns: "Spalten",
   arrangeColumns: "Spalten ein- und ausblenden, anordnen",
+  fitAllColumns: "Alle Spalten anpassen",
   columnForward: (column) => `${column} nach vorn`,
   columnBackward: (column) => `${column} nach hinten`,
   pinColumnToStart: (column) => `${column} am Anfang fixieren`,
