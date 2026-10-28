@@ -10,9 +10,7 @@ import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
-
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+import { firstTabStop } from "../../lib/firstTabStop";
 
 /* A surface opened from inside a panel belongs to it: the panel portals
    elsewhere, so the DOM cannot tell, and the React tree does. Each open
@@ -250,7 +248,7 @@ export function Popover({
     // so that a fresh array per render does not rebind the listeners.
   }, [open, anchorRef, measure, hideOnScroll, registerInParent]);
 
-  /* A dialog takes the focus in: the first focusable element, else the panel
+  /* A dialog takes the focus in: the first tab stop, else the panel
      itself - unless its content placed the focus already. Children's effects
      run before this one, so their own focusing has happened. */
   const standing = present && !!target;
@@ -260,7 +258,7 @@ export function Popover({
     const root = panel.getRootNode();
     const active = root instanceof ShadowRoot ? root.activeElement : document.activeElement;
     if (active && panel.contains(active)) return;
-    (panel.querySelector<HTMLElement>(FOCUSABLE) ?? panel).focus({ preventScroll: true });
+    (firstTabStop(panel) ?? panel).focus({ preventScroll: true });
   }, [standing, open, role]);
 
   if (!standing) return null;
