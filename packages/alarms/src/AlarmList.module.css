@@ -68,8 +68,10 @@
      column takes the width it needs from the ones that wrap. A duration
      too: "3 hrs 18" over "min" tore the unit from its number. */
   .state {
-    display: flex;
+    /* Inline, so that a cell's own alignment holds (the duration stands at the end). */
+    display: inline-flex;
     align-items: center;
+    vertical-align: middle;
     white-space: nowrap;
     max-width: 20rem;
   }
