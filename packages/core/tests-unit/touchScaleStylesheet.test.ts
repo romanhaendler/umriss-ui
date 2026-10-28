@@ -13,8 +13,8 @@ describe("touch-scale.css", () => {
   });
 
   it("grows md and sm together, and leaves xs", () => {
-    expect(TOUCH).toMatch(/--u-control-height:\s*44px/);
-    expect(TOUCH).toMatch(/--u-control-height-sm:\s*44px/);
+    expect(TOUCH).toMatch(/--u-control-height:\s*2.75rem/);
+    expect(TOUCH).toMatch(/--u-control-height-sm:\s*2.75rem/);
     expect(TOUCH).not.toMatch(/--u-control-height-xs/);
   });
 

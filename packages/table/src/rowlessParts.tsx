@@ -5,7 +5,7 @@
    Empty and loading are props of the table (`empty`, `loading`), not parts:
    they are states of the one body. */
 
-import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
+import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button, Checkbox, GripGlyph, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
@@ -227,11 +227,13 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
   const hook = registry.hook!;
   const ordered = registry.inPinOrder(orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order));
   const pins = registry.pins();
+  const headingOf = (id: string) => registry.columnById(id)?.spec.heading;
   /* A column moves inside its block: past the edge of a block it would only
-     be put back where its pin keeps it. */
+     be put back where its pin keeps it. It stays in its group too. */
+  const together = (a: string, b: string) => pins[a] === pins[b] && headingOf(a)?.id === headingOf(b)?.id;
   const movable = (index: number, step: -1 | 1) => {
     const target = ordered[index + step];
-    return target !== undefined && pins[target.id] === pins[ordered[index]!.id];
+    return target !== undefined && together(target.id, ordered[index]!.id);
   };
 
   const move = (index: number, step: -1 | 1) => {
@@ -250,7 +252,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
   const track = () => {
     const d = dragging.current!;
     const at = pointerAt(d);
-    const step = d.boxes.length > 1 ? d.boxes[1]!.top - d.boxes[0]!.top : 0;
+    const step = d.hi > d.lo ? d.boxes[d.lo + 1]!.top - d.boxes[d.lo]!.top : 0;
     setDrag({ from: d.from, place: dropPlace(d.boxes, at, d.from, d.lo, d.hi), dy: at - d.start, step });
   };
 
@@ -258,15 +260,14 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
     if (event.button !== 0 || dragging.current || !list.current) return;
     const scroller = list.current.parentElement!;
     const origin = scroller.getBoundingClientRect().top - scroller.scrollTop;
-    const boxes = Array.from(list.current.children).map((child) => {
+    const boxes = Array.from(list.current.querySelectorAll("[data-column]")).map((child) => {
       const box = child.getBoundingClientRect();
       return { top: box.top - origin, bottom: box.bottom - origin };
     });
-    const block = ordered.map((s) => pins[s.id]);
     let lo = index;
     let hi = index;
-    while (lo > 0 && block[lo - 1] === block[index]) lo--;
-    while (hi < block.length - 1 && block[hi + 1] === block[index]) hi++;
+    while (lo > 0 && together(ordered[lo - 1]!.id, ordered[index]!.id)) lo--;
+    while (hi < ordered.length - 1 && together(ordered[hi + 1]!.id, ordered[index]!.id)) hi++;
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const d = { from: index, lo, hi, boxes, start: event.clientY - origin, clientY: event.clientY, scroller, timer: 0 };
     dragging.current = d;
@@ -370,9 +371,12 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
           {ordered.map((column, index) => {
             const label = column.label ?? column.id;
             const offset = shift(index);
+            const heading = headingOf(column.id);
+            const opens = heading && heading.id !== headingOf(ordered[index - 1]?.id ?? "")?.id;
             return (
+              <Fragment key={column.id}>
+              {opens && <li className={styles.columnsGroup}>{heading.label}</li>}
               <li
-                key={column.id}
                 className={styles.columnsEntry}
                 data-column={column.id}
                 data-lifted={drag?.from === index || undefined}
@@ -428,6 +432,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
                 {pinKey(column.id, label, "start")}
                 {pinKey(column.id, label, "end")}
               </li>
+              </Fragment>
             );
           })}
         </ul>

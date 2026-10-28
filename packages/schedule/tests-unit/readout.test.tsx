@@ -49,7 +49,7 @@ describe("the plot as a tab stop", () => {
     const { container } = render(plan);
     const plot = plotOf(container);
     expect(plot.tabIndex).toBe(0);
-    expect(plot.getAttribute("aria-label")).toBe("Plan of week 12");
+    expect(plot.getAttribute("aria-label")).toBe("Plan of week 12, plot");
     expect(plot.getAttribute("aria-roledescription")).toBe("schedule");
   });
 });
