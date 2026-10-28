@@ -136,4 +136,34 @@ describe("Breadcrumb", () => {
     expect(selected).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
+  it("follows a folded entry's href past hostile spellings of a script scheme, and follows the harmless ones", () => {
+    measured();
+    const assign = vi.fn();
+    vi.stubGlobal("location", { assign });
+    const followed = (href: string) => {
+      assign.mockClear();
+      const trail = TRAIL.map((item, i) => (i === 1 ? { ...item, href } : item));
+      const { unmount } = render(<Breadcrumb items={trail} />);
+      fireEvent.click(screen.getByRole("button", { name: "Show the levels in between" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Hall B" }));
+      unmount();
+      return assign.mock.calls.length > 0;
+    };
+    const hostile = [
+      "javascript:alert(1)",
+      "JaVaScRiPt:alert(1)",
+      " javascript:alert(1)",
+      "\tjavascript:alert(1)",
+      "java\nscript:alert(1)",
+      "java\r\tscript:alert(1)",
+      "\u0000javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "vbscript:msgbox(1)",
+    ];
+    for (const href of hostile) expect(followed(href), JSON.stringify(href)).toBe(false);
+    for (const href of ["https://a.example/x", "mailto:a@b.c", "tel:+491", "../up", "/abs", "#frag"]) {
+      expect(followed(href), href).toBe(true);
+    }
+    vi.unstubAllGlobals();
+  });
 });

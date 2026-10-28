@@ -34,4 +34,23 @@ describe("CSV formulas", () => {
     const columns: CsvColumn<unknown>[] = [{ id: "c", label: "L", value: () => "=1+1" }];
     expect(asTabbed([{}], columns)).toBe("L\n=1+1");
   });
+
+  it("neutralises a formula after leading spaces", () => {
+    expect(one("  =1+1")[1]).toBe("'  =1+1");
+  });
+
+  it("neutralises and quotes a formula that holds the separator or a line break", () => {
+    expect(one("=A1,B1")[1]).toBe(`"'=A1,B1"`);
+    expect(one("=A1\nB1")[1]).toBe(`"'=A1\nB1"`);
+    expect(one("+1\r\n=2").join("\r\n")).toBe(`L\r\n"'+1\r\n=2"`);
+  });
+
+  it("leaves a full-width equals sign alone: no spreadsheet reads it as a formula", () => {
+    expect(one("＝1+1")[1]).toBe("＝1+1");
+  });
+
+  it.each(["  =1+1", "=A1,B1", "@SUM(1)", "+1\n2"])("neutralises %j as a label", (label) => {
+    const header = one("a", label).join("\r\n").split("\r\na")[0]!;
+    expect(header.replace(/^"|"$/g, "").startsWith("'")).toBe(true);
+  });
 });
