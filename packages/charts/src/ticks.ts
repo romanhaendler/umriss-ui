@@ -57,9 +57,8 @@ export function niceDomain(
   const step = tickStep(max - min, count);
   const digits = decimalsForStep(step);
   const top = Math.ceil(max / step) * step;
-  // Widened from a step above, so the ticks of the longer span stand on it.
-  if (headroom && max > 0 && top - max < step * 1e-9) return niceDomain(min, max + step, count);
-  return [roundTo(Math.floor(min / step) * step, digits), roundTo(top, digits)];
+  const above = headroom && max > 0 && top - max < step * 1e-9 ? step : 0;
+  return [roundTo(Math.floor(min / step) * step, digits), roundTo(top + above, digits)];
 }
 
 /** Exact domain from the data; constant series → ±1. */
@@ -70,11 +69,11 @@ export function dataDomain(min: number, max: number): [number, number] {
 }
 
 /** Tick values within the domain (multiples of the step). */
-export function ticksFor(min: number, max: number, count: number): number[] {
+export function ticksFor(min: number, max: number, count: number, given?: number): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [];
   if (min === max) return [normalizeZero(min)];
   const [from, to] = min < max ? [min, max] : [max, min];
-  const step = tickStep(to - from, count);
+  const step = given ?? tickStep(to - from, count);
   const digits = decimalsForStep(step);
   // Tolerance against floating point noise at the domain boundaries.
   const tolerance = step * 1e-9;
