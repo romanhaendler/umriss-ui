@@ -36,9 +36,13 @@ test("A acknowledges the alarm the focus is in, also on a row scrolled into view
   await area.evaluate((node) => {
     node.scrollTop = node.scrollHeight / 2;
   });
+  /* The window follows the scroll on the next frame. */
+  await expect(stage.locator("tbody tr[data-alarm-id]").first()).not.toHaveAttribute("data-alarm-id", "s-0");
   const cell = stage.locator("tbody tr[data-alarm-id] th").nth(5);
   const id = await cell.evaluate((node) => (node.closest("tr") as HTMLElement).dataset.alarmId!);
   await cell.focus();
   await page.keyboard.press("a");
-  await expect(stage.locator(`tbody tr[data-alarm-id="${id}"]`)).toHaveAttribute("data-lifecycle", /acknowledged/);
+  /* An acknowledged alarm sorts below the unacknowledged ones, so its row
+     leaves the window: what must not stand any more is the unacknowledged row. */
+  await expect(stage.locator(`tbody tr[data-alarm-id="${id}"][data-lifecycle="active-unacknowledged"]`)).toHaveCount(0);
 });

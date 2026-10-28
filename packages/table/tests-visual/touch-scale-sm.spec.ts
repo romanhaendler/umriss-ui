@@ -23,7 +23,7 @@ const heightsOf = async (page: Page, pageId: string, exampleId: string, scaled: 
 };
 
 const toolbar = (stage: Locator) => [stage.getByRole("searchbox").first(), stage.getByRole("button", { name: "Columns" }).first()];
-const pagination = (stage: Locator) => [stage.getByRole("button", { name: /next/i }).first(), stage.getByRole("button", { name: /previous/i }).first()];
+const pagination = (stage: Locator) => [stage.getByRole("button", { name: /next/i }).first(), stage.getByRole("button", { name: /back/i }).first()];
 
 test("the toolbar's Search and Columns are 44 px with the opt-in, 26 px without", { tag: "@quick" }, async ({ page }) => {
   expect(await heightsOf(page, "toolbar", "search-arrange-and-export", false, toolbar)).toEqual([26, 26]);

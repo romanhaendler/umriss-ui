@@ -75,3 +75,9 @@ Touch belongs to the device and reaches every surface.
   platform's wheel through the Select (ADR-0043), and nothing else is handed over.
 - **Under a finger** is a glossary term: the primary pointer is coarse. Sizes and
   hit areas follow it, and a behaviour follows the gesture's pointer type.
+
+## Amendment 2026-10-28
+
+The size no longer grows by default (ADR-0079), and the opt-in `touch-scale.css`
+grows `sm` to 44 px with `md`, not `md` alone: where this record says that `sm`
+stays 26 px under a finger, it holds without the opt-in only.
