@@ -20,3 +20,12 @@ takes no change whose CI or Semgrep check is red.
 - [ ] GitHub, branch `main`: protected, with the CI check and the Semgrep check required.
 - [ ] GitHub, Actions settings: "Require actions to be pinned to a full-length commit SHA" is on, if the account offers it.
 - [ ] The next release goes out with the reviewer's approval and is green in both publish jobs.
+
+## Left from tickets 01-06
+
+These could not be done without pushing `main` or waiting for a date:
+
+- [ ] After the push: the CI run on GitHub is green, the `semgrep` job included (first run on a runner; a "safe.directory" warning there is harmless).
+- [ ] Actions → Publish → Run workflow on a commit that publishes nothing: `find` reports every version on npm, `build` and `publish` are skipped. The next real release is watched until both jobs are green.
+- [ ] After 2026-10-28 17:28 UTC: remove `baseline-browser-mapping@2.11.33` from `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` and check that `pnpm install --frozen-lockfile` passes.
+- [ ] The first grouped Dependabot pull request for the action pins looks as intended.

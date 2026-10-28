@@ -1,6 +1,6 @@
 # Security hardening: the release path, the build tools and the DOM
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-10-28
 
 ## Problem Statement
