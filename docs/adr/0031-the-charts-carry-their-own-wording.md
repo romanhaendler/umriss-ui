@@ -34,3 +34,13 @@ would make the one package that depends on nothing depend on everything.
   tag, `locale` (`en-GB`, `de-DE`): the default number and date formats of the
   axes, tooltip, data table and screen-reader text are made in it, and the
   browser's language is not read.
+
+## Amendment 2026-10-28
+
+Setting the wording on every `Chart` did not scale to an app: a chart inside a
+dashboard widget fell back to English. `@umriss-ui/charts` exports
+`ChartsWordingProvider`, which takes a partial `ChartsWording` and sets it for
+every chart below it. A chart merges the English default, then the provider's,
+then its own `wording` prop, so one chart can still differ. The charts still
+depend on nothing: an app with both packages sets both providers, once, at the
+root.
