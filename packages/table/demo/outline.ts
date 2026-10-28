@@ -44,6 +44,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The command brings the core package along, a peer dependency: the table reads its provider, its formats and its wording (ADR-0016). React 19 or newer is a peer as well and stays the application's own.",
           "There is no stylesheet to import. The table loads its own, and the core package loads the tokens it reads; both lie in cascade layers, so the application's CSS wins. `@umriss-ui/table/styles.css` stays exported for setups that link stylesheets by hand.",
+          "Under a finger the toolbar, pagination and row actions are 26 px; `@umriss-ui/core/touch-scale.css` makes them 44 px, in any import order - see core's Installation.",
           "A table is read by default: a native table, where every control is one Tab away and a screen reader keeps its table keys. Grid mode makes it one Tab stop whose cells the arrow keys walk, and it is the mode for editing. Switch it on only where people work in the cells (ADR-0034).",
         ],
         keysOf: ["first-table"],
