@@ -1,5 +1,5 @@
 /* Column filters: one interface for the list filter, the
-   range filter and an application's filter of its own.
+   range filter, the text filter and an application's filter of its own.
 
    A filter is bound to a value type, not to a row kind - like `column<P>()` to
    a property. It says three things: whether a value satisfies a condition
@@ -15,9 +15,9 @@
 
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Checkbox, DateRangePicker, FormField, NumberInput, useFormats, useWording, zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
+import { Checkbox, DateRangePicker, FormField, Input, NumberInput, SegmentedControl, Select, useFormats, useWording, zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
-import type { Present } from "./types";
+import type { Present, TextCondition, TextOperator, TextTerm } from "./types";
 import { asText, ABSENT_KEY, filterKey, isAbsent } from "./values";
 import type { Format, ValueKind } from "./values";
 import styles from "./Table.module.css";
@@ -64,7 +64,7 @@ export function columnFilter<W, B>(definition: ColumnFilter<W, B>): ColumnFilter
 type Filter = ColumnFilter<unknown, unknown>;
 
 /** What a column gets as `filter`. */
-export type FilterSpec = "list" | "range" | Filter;
+export type FilterSpec = "list" | "range" | "text" | Filter;
 
 /** What the description of a condition knows about its column. */
 export interface FilterEnv {
@@ -82,8 +82,8 @@ interface BuiltIn<B> {
   isEmpty: (condition: B) => boolean;
   /** Whether an absent value matches. */
   absentMatches: (condition: B) => boolean;
-  /** `matches`, with the formats' time zone: a day is the zone's day. */
-  matchesIn?: (value: unknown, condition: B, timeZone: string | undefined) => boolean;
+  /** `matches`, with the formats: a day is the zone's day, case is the locale's. */
+  matchesIn?: (value: unknown, condition: B, formats: Formats) => boolean;
   /** `describe`, with the provider's formats and wording. */
   describeIn: (condition: B, env: FilterEnv) => string;
 }
@@ -101,6 +101,7 @@ export const isBuiltIn = (filter: Filter): boolean => BUILT_IN.has(filter);
 export function filterOf(spec: FilterSpec | undefined): Filter | undefined {
   if (spec === "list") return LIST;
   if (spec === "range") return RANGE;
+  if (spec === "text") return TEXT;
   return typeof spec === "object" && spec !== null ? spec : undefined;
 }
 
@@ -137,10 +138,10 @@ export function reviveCondition(filter: Filter, condition: unknown, kind: ValueK
 }
 
 /** Whether a value satisfies an effective condition. */
-export function satisfies(filter: Filter, value: unknown, condition: unknown, timeZone?: string): boolean {
+export function satisfies(filter: Filter, value: unknown, condition: unknown, formats: Formats): boolean {
   const more = BUILT_IN.get(filter);
   if (isAbsent(value)) return more?.absentMatches(condition) ?? false;
-  return more?.matchesIn ? more.matchesIn(value, condition, timeZone) : filter.matches(value, condition);
+  return more?.matchesIn ? more.matchesIn(value, condition, formats) : filter.matches(value, condition);
 }
 
 /** The text of an effective condition, without the column's name. */
@@ -430,7 +431,7 @@ const RANGE = /* @__PURE__ */ builtIn<Range>(
     },
     isEmpty: (condition) => condition.from === undefined && condition.to === undefined,
     absentMatches: () => false,
-    matchesIn: (value, condition, timeZone) => rangeMatches(value, condition, timeZone),
+    matchesIn: (value, condition, formats) => rangeMatches(value, condition, formats.timeZone),
     describeIn: (condition, env) => {
       const { from, to } = condition;
       if (from !== undefined && to !== undefined) {
@@ -445,5 +446,171 @@ const RANGE = /* @__PURE__ */ builtIn<Range>(
       if (from !== undefined) return env.wording.rangeFrom(boundText(from, env));
       return to === undefined ? "" : env.wording.rangeTo(boundText(to, env));
     },
+  },
+);
+
+/* --- The text filter ------------------------------------------------------------- */
+
+/* Its condition is one or two terms and how they join. A term that needs a
+   value and has none requires nothing and is left out; an absent text counts
+   as "": it satisfies "is empty" and "does not contain", like any empty one.
+   Case is the locale's: both sides are lowered with the formats' locale. */
+
+const OPERATORS: readonly TextOperator[] = ["contains", "notContains", "startsWith", "endsWith", "equals", "isEmpty"];
+
+const operatorLabel = (operator: TextOperator, wording: Wording): string =>
+  ({
+    contains: wording.textContains,
+    notContains: wording.textNotContains,
+    startsWith: wording.textStartsWith,
+    endsWith: wording.textEndsWith,
+    equals: wording.textEquals,
+    isEmpty: wording.textIsEmpty,
+  })[operator];
+
+const isTerm = (term: unknown): term is TextTerm =>
+  typeof term === "object" &&
+  term !== null &&
+  OPERATORS.includes((term as TextTerm).operator) &&
+  ((term as TextTerm).value === undefined || typeof (term as TextTerm).value === "string");
+
+/** Whether a term requires something. */
+const complete = (term: TextTerm): boolean => term.operator === "isEmpty" || (term.value ?? "") !== "";
+
+const completeTerms = (condition: TextCondition): TextTerm[] => condition.terms.filter(complete);
+
+function termMatches(text: string, term: TextTerm, locale: string): boolean {
+  const a = text.toLocaleLowerCase(locale);
+  const b = (term.value ?? "").toLocaleLowerCase(locale);
+  switch (term.operator) {
+    case "contains":
+      return a.includes(b);
+    case "notContains":
+      return !a.includes(b);
+    case "startsWith":
+      return a.startsWith(b);
+    case "endsWith":
+      return a.endsWith(b);
+    case "equals":
+      return a === b;
+    case "isEmpty":
+      return a === "";
+  }
+}
+
+function textMatches(value: unknown, condition: TextCondition, locale: string): boolean {
+  const text = isAbsent(value) ? "" : String(value);
+  const results = completeTerms(condition).map((term) => termMatches(text, term, locale));
+  return condition.join === "or" ? results.some(Boolean) : results.every(Boolean);
+}
+
+/** The condition a pair of terms makes: only the terms that require something,
+    the join only for two; `null` when nothing is required. */
+function textConditionOf(terms: readonly TextTerm[], join: "and" | "or"): TextCondition | null {
+  const used = terms.filter(complete).map((term): TextTerm => (term.operator === "isEmpty" ? { operator: term.operator } : term));
+  if (used.length === 0) return null;
+  return used.length === 1 ? { terms: [used[0]!] } : { join, terms: [used[0]!, used[1]!] };
+}
+
+const BLANK: TextTerm = { operator: "contains", value: "" };
+
+const draftOf = (condition: TextCondition | null) => ({
+  terms: [condition?.terms[0] ?? BLANK, condition?.terms[1] ?? BLANK] as const,
+  join: condition?.join ?? "and",
+});
+
+/* What two conditions are compared by: the effective form, keys in one order. */
+const canonical = (condition: TextCondition | null): string => {
+  const { terms, join } = draftOf(condition);
+  return JSON.stringify(textConditionOf(terms, join));
+};
+
+function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCondition>) {
+  const wording = useWording();
+  /* The draft keeps what the condition leaves out - the operator of a term
+     whose value is still empty. It follows the condition when that changes from
+     outside: reset, a chip, a view. */
+  const [draft, setDraft] = useState(() => draftOf(condition));
+  let shown = draft;
+  if (canonical({ join: draft.join, terms: draft.terms }) !== canonical(condition)) {
+    shown = draftOf(condition);
+    setDraft(shown);
+  }
+  const change = (index: 0 | 1, term: TextTerm) => {
+    const terms = [index === 0 ? term : shown.terms[0], index === 1 ? term : shown.terms[1]] as const;
+    setDraft({ ...shown, terms });
+    setCondition(textConditionOf(terms, shown.join));
+  };
+  const join = (value: "and" | "or") => {
+    setDraft({ ...shown, join: value });
+    setCondition(textConditionOf(shown.terms, value));
+  };
+
+  const row = (index: 0 | 1) => {
+    const term = shown.terms[index];
+    return (
+      <div className={styles.textTerm}>
+        <FormField label={wording.filterOperator}>
+          <Select size="sm" value={term.operator} onChange={(event) => change(index, { ...term, operator: event.target.value as TextOperator })}>
+            {OPERATORS.map((operator) => (
+              <option key={operator} value={operator}>
+                {operatorLabel(operator, wording)}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+        {term.operator !== "isEmpty" && (
+          <FormField label={wording.filterValue}>
+            <Input size="sm" value={term.value ?? ""} onChange={(event) => change(index, { ...term, value: event.target.value })} />
+          </FormField>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className={styles.textFields}>
+      {row(0)}
+      <SegmentedControl
+        size="sm"
+        aria-label={wording.filterJoin}
+        value={shown.join}
+        options={[
+          { value: "and", label: wording.textAnd },
+          { value: "or", label: wording.textOr },
+        ]}
+        onChange={join}
+      />
+      {row(1)}
+    </div>
+  );
+}
+
+const TEXT = /* @__PURE__ */ builtIn<TextCondition>(
+  /* @__PURE__ */ columnFilter<unknown, TextCondition>({
+    matches: (value, condition) => textMatches(value, condition, "en"),
+    Input: TextInput,
+    describe: (condition) => completeTerms(condition).map((term) => `${term.operator} ${term.value ?? ""}`.trim()).join(condition.join === "or" ? " or " : " and "),
+  }),
+  {
+    isCondition: (condition): condition is TextCondition =>
+      typeof condition === "object" &&
+      condition !== null &&
+      (!("join" in condition) || condition.join === "and" || condition.join === "or") &&
+      "terms" in condition &&
+      Array.isArray(condition.terms) &&
+      condition.terms.length >= 1 &&
+      condition.terms.length <= 2 &&
+      condition.terms.every(isTerm),
+    isEmpty: (condition) => completeTerms(condition).length === 0,
+    absentMatches: (condition) => textMatches("", condition, "en"),
+    matchesIn: (value, condition, formats) => textMatches(value, condition, formats.locale),
+    describeIn: (condition, env) =>
+      completeTerms(condition)
+        .map((term) => {
+          const label = operatorLabel(term.operator, env.wording);
+          return term.operator === "isEmpty" ? label : env.wording.textTerm(label, term.value ?? "");
+        })
+        .join(` ${condition.join === "or" ? env.wording.textOr : env.wording.textAnd} `),
   },
 );

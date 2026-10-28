@@ -44,6 +44,7 @@ export const OUTLINE: readonly Rubric[] = [
           "It never removes an alert to thin out a flood; deciding that a person should not see one stays with the application.",
           "No latched alerts, and no alarm-system figures beyond the frequency per type.",
           "The columns do not sort and the list does not page: the model sets the order.",
+          "The list renders only the rows in view when it has a bound: give it a `maxHeight`. Without one it renders every row, and a flood of thousands then costs seconds to paint.",
           "A, Shift+A and S act only while the focus is on a cell of the list's grid, never in a field, and they cannot be remapped (WCAG 2.1.4). “The alerts in view” is umriss's own rule, not a standard's: the rows whose box meets the list's scroll area and the window when the question opens, never the filtered set as such.",
         ],
         accessibility: [

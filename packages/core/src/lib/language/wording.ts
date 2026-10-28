@@ -382,6 +382,23 @@ export interface Wording {
   rangeTo: (to: string) => string;
   /** When "From" lies behind "To". The condition stays the last valid one. */
   rangeInvalid: string;
+  /** The text filter: its operators, as the choice and in the condition. */
+  textContains: string;
+  textNotContains: string;
+  textStartsWith: string;
+  textEndsWith: string;
+  textEquals: string;
+  textIsEmpty: string;
+  /** What joins the two terms of a text condition: the choice and the word between them. */
+  textAnd: string;
+  textOr: string;
+  /** The labels of the operator and the value fields of a term. */
+  filterOperator: string;
+  filterValue: string;
+  /** The name of the choice between AND and OR. */
+  filterJoin: string;
+  /** A term with a value in the toolbar: `starts with “foo”`. */
+  textTerm: (operator: string, value: string) => string;
   /** Clears search and conditions - in the table toolbar and in the empty body. */
   resetAll: string;
   /** The button under a server-mode table's error that sends the request once more. */
@@ -506,6 +523,9 @@ export interface Wording {
   /** What a screen reader calls the plot that takes the keys
       (`aria-roledescription`, schedule-a11y S1). */
   scheduleRoleDescription: string;
+  /** The plot's own name, beside the figure that carries the caller's
+      `aria-label`, so the caller's name is not heard twice. */
+  schedulePlotName: (label: string) => string;
   /** The plot's description (S6): the lanes, the subtasks in view, the
       visible span with both ends formatted, and the findings of the plan by
       kind. */
@@ -950,6 +970,18 @@ export const DEFAULT_WORDING: Wording = {
   rangeFrom: (from) => `from ${from}`,
   rangeTo: (to) => `to ${to}`,
   rangeInvalid: "“From” lies after “To”.",
+  textContains: "contains",
+  textNotContains: "does not contain",
+  textStartsWith: "starts with",
+  textEndsWith: "ends with",
+  textEquals: "equals",
+  textIsEmpty: "is empty",
+  textAnd: "and",
+  textOr: "or",
+  filterOperator: "Operator",
+  filterValue: "Value",
+  filterJoin: "Join",
+  textTerm: (operator, value) => `${operator} “${value}”`,
   resetAll: "Reset",
   tryAgain: "Try again",
   filteredOfTotal: (matches, total) => `${matches} of ${total}`,
@@ -1014,6 +1046,7 @@ export const DEFAULT_WORDING: Wording = {
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
   scheduleRoleDescription: "schedule",
+  schedulePlotName: (label) => `${label}, plot`,
   scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked, milestones }) =>
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
     `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}` +

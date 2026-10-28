@@ -252,6 +252,18 @@ export const GERMAN_WORDING: Wording = {
   rangeFrom: (from) => `ab ${from}`,
   rangeTo: (to) => `bis ${to}`,
   rangeInvalid: "„Von“ liegt hinter „Bis“.",
+  textContains: "enthält",
+  textNotContains: "enthält nicht",
+  textStartsWith: "beginnt mit",
+  textEndsWith: "endet mit",
+  textEquals: "ist gleich",
+  textIsEmpty: "ist leer",
+  textAnd: "und",
+  textOr: "oder",
+  filterOperator: "Operator",
+  filterValue: "Wert",
+  filterJoin: "Verknüpfung",
+  textTerm: (operator, value) => `${operator} „${value}“`,
   resetAll: "Zurücksetzen",
   tryAgain: "Erneut versuchen",
   filteredOfTotal: (matches, total) => `${matches} von ${total}`,
@@ -316,6 +328,7 @@ export const GERMAN_WORDING: Wording = {
   scheduleUnfoldGroup: "Gruppe ausklappen",
   scheduleLaneCount: (count) => (count === 1 ? "1 Bahn" : `${count} Bahnen`),
   scheduleRoleDescription: "Belegungsplan",
+  schedulePlotName: (label) => `${label}, Diagramm`,
   scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked, milestones }) =>
     `${lanes === 1 ? "1 Bahn" : `${lanes} Bahnen`}, ${subtasks === 1 ? "1 Teilaufgabe" : `${subtasks} Teilaufgaben`} im Blick von ${from} bis ${to}. ` +
     `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${violated === 1 ? "1 verletzte Abhängigkeit" : `${violated} verletzte Abhängigkeiten`}` +

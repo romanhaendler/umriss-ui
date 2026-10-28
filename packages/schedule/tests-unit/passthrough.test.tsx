@@ -1,6 +1,7 @@
 /* The pass-through guard of the schedule: the schedule is a composite - ref,
    class, style and the rest reach its root <div>; the name reaches the figure
-   root and the plot (`aria-describedby` the plot alone, joined to its summary)
+   root and the plot (the plot's `aria-label` reads "<label>, plot";
+   `aria-describedby` the plot alone, joined to its summary)
    - and its parts declare what it draws. The `Schedule` and the parts that
    `useSchedule` hands back are read from a harness, so that they stand among
    the exports the guard lists. */
@@ -33,6 +34,7 @@ const CASES: Record<string, PassThroughCase> = {
     shape: "composite",
     named: (frame) => frame.querySelector('[role="application"]'),
     alsoLabelled: (frame) => frame,
+    ownLabel: true,
   },
 };
 
