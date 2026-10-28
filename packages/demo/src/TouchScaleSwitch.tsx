@@ -3,14 +3,16 @@
    `?touch-scale`, which is how a test opens a page with it.
 
    The stylesheet is core's own, put on the page as a `<style>` element for as
-   long as the switch is on. It acts under `(pointer: coarse)` only, as it does
-   in an application: from a desk the switch shows its effect under touch
-   emulation, and the hint says so. */
+   long as the switch is on, with its `(pointer: coarse)` condition lifted: the
+   switch is there to look at the grown state from a desk. The hit areas still
+   follow the real pointer. */
 
 import { useEffect, useState } from "react";
 import touchScale from "./touch-scale.css?inline";
 
-const HINT = "Touch scale: md controls are 44 px under a coarse pointer (touch emulation)";
+const HINT = "Touch scale: md controls at 44 px, as touch-scale.css makes them under a finger";
+/* Minified, the rule reads `@media(pointer:coarse)`; unminified `@media (pointer: coarse)`. */
+const SHOWN = touchScale.replace(/@media\s*\(pointer:\s*coarse\)/, "@media all");
 
 export function TouchScaleSwitch() {
   const [on, setOn] = useState(() => new URLSearchParams(window.location.search).has("touch-scale"));
@@ -18,7 +20,7 @@ export function TouchScaleSwitch() {
   useEffect(() => {
     if (!on) return;
     const style = document.createElement("style");
-    style.textContent = touchScale;
+    style.textContent = SHOWN;
     style.dataset.touchScale = "";
     document.head.append(style);
     return () => style.remove();
