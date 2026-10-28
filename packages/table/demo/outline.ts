@@ -65,7 +65,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Three or four key figures side by side", use: "`Stat` from @umriss-ui/core" },
         ],
         limits: [
-          "No cell range selection and no undo: an edit is reported, never applied, and the application owns the rows (ADR-0032).",
+          "No cell range selection and no built-in undo: an edit is reported, never applied, and the application owns the rows; undo is a recipe over the reported edits (ADR-0032).",
           "No pivot: compute the pivoted rows and map one computed column per key from the data, as in [a matrix with row and column totals](#/aggregate) (ADR-0032).",
         ],
         keys: [
@@ -576,6 +576,7 @@ export const OUTLINE: readonly Rubric[] = [
           "An edit is reported, never applied: the application owns the rows. `validate` keeps the editor open with its message until the draft passes.",
           "By default each cell is reported as it is left (`onCellEdit`) - for another cell, or by a click outside the table. `editMode=\"row\"` opens a whole row as one draft and reports it only when it is saved (`onRowSave`); a row with a draft is left only by saving or discarding it (ADR-0036).",
           "`onRowAdd` puts up \"New row\" - in the toolbar, or beneath the table without one - and `onRowDelete` a Delete that asks inside its row. Both work in either mode.",
+          "Undo and redo are not built in. The last example keeps the history of the reported edits in the application and writes the replaced value back on Ctrl+Z - about twenty lines, and the recipe of the README.",
         ],
         keys: [
           { key: "Tab (while editing)", action: "Commits the edit and moves to the next cell that edits; in a row draft, walks its fields and buttons." },
@@ -583,7 +584,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape (row draft)", action: "Discards the row's changes." },
         ],
         limits: [
-          "No cell range selection and no undo (ADR-0032).",
+          "No cell range selection and no built-in undo: the history of the reported edits is the application's (ADR-0032).",
         ],
         types: [],
         exports: ["useTable"],
