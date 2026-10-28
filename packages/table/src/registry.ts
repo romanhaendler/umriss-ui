@@ -299,7 +299,16 @@ export class Registry {
   /** The columns with the pinned blocks at either end - the one place where
       that is decided, for screen, column menu and export. */
   inPinOrder<T extends { id: string }>(columns: readonly T[]): T[] {
-    return inPinOrder(columns, this.pins());
+    /* A `ColumnGroup`'s columns stand together wherever an order put them
+       (`setOrder` takes any list): the group sits where its first column
+       does. Pinning then splits them by block, as it does. */
+    const heading = (c: T) => this.columnById(c.id)?.spec.heading?.id;
+    const together = columns.flatMap((c, i) => {
+      const h = heading(c);
+      if (h === undefined) return [c];
+      return columns.findIndex((o) => heading(o) === h) === i ? columns.filter((o) => heading(o) === h) : [];
+    });
+    return inPinOrder(together, this.pins());
   }
 
   /** The columns in JSX order, the first one per id. */

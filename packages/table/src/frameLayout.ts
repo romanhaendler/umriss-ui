@@ -74,6 +74,8 @@ export function frameLayout({
   const rowTools = gridMode && (rowMode || props.onRowAdd !== undefined || props.onRowDelete !== undefined);
   const trailing = actions.length > 0 || rowTools;
   const columnCount = leading + dataColumns.length + (trailing ? 1 : 0);
+  /* A `ColumnGroup` adds a head row: ARIA row numbers and the footer count it. */
+  const headRows = dataColumns.some((e) => e.spec.heading) ? 2 : 1;
 
   /* The pinned blocks, in cells of the head row. Whatever stands before a
      pinned column sticks with it - the selection, the expander and the span;
@@ -134,6 +136,7 @@ export function frameLayout({
     rowTools,
     trailing,
     columnCount,
+    headRows,
     pins,
     pinned,
     blocks,
