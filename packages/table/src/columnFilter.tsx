@@ -550,19 +550,20 @@ function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCo
     const term = shown.terms[index];
     return (
       <div className={styles.textTerm}>
-        <FormField label={wording.filterOperator}>
-          <Select size="sm" value={term.operator} onChange={(event) => change(index, { ...term, operator: event.target.value as TextOperator })}>
-            {OPERATORS.map((operator) => (
-              <option key={operator} value={operator}>
-                {operatorLabel(operator, wording)}
-              </option>
-            ))}
-          </Select>
-        </FormField>
+        <Select
+          size="sm"
+          aria-label={wording.filterOperator}
+          value={term.operator}
+          onChange={(event) => change(index, { ...term, operator: event.target.value as TextOperator })}
+        >
+          {OPERATORS.map((operator) => (
+            <option key={operator} value={operator}>
+              {operatorLabel(operator, wording)}
+            </option>
+          ))}
+        </Select>
         {term.operator !== "isEmpty" && (
-          <FormField label={wording.filterValue}>
-            <Input size="sm" value={term.value ?? ""} onChange={(event) => change(index, { ...term, value: event.target.value })} />
-          </FormField>
+          <Input size="sm" aria-label={wording.filterValue} value={term.value ?? ""} onChange={(event) => change(index, { ...term, value: event.target.value })} />
         )}
       </div>
     );

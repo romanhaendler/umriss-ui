@@ -27,3 +27,15 @@ export function ColumnGroup({ label, children }: ColumnGroupProps): ReactNode {
   const heading = useMemo(() => ({ id, label }), [id, label]);
   return <HeadingContext value={heading}>{children}</HeadingContext>;
 }
+
+/** The columns with a group boundary on their left: a column whose group
+    differs from the one before it. A table without a group has none. A group
+    that pinning splits stays one group - its parts have their pin edge. */
+export function groupEdges<T extends { spec: { heading?: Heading } }>(columns: readonly T[]): ReadonlySet<T> {
+  const edges = new Set<T>();
+  if (!columns.some((e) => e.spec.heading)) return edges;
+  columns.forEach((e, i) => {
+    if (i > 0 && e.spec.heading?.id !== columns[i - 1]!.spec.heading?.id) edges.add(e);
+  });
+  return edges;
+}

@@ -21,7 +21,8 @@ import type { ColumnEntry, HookSnapshot } from "./registry";
 import { aggregate, periodText } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
-import { pinnedCell } from "./pinned";
+import { pinnedCell, withEdge } from "./pinned";
+import { groupEdges } from "./columnGroup";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
 import { groupLineLayout } from "./model/gridWalk";
@@ -203,6 +204,7 @@ export function GroupLine({
   line,
   index,
   absolute,
+  headRows = 1,
   spanEntry,
   levelEntry,
   columns,
@@ -229,6 +231,8 @@ export function GroupLine({
   depth: number;
   index: number;
   absolute: number | undefined;
+  /** The rows of the head, for the ARIA row number of a virtual line. */
+  headRows?: number;
   spanEntry: ColumnEntry | undefined;
   /** The column or group key of the group's level. */
   levelEntry: ColumnEntry | undefined;
@@ -256,6 +260,7 @@ export function GroupLine({
     blocks,
   });
   const rest = columns.slice(lead);
+  const edges = groupEdges(columns);
   const before = controlColumns + (spanEntry ? 1 : 0);
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
   const filler = (columnsCovered: number) =>
@@ -287,7 +292,7 @@ export function GroupLine({
       data-group={group.path}
       data-grid-line={grid ? `${line.kind}:${group.path}` : undefined}
       data-row={virtual ? absolute : undefined}
-      aria-rowindex={virtual ? absolute + 2 : undefined}
+      aria-rowindex={virtual ? absolute + 1 + headRows : undefined}
       data-index={index}
       style={header ? ({ "--u-header-level": group.level } as CSSProperties) : undefined}
       aria-level={header ? group.level + 1 : depth}
@@ -347,7 +352,7 @@ export function GroupLine({
       {rest.map((entry, i) => (
         <AggregateCell
           key={entry.key}
-          pin={pinAt(before + lead + i)}
+          pin={withEdge(pinAt(before + lead + i), edges.has(entry))}
           entry={entry}
           group={group}
           share={header && entry === shareColumn}

@@ -12,7 +12,8 @@ import { asText, isAbsent, isRightAligned } from "./values";
 import type { Line } from "./model/grouping";
 import { SpanCell } from "./groupLines";
 import { Absent } from "./aggregateValue";
-import { pinnedCell } from "./pinned";
+import { pinnedCell, withEdge } from "./pinned";
+import { groupEdges } from "./columnGroup";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
 import { rowLine } from "./model/gridWalk";
@@ -47,6 +48,7 @@ export function Row({
   row,
   index,
   absolute,
+  headRows = 1,
   registry,
   hook,
   columns,
@@ -77,6 +79,8 @@ export function Row({
   fresh?: boolean;
   index: number;
   absolute: number | undefined;
+  /** The rows of the head, for the ARIA row number of a virtual row. */
+  headRows?: number;
   registry: Registry;
   hook: HookSnapshot;
   columns: readonly ColumnEntry[];
@@ -116,6 +120,7 @@ export function Row({
   const controls = (selectable ? 1 : 0) + (expanderColumn ? 1 : 0);
   const leading = controls + (spanEntry ? 1 : 0);
   const pinAt = (at: number) => pinnedCell(blocks, at);
+  const edges = groupEdges(columns);
   const opens = entry !== undefined && entry.branch && !entry.empty;
 
   return (
@@ -149,7 +154,7 @@ export function Row({
         data-grid-line={grid ? gridLine : undefined}
         data-draft={draft ? "" : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
-        aria-rowindex={virtual ? absolute + 2 : undefined}
+        aria-rowindex={virtual ? absolute + 1 + headRows : undefined}
       >
         {fresh && Array.from({ length: controls + (spanEntry ? 1 : 0) }, (_, i) => (
           <td key={i} className={cx(styles.td, i < controls && styles.control, pinAt(i).className)} style={pinAt(i).style} />
@@ -207,7 +212,7 @@ export function Row({
             entry={e}
             row={row}
             kind={registry.kindOf(e, hook.rows)}
-            pin={pinAt(leading + i)}
+            pin={withEdge(pinAt(leading + i), edges.has(e))}
             formats={formats}
             wording={wording}
             line={gridLine}
