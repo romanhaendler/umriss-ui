@@ -27,6 +27,26 @@ export function warnOnce(reason: string, message: string): void {
 export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
+let checkedLowered = false;
+
+/** Warns once, in development, when a build lowered `light-dark()` and the page is dark but the tokens still
+    resolve to their light values: the mode was set from JavaScript, which a lowered token cannot follow. A
+    lowered token reads as its light half in the root's computed value (an unlowered one as the whole
+    `light-dark(…)`, and one the application's CSS flipped as the dark half). Call it in an effect, so that the
+    stylesheets have loaded. */
+export function warnLoweredLightDark(): void {
+  if (checkedLowered || !isDev() || typeof document === "undefined") return;
+  checkedLowered = true;
+  const style = getComputedStyle(document.documentElement);
+  const dark = /\bdark\b/.test(style.colorScheme) && !/\blight\b/.test(style.colorScheme);
+  if (dark && style.getPropertyValue("--u-color-bg").trim().toLowerCase() === "#fafafa") {
+    warnOnce(
+      "lowered-light-dark",
+      'this build lowered light-dark(), so the dark mode set from JavaScript leaves the components light. Declare it in CSS, e.g. [data-theme="dark"] { color-scheme: dark; }, or raise the CSS target to the browser floor (Vite build.cssTarget ["chrome123", "firefox120", "safari17.5"]; Next browserslist "chrome >= 123", "firefox >= 120", "safari >= 17.5"). See Styles in the README.',
+    );
+  }
+}
+
 let scanned = false;
 
 /* Whether a rule sits in an `umriss.*` layer: the library's own rules, which keep reading an old token on purpose. */
