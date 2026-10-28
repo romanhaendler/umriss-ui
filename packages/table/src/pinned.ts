@@ -18,6 +18,12 @@ export interface PinnedCell {
 
 export const NOT_PINNED: PinnedCell = {};
 
+/** The cell's class and offset, plus the rule of a group boundary where the
+    column starts a `ColumnGroup` (or follows one) - see `groupEdges`. */
+export function withEdge(pin: PinnedCell, edge: boolean): PinnedCell {
+  return edge ? { ...pin, className: cx(pin.className, styles.groupEdge) } : pin;
+}
+
 /** The class and offset of a cell covering the head row's cells `first` to
     `last`; nothing when it does not stick. */
 export function pinnedCell(blocks: PinBlocks, first: number, last = first): PinnedCell {

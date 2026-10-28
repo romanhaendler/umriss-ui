@@ -144,6 +144,18 @@
     text-align: center;
   }
 
+  /* The rule at a group boundary, through head, body and foot. A box-shadow
+     is not painted on a cell of a collapsed table and a border scrolls away
+     from a sticky cell, so a cell's own gradient draws it. The pin edge's
+     shadow and the sticky head's line sit on pseudo-elements; this one is
+     the cell's background layer, under its surface. */
+  .groupEdge {
+    background-image: linear-gradient(var(--u-hairline-strong), var(--u-hairline-strong));
+    background-repeat: no-repeat;
+    background-size: 1px 100%;
+    background-position: left top;
+  }
+
   .sticky thead tr + tr .th {
     top: var(--u-table-head-group-row, 0px);
   }
@@ -196,7 +208,7 @@
   }
 
   .table tbody tr:hover .td {
-    background: var(--u-color-surface-sunken);
+    background-color: var(--u-color-surface-sunken);
   }
 
   /* The controls in a compact row - its actions, a Row draft's editors and
@@ -216,11 +228,11 @@
      the three things the accent marks. Under the pointer it deepens, as any
      surface does. */
   .table tbody tr[data-selected] > .td {
-    background: var(--u-color-accent-subtle);
+    background-color: var(--u-color-accent-subtle);
   }
 
   .table tbody tr[data-selected]:hover > .td {
-    background: color-mix(in srgb, var(--u-color-accent-subtle) 70%, var(--u-color-surface-sunken));
+    background-color: color-mix(in srgb, var(--u-color-accent-subtle) 70%, var(--u-color-surface-sunken));
   }
 
   /* The current row: an accent bar at the inline start of its first cell,
@@ -348,7 +360,7 @@
   }
 
   .striped tbody tr:nth-child(even) .td {
-    background: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
+    background-color: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
   }
 
   /* ---- Control cells: selection and expander --------------------------- */
@@ -375,7 +387,7 @@
   .pinned {
     position: sticky;
     z-index: 2;
-    background: var(--u-color-surface);
+    background-color: var(--u-color-surface);
   }
 
   .sticky .th.pinned {
@@ -845,17 +857,24 @@
     min-width: 0;
   }
 
+  /* A term is one row: the operator and its value side by side. The join
+     stands between the rows, under the operators; the panel takes the width
+     the two columns need and no more. */
   .textFields {
     display: flex;
     flex-direction: column;
     gap: var(--u-space-2);
-    min-width: 240px;
+    align-items: flex-start;
   }
 
   .textTerm {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 9.5rem 8rem;
     gap: var(--u-space-2);
+  }
+
+  .filterPanel:has(.textFields) {
+    max-width: none;
   }
 
   .rangePeriod {
@@ -1651,11 +1670,11 @@
   /* ---- Virtualisation -------------------------------------------------- */
 
   .striped .virtualBody tr:nth-child(even) .td {
-    background: none;
+    background-color: transparent;
   }
 
   .striped .virtualBody tr[data-even] .td {
-    background: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
+    background-color: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
   }
 
   /* The ring's colour and width, drawn inside as an outline - against the
@@ -1947,6 +1966,12 @@
     /* The group's share is a ground too: it takes the system's text colour. */
     .shareBar {
       background: CanvasText;
+    }
+
+    /* The group rule is a gradient as well: a border in the text colour. */
+    .groupEdge {
+      background-image: none;
+      border-left: 1px solid CanvasText;
     }
 
     /* A pinned block's inner edge is a gradient, which forced colours drop:

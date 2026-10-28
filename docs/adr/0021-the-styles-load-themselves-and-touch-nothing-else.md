@@ -133,3 +133,11 @@ the operating system did. `UmrissProvider` loses `theme`, and it stops writing
   `server.deps.inline: [/@umriss-ui/]`. Jest writes a CSS `moduleNameMapper` and
   `transformIgnorePatterns`. Core's README carries both, and `check:dist` runs
   them.
+
+## Amendment 2026-10-28
+
+In development, core now says it when a lowered build keeps a JavaScript dark
+mode light: once, after the first control mounts, if the page's computed
+`color-scheme` is dark while the root's tokens still read as their light half,
+the console names both fixes (a `color-scheme` rule for the application's dark
+marker, or the CSS target at the browser floor). Behaviour does not change.
