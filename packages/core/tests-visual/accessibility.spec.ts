@@ -86,6 +86,17 @@ test("a page with all code blocks open is accessible", async ({ page }, testInfo
   expect(report, `code open (${testInfo.project.name})`).toEqual([]);
 });
 
+/* An empty DatePicker: its placeholder is read at 4.5:1 in both schemes. */
+test("an empty DatePicker is accessible", async ({ page }, testInfo) => {
+  await open(page, "datepicker");
+  const result = await new AxeBuilder({ page })
+    .include('[data-example="pick-a-day"]')
+    .withTags(STANDARDS)
+    .analyze();
+
+  expect(findings(result), `empty DatePicker (${testInfo.project.name})`).toEqual([]);
+});
+
 /* A toast standing inside an open modal dialog: the dialog, the toast and the
    live regions that moved into it. */
 test("a toast inside a modal is accessible", async ({ page }, testInfo) => {

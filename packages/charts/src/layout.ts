@@ -53,6 +53,8 @@ export interface AxisInput {
   grid: boolean;
   /** Raw extent out of the bound series (independent of the layout). */
   extent: readonly [number, number];
+  /** Bars stand on this value axis: a "nice" domain ends above the largest. */
+  headroom?: boolean;
   /** "visible" arrives as its extent and is then widened as "nice" is. */
   domainMode: "nice" | "data" | "visible" | readonly [number, number];
   /** A zoomed x axis: its own domain, where the view puts a span in its place. */
@@ -220,7 +222,7 @@ function domainOf(
     const step = stepOf(axis, [min, max], tickCount);
     return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n }, axis.timeZone);
   }
-  return niceDomain(min, max, tickCount);
+  return niceDomain(min, max, tickCount, axis.headroom);
 }
 
 /** The tick values of an axis: named explicitly, on local time, or 1-2-5.
