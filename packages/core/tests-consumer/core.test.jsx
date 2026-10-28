@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Combobox, Modal, ModalBody, ModalHeader, ToastProvider, useToast } from "@umriss-ui/core";
+import { Combobox, formatsFor, Modal, ModalBody, ModalHeader, ToastProvider, useToast } from "@umriss-ui/core";
 import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 
 const OPTIONS = [
@@ -52,4 +52,11 @@ it("opens a modal, picks an option and shows a toast", () => {
 
 it("loads the German wording from its subpath", () => {
   expect(GERMAN_WORDING.clearInput).toBe("Eingabe leeren");
+});
+
+it("derives the formats of a third language from formatsFor", () => {
+  const f = formatsFor("fr-CH");
+  expect(f.locale).toBe("fr-CH");
+  expect(f.number(1234.5, 1)).toBe(new Intl.NumberFormat("fr-CH", { minimumFractionDigits: 1 }).format(1234.5));
+  expect(f.date(new Date(2026, 2, 17))).toBe("17.03.2026");
 });
