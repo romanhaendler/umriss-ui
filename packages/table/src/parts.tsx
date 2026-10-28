@@ -48,6 +48,8 @@ interface RuntimeColumnProps {
   rowHeader?: boolean;
   numeric?: boolean;
   width?: number;
+  flex?: number;
+  minWidth?: number;
   pin?: ColumnSpec["pin"];
   resizable?: boolean;
   sortable?: boolean;
@@ -112,6 +114,8 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,
     width: props.width,
+    flex: props.flex,
+    minWidth: props.minWidth,
     pin: props.pin === "start" || props.pin === "end" ? props.pin : undefined,
     resizable: props.resizable === true,
     sortable: props.sortable,

@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
+import { fitAllColumns } from "./headerCell";
 import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
@@ -664,6 +665,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     setPin,
     widths: effectiveWidths(modelColumns, b.widths),
     setWidth: b.setWidth,
+    autoSizeColumns: () => fitAllColumns(registry.frameTable, b.setWidth),
     expanded: b.expanded,
     toggleRow: b.toggleRow,
     filter: Object.fromEntries(effective),
