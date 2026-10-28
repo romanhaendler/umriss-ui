@@ -27,6 +27,21 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.48.0 – One size on every device, and a dialog's focus where Tab would put it (Oct. 2026)
+
+### Changed
+
+- **`md` controls stay 32 px under a finger** (ADR-0079); the 24 px hit areas and the touch behaviours stay.
+  - Migration: to keep the 44 px of 0.43.0 to 0.47.0, `import "@umriss-ui/core/touch-scale.css"`.
+
+### Added
+
+- **`@umriss-ui/core/touch-scale.css`**, the opt-in for 44 px `md` controls under a finger: static CSS in the tokens layer, so a server renders one markup and the size is known before the first paint. An application that wants another height writes its own media query.
+
+### Fixed
+
+- **A dialog Popover focuses its first tab stop**: in a radio group the chosen option, in a composite its tab stop, never a hidden element.
+
 ## 0.47.1 – Released in step with the table (Oct. 2026)
 
 No change of its own; the number moves with the table's repaired exports.

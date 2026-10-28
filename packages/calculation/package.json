@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/calculation",
-  "version": "0.47.1",
+  "version": "0.48.0",
   "description": "React calculation view for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",
@@ -70,7 +70,7 @@
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts calculation.js calculation.css calculation.client.js"
   },
   "peerDependencies": {
-    "@umriss-ui/core": "workspace:^0.47.0",
+    "@umriss-ui/core": "workspace:^0.48.0",
     "react": ">=19",
     "react-dom": ">=19"
   },

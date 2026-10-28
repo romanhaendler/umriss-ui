@@ -12,13 +12,13 @@ hard outlines or effects.
 
 | Package | Version | What it is |
 |---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.47.1 | The component library — forms, overlays, structure, the tree, the command palette. The package you install first |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.47.1 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.47.1 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
-| [`@umriss-ui/alarms`](packages/alarms/README.md) | 0.47.1 | Alarm management for a control room: the lifecycle of an alarm after the application raised it - acknowledgement, shelving, flood and chatter - in a pure model, a list and a banner. Takes `@umriss-ui/core` and `@umriss-ui/table` as peers |
-| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.47.1 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
-| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.47.1 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
-| [`@umriss-ui/dashboard`](packages/dashboard/README.md) | 0.47.1 | Widgets a developer declares and a reader arranges: a sequence at named sizes, packed on twelve columns, edited as a draft with undo, the arrangement the application's to keep. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/core`](packages/core/README.md) | 0.48.0 | The component library — forms, overlays, structure, the tree, the command palette. The package you install first |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.48.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.48.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/alarms`](packages/alarms/README.md) | 0.48.0 | Alarm management for a control room: the lifecycle of an alarm after the application raised it - acknowledgement, shelving, flood and chatter - in a pure model, a list and a banner. Takes `@umriss-ui/core` and `@umriss-ui/table` as peers |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.48.0 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
+| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.48.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/dashboard`](packages/dashboard/README.md) | 0.48.0 | Widgets a developer declares and a reader arranges: a sequence at named sizes, packed on twelve columns, edited as a draft with undo, the arrangement the application's to keep. Takes `@umriss-ui/core` as a peer |
 | `@umriss-ui/demo` | — | The private shell all seven demos are built from. Never published |
 
 All seven published packages are released under the npm tag `latest`, so a plain
@@ -58,7 +58,7 @@ Three commands open it. They need Node 22 and pnpm 9 (`corepack enable` gives
 you the pnpm the repository names):
 
 ```bash
-git clone --branch core-v0.47.1 https://github.com/romanhaendler/umriss-ui.git
+git clone --branch core-v0.48.0 https://github.com/romanhaendler/umriss-ui.git
 cd umriss-ui && pnpm install
 pnpm start
 ```
