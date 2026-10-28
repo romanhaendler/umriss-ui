@@ -6,54 +6,11 @@ import { useTimeZoneLabel } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { ColumnFilterButton } from "./filter";
 import { filterOf } from "./columnFilter";
+import { contentWidth } from "./flexWidths";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
 import type { PinnedCell } from "./pinned";
 import { isDateFormat, isRightAligned } from "./values";
 import styles from "./Table.module.css";
-
-/* "Fit to content" measures the widest cell of the column; rows with a
-   different number of cells (detail rows) stay out of it. */
-export function contentWidth(cell: HTMLTableCellElement): number {
-  const headerRow = cell.parentElement;
-  const table = cell.closest("table");
-  if (!headerRow || !table) return 0;
-  const index = Array.from(headerRow.children).indexOf(cell);
-  const count = headerRow.children.length;
-  /* Measured without the width it has now, and without the surplus a full
-     width table hands its columns: a cell is never narrower than its width,
-     so a widened column would only ever grow. */
-  const before = { cell: cell.style.width, min: cell.style.minWidth, table: table.style.width };
-  cell.style.width = "";
-  cell.style.minWidth = "";
-  table.style.width = "auto";
-  let widest = 0;
-  for (const tableRow of Array.from(table.rows)) {
-    if (tableRow.cells.length !== count || tableRow.dataset.headGroup !== undefined) continue;
-    const c = tableRow.cells[index];
-    if (!c) continue;
-    /* A value cut at the cap is wider than its box: its whole width, and
-       the cell's padding beside it. */
-    const box = c.querySelector<HTMLElement>(`.${styles.value}`);
-    const style = getComputedStyle(c);
-    const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-    /* A head's label gives way with an ellipsis: what it hides counts. */
-    const label = c.querySelector<HTMLElement>(`.${styles.headLabel}`);
-    const hidden = label ? label.scrollWidth - label.clientWidth : 0;
-    widest = Math.max(widest, c.scrollWidth + hidden, box ? box.scrollWidth + padding : 0);
-  }
-  cell.style.width = before.cell;
-  cell.style.minWidth = before.min;
-  table.style.width = before.table;
-  return widest;
-}
-
-/** Sets every column of the table to the width of its content. */
-export function fitAllColumns(table: HTMLTableElement | null, setWidth: (column: string, width: number) => void) {
-  for (const cell of Array.from(table?.tHead?.querySelectorAll<HTMLTableCellElement>("th[data-column]") ?? [])) {
-    const widest = contentWidth(cell);
-    if (widest > 0) setWidth(cell.dataset.column!, Math.max(48, widest + 1));
-  }
-}
 
 export function HeaderCell({
   entry,

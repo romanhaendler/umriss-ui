@@ -58,7 +58,7 @@ text is 16 px under a finger.
 - On upgrade, a `md` control on a touch device stays 32 px. An application that wants the 44 px of
   0.43.0 to 0.47.0 imports `touch-scale.css`; core's changelog states it under "Changed", with the
   line that restores it.
-- The 24 × 24 px hit areas, `sm`, `xs`, dense surfaces (ADR-0042, ADR-0051) and the Select's choice
+- The 24 × 24 px hit areas, `xs` (`sm` grows with `md` under the opt-in, see the amendment below), dense surfaces (ADR-0042, ADR-0051) and the Select's choice
   of list by the gesture (ADR-0043) are unchanged.
 - A scale that also grows spacing, icons and type is not built. If it is ever wanted, it belongs in
   `touch-scale.css` as well, so the opt-in stays one import.

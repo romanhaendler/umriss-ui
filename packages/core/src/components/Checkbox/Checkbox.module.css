@@ -16,20 +16,21 @@
     user-select: none;
   }
 
-  /* The input covers the whole control, invisible and full size: a test
-     runner's click lands on it, and the drawn parts take no pointer. */
+  /* The input covers the drawn box, invisible: a test runner's click lands
+     on it, and the box takes no pointer. The label beside it stays
+     clickable. */
   .input {
     position: absolute;
-    inset: 0;
-    width: 100%;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 16px;
     height: 100%;
     margin: 0;
     opacity: 0;
     cursor: inherit;
   }
 
-  .box,
-  .label {
+  .box {
     pointer-events: none;
   }
 

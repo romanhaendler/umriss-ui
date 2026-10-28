@@ -42,20 +42,21 @@
     opacity: 0.5;
   }
 
-  /* The input covers the whole option, invisible and full size: a test
-     runner's click lands on it, and the drawn parts take no pointer. */
+  /* The input covers the drawn dot, invisible: a test runner's click lands
+     on it, and the dot takes no pointer. The text beside it stays
+     clickable. */
   .input {
     position: absolute;
-    inset: 0;
-    width: 100%;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 16px;
     height: 100%;
     margin: 0;
     opacity: 0;
     cursor: inherit;
   }
 
-  .dot,
-  .texts {
+  .dot {
     pointer-events: none;
   }
 
@@ -142,6 +143,10 @@
 
   .sm {
     gap: var(--u-space-2);
+  }
+
+  .sm .input {
+    width: 14px;
   }
 
   .sm .dot {
