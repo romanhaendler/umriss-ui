@@ -13,6 +13,12 @@ import type { ExportFormat, ExportSheet, TableSnapshot } from "./types";
 import { exportCell, exportValue } from "./values";
 import type { ExportCell } from "./values";
 
+/** A column's name in a file: under its group, "<group> · <column>". */
+const exportLabel = (e: ColumnEntry): string => {
+  const label = e.spec.label ?? e.spec.id;
+  return e.spec.heading ? `${e.spec.heading.label} · ${label}` : label;
+};
+
 /** The visible columns in the order the user sees - with the pinned blocks at
     either end. Screen and export both read here, so that they cannot drift
     apart. */
@@ -73,7 +79,7 @@ const csvColumn = (e: ColumnEntry, rows: readonly unknown[], timeZone: string | 
   const write = dateWriter(rows.map((row) => exportCell(e.read(row), e.spec.ownExportValue)), own, timeZone);
   return {
     id: e.spec.id,
-    label: e.spec.label,
+    label: exportLabel(e),
     value: (row) => write(exportCell(e.read(row), e.spec.ownExportValue)),
   };
 };
@@ -88,7 +94,7 @@ export function sheetOf(registry: Registry, levelLabel: string, given?: readonly
   const entries = exportColumns(registry, given ?? hook.rows);
   const { widths } = hook.publicSnapshot;
   const columns: { label: string; width?: number; own?: true }[] = entries.map((e) => ({
-    label: e.spec.label ?? e.spec.id,
+    label: exportLabel(e),
     width: widths[e.spec.id],
     ...(e.spec.ownExportValue && { own: true as const }),
   }));

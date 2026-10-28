@@ -8,6 +8,8 @@
 export { useTable } from "./useTable";
 export { column } from "./column";
 export { columnFilter } from "./columnFilter";
+export { ColumnGroup } from "./columnGroup";
+export type { ColumnGroupProps } from "./columnGroup";
 export type { FilterInputProps, ColumnFilter } from "./columnFilter";
 export { ColumnMenu, Export, Pagination, Search, Toolbar } from "./rowlessParts";
 export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, ToolbarProps } from "./rowlessParts";

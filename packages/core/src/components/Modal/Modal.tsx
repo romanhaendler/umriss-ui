@@ -9,6 +9,9 @@ import styles from "./Modal.module.css";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 import { IconButton } from "../Button";
+import { useShapeWarning } from "../../lib/useShapeWarning";
+
+const noop = () => {};
 
 interface ModalContextValue {
   onClose: () => void;
@@ -102,7 +105,7 @@ interface DialogFrameProps extends Omit<ModalProps, "size"> {
 function DialogFrame({
   ref,
   open,
-  onClose,
+  onClose: onCloseProp,
   closeOnBackdrop = true,
   sheetClassName,
   spacers = false,
@@ -116,6 +119,10 @@ function DialogFrame({
   const topRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  /* A host without types may leave `onClose` out: Escape and the cross then
+     report to nobody, and the window stays as the caller's `open` says. */
+  useShapeWarning("Modal", "onClose", typeof onCloseProp !== "function", "a function");
+  const onClose = typeof onCloseProp === "function" ? onCloseProp : noop;
   /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
      The name belongs to the Modal; the palette uses the same routine without
      an exit. */

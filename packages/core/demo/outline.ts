@@ -986,6 +986,7 @@ export const OUTLINE: readonly Rubric[] = [
           "It is controlled: you hold `open`, and `onClose` reports Escape, the cross and a click on the backdrop. Whether it closes is yours, so a window with unsaved edits can ask first.",
           "The title in `ModalHeader` names the dialog for a screen reader. The height follows the content; where it does not fit, only `ModalBody` scrolls.",
           "It is the browser's modal dialog: focus stays inside, the page behind cannot be scrolled, and focus returns to the opener on closing.",
+          "Focus lands on the first control, the cross. A field with `autoFocus` inside takes it instead.",
         ],
         alternatives: [
           { when: "A detail beside the list the user came from", use: "drawer" },
