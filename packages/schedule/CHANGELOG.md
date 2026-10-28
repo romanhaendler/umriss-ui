@@ -18,6 +18,10 @@ moves from here under the rule above.
 
 ---
 
+## 0.48.0 – Released in step with core (Oct. 2026)
+
+No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.
+
 ## 0.47.1 – Released in step with the table (Oct. 2026)
 
 No change of its own; the number moves with the table's repaired exports.

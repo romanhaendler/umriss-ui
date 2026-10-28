@@ -26,6 +26,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.48.0 – Released in step with core (Oct. 2026)
+
+No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.
+
 ## 0.47.1 – Exports that hostile text cannot turn into a formula or a broken file (Oct. 2026)
 
 ### Fixed
