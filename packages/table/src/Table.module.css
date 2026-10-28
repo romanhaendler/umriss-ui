@@ -82,8 +82,8 @@
      that the default sizes do not round up to the next pixel. */
   .table {
     --_table-line: round(up, calc(var(--u-text-sm) * 1.46), 1px);
-    --_table-pad: 0.5rem;
-    --_table-pitch: calc(max(var(--_table-line) + 2 * var(--_table-pad), var(--u-control-height-sm) + 2 * 0.25rem) + 1px);
+    --_table-pad: var(--u-space-2);
+    --_table-pitch: calc(max(var(--_table-line) + 2 * var(--_table-pad), var(--u-control-height-sm) + 2 * var(--u-space-1)) + 1px);
     --_table-padY: calc((var(--_table-pitch) - 1px - var(--_table-line)) / 2);
     width: 100%;
     border-collapse: collapse;

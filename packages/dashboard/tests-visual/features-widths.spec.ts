@@ -41,8 +41,8 @@ test("@quick at 1280, 1920 and 2560 px every widget has the same neighbours; the
   const at2560 = await places(page, 2560);
   expect(at1920.places).toEqual(at1280.places);
   expect(at2560.places).toEqual(at1280.places);
-  /* The dashboard keeps one space-4 of padding at each side, for its frame. */
-  expect(at1280.grid.width).toBeCloseTo(1280 - 32, 0);
+  /* The dashboard stands flush with its neighbours: no side padding; the edit frame is drawn inside the cards. */
+  expect(at1280.grid.width).toBeCloseTo(1280, 0);
   expect(at1920.grid.width).toBeCloseTo(1560, 0);
   expect(at2560.grid.width).toBeCloseTo(1560, 0);
   /* It stands at the start of its container, not in the middle. */
