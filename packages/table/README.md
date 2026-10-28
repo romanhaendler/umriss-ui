@@ -146,6 +146,11 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   the others leave (with `minWidth` as its floor); a width dragged by hand ends
   the flex of that column and stands in the view. "Fit all columns" in the column
   menu, or `autoSizeColumns()`, sets every column to its content.
+* **A header over columns**: `ColumnGroup` wraps `Column`s and puts its `label` in a
+  second head row over them (`scope="colgroup"`, spanning the visible columns, gone
+  with the last one). Columns hide, resize and pin one by one; reordering never
+  takes a column out of its group; a group split by pinning shows its label over
+  each part. Exports keep one header row and write "Q1 · Jan".
 * **A time zone named in the formats** (core's Time zone): the dates, the day
   groups and the date filter follow it, and the head of a `"date"`, `"time"` or
   `"dateTime"` column names it, in muted text, where the reader's own is another.

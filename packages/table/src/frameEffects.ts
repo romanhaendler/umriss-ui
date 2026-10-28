@@ -12,6 +12,7 @@ import { rowLine } from "./model/gridWalk";
 import { NEW_LINE } from "./grid";
 import type { GridHandle } from "./grid";
 import { markStuck } from "./scrollMarks";
+import { columnRow } from "./pinned";
 import { scrollToRow, showPending } from "./reach";
 import styles from "./Table.module.css";
 
@@ -39,6 +40,9 @@ export function useStickyHeaderHeights(tableRef: TableRef, stickyHeader: boolean
     const head = table.tHead?.getBoundingClientRect().height ?? 0;
     const headerHeight = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
     table.style.setProperty("--u-table-head", `${head}px`);
+    /* The column row sticks under the row of a group's cells. */
+    const grouped = table.tHead && table.tHead.rows.length > 1 ? table.tHead.rows[0]!.getBoundingClientRect().height : 0;
+    table.style.setProperty("--u-table-head-group-row", `${grouped}px`);
     table.style.setProperty("--u-table-group-header", `${headerHeight}px`);
     /* The browser's own scroll into view - a focused cell, a walked one -
        keeps what it brings in clear of the head. */
@@ -101,7 +105,7 @@ export function useCutValueWarnings(tableRef: TableRef) {
       if (box.scrollHeight <= box.clientHeight + 1) continue;
       const cell = box.closest("td, th");
       const at = cell?.parentElement ? Array.from(cell.parentElement.children).indexOf(cell) : -1;
-      const label = table.tHead?.rows?.[0]?.cells[at]?.textContent?.trim() || `column ${at + 1}`;
+      const label = columnRow(table)?.cells[at]?.textContent?.trim() || `column ${at + 1}`;
       warnOnce(
         `taller-than-a-row:${label}`,
         `a value in "${label}" is taller than a row and is cut at its edge. A row's height never follows what it shows (ADR-0042): draw it with a small control, or show it whole in the row's detail.`,
@@ -139,7 +143,7 @@ export function useUnboundedVirtualWarning(virtual: VirtualRows | undefined) {
    application's may each change it. */
 export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   useLayoutEffect(() => {
-    const head = tableRef.current?.tHead?.rows?.[0]?.getBoundingClientRect().height;
+    const head = columnRow(tableRef.current)?.getBoundingClientRect().height;
     if (head && registry.hook?.tableState.virtual) registry.hook.tableState.setPitch(head);
   });
 }

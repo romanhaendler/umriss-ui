@@ -53,6 +53,8 @@ const signatureOf = (a: ColumnSpec): string =>
   JSON.stringify([
     a.id,
     a.label,
+    a.heading?.id,
+    a.heading?.label,
     typeof a.value === "string" ? a.value : "ƒ",
     a.format,
     typeof a.aggregate === "function" ? "ƒ" : a.aggregate,
