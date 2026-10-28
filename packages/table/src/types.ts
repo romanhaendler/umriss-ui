@@ -619,6 +619,11 @@ interface TableOptionsCommon<Z> {
   virtual?: boolean | { overscan?: number };
   /** A selection from outside instead of its own – when the application holds it. */
   selection?: TableSelection<string>;
+  /** Called with the selected keys after each change – the user's or the API's,
+      its own selection or the one handed in – from an effect, never at mount.
+      Under "all that match" (server mode) the keys are the ones ticked
+      before it; `selection.allMatching` and `selection.except` tell the rest. */
+  onSelectionChange?: (keys: string[]) => void;
 }
 
 /** The table holds every row and does the work itself. */
