@@ -12,6 +12,10 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.47.1 – Released in step with the table (Oct. 2026)
+
+No change of its own; the number moves with the table's repaired exports.
+
 ## 0.47.0 – Alarm management: a model, a list and a banner (Oct. 2026)
 
 ### Added

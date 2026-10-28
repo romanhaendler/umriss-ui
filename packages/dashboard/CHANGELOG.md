@@ -13,6 +13,10 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.47.1 – Released in step with the table (Oct. 2026)
+
+No change of its own; the number moves with the table's repaired exports.
+
 ## 0.47.0 – Released in step with alarms (Oct. 2026)
 
 No change of its own; the number moves with the new package `@umriss-ui/alarms`.

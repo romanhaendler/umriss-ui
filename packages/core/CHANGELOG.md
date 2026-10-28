@@ -27,6 +27,10 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.47.1 – Released in step with the table (Oct. 2026)
+
+No change of its own; the number moves with the table's repaired exports.
+
 ## 0.47.0 – Words, tokens and a date for the alarm package (Oct. 2026)
 
 ### Added

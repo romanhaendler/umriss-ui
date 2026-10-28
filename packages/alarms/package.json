@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/alarms",
-  "version": "0.47.0",
+  "version": "0.47.1",
   "description": "React alarm management for data-dense applications - the lifecycle of an alarm after it is raised: a model and a list.",
   "license": "MIT",
   "author": "Roman Händler",
