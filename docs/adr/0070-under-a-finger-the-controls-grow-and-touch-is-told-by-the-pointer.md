@@ -1,6 +1,6 @@
 # Under a finger the controls grow, and touch is told by the pointer
 
-Status: accepted
+Status: amended by ADR-0079
 Date:   2026-10
 
 On a phone, a tablet and a touch-only kiosk every umriss control was 32 px tall,
@@ -28,8 +28,10 @@ device during render:
 
 `any-pointer` is not used: it would make every touch laptop a tablet.
 
-**Under a finger a `md` control is 44 px tall**, the height WCAG 2.5.5 and Apple's
-guidelines name. One token block under `pointer: coarse` sets it. `sm` stays 26,
+~~**Under a finger a `md` control is 44 px tall**, the height WCAG 2.5.5 and Apple's
+guidelines name. One token block under `pointer: coarse` sets it.~~ Superseded by
+[ADR-0079](0079-the-size-is-the-applications-the-hit-area-the-librarys.md): a `md` control is
+32 px under any pointer, and an application that wants 44 px imports `touch-scale.css`. `sm` stays 26,
 and a dense surface's `xs` becomes 26 as before. A place that chose `sm` chose
 density, and a finger does not undo that: a table's toolbar, a compact table, a
 tree and a breadcrumb keep their pitch, and ADR-0042 and ADR-0051 do not move.
@@ -63,8 +65,9 @@ Touch belongs to the device and reaches every surface.
 
 ## Consequences
 
-- On upgrade, every application on a touch device sees its `md` controls at 44 px.
-  Core's changelog states it under "Changed", with the line that restores 32.
+- ~~On upgrade, every application on a touch device sees its `md` controls at 44 px.
+  Core's changelog states it under "Changed", with the line that restores 32.~~
+  Superseded by ADR-0079: a `md` control stays 32 px on upgrade.
 - Later touch work uses this signal. Where a component hands a control to the
   platform on touch, it decides per gesture, as the Select does, or by CSS, never
   by a render-time test.

@@ -1,9 +1,21 @@
-import { defineConfig } from "vite";
+import { copyFileSync } from "node:fs";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import { importOwnCss } from "../../scripts/styles/importOwnCss.ts";
 import { clientDirective } from "../../scripts/styles/useClient.ts";
 import { ownStyles } from "../../scripts/styles/ownStyles.ts";
+
+/* `touch-scale.css` is a plain stylesheet beside the bundle, not part of
+   `core.css`: an application opts in by importing it. It is copied as written so
+   its `@layer umriss.tokens` wrapper stays. */
+const touchScale = (): Plugin => ({
+  name: "umriss-touch-scale",
+  apply: "build",
+  writeBundle(options) {
+    copyFileSync("src/styles/touch-scale.css", `${options.dir ?? "dist"}/touch-scale.css`);
+  },
+});
 
 export default defineConfig({
   /* `rollupTypes` gathers the types of each entry into ONE file, and flatly at
@@ -13,7 +25,7 @@ export default defineConfig({
      `exports["./wording/de"].types` in the package.json points at
      `./dist/de.d.ts` and not there. */
   /* clientDirective() after importOwnCss(): the directive goes in front of the stylesheet import. */
-  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true }), importOwnCss("core.js", "core.css"), clientDirective()],
+  plugins: [react(), ownStyles(), dts({ include: ["src"], rollupTypes: true }), importOwnCss("core.js", "core.css"), clientDirective(), touchScale()],
   build: {
     /* Two entries: the library, and the German wording as `./wording/de`. The
        second is a subpath rather than a name in the barrel so that an

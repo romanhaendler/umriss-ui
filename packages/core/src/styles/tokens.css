@@ -353,17 +353,6 @@
     }
   }
 
-  /* Under a finger (the primary pointer is coarse) a `md` control is 44 px,
-     the height WCAG 2.5.5 and the HIG name. `sm` (26) and `xs` stay: a place
-     that chose them chose density, and both are above the 24 px floor of
-     WCAG 2.5.8 (ADR-0070). An application sets the token again in its own
-     media query to want another height. */
-  @media (pointer: coarse) {
-    :root {
-      --u-control-height: 44px;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     :root {
       --u-transition: 0ms;

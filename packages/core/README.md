@@ -105,6 +105,11 @@ a full-window `Modal`, a `Drawer` and the `CommandPalette` keep clear of a notch
 and a home indicator, each edge's inset added to its room. Without
 `viewport-fit=cover` nothing moves.
 
+**Touch.** Under a finger (a coarse primary pointer) hit areas are at least
+24 × 24 px, a field's text is 16 px and behaviours follow the gesture; a `md`
+control stays 32 px. To make it 44 px under a finger, the height WCAG 2.5.5
+names, opt in with `import "@umriss-ui/core/touch-scale.css"` (ADR-0079).
+
 **They touch nothing else** (ADR-0021). No rule selects `html`, `body`, `*` or a
 native element of the page, and the only rules on `:root` declare the tokens.
 Each component carries what it needs itself: its type, `box-sizing` on its own
