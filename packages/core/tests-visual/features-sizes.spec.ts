@@ -424,7 +424,7 @@ for (const width of [1280, 320]) {
   });
 }
 
-/* Under a finger (ADR-0070): the `md` control is 44 px, `sm` stays 26, and the
+/* Under a finger the `md` control stays 32 px (ADR-0079), `sm` stays 26, and the
    same page without touch is as it was. */
 const sizesPage = async (page: Page) => {
   await openExample(page, "sizes", "one-size-for-a-place");
@@ -447,11 +447,11 @@ const sizesPage = async (page: Page) => {
 test.describe("under a finger", () => {
   test.use({ hasTouch: true });
 
-  test("a md control is 44 px and a sm control 26", async ({ page }) => {
+  test("a md control stays 32 px and a sm control 26", async ({ page }) => {
     const { small, save } = await sizesPage(page);
     expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
     expect(small).toEqual([26, 26, 26, 26, 26]);
-    expect(save).toBe(44);
+    expect(save).toBe(32);
   });
 });
 

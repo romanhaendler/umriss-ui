@@ -44,7 +44,8 @@
   "typesVersions": {
     "*": {
       "wording/de": ["dist/de.d.ts"],
-      "styles.css": ["dist/styles.d.ts"]
+      "styles.css": ["dist/styles.d.ts"],
+      "touch-scale.css": ["dist/styles.d.ts"]
     }
   },
   "exports": {
@@ -61,6 +62,10 @@
     "./styles.css": {
       "types": "./dist/styles.d.ts",
       "default": "./dist/core.css"
+    },
+    "./touch-scale.css": {
+      "types": "./dist/styles.d.ts",
+      "default": "./dist/touch-scale.css"
     }
   },
   "scripts": {
