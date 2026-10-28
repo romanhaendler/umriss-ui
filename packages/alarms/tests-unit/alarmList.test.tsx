@@ -547,3 +547,17 @@ describe("Hidden", () => {
     expect(screen.getByText("Shelved until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
   });
 });
+
+describe("The grid's name", () => {
+  it("is the caller's aria-label, and the wording's when there is none", () => {
+    const named = render(<AlarmList view={projectionOf()} aria-label="Line 1" />);
+    expect(named.getByRole("grid").getAttribute("aria-label")).toBe("Line 1");
+    named.unmount();
+    const plain = render(<AlarmList view={projectionOf()} />);
+    expect(plain.getByRole("grid").getAttribute("aria-label")).toBe(DEFAULT_WORDING.alarmList);
+  });
+  it("is the caller's aria-labelledby when given", () => {
+    const { getByRole } = render(<><h2 id="h">Line 2</h2><AlarmList view={projectionOf()} aria-labelledby="h" /></>);
+    expect(getByRole("grid", { name: "Line 2" })).toBeTruthy();
+  });
+});

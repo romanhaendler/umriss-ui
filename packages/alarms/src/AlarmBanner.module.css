@@ -29,6 +29,11 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* "10:27:00 AM" stays one line; the banner wraps between its parts. */
+  .time {
+    white-space: nowrap;
+  }
+
   .asOf[data-freshness="stale"] {
     color: var(--u-color-warning);
   }
