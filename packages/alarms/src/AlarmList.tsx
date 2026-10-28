@@ -283,6 +283,8 @@ function Body({
   hiddenOnly = false,
   onHiddenOnlyChange,
   onKeyDown,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...rest
 }: BodyProps & { freshness: FreshnessReading | null }) {
   const wording = useWording();
@@ -521,8 +523,8 @@ function Body({
       <div ref={tableBox}>
       <Table
         grid
-        aria-label={rest["aria-labelledby"] === undefined ? (rest["aria-label"] ?? wording.alarmList) : undefined}
-        aria-labelledby={rest["aria-labelledby"]}
+        aria-label={ariaLabelledBy === undefined ? (ariaLabel ?? wording.alarmList) : undefined}
+        aria-labelledby={ariaLabelledBy}
         selectable={selection !== undefined}
         density={density}
         maxHeight={maxHeight}

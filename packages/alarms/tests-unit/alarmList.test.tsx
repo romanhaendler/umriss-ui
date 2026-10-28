@@ -144,11 +144,12 @@ describe("The live region", () => {
     expect(container.querySelector("[aria-live]")?.textContent).toBe(DEFAULT_WORDING.alarmActiveUnacknowledged(0));
   });
 
-  it("takes the root contract: rest props, a ref and its own aria-label", () => {
+  it("takes the root contract: rest props and a ref on the root, its aria-label on the grid", () => {
     let node: HTMLElement | null = null;
     const { container } = render(<AlarmList view={projectionOf()} aria-label="Plant 2" data-x="1" ref={(n) => void (node = n)} />);
     const root = container.querySelector("[data-x]");
-    expect(root?.getAttribute("aria-label")).toBe("Plant 2");
+    expect(root?.hasAttribute("aria-label")).toBe(false);
+    expect(container.querySelector('[role="grid"]')?.getAttribute("aria-label")).toBe("Plant 2");
     expect(node).toBe(root);
   });
 });
