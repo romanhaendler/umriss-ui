@@ -27,7 +27,16 @@ const withSheet = (page: Page, where: "first" | "last") =>
         if (at === "first") document.documentElement.prepend(style);
         else document.head.append(style);
       };
-      if (at === "first") put();
+      /* An init script runs before the document has a root: "first" waits for
+         it and puts the sheet in ahead of the head. */
+      if (at === "first") {
+        const watch = new MutationObserver(() => {
+          if (!document.documentElement) return;
+          watch.disconnect();
+          put();
+        });
+        watch.observe(document, { childList: true });
+      }
       else addEventListener("DOMContentLoaded", put);
     },
     [SHEET, where] as const,

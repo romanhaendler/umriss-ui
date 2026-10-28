@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
 test("two flex columns beside a fixed one split the rest equally and keep minWidth", { tag: "@quick" }, async ({ page }) => {
   const table = example(page, "columns-that-share-the-width");
   const frame = (await table.locator("table").boundingBox())!.width;
-  const fixed = await widthOf(page, "Shipment");
+  const fixed = await widthOf(page, "Customer");
   const customer = await widthOf(page, "Customer");
   const note = await widthOf(page, "Note");
   expect(Math.abs(customer - note)).toBeLessThan(2);
@@ -36,9 +36,12 @@ test("dragging a flex column's grip fixes its width, and it stays when the frame
   const table = example(page, "columns-that-share-the-width");
   const head = table.getByRole("columnheader", { name: "Customer" });
   const box = (await head.boundingBox())!;
-  await head.locator("span[role='presentation']").hover();
+  const grip = head.locator("span[role='presentation']");
+  await grip.hover();
+  const gripBox = (await grip.boundingBox())!;
+  const from = gripBox.x + gripBox.width / 2;
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width - 40, box.y + box.height / 2, { steps: 6 });
+  await page.mouse.move(from - 40, box.y + box.height / 2, { steps: 6 });
   await page.mouse.up();
   const dragged = await widthOf(page, "Customer");
   expect(Math.abs(dragged - (box.width - 40))).toBeLessThan(2);
@@ -48,11 +51,11 @@ test("dragging a flex column's grip fixes its width, and it stays when the frame
 
 test("Fit all columns sets every column to its content", async ({ page }) => {
   const table = example(page, "columns-that-share-the-width");
-  const before = await widthOf(page, "Shipment");
-  await table.getByRole("button", { name: "Columns" }).click();
+  const before = await widthOf(page, "Customer");
+  await table.getByRole("button", { name: "Columns", exact: true }).click();
   await page.getByRole("button", { name: "Fit all columns" }).click();
   await page.keyboard.press("Escape");
-  const fitted = await widthOf(page, "Shipment");
+  const fitted = await widthOf(page, "Customer");
   expect(fitted).toBeLessThan(before);
   expect((await widthOf(page, "Note")) + 2).toBeGreaterThan(await widthOf(page, "Customer"));
 });

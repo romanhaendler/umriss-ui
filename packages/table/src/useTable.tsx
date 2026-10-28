@@ -20,7 +20,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, use
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
 import type { Formats } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
-import { fitAllColumns } from "./headerCell";
+import { fitAllColumns } from "./flexWidths";
 import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
@@ -216,7 +216,10 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z, boolean> {
   /* A rowKey that is not a function would crash in the first row read: the table shows no rows instead. */
   const keyed = typeof options.rowKey === "function";
-  if (!keyed) warnOnce(`rowkey:${typeof options.rowKey}`, "rowKey must be a function (row) => string, e.g. `rowKey: (row) => row.id`; the table shows no rows.");
+  const rowKeyType = typeof options.rowKey;
+  useEffect(() => {
+    if (!keyed) warnOnce(`rowkey:${rowKeyType}`, "rowKey must be a function (row) => string, e.g. `rowKey: (row) => row.id`; the table shows no rows.");
+  }, [keyed, rowKeyType]);
   const rows = keyed ? asRows(given, "the rows of useTable") : asRows([], "");
   const [registry] = useState(() => new Registry());
   registry.setRows(rows);
