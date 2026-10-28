@@ -53,6 +53,7 @@ function renderRow(
       row={row}
       index={index}
       absolute={layout.virtual ? absolute : undefined}
+      headRows={layout.headRows}
       registry={registry}
       hook={hook}
       columns={layout.dataColumns}
@@ -200,6 +201,7 @@ function groupedBody(ctx: BodyContext, lines: readonly Line<unknown>[]) {
       line={line}
       index={index}
       absolute={absolute}
+      headRows={layout.headRows}
       spanEntry={layout.spanEntry}
       levelEntry={layout.entryOf(grouping[line.group.level])}
       columns={layout.dataColumns}

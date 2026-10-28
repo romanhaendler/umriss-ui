@@ -1,4 +1,5 @@
-import { ColumnMenu, useTable } from "../../../src";
+import { Button } from "@umriss-ui/core";
+import { ColumnMenu, Toolbar, useTable } from "../../../src";
 
 export const title = "Columns that share the width";
 export const lead = "`flex` takes a share of the width the other columns leave - two columns with `flex={1}` split it equally - and `minWidth` keeps one readable. A column the reader drags keeps the dragged width. \"Fit all columns\" in the column menu, or `autoSizeColumns()`, sets every column to its content.";
@@ -19,16 +20,16 @@ export default function SharedWidth() {
   const { Table, Column, autoSizeColumns } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
 
   return (
-    <>
-      <button type="button" onClick={autoSizeColumns}>
-        Fit now
-      </button>
-      <Table aria-label="Shipments filling the frame">
+    <Table aria-label="Shipments filling the frame">
+      <Toolbar>
         <ColumnMenu />
-        <Column value="id" label="Shipment" rowHeader width={120} />
-        <Column value="customer" label="Customer" resizable flex={1} minWidth={140} />
-        <Column value="note" label="Note" resizable sortable={false} flex={1} minWidth={160} />
-      </Table>
-    </>
+        <Button size="sm" onClick={autoSizeColumns}>
+          Fit columns now
+        </Button>
+      </Toolbar>
+      <Column value="id" label="Shipment" rowHeader width={120} />
+      <Column value="customer" label="Customer" resizable flex={1} minWidth={140} />
+      <Column value="note" label="Note" resizable sortable={false} flex={1} minWidth={160} />
+    </Table>
   );
 }
