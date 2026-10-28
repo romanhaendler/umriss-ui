@@ -6,7 +6,7 @@ import { warnOnce } from "./dev";
 import { computeLayout, type AxisInput, type AxisLayout } from "./layout";
 import { axisExtent, visibleExtent, type Extent } from "./materialize";
 import type { ChartScene } from "./scene";
-import { labelled, baselineOf } from "./sceneConfig";
+import { labelled, baselineOf, normalizes } from "./sceneConfig";
 import { inTime, materialize } from "./sceneMaterial";
 import { type SeriesEntry } from "./sceneModel";
 import { yTickFormat } from "./sceneSpeech";
@@ -159,9 +159,11 @@ function barStepOn(s: ChartScene, axis: AxisConfig): number | undefined {
   return Number.isFinite(smallest) ? smallest : undefined;
 }
 
-/** Whether a bar stands on a y axis. */
+/** Whether a bar stands on a y axis whose top is the data's: a normalised
+    stack ends at 100 % by definition and gets no room above it. */
 function barsOn(s: ChartScene, axis: AxisConfig): boolean {
-  return s.seriesInOrder().some((e) => e.config.kind === "bar" && e.config.yAxisId === axis.id);
+  const on = s.seriesInOrder().filter((e) => e.config.yAxisId === axis.id);
+  return on.some((e) => e.config.kind === "bar") && !on.some((e) => normalizes(e.config));
 }
 
 export function updateLayout(s: ChartScene): void {
