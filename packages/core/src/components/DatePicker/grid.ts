@@ -1,6 +1,7 @@
 /* The month grid and the date arithmetic of the pickers. Pure functions without
    React: the seam at which the build-up of the grid, the range band and the
-   keyboard step are checked. The week starts on Monday, and all days lie on
+   keyboard step are checked. The week starts on the formats' `weekStart`
+   (ISO: 1 = Monday ... 7 = Sunday; Monday by default), and all days lie on
    local midnight. */
 
 export const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
@@ -20,14 +21,13 @@ export const beforeDay = (a: Date, b: Date) => dayOnly(a).getTime() < dayOnly(b)
 export const GRID_CELLS = 42;
 
 /**
- * The month grid for a view: 42 consecutive days, beginning on the Monday of
- * the week the first of the month falls into. The day is constructed through
+ * The month grid for a view: 42 consecutive days, beginning on the first
+ * day of the week the first of the month falls into. The day is constructed through
  * the Date constructor and therefore skips no change of daylight saving time.
  */
-export function monthGrid(view: Date): Date[] {
+export function monthGrid(view: Date, weekStart = 1): Date[] {
   const first = startOfMonth(view);
-  const offset = (first.getDay() + 6) % 7; // Monday = 0
-  const start = addDays(first, -offset);
+  const start = startOfWeek(first, weekStart);
   return Array.from({ length: GRID_CELLS }, (_, index) => addDays(start, index));
 }
 
@@ -70,5 +70,5 @@ export const dayStep = (key: string): number | undefined => STEPS[key];
 export const viewFollows = (next: Date, view: Date) =>
   next.getMonth() !== view.getMonth() || next.getFullYear() !== view.getFullYear();
 
-/** Monday of the week the day falls into. */
-export const startOfWeek = (d: Date) => addDays(d, -((d.getDay() + 6) % 7));
+/** First day (`weekStart`, ISO-numbered) of the week the day falls into. */
+export const startOfWeek = (d: Date, weekStart = 1) => addDays(d, -((d.getDay() - (weekStart % 7) + 7) % 7));

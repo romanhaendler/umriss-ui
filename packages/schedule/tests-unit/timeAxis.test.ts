@@ -124,6 +124,13 @@ describe("opensRun", () => {
     expect(opensRun(t("2026-03-23T00:00:00+01:00"), 7)).toBe(true);
   });
 
+  it("opens a week on its Sunday under a week start of 7", () => {
+    // 15.03.2026 is a Sunday.
+    expect(opensRun(t("2026-03-15T00:00:00+01:00"), 7, undefined, 7)).toBe(true);
+    expect(opensRun(t("2026-03-16T00:00:00+01:00"), 7, undefined, 7)).toBe(false);
+    expect(opensRun(t("2026-03-15T00:00:00+01:00"), 7)).toBe(false);
+  });
+
   it("keeps its Mondays across the clock change", () => {
     // 29.03.2026 is the change; the next Monday has an offset of two hours.
     expect(opensRun(t("2026-03-30T00:00:00+02:00"), 7)).toBe(true);
