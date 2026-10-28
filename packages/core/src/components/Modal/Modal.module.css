@@ -32,16 +32,6 @@
     display: none;
   }
 
-  /* Rendered open, not yet shown: laid out but invisible, because a field
-     in a display:none dialog cannot take `autoFocus`. */
-  .dialog:not([open])[data-pending] {
-    display: flex;
-    position: fixed;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-
   .spacerTop {
     flex: 38 38 0px;
     min-height: 0;

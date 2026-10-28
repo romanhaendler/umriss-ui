@@ -13,6 +13,14 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject, SyntheticEvent } from "react";
 import { durationFrom, prefersReducedMotion } from "./motion";
 
+/* ponytail: reads React's `__reactProps$` expando; if React renames it, the autoFocus is ignored and the dialog's own focusing steps apply. */
+function autoFocusTarget(dialog: HTMLDialogElement): HTMLElement | undefined {
+  for (const el of dialog.querySelectorAll<HTMLElement>("*")) {
+    const key = Object.keys(el).find((k) => k.startsWith("__reactProps$"));
+    if (key && (el as unknown as Record<string, { autoFocus?: boolean }>)[key]?.autoFocus) return el;
+  }
+}
+
 export interface DialogChoreography {
   /** Belongs on the <dialog> element. */
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -88,11 +96,12 @@ export function useDialogChoreography(
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setClosing(false);
       if (!dialog.open) {
-        /* The dialog's focusing steps move the focus to its first tab stop.
-           A field inside that React focused for `autoFocus` keeps it. */
-        const held = document.activeElement;
         dialog.showModal();
-        if (held instanceof HTMLElement && held !== dialog && dialog.contains(held)) held.focus();
+        /* The dialog's focusing steps put the focus on its first tab stop. A
+           field marked `autoFocus` was focused by React when it mounted, long
+           before the dialog opened, and React writes no attribute for it:
+           the prop on the element's React props is the only trace. */
+        autoFocusTarget(dialog)?.focus();
       }
       return;
     }
