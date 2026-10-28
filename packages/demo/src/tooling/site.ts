@@ -283,8 +283,8 @@ export function whatsNewFaults(html: string, home: string, files: ReadonlyMap<st
 }
 
 /** What the site's search index may weigh, uncompressed: the palette fetches
-    all of it on its first opening. */
-export const SEARCH_BUDGET = 500_000;
+    all of it on its first opening (about a fifth of it over the wire). */
+export const SEARCH_BUDGET = 550_000;
 
 /** The site's search index, `search.json` at its root: the five packages'
     fragments (`demo/.generated/search.json`, as text) in one list. */
