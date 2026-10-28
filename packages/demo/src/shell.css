@@ -194,6 +194,10 @@ body {
   color: var(--u-color-text);
 }
 
+.shellTheme[aria-pressed="true"] {
+  color: var(--u-color-text);
+}
+
 .shellTheme:focus-visible,
 .shellIcon:focus-visible {
   outline: none;
