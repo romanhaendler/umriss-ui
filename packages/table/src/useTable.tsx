@@ -18,7 +18,9 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
+import type { Formats } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
+import { fitAllColumns } from "./headerCell";
 import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
@@ -88,7 +90,7 @@ function combineConditions(
   conditions: ConditionList,
   registry: Registry,
   rowFilters: RowFilters,
-  timeZone: string | undefined,
+  formats: Formats,
   rows: readonly unknown[],
 ): ((row: unknown) => boolean) | undefined {
   if (conditions.length === 0) return undefined;
@@ -109,7 +111,7 @@ function combineConditions(
         if (entry && appliesTo(registry, id, condition)) {
           resolved.push((r) => {
             const filter = filterOf(entry.spec.filter);
-            return !filter || satisfies(filter, entry.read(r), condition, timeZone);
+            return !filter || satisfies(filter, entry.read(r), condition, formats);
           });
         }
       }
@@ -273,7 +275,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; a condition under that id is the row filter's, and the column's filter cannot hold one of its own.`);
     }
   }
-  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats.timeZone, rowsUnknown), [conditions, registry, rowFilters, formats.timeZone, rowsUnknown]);
+  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats, rowsUnknown), [conditions, registry, rowFilters, formats, rowsUnknown]);
 
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
@@ -611,6 +613,18 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
   }, [matchKey, selection.allMatching]);
 
+  /* The application hears the selected keys after a change, from an effect and
+     never at mount; a new function each render does not repeat the report. A change of "all that match" or of its
+     exceptions counts as one too. */
+  const selectedKeys = JSON.stringify([[...selection.selected], selection.allMatching, [...selection.except]]);
+  const keysSeen = useRef(selectedKeys);
+  useEffect(() => {
+    if (keysSeen.current === selectedKeys) return;
+    keysSeen.current = selectedKeys;
+    options.onSelectionChange?.([...selection.selected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the selection, with that render's callback
+  }, [selectedKeys]);
+
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never
@@ -683,6 +697,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     setPin,
     widths: effectiveWidths(modelColumns, b.widths),
     setWidth: b.setWidth,
+    autoSizeColumns: () => fitAllColumns(registry.frameTable, b.setWidth),
     expanded: b.expanded,
     toggleRow: b.toggleRow,
     filter: Object.fromEntries(effective),
