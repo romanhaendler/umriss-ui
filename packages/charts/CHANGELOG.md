@@ -30,6 +30,17 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
+
+### Added
+
+- **`ChartsWordingProvider`** takes a partial `ChartsWording` and sets it for every chart below it, one inside a dashboard widget included; a chart's own `wording` still wins. Charts still depend on nothing: an application with core and charts sets both providers (ADR-0031 amended).
+
+### Fixed
+
+- **A bar chart's value axis** ends one step above a largest bar that sits exactly on a tick, in the step the data gave, so the bar no longer touches the top; a normalised stack keeps its axis at 100 %.
+- **README links resolve on npm**: links to files the package does not ship point to the repository on GitHub.
+
 ## 0.48.0 – Released in step with core (Oct. 2026)
 
 No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.

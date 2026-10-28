@@ -13,6 +13,17 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
+
+### Changed
+
+- **The dashboard stands flush with its neighbours**: no side padding, at rest and while editing; the edit frame is drawn inside the cards, so nothing moves when editing starts and a host that clips its overflow does not cut the frame.
+  - Migration: a dashboard's content is 32 px wider than before; one that relied on the library's side padding gives itself a margin.
+
+### Fixed
+
+- **README links resolve on npm**: links to files the package does not ship point to the repository on GitHub.
+
 ## 0.48.0 – Released in step with core (Oct. 2026)
 
 No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.

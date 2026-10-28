@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/alarms",
-  "version": "0.48.0",
+  "version": "0.49.0",
   "description": "React alarm management for data-dense applications - the lifecycle of an alarm after it is raised: a model and a list.",
   "license": "MIT",
   "author": "Roman Händler",
@@ -69,8 +69,8 @@
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts alarms.js alarms.css"
   },
   "peerDependencies": {
-    "@umriss-ui/core": "workspace:^0.48.0",
-    "@umriss-ui/table": "workspace:^0.48.0",
+    "@umriss-ui/core": "workspace:^0.49.0",
+    "@umriss-ui/table": "workspace:^0.49.0",
     "react": ">=19",
     "react-dom": ">=19"
   },

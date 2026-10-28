@@ -26,6 +26,29 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
+
+### Changed
+
+- **Under `touch-scale.css` the toolbar, pagination and row actions are 44 px** with core's `sm` controls.
+  - Migration: to keep them at 26 px under the opt-in, set `--u-control-height-sm` after the import (see core's changelog).
+
+### Added
+
+- **`ColumnGroup`**: a label in a second head row over the columns it wraps (`scope="colgroup"`), with a rule at each group boundary; hiding, resizing, flex and pinning stay per column, reordering keeps a column in its group, a group split by pinning shows its label over each part, and exports write "Q1 · Jan".
+- **`filter="text"`**: contains, does not contain, starts with, ends with, equals, is empty; up to two terms joined by AND or OR, without regard to case; the condition is JSON in the view, a chip, and part of a server request (`TextCondition`, `TextTerm`, `TextOperator`).
+- **`onSelectionChange(keys)`** on `useTable`, called from an effect after each change of the selection - never during render or at mount - with the table's own or a handed-in selection.
+- **`flex` and `minWidth` on a column**: columns share the width the fixed ones leave; a hand resize stores a pixel width and ends the flex. **"Fit all columns"** in the column menu and **`autoSizeColumns()`** on the hook size every column to its content.
+- In development, a column whose field no row of the first page has warns once, naming the field.
+- A recipe for undo and redo over `onCellEdit` (README, Edits page); the API is unchanged.
+- The README and capabilities say that dev mode is about ten times slower than the production figures.
+
+### Fixed
+
+- **A virtual table scrolled to the end** shows rows and a matching scroll height after a search narrows it.
+- **`useTable` without `rowKey`, or with a string**, warns "rowKey must be a function (row) => string" and shows no rows instead of throwing.
+- **README links resolve on npm**: links to files the package does not ship point to the repository on GitHub.
+
 ## 0.48.0 – Released in step with core (Oct. 2026)
 
 No change of its own; the number moves with core's touch scale, now an opt-in (ADR-0079): a `md` control of core stays 32 px under a finger unless the application imports `@umriss-ui/core/touch-scale.css`.
