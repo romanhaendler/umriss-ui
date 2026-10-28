@@ -128,8 +128,10 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   regions and places, cost centres. Every level sorts on its own, a search
   shows a match with the rows above it, the footer sums the top level, the
   export writes the level, and a leaf's detail opens from its own fold.
-* **Restricting a column**: the values that occur, two bounds, or a filter the
-  application writes itself — plus conditions set from outside and read back.
+* **Restricting a column**: the values that occur, two bounds, text operators
+  (`filter="text"`: contains, starts with, is empty ... up to two terms joined
+  by AND or OR; a server request carries `{ join, terms: [{ operator, value }] }`
+  under the column's id), or a filter the application writes itself — plus conditions set from outside and read back.
   A view survives JSON: the dates of a stored condition come back as `Date`s.
 * **Restricting by the whole row**: a row filter asks any question of a row
   ("overdue" = past its window and not delivered) through a control of the
@@ -142,6 +144,10 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
+* **Columns that fill the frame**: `flex` on a column takes a share of the width
+  the others leave (with `minWidth` as its floor); a width dragged by hand ends
+  the flex of that column and stands in the view. "Fit all columns" in the column
+  menu, or `autoSizeColumns()`, sets every column to its content.
 * **A time zone named in the formats** (core's Time zone): the dates, the day
   groups and the date filter follow it, and the head of a `"date"`, `"time"` or
   `"dateTime"` column names it, in muted text, where the reader's own is another.
@@ -193,6 +199,13 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
+* **A selection the application hears** (`onSelectionChange`): `useTable`
+  calls it with the selected keys after each change - a tick, "select all", a
+  shift-click range, a clear, `selection.toggle()` - from an effect, never at
+  mount or during render, so `onSelectionChange: setKeys` cannot loop. It works
+  with the table's own selection, with one handed in as `selection`, and in
+  server mode (there, under "all that match", `selection.allMatching` and
+  `selection.except` tell the rest).
 * **Rows that change every second** (`tests-unit/rowsThatKeepArriving.test.tsx`):
   `rows` may be a new array each second - values move, a row appears, one goes.
   The sort stays and the rows stand in its order; a row keeps its place in the
