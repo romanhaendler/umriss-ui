@@ -6,13 +6,21 @@
 import { DEFAULT_FORMATS, DEFAULT_SEPARATORS, type Separators } from "../../lib/language/formats";
 
 /**
+ * A typed "." is the decimal separator wherever "." is not the group
+ * separator (fr-CH 1234.5); where it is (German), it stays a group separator.
+ * Reading and filtering both go through here so that they agree.
+ */
+const dotAsDecimal = (raw: string, { group, decimal }: Separators): string =>
+  group === "." || decimal === "." ? raw : raw.replaceAll(".", decimal);
+
+/**
  * Reads a number in the given notation - the default one where none is given.
  * Spaces and group separators fall away, the decimal separator becomes the
  * dot. An empty string and a lone minus are "no value" and are thereby
  * distinguishable from zero.
  */
 export function parseNumber(raw: string, separators: Separators = DEFAULT_SEPARATORS): number | null {
-  const cleaned = [...raw]
+  const cleaned = [...dotAsDecimal(raw, separators)]
     .filter((char) => !/\s/.test(char) && (separators.group === "" || char !== separators.group))
     .map((char) => (char === separators.decimal ? "." : char))
     .join("");
@@ -65,7 +73,7 @@ export function filterInput(
   if (decimalsAllowed(constraints.decimals)) allowed.add(separators.decimal);
   if (negativeAllowed(constraints.min)) allowed.add("-");
   allowed.delete("");
-  return [...raw].filter((char) => allowed.has(char)).join("");
+  return [...dotAsDecimal(raw, separators)].filter((char) => allowed.has(char) || /\s/.test(char)).join("");
 }
 
 /**
