@@ -110,7 +110,9 @@ application's CSS wins and every token can be overridden; light and dark follow
 the application's `color-scheme`; fonts are the application's (Geist
 recommended). The details stand in the README of `@umriss-ui/core`, under
 **Styles**. `@umriss-ui/table/styles.css` stays exported for setups that link
-stylesheets by hand.
+stylesheets by hand. Under a finger the toolbar, pagination and row actions are
+26 px; `@umriss-ui/core/touch-scale.css` makes them 44 px, in any import order
+(core's README, **Touch**).
 
 ## What it can do
 
