@@ -1,6 +1,7 @@
 /* The row pitch derives from the `rem` control heights: at a root font size
-   of 32 px a row is twice its height at 16 px, give or take the one pixel of
-   the border, which stays a pixel. Chromium only; light only. */
+   of 32 px a `sm` control is 52 px, and a row still holds it with its
+   space-1 above and below. The row's padding stays on the density
+   tokens, which an application sets in pixels. Chromium only; light only. */
 
 import { test, expect, type Page } from "@playwright/test";
 import { addressOf } from "./navigation";
@@ -16,7 +17,6 @@ const rowHeight = async (page: Page, root: number) => {
   return (await row.boundingBox())!.height;
 };
 
-test("a row is twice as tall at a 32 px root", { tag: "@quick" }, async ({ page }) => {
-  const plain = await rowHeight(page, 16);
-  expect(Math.abs((await rowHeight(page, 32)) - plain * 2)).toBeLessThanOrEqual(1);
+test("a row grows with the controls at a 32 px root", { tag: "@quick" }, async ({ page }) => {
+  expect(await rowHeight(page, 32)).toBeGreaterThanOrEqual(52 + 2 * 4);
 });

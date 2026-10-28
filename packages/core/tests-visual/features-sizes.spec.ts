@@ -246,12 +246,10 @@ test.describe("on a phone", () => {
 test("One size for a place reaches every control, and a dialog keeps its own", async ({ page }) => {
   await openExample(page, "sizes", "one-size-for-a-place");
   const stage = example(page, "one-size-for-a-place");
-  const small = await page.evaluate(() =>
-    Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-control-height-sm")),
-  );
-  const regular = await page.evaluate(() =>
-    Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-control-height")),
-  );
+  /* A token in rem, resolved to the pixels a control takes. */
+  const token = (name: string) => page.evaluate((n) => { const p = document.createElement("div"); p.style.height = `var(${n})`; document.body.append(p); const h = p.offsetHeight; p.remove(); return h; }, name);
+  const small = await token("--u-control-height-sm");
+  const regular = await token("--u-control-height");
   /* The layout height, which a dialog's entering scale does not touch. */
   const height = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement).offsetHeight);
   for (const control of [
@@ -376,7 +374,7 @@ test("A segment's icon stands on its word's line and stays whole in a narrow pla
    either size, its padding inside it - so it lines up with a field. */
 test("An inset segmented control is as tall as a field, at either size", async ({ page }) => {
   await openExample(page, "segmentedcontrol", "a-theme-switch");
-  const token = (name: string) => page.evaluate((n) => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)), name);
+  const token = (name: string) => page.evaluate((n) => { const p = document.createElement("div"); p.style.height = `var(${n})`; document.body.append(p); const h = p.offsetHeight; p.remove(); return h; }, name);
   const control = example(page, "a-theme-switch").getByRole("radiogroup", { name: "Theme" });
   const height = () => control.evaluate((element) => (element as HTMLElement).offsetHeight);
   expect(await height()).toBe(await token("--u-control-height"));
