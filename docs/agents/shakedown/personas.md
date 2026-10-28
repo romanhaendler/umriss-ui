@@ -236,5 +236,11 @@ nothing and waits that only pass on a fast machine. Weighs speed: which tests co
 Lets the tools speak first, then reads: type escapes (`as`, `any`, `!`, `@ts-expect-error`, `eslint-disable`)
 counted per package and each one judged, import cycles (madge), dead files and exports (knip), duplication
 (jscpd), the longest functions and the deepest nesting, CSS rules that repeat a token's value, dependencies
-the code does not use. A count is not a finding; a finding is the escape that hides a real type hole, the
-cycle that forces an import order, the copy that already drifted.
+the code does not use. Then the smells by hand, the largest first: components and hooks ranked by lines,
+props, `useState`/`useEffect` count and branches; god components that render, fetch state and handle keys
+in one body; effects that derive state or sync props, refs used as a second state, boolean props that
+combine into impossible states, long parameter lists, flag arguments, primitive obsession, feature envy
+(a module reaching into another's internals), shotgun surgery (one concept spread over many files). A count
+is not a finding; a finding is the escape that hides a real type hole, the cycle that forces an import
+order, the copy that already drifted, the component whose next change will break a neighbour - each with
+the smallest split or rewrite that cures it.
