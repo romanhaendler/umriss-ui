@@ -113,6 +113,7 @@ export { inDoubledHour } from "./zone";
 /* The charts' own wording (ADR-0031); German stands behind the subpath
    `@umriss-ui/charts/wording/de`. */
 export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
+export { ChartsWordingProvider, type ChartsWordingProviderProps } from "./WordingProvider";
 
 /* The data table. At the end, by the workspace's rule
    for new exports. */

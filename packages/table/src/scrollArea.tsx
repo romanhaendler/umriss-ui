@@ -6,6 +6,7 @@ import type { RefObject } from "react";
 import { blocksThatStick } from "./model/pinning";
 import type { PinBlocks } from "./model/pinning";
 import { markBeyond, markUnder } from "./scrollMarks";
+import { columnRow } from "./pinned";
 
 /* Where the pinned cells stick: each at the sum of the widths before it in
    its block, read off the head row - after every render and whenever a cell
@@ -44,7 +45,7 @@ export function PinPlacement({
     scroller.style.removeProperty("scroll-padding-left");
     scroller.style.removeProperty("scroll-padding-right");
     if (!start && !end) return;
-    const cells = Array.from(table.tHead?.rows?.[0]?.cells ?? []);
+    const cells = Array.from(columnRow(table)?.cells ?? []);
     let startWidth = 0;
     for (let i = 0; i < start; i++) {
       table.style.setProperty(`--u-table-pin-start-${i}`, `${startWidth}px`);
@@ -77,7 +78,7 @@ export function PinPlacement({
     const table = tableRef.current;
     if (!table || (!start && !end) || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(place);
-    const cells = Array.from(table.tHead?.rows?.[0]?.cells ?? []);
+    const cells = Array.from(columnRow(table)?.cells ?? []);
     for (const cell of [...cells.slice(0, start), ...cells.slice(cells.length - end)]) observer.observe(cell);
     /* The scroll area too: whether content lies under a block changes with its width. */
     if (table.parentElement) observer.observe(table.parentElement);

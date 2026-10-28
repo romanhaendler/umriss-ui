@@ -130,6 +130,24 @@
     pointer-events: none;
   }
 
+  /* A group's cell over its columns: centred, its line under the label. The
+     column row of a sticky head sticks below it (frameEffects.ts). */
+  /* The group's name in the column menu, over its columns. */
+  .columnsGroup {
+    padding: var(--u-space-1) var(--u-space-2) 0;
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text-secondary);
+  }
+
+  .headGroup {
+    text-align: center;
+  }
+
+  .sticky thead tr + tr .th {
+    top: var(--u-table-head-group-row, 0px);
+  }
+
   /* ---- Cells ----------------------------------------------------------- */
 
   .td {

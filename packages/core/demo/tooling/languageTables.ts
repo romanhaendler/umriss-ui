@@ -103,7 +103,7 @@ export function languageTables(packageDir: string): ReferenceTable[] {
     wordingTable({
       title: "Charts wording",
       anchor: "charts-wording",
-      lead: "Every entry of `ChartsWording` from `@umriss-ui/charts`, which a chart takes through its `wording` prop: the English of `DEFAULT_CHARTS_WORDING` beside the German of `GERMAN_CHARTS_WORDING`, imported from `@umriss-ui/charts/wording/de`.",
+      lead: "Every entry of `ChartsWording` from `@umriss-ui/charts`, which a chart takes through its `wording` prop: the English of `DEFAULT_CHARTS_WORDING` beside the German of `GERMAN_CHARTS_WORDING`, imported from `@umriss-ui/charts/wording/de`. One `ChartsWordingProvider` from `@umriss-ui/charts` at the root sets it for every chart below, also one inside a dashboard widget; a chart's own `wording` wins. An app with both packages sets both providers, `LanguageProvider` for core and `ChartsWordingProvider` for the charts.",
       entries: readEntries(read(join(charts, "index.ts")), "ChartsWording"),
       english: readTexts(read(join(charts, "index.ts")), "DEFAULT_CHARTS_WORDING"),
       german: readTexts(read(join(charts, "de.ts")), "GERMAN_CHARTS_WORDING"),

@@ -15,6 +15,7 @@
 
 import {
   useCallback,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -30,6 +31,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { ChartContext } from "./context";
+import { ChartsWordingContext } from "./WordingProvider";
 import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
 import { useSilhouette } from "./Silhouette";
@@ -144,7 +146,11 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     ...rest
   } = props;
 
-  const wording = useMemo<ChartsWording>(() => ({ ...DEFAULT_CHARTS_WORDING, ...wordingProp }), [wordingProp]);
+  const provided = useContext(ChartsWordingContext);
+  const wording = useMemo<ChartsWording>(
+    () => ({ ...DEFAULT_CHARTS_WORDING, ...provided, ...wordingProp }),
+    [provided, wordingProp],
+  );
   if (timeZone !== undefined) checkZone(timeZone);
   const empty = emptyProp ?? wording.empty;
 

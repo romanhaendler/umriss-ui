@@ -47,6 +47,7 @@ passThroughGuard("charts", { ...charts, Chart }, CASES, {
   LimitLine: registers,
   LimitBand: registers,
   ControlChart: "a composition of series and limits that register with the chart; no element of its own",
+  ChartsWordingProvider: "a context provider; renders no element of its own",
   LinearScale: "a class of arithmetic, not a component",
 });
 

@@ -121,3 +121,37 @@ describe("Modal – named by its header", () => {
     expect([ok, wrong]).toHaveLength(2);
   });
 });
+
+describe("a Modal without onClose", () => {
+  it("throws nothing on Escape and the cross, and warns once naming onClose", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    // @ts-expect-error a JavaScript host leaves `onClose` out
+    render(<Modal open><ModalHeader title="Title" /></Modal>);
+    expect(() => {
+      fireEvent.click(screen.getByRole("button", { name: /close/i }));
+      fireEvent(dialog(), new Event("cancel", { cancelable: true }));
+      act(() => vi.advanceTimersByTime(1000));
+    }).not.toThrow();
+    const named = warn.mock.calls.filter((c) => String(c[0]).includes("onClose"));
+    expect(named).toHaveLength(1);
+    warn.mockRestore();
+  });
+});
+
+describe("autoFocus inside a Modal", () => {
+  it("keeps the focus the dialog's own focusing steps would take away", () => {
+    // The platform's showModal() puts the focus on the first tab stop.
+    const show = vi.spyOn(HTMLDialogElement.prototype, "showModal").mockImplementation(function (this: HTMLDialogElement) {
+      this.setAttribute("open", "");
+      this.querySelector("button")!.focus();
+    });
+    render(
+      <Modal open onClose={() => {}}>
+        <ModalHeader title="Title" />
+        <ModalBody><input aria-label="Second" autoFocus /></ModalBody>
+      </Modal>,
+    );
+    expect(document.activeElement).toBe(screen.getByLabelText("Second"));
+    show.mockRestore();
+  });
+});

@@ -95,6 +95,18 @@ import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
 <Chart aria-label="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
 ```
 
+To set it once, wrap the app (or a page) in `ChartsWordingProvider`; every chart below it, also one inside a
+dashboard widget, speaks that wording. A chart's own `wording` is merged over the provider's, so one chart can
+still differ. An app that uses `@umriss-ui/core` as well sets both providers - the charts depend on nothing:
+
+```tsx
+import { ChartsWordingProvider } from "@umriss-ui/charts";
+
+<ChartsWordingProvider wording={GERMAN_CHARTS_WORDING}>
+  <App />
+</ChartsWordingProvider>
+```
+
 ## Styles
 
 Nothing to import. `dist/charts.js` loads its own stylesheet; the axes, ticks,
