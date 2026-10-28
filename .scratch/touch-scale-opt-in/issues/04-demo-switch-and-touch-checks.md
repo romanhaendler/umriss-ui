@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Size: M
 Blocked by: 02
 
