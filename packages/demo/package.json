@@ -31,6 +31,7 @@
     "./checks/forcedColors": "./checks/forcedColors.ts",
     "./checks/largeText": "./checks/largeText.ts",
     "./checks/floor": "./checks/floor.ts",
+    "./checks/touchScale": "./checks/touchScale.ts",
     "./checks/silentPages": "./checks/silentPages.ts",
     "./checks/trustedTypes": "./checks/trustedTypes.ts",
     "./tests-support/setup": "./tests-support/setup.ts",
