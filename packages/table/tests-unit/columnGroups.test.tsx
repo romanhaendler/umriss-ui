@@ -2,7 +2,7 @@
    that follow what is visible, a group that cannot be left by reordering, and
    the groups' names in the export. */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ColumnGroup, ColumnMenu, Export, Toolbar, useTable } from "../src";
 import type { ExportFormat, ExportSheet, Table } from "../src";
@@ -88,6 +88,50 @@ describe("reordering in the column menu", () => {
     expect(disabled("Move Feb forward")).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Move Feb forward" }));
     expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Name,Q1 · Feb,Q1 · Jan,Q1 · Mar,Apr");
+  });
+});
+
+describe("the rule between groups", () => {
+  it("marks the cells of every column that follows another group, head and body, and none inside a group", () => {
+    const { container } = render(<Report />);
+    const edged = (row: Element) => Array.from((row as HTMLTableRowElement).cells).map((c) => c.className.includes("groupEdge"));
+    // Name | Jan Feb Mar (Q1) | Apr: the boundaries stand before Jan and before Apr.
+    expect(edged(rows(container)[1]!)).toEqual([false, true, false, false, true]);
+    expect(edged(container.querySelector("tbody tr")!)).toEqual([false, true, false, false, true]);
+    expect(edged(rows(container)[0]!)).toEqual([false, true, true]);
+  });
+});
+
+describe("setOrder", () => {
+  it("keeps a column in its group", () => {
+    const { container } = render(<Report />);
+    act(() => current!.setOrder(["name", "jan", "apr", "feb", "mar"]));
+    expect(cells(rows(container)[1]!).map(([t]) => t)).toEqual(["Name", "Jan", "Feb", "Mar", "Apr"]);
+    expect(cells(rows(container)[0]!)).toEqual([["", 1], ["Q1", 3], ["", 1]]);
+  });
+});
+
+describe("a virtual table with groups", () => {
+  it("counts both head rows in aria-rowindex and aria-rowcount", () => {
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
+    vi.spyOn(HTMLTableRowElement.prototype, "getBoundingClientRect").mockReturnValue({ height: 20, width: 0, top: 0, left: 0, right: 0, bottom: 20, x: 0, y: 0, toJSON: () => ({}) });
+    const many = Array.from({ length: 50 }, (_, i) => ({ id: String(i), a: i, b: i }));
+    const V = () => {
+      const { Table: Frame, Column } = useTable(many, { rowKey: (r) => r.id, virtual: true });
+      return (
+        <Frame maxHeight="100px" aria-label="V">
+          <ColumnGroup label="G">
+            <Column value="a" label="A" />
+            <Column value="b" label="B" />
+          </ColumnGroup>
+        </Frame>
+      );
+    };
+    const { container } = render(<V />);
+    expect(container.querySelector("table")!.getAttribute("aria-rowcount")).toBe("52");
+    const head = Array.from(container.querySelectorAll("thead tr")).map((r) => r.getAttribute("aria-rowindex"));
+    expect(head).toEqual(["1", "2"]);
+    expect(container.querySelector("tbody tr[data-row]")!.getAttribute("aria-rowindex")).toBe("3");
   });
 });
 
