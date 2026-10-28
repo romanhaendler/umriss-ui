@@ -12,7 +12,8 @@ export const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "
 /** A sheet name as Excel takes it: without `[]:*?/\`, control characters and
     lone surrogates (not XML), at most 31 characters, `Sheet1` where nothing is left. */
 export function sheetName(name: string): string {
-  return name.replace(/[[\]:*?/\\\u0000-\u001f]|[\ud800-\udfff]/gu, "").slice(0, 31) || "Sheet1";
+  // Cut first, then drop lone surrogates: the cut can split a pair.
+  return name.replace(/[[\]:*?/\\\u0000-\u001f]/g, "").slice(0, 31).replace(/[\ud800-\udfff]/gu, "") || "Sheet1";
 }
 
 /** The six parts in the order the file holds them. `sheet` is `sheet1.xml`. */
