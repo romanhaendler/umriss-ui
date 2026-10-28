@@ -827,6 +827,19 @@
     min-width: 0;
   }
 
+  .textFields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-2);
+    min-width: 240px;
+  }
+
+  .textTerm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-2);
+  }
+
   .rangePeriod {
     min-width: 240px;
   }
