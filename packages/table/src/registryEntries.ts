@@ -36,6 +36,8 @@ export interface ColumnSpec {
   rowHeader: boolean;
   rightAligned?: boolean;
   width?: number;
+  flex?: number;
+  minWidth?: number;
   pin?: Pin;
   resizable: boolean;
   sortable?: boolean;

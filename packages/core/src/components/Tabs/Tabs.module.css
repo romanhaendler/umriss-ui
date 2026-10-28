@@ -35,6 +35,7 @@
     composes: ring from "#own-styles";
     position: relative;
     flex: none;
+    min-height: var(--u-control-height);
     padding: var(--u-space-2) 2px;
     border: none;
     background: none;

@@ -107,15 +107,16 @@ export function dayRun(dayWidth: number, room: number): number {
 }
 
 /** Whether the day that begins at `start` opens a run of `run` days.
-    Counted from a Monday, so that a week's date stands on its first day - and
+    Counted from the formats' week start (1 = Monday ... 7 = Sunday), so that a
+    week's date stands on its first day - and
     counted on the calendar, not in the view, so that the dates hold still while
     the plot pans instead of hopping from day to day. */
-export function opensRun(start: number, run: number, timeZone?: string): boolean {
+export function opensRun(start: number, run: number, timeZone?: string, weekStart = 1): boolean {
   /* The day's number in the zone since 1 January 1970; the 5th, day 4, was a Monday.
      Rounded, because a grid laid on one offset is an hour off after a clock
      change (`localOffset`). */
   const day = Math.round((start - localOffset(start, timeZone)) / DAY);
-  return (((day - 4) % run) + run) % run === 0;
+  return (((day - 3 - weekStart) % run) + run) % run === 0;
 }
 
 /** The clock time of an instant; inside the hour a clock change doubles it

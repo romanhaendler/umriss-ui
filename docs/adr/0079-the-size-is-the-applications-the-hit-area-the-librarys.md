@@ -62,3 +62,20 @@ text is 16 px under a finger.
   of list by the gesture (ADR-0043) are unchanged.
 - A scale that also grows spacing, icons and type is not built. If it is ever wanted, it belongs in
   `touch-scale.css` as well, so the opt-in stays one import.
+
+## Amendment 2026-10-28
+
+The opt-in fell short in two ways. It lost to the token rule when imported before core, because both
+rules sat on `:root` in `umriss.tokens` with the same specificity and the later file won. And it
+grew `md` only, so a screen showed 44 px fields beside 26 px toolbar, pagination, row-action and
+Acknowledge/Shelve buttons, and Tabs stood at 32 px.
+
+- **The rule wins whatever the order.** `touch-scale.css` writes `:root:root`, a higher specificity
+  than the token rule, still on `:root` inside `umriss.tokens` (ADR-0021 holds). No layer or
+  `!important` is added.
+- **`sm` grows with `md`.** Under the opt-in `--u-control-height-sm` is 44 px as well, so everything
+  built on `sm` grows: the table's toolbar, pagination and row actions, the alarms' Acknowledge,
+  Shelve and Unshelve. No size prop is added to alarms.
+- **Tabs read `--u-control-height`** like every `md` control (a `min-height`, so 32 px by default).
+- **What keeps its size:** `xs`, menu rows, calendar days, checkboxes, switches and radios, with
+  their 24 x 24 px hit areas. The READMEs and the documentation of core, table and alarms say so.

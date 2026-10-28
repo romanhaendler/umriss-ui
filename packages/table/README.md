@@ -110,7 +110,9 @@ application's CSS wins and every token can be overridden; light and dark follow
 the application's `color-scheme`; fonts are the application's (Geist
 recommended). The details stand in the README of `@umriss-ui/core`, under
 **Styles**. `@umriss-ui/table/styles.css` stays exported for setups that link
-stylesheets by hand.
+stylesheets by hand. Under a finger the toolbar, pagination and row actions are
+26 px; `@umriss-ui/core/touch-scale.css` makes them 44 px, in any import order
+(core's README, **Touch**).
 
 ## What it can do
 
@@ -126,8 +128,10 @@ stylesheets by hand.
   regions and places, cost centres. Every level sorts on its own, a search
   shows a match with the rows above it, the footer sums the top level, the
   export writes the level, and a leaf's detail opens from its own fold.
-* **Restricting a column**: the values that occur, two bounds, or a filter the
-  application writes itself — plus conditions set from outside and read back.
+* **Restricting a column**: the values that occur, two bounds, text operators
+  (`filter="text"`: contains, starts with, is empty ... up to two terms joined
+  by AND or OR; a server request carries `{ join, terms: [{ operator, value }] }`
+  under the column's id), or a filter the application writes itself — plus conditions set from outside and read back.
   A view survives JSON: the dates of a stored condition come back as `Date`s.
 * **Restricting by the whole row**: a row filter asks any question of a row
   ("overdue" = past its window and not delivered) through a control of the
@@ -140,6 +144,10 @@ stylesheets by hand.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
+* **Columns that fill the frame**: `flex` on a column takes a share of the width
+  the others leave (with `minWidth` as its floor); a width dragged by hand ends
+  the flex of that column and stands in the view. "Fit all columns" in the column
+  menu, or `autoSizeColumns()`, sets every column to its content.
 * **A time zone named in the formats** (core's Time zone): the dates, the day
   groups and the date filter follow it, and the head of a `"date"`, `"time"` or
   `"dateTime"` column names it, in muted text, where the reader's own is another.
