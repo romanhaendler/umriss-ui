@@ -18,6 +18,22 @@ throwaway (session scratch).
   virtualisation, export of formatted values, styled Excel, header drag, context menu, pinned rows, status
   bar, side panel, runtime pivot, the rarer ones. ADR-0032's "never" stands.
 - Decision 2 below is answered by the two lines above.
+- **Decision 1:** `touch-scale.css` raises `sm` too.
+- **Decision 3:** DEV warnings where a prop crashes or renders empty today (`rowKey` missing or not a
+  function, a string `value` on date and multi fields, string `options`); misspelt variants stay with
+  TypeScript.
+- **Decision 4:** export `formatsFor`, add `weekStart`; `hourCycle` later.
+- **Decision 5:** charts get a wording provider of their own; charts keep depending on nothing.
+- **Decision 6:** no - the rename window stays one minor for now.
+- **Decision 7:** the dashboard is flush with its neighbours while not editing.
+- **Decision 8:** the header stays as it is for now (only the button sorts).
+- **NumberInput:** where "." is not the group separator, a typed "." is the decimal; in German it stays
+  the group separator.
+- **Schedule name:** the plot is named "<label>, plot" (ADR-0068 does not name figure and plot; a fix).
+- The whole of it is specified in `spec.md`.
+- **Still open from the last run:** all three are taken - Playwright `.check()` on Checkbox, Switch and
+  the table's boxes; buttons that do not grow on a wall display at root 32 px; the `light-dark()` lowering
+  in production builds without `cssTarget`.
 
 ## 1. Defects to fix
 
