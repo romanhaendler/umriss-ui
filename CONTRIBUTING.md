@@ -34,6 +34,9 @@ which `pnpm test:visual:update` creates and which are then checked in.
   room page reaches the other packages' sources there)
 * `pnpm check:site` – the gates of the demos: `props` in every package, and core's
   README table
+* `pnpm semgrep` – Semgrep over the seven packages' `src` and the workflows with the rule sets
+  vendored in `.semgrep/`, in the pinned container image (needs Docker); CI runs the same script
+  and any finding fails it. Accept a finding only with `nosemgrep: <rule-id>` and a reason at its line
 * `pnpm test:unit` – vitest across all packages, the shell included
 * `pnpm test:visual` – Playwright; builds the seven demos and starts
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
