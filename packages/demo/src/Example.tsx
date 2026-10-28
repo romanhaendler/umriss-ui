@@ -26,6 +26,7 @@
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 import { CopyButton } from "./CopyButton";
+import { trustedHtml } from "./trustedHtml";
 import { Stage } from "./Language";
 import { Prose } from "./Prose";
 import type { Example as ExampleData } from "./tooling/examples";
@@ -67,7 +68,7 @@ export function CodeBlock({ name, source }: { name: string; source: string }) {
           only puts marks around it - no input from outside. A long line scrolls
           the block sideways, so the keyboard has to reach it too. */}
       <pre className="code" tabIndex={0} aria-label={`Source of ${name}`}>
-        <code dangerouslySetInnerHTML={{ __html: highlighted }} />
+        <code dangerouslySetInnerHTML={{ __html: trustedHtml(highlighted) }} />
       </pre>
     </div>
   );

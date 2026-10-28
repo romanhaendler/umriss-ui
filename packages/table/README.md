@@ -30,6 +30,8 @@ page has hydrated, a date or time is empty, because only the browser knows the r
 ([ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md)). No test runs inside such a framework: the
 table is rendered to a string in a test.
 
+umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: every page of the demo is opened under that policy in the visual suite, and an HTML sink in the library fails it.
+
 ## The smallest table that runs
 
 ```tsx
