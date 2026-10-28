@@ -242,6 +242,10 @@ export function NumberInput(
         value={text}
         onChange={(event) => {
           const raw = filterInput(event.target.value, constraints, separators);
+          /* A character the field cannot read refuses the whole edit: the
+             field keeps its text instead of reading the rest as another
+             value. */
+          if (raw.length !== event.target.value.length) return;
           setText(raw);
           /* One contract for every route: what goes out is clamped. The
              text stays local so that typing does not stutter over it. */
