@@ -159,6 +159,11 @@ function barStepOn(s: ChartScene, axis: AxisConfig): number | undefined {
   return Number.isFinite(smallest) ? smallest : undefined;
 }
 
+/** Whether a bar stands on a y axis. */
+function barsOn(s: ChartScene, axis: AxisConfig): boolean {
+  return s.seriesInOrder().some((e) => e.config.kind === "bar" && e.config.yAxisId === axis.id);
+}
+
 export function updateLayout(s: ChartScene): void {
   const measurer = s.measurer;
   // A zooming chart keeps the horizontal drag and the pinch; the page keeps
@@ -197,6 +202,7 @@ export function updateLayout(s: ChartScene): void {
       calendar: categories === undefined ? c.calendar : undefined,
       barStep: categories === undefined && c.calendar === undefined && inTime(s, c) ? barStepOn(s, c) : undefined,
       alignTicks: c.alignTicks,
+      headroom: c.orientation === "y" && categories === undefined && barsOn(s, c) ? true : undefined,
       limitLabels:
         c.orientation === "y"
           ? s.limitsInOrder()

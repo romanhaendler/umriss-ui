@@ -65,7 +65,8 @@
   .placeholder {
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
-    color: var(--u-color-text-muted);
+    /* The muted colour is 3.4:1 on the field; this one reaches 4.5:1. */
+    color: var(--u-color-text-secondary);
   }
 
   /* The compact field's placeholder is compact too, as in an Input of size

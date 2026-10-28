@@ -43,20 +43,23 @@ function roundTo(v: number, digits: number): number {
   return normalizeZero(Number(v.toFixed(Math.min(20, digits))));
 }
 
-/** Domain widened to nice boundaries. Constant series → ±1. */
+/** Domain widened to nice boundaries. Constant series → ±1. With `headroom`, a
+    positive maximum that already stands on a boundary gets one more step, so
+    a bar of that height does not touch the top. */
 export function niceDomain(
   min: number,
   max: number,
   count: number,
+  headroom = false,
 ): [number, number] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
   if (min === max) return [min - 1, max + 1];
   const step = tickStep(max - min, count);
   const digits = decimalsForStep(step);
-  return [
-    roundTo(Math.floor(min / step) * step, digits),
-    roundTo(Math.ceil(max / step) * step, digits),
-  ];
+  const top = Math.ceil(max / step) * step;
+  // Widened from a step above, so the ticks of the longer span stand on it.
+  if (headroom && max > 0 && top - max < step * 1e-9) return niceDomain(min, max + step, count);
+  return [roundTo(Math.floor(min / step) * step, digits), roundTo(top, digits)];
 }
 
 /** Exact domain from the data; constant series → ±1. */

@@ -17,14 +17,16 @@
   .root {
     container-type: inline-size;
     width: 100%;
-    padding: 0 var(--u-space-4) var(--u-space-4);
+    padding: 0 0 var(--u-space-4);
     border-radius: var(--u-radius-lg);
     --_dashboard-row-unit: var(--u-dashboard-row, round(max(50px, 3.125rem), 1px));
     --_dashboard-gap: var(--u-dashboard-gap, 12px);
   }
 
-  /* The mode: a frame of the accent around the whole dashboard, inside its edge. */
+  /* The mode: a frame of the accent around the whole dashboard, inside its edge;
+     the cards keep clear of it. At rest they stand flush with what is above. */
   .root[data-editing] {
+    padding-inline: var(--u-space-4);
     box-shadow: inset 0 0 0 2px var(--u-color-accent);
     /* Forced colours drop the shadow; the transparent outline is drawn then. */
     outline: 2px solid transparent;
