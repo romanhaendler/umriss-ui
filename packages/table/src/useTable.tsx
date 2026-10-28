@@ -18,6 +18,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
+import type { Formats } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
 import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
@@ -88,7 +89,7 @@ function combineConditions(
   conditions: ConditionList,
   registry: Registry,
   rowFilters: RowFilters,
-  timeZone: string | undefined,
+  formats: Formats,
   rows: readonly unknown[],
 ): ((row: unknown) => boolean) | undefined {
   if (conditions.length === 0) return undefined;
@@ -109,7 +110,7 @@ function combineConditions(
         if (entry && appliesTo(registry, id, condition)) {
           resolved.push((r) => {
             const filter = filterOf(entry.spec.filter);
-            return !filter || satisfies(filter, entry.read(r), condition, timeZone);
+            return !filter || satisfies(filter, entry.read(r), condition, formats);
           });
         }
       }
@@ -270,7 +271,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; a condition under that id is the row filter's, and the column's filter cannot hold one of its own.`);
     }
   }
-  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats.timeZone, rowsUnknown), [conditions, registry, rowFilters, formats.timeZone, rowsUnknown]);
+  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters, formats, rowsUnknown), [conditions, registry, rowFilters, formats, rowsUnknown]);
 
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
