@@ -105,7 +105,7 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
   density?: "regular" | "compact";
   /** Height of the list's scroll area, e.g. `"480px"`: a list of hundreds of
       rows scrolls inside it, under its sticky header, instead of stretching the
-      page. */
+      page. Only the rows in view are rendered then; without it, all are. */
   maxHeight?: string;
   /** The view of hidden alarms is on. The list does not filter - the
       projection does, with the table's own `filter` and `isHidden`; this
@@ -283,6 +283,8 @@ function Body({
   hiddenOnly = false,
   onHiddenOnlyChange,
   onKeyDown,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...rest
 }: BodyProps & { freshness: FreshnessReading | null }) {
   const wording = useWording();
@@ -291,7 +293,9 @@ function Body({
   const disconnected = freshness?.freshness === "lost";
 
   const [keyedId, setKeyedId] = useState<string | null>(null);
-  const { Table, Column } = useTable(projection.visible, { rowKey: (row) => row.id, selection });
+  /* A bounded scroll area windows its rows: a flood of thousands stays a
+     screenful of nodes. Without a bound the list shows every row. */
+  const { Table, Column } = useTable(projection.visible, { rowKey: (row) => row.id, selection, virtual: maxHeight !== undefined });
 
   const alarms = useMemo(() => projection.filtered.map((row) => row.alarm), [projection.filtered]);
 
@@ -519,7 +523,8 @@ function Body({
       <div ref={tableBox}>
       <Table
         grid
-        aria-label={wording.alarmList}
+        aria-label={ariaLabelledBy === undefined ? (ariaLabel ?? wording.alarmList) : undefined}
+        aria-labelledby={ariaLabelledBy}
         selectable={selection !== undefined}
         density={density}
         maxHeight={maxHeight}
@@ -574,7 +579,7 @@ function Body({
             return (
               <span className={styles.state}>
                 {badge}
-                <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>
+                <span className={styles.lifecycle} title={lifecycleWord(state, wording)}>{lifecycleWord(state, wording)}</span>
               </span>
             );
           }}
