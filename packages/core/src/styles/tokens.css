@@ -169,11 +169,11 @@
     --u-radius-xl: 18px;
     --u-radius-full: 999px;
 
-    --u-control-height: 32px;
-    --u-control-height-sm: 26px;
+    --u-control-height: 2rem;
+    --u-control-height-sm: 1.625rem;
     /* The small control on a dense surface - a compact table's row draft and
        actions (`dense` in the shared own styles). */
-    --u-control-height-xs: 18px;
+    --u-control-height-xs: 1.125rem;
     /* The icon in a button, beside a label or alone (CONTEXT.md, "Icon"): the
        button decides its size, one step per control height. */
     --u-icon-size: 14px;
