@@ -1,3 +1,4 @@
+import { useShapeWarning, areOptions, NONE } from "../../lib/useShapeWarning";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
@@ -80,7 +81,7 @@ export interface ComboboxProps<T extends string = string>
 export function Combobox<T extends string = string>(
   {
     ref,
-    options,
+    options: optionsGiven,
     value,
     onChange,
     placeholder,
@@ -102,6 +103,9 @@ export function Combobox<T extends string = string>(
     ...rest
   }: ComboboxProps<T>,
 ) {
+  const optionsOk = areOptions(optionsGiven);
+  const options = optionsOk ? optionsGiven : NONE;
+  useShapeWarning("Combobox", "options", !optionsOk, "an array of { value, label } objects, not strings");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();

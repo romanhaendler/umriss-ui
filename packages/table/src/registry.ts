@@ -61,6 +61,8 @@ const signatureOf = (a: ColumnSpec): string =>
     a.rowHeader,
     a.rightAligned,
     a.width,
+    a.flex,
+    a.minWidth,
     a.pin,
     a.resizable,
     a.sortable,

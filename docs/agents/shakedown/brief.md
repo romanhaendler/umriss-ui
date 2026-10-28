@@ -106,3 +106,23 @@ report: say what this person reached for first and was surprised not to find.
    Status: never: ADR-.. (Instead holds | fails: …) | not yet: .. | unlisted
    ```
 4. What held up, one line each - this matters as much as the findings.
+
+## Code reviewers
+
+If your task names a reviewer (P23 and up), these replace the ground rules on tarballs and hosts above:
+
+- Work on an export of the repository at `<scratch>/<your directory>/repo` (`git archive HEAD | tar -x -C …`,
+  then `pnpm install`). Change, break and measure there freely; never edit the workspace itself.
+- Install review tools (StrykerJS, fast-check, knip, madge, jscpd) into the export, never globally, and name them in
+  your report.
+- A finding counts only with evidence: a mutant that survives, a deleted line no test notices, a failure
+  that depends on order or speed (with the seed), the same logic in two places (both paths and lines), a
+  comment the code contradicts, an escape that hides a reachable type error, the files one everyday change
+  had to touch. Kinds: **Duplication**, **Drift** (two places that should agree and do not), **Weak test**,
+  **Flake**, **Escape**, **Dead**, **Tangle** (a cycle, a module too wide or too long to change safely).
+  In the report, `Red:` is the command or the paths and lines that show it, and `Idea:` the smallest change
+  that removes it.
+- A cleanup that is not guarded comes back. For every kind of finding, name the **gate** that would hold
+  it from now on - an eslint rule, a dependency rule, a size budget per file, a registry or contract test,
+  a `check:site` gate - and whether the workspace already has one that missed it (`Gate:` under `Idea:`).
+- Wishes are optional for reviewers; "What held up" is not.

@@ -2,5 +2,7 @@
   "SearchProps.className": "(a) pass-through: a class on the field",
   "ToolbarProps.className": "(a) pass-through: a class on the toolbar",
   "PaginationProps.className": "(a) pass-through: a class on the bar",
-  "VerdictBase.resizable": "(f) twin of `ColumnBase.resizable`: the same grip, shown on Width and pinning"
+  "VerdictBase.resizable": "(f) twin of `ColumnBase.resizable`: the same grip, shown on Width and pinning",
+  "VerdictBase.flex": "(f) twin of `ColumnBase.flex`: the same share, shown on Width and pinning",
+  "VerdictBase.minWidth": "(f) twin of `ColumnBase.minWidth`: the same floor, shown on Width and pinning"
 }
