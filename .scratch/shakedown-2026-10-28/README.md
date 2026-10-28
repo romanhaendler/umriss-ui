@@ -9,6 +9,16 @@ specialist (new). The reports are in `personas/`, the table feature matrix in `t
 ✓ = confirmed by the coordinating session in the source or by rerunning the host's repro. The hosts were
 throwaway (session scratch).
 
+## Decided (maintainer, 2026-10-28)
+
+- **Defects:** all ten in section 1 are fixed.
+- **Table wishes taken:** undo/redo as a recipe (the app's history over `onCellEdit`, no API); a text filter
+  with operators; `onSelectionChange`; column groups; auto-size and flex widths.
+- **Table wishes not taken now:** range selection, paste and Delete, fill handle, infinite scroll, column
+  virtualisation, export of formatted values, styled Excel, header drag, context menu, pinned rows, status
+  bar, side panel, runtime pivot, the rarer ones. ADR-0032's "never" stands.
+- Decision 2 below is answered by the two lines above.
+
 ## 1. Defects to fix
 
 Ranked by harm. Each is ✓ unless marked otherwise.
