@@ -95,6 +95,18 @@ import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
 <Chart aria-label="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
 ```
 
+To set it once, wrap the app (or a page) in `ChartsWordingProvider`; every chart below it, also one inside a
+dashboard widget, speaks that wording. A chart's own `wording` is merged over the provider's, so one chart can
+still differ. An app that uses `@umriss-ui/core` as well sets both providers - the charts depend on nothing:
+
+```tsx
+import { ChartsWordingProvider } from "@umriss-ui/charts";
+
+<ChartsWordingProvider wording={GERMAN_CHARTS_WORDING}>
+  <App />
+</ChartsWordingProvider>
+```
+
 ## Styles
 
 Nothing to import. `dist/charts.js` loads its own stylesheet; the axes, ticks,
@@ -151,7 +163,7 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **Performance, measured rather than claimed**, up to three series of a
   million points, with the hover at 60 FPS throughout. The figures, the
   measuring run and its conditions stand once, in
-  [`docs/capabilities.md`](docs/capabilities.md) under "Performance" — they are
+  [`docs/capabilities.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/charts/docs/capabilities.md) under "Performance" — they are
   not repeated here, so that a new measurement has one place to go.
 
 ### The picture
@@ -181,7 +193,7 @@ const copy = async () =>
 What it deliberately cannot do — animations, a log scale, pie, donut and
 radar — stands in the same record, with the reason,
 and across all five packages in
-[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Stacking is not among
+[ADR-0032](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md). Stacking is not among
 them: bars and areas stack (`stack`, `normalize`). Horizontal bars are the
 next kind to come (ADR-0059).
 
@@ -222,9 +234,9 @@ passes `useFormats().timeZone` to the chart; see core's README on formats.
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
   and an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm start`.
-* [`docs/capabilities.md`](docs/capabilities.md) — every capability with the
+* [`docs/capabilities.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/charts/docs/capabilities.md) — every capability with the
   level at which it is proved.
-* [`../../docs/design-language.md`](../../docs/design-language.md) — the design
+* [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
   language all five packages share.
 
 ## Testing

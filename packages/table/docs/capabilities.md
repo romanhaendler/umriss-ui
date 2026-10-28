@@ -31,6 +31,8 @@ service with share bars. **Paged** = pages of 50 instead of a window.
 
 All figures in milliseconds; `-` means not yet measured, or not applicable in that set.
 
+The figures are a production build's. `vite dev` runs the same work about ten times slower (a 100,000-row sort takes 3.5 s there against 0.33 s in production), so measure in a production build.
+
 Machine / browser / date: Apple M2, 16 GB; Chromium headless (Playwright 1.62);
 2026-10-12. One run of the page per row, driven by a script.
 

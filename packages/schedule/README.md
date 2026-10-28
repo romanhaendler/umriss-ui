@@ -231,14 +231,14 @@ Done from this list: **blocked time** per lane and **milestones**.
   **Dependency**, **Violated dependency**, **Blocked time**, **Milestone**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
-* [`../../docs/design-language.md`](../../docs/design-language.md) — the design
+* [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
   language all five packages share.
 
 ## Testing
 
 Tested under Vitest 5 and Jest 30 on jsdom. A schedule draws with core and charts, so it needs the
-runner lines and the setup file of [`@umriss-ui/core`'s Testing section](../core/README.md#testing)
-and the setup file of [`@umriss-ui/charts`'](../charts/README.md#testing), one file after the other
+runner lines and the setup file of [`@umriss-ui/core`'s Testing section](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/README.md#testing)
+and the setup file of [`@umriss-ui/charts`'](https://github.com/romanhaendler/umriss-ui/blob/main/packages/charts/README.md#testing), one file after the other
 in your `umriss.setup.js`. `check:dist` runs a test of the installed schedule (a lane with a bar)
 with exactly those files.
 

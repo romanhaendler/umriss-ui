@@ -38,9 +38,9 @@ The application generates its alarms, applies every transition and keeps the
 result; the package derives a view from them and reports what the operator asked
 for. It raises no alarm, sounds no horn - `onAnnunciate` is the cue - and keeps no
 record. What it follows of ISA-18.2 and where it departs is in
-[`docs/standards.md`](../../docs/standards.md#isa-182---alarm-management).
+[`docs/standards.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/standards.md#isa-182---alarm-management).
 
 ## Documentation
 
 The demo is the documentation; in a checkout, `pnpm dev:alarms` (port 4179)
-opens it. Every export is listed in [API.md](API.md).
+opens it. Every export is listed in [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/alarms/API.md).

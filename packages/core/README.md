@@ -6,7 +6,7 @@ Guiding idea: **precise and quiet, with palpable quality** – depth comes from
 soft shadows and fine light edges, not from hard outlines or effects.
 
 The design language — "Ink & Paper", the dark theme, motion — is written down
-once for all five packages in [`../../docs/design-language.md`](../../docs/design-language.md).
+once for all five packages in [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md).
 
 ## Use
 
@@ -79,7 +79,7 @@ knows the reader's zone - unless the application names a time zone in its format
 
 The calculation is the one view a Server Component writes itself: its tree is read where it is
 written (see `@umriss-ui/calculation`). The reasons are in
-[ADR-0067](../../docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
+[ADR-0067](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0067-a-server-component-hands-umriss-its-data-and-writes-only-a-calculation.md).
 
 ### What an import costs
 
@@ -354,7 +354,7 @@ plant in Berlin, read from Chicago - names that zone in the formats, an IANA nam
 ```
 
 A switch between the plant's time and the reader's is a provider whose formats name the zone or not;
-[the control room scenario](demo/scenarios/05-watch-a-kiln-line.tsx) shows it, with its charts, table and
+[the control room scenario](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/demo/scenarios/05-watch-a-kiln-line.tsx) shows it, with its charts, table and
 schedule following:
 
 ```tsx
@@ -506,8 +506,8 @@ root (ADR-0068), the targets under a finger (ADR-0070), long option lists, a dat
 that can be typed and bounded, and a source's quality (ADR-0077).
 
 What core will not build at all stands in
-[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
+[ADR-0032](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md). Validation is the
 caller's, and umriss shows the reader's time unless the application names a zone
-([ADR-0076](../../docs/adr/0076-an-application-names-the-time-zone-its-instants-are-shown-in.md)); a dashboard
+([ADR-0076](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0076-an-application-names-the-time-zone-its-instants-are-shown-in.md)); a dashboard
 a user arranges is its own package, `@umriss-ui/dashboard`
-([ADR-0064](../../docs/adr/0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md)).
+([ADR-0064](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md)).
