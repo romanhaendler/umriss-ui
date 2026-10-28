@@ -43,20 +43,22 @@ function roundTo(v: number, digits: number): number {
   return normalizeZero(Number(v.toFixed(Math.min(20, digits))));
 }
 
-/** Domain widened to nice boundaries. Constant series → ±1. */
+/** Domain widened to nice boundaries. Constant series → ±1. With `headroom`, a
+    positive maximum that already stands on a boundary gets one more step, so
+    a bar of that height does not touch the top. */
 export function niceDomain(
   min: number,
   max: number,
   count: number,
+  headroom = false,
 ): [number, number] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
   if (min === max) return [min - 1, max + 1];
   const step = tickStep(max - min, count);
   const digits = decimalsForStep(step);
-  return [
-    roundTo(Math.floor(min / step) * step, digits),
-    roundTo(Math.ceil(max / step) * step, digits),
-  ];
+  const top = Math.ceil(max / step) * step;
+  const above = headroom && max > 0 && top - max < step * 1e-9 ? step : 0;
+  return [roundTo(Math.floor(min / step) * step, digits), roundTo(top + above, digits)];
 }
 
 /** Exact domain from the data; constant series → ±1. */
@@ -67,11 +69,11 @@ export function dataDomain(min: number, max: number): [number, number] {
 }
 
 /** Tick values within the domain (multiples of the step). */
-export function ticksFor(min: number, max: number, count: number): number[] {
+export function ticksFor(min: number, max: number, count: number, given?: number): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [];
   if (min === max) return [normalizeZero(min)];
   const [from, to] = min < max ? [min, max] : [max, min];
-  const step = tickStep(to - from, count);
+  const step = given ?? tickStep(to - from, count);
   const digits = decimalsForStep(step);
   // Tolerance against floating point noise at the domain boundaries.
   const tolerance = step * 1e-9;

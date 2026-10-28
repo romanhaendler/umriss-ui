@@ -53,6 +53,8 @@ export interface AxisInput {
   grid: boolean;
   /** Raw extent out of the bound series (independent of the layout). */
   extent: readonly [number, number];
+  /** Bars stand on this value axis: a "nice" domain ends above the largest. */
+  headroom?: boolean;
   /** "visible" arrives as its extent and is then widened as "nice" is. */
   domainMode: "nice" | "data" | "visible" | readonly [number, number];
   /** A zoomed x axis: its own domain, where the view puts a span in its place. */
@@ -220,7 +222,7 @@ function domainOf(
     const step = stepOf(axis, [min, max], tickCount);
     return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n }, axis.timeZone);
   }
-  return niceDomain(min, max, tickCount);
+  return niceDomain(min, max, tickCount, axis.headroom);
 }
 
 /** The tick values of an axis: named explicitly, on local time, or 1-2-5.
@@ -254,7 +256,15 @@ function tickValuesFor(
     return values;
   }
   if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(axis, domain, tickCount), axis.timeZone) : [];
-  return ticksFor(domain[0], domain[1], tickCount);
+  return ticksFor(domain[0], domain[1], tickCount, headroomStep(axis, domain, tickCount));
+}
+
+/** The step the data gave, where the domain was widened by one step above
+    it (ticks of the longer span would otherwise be coarser). */
+function headroomStep(axis: AxisInput, domain: readonly [number, number], tickCount: number): number | undefined {
+  if (axis.headroom !== true || axis.extent[1] <= 0) return undefined;
+  const step = tickStep(axis.extent[1] - axis.extent[0], tickCount);
+  return Math.abs(domain[1] - step - axis.extent[1]) < step * 1e-9 ? step : undefined;
 }
 
 function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCount: number, locale: string) {
@@ -269,7 +279,7 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
       : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds, locale, axis.timeZone);
   }
   if (axis.time === true && own === undefined) return (v: number, seconds?: boolean) => timeText(v, seconds, locale, axis.timeZone);
-  const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
+  const step = headroomStep(axis, domain, tickCount) ?? tickStep(Math.abs(domain[1] - domain[0]), tickCount);
   if (own !== undefined) return tickFn(own, locale, step);
   return (v: number) => formatTick(v, step, locale);
 }

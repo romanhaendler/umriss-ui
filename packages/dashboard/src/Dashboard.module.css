@@ -17,18 +17,19 @@
   .root {
     container-type: inline-size;
     width: 100%;
-    padding: 0 var(--u-space-4) var(--u-space-4);
+    padding: 0 0 var(--u-space-4);
     border-radius: var(--u-radius-lg);
     --_dashboard-row-unit: var(--u-dashboard-row, round(max(50px, 3.125rem), 1px));
     --_dashboard-gap: var(--u-dashboard-gap, 12px);
   }
 
-  /* The mode: a frame of the accent around the whole dashboard, inside its edge. */
+  /* The mode: a frame of the accent just outside the dashboard's edge, so the
+     cards stay where they stand at rest and nothing moves when it appears. */
   .root[data-editing] {
-    box-shadow: inset 0 0 0 2px var(--u-color-accent);
+    box-shadow: 0 0 0 2px var(--u-color-accent);
     /* Forced colours drop the shadow; the transparent outline is drawn then. */
     outline: 2px solid transparent;
-    outline-offset: -2px;
+    outline-offset: 0;
   }
 
   .bar {
