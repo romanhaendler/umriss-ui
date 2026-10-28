@@ -1,4 +1,4 @@
-/* The README a package ships must not link to a file npm does not ship (ticket 13).
+/* The README a package ships must not link to a file npm does not ship.
 
    A relative link is resolved from the package directory. It is dead on npm
    and in `node_modules` unless it names a file the manifest's `files` ships,
