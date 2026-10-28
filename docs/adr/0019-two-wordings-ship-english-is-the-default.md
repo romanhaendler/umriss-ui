@@ -64,3 +64,9 @@ wording says. The mixture is visible — an English default wording over German
 number notation renders "43 of 1.204" — and it is left standing here rather than
 folded into this decision, because the locale of the formats is a decision about
 a different object and deserves its own.
+
+## Amendment 2026-10-28
+
+A third language no longer hand-writes its formats: core exports `formatsFor(locale, timeZone?)`, and
+`formatsFor("fr-CH")` is the whole set. The `weekdays` wording stays Monday-first by definition; the
+calendars rotate the heads by the formats' `weekStart`, so a team's wording cannot mislabel a day.
