@@ -35,6 +35,8 @@ export interface Formats {
   monthName: (d: Date) => string;
   /** Accessible name of a calendar cell: Tuesday, 17 March 2026 */
   dateLong: (d: Date) => string;
+  /** The first day of the calendars' week, ISO-numbered: 1 = Monday ... 7 = Sunday. */
+  weekStart: number;
   /** Time of day, optionally with seconds: 09:05 or 09:05:03 */
   time: (d: Date, withSeconds: boolean) => string;
   /** Date and time together: 17/03/2026, 09:05 */
@@ -134,6 +136,14 @@ export const builtInInstants = /* @__PURE__ */ new WeakSet<object>();
     application left as the built-in set has them. */
 export const INSTANT_ENTRIES = ["date", "dateShort", "month", "dateLong", "time", "dateTime", "offset", "timeZoneName"] as const;
 
+/* The locale's first weekday where the runtime knows week info (`getWeekInfo()`
+   or the older `weekInfo` property), else Monday. Exported as the seam the tests
+   stub. */
+export function weekStartOf(locale: string): number {
+  const l = new Intl.Locale(locale) as { getWeekInfo?: () => { firstDay: number }; weekInfo?: { firstDay: number } };
+  return l.getWeekInfo?.().firstDay ?? l.weekInfo?.firstDay ?? 1;
+}
+
 function buildFormats(locale: string, timeZone: string | undefined): Formats {
   // An unknown zone throws Intl's RangeError, naming it, in the first formatter.
   const dateFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit", year: "numeric" });
@@ -185,6 +195,7 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
   return {
     locale,
     timeZone,
+    weekStart: weekStartOf(locale),
     timeZoneName: (d) => nameFormat.formatToParts(d).find((part) => part.type === "timeZoneName")?.value ?? "",
     date: (d) => dateFormat.format(d),
     dateShort: (d) => dateShortFormat.format(d),
