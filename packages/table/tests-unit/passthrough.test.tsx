@@ -60,6 +60,7 @@ passThroughGuard(
   CASES,
   {
     Column: "declares a column for the table; no element of its own stands in the page",
+    ColumnGroup: "wraps columns; the table draws its cell in the head",
     VerdictColumn: "a Column that judges its value; it declares, it renders no element",
     RowDetail: "declares what opens under a row; the table draws it in the row's place",
     RowActions: "declares the actions of a row; the table draws the menu in its cell",
