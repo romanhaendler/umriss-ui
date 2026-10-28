@@ -107,8 +107,12 @@ and a home indicator, each edge's inset added to its room. Without
 
 **Touch.** Under a finger (a coarse primary pointer) hit areas are at least
 24 × 24 px, a field's text is 16 px and behaviours follow the gesture; a `md`
-control stays 32 px. To make it 44 px under a finger, the height WCAG 2.5.5
-names, opt in with `import "@umriss-ui/core/touch-scale.css"` (ADR-0079).
+control stays 32 px and a `sm` one 26 px. To make both 44 px under a finger,
+the height WCAG 2.5.5 names, opt in with
+`import "@umriss-ui/core/touch-scale.css"` (ADR-0079), anywhere in the entry
+file: before or after core makes no difference. Buttons, fields, selects, Tabs,
+and the table's and alarms' `sm` buttons grow; `xs`, menu rows, calendar days,
+checkboxes, switches and radios keep their size and their 24 × 24 px hit areas.
 
 **They touch nothing else** (ADR-0021). No rule selects `html`, `body`, `*` or a
 native element of the page, and the only rules on `:root` declare the tokens.
