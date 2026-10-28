@@ -225,6 +225,8 @@ export interface Wording {
   columns: string;
   /** Accessible name of the list in the column menu. */
   arrangeColumns: string;
+  /** The column menu's button that sets every column to the width of its content. */
+  fitAllColumns: string;
   /** The two buttons that move a column in the column menu. */
   columnForward: (column: string) => string;
   columnBackward: (column: string) => string;
@@ -857,6 +859,7 @@ export const DEFAULT_WORDING: Wording = {
 
   columns: "Columns",
   arrangeColumns: "Show, hide and arrange columns",
+  fitAllColumns: "Fit all columns",
   columnForward: (column) => `Move ${column} forward`,
   columnBackward: (column) => `Move ${column} backward`,
   pinColumnToStart: (column) => `Pin ${column} to start`,

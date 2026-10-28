@@ -202,6 +202,13 @@ export interface ColumnBase {
   /** Initial width in pixels.
       @default the browser's */
   width?: number;
+  /** A share of the width the other columns leave, so that the table fills its
+      frame: two columns with `flex={1}` split it equally. A width, declared or
+      dragged by hand, ends the flex of that column.
+      @default none: the column is as wide as its content */
+  flex?: number;
+  /** The least width of a column with `flex`, in pixels. */
+  minWidth?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
   /** Keeps the column in view while the table scrolls sideways: in a block
@@ -396,6 +403,13 @@ export interface VerdictBase {
   /** Initial width in pixels.
       @default the browser's */
   width?: number;
+  /** A share of the width the other columns leave, so that the table fills its
+      frame: two columns with `flex={1}` split it equally. A width, declared or
+      dragged by hand, ends the flex of that column.
+      @default none: the column is as wide as its content */
+  flex?: number;
+  /** The least width of a column with `flex`, in pixels. */
+  minWidth?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
   /** Keeps the column in view while the table scrolls sideways, before or after every other column. */
@@ -768,6 +782,9 @@ export interface TableSnapshot<Z> {
   widths: Readonly<Record<string, number>>;
   /** Sets the width of a column; `undefined` takes it back. */
   setWidth: (column: string, width: number | undefined) => void;
+  /** Sets every column to the width of its content - the measurement of the
+      grip's double click, for all columns at once. */
+  autoSizeColumns: () => void;
   /** The keys of the expanded rows. */
   expanded: readonly string[];
   /** Expands a row or collapses it. */
