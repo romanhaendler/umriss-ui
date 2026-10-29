@@ -4,6 +4,8 @@
    appears once per reason - a table renders often, and nobody reads a console
    full of repetitions. */
 
+import { hasWarned, warnOnce as warnOnceFor } from "@umriss-ui/core";
+
 declare const process: { env: Record<string, string | undefined> };
 
 function detectDev(): boolean {
@@ -16,13 +18,9 @@ function detectDev(): boolean {
 
 export const DEV: boolean = detectDev();
 
-const warned = new Set<string>();
+const PACKAGE = "@umriss-ui/table";
 
-export function warnOnce(reason: string, message: string): void {
-  if (!DEV || warned.has(reason)) return;
-  warned.add(reason);
-  console.warn(`@umriss-ui/table: ${message}`);
-}
+export const warnOnce = (reason: string, message: string): void => warnOnceFor(PACKAGE, reason, message);
 
 const NO_ROWS: readonly never[] = [];
 
@@ -55,7 +53,7 @@ const differs = (a: unknown, b: unknown): boolean => {
     Never changes which function is held. */
 export function probeStale(who: string, held: unknown, next: unknown, rows: readonly unknown[], arg?: (row: unknown) => unknown): void {
   const key = `stale:${who}`;
-  if (!DEV || held === next || warned.has(key) || typeof held !== "function" || typeof next !== "function") return;
+  if (!DEV || held === next || hasWarned(PACKAGE, key) || typeof held !== "function" || typeof next !== "function") return;
   const way = who === "The rowKey" ? "Carry the value in the rows." : "Carry the value in the rows, or give the column a `key` that changes with it.";
   try {
     for (let i = 0; i < Math.min(rows.length, 1000); i++) {
