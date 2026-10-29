@@ -239,6 +239,17 @@ test("a table scrolled to the end still shows rows once a search shrinks it", { 
   expect(scrollHeight).toBeLessThan(200 * rowHeight);
 });
 
+test("a search starts the narrowed table at its top", { tag: "@quick" }, async ({ page }) => {
+  const area = scrollArea(page);
+  await area.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect(row(page, 19_999)).toBeVisible();
+  await example(page).getByPlaceholder("Request or service").fill("REQ-0001");
+  await expect.poll(() => area.evaluate((el) => el.scrollTop)).toBe(0);
+  await expect(row(page, 0)).toBeVisible();
+});
+
 test("there is no paging beside virtualisation", async ({ page }) => {
   await expect(example(page).getByRole("navigation", { name: "Pagination" })).toHaveCount(0);
 });
