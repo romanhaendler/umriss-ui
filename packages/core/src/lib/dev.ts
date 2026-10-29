@@ -27,24 +27,43 @@ export function warnOnce(reason: string, message: string): void {
 export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
-let checkedLowered = false;
+let watchingLowered = false;
 
-/** Warns once, in development, when a build lowered `light-dark()` and the page is dark but the tokens still
-    resolve to their light values: the mode was set from JavaScript, which a lowered token cannot follow. A
-    lowered token reads as its light half in the root's computed value (an unlowered one as the whole
-    `light-dark(…)`, and one the application's CSS flipped as the dark half). Call it in an effect, so that the
-    stylesheets have loaded. */
+/* The colour the root's background token resolves to for a child that forces `scheme`, or inherits the page's. */
+function backgroundToken(scheme?: "light"): string {
+  const probe = document.createElement("div");
+  probe.style.display = "none";
+  if (scheme) probe.style.colorScheme = scheme;
+  probe.style.backgroundColor = "var(--u-color-bg)";
+  document.documentElement.appendChild(probe);
+  const colour = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+  return colour;
+}
+
+/** Warns once, in development, when a build lowered `light-dark()` and the page is dark but the background
+    token still resolves to its light value: the mode was set from JavaScript, which a lowered token cannot
+    follow. The light value is the token as a child forcing `color-scheme: light` sees it; an unlowered token,
+    or one the application's CSS flipped or a theme replaced with a pair, differs from it on a dark page.
+    Checks now and again whenever the root's attributes change (a mode switched on later), and stops watching
+    after the warning. Call it in an effect, so that the stylesheets have loaded. */
 export function warnLoweredLightDark(): void {
-  if (checkedLowered || !isDev() || typeof document === "undefined") return;
-  checkedLowered = true;
-  const style = getComputedStyle(document.documentElement);
-  const dark = /\bdark\b/.test(style.colorScheme) && !/\blight\b/.test(style.colorScheme);
-  if (dark && style.getPropertyValue("--u-color-bg").trim().toLowerCase() === "#fafafa") {
+  if (watchingLowered || !isDev() || typeof document === "undefined") return;
+  watchingLowered = true;
+  const observer = new MutationObserver(check);
+  function check(): void {
+    const scheme = getComputedStyle(document.documentElement).colorScheme;
+    if (!/\bdark\b/.test(scheme) || /\blight\b/.test(scheme)) return;
+    const light = backgroundToken("light");
+    if (light === "" || light !== backgroundToken()) return;
+    observer.disconnect();
     warnOnce(
       "lowered-light-dark",
       'this build lowered light-dark(), so the dark mode set from JavaScript leaves the components light. Declare it in CSS, e.g. [data-theme="dark"] { color-scheme: dark; }, or raise the CSS target to the browser floor (Vite build.cssTarget ["chrome123", "firefox120", "safari17.5"]; Next browserslist "chrome >= 123", "firefox >= 120", "safari >= 17.5"). See Styles in the README.',
     );
   }
+  observer.observe(document.documentElement, { attributes: true });
+  check();
 }
 
 let scanned = false;

@@ -141,3 +141,13 @@ mode light: once, after the first control mounts, if the page's computed
 `color-scheme` is dark while the root's tokens still read as their light half,
 the console names both fixes (a `color-scheme` rule for the application's dark
 marker, or the CSS target at the browser floor). Behaviour does not change.
+
+## Amendment 2026-10-29
+
+The warning reads the light value from the token itself: a probe that forces
+`color-scheme: light` resolves the root's background token, and the warning
+fires when the page is dark and a probe that follows the page resolves to the
+same colour. It checks after mount and again whenever the root's attributes
+change, and stops watching after the warning. A theme that gives the token a
+`light-dark()` pair, or any value the dark page resolves differently, raises
+nothing.
