@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
-import { firstSentence, searchEntries, wordingKeywords } from "../src/search";
+import { packSearch, searchEntries, unpackSearch, wordingKeywords, type PackedSearch } from "../src/search";
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "llms");
 
@@ -187,9 +187,9 @@ describe("the props in the search fragment", () => {
   });
 });
 
-/* What the index leaves out: a lead's second sentence and a wording text
-   that stands twice. */
-describe("the search fragment's slimming", () => {
+/* The index the site ships is the entries written small and read back whole;
+   a lead keeps every sentence. */
+describe("the shipped search index", () => {
   const entries = searchEntries(
     "fixture",
     OUTLINE,
@@ -199,18 +199,21 @@ describe("the search fragment's slimming", () => {
       { pageId: "gauge", id: "switch", title: "A switch", lead: "Use a switch for a setting that takes effect at once; Space toggles it." },
     ],
   );
-  const finds = (query: string) => entries.filter((entry) => entry.kind === "example" && [entry.label, ...(entry.keywords ?? [])].some((text) => text.toLowerCase().includes(query))).map((entry) => entry.label);
+  const shipped = unpackSearch(JSON.parse(JSON.stringify(packSearch(entries))) as PackedSearch);
+  const finds = (query: string) => shipped.filter((entry) => entry.kind === "example" && [entry.label, ...(entry.keywords ?? [])].some((text) => text.toLowerCase().includes(query))).map((entry) => entry.label);
 
-  it("still finds an example by its title and by an everyday word of its first sentence", () => {
-    expect(finds("tooltip")).toEqual(["A tooltip"]);
-    expect(finds("hint")).toEqual(["A tooltip"]);
-    expect(finds("setting")).toEqual(["A switch"]);
-    expect(finds("however")).toEqual([]);
+  it("reads back every entry as it was written, with its group and keywords", () => {
+    expect(shipped).toEqual(entries);
   });
 
-  it("keeps the first sentence whole, even with a semicolon, and drops the rest", () => {
-    expect(firstSentence("Use a switch for a setting at once; Space toggles it. More words follow.")).toBe("Use a switch for a setting at once; Space toggles it.");
-    expect(firstSentence("Only one sentence.")).toBe("Only one sentence.");
+  it("still finds an example by its title, a word of its first sentence and a word of a later one", () => {
+    expect(finds("tooltip")).toEqual(["A tooltip"]);
+    expect(finds("setting")).toEqual(["A switch"]);
+    expect(finds("however")).toEqual(["A tooltip"]);
+  });
+
+  it("names each group once", () => {
+    expect(packSearch(entries).groups).toEqual(["fixture · Scenarios", "fixture · Instruments", "fixture · Gauge"]);
   });
 
   it("keeps a wording text once when both languages say the same", () => {

@@ -297,9 +297,10 @@ export function siteSearch(fragments: readonly string[]): string {
     forwarder - whose page carries the entry's anchor, and the whole stays
     within its budget. A find that lands on nothing is the one defect a
     reader cannot work around. `home` is the site's address, `files` as for
-    `siteFaults`. */
-export function searchFaults(index: string, home: string, urls: readonly string[], files: ReadonlyMap<string, string>): string[] {
-  const size = new TextEncoder().encode(index).length;
+    `siteFaults`. `index` is the list of entries; `shipped` is the text that
+    goes out (`packSearch`), whose size the budget counts. */
+export function searchFaults(index: string, home: string, urls: readonly string[], files: ReadonlyMap<string, string>, shipped = index): string[] {
+  const size = new TextEncoder().encode(shipped).length;
   return [
     ...(size > SEARCH_BUDGET ? [`search.json: ${size} bytes, over its budget of ${SEARCH_BUDGET}`] : []),
     ...(JSON.parse(index) as { address: string; label: string }[]).flatMap(({ address, label }) => {
