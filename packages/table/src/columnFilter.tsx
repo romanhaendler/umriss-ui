@@ -477,9 +477,9 @@ const isTerm = (term: unknown): term is TextTerm =>
   ((term as TextTerm).value === undefined || typeof (term as TextTerm).value === "string");
 
 /** Whether a term requires something. */
-const complete = (term: TextTerm): boolean => term.operator === "isEmpty" || (term.value ?? "") !== "";
+const isFilled = (term: TextTerm): boolean => term.operator === "isEmpty" || (term.value ?? "") !== "";
 
-const completeTerms = (condition: TextCondition): TextTerm[] => condition.terms.filter(complete);
+const filledTerms = (condition: TextCondition): TextTerm[] => condition.terms.filter(isFilled);
 
 function termMatches(text: string, term: TextTerm, locale: string | undefined): boolean {
   return OPERATORS[term.operator].test(text.toLocaleLowerCase(locale), (term.value ?? "").toLocaleLowerCase(locale));
@@ -487,21 +487,21 @@ function termMatches(text: string, term: TextTerm, locale: string | undefined): 
 
 function textMatches(value: unknown, condition: TextCondition, locale: string | undefined): boolean {
   const text = isAbsent(value) ? "" : String(value);
-  const results = completeTerms(condition).map((term) => termMatches(text, term, locale));
+  const results = filledTerms(condition).map((term) => termMatches(text, term, locale));
   return condition.join === "or" ? results.some(Boolean) : results.every(Boolean);
 }
 
 /** The condition a pair of terms makes: only the terms that require something,
     the join only for two; `null` when nothing is required. */
-function textConditionOf(terms: readonly TextTerm[], join: Join): TextCondition | null {
-  const used = terms.filter(complete).map((term): TextTerm => (term.operator === "isEmpty" ? { operator: term.operator } : term));
+function canonicalCondition(terms: readonly TextTerm[], join: Join): TextCondition | null {
+  const used = terms.filter(isFilled).map((term): TextTerm => (term.operator === "isEmpty" ? { operator: term.operator } : term));
   if (used.length === 0) return null;
   return used.length === 1 ? { terms: [used[0]!] } : { join, terms: [used[0]!, used[1]!] };
 }
 
 /** The condition's text in the toolbar, in the given wording. */
 function describeText(condition: TextCondition, wording: Wording): string {
-  return completeTerms(condition)
+  return filledTerms(condition)
     .map((term) => {
       const label = OPERATORS[term.operator].label(wording);
       return term.operator === "isEmpty" ? label : wording.textTerm(label, term.value ?? "");
@@ -509,17 +509,17 @@ function describeText(condition: TextCondition, wording: Wording): string {
     .join(` ${condition.join === "or" ? wording.textOr : wording.textAnd} `);
 }
 
-const BLANK: TextTerm = { operator: "contains", value: "" };
+const EMPTY_TERM: TextTerm = { operator: "contains", value: "" };
 
-const draftOf = (condition: TextCondition | null) => ({
-  terms: [condition?.terms[0] ?? BLANK, condition?.terms[1] ?? BLANK] as const,
+const panelDraftOf = (condition: TextCondition | null) => ({
+  terms: [condition?.terms[0] ?? EMPTY_TERM, condition?.terms[1] ?? EMPTY_TERM] as const,
   join: condition?.join ?? "and",
 });
 
 /* What two conditions are compared by: the effective form, keys in one order. */
-const canonical = (condition: TextCondition | null): string => {
-  const { terms, join } = draftOf(condition);
-  return JSON.stringify(textConditionOf(terms, join));
+const canonicalKey = (condition: TextCondition | null): string => {
+  const { terms, join } = panelDraftOf(condition);
+  return JSON.stringify(canonicalCondition(terms, join));
 };
 
 function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCondition>) {
@@ -527,20 +527,20 @@ function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCo
   /* The draft keeps what the condition leaves out - the operator of a term
      whose value is still empty. It follows the condition when that changes from
      outside: reset, a chip, a view. */
-  const [draft, setDraft] = useState(() => draftOf(condition));
+  const [draft, setDraft] = useState(() => panelDraftOf(condition));
   let shown = draft;
-  if (canonical({ join: draft.join, terms: draft.terms }) !== canonical(condition)) {
-    shown = draftOf(condition);
+  if (canonicalKey({ join: draft.join, terms: draft.terms }) !== canonicalKey(condition)) {
+    shown = panelDraftOf(condition);
     setDraft(shown);
   }
   const change = (index: 0 | 1, term: TextTerm) => {
     const terms = [index === 0 ? term : shown.terms[0], index === 1 ? term : shown.terms[1]] as const;
     setDraft({ ...shown, terms });
-    setCondition(textConditionOf(terms, shown.join));
+    setCondition(canonicalCondition(terms, shown.join));
   };
   const join = (value: Join) => {
     setDraft({ ...shown, join: value });
-    setCondition(textConditionOf(shown.terms, value));
+    setCondition(canonicalCondition(shown.terms, value));
   };
 
   const row = (index: 0 | 1) => {
@@ -600,7 +600,7 @@ const TEXT = /* @__PURE__ */ builtIn<TextCondition>(
       condition.terms.length >= 1 &&
       condition.terms.length <= 2 &&
       condition.terms.every(isTerm),
-    isEmpty: (condition) => completeTerms(condition).length === 0,
+    isEmpty: (condition) => filledTerms(condition).length === 0,
     absentMatches: (condition, formats) => textMatches("", condition, formats.locale),
     matchesIn: (value, condition, formats) => textMatches(value, condition, formats.locale),
     describeIn: (condition, env) => describeText(condition, env.wording),
