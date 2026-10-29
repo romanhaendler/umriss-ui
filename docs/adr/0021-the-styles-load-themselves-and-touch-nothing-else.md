@@ -144,10 +144,11 @@ marker, or the CSS target at the browser floor). Behaviour does not change.
 
 ## Amendment 2026-10-29
 
-The warning reads the light value from the token itself: a probe that forces
-`color-scheme: light` resolves the root's background token, and the warning
-fires when the page is dark and a probe that follows the page resolves to the
-same colour. It checks after mount and again whenever the root's attributes
-change, and stops watching after the warning. A theme that gives the token a
-`light-dark()` pair, or any value the dark page resolves differently, raises
-nothing.
+The warning decides from the build, not from a colour. It fires when the
+root's computed `color-scheme` is dark only, a readable stylesheet carries the
+lowered `light-dark()` (a rule naming `var(--lightningcss-light`), and
+Lightning's dark switch is off on the root (a hidden probe with
+`background-color: var(--lightningcss-dark, canvastext)` stays transparent).
+It checks after mount and again whenever the root's attributes change, and
+stops watching after the warning. An unlowered build never warns, a theme's
+`--u-color-bg` included.

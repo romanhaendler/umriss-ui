@@ -28,23 +28,37 @@ export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
 let watchingLowered = false;
+let loweredBuild = false;
 
-/* The colour the root's background token resolves to for a child that forces `scheme`, or inherits the page's. */
-function backgroundToken(scheme?: "light"): string {
+/* Whether a readable stylesheet carries Lightning CSS's lowered `light-dark()` (a rule naming its light switch).
+   Once found it stays found. A sheet whose `cssRules` throws is cross-origin and unreadable. */
+function isLoweredBuild(): boolean {
+  if (loweredBuild) return true;
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      loweredBuild = Array.from(sheet.cssRules).some((rule) => rule.cssText.includes("var(--lightningcss-light"));
+    } catch {
+      continue;
+    }
+    if (loweredBuild) return true;
+  }
+  return false;
+}
+
+/* Whether the root's Lightning dark switch is off: its value is then empty, the declaration is invalid at
+   computed-value time, and the probe stays transparent. A CSS rule that made the page dark switches it on. */
+function darkSwitchOff(): boolean {
   const probe = document.createElement("div");
   probe.style.display = "none";
-  if (scheme) probe.style.colorScheme = scheme;
-  probe.style.backgroundColor = "var(--u-color-bg)";
+  probe.style.backgroundColor = "var(--lightningcss-dark, canvastext)";
   document.documentElement.appendChild(probe);
   const colour = getComputedStyle(probe).backgroundColor;
   probe.remove();
-  return colour;
+  return colour === "rgba(0, 0, 0, 0)" || colour === "transparent";
 }
 
-/** Warns once, in development, when a build lowered `light-dark()` and the page is dark but the background
-    token still resolves to its light value: the mode was set from JavaScript, which a lowered token cannot
-    follow. The light value is the token as a child forcing `color-scheme: light` sees it; an unlowered token,
-    or one the application's CSS flipped or a theme replaced with a pair, differs from it on a dark page.
+/** Warns once, in development, when a build lowered `light-dark()` and the page is dark but the dark switch is
+    off: the mode was set from JavaScript, which a lowered token cannot follow. An unlowered build never warns.
     Checks now and again whenever the root's attributes change (a mode switched on later), and stops watching
     after the warning. Call it in an effect, so that the stylesheets have loaded. */
 export function warnLoweredLightDark(): void {
@@ -54,8 +68,7 @@ export function warnLoweredLightDark(): void {
   function check(): void {
     const scheme = getComputedStyle(document.documentElement).colorScheme;
     if (!/\bdark\b/.test(scheme) || /\blight\b/.test(scheme)) return;
-    const light = backgroundToken("light");
-    if (light === "" || light !== backgroundToken()) return;
+    if (!isLoweredBuild() || !darkSwitchOff()) return;
     observer.disconnect();
     warnOnce(
       "lowered-light-dark",

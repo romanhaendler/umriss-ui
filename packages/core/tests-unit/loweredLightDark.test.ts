@@ -11,17 +11,24 @@ describe("warnLoweredLightDark", () => {
     vi.restoreAllMocks();
   });
 
-  /* The page's computed colour scheme and the colour the background token resolves to: `light` for a probe that
-     forces the light scheme, `page` for one that inherits the page's. */
-  const setup = async (colorScheme: () => string, light: string, page: string) => {
+  /* jsdom lacks what the check reads, so it is stubbed as a browser shows it: the page's computed scheme, a
+     stylesheet naming Lightning's light switch when the build is lowered, and the probe's background, which is
+     transparent while the dark switch is off (the page is dark from JavaScript only). */
+  const setup = async (opts: { scheme: () => string; lowered: boolean; darkSwitchOn?: boolean }) => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(window, "getComputedStyle").mockImplementation(
-      (el) =>
+      () =>
         ({
-          colorScheme: colorScheme(),
-          backgroundColor: (el as HTMLElement).style.colorScheme === "light" ? light : page,
+          colorScheme: opts.scheme(),
+          backgroundColor: opts.darkSwitchOn ? "rgb(0, 0, 0)" : "rgba(0, 0, 0, 0)",
         }) as unknown as CSSStyleDeclaration,
     );
+    const rule = { cssText: ":root { --lightningcss-light: initial; --lightningcss-dark: ; }" };
+    const plain = { cssText: ".a { color: red; }" };
+    Object.defineProperty(document, "styleSheets", {
+      configurable: true,
+      value: [{ cssRules: opts.lowered ? [plain, { cssText: ".b { color: var(--lightningcss-light, #fafafa) var(--lightningcss-dark, #0f0f10); }" }, rule] : [plain] }],
+    });
     const { warnLoweredLightDark } = await import("../src/lib/dev");
     warnLoweredLightDark();
     warnLoweredLightDark();
@@ -31,7 +38,7 @@ describe("warnLoweredLightDark", () => {
   /* First: an earlier case's observer would outlive its module and warn again on this root. */
   it("warns once when dark is switched on after mount, and not before", async () => {
     let scheme = "normal";
-    const warn = await setup(() => scheme, "rgb(250, 250, 250)", "rgb(250, 250, 250)");
+    const warn = await setup({ scheme: () => scheme, lowered: true });
     expect(warn).not.toHaveBeenCalled();
     scheme = "dark";
     document.documentElement.setAttribute("data-mode", "dark");
@@ -41,17 +48,18 @@ describe("warnLoweredLightDark", () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
-  it("warns once, naming both fixes, for a dark page whose lowered token stays light", async () => {
-    const warn = await setup(() => "dark", "rgb(250, 250, 250)", "rgb(250, 250, 250)");
+  it("warns once, naming both fixes, for a lowered build on a page made dark from JavaScript", async () => {
+    const warn = await setup({ scheme: () => "dark", lowered: true });
     expect(warn).toHaveBeenCalledTimes(1);
     const text = String(warn.mock.calls[0]?.[0]);
     expect(text).toContain("color-scheme: dark");
     expect(text).toContain("cssTarget");
   });
 
-  it("is silent where the token follows the mode (modern target, CSS-set dark, a themed pair), or the page is light", async () => {
-    expect(await setup(() => "dark", "rgb(250, 250, 250)", "rgb(15, 15, 16)")).not.toHaveBeenCalled();
-    expect(await setup(() => "normal", "rgb(250, 250, 250)", "rgb(250, 250, 250)")).not.toHaveBeenCalled();
-    expect(await setup(() => "light dark", "rgb(250, 250, 250)", "rgb(250, 250, 250)")).not.toHaveBeenCalled();
+  it("is silent for a lowered build whose dark was set in CSS, an unlowered build (a themed token included), and a light page", async () => {
+    expect(await setup({ scheme: () => "dark", lowered: true, darkSwitchOn: true })).not.toHaveBeenCalled();
+    expect(await setup({ scheme: () => "dark", lowered: false })).not.toHaveBeenCalled();
+    expect(await setup({ scheme: () => "normal", lowered: true })).not.toHaveBeenCalled();
+    expect(await setup({ scheme: () => "light dark", lowered: true })).not.toHaveBeenCalled();
   });
 });
