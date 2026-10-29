@@ -11,19 +11,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { RefObject, SyntheticEvent } from "react";
+import { firstTabStop } from "./firstTabStop";
 import { durationFrom, prefersReducedMotion } from "./motion";
-
-/* ponytail: reads React's `__reactProps$` expando; if React renames it, the autoFocus is ignored and the dialog's own focusing steps apply. */
-function autoFocusTarget(dialog: HTMLDialogElement): HTMLElement | undefined {
-  for (const el of dialog.querySelectorAll<HTMLElement>("*")) {
-    const key = Object.keys(el).find((k) => k.startsWith("__reactProps$"));
-    if (key && (el as unknown as Record<string, { autoFocus?: boolean }>)[key]?.autoFocus) return el;
-  }
-}
 
 export interface DialogChoreography {
   /** Belongs on the <dialog> element. */
   dialogRef: RefObject<HTMLDialogElement | null>;
+  /**
+   * Are the dialog's children to be in the tree? True from the moment
+   * `showModal()` has made the dialog visible until the exit has ended, so
+   * React's own `autoFocus` focuses a visible field. A closed dialog keeps no
+   * state of its children.
+   */
+  mounted: boolean;
   /** Is the exit running? Belongs on a data attribute the styles read. */
   closing: boolean;
   /**
@@ -65,6 +65,7 @@ export function useDialogChoreography(
 ): DialogChoreography {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
+  const [mounted, setMounted] = useState(false);
   /* Set immediately before our own `close()`, cleared when its event arrives.
      Not reset on opening: in the browser the close event comes in a later
      task, and a quick reopen in between would otherwise turn it into a
@@ -97,20 +98,22 @@ export function useDialogChoreography(
       setClosing(false);
       if (!dialog.open) {
         dialog.showModal();
-        /* The dialog's focusing steps put the focus on its first tab stop. A
-           field marked `autoFocus` was focused by React when it mounted, long
-           before the dialog opened, and React writes no attribute for it:
-           the prop on the element's React props is the only trace. */
-        autoFocusTarget(dialog)?.focus();
       }
+      /* The children mount only now: a field with `autoFocus` focuses itself
+         on mounting, which needs the dialog visible. */
+      setMounted(true);
       return;
     }
 
-    if (!dialog.open) return;
+    if (!dialog.open) {
+      setMounted(false);
+      return;
+    }
     const exitMs = typeof exit === "number" ? exit : durationFrom(getComputedStyle(dialog), exit);
     if (exitMs <= 0 || prefersReducedMotion()) {
       closedByUs.current = true;
       dialog.close();
+      setMounted(false);
       return;
     }
 
@@ -120,9 +123,21 @@ export function useDialogChoreography(
       setClosing(false);
       closedByUs.current = true;
       dialog.close();
+      setMounted(false);
     }, exitMs);
     return () => window.clearTimeout(timer);
   }, [open, exit]);
 
-  return { dialogRef, closing, onDialogClose, onDialogCancel };
+  /* showModal() found no children to focus and put the focus on the dialog
+     itself. Unless a field took it by `autoFocus`, the first tab stop gets it,
+     as the platform's own focusing steps would have given it. */
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!mounted || !dialog) return;
+    const active = document.activeElement;
+    if (active !== dialog && dialog.contains(active)) return;
+    firstTabStop(dialog)?.focus();
+  }, [mounted]);
+
+  return { dialogRef, mounted, closing, onDialogClose, onDialogCancel };
 }

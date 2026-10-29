@@ -729,7 +729,7 @@ test("the subtask that was clicked is told from its task's other bars", async ({
   const column = {
     x: Math.round(plot.x(7) - plot.box.x),
     y: LANE_HEIGHT * plot.index("truck-520"),
-    width: 3,
+    width: 12,
     height: LANE_HEIGHT,
   };
   const idle = async () => {
@@ -749,7 +749,9 @@ test("the subtask that was clicked is told from its task's other bars", async ({
   await idle();
   const asSibling = await painted(example, "data", column);
 
-  expect(asClicked).toBeGreaterThan(asSibling);
+  /* With margin: the column is wide enough that the heavier outline adds a few
+     tens of pixels (about 22 measured), so anti-aliasing cannot close the gap. */
+  expect(asClicked - asSibling).toBeGreaterThan(8);
   /* And a sibling is still outlined: the whole task is selected. */
   expect(asSibling).toBeGreaterThan(LANE_HEIGHT);
 });
