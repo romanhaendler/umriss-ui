@@ -154,3 +154,30 @@ describe("malformed data", () => {
     for (const word of ["str1", "date1", "sec1", "milliseconds"]) expect(textOf(warn)).toContain(word);
   });
 });
+
+describe("layers registering in turn", () => {
+  function Split({ missing = false }: { missing?: boolean }) {
+    const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
+    return (
+      <Schedule aria-label="Plan">
+        <Lane id="l" label="l" />
+        <Subtasks data={[sub("split-a")]} tasks={TASKS} />
+        <Dependencies data={[{ id: "split-dep", from: "split-a", to: missing ? "split-gone" : "split-b", lag: 0 }]} />
+        <Subtasks data={[sub("split-b")]} tasks={TASKS} />
+      </Schedule>
+    );
+  }
+
+  it("says nothing about a dependency whose end a later layer holds", () => {
+    const warn = warnings();
+    render(<Split />);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("still warns once about a subtask no layer holds", () => {
+    const warn = warnings();
+    render(<Split missing />);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(textOf(warn)).toMatch(/split-dep.*split-gone/);
+  });
+});

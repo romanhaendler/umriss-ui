@@ -272,6 +272,12 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
 
   useImperativeHandle(ref as Ref<HTMLDivElement | null>, () => rootRef.current as HTMLDivElement, []);
 
+  /* No dependency list: after every commit, behind the effects of the parts
+     that registered in it. */
+  useEffect(() => {
+    scene.data.warnOfMalformedData();
+  });
+
   useEffect(() => {
     scene.setLoading(loading);
   }, [scene, loading]);

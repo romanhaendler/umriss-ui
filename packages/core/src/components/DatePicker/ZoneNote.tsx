@@ -23,6 +23,7 @@ export function useMidnightWarning(values: readonly (Date | null | undefined)[])
   useEffect(() => {
     if (!off) return;
     warnOnce(
+      "@umriss-ui/core",
       `midnight:${id}`,
       `a date picker's value is a day: the instant of midnight in the formats' zone (${timeZone}). This value is not on that midnight.`,
     );
