@@ -812,6 +812,18 @@ test("on a phone the dates of narrow days stand a run apart, and none runs into 
   expect(await overlayOffenders(page)).toEqual([]);
 });
 
+test("under a Sunday-first week the week band's dates stand on Sundays", { tag: "@quick" }, async ({ page }) => {
+  await openExample(page, "time-axis", "week-from-sunday");
+  const example = page.locator('[data-example="week-from-sunday"]');
+  const labels = (await example.locator('[data-schedule-overlay="day label"]').allTextContents()).filter(Boolean);
+  expect(labels.length).toBeGreaterThan(3);
+  /* en-US writes MM/DD; the plan lies in 2026. */
+  for (const label of labels) {
+    const [month, day] = label.split("/").map(Number);
+    expect(new Date(2026, month! - 1, day).getDay(), label).toBe(0);
+  }
+});
+
 test("the fold control is a real button, and says whether its group is open", async ({ page }) => {
   await openExample(page, "lane-groups", "a-group");
   const example = page.locator('[data-example="a-group"]');

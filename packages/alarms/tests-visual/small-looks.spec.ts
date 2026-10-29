@@ -23,6 +23,28 @@ test("@quick A state wider than its cell ends in an ellipsis, and its full text 
   await expect(state).toHaveAttribute("title", full);
 });
 
+test("@quick In a narrow list a long state ends in an ellipsis with its text as title, and the duration keeps a class and one line of its own", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openExample(page, "alarmlist", "show-the-alerts");
+  const row = page.locator('[data-example="show-the-alerts"] tbody tr[data-alarm-id]').first();
+  const lifecycle = row.locator("td span[title]").first();
+  await lifecycle.waitFor({ state: "visible" });
+  const full = "Zurückgekehrt und noch nicht quittiert, Bestätigung durch die Schichtleitung steht aus";
+  await lifecycle.evaluate((node, text) => {
+    node.textContent = text;
+    node.setAttribute("title", text);
+  }, full);
+  expect(await lifecycle.evaluate((node) => getComputedStyle(node).textOverflow)).toBe("ellipsis");
+  expect(await lifecycle.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+  await expect(lifecycle).toHaveAttribute("title", full);
+  const stateClass = await lifecycle.evaluate((node) => node.parentElement!.className);
+  const table = page.locator('[data-example="show-the-alerts"] table').first();
+  const index = await table.locator("thead th").evaluateAll((ths) => ths.findIndex((th) => /duration/i.test(th.textContent ?? "")));
+  const duration = row.locator("> *").nth(index).locator("span").first();
+  expect(await duration.evaluate((node) => node.className)).not.toBe(stateClass);
+  expect(await duration.evaluate((node) => getComputedStyle(node).whiteSpace)).toBe("nowrap");
+});
+
 test("@quick At 375 px the banner's time is one line", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await openExample(page, "alarmbanner", "banner-over-the-list");
