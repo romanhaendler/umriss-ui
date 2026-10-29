@@ -126,7 +126,7 @@ function DialogFrame({
   /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
      The name belongs to the Modal; the palette uses the same routine without
      an exit. */
-  const { dialogRef, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
+  const { dialogRef, mounted, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
@@ -170,7 +170,7 @@ function DialogFrame({
         {/* A dialog keeps a dialog's controls, whatever size the place it
             was opened from has (ADR-0041). */}
         <SurfaceSizeReset>
-          <ModalContext value={{ onClose, titleId }}>{children}</ModalContext>
+          <ModalContext value={{ onClose, titleId }}>{mounted && children}</ModalContext>
         </SurfaceSizeReset>
       </div>
       {spacers && <div ref={bottomRef} className={styles.spacerBottom} aria-hidden="true" />}

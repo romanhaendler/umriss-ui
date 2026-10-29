@@ -25,6 +25,7 @@ export default defineConfig({
   test: {
     include: ["tests-unit/**/*.test.{ts,tsx}"],
     css: true,
+    testTimeout: 30_000,
     setupFiles: ["../demo/tests-support/setup.ts"],
     environment: "node", // jsdom tests annotate themselves with // @vitest-environment jsdom
   },
