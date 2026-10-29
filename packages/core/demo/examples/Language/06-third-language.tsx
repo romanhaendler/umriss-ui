@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatePicker, FormField, Grid, LanguageProvider, NumberInput, Stack, formatsFor } from "../../../src";
+import { DatePicker, FormField, Grid, LanguageProvider, NumberInput, Stack, Text, formatsFor } from "../../../src";
 
 export const title = "A third language, notation first";
 export const lead = "`formatsFor` builds the notation of any locale the runtime knows: Swiss French dates and numbers, and a week that starts on Sunday where your users' calendars do. The words stay English until you hand over a `Wording` of your own.";
@@ -26,10 +26,20 @@ function Surface() {
 export default function ThirdLanguage() {
   return (
     <Grid minItemWidth="240px" gap={5}>
-      <Surface />
-      <LanguageProvider formats={SWISS_FRENCH}>
+      <Stack gap={2}>
+        <Text size="xs" tone="muted">
+          Without a provider
+        </Text>
         <Surface />
-      </LanguageProvider>
+      </Stack>
+      <Stack gap={2}>
+        <Text size="xs" tone="muted">
+          formatsFor("fr-CH"), weekStart 7
+        </Text>
+        <LanguageProvider formats={SWISS_FRENCH}>
+          <Surface />
+        </LanguageProvider>
+      </Stack>
     </Grid>
   );
 }
