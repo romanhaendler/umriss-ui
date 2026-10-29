@@ -143,7 +143,8 @@ describe("autoFocus inside a Modal", () => {
     // The platform's showModal() puts the focus on the first tab stop.
     const show = vi.spyOn(HTMLDialogElement.prototype, "showModal").mockImplementation(function (this: HTMLDialogElement) {
       this.setAttribute("open", "");
-      this.querySelector("button")!.focus();
+      // The children mount once the dialog is open, so there may be no tab stop yet.
+      this.querySelector("button")?.focus();
     });
     render(
       <Modal open onClose={() => {}}>
