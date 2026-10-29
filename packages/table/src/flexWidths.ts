@@ -52,17 +52,24 @@ function flexInputs(table: HTMLTableElement): string {
     .join("\n");
 }
 
+/** The same array, or one holding the same rows (a table given a fresh slice
+    each render); compared only when the identity differs. */
+const sameRows = (a: readonly unknown[] | undefined, b: readonly unknown[] | undefined) =>
+  a === b || (a !== undefined && b !== undefined && a.length === b.length && a.every((r, i) => r === b[i]));
+
 /** Keeps the flex heads at their share: when the columns, their widths, order
     or pins change, and when the scroll area changes its width - not after a
-    render that changed none of them. */
-export function useFlexWidths(tableRef: RefObject<HTMLTableElement | null>) {
-  const fitted = useRef<string | null>(null);
+    render that changed none of them. The rows count too (`rows`, by identity of the array or its elements):
+    the other columns' automatic widths follow their content. A scroll of a
+    virtual window leaves it as it is. */
+export function useFlexWidths(tableRef: RefObject<HTMLTableElement | null>, rows: readonly unknown[] | undefined) {
+  const fitted = useRef<{ inputs: string; rows: readonly unknown[] | undefined } | null>(null);
   useLayoutEffect(() => {
     const table = tableRef.current;
     if (!table) return;
     const inputs = flexInputs(table);
-    if (inputs === fitted.current) return;
-    fitted.current = inputs;
+    if (inputs === fitted.current?.inputs && sameRows(rows, fitted.current.rows)) return;
+    fitted.current = { inputs, rows };
     fitFlexHeads(table);
   });
   useLayoutEffect(() => {
