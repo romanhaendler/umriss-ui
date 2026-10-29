@@ -16,16 +16,24 @@ export function isDev(): boolean {
 
 const warned = new Set<string>();
 
-/** One development console warning per reason; silent in production. */
-export function warnOnce(reason: string, message: string): void {
-  if (!isDev() || warned.has(reason)) return;
-  warned.add(reason);
-  console.warn(`@umriss-ui/core: ${message}`);
+const onceKey = (pkg: string, reason: string): string => `${pkg}\n${reason}`;
+
+/** Whether `warnOnce` has already spoken for this package and reason. */
+export function hasWarned(pkg: string, reason: string): boolean {
+  return warned.has(onceKey(pkg, reason));
+}
+
+/** One development console warning per package and reason; silent in production. The prefix names the package. */
+export function warnOnce(pkg: string, reason: string, message: string): void {
+  const key = onceKey(pkg, reason);
+  if (!isDev() || warned.has(key)) return;
+  warned.add(key);
+  console.warn(`${pkg}: ${message}`);
 }
 
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
+  warnOnce("@umriss-ui/core", `deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
 let watchingLowered = false;
 let loweredBuild = false;
@@ -71,6 +79,7 @@ export function warnLoweredLightDark(): void {
     if (!isLoweredBuild() || !darkSwitchOff()) return;
     observer.disconnect();
     warnOnce(
+      "@umriss-ui/core",
       "lowered-light-dark",
       'this build lowered light-dark(), so the dark mode set from JavaScript leaves the components light. Declare it in CSS, e.g. [data-theme="dark"] { color-scheme: dark; }, or raise the CSS target to the browser floor (Vite build.cssTarget ["chrome123", "firefox120", "safari17.5"]; Next browserslist "chrome >= 123", "firefox >= 120", "safari >= 17.5"). See Styles in the README.',
     );
