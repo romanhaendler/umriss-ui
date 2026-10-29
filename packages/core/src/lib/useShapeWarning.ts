@@ -7,7 +7,7 @@ import { warnOnce } from "./dev";
 export function useShapeWarning(component: string, prop: string, wrong: boolean, expected: string): void {
   const id = useId();
   useEffect(() => {
-    if (wrong) warnOnce(`shape:${id}:${prop}`, `${component} ${prop} must be ${expected}.`);
+    if (wrong) warnOnce("@umriss-ui/core", `shape:${id}:${prop}`, `${component} ${prop} must be ${expected}.`);
   }, [id, component, prop, wrong, expected]);
 }
 
