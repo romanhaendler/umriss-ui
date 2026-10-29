@@ -11,19 +11,24 @@ const TRIP = EXAMPLE_ADDRESSES.find((one) => one.pageId === "trips-and-floods" &
 test("Shift+A on a scrolled list names the rows in its visible area", async ({ page }) => {
   await openExample(page, TRIP.pageId, TRIP.exampleId);
   const stage = page.locator(`[data-example="${TRIP.exampleId}"]`);
-  await stage.locator("tbody tr[data-alarm-id] th").first().evaluate((cell) => cell.focus({ preventScroll: true }));
   const area = stage.locator('div[style*="max-height"]').first();
   await area.evaluate((node) => {
     node.scrollTop = (node.scrollHeight - node.clientHeight) / 2;
   });
+  /* The list is virtual: a row scrolled out of the area leaves the DOM, and
+     the focus with it. So the focus goes to a row in view, once the rows of
+     the new position have rendered. */
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
 
   /* The rows whose box meets the scroll area and the window. */
   const inView = await area.evaluate((node) => {
     const box = node.getBoundingClientRect();
-    return [...node.querySelectorAll<HTMLElement>("tbody tr[data-alarm-id]")].filter((row) => {
+    const rows = [...node.querySelectorAll<HTMLElement>("tbody tr[data-alarm-id]")].filter((row) => {
       const r = row.getBoundingClientRect();
       return r.bottom > box.top && r.top < box.bottom && r.bottom > 0 && r.top < window.innerHeight;
-    }).length;
+    });
+    rows[0]?.querySelector<HTMLElement>("th")?.focus({ preventScroll: true });
+    return rows.length;
   });
   expect(inView).toBeGreaterThan(0);
   expect(inView).toBeLessThan(40);
