@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
+import { firstSentence, searchEntries, wordingKeywords } from "../src/search";
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "llms");
 
@@ -183,5 +184,37 @@ describe("the props in the search fragment", () => {
       const [path, anchor] = address.replace(/^\/fixture\//, "").split("#");
       expect(rendered.pages.find((one) => one.path === path)?.html, address).toContain(`<tr id="${anchor}"`);
     }
+  });
+});
+
+/* What the index leaves out: a lead's second sentence and a wording text
+   that stands twice. */
+describe("the search fragment's slimming", () => {
+  const entries = searchEntries(
+    "fixture",
+    OUTLINE,
+    [],
+    [
+      { pageId: "gauge", id: "tooltip", title: "A tooltip", lead: "Hover a field to read its hint. The hint stays until the pointer leaves, however long it takes." },
+      { pageId: "gauge", id: "switch", title: "A switch", lead: "Use a switch for a setting that takes effect at once; Space toggles it." },
+    ],
+  );
+  const finds = (query: string) => entries.filter((entry) => entry.kind === "example" && [entry.label, ...(entry.keywords ?? [])].some((text) => text.toLowerCase().includes(query))).map((entry) => entry.label);
+
+  it("still finds an example by its title and by an everyday word of its first sentence", () => {
+    expect(finds("tooltip")).toEqual(["A tooltip"]);
+    expect(finds("hint")).toEqual(["A tooltip"]);
+    expect(finds("setting")).toEqual(["A switch"]);
+    expect(finds("however")).toEqual([]);
+  });
+
+  it("keeps the first sentence whole, even with a semicolon, and drops the rest", () => {
+    expect(firstSentence("Use a switch for a setting at once; Space toggles it. More words follow.")).toBe("Use a switch for a setting at once; Space toggles it.");
+    expect(firstSentence("Only one sentence.")).toBe("Only one sentence.");
+  });
+
+  it("keeps a wording text once when both languages say the same", () => {
+    expect(wordingKeywords(["Clear input", "Eingabe leeren"])).toEqual(["Clear input", "Eingabe leeren"]);
+    expect(wordingKeywords(["Esc", "Esc"])).toEqual(["Esc"]);
   });
 });
