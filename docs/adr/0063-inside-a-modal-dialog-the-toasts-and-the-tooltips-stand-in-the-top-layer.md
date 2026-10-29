@@ -132,3 +132,16 @@ and `--u-z-tooltip` order the surfaces.**
   `show()` leaves the toasts where they are.
 - Not the Shadow step: "top layer" is the platform's word, as the portal
   target module already uses it.
+
+## Amendment 2026-10-29
+
+The dialog choreography (`useDialogChoreography`, shared by Modal, Drawer,
+ConfirmDialog and CommandPalette) now mounts a Modal's children only once
+`showModal()` has made the dialog visible, and unmounts them when the exit has
+ended. React's own `autoFocus` then focuses a visible field in every React
+version, and the dialog's focusing steps apply only where no field asked; the
+read of React's private props is gone. A closed dialog therefore keeps no state
+of its children: a form inside a closed Modal starts afresh on the next
+opening, and a host that wants state to survive closing keeps it itself, as the
+Modal is controlled already. Focus return to the trigger and the exit
+choreography are unchanged.
