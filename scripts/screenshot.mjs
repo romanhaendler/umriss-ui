@@ -7,15 +7,15 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { parseArgs } from "node:util";
 import { chromium } from "@playwright/test";
+import { PACKAGES } from "./ports.ts";
 
-const PACKAGES = ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms"];
 const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: { click: { type: "string" }, width: { type: "string", default: "1280" }, dark: { type: "boolean" }, touch: { type: "boolean" }, out: { type: "string" } },
 });
 const [pkg, pageId, exampleId] = positionals;
 if (!PACKAGES.includes(pkg) || !pageId || !exampleId) {
-  console.error('usage: pnpm screenshot <core|charts|table|schedule|calculation|dashboard|alarms> <page> <example> [--click "<button>"] [--width 1280] [--dark] [--touch] [--out file.png]');
+  console.error(`usage: pnpm screenshot <${PACKAGES.join("|")}> <page> <example> [--click "<button>"] [--width 1280] [--dark] [--touch] [--out file.png]`);
   process.exit(2);
 }
 const out = values.out ?? `${pkg}-${pageId}-${exampleId}${values.dark ? "-dark" : ""}.png`;

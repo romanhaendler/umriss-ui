@@ -36,19 +36,19 @@ export const warnDeprecated = (old: string, replacement: string): void =>
   warnOnce("@umriss-ui/core", `deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
 let watchingLowered = false;
-let loweredBuild = false;
+let foundLoweredSheet = false;
 
 /* Whether a readable stylesheet carries Lightning CSS's lowered `light-dark()` (a rule naming its light switch).
    Once found it stays found. A sheet whose `cssRules` throws is cross-origin and unreadable. */
 function isLoweredBuild(): boolean {
-  if (loweredBuild) return true;
+  if (foundLoweredSheet) return true;
   for (const sheet of Array.from(document.styleSheets)) {
     try {
-      loweredBuild = Array.from(sheet.cssRules).some((rule) => rule.cssText.includes("var(--lightningcss-light"));
+      foundLoweredSheet = Array.from(sheet.cssRules).some((rule) => rule.cssText.includes("var(--lightningcss-light"));
     } catch {
       continue;
     }
-    if (loweredBuild) return true;
+    if (foundLoweredSheet) return true;
   }
   return false;
 }
