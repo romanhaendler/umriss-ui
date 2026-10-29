@@ -7,7 +7,7 @@
     "build:site": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/build-site.mjs",
     "start": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/start.mjs",
     "previews": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/previews.mjs",
-    "prepare": "[ -e .git ] && git config core.hooksPath .githooks || true",
+    "prepare": "node scripts/prepare.mjs",
     "check": "node scripts/check.mjs",
     "screenshot": "node scripts/screenshot.mjs",
     "changelog": "node scripts/changelog.mjs",
