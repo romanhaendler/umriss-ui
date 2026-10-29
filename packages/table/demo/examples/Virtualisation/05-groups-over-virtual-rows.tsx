@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { ColumnGroup, useTable } from "../../../src";
 
 export const title = "Column groups over virtual rows";
-export const lead = "Both head rows stay in the sticky head and the rows keep their numbers while the window moves.";
+export const lead = "Two thousand rows, rendered a window at a time: both head rows stay in the sticky head, and a screen reader still counts each row within the whole set.";
 
 interface Reading {
   id: string;
