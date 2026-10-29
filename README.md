@@ -134,6 +134,10 @@ pnpm dev:dashboard    # port 4178
 pnpm dev:alarms       # port 4179
 ```
 
+The browser tests (`pnpm test:visual`, `test:visual:quick`, `test:visual:on-main`)
+serve the demos from `UMRISS_PORT_BASE` (default 4173) plus the offsets above; a
+second checkout running them at the same time sets a base of its own.
+
 ## Where the documentation is
 
 * **[`docs/README.md`](docs/README.md)** — the map: which document answers which

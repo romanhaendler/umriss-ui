@@ -40,7 +40,8 @@ which `pnpm test:visual:update` creates and which are then checked in.
 * `pnpm test:unit` – vitest across all packages, the shell included
 * `pnpm test:visual` – Playwright; builds the seven demos and starts
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
-  4176 schedule, 4177 calculation, 4178 dashboard, 4179 alarms)
+  4176 schedule, 4177 calculation, 4178 dashboard, 4179 alarms; add
+  `UMRISS_PORT_BASE=<port>` to move all seven, one base per checkout)
 * `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard`, `pnpm dev:alarms` – the demos in the dev server
 * `pnpm screenshot <package> <page> <example> [--click "<button>"] [--width 1280] [--dark] [--touch] [--out file.png]` – a PNG of one demo example from a dev server on a free port, with the page's console errors printed; `--click` presses a button of the example first and shoots the whole window, `--touch` opens the page with `touch-scale.css` on
 * `pnpm test:visual:update` – create or update baselines
@@ -62,9 +63,14 @@ For the charts part only:
 npx playwright test --project=charts-light --project=charts-dark
 ```
 
-The dev servers run on fixed ports: **4173** core, **4174** charts, **4175**
-table, **4176** schedule, **4177** calculation, **4178** dashboard, **4179** alarms. The screenshot suites address exactly those, so a port taken by something
-else is a failing suite rather than a mystery.
+The preview servers sit on `UMRISS_PORT_BASE` (default **4173**) plus a fixed
+offset: core +0, charts +1, table +2, schedule +3, calculation +4, dashboard +5,
+alarms +6 – 4173 to 4179 by default. `test:visual`, `test:visual:quick` and
+`test:visual:on-main` all read the variable, so a second checkout (a worktree, an
+agent) takes a base of its own, e.g. `UMRISS_PORT_BASE=4400 pnpm test:visual:quick
+charts`. A running server is reused only if it answers with this checkout's path
+(header `x-umriss-checkout`); one of another checkout, or a port taken by
+something else, is a failing suite that names both paths rather than a mystery.
 
 ## How work is organised here
 

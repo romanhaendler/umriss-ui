@@ -18,6 +18,7 @@ import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
 import { useFormats, useWording } from "../../lib/language";
 import { separatorsOf } from "../../lib/language/formats";
+import { announce } from "../../lib/announce";
 import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 
 /** The props of `NumberInput`: a native input's attributes, with the value a
@@ -122,7 +123,16 @@ export function NumberInput(
     return grouping || separators.group === "" ? text : text.replaceAll(separators.group, "");
   };
   const read = (raw: string) => parseNumber(raw, separators);
-  const isInvalid = invalid ?? field?.invalid ?? false;
+  // A refused character shows the invalid look for a moment.
+  const [refused, setRefused] = useState(false);
+  const refusedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (refusedTimer.current !== null) clearTimeout(refusedTimer.current);
+    },
+    [],
+  );
+  const isInvalid = (invalid ?? field?.invalid ?? false) || refused;
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
 
   // In the notation of the formats from the first render on, not after the effect.
@@ -248,7 +258,13 @@ export function NumberInput(
           /* A character the field cannot read refuses the whole edit: the
              field keeps its text instead of reading the rest as another
              value. */
-          if (raw.length !== event.target.value.length) return;
+          if (raw.length !== event.target.value.length) {
+            announce(wording.numberRefused, event.target);
+            setRefused(true);
+            if (refusedTimer.current !== null) clearTimeout(refusedTimer.current);
+            refusedTimer.current = setTimeout(() => setRefused(false), 1200);
+            return;
+          }
           setText(raw);
           /* One contract for every route: what goes out is clamped. The
              text stays local so that typing does not stutter over it. */

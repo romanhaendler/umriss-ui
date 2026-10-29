@@ -306,6 +306,7 @@ export const GERMAN_WORDING: Wording = {
   dropFiles: "oder hier ablegen",
   removeFile: (name) => `${name} entfernen`,
   fileNotAccepted: (name) => `${name} ist kein zugelassener Dateityp`,
+  numberRefused: "Nur Ziffern und das Dezimaltrennzeichen",
   show: "Einblenden",
   hide: "Ausblenden",
   moreActions: "Weitere Aktionen",
