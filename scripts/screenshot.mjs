@@ -3,7 +3,7 @@
    page's console errors, and stops the server. With --click the button inside
    the example is pressed first and the whole window is shot, so the popover or
    dialog it opens is in the picture; without it, the example alone. */
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { parseArgs } from "node:util";
 import { chromium } from "@playwright/test";
@@ -19,6 +19,7 @@ if (!PACKAGES.includes(pkg) || !pageId || !exampleId) {
   console.error(`usage: pnpm screenshot <${PACKAGES.join("|")}> <page> <example> [--click "<button>"] [--width 1280] [--dark] [--touch] [--out file.png]`);
   process.exit(2);
 }
+const WINDOWS = process.platform === "win32";
 const out = values.out ?? `${pkg}-${pageId}-${exampleId}${values.dark ? "-dark" : ""}.png`;
 
 const port = await new Promise((resolve) => {
@@ -27,7 +28,7 @@ const port = await new Promise((resolve) => {
     probe.close(() => resolve(port));
   });
 });
-const dev = spawn(...pnpm(["--filter", `@umriss-ui/${pkg}`, "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"]), { stdio: "ignore", detached: true });
+const dev = spawn(...pnpm(["--filter", `@umriss-ui/${pkg}`, "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"]), { stdio: "ignore", detached: !WINDOWS });
 let browser;
 try {
   for (let tries = 0; ; tries += 1) {
@@ -52,5 +53,8 @@ try {
   console.log(`${out}\nerrors: ${errors.length ? "\n" + errors.join("\n") : "none"}`);
 } finally {
   await browser?.close();
-  process.kill(-dev.pid);
+  /* The dev server is pnpm's grandchild: the whole tree goes. Windows has no
+     process groups, so there taskkill walks the tree. */
+  if (WINDOWS) execFileSync("taskkill", ["/pid", String(dev.pid), "/T", "/F"], { stdio: "ignore" });
+  else process.kill(-dev.pid);
 }

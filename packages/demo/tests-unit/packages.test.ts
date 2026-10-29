@@ -3,11 +3,11 @@
    even with an import Node cannot resolve. */
 
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 
 it("loads in Node without a bundler, the five in their fixed order", () => {
-  const file = fileURLToPath(new URL("../src/packages.ts", import.meta.url));
+  /* A file URL, not a path: Node's import() reads `C:\...` as a URL scheme. */
+  const file = new URL("../src/packages.ts", import.meta.url).href;
   const ids = execFileSync(
     process.execPath,
     [

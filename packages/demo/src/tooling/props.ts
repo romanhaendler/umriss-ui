@@ -36,16 +36,20 @@ import { exampleFaults, shownIn } from "./shownIn.ts";
 import { compilerOptionsOf, entriesOf, exportedDeclarations, typesOnTheIndex, undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
+/* A path in a message reads the same on every system. */
+const slashed = (path: string) => path.replaceAll("\\", "/");
+
 /** Every `.ts`/`.tsx` under a directory, sorted.
 
     Sorted so that two runs yield the same file: the order the file system
-    reads in is not a promise. */
+    reads in is not a promise. With `/`, as the compiler names files, so the
+    order is the same on Windows as well. */
 export function sourceFiles(root: string): string[] {
   const found: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
     if (entry.isDirectory()) found.push(...sourceFiles(path));
-    else if (/\.tsx?$/.test(entry.name)) found.push(path);
+    else if (/\.tsx?$/.test(entry.name)) found.push(path.replaceAll("\\", "/"));
   }
   return found.sort();
 }
@@ -181,7 +185,7 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
        comments in a hundred and fifty runs is not a workflow. */
     if (gaps.length > 0) {
       const lines = gaps.map(
-        (l) => `  ${relative(packageName, l.file)}:${l.line}  ${l.type}.${l.prop}`,
+        (l) => `  ${slashed(relative(packageName, l.file))}:${l.line}  ${l.type}.${l.prop}`,
       );
       process.stderr.write(
         `${gaps.length} prop${gaps.length === 1 ? "" : "s"} without JSDoc:\n${lines.join("\n")}\n` +
@@ -189,17 +193,17 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
       );
     }
     if (bareExports.length > 0) {
-      const lines = bareExports.map((e) => `  ${relative(packageName, e.file)}:${e.line}  ${e.name}`);
+      const lines = bareExports.map((e) => `  ${slashed(relative(packageName, e.file))}:${e.line}  ${e.name}`);
       process.stderr.write(
         `${bareExports.length} export${bareExports.length === 1 ? "" : "s"} without JSDoc:\n${lines.join("\n")}\n` +
           `\nEvery export of the entry and its subpaths says what it is for.\n`,
       );
     }
     const flagLines = (kind: Flag["kind"]) =>
-      flags.filter((f) => f.kind === kind).map((f) => `  ${relative(packageName, f.file)}:${f.line}  ${f.type}.${f.prop}: ${f.found.join(", ")}`);
+      flags.filter((f) => f.kind === kind).map((f) => `  ${slashed(relative(packageName, f.file))}:${f.line}  ${f.type}.${f.prop}: ${f.found.join(", ")}`);
     const references = [
       ...flagLines("reference"),
-      ...pageFlags.map((f) => `  ${relative(packageName, outlineFile)}:${f.line}  ${f.where}: ${f.found.join(", ")}`),
+      ...pageFlags.map((f) => `  ${slashed(relative(packageName, outlineFile))}:${f.line}  ${f.where}: ${f.found.join(", ")}`),
     ];
     if (references.length > 0) {
       process.stderr.write(
@@ -221,7 +225,7 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
           `\nEvery name a reader sees can be imported: export the type from the entry or a subpath.\n`,
       );
     }
-    const list = relative(packageName, notYetFile);
+    const list = slashed(relative(packageName, notYetFile));
     const entries = (n: number) => `${n} entr${n === 1 ? "y" : "ies"} of ${list}`;
     if (unshown.length > 0) {
       process.stderr.write(

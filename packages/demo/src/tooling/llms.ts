@@ -778,7 +778,8 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   writeFileSync(fullPath, packaged, "utf8");
   /* Anew every time: a page that is gone must not leave its twin behind. */
   const twinsDir = join(dirname(indexPath), "twins");
-  rmSync(twinsDir, { recursive: true, force: true });
+  /* Retries: on Windows a virus scanner holds fresh files for a moment. */
+  rmSync(twinsDir, { recursive: true, force: true, maxRetries: 5 });
   mkdirSync(twinsDir);
   for (const twin of twins) writeFileSync(join(twinsDir, twin.path), twin.text, "utf8");
   if (job.references !== undefined) writeFileSync(join(dirname(indexPath), "references.json"), `${JSON.stringify(job.references, null, 2)}\n`, "utf8");

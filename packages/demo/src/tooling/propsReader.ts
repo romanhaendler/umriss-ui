@@ -186,8 +186,9 @@ export function readProps(
     noEmit: true,
   });
   const checker = program.getTypeChecker();
-  /* The package read; a neighbour's source stands in the program as well. */
-  const own = new Set(files);
+  /* The package read; a neighbour's source stands in the program as well.
+     With `/` as the compiler writes `fileName`, also on Windows. */
+  const own = new Set(files.map((file) => file.replaceAll("\\", "/")));
 
   /* What the entries export, re-exports followed to their declaration. */
   const importable = new Set<ts.Declaration>();

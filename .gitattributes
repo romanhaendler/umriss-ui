@@ -1,0 +1,2 @@
+# Every checkout writes LF, also on Windows: the tooling splits lines on "\n".
+* text=auto eol=lf

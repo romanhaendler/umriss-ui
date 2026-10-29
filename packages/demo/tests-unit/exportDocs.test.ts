@@ -4,11 +4,11 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { dirname, join } from "node:path/posix";
 import { undocumentedExports } from "../src/tooling/exportDocs";
 import { generateProps } from "../src/tooling/props";
 
-const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "exports");
+const FIXTURES = join(dirname(fileURLToPath(import.meta.url).replaceAll("\\", "/")), "fixtures", "exports");
 const BARE = join(FIXTURES, "bare");
 const DOCUMENTED = join(FIXTURES, "documented");
 
