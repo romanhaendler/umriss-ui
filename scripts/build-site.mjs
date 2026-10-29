@@ -59,6 +59,7 @@ import { dependencyLine, installCommand } from "../packages/demo/src/tooling/ins
 import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, hostedFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
+import { packSearch } from "../packages/demo/src/search.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
 import { escapeAttribute as escape } from "../packages/demo/src/tooling/escape.ts";
 
@@ -316,7 +317,8 @@ ${urls.map((url) => `  <url><loc>${escape(url)}</loc><lastmod>${today}</lastmod>
 /* The palette's index of the whole site: each demo searches its own fragment
    at once and fetches this for the other four on its first opening. */
 const search = siteSearch(PACKAGES.map((dir) => readFileSync(join(SITE, dir, "search.json"), "utf8")));
-writeFileSync(join(SITE, "search.json"), search);
+const shipped = JSON.stringify(packSearch(JSON.parse(search)));
+writeFileSync(join(SITE, "search.json"), shipped);
 
 /* An address that is no page. `pnpm start` serves this file for it; there is
    no fallback to a demo's index.html as in the dev server. */
@@ -449,7 +451,7 @@ const faults = [
     ]);
   }),
   ...typeLinkFaults(files),
-  ...searchFaults(search, HOME, urls, files),
+  ...searchFaults(search, HOME, urls, files, shipped),
   /* Every export has a place on the site (ADR-0044): each name a package's
      entries export has an element with its anchor on its API index. */
   ...rows.flatMap((row) => {

@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Demo } from "./demo";
 import { BASE } from "./href";
-import { searchEntries, type SearchEntry, type SearchKind } from "./search";
+import { searchEntries, unpackSearch, type PackedSearch, type SearchEntry, type SearchKind } from "./search";
 
 /* The palette's candidates are the search entries (`search.ts`) translated
    into the palette's language (CONTEXT.md, "Finding"): the id IS the entry's
@@ -50,7 +50,7 @@ export function usePaletteSearch(demo: Demo, paletteOpen: boolean, site: string)
   useEffect(() => {
     if (!paletteOpen || elsewhere !== null || site === BASE) return;
     fetch(`${site}search.json`)
-      .then((response) => (response.ok ? (response.json() as Promise<SearchEntry[]>) : []))
+      .then((response) => (response.ok ? (response.json() as Promise<PackedSearch>).then(unpackSearch) : []))
       .then((entries) => setElsewhere(entries.filter((entry) => !entry.address.startsWith(`/${ownId}/`))))
       .catch(() => setElsewhere([]));
   }, [paletteOpen, elsewhere, ownId, site]);

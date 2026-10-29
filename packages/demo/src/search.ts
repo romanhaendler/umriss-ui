@@ -41,11 +41,23 @@ export function plain(text: string): string {
   return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
 }
 
-/** An example's lead up to its first full stop: the rest explains what the
-    page's prose says again, and the index is fetched whole on the first
-    opening. */
-export function firstSentence(text: string): string {
-  return text.replace(/(?<=[a-z0-9)`"]\.) [A-Z`].*$/s, "");
+/** The index the site ships (`search.json` at its root), written small: the
+    distinct groups once, and each entry as an array - address, label, the
+    group's place in the list, kind, then its keywords. The key names and the
+    repeated group would otherwise be a third of the file. */
+export interface PackedSearch {
+  groups: string[];
+  entries: [address: string, label: string, group: number, kind: SearchKind, ...keywords: string[]][];
+}
+
+export function packSearch(entries: readonly SearchEntry[]): PackedSearch {
+  const groups = [...new Set(entries.map((entry) => entry.group))];
+  return { groups, entries: entries.map((entry) => [entry.address, entry.label, groups.indexOf(entry.group), entry.kind, ...(entry.keywords ?? [])]) };
+}
+
+/** The entries `packSearch` wrote: the one place that reads the shipped form. */
+export function unpackSearch({ groups, entries }: PackedSearch): SearchEntry[] {
+  return entries.map(([address, label, group, kind, ...keywords]) => ({ address, label, group: groups[group]!, kind, ...(keywords.length === 0 ? {} : { keywords }) }));
 }
 
 /** A wording row's texts once each: a German text that is the English one
@@ -109,7 +121,7 @@ export function searchEntries(
       label: example.title,
       group: `${packageId} · ${pages.find(({ page }) => page.id === example.pageId)?.page.name ?? example.pageId}`,
       kind: "example",
-      ...(example.lead === undefined ? {} : { keywords: [firstSentence(plain(example.lead))] }),
+      ...(example.lead === undefined ? {} : { keywords: [plain(example.lead)] }),
     })),
   ];
 }
