@@ -27,6 +27,13 @@ test("a header label that fits its column is not cut", { tag: "@quick" }, async 
   expect(scroll).toBeLessThanOrEqual(client);
 });
 
+test("every sortable header label in the example is shown whole", { tag: "@quick" }, async ({ page }) => {
+  for (const name of ["Project", "Phase", "Owner", "Budget (days)"]) {
+    const { scroll, client } = await measure(page, name);
+    expect(scroll, name).toBeLessThanOrEqual(client);
+  }
+});
+
 test("a column narrower than its label ends in an ellipsis and keeps its name", { tag: "@quick" }, async ({ page }) => {
   /* The table holds a column's width from its head and from its values' size
      variable: the whole column is set. */
