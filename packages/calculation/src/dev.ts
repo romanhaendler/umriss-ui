@@ -4,6 +4,8 @@
    appears once per reason - a calculation renders often, and nobody reads a console
    full of repetitions. */
 
+import { warnOnce as warnOnceFor } from "@umriss-ui/core";
+
 declare const process: { env: Record<string, string | undefined> };
 
 function detectDev(): boolean {
@@ -16,10 +18,6 @@ function detectDev(): boolean {
 
 export const DEV: boolean = detectDev();
 
-const warned = new Set<string>();
+const PACKAGE = "@umriss-ui/calculation";
 
-export function warnOnce(reason: string, message: string): void {
-  if (!DEV || warned.has(reason)) return;
-  warned.add(reason);
-  console.warn(`@umriss-ui/calculation: ${message}`);
-}
+export const warnOnce = (reason: string, message: string): void => warnOnceFor(PACKAGE, reason, message);
