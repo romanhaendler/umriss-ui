@@ -476,6 +476,8 @@ export interface Wording {
   removeFile: (name: string) => string;
   /** A dropped file the input's `accept` does not take. */
   fileNotAccepted: (name: string) => string;
+  /** A NumberInput refusing a character it cannot read. */
+  numberRefused: string;
   show: string;
   hide: string;
   moreActions: string;
@@ -1024,6 +1026,7 @@ export const DEFAULT_WORDING: Wording = {
   dropFiles: "or drop them here",
   removeFile: (name) => `Remove ${name}`,
   fileNotAccepted: (name) => `${name} is not an accepted type`,
+  numberRefused: "Only digits and the decimal separator",
   show: "Show",
   hide: "Hide",
   moreActions: "More actions",
