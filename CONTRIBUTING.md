@@ -42,6 +42,7 @@ which `pnpm test:visual:update` creates and which are then checked in.
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
   4176 schedule, 4177 calculation, 4178 dashboard, 4179 alarms)
 * `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard`, `pnpm dev:alarms` – the demos in the dev server
+* `pnpm screenshot <package> <page> <example> [--click "<button>"] [--width 1280] [--dark] [--touch] [--out file.png]` – a PNG of one demo example from a dev server on a free port, with the page's console errors printed; `--click` presses a button of the example first and shoots the whole window, `--touch` opens the page with `touch-scale.css` on
 * `pnpm test:visual:update` – create or update baselines
 * `pnpm lint` – among other things the rule "@umriss-ui/charts is standalone: no
   import from @umriss-ui/core (R-1.2)", and the directions of ADR-0016 and
