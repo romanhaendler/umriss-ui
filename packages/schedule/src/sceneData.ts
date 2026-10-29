@@ -61,6 +61,8 @@ export class SceneData {
   depth = new Map<string, number>();
   inBlocked: InBlockedTime[] = [];
 
+  private unchecked = false;
+
   /** `changed` is called after every registration change. */
   constructor(private readonly changed: () => void) {}
 
@@ -154,16 +156,19 @@ export class SceneData {
     this.violatedById = new Map(violatedDependencies(this.subtasks, this.dependencies).map((l) => [l.dependency, l] as const));
     this.depth = overlapDepth(this.subtasks);
     this.inBlocked = inBlockedTime(this.subtasks, this.blocked);
-    this.warnOfMalformedData();
+    this.unchecked = true;
     return true;
   }
 
   /** Says in development what the data gets wrong and is drawn, dropped or
-      counted regardless. It runs here, once the parts have registered, so a
-      lane declared after its subtasks is not missing; with no lane declared
-      the lanes are still on their way, and an empty `tasks` is a plan drawn
-      muted on purpose. */
-  private warnOfMalformedData(): void {
+      counted regardless. The Schedule calls it from an effect of its own,
+      which runs after the effects of every part in the same commit: a lane
+      or a subtask layer registered after the layer that names it is not
+      missing. With no lane declared the lanes are still on their way, and an
+      empty `tasks` is a plan drawn muted on purpose. */
+  warnOfMalformedData(): void {
+    if (!this.unchecked) return;
+    this.unchecked = false;
     if (!DEV) return;
     const twice = (kind: string, ids: readonly string[]) => {
       const seen = new Set<string>();
@@ -190,12 +195,9 @@ export class SceneData {
         if (!known.has(s.task))
           warnOnce(`task:${s.id}`, `subtask "${s.id}" names the task "${s.task}", which is not among the tasks of its Subtasks layer; it is drawn muted. Add the task, or correct the subtask's task.`);
     }
-    /* Dependencies may register before the Subtasks they join; with no subtask
-       yet the layers are still on their way. */
-    if (this.subtasks.length > 0)
-      for (const d of this.dependencies)
-        for (const end of [d.from, d.to])
-          if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
+    for (const d of this.dependencies)
+      for (const end of [d.from, d.to])
+        if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
     if (this.lanes.length === 0) return;
     const declared = new Set(this.lanes.map((l) => l.id));
     const onLane = (kind: string, items: readonly { id: string; lane: string }[]) => {
