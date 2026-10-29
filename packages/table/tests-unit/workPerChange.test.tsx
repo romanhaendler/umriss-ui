@@ -21,7 +21,30 @@ function Rows({ onSelectionChange, label = "Name" }: { onSelectionChange: (keys:
 
 afterEach(() => vi.restoreAllMocks());
 
+function Loading({ rows }: { rows: typeof ROWS }) {
+  const { Table, Column } = useTable(rows, { rowKey: (r) => r.id });
+  return (
+    <Table aria-label="Loading">
+      <Column value="id" label="Id" />
+      <Column value="name" label="Name" flex={1} />
+    </Table>
+  );
+}
+
 describe("work per change", () => {
+  it("refits the flex heads when rows arrive after mount", () => {
+    const empty: typeof ROWS = [];
+    const loaded = ROWS.slice(0, 5);
+    const measure = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect");
+    const flexCalls = () => measure.mock.contexts.filter((c) => (c as HTMLElement).tagName === "TH" && (c as HTMLElement).dataset.flex).length;
+    const { rerender } = render(<Loading rows={empty} />);
+    const first = flexCalls();
+    rerender(<Loading rows={empty} />);
+    expect(flexCalls()).toBe(first);
+    rerender(<Loading rows={loaded} />);
+    expect(flexCalls()).toBeGreaterThan(first);
+  });
+
   it("re-renders a large selection without a call or a serialisation", () => {
     const fn = vi.fn();
     const { rerender } = render(<Rows onSelectionChange={fn} />);
