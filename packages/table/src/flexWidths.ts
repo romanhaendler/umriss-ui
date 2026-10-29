@@ -3,7 +3,7 @@
    measured and written as the head's pixel width (a percentage or a calc()
    gives the fixed columns no room in the automatic layout). */
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import styles from "./Table.module.css";
 
@@ -43,12 +43,27 @@ function fitFlexHeads(table: HTMLTableElement) {
   heads.forEach((th, i) => (th.style.width = `${widths[i]}px`));
 }
 
-/** Keeps the flex heads at their share: after every render and when the
-    scroll area changes its width. */
+/** What the flex shares depend on, read from the heads' attributes (no
+    layout): which columns, in which order, their declared or stored widths,
+    the pins and the minimums. The widths `fitFlexHeads` writes are left out. */
+function flexInputs(table: HTMLTableElement): string {
+  return Array.from(table.tHead?.querySelectorAll<HTMLElement>("th[data-column]") ?? [])
+    .map((th) => `${th.dataset.column}|${th.dataset.flex ?? ""}|${th.className}|${th.dataset.flex ? th.style.minWidth : th.style.cssText}`)
+    .join("\n");
+}
+
+/** Keeps the flex heads at their share: when the columns, their widths, order
+    or pins change, and when the scroll area changes its width - not after a
+    render that changed none of them. */
 export function useFlexWidths(tableRef: RefObject<HTMLTableElement | null>) {
+  const fitted = useRef<string | null>(null);
   useLayoutEffect(() => {
     const table = tableRef.current;
-    if (table) fitFlexHeads(table);
+    if (!table) return;
+    const inputs = flexInputs(table);
+    if (inputs === fitted.current) return;
+    fitted.current = inputs;
+    fitFlexHeads(table);
   });
   useLayoutEffect(() => {
     const table = tableRef.current;
