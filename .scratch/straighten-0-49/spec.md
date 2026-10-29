@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Date:   2026-10-29
 
 # What 0.49.0 left crooked is straightened
@@ -314,3 +314,16 @@ children mounting on open is `Changed` with `Migration:`.
 - The worker brief used in 0.49.0 (`$CLAUDE_JOB_DIR/tmp/brief.md` of that job) gains the port base and the
   screenshot command once they exist; the coordinator's lesson "look before merging UI" stands in the
   maintainer's memory.
+
+## Comments
+
+2026-10-29 (coordinator) - delivered in 0.50.0. The sixteen tickets were implemented on parallel agents, each in its own checkout and on its own browser ports, then merged, code-reviewed on both axes, and run through the full browser suite: 4,410 passed, and the six failures were the three new examples' missing baselines, which were reviewed by eye and then written.
+
+Where the delivery departs from the decisions above:
+- Charts headroom: does not reproduce. Charts has no horizontal bar kind yet, and the rule should travel with that kind when it comes.
+- Lowered light-dark() warning: the probe design was shown in Chromium to warn falsely. A lowered token is substituted on the root, so a light-forcing child sees the same value: a lowered build with a CSS dark mode, and an unlowered one with a plain theme, both warned. The warning now decides from the build (a readable rule carrying `var(--lightningcss-light`) and from Lightning's dark switch on the root, and no token colour stands in the code (ADR-0021 amendment).
+- Search index: no keyword equalled a title or heading. The shipped index is written compact instead - each entry an array, each group once - and went from 501 to 351 kB with every lead whole.
+- Flex widths: they refit when the rows change as well, so rows that arrive after mount are measured. A scroll of a virtual window measures nothing.
+- CommandPalette: unchanged. It takes no children from a host, resets its own query on opening and focuses its own field.
+- One warn-once helper: alarms and dashboard had no copy of their own.
+- The alarms "Shift+A on a scrolled list" browser test had a race of its own, present at 0.49.0 too: it focused a row and then scrolled it out of the virtual window. It now focuses a row in view.

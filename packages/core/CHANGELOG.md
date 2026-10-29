@@ -27,6 +27,23 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
+
+### Changed
+
+- **A Modal, Drawer and ConfirmDialog mount their children when they open** and unmount them once the exit has ended, so a field with `autoFocus` gets the cursor in every React version - without a read of React's internals (ADR-0063 amended). A dialog without `autoFocus` focuses its first tab stop, and focus returns to the trigger, as before.
+  - Migration: state inside a closed dialog's children no longer survives closing - a form starts afresh on the next opening; keep what must survive in the host, as the dialog's `open` already is.
+
+### Added
+
+- **A NumberInput says why it refused a character**: it announces once, politely, "Only digits and the decimal separator" (wording `numberRefused`, English and German) and shows its invalid look for a moment; text and value stay as they were.
+- **`warnOnce(pkg, reason, message)` and `hasWarned(pkg, reason)`**: the development warning the packages on core share - once per package and reason, silent in production, the package named in the prefix.
+- **The Language page shows a third language**: `formatsFor("fr-CH")` with a Sunday-first week beside the default.
+
+### Fixed
+
+- **The development warning about a lowered `light-dark()`** fires only for a lowered build whose page is dark from JavaScript - once, also when dark is switched on after mount; a CSS-set dark mode, an unlowered build and a themed background raise nothing (ADR-0021 amended).
+
 ## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
 
 ### Changed

@@ -30,6 +30,10 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
+
+No change of its own; the number moves with the other packages (ADR-0066).
+
 ## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
 
 ### Added
