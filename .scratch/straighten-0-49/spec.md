@@ -309,9 +309,8 @@ children mounting on open is `Changed` with `Migration:`.
 - Source of each item: the 0.49.0 run's code review (standards and spec axes), the coordinator's screenshot
   review of every moved baseline, the browser runs, and the open points in the release report.
 - The Modal decision is the only one that moves behaviour for hosts; everything else is internal, a fix of
-  a 0.49.0 edge, or tooling. If the maintainer prefers to keep children mounted while closed, the fallback
-  is a documented `data-autofocus` attribute the choreography honours - stated here so the choice is
-  explicit, not because it is recommended.
+  a 0.49.0 edge, or tooling. Confirmed by the maintainer (2026-10-29): the children mount on opening; a host
+  that wants state to survive closing keeps it itself. The seams above are confirmed as well.
 - The worker brief used in 0.49.0 (`$CLAUDE_JOB_DIR/tmp/brief.md` of that job) gains the port base and the
   screenshot command once they exist; the coordinator's lesson "look before merging UI" stands in the
   maintainer's memory.
