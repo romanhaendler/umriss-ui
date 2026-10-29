@@ -41,6 +41,19 @@ export function plain(text: string): string {
   return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
 }
 
+/** An example's lead up to its first full stop: the rest explains what the
+    page's prose says again, and the index is fetched whole on the first
+    opening. */
+export function firstSentence(text: string): string {
+  return text.replace(/(?<=[a-z0-9)`"]\.) [A-Z`].*$/s, "");
+}
+
+/** A wording row's texts once each: a German text that is the English one
+    (`Esc`, `Minute`) finds nothing more. */
+export function wordingKeywords(texts: readonly string[]): string[] {
+  return [...new Set(texts)];
+}
+
 /** A page's props tables, as far as the search reads them: each table's
     type, and each row's name and the type it is inherited from. */
 export interface PropsOfPage {
@@ -96,7 +109,7 @@ export function searchEntries(
       label: example.title,
       group: `${packageId} · ${pages.find(({ page }) => page.id === example.pageId)?.page.name ?? example.pageId}`,
       kind: "example",
-      ...(example.lead === undefined ? {} : { keywords: [plain(example.lead)] }),
+      ...(example.lead === undefined ? {} : { keywords: [firstSentence(plain(example.lead))] }),
     })),
   ];
 }
@@ -120,7 +133,7 @@ export function referenceEntries(packageId: string, outline: readonly Rubric[], 
               label: words(row.cells[0]),
               group: `${packageId} · ${page.name}`,
               kind: wording ? "wording" : "token",
-              ...(wording ? { keywords: texts.map((at) => words(row.cells[at])) } : {}),
+              ...(wording ? { keywords: wordingKeywords(texts.map((at) => words(row.cells[at]))) } : {}),
             }),
           ),
         );
