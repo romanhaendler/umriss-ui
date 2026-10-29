@@ -18,7 +18,12 @@ const { port, pathname } = new URL(SITE);
 /* Listening comes first: a taken port fails at once, not after the build. */
 const server = siteServer(join(ROOT, "site"), pathname);
 server.on("error", (error) => {
-  console.error(error.code === "EADDRINUSE" ? `Port ${port} is taken. Stop what is using it - another \`pnpm start\`, perhaps - and run this again.` : error);
+  const why = {
+    EADDRINUSE: `Port ${port} is taken. Stop what is using it - another \`pnpm start\`, perhaps - and run this again.`,
+    /* Windows reserves port ranges for Hyper-V and WSL. */
+    EACCES: `Port ${port} may not be used here. On Windows it may lie in a reserved range: netsh int ipv4 show excludedportrange protocol=tcp`,
+  }[error.code];
+  console.error(why ?? error);
   process.exit(1);
 });
 await new Promise((listening) => server.listen(Number(port), "127.0.0.1", listening));

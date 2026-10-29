@@ -132,7 +132,8 @@ function pageDocument(template, page, extraHead = "") {
     .replace(root, () => `<div id="root"><div class="prerendered">${page.html}</div></div>`);
 }
 
-rmSync(SITE, { recursive: true, force: true });
+/* Retries: on Windows a virus scanner or an open Explorer window holds fresh files for a moment. */
+rmSync(SITE, { recursive: true, force: true, maxRetries: 5 });
 mkdirSync(SITE, { recursive: true });
 cpSync(join(ROOT, "packages", "demo", "src", FAVICON), join(SITE, FAVICON));
 

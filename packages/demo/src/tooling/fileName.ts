@@ -30,7 +30,8 @@ export interface FileName {
 /** Splits a path, or throws - an example that is not named like one should
     be noticed at load time rather than appear as "undefined". */
 export function parseFileName(path: string): FileName {
-  const match = EXAMPLE_PATTERN.exec(path);
+  /* A file-system path on Windows has `\`; the patterns read `/`. */
+  const match = EXAMPLE_PATTERN.exec(path.replaceAll("\\", "/"));
   if (match === null) {
     throw new Error(
       `\`${path}\` is not named like an example. Expected: examples/<Component>/NN-<anchor>.tsx`,
@@ -46,7 +47,7 @@ export function parseFileName(path: string): FileName {
 
 /** A scenario's number and anchor, or throws. */
 export function parseScenarioName(path: string): { rank: number; id: string } {
-  const match = SCENARIO_PATTERN.exec(path);
+  const match = SCENARIO_PATTERN.exec(path.replaceAll("\\", "/"));
   if (match === null) {
     throw new Error(`\`${path}\` is not named like a scenario. Expected: scenarios/NN-<anchor>.tsx`);
   }

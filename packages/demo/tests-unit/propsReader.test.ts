@@ -7,11 +7,11 @@
 
 import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { dirname, join } from "node:path/posix";
 import { readProps } from "../src/tooling/propsReader";
 import { internalReferences } from "../src/tooling/references";
 
-const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "props");
+const FIXTURES = join(dirname(fileURLToPath(import.meta.url).replaceAll("\\", "/")), "fixtures", "props");
 const GOOD = join(FIXTURES, "good.tsx");
 const GAP = join(FIXTURES, "gap.tsx");
 const SHAPES = join(FIXTURES, "shapes.tsx");

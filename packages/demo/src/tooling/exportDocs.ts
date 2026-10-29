@@ -64,7 +64,7 @@ export function undocumentedExports(packageDir: string): UndocumentedExport[] {
       const declarations = target.declarations ?? [];
       if (declarations.some((one) => ts.getJSDocCommentsAndTags(one).some((doc) => ts.isJSDoc(doc)))) return [];
       const first = declarations[0];
-      if (first === undefined) return [{ name: exported.name, file: entry, line: 1 }];
+      if (first === undefined) return [{ name: exported.name, file: entry.replaceAll("\\", "/"), line: 1 }];
       const file = first.getSourceFile();
       return [{ name: exported.name, file: file.fileName, line: file.getLineAndCharacterOfPosition(first.getStart()).line + 1 }];
     });
