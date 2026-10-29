@@ -12,6 +12,10 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
+
+No change a caller sees; the number moves with the other packages (ADR-0066). The list's state and duration cells are styled apart, so a change to one can no longer move the other.
+
 ## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
 
 ### Changed

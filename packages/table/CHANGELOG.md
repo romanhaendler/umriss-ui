@@ -26,6 +26,19 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
+
+### Changed
+
+- **A search or a column condition that narrows a virtual table scrolls it back to its top**, so the first matches are in view; a row set that shrinks for another reason (a live feed) keeps its clamped position.
+  - Migration: nothing to change; a narrowed table opens at its top.
+
+### Fixed
+
+- **A header with a width shows its label whole when it fits**, such as "Budget (days)" at 130 px; a column narrower than its label still ends in an ellipsis with the full name.
+- **Flex columns are fitted per change, not per render**: when the columns, their widths, order or pins, the rows or the scroll area's width change; a scroll frame of a virtual table measures nothing.
+- **`onSelectionChange` no longer serialises the selection on every render**: a change is detected from the selection's identity, so an unchanged 50,000-key selection costs nothing.
+
 ## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
 
 ### Changed

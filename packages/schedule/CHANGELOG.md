@@ -18,6 +18,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
+
+### Fixed
+
+- **No false "dependency is left out" warning** for a plan with a `Dependencies` layer between two `Subtasks` layers: the dependency and lane checks run once every layer has registered; a dependency naming a subtask no layer has still warns once.
+
 ## 0.49.0 – The second shakedown: lists that shrink, a flood that scrolls, five things the table lacked (Oct. 2026)
 
 ### Added
