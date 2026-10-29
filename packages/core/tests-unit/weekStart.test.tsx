@@ -3,7 +3,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { DatePicker } from "../src/components/DatePicker";
+import { DatePicker, DateRangePicker, DateTimePicker } from "../src/components/DatePicker";
 import { monthGrid, startOfWeek } from "../src/components/DatePicker/grid";
 import { DEFAULT_FORMATS, LanguageProvider, formatsFor } from "../src/lib/language";
 import { GERMAN_FORMATS } from "../src/lib/language/de";
@@ -59,6 +59,34 @@ describe("the calendar by weekStart", () => {
     const col = cells.findIndex((c) => c.getAttribute("aria-label")?.includes("17 March 2026")) % 7;
     expect(heads[col]).toBe("Tue");
     expect(heads[0]).toBe("Sun");
+  });
+
+  it("sends Home and End to Sunday and Saturday", () => {
+    open();
+    const active = () => document.querySelector<HTMLElement>('[data-active="true"]')!;
+    fireEvent.keyDown(active(), { key: "Home" });
+    expect(active().getAttribute("aria-label")).toContain("15 March");
+    fireEvent.keyDown(active(), { key: "End" });
+    expect(active().getAttribute("aria-label")).toContain("21 March");
+  });
+});
+
+describe.each([
+  ["DateRangePicker", () => <DateRangePicker value={{ from: new Date(2026, 2, 17), to: new Date(2026, 2, 17) }} onChange={vi.fn()} />],
+  ["DateTimePicker", () => <DateTimePicker value={new Date(2026, 2, 17, 9, 30)} onChange={vi.fn()} />],
+])("the %s calendar by weekStart", (_name, picker) => {
+  const open = () => {
+    render(<LanguageProvider formats={{ weekStart: 7 }}>{picker()}</LanguageProvider>);
+    fireEvent.click(screen.getAllByRole("button")[0]!);
+  };
+
+  it("puts Sunday first and 17 March under Tuesday", () => {
+    open();
+    const heads = [...document.querySelectorAll<HTMLElement>('[class*="weekdays"] span')].map((s) => s.textContent);
+    const cells = [...document.querySelectorAll<HTMLElement>('[class*="grid"] button')];
+    const col = cells.findIndex((c) => c.getAttribute("aria-label")?.includes("17 March 2026")) % 7;
+    expect(heads[0]).toBe("Sun");
+    expect(heads[col]).toBe("Tue");
   });
 
   it("sends Home and End to Sunday and Saturday", () => {
