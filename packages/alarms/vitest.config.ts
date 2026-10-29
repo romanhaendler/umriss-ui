@@ -39,6 +39,6 @@ export default defineConfig({
     /* The flood example renders a thousand rows without virtualising them, on
        purpose; in jsdom that takes about two seconds alone and more than
        vitest's five while every package's suite runs at once. */
-    testTimeout: 20_000,
+    testTimeout: 30_000,
   },
 });
