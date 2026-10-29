@@ -91,7 +91,7 @@ export function Frame({
   useStickyHeaderHeights(tableRef, stickyHeader);
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
-  useFlexWidths(tableRef);
+  useFlexWidths(tableRef, registry.hook?.tableState.filtered);
   useCutValueWarnings(tableRef);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
