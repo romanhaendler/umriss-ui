@@ -63,7 +63,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:demo": "pnpm run props && tsc --noEmit -p tsconfig.demo.json",
     "check:site": "pnpm run props -- --check && node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/checkReadmeLinks.ts",
-    "preview:demo": "vite preview --config vite.demo.config.ts --port 4179 --strictPort",
+    "preview:demo": "node ../../scripts/preview.mjs alarms",
     "test:unit": "vitest run",
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts alarms.js alarms.css"
