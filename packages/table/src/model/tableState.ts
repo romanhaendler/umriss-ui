@@ -9,7 +9,7 @@
    call is a new one on every render, and a reset during the render would loop endlessly. Whoever changes the filter because the user chose
    something resets the page there; otherwise the model clamps it. */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { filterSort, groupStage, pageStage, tableModel } from "./tableModel";
@@ -154,7 +154,7 @@ export function useTableState<Z, K extends string = string>(
   };
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => sortOf(initialView));
-  const [page, setPage] = useState(initialView?.page ?? 1);
+  const [page, setPageRaw] = useState(initialView?.page ?? 1);
   const [pageSize, setPageSizeRaw] = useState(
     initialView?.pageSize ?? options.pageSize ?? 10,
   );
@@ -166,7 +166,7 @@ export function useTableState<Z, K extends string = string>(
   const restart = (view: TableView<K>) => {
     setSearchRaw(view.search ?? "");
     setSort(sortOf(view));
-    setPage(view.page ?? 1);
+    setPageRaw(view.page ?? 1);
     setPageSizeRaw(view.pageSize ?? options.pageSize ?? 10);
     setHidden(view.hidden ?? []);
     setOrder(view.order ?? []);
@@ -232,14 +232,28 @@ export function useTableState<Z, K extends string = string>(
   const keyList = useMemo(() => projection.filtered.map(rowKey), [projection.filtered, rowKey]);
   const selection = useTableSelection(keyList);
 
+  /* A search or a column condition (both come through here) starts a virtual
+     table at its top; any other shrinking keeps the position the browser clamps to. */
+  const [tops, setTops] = useState(0);
+  const scrollArea = rowWindow.scrollRef;
+  useLayoutEffect(() => {
+    const area = scrollArea.current;
+    if (tops > 0) area?.scrollTo({ top: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per request, not per render of the window
+  }, [tops]);
+  const setPage = useCallback((next: number) => {
+    setPageRaw(next);
+    if (next === 1) setTops((n) => n + 1);
+  }, []);
+
   const setSearch = useCallback((value: string) => {
     setSearchRaw(value);
     setPage(1);
-  }, []);
+  }, [setPage]);
 
   const setPageSize = useCallback((size: number) => {
     setPageSizeRaw(size);
-    setPage(1);
+    setPageRaw(1);
   }, []);
 
   const toggleSort = useCallback((column: K, additive = false) => {
@@ -265,7 +279,7 @@ export function useTableState<Z, K extends string = string>(
       }
       return current.filter((level) => level.column !== column);
     });
-    setPage(1);
+    setPageRaw(1);
   }, []);
 
   /* Expanded rows survive a change of filter.
