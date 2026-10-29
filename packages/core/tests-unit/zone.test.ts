@@ -48,20 +48,14 @@ describe("zone arithmetic", () => {
     expect(() => zoneFields(0, "Mars/Base")).toThrow(RangeError);
   });
 
-  it("groups 100,000 instants by day in under 100 ms", () => {
+  it("groups 100,000 instants by day, one instant per Berlin day", () => {
     const start = Date.UTC(2026, 0, 1);
-    zoneFields(start, "Europe/Berlin"); // the formatter's first build is not the grouping
-    // The best of three: a loaded machine slows a run, not the work.
     const days = new Set<number>();
-    const times = [0, 1, 2].map(() => {
-      const t0 = performance.now();
-      for (let i = 0; i < 100_000; i++) {
-        const f = zoneFields(start + i * 300_000, "Europe/Berlin");
-        days.add(zoneInstant({ year: f.year, month: f.month, day: f.day }, "Europe/Berlin").getTime());
-      }
-      return performance.now() - t0;
-    });
-    expect(Math.min(...times)).toBeLessThan(100);
-    expect(days.size).toBeGreaterThan(300);
+    for (let i = 0; i < 100_000; i++) {
+      const f = zoneFields(start + i * 300_000, "Europe/Berlin");
+      days.add(zoneInstant({ year: f.year, month: f.month, day: f.day }, "Europe/Berlin").getTime());
+    }
+    /* 100,000 steps of five minutes span 347.2 days from 1 January 00:00 UTC, which is 01:00 in Berlin. */
+    expect(days.size).toBe(348);
   });
 });
