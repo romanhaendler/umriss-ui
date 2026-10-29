@@ -7,6 +7,7 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { parseArgs } from "node:util";
 import { chromium } from "@playwright/test";
+import { pnpm } from "./pnpm.mjs";
 import { PACKAGES } from "./ports.ts";
 
 const { positionals, values } = parseArgs({
@@ -26,7 +27,7 @@ const port = await new Promise((resolve) => {
     probe.close(() => resolve(port));
   });
 });
-const dev = spawn("pnpm", ["--filter", `@umriss-ui/${pkg}`, "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"], { stdio: "ignore", detached: true });
+const dev = spawn(...pnpm(["--filter", `@umriss-ui/${pkg}`, "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"]), { stdio: "ignore", detached: true });
 let browser;
 try {
   for (let tries = 0; ; tries += 1) {

@@ -62,6 +62,7 @@ import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/t
 import { packSearch } from "../packages/demo/src/search.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
 import { escapeAttribute as escape } from "../packages/demo/src/tooling/escape.ts";
+import { pnpm } from "./pnpm.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -146,7 +147,7 @@ for (const dir of PACKAGES) {
   const packageDir = join(ROOT, "packages", dir);
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
   const base = new URL(`${dir}/`, HOME).pathname;
-  execFileSync("pnpm", ["--filter", manifest.name, "run", "build:demo", "--base", base], { cwd: ROOT, stdio: "inherit" });
+  execFileSync(...pnpm(["--filter", manifest.name, "run", "build:demo", "--base", base]), { cwd: ROOT, stdio: "inherit" });
   const out = join(SITE, dir);
   cpSync(join(packageDir, "dist-demo"), out, { recursive: true });
   cpSync(join(packageDir, "demo", ".generated", "llms.txt"), join(out, "llms.txt"));

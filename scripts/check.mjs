@@ -4,6 +4,7 @@
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { pnpm } from "./pnpm.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const all = ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms", "demo"];
@@ -27,8 +28,8 @@ const run = (label, cmd, args) => {
 run("shrink guard", "node", ["scripts/check-shrunk.mjs", ...allowed]);
 for (const name of arg ? [arg] : all) {
   const filter = ["--filter", `@umriss-ui/${name}`];
-  run(`${name}: eslint`, "pnpm", ["exec", "eslint", "--max-warnings", "0", `packages/${name}`]);
-  run(`${name}: typecheck`, "pnpm", [...filter, "typecheck"]);
-  run(`${name}: test:unit`, "pnpm", [...filter, "test:unit"]);
+  run(`${name}: eslint`, ...pnpm(["exec", "eslint", "--max-warnings", "0", `packages/${name}`]));
+  run(`${name}: typecheck`, ...pnpm([...filter, "typecheck"]));
+  run(`${name}: test:unit`, ...pnpm([...filter, "test:unit"]));
 }
 console.log("\ncheck: all passed");
