@@ -601,7 +601,7 @@ function Body({
           sortable={false}
         />
         <Column value="duration" label={wording.alarmColumnDuration} sortable={false}>
-          {(ms) => <span className={styles.state}>{durationWord(ms, wording)}</span>}
+          {(ms) => <span className={styles.duration}>{durationWord(ms, wording)}</span>}
         </Column>
         <Column value="frequency" label={wording.alarmColumnFrequency} format="count" sortable={false} />
       </Table>
