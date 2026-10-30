@@ -48,7 +48,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
 
   /* The page is cut where the table is filled, paged by the application's
      option or by this hook, and has a held height to measure against. */
-  const cut = () => {
+  const cut = (force = false) => {
     const hook = registry.hook;
     const table = tableRef.current;
     const scroll = table?.parentElement;
@@ -75,6 +75,10 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
        says nothing about the frame. */
     if (total > 0 && next >= total && now >= total) return;
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
+    /* A resize waits while focus is in the rows, so that it never pulls the row
+       from under the user; the focus leaving the rows cuts again. A density, a
+       search or a fold (`force`) applies at once. */
+    if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
     if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
   };
 
@@ -86,7 +90,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
   useLayoutEffect(() => {
     if (seen.current === key) return;
     seen.current = key;
-    cut();
+    cut(true);
   });
 
   useLayoutEffect(() => {
@@ -106,7 +110,14 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
       else timer = setTimeout(cut, SETTLE_MS);
     });
     observer.observe(scroll);
+    /* Focus leaving the rows: the activeElement is the new one a tick later. */
+    const table = tableRef.current;
+    const left = (event: FocusEvent) => {
+      if (!table?.tBodies[0]?.contains(event.relatedTarget as Node | null)) setTimeout(cut, 0);
+    };
+    table?.addEventListener("focusout", left);
     return () => {
+      table?.removeEventListener("focusout", left);
       clearTimeout(timer);
       observer.disconnect();
     };

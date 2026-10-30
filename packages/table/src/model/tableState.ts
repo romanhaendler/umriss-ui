@@ -9,11 +9,11 @@
    call is a new one on every render, and a reset during the render would loop endlessly. Whoever changes the filter because the user chose
    something resets the page there; otherwise the model clamps it. */
 
-import { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { filterSort, groupStage, pageStage, tableModel } from "./tableModel";
-import { linesOf, rowsOf } from "./grouping";
+import { linesOf, pageLines, rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
@@ -93,14 +93,19 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   /** The rows a page holds now: the fitted size when the frame cut one,
       otherwise the chosen size. */
   pageSize: number;
-  /** Sets the size the user or the application chose, and ends any fitted one;
-      `"fit"` takes the choice back, so the option or the frame decides. */
+  /** Sets the size the user or the application chose, and ends any fitted one.
+      The page follows the anchor row (focus, else the current row, else the top
+      row) and does not go back to page one. `"fit"` takes the choice back, so
+      the option or the frame decides. */
   setPageSize: (size: number | "fit") => void;
   /** The size someone chose, which the view carries; `null` while none is
       chosen. Never the fitted one. */
   chosenPageSize: number | null;
   /** The option's size, the one a table starts with. */
   defaultPageSize: number;
+  /** Who the anchor is, asked when the page size changes: the key of the row
+      with focus and the current row's key. The frame sets it. */
+  setAnchor: (read: () => { focus: string | null; current: string | null | undefined }) => void;
   /** The size the frame holds, apart from the chosen one: `null` for none. It
       keeps the page and the view as they are. */
   setFittedPageSize: (size: number | null) => void;
@@ -170,7 +175,7 @@ export function useTableState<Z, K extends string = string>(
   const [chosen, setPageSizeRaw] = useState<number | null>(initialView?.pageSize ?? null);
   const defaultPageSize = options.pageSize ?? 10;
   const pageSize = chosen ?? defaultPageSize;
-  const [fitted, setFittedPageSize] = useState<number | null>(null);
+  const [fitted, setFittedRaw] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<readonly string[]>([]);
   const [hidden, setHidden] = useState<readonly K[]>(initialView?.hidden ?? []);
   const [order, setOrder] = useState<readonly K[]>(initialView?.order ?? []);
@@ -181,7 +186,7 @@ export function useTableState<Z, K extends string = string>(
     setSort(sortOf(view));
     setPageRaw(view.page ?? 1);
     setPageSizeRaw(view.pageSize ?? null);
-    setFittedPageSize(null);
+    setFittedRaw(null);
     setHidden(view.hidden ?? []);
     setOrder(view.order ?? []);
     setWidths(widthsOf(view));
@@ -265,11 +270,44 @@ export function useTableState<Z, K extends string = string>(
     setPage(1);
   }, [setPage]);
 
+  /* The page that keeps the anchor row on a page of `size` lines: the row
+     with focus, else the current row if this page shows it, else the top row.
+     Read at the moment of the change, from the projection last rendered. */
+  const latest = useRef({ projection, chosen: pageSize });
+  useLayoutEffect(() => {
+    latest.current = { projection, chosen: pageSize };
+  });
+  const anchorKey = useRef<() => { focus: string | null; current: string | null | undefined }>(() => ({ focus: null, current: null }));
+  const pageKeeping = useCallback((size: number) => {
+    const shown = latest.current.projection;
+    const all: readonly Z[] = shown.lines ? rowsOf(shown.lines) : shown.filtered;
+    const keys = all.map(rowKey);
+    const onPage = new Set(shown.visible.map(rowKey));
+    const { focus, current } = anchorKey.current();
+    const at = [focus, current && onPage.has(current) ? current : null, shown.visible[0] ? rowKey(shown.visible[0]) : null]
+      .map((key) => (key == null ? -1 : keys.indexOf(key)))
+      .find((index) => index >= 0);
+    if (at === undefined) return 1;
+    if (!shown.lines) return Math.floor(at / size) + 1;
+    /* Grouped pages are cut by lines, headers counted: ask the cut itself. */
+    const row = all[at];
+    const count = pageLines(shown.lines, 1, size).pageCount;
+    for (let page = 1; page <= count; page++) {
+      if (rowsOf(pageLines(shown.lines, page, size).lines).includes(row as Z)) return page;
+    }
+    return 1;
+  }, [rowKey]);
+
   const setPageSize = useCallback((size: number | "fit") => {
+    setPageRaw(pageKeeping(size === "fit" ? defaultPageSize : size));
     setPageSizeRaw(size === "fit" ? null : size);
-    setFittedPageSize(null);
-    setPageRaw(1);
-  }, []);
+    setFittedRaw(null);
+  }, [pageKeeping, defaultPageSize]);
+
+  const setFittedPageSize = useCallback((size: number | null) => {
+    setPageRaw(pageKeeping(size ?? latest.current.chosen));
+    setFittedRaw(size);
+  }, [pageKeeping]);
 
   const toggleSort = useCallback((column: K, additive = false) => {
     setSort((current) => {
@@ -411,6 +449,9 @@ export function useTableState<Z, K extends string = string>(
     pageSize: fitted ?? pageSize,
     setPageSize,
     chosenPageSize: chosen,
+    setAnchor: (read) => {
+      anchorKey.current = read;
+    },
     defaultPageSize,
     setFittedPageSize,
     expanded,
