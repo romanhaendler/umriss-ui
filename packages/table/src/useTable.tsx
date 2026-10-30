@@ -538,8 +538,19 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   const viewNowKey = viewKey(groupedView);
   const viewReported = useRef(viewNowKey);
   const appliedSeen = useRef(0);
+  const withoutPageNow = viewKey({ ...groupedView, page: undefined });
+  const withoutPage = useRef(withoutPageNow);
+  /* Asked every commit, before the report: the flag covers one commit. */
+  const fitMoved = useRef(false);
   useEffect(() => {
-    const silent = appliedSeen.current !== applied;
+    fitMoved.current = b.takeFitMoved();
+  });
+  useEffect(() => {
+    /* A page that only moved with the fit is not reported; a fit in the same
+       commit as a change of the reader's own is. */
+    const fitOnly = fitMoved.current && withoutPage.current === withoutPageNow;
+    withoutPage.current = withoutPageNow;
+    const silent = appliedSeen.current !== applied || fitOnly;
     appliedSeen.current = applied;
     if (viewReported.current === viewNowKey) return;
     viewReported.current = viewNowKey;

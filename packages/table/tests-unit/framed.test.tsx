@@ -30,7 +30,7 @@ function definiteParent(definite: boolean, contentSized = false) {
     const asked = this.style.height.startsWith("calc(100% - ");
     const isParent = this.parentElement === document.body;
     /* A content-sized parent is as tall as its frame; without it, nothing. */
-    const parentHeight = contentSized && this.firstElementChild?.getAttribute("style")?.includes("display: none") ? 0 : 100;
+    const parentHeight = contentSized && this.firstElementChild?.getAttribute("style")?.includes("position: absolute") ? 0 : 100;
     const height = isParent ? parentHeight : this.hasAttribute("data-bounded") || !definite ? 40 : asked ? 93 : 100;
     return { height, top: 0, left: 0, bottom: height, right: 0, width: 0, x: 0, y: 0, toJSON: () => ({}) };
   });

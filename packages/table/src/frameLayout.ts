@@ -7,6 +7,7 @@ import { visibleColumns } from "./export";
 import type { HookSnapshot, Registry } from "./registry";
 import type { TableProps } from "./types";
 import type { PinBlocks } from "./model/pinning";
+import { lineCount } from "./model/tableModel";
 import { buildTree } from "./tree";
 import type { TreeSetup } from "./tree";
 
@@ -114,7 +115,7 @@ export function frameLayout({
      them all and the browser counts. */
   const paged = registry.paginates() && !virtual && !entries;
   const numbered = virtual !== undefined || paged;
-  const rowTotal = snapshot.server ? snapshot.rowCount : (projection.lines ?? projection.shown ?? projection.filtered).length;
+  const rowTotal = snapshot.server ? snapshot.rowCount : lineCount(projection);
   const first = projection.visibleLines?.find((l) => l.kind !== "header" || !l.continued);
   const pageStart = !paged
     ? 0

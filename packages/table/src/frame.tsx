@@ -33,7 +33,7 @@ import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
 import { awaitsFit, useFit } from "./fit";
-import { columnRow } from "./pinned";
+import { linePitch } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
 import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
@@ -84,7 +84,7 @@ export function Frame({
      without a prop of the table changing. It settles after one more render. */
   // eslint-disable-next-line react-hooks/exhaustive-deps -- the pitch is read after every render, by design
   useLayoutEffect(() => {
-    const height = columnRow(tableRef.current)?.getBoundingClientRect().height ?? 0;
+    const height = linePitch(tableRef.current);
     if (height && height !== pitch) setPitch(height);
   });
   /* A change the render does not see - the reader's root font size, a theme -
@@ -98,7 +98,7 @@ export function Frame({
     headSeen.current = head;
     if (!head) return;
     headObserver.current = new ResizeObserver(() => {
-      const height = columnRow(tableRef.current)?.getBoundingClientRect().height ?? 0;
+      const height = linePitch(tableRef.current);
       if (height) setPitch(height);
     });
     headObserver.current.observe(head);
