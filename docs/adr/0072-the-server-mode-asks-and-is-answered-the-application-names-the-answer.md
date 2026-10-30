@@ -55,3 +55,5 @@ An application that passes none of the new props sees no change, apart from the
 type of a server-mode bulk action's argument. An application that passes
 `answers` and builds it in another shape than it was given is busy for ever, and is
 told so in development. Research: `docs/research/open-points-2026-10/server_mode.md`.
+
+*Amended 2026-10-30 (ADR-0080):* in a filled frame the page is the fitted page. The first request waits for the first measurement and carries it, and a resize sends one request once the size has held 300 ms; until the answer the rows stay, new slots show placeholders and surplus rows leave.

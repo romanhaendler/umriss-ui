@@ -254,6 +254,16 @@ export function pageFiller(heldLines: number, shownLines: number, pageSize: numb
   ) : null;
 }
 
+/** The row that takes what the rows leave of a table the scroll area's height
+    (Table.module.css, `reaching`), so that the footer stands at the bottom. */
+export function ReachRow({ colSpan }: { colSpan: number }) {
+  return (
+    <tr aria-hidden="true" data-filler="" className={styles.fillerRow} style={{ height: "100%" }}>
+      <td colSpan={colSpan} />
+    </tr>
+  );
+}
+
 /** The body for what the table shows now; `empty` is set when it is the empty message. */
 export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): { body: ReactNode; empty: boolean } {
   const { layout } = ctx;
@@ -266,6 +276,7 @@ export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): 
       body: (
         <VirtualBody virtual={virtual} colSpan={layout.columnCount}>
           {rows.map((row, i) => renderRow(ctx, row, i, virtual.from + i))}
+          {ctx.filler}
         </VirtualBody>
       ),
       empty: false,

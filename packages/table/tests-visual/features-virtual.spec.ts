@@ -284,6 +284,92 @@ test.describe("in a pane of fixed height", () => {
   }
 });
 
+/* ---------------- A table fills a parent of definite height ---------------- */
+
+test.describe("a table fills a pane of fixed height", () => {
+  const pane = (page: Page) => page.locator('[data-example="fill-a-pane"] [data-pane]');
+  const frameOf = (page: Page) => pane(page).locator("table").locator("..").locator("..");
+  const toggle = (page: Page, name: string) => page.locator('[data-example="fill-a-pane"]').getByRole("button", { name, exact: true });
+
+  test.beforeEach(async ({ page }) => {
+    await openExample(page, "pagination", "fill-a-pane");
+  });
+
+  for (const rows of [0, 5, 100]) {
+    test(`with ${rows} rows the frame is the pane and the pager stands at its bottom edge`, { tag: "@quick" }, async ({ page }) => {
+      await toggle(page, `${rows} rows`).click();
+      const paneBox = (await pane(page).boundingBox())!;
+      const frame = (await frameOf(page).boundingBox())!;
+      expect(Math.abs(frame.height - paneBox.height)).toBeLessThanOrEqual(1);
+      const pager = (await pane(page).getByRole("navigation", { name: "Pagination" }).boundingBox())!;
+      expect(Math.abs(pager.y + pager.height - (frame.y + frame.height))).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test("a pane of another height gives the frame that height", { tag: "@quick" }, async ({ page }) => {
+    for (const height of [260, 480]) {
+      await toggle(page, `${height} px`).click();
+      const frame = (await frameOf(page).boundingBox())!;
+      expect(Math.abs(frame.height - height)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test("the empty message stands at the top of the scroll area", { tag: "@quick" }, async ({ page }) => {
+    await toggle(page, "0 rows").click();
+    const area = (await pane(page).locator("table").locator("..").boundingBox())!;
+    const message = (await pane(page).getByText("No entries").boundingBox())!;
+    expect(message.y).toBeLessThan(area.y + area.height / 2);
+  });
+
+  test("the surface under the last row takes no click and is not announced", { tag: "@quick" }, async ({ page }) => {
+    await toggle(page, "100 rows").click();
+    await pane(page).getByPlaceholder("Stop or dock").fill("ST-0001");
+    await expect(pane(page).locator("tbody tr:not([data-filler])")).toHaveCount(1);
+    const filler = pane(page).locator("tr[data-filler]");
+    await expect(filler).toHaveAttribute("aria-hidden", "true");
+    expect(await filler.locator("button, a, input, [tabindex]").count()).toBe(0);
+    const box = (await filler.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    expect(await pane(page).locator("tbody tr:not([data-filler])").evaluate((tr) => tr.contains(document.activeElement))).toBe(false);
+  });
+
+  test("with maxHeight the table is as tall as its rows, as before", { tag: "@quick" }, async ({ page }) => {
+    await toggle(page, "5 rows").click();
+    await toggle(page, "maxHeight 200 px").click();
+    const frame = (await frameOf(page).boundingBox())!;
+    const area = (await pane(page).locator("table").locator("..").boundingBox())!;
+    expect(area.height).toBeLessThanOrEqual(201);
+    expect(frame.height).toBeLessThan(((await pane(page).boundingBox())!).height - 20);
+  });
+
+  test("in a flowing parent the table is as tall as its rows", { tag: "@quick" }, async ({ page }) => {
+    await openExample(page, "pagination", "show-every-row");
+    const table = page.locator('[data-example="show-every-row"] table');
+    const height = (await table.boundingBox())!.height;
+    expect(Math.abs((await table.locator("..").boundingBox())!.height - height)).toBeLessThanOrEqual(1);
+    expect(Math.abs((await table.locator("..").locator("..").boundingBox())!.height - height)).toBeLessThanOrEqual(1);
+  });
+});
+
+test.describe("a table in a stretched grid row", () => {
+  const demo = (page: Page) => page.locator('[data-example="beside-a-taller-neighbour"]');
+  const cell = async (page: Page) => (await demo(page).locator("[data-cell]").boundingBox())!;
+  const frame = async (page: Page) => (await demo(page).locator("table").locator("..").locator("..").boundingBox())!;
+
+  test("fills the row beside a taller neighbour and gives the height back when it shrinks", { tag: "@quick" }, async ({ page }) => {
+    await openExample(page, "pagination", "beside-a-taller-neighbour");
+    const button = (height: number) => demo(page).getByRole("button", { name: `Neighbour ${height} px` });
+    const held = (await cell(page)).height;
+    await button(700).click();
+    await expect.poll(async () => (await cell(page)).height).toBeGreaterThanOrEqual(699);
+    expect(Math.abs((await frame(page)).height - (await cell(page)).height)).toBeLessThanOrEqual(1);
+    await button(200).click();
+    await expect.poll(async () => Math.abs((await cell(page)).height - held)).toBeLessThanOrEqual(1);
+    expect(Math.abs((await frame(page)).height - held)).toBeLessThanOrEqual(1);
+    await expect(demo(page).locator("tbody tr")).toHaveCount(10);
+  });
+});
+
 /* ---------------- Another view chooses a row ---------------- */
 
 test("a current row set from outside is rendered, in view and marked", async ({ page }) => {

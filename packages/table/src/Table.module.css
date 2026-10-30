@@ -17,10 +17,28 @@
        scroll area - a flex item that may shrink - takes what the toolbar and
        the parts beneath leave. Without one, the percentage resolves to none. */
     max-height: 100%;
+    /* ... and exactly as tall as that parent. Where it has none, the
+       percentage is auto: the frame is as tall as its toolbar, its scroll
+       area (`--_table-held`) and its pager. `min-height: 0` lets a frame that
+       is a flex item of the parent's shrink with it. */
+    height: 100%;
+    min-height: 0;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
     outline: 1px solid transparent;
     box-shadow: var(--u-edge);
+  }
+
+  /* An explicit `maxHeight` keeps the rows' height up to that bound. */
+  .frame[data-bounded] {
+    height: auto;
+  }
+
+  /* A printout is as tall as its page, not as the frame. */
+  @media print {
+    .frame {
+      height: auto;
+    }
   }
 
   /* The table's children stand in the flow of the frame, as if they stood
@@ -39,6 +57,12 @@
     position: relative;
     overflow: auto;
     min-width: 0;
+    min-height: 0;
+    /* Takes what the toolbar and the pager leave, growing and shrinking round
+       the height the table holds for itself (`--_table-held`, set by the
+       frame while it fills a parent): that is all it asks of the parent. */
+    flex: 1 1 auto;
+    height: var(--_table-held, auto);
     border-radius: inherit;
   }
 
@@ -545,6 +569,14 @@
     border-bottom: none;
     background: var(--u-color-surface);
     font-weight: var(--u-weight-semibold);
+  }
+
+  /* A footer in a filled frame without a page stays at the frame's bottom edge
+     while the rows scroll under it (above a pinned cell, which sticks too). */
+  .reaching tfoot .td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
   }
 
   /* The sign of the arithmetic before the number: a sum or an average. The word
@@ -1726,6 +1758,11 @@
 
   .fillerRow {
     pointer-events: none;
+  }
+
+  /* Reaches the scroll area's bottom, so that the footer stands there. */
+  .reaching {
+    min-height: 100%;
   }
 
   /* ---- Grid mode (ADR-0034) --------------------------- */
