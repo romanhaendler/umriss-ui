@@ -48,7 +48,7 @@ export function Row({
   row,
   index,
   absolute,
-  headRows = 1,
+  ariaRow,
   registry,
   hook,
   columns,
@@ -79,8 +79,8 @@ export function Row({
   fresh?: boolean;
   index: number;
   absolute: number | undefined;
-  /** The rows of the head, for the ARIA row number of a virtual row. */
-  headRows?: number;
+  /** The ARIA row number: the place in the whole set, head rows counted. */
+  ariaRow?: number;
   registry: Registry;
   hook: HookSnapshot;
   columns: readonly ColumnEntry[];
@@ -154,7 +154,7 @@ export function Row({
         data-grid-line={grid ? gridLine : undefined}
         data-draft={draft ? "" : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
-        aria-rowindex={virtual ? absolute + 1 + headRows : undefined}
+        aria-rowindex={ariaRow}
       >
         {fresh && Array.from({ length: controls + (spanEntry ? 1 : 0) }, (_, i) => (
           <td key={i} className={cx(styles.td, i < controls && styles.control, pinAt(i).className)} style={pinAt(i).style} />
