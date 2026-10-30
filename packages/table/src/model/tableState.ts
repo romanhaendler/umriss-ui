@@ -273,13 +273,21 @@ export function useTableState<Z, K extends string = string>(
   /* The page that keeps the anchor row on a page of `size` lines: the row
      with focus, else the current row if this page shows it, else the top row.
      Read at the moment of the change, from the projection last rendered. */
-  const latest = useRef({ projection, chosen: pageSize });
+  const latest = useRef({ projection, chosen: pageSize, size: fitted ?? pageSize });
   useLayoutEffect(() => {
-    latest.current = { projection, chosen: pageSize };
+    latest.current = { projection, chosen: pageSize, size: fitted ?? pageSize };
   });
   const anchorKey = useRef<() => { focus: string | null; current: string | null | undefined }>(() => ({ focus: null, current: null }));
   const pageKeeping = useCallback((size: number) => {
     const shown = latest.current.projection;
+    if (server) {
+      /* Only the page's rows are known: the anchor stands at its offset on
+         the page, the page's first row at the page's own offset. */
+      const { focus, current } = anchorKey.current();
+      const keys = shown.visible.map(rowKey);
+      const offset = [focus, current].map((key) => (key == null ? -1 : keys.indexOf(key))).find((index) => index >= 0) ?? 0;
+      return Math.floor(((shown.page - 1) * latest.current.size + offset) / size) + 1;
+    }
     const all: readonly Z[] = shown.lines ? rowsOf(shown.lines) : shown.filtered;
     const keys = all.map(rowKey);
     const onPage = new Set(shown.visible.map(rowKey));
@@ -296,7 +304,7 @@ export function useTableState<Z, K extends string = string>(
       if (rowsOf(pageLines(shown.lines, page, size).lines).includes(row as Z)) return page;
     }
     return 1;
-  }, [rowKey]);
+  }, [rowKey, server]);
 
   const setPageSize = useCallback((size: number | "fit") => {
     setPageRaw(pageKeeping(size === "fit" ? defaultPageSize : size));

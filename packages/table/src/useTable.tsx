@@ -16,6 +16,7 @@
    the column filters the hook holds itself, in the order in which they were
    set. */
 
+import { awaitsFit } from "./fit";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording, zoneFields } from "@umriss-ui/core";
 import type { Formats } from "@umriss-ui/core";
@@ -574,8 +575,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     onRequestNow.current = options.onRequest;
   });
   useEffect(() => () => registry.settleSearch(false), [registry]);
+  const waiting = awaitsFit(registry);
   useEffect(() => {
-    if (!server) return;
+    /* A fitted page is asked for with its measured size, never before. */
+    if (!server || awaitsFit(registry)) return;
     const typed = registry.takeTyped();
     if (reported.current !== reportKey) {
       reported.current = reportKey;
@@ -591,7 +594,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       warnOnce("server-answers", "`answers` matches none of the requests `onRequest` received; the table stays busy. Hand back the request object you were given, or one with the same search, conditions, sort, page and page size.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
-  }, [reportKey, answersKey]);
+  }, [reportKey, answersKey, waiting]);
   /* A keystroke is typed for the commit it caused only: one that left the key
      as it was must not make a later sort or page change wait. Declared after
      the report effect, so that it runs after it takes the flag. */
