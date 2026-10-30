@@ -54,9 +54,9 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     const scroll = table?.parentElement;
     if (!hook || !table || !scroll) return;
     const state = hook.tableState;
-    const fit = registry.framed && registry.paginates() && !state.virtual && !registry.tree && !registry.server && state.chosenPageSize === state.defaultPageSize;
+    const fit = registry.framed && registry.paginates() && !state.virtual && !registry.tree && !registry.server && state.chosenPageSize === null;
     if (!fit) {
-      if (state.pageSize !== state.chosenPageSize) state.setFittedPageSize(null);
+      if (state.pageSize !== (state.chosenPageSize ?? state.defaultPageSize)) state.setFittedPageSize(null);
       return;
     }
     /* The held height is the basis the scroll area is measured around; before
@@ -75,7 +75,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
        says nothing about the frame. */
     if (total > 0 && next >= total && now >= total) return;
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
-    if (next !== now) state.setFittedPageSize(next === state.chosenPageSize ? null : next);
+    if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
