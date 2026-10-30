@@ -115,7 +115,7 @@ describe("its condition is a condition like any other", () => {
 
   it("a change goes back to page one", () => {
     render(<Shipments pageSize={1} />);
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(t!.page).toBe(2);
     act(() => t!.setFilter(tours, ["T-01"]));
     expect(t!.page).toBe(1);
