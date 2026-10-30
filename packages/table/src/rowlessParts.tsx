@@ -20,6 +20,7 @@ import { GroupingChoice, TreeChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { dropPlace } from "./columnDrag";
 import { orderColumns } from "./model/tableModel";
+import { rowsOf } from "./model/grouping";
 import type { ExportFormat, TableRef } from "./types";
 import { csv } from "./export";
 import type { Pin } from "./model/pinning";
@@ -575,8 +576,13 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   const current = connection?.snapshot;
   // The rows this page holds: 13-24 of 120; 0-0 of 0 for none.
   const count = current?.rowCount ?? 0;
-  const from = !current || count === 0 ? 0 : (current.page - 1) * current.pageSize + 1;
-  const to = current ? Math.min(current.page * current.pageSize, count) : 0;
+  /* A grouped page is cut by lines, headers counted: its rows are found in
+     all the rows, not by the page number. */
+  const projection = connection?.registry.projection();
+  const onPage = projection?.visible ?? [];
+  const before = !projection?.lines || current?.server ? -1 : rowsOf(projection.lines).indexOf(onPage[0] as never);
+  const from = !current || count === 0 ? 0 : before >= 0 ? before + 1 : (current.page - 1) * current.pageSize + 1;
+  const to = !current ? 0 : before >= 0 ? before + onPage.length : Math.min(current.page * current.pageSize, count);
   const rangeText = current
     ? wording.pageRange(from, to, count, { from: formats.count(from), to: formats.count(to), total: formats.count(count) })
     : "";
@@ -593,6 +599,21 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
     setSpoken(rangeText);
   }, [current?.page]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* A step that lands on an edge disables itself, and focus would fall to the
+     body: it moves to the nearest step still enabled. */
+  const steps = useRef<HTMLSpanElement>(null);
+  const pressed = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const at = pressed.current;
+    pressed.current = null;
+    const buttons = Array.from(steps.current?.querySelectorAll("button") ?? []);
+    if (at === null || !buttons[at]?.disabled) return;
+    const near = buttons
+      .map((button, index) => ({ button, index }))
+      .filter(({ button }) => !button.disabled)
+      .sort((a, b) => Math.abs(a.index - at) - Math.abs(b.index - at))[0];
+    near?.button.focus();
+  }, [current?.page]);
   if (!connection || connection.snapshot.virtual || connection.registry.tree) return null;
   const { snapshot } = connection;
   /* "Fit" stands while no size is chosen, in a frame that cuts its page. */
@@ -602,7 +623,8 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   const sizes = fitting || pageSizes.includes(snapshot.pageSize)
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
-  const goTo = (page: number) => {
+  const goTo = (page: number, button: number, from: HTMLElement) => {
+    pressed.current = document.activeElement === from ? button : null;
     stepped.current = true;
     setSpoken((words) => words ?? "");
     snapshot.setPage(page);
@@ -635,21 +657,21 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
         </label>
         {/* The four steps and the page wrap as one: a step alone on a line
             of its own, split from its pair, read as a control of its own. */}
-        <span className={styles.pageSteps}>
-          <IconButton size="sm" disabled={atFirst} aria-label={wording.firstPage} onClick={() => goTo(1)}>
+        <span className={styles.pageSteps} ref={steps}>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.firstPage} onClick={(event) => goTo(1, 0, event.currentTarget)}>
             <EndGlyph className={styles.turned} />
           </IconButton>
-          <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={() => goTo(snapshot.page - 1)}>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={(event) => goTo(snapshot.page - 1, 1, event.currentTarget)}>
             <AngleGlyph className={styles.turned} />
           </IconButton>
           <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
               page: formats.count(snapshot.page),
               total: formats.count(snapshot.pageCount),
             })}</span>
-          <IconButton size="sm" disabled={atLast} aria-label={wording.nextPage} onClick={() => goTo(snapshot.page + 1)}>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.nextPage} onClick={(event) => goTo(snapshot.page + 1, 2, event.currentTarget)}>
             <AngleGlyph />
           </IconButton>
-          <IconButton size="sm" disabled={atLast} aria-label={wording.lastPage} onClick={() => goTo(snapshot.pageCount)}>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.lastPage} onClick={(event) => goTo(snapshot.pageCount, 3, event.currentTarget)}>
             <EndGlyph />
           </IconButton>
         </span>
