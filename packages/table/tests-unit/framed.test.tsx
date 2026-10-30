@@ -25,10 +25,13 @@ function Case({ n, maxHeight, paged = true }: { n: number; maxHeight?: string; p
 }
 
 /* A parent with a definite height: the frame follows a percentage style. */
-function definiteParent(definite: boolean) {
+function definiteParent(definite: boolean, contentSized = false) {
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
     const asked = this.style.height.startsWith("calc(100% - ");
-    const height = this.hasAttribute("data-bounded") || !definite ? 40 : asked ? 93 : 100;
+    const isParent = this.parentElement === document.body;
+    /* A content-sized parent is as tall as its frame; without it, nothing. */
+    const parentHeight = contentSized && this.firstElementChild?.getAttribute("style")?.includes("display: none") ? 0 : 100;
+    const height = isParent ? parentHeight : this.hasAttribute("data-bounded") || !definite ? 40 : asked ? 93 : 100;
     return { height, top: 0, left: 0, bottom: height, right: 0, width: 0, x: 0, y: 0, toJSON: () => ({}) };
   });
 }
@@ -42,6 +45,12 @@ describe("framed", () => {
     definiteParent(true);
     render(<Case n={20} />);
     expect(screen.getByRole("status").textContent).toBe("true");
+  });
+
+  it("is false where the parent's height comes from the table itself", () => {
+    definiteParent(true, true);
+    render(<Case n={20} />);
+    expect(screen.getByRole("status").textContent).toBe("false");
   });
 
   it("is false in a flowing parent", () => {
