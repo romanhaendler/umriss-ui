@@ -595,7 +595,11 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
 
   if (!connection || connection.snapshot.virtual || connection.registry.tree) return null;
   const { snapshot } = connection;
-  const sizes = pageSizes.includes(snapshot.pageSize)
+  /* "Fit" stands while no size is chosen, in a frame that cuts its page. */
+  const chosen = connection.registry.hook?.tableState.chosenPageSize ?? null;
+  const fitOffered = connection.registry.framed && !connection.registry.server;
+  const fitting = fitOffered && chosen === null;
+  const sizes = fitting || pageSizes.includes(snapshot.pageSize)
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
   const goTo = (page: number) => {
@@ -616,11 +620,12 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
           <Select
             size="sm"
             /* As wide as the longest size offered */
-            chars={Math.max(...sizes.map((size) => String(size).length))}
-            value={snapshot.pageSize}
-            onChange={(event) => snapshot.setPageSize(Number(event.target.value))}
+            chars={Math.max(...sizes.map((size) => String(size).length), ...(fitOffered ? [wording.fit.length] : []))}
+            value={fitting ? "fit" : snapshot.pageSize}
+            onChange={(event) => snapshot.setPageSize(event.target.value === "fit" ? "fit" : Number(event.target.value))}
             aria-label={wording.rowsPerPage}
           >
+            {fitOffered && <option value="fit">{wording.fit}</option>}
             {sizes.map((size) => (
               <option key={size} value={size}>
                 {size}

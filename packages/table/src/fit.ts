@@ -54,9 +54,9 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     const scroll = table?.parentElement;
     if (!hook || !table || !scroll) return;
     const state = hook.tableState;
-    const fit = registry.framed && registry.paginates() && !state.virtual && !registry.tree && !registry.server && state.chosenPageSize === state.defaultPageSize;
+    const fit = registry.framed && registry.paginates() && !state.virtual && !registry.tree && !registry.server && state.chosenPageSize === null;
     if (!fit) {
-      if (state.pageSize !== state.chosenPageSize) state.setFittedPageSize(null);
+      if (state.pageSize !== (state.chosenPageSize ?? state.defaultPageSize)) state.setFittedPageSize(null);
       return;
     }
     /* The held height is the basis the scroll area is measured around; before
@@ -79,7 +79,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
        from under the user; the focus leaving the rows cuts again. A density, a
        search or a fold (`force`) applies at once. */
     if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
-    if (next !== now) state.setFittedPageSize(next === state.chosenPageSize ? null : next);
+    if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
