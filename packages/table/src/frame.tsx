@@ -32,7 +32,7 @@ import {
 import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
-import { useFit } from "./fit";
+import { awaitsFit, useFit } from "./fit";
 import { columnRow } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
@@ -52,7 +52,7 @@ export function Frame({
 }) {
   /* A late answer makes the table busy as `loading` does. */
   const error = registry.hook?.error;
-  const props = error !== undefined ? { ...given, loading: false } : registry.hook?.late ? { ...given, loading: true } : given;
+  const props = error !== undefined ? { ...given, loading: false } : registry.hook?.late || awaitsFit(registry) ? { ...given, loading: true } : given;
   const {
     selectable = false,
     stickyHeader = false,
