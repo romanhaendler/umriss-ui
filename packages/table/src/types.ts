@@ -878,6 +878,10 @@ export interface TableSnapshot<Z> {
   /** Server mode: the request `onRequest` last received, or is about to;
       `null` outside it. */
   request: TableRequest | null;
+  /** Whether the table fills a parent of definite height, with no prop: the
+      frame is exactly as tall as the parent. `false` in a flowing parent and
+      with `maxHeight`. It does not depend on the Pagination. */
+  framed: boolean;
 }
 
 /** What a part without a row type needs from a table – for `of`. */

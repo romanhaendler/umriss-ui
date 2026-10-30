@@ -51,3 +51,5 @@ reason `"fill"` was: no one wants to opt out where the parent has a height.
 *Amended 2026-10-25:* the schedule follows the chart's rule. Without `height` it fills its frame and never goes below
 400 px, its height before; in a frame without a definite height, it is 400 px whatever its lanes. A number stays
 a fixed height, and a different floor goes through `style`'s `minHeight`.
+
+*Amended 2026-10-30:* the table part of the amendment of 2026-10-25 is reversed by ADR-0080. A table in a parent of definite height fills it, and a page is what its frame holds; the table contributes only its held page height to its parent. A table in a flowing parent, and one with `maxHeight`, is as tall as its rows as before.

@@ -720,6 +720,15 @@ export class Registry {
     this.reveal = next;
   }
 
+  /** Whether the frame fills a parent of definite height (framed.ts). */
+  framed = false;
+
+  setFramed(framed: boolean) {
+    if (this.framed === framed) return;
+    this.framed = framed;
+    this.structure++;
+  }
+
   setFrameTable(table: HTMLTableElement | null) {
     this.frameTable = table;
   }

@@ -109,3 +109,5 @@ the same rule; over nothing, placeholder lines stand in its lane column.
 Measured, not argued: the table's browser suite holds every row of every demo
 table at one pitch in Chromium, Firefox and WebKit, and "Next" on one pixel
 over a short last page and an empty result.
+
+*Amended 2026-10-30 (ADR-0080):* in a filled frame the held height is the frame's: the scroll area takes what the toolbar and the pager leave, and the held lines are what the table asks of its parent, never its rows. A page-size change keeps the anchor row on the page instead of going back to page one.
