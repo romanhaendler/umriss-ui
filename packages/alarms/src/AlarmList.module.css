@@ -7,6 +7,15 @@
     flex-direction: column;
     gap: var(--u-space-3);
     min-width: 0;
+    height: 100%;
+  }
+
+  /* Passes a pane's height on to the table's frame. */
+  .tableBox {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .bar {
