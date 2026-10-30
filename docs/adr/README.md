@@ -1,6 +1,6 @@
 # Decisions
 
-Seventy-nine decisions, each one written where it was made and kept afterwards. An
+Eighty decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -55,7 +55,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0039](0039-an-icon-button-names-itself-once.md) | An icon button names itself once, and shows that name | Icon buttons name themselves once | accepted | components |
 | [0040](0040-a-box-carries-its-outliers.md) | A box carries its outliers | Box plots carry their outliers | accepted | charts |
 | [0041](0041-a-fields-width-never-follows-what-it-shows.md) | A field's width never follows what it shows | Field width ignores its content | accepted | components |
-| [0042](0042-a-rows-height-never-follows-what-it-shows.md) | A row's height never follows what it shows | Table row height ignores its content | accepted | table |
+| [0042](0042-a-rows-height-never-follows-what-it-shows.md) | A row's height never follows what it shows | Table row height ignores its content | accepted, amended by ADR-0080 (in a filled frame the held height is the frame's) | table |
 | [0043](0043-the-select-draws-its-own-list-under-a-pointer.md) | The select draws its own list under a pointer and the keys | Select draws its own list | accepted | components |
 | [0044](0044-every-export-has-a-place-on-the-site.md) | Every export has a place on the site | Every export gets an API index entry | accepted | demo |
 | [0045](0045-tokens-are-the-styling-api-data-attributes-are-not.md) | Tokens are the styling API; data attributes are not | Styling through tokens, not data attributes | accepted | components |
@@ -63,7 +63,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0047](0047-a-component-holds-its-own-view.md) | A component holds its own view | Components keep their own view state | accepted | architecture |
 | [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | Charts take rows through a hook | accepted | charts |
 | [0049](0049-a-sum-takes-rows-from-data.md) | A sum takes rows from data, and a line shows its contribution | Sums over rows from data | accepted | calculation |
-| [0050](0050-a-chart-fills-its-frame-never-below-its-floor.md) | A chart fills its frame, never below its floor | Chart fills its frame, with a minimum | accepted | charts |
+| [0050](0050-a-chart-fills-its-frame-never-below-its-floor.md) | A chart fills its frame, never below its floor | Chart fills its frame, with a minimum | accepted, amended by ADR-0080 (a table fills its frame too) | charts |
 | [0051](0051-a-calculation-follows-the-density.md) | A calculation follows the density | Calculation spacing follows density | accepted | calculation |
 | [0052](0052-a-chart-reads-its-rows-as-they-come.md) | A chart reads its rows as they come | Charts read rows and categories directly | accepted, supersedes ADR-0002 and ADR-0032 in one consequence each | charts |
 | [0053](0053-a-milestone-is-a-mark-on-a-lane.md) | A milestone is a mark on a lane, not a piece of work | Milestones are marks, not work | accepted | schedule |
@@ -85,7 +85,7 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0069](0069-a-number-format-is-intls-options.md) | A number format is Intl's options | A number format is Intl options | accepted | core, table, charts, calculation |
 | [0070](0070-under-a-finger-the-controls-grow-and-touch-is-told-by-the-pointer.md) | Under a finger the controls grow, and touch is told by the pointer | Touch is the pointer, never a setting; md is 44 px under a finger | amended by ADR-0079 (the 44 px decision and its first consequence) | components, core |
 | [0071](0071-the-current-row-is-the-applications-the-table-marks-it-and-reports-it.md) | The current row is the application's; the table marks it and reports it | Current row: the application holds it, the table marks and reports it | accepted | table |
-| [0072](0072-the-server-mode-asks-and-is-answered-the-application-names-the-answer.md) | The server mode asks and is answered; the application names the answer | `answers` names the request the rows answer; error, select-all, export and totals follow | accepted | table |
+| [0072](0072-the-server-mode-asks-and-is-answered-the-application-names-the-answer.md) | The server mode asks and is answered; the application names the answer | `answers` names the request the rows answer; error, select-all, export and totals follow | accepted, amended by ADR-0080 (the first request and the settled resize) | table |
 | [0073](0073-no-package-takes-a-foreign-runtime-dependency.md) | No package takes a foreign runtime dependency | No runtime dependency; XLSX is written by hand | accepted | packages, table |
 | [0074](0074-a-chart-reports-a-range-as-it-reports-a-hit-and-keeps-none.md) | A chart reports a range as it reports a hit, and keeps none | Chart reports a range, keeps none; Alt-drag on a zoomable chart, plain drag elsewhere | accepted | charts |
 | [0075](0075-a-chart-draws-its-own-picture.md) | A chart draws its own picture | A chart hands over its own PNG, not a bare `toDataURL` | accepted, supersedes ADR-0032 in its "export" point | charts |
@@ -93,5 +93,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0077](0077-a-bad-value-keeps-its-verdict.md) | A bad value keeps its verdict | A source's quality is a third axis beside the verdict and the freshness | accepted, extends ADR-0010 | limits and alarms |
 | [0078](0078-alarm-management-is-a-package-that-owns-a-lifecycle-never-a-generation.md) | Alarm management is a package on core and table; it owns an alarm's lifecycle, never its generation | Alarms are a package of their own, after the alarm list was removed; supersedes ADR-0009 and ADR-0057 | accepted, supersedes ADR-0009 and ADR-0057, amends ADR-0035 | limits and alarms, architecture |
 | [0079](0079-the-size-is-the-applications-the-hit-area-the-librarys.md) | The size is the application's, the hit area the library's | A `md` control is 32 px under any pointer; `touch-scale.css` opts into 44 px under a finger; amends ADR-0070 | accepted, amends ADR-0070 | components, core |
+| [0080](0080-a-page-is-what-its-frame-holds.md) | A page is what its frame holds | A table fills a parent of definite height and contributes only its held page height; the page is the lines that fit; amends ADR-0042, ADR-0050 and ADR-0072 | accepted, amends ADR-0042, ADR-0050 and ADR-0072 | table |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

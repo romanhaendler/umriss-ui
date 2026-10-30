@@ -29,9 +29,10 @@ import {
   useStickyHeaderHeights,
   useVirtualPitch,
 } from "./frameEffects";
-import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
+import { errorBody, newRowBody, pageFiller, ReachRow, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
+import { columnRow } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
 import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
@@ -75,6 +76,16 @@ export function Frame({
      empty result and placeholders keep the height of (ADR-0042). Kept from an earlier render,
      as React keeps information from previous renders: set while rendering. */
   const [heldBefore, setHeldBefore] = useState(0);
+  /* What one line of the table is tall, read off the column row: a constant of
+     the density and the type, never a function of the rows shown. */
+  const [pitch, setPitch] = useState(0);
+  /* After every render: a density, a finger or a root font size changes it
+     without a prop of the table changing. It settles after one more render. */
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the pitch is read after every render, by design
+  useLayoutEffect(() => {
+    const height = columnRow(tableRef.current)?.getBoundingClientRect().height ?? 0;
+    if (height && height !== pitch) setPitch(height);
+  });
   const grid = useGridState();
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
@@ -160,6 +171,18 @@ export function Frame({
      nothing to keep. */
   const stale = loading && shownLines > 0;
 
+  /* In a frame the table asks its parent for the height of its held page -
+     head, held lines, footer - never for the rows it shows now, so that a
+     taller neighbour fills the table and a shrinking one gives the height
+     back. Placeholders hold a page's worth while the first answer is on its
+     way. Without a page there is no held height: the rows are the height. */
+  const askedLines = heldLines || (loading && !stale ? pageSize : 0);
+  /* Without a page, in a frame, the totals footer stands at the frame's bottom
+     edge: the table is at least the scroll area tall, and the last row of the
+     body - 100% tall, in the body's own section - takes what the rows leave. */
+  const footerAtEdge = registry.framed && !pageSize && footerShown && !maxHeight && !loading && error === undefined && projection.filtered.length > 0;
+  const heldHeight = registry.framed && pageSize && pitch && !maxHeight ? (layout.headRows + askedLines + (footerShown ? 1 : 0)) * pitch : 0;
+
   const body: BodyContext = {
     registry,
     hook,
@@ -173,7 +196,7 @@ export function Frame({
     wording,
     pageSize,
     heldLines,
-    filler: pageFiller(heldLines, shownLines, pageSize, columnCount),
+    filler: footerAtEdge ? <ReachRow colSpan={columnCount} /> : pageFiller(heldLines, shownLines, pageSize, columnCount),
   };
   const shown = error !== undefined ? { body: errorBody(body, error, hook.retry), empty: true } : renderBody(body, loading, stale);
 
@@ -191,7 +214,13 @@ export function Frame({
         onKeyDown={onCopyKey}
         onAnimationEnd={(event) => (event.target as Element).removeAttribute("data-copied")}
         className={styles.scroll}
-        style={maxHeight ? { maxHeight } : undefined}
+        style={
+          maxHeight
+            ? { maxHeight }
+            : heldHeight
+              ? ({ "--_table-held": `${heldHeight}px` } as CSSProperties)
+              : undefined
+        }
       >
         {/* Every control in the table is small: a row is one pitch tall, and a
             control of the regular size would not fit it (ADR-0042). */}
@@ -222,6 +251,7 @@ export function Frame({
             stickyHeader && styles.sticky,
             striped && styles.striped,
             gridMode && styles.grid,
+            footerAtEdge && styles.reaching,
           )}
         >
           <HeadRow registry={registry} hook={hook} layout={layout} props={props} wording={wording} />

@@ -74,8 +74,8 @@ const { Dashboard, WidgetType } = useDashboard({
   height follows the size, never the content: what the content needs beyond
   the size scrolls inside the widget, and the keyboard reaches it.
 - **A view fills its widget's body.** A chart and a schedule fill the body and
-  need no height of their own; a table stays within it, its toolbar and pager
-  in view, and its rows scroll. A wrapper of the application's own between the
+  need no height of their own; a table fills it, its toolbar on top, its pager
+  at the bottom edge and its rows scrolling between them. A wrapper of the application's own between the
   body and the view passes the height on with `height: 100%`. A view whose floor
   is taller than a size (a chart's 300 px, a schedule's 400 px) takes a lower one
   through `style`'s `minHeight`, as the dispatcher's trends do.

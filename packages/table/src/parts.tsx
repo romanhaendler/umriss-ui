@@ -21,6 +21,7 @@ import type { Registry, ColumnSpec } from "./registry";
 import { link } from "./registry";
 import type { TableProps } from "./types";
 import { Frame } from "./frame";
+import { useFramed } from "./framed";
 import styles from "./Table.module.css";
 
 /* The props the table reads itself: what is left of its props is the frame's
@@ -263,6 +264,8 @@ export function buildParts(registry: Registry): Parts {
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
 
+    useFramed(registry, childrenRef, Boolean(props.maxHeight));
+
     useLayoutEffect(() => {
       registry.children = childrenRef.current;
       registry.checkOrder();
@@ -273,7 +276,7 @@ export function buildParts(registry: Registry): Parts {
 
     return (
       <TableContext value={contextValue}>
-        <div {...rest} ref={ref} className={cx(styles.frame, className)} style={style}>
+        <div {...rest} ref={ref} className={cx(styles.frame, className)} style={style} data-bounded={props.maxHeight ? "" : undefined}>
           <div ref={childrenRef} className={styles.children}>
             {children}
           </div>
