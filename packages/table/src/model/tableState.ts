@@ -109,6 +109,9 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   /** The size the frame holds, apart from the chosen one: `null` for none. It
       keeps the page and the view as they are. */
   setFittedPageSize: (size: number | null) => void;
+  /** Whether `setFittedPageSize` was called since the last ask: the page may
+      have moved with the fit, which the view does not report. */
+  takeFitMoved: () => boolean;
   /** Ids of the columns switched away. */
   hidden: readonly K[];
   /** Switches a column away or back. Columns that are not hideable stay, even
@@ -312,7 +315,9 @@ export function useTableState<Z, K extends string = string>(
     setFittedRaw(null);
   }, [pageKeeping, defaultPageSize]);
 
+  const fitMoved = useRef(false);
   const setFittedPageSize = useCallback((size: number | null) => {
+    fitMoved.current = true;
     setPageRaw(pageKeeping(size ?? latest.current.chosen));
     setFittedRaw(size);
   }, [pageKeeping]);
@@ -462,6 +467,11 @@ export function useTableState<Z, K extends string = string>(
     },
     defaultPageSize,
     setFittedPageSize,
+    takeFitMoved: () => {
+      const moved = fitMoved.current;
+      fitMoved.current = false;
+      return moved;
+    },
     expanded,
     toggleRow,
     hidden,
