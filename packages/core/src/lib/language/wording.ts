@@ -207,6 +207,8 @@ export interface Wording {
   pagination: string;
   rows: string;
   rowsPerPage: string;
+  /** The page-size choice that leaves the page to the frame. */
+  fit: string;
   /** "Page 2 of 7". `formatted` carries both numbers in the provider's
       formats, where the caller has them - a table over a server has "Page 1 of
       100,000". */
@@ -879,6 +881,7 @@ export const DEFAULT_WORDING: Wording = {
   pagination: "Pagination",
   rows: "Rows",
   rowsPerPage: "Rows per page",
+  fit: "Fit",
   pageOfPages: (page, total, formatted) => `Page ${formatted?.page ?? page} of ${formatted?.total ?? total}`,
   pageRange: (from, to, total, formatted) => `${formatted?.from ?? from}–${formatted?.to ?? to} of ${formatted?.total ?? total}`,
   firstPage: "First page",
