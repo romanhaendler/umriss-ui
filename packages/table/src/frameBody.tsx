@@ -111,8 +111,16 @@ export function newRowBody(ctx: BodyContext, fresh: { fresh?: unknown }) {
   );
 }
 
-function loadingBody(ctx: BodyContext) {
+function rightAlignment(ctx: BodyContext) {
   const { registry, hook, layout } = ctx;
+  return [
+    ...Array.from({ length: layout.controlColumns + (layout.spanEntry ? 1 : 0) }, () => false),
+    ...layout.dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
+  ];
+}
+
+function loadingBody(ctx: BodyContext) {
+  const { layout } = ctx;
   return (
     <tbody>
       <LoadingRows
@@ -120,10 +128,7 @@ function loadingBody(ctx: BodyContext) {
         /* A page's worth, or the lines the page last held: nothing below
            moves while the answer is on its way. */
         rows={ctx.pageSize ? ctx.heldLines || ctx.pageSize : undefined}
-        rightAligned={[
-          ...Array.from({ length: layout.controlColumns + (layout.spanEntry ? 1 : 0) }, () => false),
-          ...layout.dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
-        ]}
+        rightAligned={rightAlignment(ctx)}
       />
     </tbody>
   );
@@ -261,7 +266,7 @@ export function pageFiller(heldLines: number, shownLines: number, pageSize: numb
 
 /** The body for what the table shows now; `empty` is set when it is the empty message. */
 export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): { body: ReactNode; empty: boolean } {
-  const { layout } = ctx;
+  const { layout, registry, hook } = ctx;
   const { virtual, lines, rows, projection } = layout;
   if (loading && !stale) return { body: loadingBody(ctx), empty: false };
   if (projection.filtered.length === 0) return { body: emptyBody(ctx), empty: true };
@@ -272,6 +277,24 @@ export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): 
         <VirtualBody virtual={virtual} colSpan={layout.columnCount}>
           {rows.map((row, i) => renderRow(ctx, row, i, virtual.from + i))}
         </VirtualBody>
+      ),
+      empty: false,
+    };
+  }
+  /* A server's page that is being asked again for another size: the rows that
+     stay stand, the ones past the new size leave, and the slots the answer
+     will fill show placeholders. */
+  if (stale && registry.server && ctx.pageSize) {
+    const standing = rows.slice(0, ctx.pageSize);
+    const expected = Math.min(ctx.pageSize, hook.publicSnapshot.rowCount - (projection.page - 1) * ctx.pageSize);
+    const fresh = Math.max(0, expected - standing.length);
+    return {
+      body: (
+        <tbody>
+          {standing.map((row, i) => renderRow(ctx, row, i, i))}
+          <LoadingRows columns={layout.columnCount} rows={fresh} rightAligned={rightAlignment(ctx)} />
+          {fresh ? null : ctx.filler}
+        </tbody>
       ),
       empty: false,
     };

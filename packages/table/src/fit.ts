@@ -17,6 +17,21 @@ import type { Registry } from "./registry";
 /** How long the scroll area's height must hold before the page grows or shrinks to it. */
 export const SETTLE_MS = 120;
 
+/** The same in server mode, where every cut is a request. */
+export const SERVER_SETTLE_MS = 300;
+
+/** Whether the frame cuts the page: filled, paged by the application's option
+    or by this hook, and not virtual or a tree. */
+export function fits(registry: Registry): boolean {
+  const state = registry.hook?.tableState;
+  return !!state && registry.framed && registry.paginates() && !state.virtual && !registry.tree && state.chosenPageSize === state.defaultPageSize;
+}
+
+/** Server mode, the page to be fitted and not yet measured, or measured and
+    not yet the page in the state: no request goes out. */
+export const awaitsFit = (registry: Registry): boolean =>
+  registry.server && fits(registry) && registry.fitMeasured !== registry.hook!.tableState.pageSize;
+
 /** The lines a page holds in `room` px of lines of `pitch` px, `now` being the
     page held: it keeps its size while `room` is in [now·pitch − 1, (now+1)·pitch)
     - it grows at a whole further line and shrinks only when more than a pixel
@@ -27,6 +42,7 @@ export function fittedLines(room: number, pitch: number, now: number): number {
 }
 
 const linesOf = (registry: Registry) => {
+  if (registry.server) return registry.hook?.publicSnapshot.rowCount ?? 0;
   const projection = registry.projection();
   return (projection.lines ?? projection.shown ?? projection.filtered).length;
 };
@@ -54,8 +70,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     const scroll = table?.parentElement;
     if (!hook || !table || !scroll) return;
     const state = hook.tableState;
-    const fit = registry.framed && registry.paginates() && !state.virtual && !registry.tree && !registry.server && state.chosenPageSize === state.defaultPageSize;
-    if (!fit) {
+    if (!fits(registry)) {
       if (state.pageSize !== state.chosenPageSize) state.setFittedPageSize(null);
       return;
     }
@@ -67,26 +82,32 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     const { pitch: line, room } = measure(table, scroll);
     if (!line) return;
     const total = linesOf(registry);
-    /* No lines and no placeholders: the area is as tall as the empty message. */
-    if (total === 0 && !latest.current.loading) return;
     const now = state.pageSize;
     const next = fittedLines(room, line, now);
-    /* Where every line fits one page the area is as tall as the lines and
-       says nothing about the frame. */
-    if (total > 0 && next >= total && now >= total) return;
+    /* The first measurement of a server's table is what its first request
+       waits for: it is taken whatever the rows say. */
+    const first = registry.server && registry.fitMeasured === null;
+    if (!first) {
+      /* No lines and no placeholders: the area is as tall as the empty message. */
+      if (total === 0 && !latest.current.loading) return;
+      /* Where every line fits one page the area is as tall as the lines and
+         says nothing about the frame. */
+      if (total > 0 && next >= total && now >= total) return;
+    }
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
     /* A resize waits while focus is in the rows, so that it never pulls the row
        from under the user; the focus leaving the rows cuts again. A density, a
        search or a fold (`force`) applies at once. */
     if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
     if (next !== now) state.setFittedPageSize(next === state.chosenPageSize ? null : next);
+    if (registry.server) registry.setFitMeasured(next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
      first measurement and the follow-up of a density, a search or a fold
      never show a page that is cut wrong for a frame. */
   const state = registry.hook?.tableState;
-  const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}|${registry.hook ? linesOf(registry) : 0}`;
+  const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}|${registry.hook && !registry.server ? linesOf(registry) : 0}`;
   useLayoutEffect(() => {
     if (seen.current === key) return;
     seen.current = key;
@@ -106,8 +127,8 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     };
     const observer = new ResizeObserver(() => {
       clearTimeout(timer);
-      if (cutsARow()) cut();
-      else timer = setTimeout(cut, SETTLE_MS);
+      if (!registry.server && cutsARow()) cut();
+      else timer = setTimeout(cut, registry.server ? SERVER_SETTLE_MS : SETTLE_MS);
     });
     observer.observe(scroll);
     /* Focus leaving the rows: the activeElement is the new one a tick later. */
