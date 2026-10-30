@@ -619,7 +619,9 @@ export interface SetFilter<Z> {
 interface TableOptionsCommon<Z> {
   /** A stable key per row – the basis of selection and expansion. */
   rowKey: (row: Z) => string;
-  /** How many rows a page holds.
+  /** How many rows a page holds in flow, or with `maxHeight`, and the start
+      value in a frame of definite height before it is measured: there a page
+      holds the whole lines the frame leaves between the head and the pager.
       @default 10 */
   pageSize?: number;
   /** The application's sort; it is the default that `view` leaves out.
@@ -780,7 +782,8 @@ export interface TableSnapshot<Z> {
   page: number;
   /** How many pages the filtered set makes. */
   pageCount: number;
-  /** Rows per page. */
+  /** Rows per page now: the whole lines a filled frame holds, otherwise the
+      chosen size. */
   pageSize: number;
   /** Changes the page, clamped to those that exist. */
   setPage: (page: number) => void;

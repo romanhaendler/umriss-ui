@@ -4,7 +4,7 @@ import { Pagination, Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Fill a pane";
 
-export const lead = "In a parent of definite height the table is exactly as tall as the parent - with no rows, five or a hundred. Toolbar on top, the pager at the bottom edge, and the surface under the last row stays blank. In a parent without a height the table is as tall as its rows, as ever.";
+export const lead = "In a parent of definite height the table is exactly as tall as the parent - with no rows, five or a hundred. Toolbar on top, the pager at the bottom edge, and a page holds the whole rows that fit - none cut, no scrollbar; blank surface stands only under a short last page, the few rows a search leaves and the empty message. In a parent without a height the table is as tall as its rows, as ever.";
 
 interface Stop {
   id: string;
