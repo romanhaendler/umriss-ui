@@ -712,6 +712,7 @@
     border-top: 1px solid var(--u-hairline);
     font-size: var(--u-text-sm);
     color: var(--u-color-text-secondary);
+    container-type: inline-size;
   }
 
   .paginationControls {
@@ -737,6 +738,21 @@
 
   .turned {
     transform: rotate(180deg);
+  }
+
+  /* Where the four steps and the status (263 px under a finger) no longer fit
+     on a line, the status stands above the steps and the steps stay one row. */
+  @container (max-width: 262px) {
+    .pageSteps {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .paginationStatus {
+      order: -1;
+      flex-basis: 100%;
+      text-align: center;
+    }
   }
 
   .paginationStatus {
