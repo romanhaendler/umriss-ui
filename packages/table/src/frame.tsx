@@ -180,7 +180,7 @@ export function Frame({
   /* Without a page, in a frame, the totals footer stands at the frame's bottom
      edge: the table is at least the scroll area tall, and the last row of the
      body - 100% tall, in the body's own section - takes what the rows leave. */
-  const footerAtEdge = registry.framed && !pageSize && footerShown && !maxHeight && !loading && error === undefined && projection.filtered.length > 0;
+  const footerAtEdge = registry.framed && !pageSize && footerShown && !maxHeight && !loading && error === undefined && layout.projection.filtered.length > 0;
   const heldHeight = registry.framed && pageSize && pitch && !maxHeight ? (layout.headRows + askedLines + (footerShown ? 1 : 0)) * pitch : 0;
 
   const body: BodyContext = {
