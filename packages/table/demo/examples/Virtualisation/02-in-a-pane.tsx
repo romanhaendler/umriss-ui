@@ -3,7 +3,7 @@ import { Text } from "@umriss-ui/core";
 import { Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Inside a pane of fixed height";
-export const lead = "In a parent of definite height the table stays within it: the toolbar keeps its place, the rows scroll, and `virtual` renders only the window - no `maxHeight` needed.";
+export const lead = "In a parent of definite height the table fills it: the toolbar keeps its place, the rows scroll, and `virtual` renders only the window - no `maxHeight` needed.";
 
 interface Stop {
   id: string;

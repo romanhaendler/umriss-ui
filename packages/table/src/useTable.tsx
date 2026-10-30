@@ -739,6 +739,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     rowCount: server ? rowCount : b.filtered.length,
     server,
     request: server ? request : null,
+    framed: registry.framed,
   };
 
   // Idempotent for the same snapshot (registry.ts, guarantee 1).
