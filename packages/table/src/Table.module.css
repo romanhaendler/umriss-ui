@@ -735,8 +735,13 @@
     gap: var(--u-space-2);
   }
 
+  .turned {
+    transform: rotate(180deg);
+  }
+
   .paginationStatus {
-    margin-right: var(--u-space-2);
+    margin-inline: var(--u-space-2);
+    white-space: nowrap;
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);
     letter-spacing: var(--u-tracking-figures);

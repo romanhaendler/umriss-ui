@@ -177,13 +177,22 @@ describe("Server mode - the request goes out", () => {
     render(<Server />);
     settle();
     const bar = screen.getByRole("navigation", { name: "Pagination" });
-    expect(bar.textContent).toContain("95 entries");
+    expect(bar.textContent).toContain("1–10 of 95");
     expect(bar.textContent).toContain("Page 1 of 10");
-    fireEvent.click(within(bar).getByRole("button", { name: "Next" }));
+    fireEvent.click(within(bar).getByRole("button", { name: "Next page" }));
     expect(reports.at(-1)!.page).toBe(2);
     settle();
     expect(bodyNumbers()[0]).toBe("A-011");
     expect(bar.textContent).toContain("Page 2 of 10");
+  });
+
+  it("sends one request for the last page", () => {
+    render(<Server />);
+    settle();
+    const before = reports.length;
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Pagination" })).getByRole("button", { name: "Last page" }));
+    expect(reports).toHaveLength(before + 1);
+    expect(reports.at(-1)!.page).toBe(10);
   });
 
   it("counts the matches in the toolbar by the server's count, and offers the way back when nothing matches", () => {

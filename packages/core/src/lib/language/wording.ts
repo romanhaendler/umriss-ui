@@ -211,8 +211,14 @@ export interface Wording {
       formats, where the caller has them - a table over a server has "Page 1 of
       100,000". */
   pageOfPages: (page: number, total: number, formatted?: { page: string; total: string }) => string;
+  /** "13–24 of 120" in the pagination bar. `formatted` carries the three
+      numbers in the provider's formats, where the caller has them. */
+  pageRange: (from: number, to: number, total: number, formatted?: { from: string; to: string; total: string }) => string;
+  /** The names of the four steps of the pagination bar. */
+  firstPage: string;
   previousPage: string;
   nextPage: string;
+  lastPage: string;
   /** The two buttons in the column filter's footer. */
   filterReset: string;
   filterDone: string;
@@ -874,8 +880,11 @@ export const DEFAULT_WORDING: Wording = {
   rows: "Rows",
   rowsPerPage: "Rows per page",
   pageOfPages: (page, total, formatted) => `Page ${formatted?.page ?? page} of ${formatted?.total ?? total}`,
-  previousPage: "Back",
-  nextPage: "Next",
+  pageRange: (from, to, total, formatted) => `${formatted?.from ?? from}–${formatted?.to ?? to} of ${formatted?.total ?? total}`,
+  firstPage: "First page",
+  previousPage: "Previous page",
+  nextPage: "Next page",
+  lastPage: "Last page",
   filterReset: "Reset",
   filterDone: "Done",
 

@@ -276,18 +276,53 @@ describe("Paging", () => {
     const bar = screen.getByRole("navigation", { name: "Pagination" });
     expect(table.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(bar.textContent).toContain("Page 1 of 3");
-    expect(bar.textContent).toContain("5 entries");
-    fireEvent.click(within(bar).getByRole("button", { name: "Next" }));
+    expect(bar.textContent).toContain("1–2 of 5");
+    fireEvent.click(within(bar).getByRole("button", { name: "Next page" }));
     expect(rowHeaders(container)).toEqual(["B-3", "B-4"]);
   });
 
   it("keeps the page and its two steps together, so that a narrow bar wraps them as one", () => {
     render(<List />);
     const bar = screen.getByRole("navigation", { name: "Pagination" });
-    const back = within(bar).getByRole("button", { name: "Back" });
-    const next = within(bar).getByRole("button", { name: "Next" });
+    const back = within(bar).getByRole("button", { name: "Previous page" });
+    const next = within(bar).getByRole("button", { name: "Next page" });
     expect(back.parentElement).toBe(next.parentElement);
     expect(next.parentElement!.textContent).toContain("Page 1 of 3");
+  });
+
+  it("steps by four named buttons in order - first, previous, page, next, last - and says the range", () => {
+    render(<List />);
+    const bar = screen.getByRole("navigation", { name: "Pagination" });
+    const steps = within(bar).getByRole("button", { name: "Next page" }).parentElement!;
+    expect(Array.from(steps.children).map((child) => child.getAttribute("aria-label") ?? child.textContent)).toEqual([
+      "First page",
+      "Previous page",
+      "Page 1 of 3",
+      "Next page",
+      "Last page",
+    ]);
+    expect(bar.textContent).toContain("1–2 of 5");
+  });
+
+  it("disables first and previous on page 1, next and last on the last page, and lands on both ends", () => {
+    render(<List />);
+    const bar = screen.getByRole("navigation", { name: "Pagination" });
+    const step = (name: string) => within(bar).getByRole("button", { name }) as HTMLButtonElement;
+    const disabled = () => ["First page", "Previous page", "Next page", "Last page"].map((name) => step(name).disabled);
+    expect(disabled()).toEqual([true, true, false, false]);
+    fireEvent.click(step("Last page"));
+    expect(bar.textContent).toContain("Page 3 of 3");
+    expect(bar.textContent).toContain("5–5 of 5");
+    expect(disabled()).toEqual([false, false, true, true]);
+    fireEvent.click(step("First page"));
+    expect(bar.textContent).toContain("Page 1 of 3");
+  });
+
+  it("stays when everything fits on one page", () => {
+    render(<List rows={ORDERS.slice(0, 2)} />);
+    const bar = screen.getByRole("navigation", { name: "Pagination" });
+    expect(bar.textContent).toContain("1–2 of 2");
+    expect((within(bar).getByRole("button", { name: "Last page" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });
 

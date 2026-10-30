@@ -8,7 +8,7 @@
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Button, Checkbox, GripGlyph, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, Button, Checkbox, EndGlyph, GripGlyph, IconButton, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
@@ -579,9 +579,15 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
 
+  // The rows this page holds: 13-24 of 120; 0-0 of 0 for none.
+  const from = count === 0 ? 0 : (snapshot.page - 1) * snapshot.pageSize + 1;
+  const to = Math.min(snapshot.page * snapshot.pageSize, count);
+  const atFirst = snapshot.page <= 1;
+  const atLast = snapshot.page >= snapshot.pageCount;
+
   const bar = (
     <nav {...rest} aria-label={wording.pagination} className={cx(styles.pagination, className)}>
-      <span>{wording.entries(count, formats.count(count))}</span>
+      <span>{wording.pageRange(from, to, count, { from: formats.count(from), to: formats.count(to), total: formats.count(count) })}</span>
       <div className={styles.paginationControls}>
         <label className={styles.pageSize}>
           {wording.rows}
@@ -600,19 +606,25 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
             ))}
           </Select>
         </label>
-        {/* The page and its two steps wrap as one: "Next" alone on a line
-            of its own, split from "Back", read as a control of its own. */}
+        {/* The four steps and the page wrap as one: a step alone on a line
+            of its own, split from its pair, read as a control of its own. */}
         <span className={styles.pageSteps}>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.firstPage} onClick={() => snapshot.setPage(1)}>
+            <EndGlyph className={styles.turned} />
+          </IconButton>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={() => snapshot.setPage(snapshot.page - 1)}>
+            <AngleGlyph className={styles.turned} />
+          </IconButton>
           <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
               page: formats.count(snapshot.page),
               total: formats.count(snapshot.pageCount),
             })}</span>
-          <Button size="sm" disabled={snapshot.page <= 1} onClick={() => snapshot.setPage(snapshot.page - 1)}>
-            {wording.previousPage}
-          </Button>
-          <Button size="sm" disabled={snapshot.page >= snapshot.pageCount} onClick={() => snapshot.setPage(snapshot.page + 1)}>
-            {wording.nextPage}
-          </Button>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.nextPage} onClick={() => snapshot.setPage(snapshot.page + 1)}>
+            <AngleGlyph />
+          </IconButton>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.lastPage} onClick={() => snapshot.setPage(snapshot.pageCount)}>
+            <EndGlyph />
+          </IconButton>
         </span>
       </div>
     </nav>

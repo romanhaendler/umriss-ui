@@ -16,7 +16,7 @@ test("the next page: the previous page kept and busy at its height, then the ser
   const example = page.locator(`[data-example="${ID}"]`);
   const table = example.locator("table");
   const before = await table.boundingBox();
-  await example.getByRole("button", { name: "Next" }).click();
+  await example.getByRole("button", { name: "Next page" }).click();
   await expect(table).toHaveAttribute("aria-busy", "true");
   await expect(table).toHaveAttribute("data-stale", "true");
   await expect(table.locator("tbody tr[aria-hidden]")).toHaveCount(0);
@@ -45,7 +45,7 @@ test("'select all' selects the page and says so; a key from another page stays",
   await openExample(page, "server-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   await example.getByRole("checkbox", { name: "Select REQ-0000001" }).check({ force: true });
-  await example.getByRole("button", { name: "Next" }).click();
+  await example.getByRole("button", { name: "Next page" }).click();
   await expect(example.locator("tbody th").first()).toHaveText("REQ-0000011");
   await example.getByRole("checkbox", { name: "Select all on this page" }).check({ force: true });
   await expect(example.getByText("11 selected", { exact: true })).toBeVisible();
@@ -60,7 +60,7 @@ test("a failed fetch: the message in place of the rows, in the height of a page,
   const example = page.locator(`[data-example="a-failed-fetch"]`);
   const table = example.locator("table");
   const before = await table.boundingBox();
-  await example.getByRole("button", { name: "Next" }).click();
+  await example.getByRole("button", { name: "Next page" }).click();
   await expect(example.getByRole("alert")).toContainText("could not be loaded");
   expect((await table.boundingBox())!.height).toBeGreaterThan(before!.height * 0.8);
   await expect(example).toHaveScreenshot(`server-error-${info.project.name}.png`);
@@ -88,7 +88,7 @@ test("sums from the server: the value over every match, skeleton while the next 
   const footer = example.locator("tfoot");
   await expect(footer).toContainText("1,000");
   await expect(example).toHaveScreenshot(`server-footer-value-${info.project.name}.png`);
-  await example.getByRole("button", { name: "Next" }).click();
+  await example.getByRole("button", { name: "Next page" }).click();
   await expect(example.locator("table")).toHaveAttribute("aria-busy", "true");
   await expect(example).toHaveScreenshot(`server-footer-skeleton-${info.project.name}.png`);
   await expect(example.locator("table")).not.toHaveAttribute("aria-busy", "true");
