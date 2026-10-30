@@ -95,11 +95,12 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   pageSize: number;
   /** Sets the size the user or the application chose, and ends any fitted one.
       The page follows the anchor row (focus, else the current row, else the top
-      row) and does not go back to page one. */
-  setPageSize: (size: number) => void;
-  /** The chosen size - the option until someone chooses - which the view
-      carries and the frame's held height is made of; never the fitted one. */
-  chosenPageSize: number;
+      row) and does not go back to page one. `"fit"` takes the choice back, so
+      the option or the frame decides. */
+  setPageSize: (size: number | "fit") => void;
+  /** The size someone chose, which the view carries; `null` while none is
+      chosen. Never the fitted one. */
+  chosenPageSize: number | null;
   /** The option's size, the one a table starts with. */
   defaultPageSize: number;
   /** Who the anchor is, asked when the page size changes: the key of the row
@@ -171,9 +172,9 @@ export function useTableState<Z, K extends string = string>(
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => sortOf(initialView));
   const [page, setPageRaw] = useState(initialView?.page ?? 1);
-  const [pageSize, setPageSizeRaw] = useState(
-    initialView?.pageSize ?? options.pageSize ?? 10,
-  );
+  const [chosen, setPageSizeRaw] = useState<number | null>(initialView?.pageSize ?? null);
+  const defaultPageSize = options.pageSize ?? 10;
+  const pageSize = chosen ?? defaultPageSize;
   const [fitted, setFittedRaw] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<readonly string[]>([]);
   const [hidden, setHidden] = useState<readonly K[]>(initialView?.hidden ?? []);
@@ -184,7 +185,7 @@ export function useTableState<Z, K extends string = string>(
     setSearchRaw(view.search ?? "");
     setSort(sortOf(view));
     setPageRaw(view.page ?? 1);
-    setPageSizeRaw(view.pageSize ?? options.pageSize ?? 10);
+    setPageSizeRaw(view.pageSize ?? null);
     setFittedRaw(null);
     setHidden(view.hidden ?? []);
     setOrder(view.order ?? []);
@@ -297,11 +298,11 @@ export function useTableState<Z, K extends string = string>(
     return 1;
   }, [rowKey]);
 
-  const setPageSize = useCallback((size: number) => {
-    setPageRaw(pageKeeping(size));
-    setPageSizeRaw(size);
+  const setPageSize = useCallback((size: number | "fit") => {
+    setPageRaw(pageKeeping(size === "fit" ? defaultPageSize : size));
+    setPageSizeRaw(size === "fit" ? null : size);
     setFittedRaw(null);
-  }, [pageKeeping]);
+  }, [pageKeeping, defaultPageSize]);
 
   const setFittedPageSize = useCallback((size: number | null) => {
     setPageRaw(pageKeeping(size ?? latest.current.chosen));
@@ -372,10 +373,8 @@ export function useTableState<Z, K extends string = string>(
     });
   }, []);
 
-  /* What is reported is what deviates from the default - otherwise every kept
-     view would carry a page size although the user did nothing. The default of
-     the page size is the application's setting, not the built-in ten. */
-  const defaultPageSize = options.pageSize ?? 10;
+  /* What is reported is a choice - otherwise every kept view would carry a
+     page size although the user did nothing. */
 
   /* The widths declared in the columns are the default. Without this
      comparison every view would carry widths before the user had dragged at
@@ -415,7 +414,7 @@ export function useTableState<Z, K extends string = string>(
          the view of a virtualised table would be a promise nobody redeems on
          opening. */
       ...(!virtual && projection.page > 1 ? { page: projection.page } : {}),
-      ...(!virtual && pageSize !== defaultPageSize ? { pageSize } : {}),
+      ...(!virtual && chosen !== null ? { pageSize: chosen } : {}),
       ...(hidden.length ? { hidden } : {}),
       ...(order.length ? { order } : {}),
       ...(Object.keys(changedWidths).length ? { widths: changedWidths } : {}),
@@ -426,8 +425,7 @@ export function useTableState<Z, K extends string = string>(
       sort,
       isDefaultSort,
       projection.page,
-      pageSize,
-      defaultPageSize,
+      chosen,
       hidden,
       order,
       changedWidths,
@@ -450,7 +448,7 @@ export function useTableState<Z, K extends string = string>(
     setPage,
     pageSize: fitted ?? pageSize,
     setPageSize,
-    chosenPageSize: pageSize,
+    chosenPageSize: chosen,
     setAnchor: (read) => {
       anchorKey.current = read;
     },
