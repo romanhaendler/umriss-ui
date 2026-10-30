@@ -125,13 +125,21 @@ export function Frame({
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
   useFit(registry, tableRef, loading, pitch);
+  /* The anchor of a page-size change: the row with focus, and the current row. */
+  const setAnchor = registry.hook?.tableState.setAnchor;
+  useLayoutEffect(() => {
+    setAnchor?.(() => {
+      const row = tableRef.current?.tBodies[0]?.contains(document.activeElement) ? (document.activeElement as Element).closest<HTMLElement>("tr[data-motion]") : null;
+      return { focus: row?.dataset.motion ?? null, current: currentRow };
+    });
+  });
   useCurrentRowInView(registry, currentRow);
   useRevealedRow(registry);
 
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
   const moving = registry.hook && !registry.hook.tableState.virtual ? registry.hook.publicSnapshot : null;
-  useLineMotion(tableRef, moving ? `${moving.grouping.join("|")}#${moving.folded.join("|")}` : "");
+  useLineMotion(tableRef, moving ? `${moving.grouping.join("|")}#${moving.folded.join("|")}|${moving.pageSize}` : "");
 
   /* A selection the user changed is said as a count; one handed in and changed
      by the application is not. */
