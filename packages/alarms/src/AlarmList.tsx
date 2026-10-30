@@ -37,7 +37,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentPropsWithRef, KeyboardEvent } from "react";
 import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
-import { useTable } from "@umriss-ui/table";
+import { Pagination, useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
 import { RATE_WINDOW_MS, countAcknowledgeable, isActive } from "./alarmModel";
 import { PriorityMark, priorityWord } from "./PriorityMark";
@@ -105,7 +105,10 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
   density?: "regular" | "compact";
   /** Height of the list's scroll area, e.g. `"480px"`: a list of hundreds of
       rows scrolls inside it, under its sticky header, instead of stretching the
-      page. Only the rows in view are rendered then; without it, all are. */
+      page. Only the rows in view are rendered then. Without it the list is as
+      tall as its rows - or, in a pane of definite height, fills the pane and
+      pages with as many whole rows as fit, not re-cut while focus is in the
+      rows. */
   maxHeight?: string;
   /** The view of hidden alarms is on. The list does not filter - the
       projection does, with the table's own `filter` and `isHidden`; this
@@ -295,7 +298,7 @@ function Body({
   const [keyedId, setKeyedId] = useState<string | null>(null);
   /* A bounded scroll area windows its rows: a flood of thousands stays a
      screenful of nodes. Without a bound the list shows every row. */
-  const { Table, Column } = useTable(projection.visible, { rowKey: (row) => row.id, selection, virtual: maxHeight !== undefined });
+  const { Table, Column, framed } = useTable(projection.visible, { rowKey: (row) => row.id, selection, virtual: maxHeight !== undefined });
 
   const alarms = useMemo(() => projection.filtered.map((row) => row.alarm), [projection.filtered]);
 
@@ -520,7 +523,7 @@ function Body({
         {wording.alarmActiveUnacknowledged(spoken.count)}
       </div>
 
-      <div ref={tableBox}>
+      <div ref={tableBox} className={styles.tableBox}>
       <Table
         grid
         aria-label={ariaLabelledBy === undefined ? (ariaLabel ?? wording.alarmList) : undefined}
@@ -604,6 +607,9 @@ function Body({
           {(ms) => <span className={styles.duration}>{durationWord(ms, wording)}</span>}
         </Column>
         <Column value="frequency" label={wording.alarmColumnFrequency} format="count" sortable={false} />
+        {/* In a pane of definite height the list pages with a fitted page; new
+            alarms then do not roll it away under the operator. */}
+        {framed && maxHeight === undefined && <Pagination />}
       </Table>
       </div>
 
