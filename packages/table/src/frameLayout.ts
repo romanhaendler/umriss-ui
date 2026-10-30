@@ -109,6 +109,18 @@ export function frameLayout({
   };
 
   const rows = projection.visible;
+  /* ARIA numbers the rows of the whole set, not of the slice standing in the
+     document: a virtual window or a page. Without either the document holds
+     them all and the browser counts. */
+  const paged = registry.paginates() && !virtual && !entries;
+  const numbered = virtual !== undefined || paged;
+  const rowTotal = snapshot.server ? snapshot.rowCount : (projection.lines ?? projection.shown ?? projection.filtered).length;
+  const first = projection.visibleLines?.find((l) => l.kind !== "header" || !l.continued);
+  const pageStart = !paged
+    ? 0
+    : projection.lines && first
+      ? Math.max(0, projection.lines.findIndex((l) => l === first || (l.kind === "row" && first.kind === "row" && l.row === first.row)))
+      : (projection.page - 1) * snapshot.pageSize;
   /* In server mode the aggregates would be the page's, standing where the
      filtered set's belong - the footer shows the server's totals, or none; under
      an error the totals are the old request's, so none. */
@@ -137,6 +149,9 @@ export function frameLayout({
     trailing,
     columnCount,
     headRows,
+    numbered,
+    rowTotal,
+    pageStart,
     pins,
     pinned,
     blocks,
