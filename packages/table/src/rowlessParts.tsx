@@ -597,7 +597,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   const { snapshot } = connection;
   /* "Fit" stands while no size is chosen, in a frame that cuts its page. */
   const chosen = connection.registry.hook?.tableState.chosenPageSize ?? null;
-  const fitOffered = connection.registry.framed && !connection.registry.server;
+  const fitOffered = connection.registry.framed;
   const fitting = fitOffered && chosen === null;
   const sizes = fitting || pageSizes.includes(snapshot.pageSize)
     ? pageSizes

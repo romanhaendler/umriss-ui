@@ -729,6 +729,17 @@ export class Registry {
     this.structure++;
   }
 
+  /** Server mode: the page size the frame last measured, `null` before the
+      first measurement. A request waits while the page in the state is not it. */
+  fitMeasured: number | null = null;
+
+  setFitMeasured(size: number) {
+    if (this.fitMeasured === size) return;
+    this.fitMeasured = size;
+    this.structure++;
+    this.commit();
+  }
+
   setFrameTable(table: HTMLTableElement | null) {
     this.frameTable = table;
   }
