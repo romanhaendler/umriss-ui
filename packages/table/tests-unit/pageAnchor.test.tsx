@@ -113,3 +113,26 @@ describe("a page-size change keeps the anchor", () => {
     expect(screen.queryByRole("status")).toBeNull();
   });
 });
+
+describe("a grouped table", () => {
+  it("shows the anchor row on the page the new size cuts, headers counted", () => {
+    const grouped = Array.from({ length: 60 }, (_, i) => ({ id: `r${i}`, g: `G${Math.floor(i / 7)}` }));
+    function Grouped() {
+      const t = useTable(grouped, { rowKey: (r) => r.id, pageSize: 10, defaultGrouping: ["g"], initialView: { page: 4 } });
+      return (
+        <t.Table aria-label="G">
+          <t.Column value="g" label="G" />
+          <t.Column value="id" label="Id" rowHeader />
+          <Pagination />
+        </t.Table>
+      );
+    }
+    render(<Grouped />);
+    const ids = () => Array.from(document.querySelectorAll<HTMLElement>("tr[data-line='row']")).map((tr) => tr.dataset.motion);
+    const anchor = ids()[0];
+    for (const size of ["25", "50"]) {
+      fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: size } });
+      expect(ids()).toContain(anchor);
+    }
+  });
+});

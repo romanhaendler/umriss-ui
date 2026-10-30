@@ -13,7 +13,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { filterSort, groupStage, pageStage, tableModel } from "./tableModel";
-import { linesOf, rowsOf } from "./grouping";
+import { linesOf, pageLines, rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
@@ -279,14 +279,22 @@ export function useTableState<Z, K extends string = string>(
   const anchorKey = useRef<() => { focus: string | null; current: string | null | undefined }>(() => ({ focus: null, current: null }));
   const pageKeeping = useCallback((size: number) => {
     const shown = latest.current.projection;
-    const all: readonly Z[] = shown.lines ? shown.lines.flatMap((line) => (line.kind === "row" ? [line.row] : [])) : shown.filtered;
+    const all: readonly Z[] = shown.lines ? rowsOf(shown.lines) : shown.filtered;
     const keys = all.map(rowKey);
     const onPage = new Set(shown.visible.map(rowKey));
     const { focus, current } = anchorKey.current();
     const at = [focus, current && onPage.has(current) ? current : null, shown.visible[0] ? rowKey(shown.visible[0]) : null]
       .map((key) => (key == null ? -1 : keys.indexOf(key)))
       .find((index) => index >= 0);
-    return at === undefined ? 1 : Math.floor(at / size) + 1;
+    if (at === undefined) return 1;
+    if (!shown.lines) return Math.floor(at / size) + 1;
+    /* Grouped pages are cut by lines, headers counted: ask the cut itself. */
+    const row = all[at];
+    const count = pageLines(shown.lines, 1, size).pageCount;
+    for (let page = 1; page <= count; page++) {
+      if (rowsOf(pageLines(shown.lines, page, size).lines).includes(row as Z)) return page;
+    }
+    return 1;
   }, [rowKey]);
 
   const setPageSize = useCallback((size: number) => {
