@@ -26,6 +26,31 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
+
+### Changed
+
+- **In a parent of definite height a table is exactly as tall as the parent, with no prop** - with no rows, five or a hundred: the toolbar on top, the pager at the bottom edge, the surface under the last row blank and unlined. It asks of its parent only the height of its held page, never its rows, so beside a taller neighbour it fills the row and the row shrinks back with the neighbour (ADR-0080; ADR-0050 amended). A parent whose height comes from the table itself, and a printout, see the table as tall as its page.
+  - Migration: to keep the old look, give the table `maxHeight` or put it in a parent without a definite height. A fixed-height Card whose body is smaller than the table needs `min-height: 0` on its body.
+- **With a Pagination in such a frame the page is what the frame holds** (a **Fitted page**): as many whole lines as fit between the head and the pager - group headers and the totals footer counted, at least one, no row cut and no scrollbar. `pageSize` is the page in flow and the start value before the first measurement; `snapshot.pageSize` is the page held now (ADR-0042 amended).
+  - Migration: nothing for tables in flow or with `maxHeight`; in a pane of fixed height drop a `pageSize` tuned to the pane.
+- **A page-size change keeps the row the user looks at**: `setPageSize`, a chosen size, a frame resize or a density change re-cut the pages so that the focused row - else the current row, else the top row - stays on the page, instead of going back to page one. A frame resize waits until the size has settled and while focus is in the rows; a search, a filter and a sort still go back to page one.
+  - Migration: call `setPage(1)` after `setPageSize` where page one was wanted.
+- **The pager says the range and steps by glyphs**: "13–24 of 120" where it said the entry count, beside "Page 2 of 10"; its steps are four icon buttons - first, previous, the page, next, last - named in a tooltip, and it stays visible with one page.
+  - Migration: find the steps by their accessible names ("Previous page", "Next page") instead of the text "Back"/"Next"; the entry count is no longer in the pager.
+- **A page size picked in a filled frame wins** over the fitted page and is kept in the view; "Fit" is never written to the view, and a frame resize under "Fit" fires no `onViewChange`.
+  - Migration: none; pass no `pageSize` in `initialView` to keep fitting.
+- **Server mode in a filled frame asks for the fitted page**: the first request waits for the first measurement and carries it, a resize sends one request after 300 ms of rest, and meanwhile the rows that stay stand and new slots show placeholders (ADR-0072 amended).
+  - Migration: none for a server that answers the `pageSize` the request names; one that assumed the option's size now receives the fitted one.
+
+### Added
+
+- **`framed`** on what `useTable` returns and on the snapshot: whether the table fills a parent of definite height - for example to offer "View all" in a dashboard widget.
+- **"Fit" in the page-size selector**, first and preselected in a filled frame; `setPageSize("fit")` goes back to it.
+- **Steps to the first and the last page** in `Pagination`; in server mode "last page" is one request for that page.
+- **A paged table tells a screen reader where a row stands**: `aria-rowcount` and `aria-rowindex` count the whole set, so a row on page 2 is "row 14 of 121"; paging announces the new range in a polite status message, a resize nothing.
+- **A development warning** when fewer than three lines fit a table's frame.
+
 ## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
 
 ### Changed

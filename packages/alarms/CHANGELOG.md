@@ -12,6 +12,13 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
+
+### Changed
+
+- **`AlarmList` in a pane of definite height fills it and pages** with as many whole rows as fit, instead of showing every row, so new alarms do not roll the list away under the operator; the page is not re-cut while focus is in the rows. With `maxHeight` it scrolls virtually and in flow it shows every row, as before.
+  - Migration: pass `maxHeight` for the virtual scrolling list, or put the list in a flowing parent.
+
 ## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
 
 No change a caller sees; the number moves with the other packages (ADR-0066). The list's state and duration cells are styled apart, so a change to one can no longer move the other.

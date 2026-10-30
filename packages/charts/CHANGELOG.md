@@ -30,6 +30,10 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
+
+No change of its own; the number moves with the other packages (ADR-0066).
+
 ## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
 
 No change of its own; the number moves with the other packages (ADR-0066).
