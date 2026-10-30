@@ -70,7 +70,7 @@ test("a sticky group header while its group scrolls", async ({ page }, info) => 
 test("a page that begins inside a group", async ({ page }, info) => {
   await openExample(page, "grouping", "paging");
   const table = example(page, "paging");
-  await table.getByRole("button", { name: "Next" }).click();
+  await table.getByRole("button", { name: "Next page" }).click();
   await expect(table.locator("tbody tr[data-continued]")).toHaveCount(1);
   await expect(table).toHaveScreenshot(shot("continued", info.project.name));
 });

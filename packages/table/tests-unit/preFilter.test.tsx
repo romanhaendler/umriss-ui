@@ -61,13 +61,13 @@ describe("D4: a pre-filter may stand in the call", () => {
   it("renders and pages", () => {
     const { container } = render(<List plant="Plant A" pageSize={1} />);
     expect(rowHeaders(container)).toEqual(["A-1"]);
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(rowHeaders(container)).toEqual(["A-2"]);
   });
 
   it("a change of the pre-filter does not reset the page", () => {
     const { container, rerender } = render(<List plant="Plant A" pageSize={1} />);
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(rowHeaders(container)).toEqual(["A-2"]);
     rerender(<List plant="Plant B" pageSize={1} />);
     expect(rowHeaders(container)).toEqual(["B-2"]);

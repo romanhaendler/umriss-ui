@@ -50,7 +50,8 @@ the layout grid the **Month grid** entry in `CONTEXT.md` forbids, and
 |---|---|
 | `CrossGlyph` | Input, Select, Combobox, DatePicker, DateTimePicker, RangeTrigger (the clearing cross); Alert, Modal, Toast (closing); Tag, MultiSelect chip (removing) |
 | `PlusGlyph`, `MinusGlyph` | NumberInput |
-| `AngleGlyph` | TreeView; the table's row expander, the schedule's lane-group fold and the calculation's disclosure, through core's public entry |
+| `AngleGlyph` | TreeView; the table's pagination bar (previous and next, turned); the table's row expander, the schedule's lane-group fold and the calculation's disclosure, through core's public entry |
+| `EndGlyph` | the table's pagination bar: the last page, turned by 180 degrees the first |
 | `CalendarGlyph` | DatePicker; DateRangePicker with `range` |
 | `ClockGlyph` | DateTimePicker, DateTimeRangePicker |
 | `GripGlyph` | Splitter |
