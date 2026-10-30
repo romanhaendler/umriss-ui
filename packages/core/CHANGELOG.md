@@ -27,6 +27,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
+
+### Added
+
+- **`EndGlyph`**, the chevron against a bar - the step to the last item of a sequence, turned for the first; drawn like every glyph of the set (`docs/glyphs.md`).
+- **Wording for the pager**: `pageRange` ("13–24 of 120", "13–24 von 120"), `firstPage` and `lastPage` ("First page", "Last page"; "Erste Seite", "Letzte Seite") and `fit` ("Fit", "Passend"), in English and German.
+
+### Changed
+
+- **`previousPage` and `nextPage` read "Previous page" and "Next page"** ("Vorherige Seite", "Nächste Seite"): they name the table pager's glyph steps now, where they were the words "Back" and "Next" on its buttons.
+  - Migration: an application that overrides `previousPage` or `nextPage` keeps its own text; a test that found the steps by "Back"/"Next" finds them by the new names.
+
 ## 0.50.0 – Straightened: dialogs focus without React's internals, tables work per change, the edges 0.49.0 left (Oct. 2026)
 
 ### Changed

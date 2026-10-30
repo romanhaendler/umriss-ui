@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Date:   2026-10-30
 
 # A page is what its frame holds
@@ -336,3 +336,14 @@ narrower and wraps less in a narrow pane.
   to. Accepted.
 - Every table in a sized parent looks different after this. Minor versions
   for table and alarms.
+
+## Comments
+
+2026-10-30 (coordinator) - delivered in 0.51.0. The nine tickets were implemented on parallel agents, each in its own checkout, merged, code-reviewed on both axes (standards and spec), the review's findings fixed in one pass, and run through the full browser suite: 4,379 passed; the 52 failures were screenshots of the new pager, "Fit" and the two new examples, each looked at and then written.
+
+Where the delivery departs from the decisions above:
+- `framed` is true only where `height: 100%` resolves and the parent's height does not come from the table (it stays true once it was, while the percentage resolves). A content-sized grid or flex cell - every demo stage - is flow; without this the alarm list paged and "Fit" stood in tables that never fill anything. Beside a taller neighbour the table is framed, as decided.
+- The pager's step group wraps in a pane narrower than its one line (263 px under a finger): the page status stands above the four steps, which stay one row.
+- Ticket 03's prototype answered the feedback-loop question in Chromium and WebKit (62 s of resizing, no loop, the row shrinks back); Firefox is to be checked by the maintainer (prototype on local branch `prototype/table-fills-its-frame`).
+- In a virtual table in a pane, a resize loses a focused row in Chromium and resets the scroll in WebKit - on main as well; not this spec's change.
+- The VoiceOver check of ticket 08 was not done by an agent.
