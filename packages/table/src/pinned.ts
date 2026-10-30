@@ -53,3 +53,6 @@ export function pinnedCell(blocks: PinBlocks, first: number, last = first): Pinn
 /** The head row that holds the columns' cells: the last one, under the row of a
     `ColumnGroup`'s cells when there is one. */
 export const columnRow = (table: HTMLTableElement | null | undefined) => table?.tHead?.rows?.[table.tHead.rows.length - 1];
+
+/** What one line of the table is tall: the column row's height, 0 where there is none. */
+export const linePitch = (table: HTMLTableElement | null | undefined) => columnRow(table)?.getBoundingClientRect().height ?? 0;

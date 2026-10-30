@@ -102,6 +102,10 @@ export interface TreeInput<Z> {
   admit?: (row: Z) => boolean;
 }
 
+/** How many lines the filtered set has: its rows, a grouping's headers and a tree's shown rows counted. */
+export const lineCount = (projection: Pick<TableProjection<unknown>, "lines" | "shown" | "filtered">) =>
+  (projection.lines ?? projection.shown ?? projection.filtered).length;
+
 /** The table's pipeline as a pure function - filter, sort, page over rows and model columns. */
 export interface TableProjection<Z, K extends string = string> {
   /** The visible columns in their order – the basis for the header row, the

@@ -11,7 +11,8 @@
 import { useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { warnOnce } from "./dev";
-import { columnRow } from "./pinned";
+import { linePitch } from "./pinned";
+import { lineCount } from "./model/tableModel";
 import type { Registry } from "./registry";
 
 /** How long the scroll area's height must hold before the page grows or shrinks to it. */
@@ -43,13 +44,12 @@ export function fittedLines(room: number, pitch: number, now: number): number {
 
 const linesOf = (registry: Registry) => {
   if (registry.server) return registry.hook?.publicSnapshot.rowCount ?? 0;
-  const projection = registry.projection();
-  return (projection.lines ?? projection.shown ?? projection.filtered).length;
+  return lineCount(registry.projection());
 };
 
 /** The head, the foot and the room between them in a scroll area. */
 function measure(table: HTMLTableElement, scroll: HTMLElement) {
-  const pitch = columnRow(table)?.getBoundingClientRect().height ?? 0;
+  const pitch = linePitch(table);
   const head = table.tHead?.getBoundingClientRect().height ?? 0;
   const foot = table.tFoot?.getBoundingClientRect().height ?? 0;
   return { pitch, room: scroll.clientHeight - head - foot };
@@ -61,6 +61,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     latest.current = { loading };
   });
   const seen = useRef("");
+  const seenLines = useRef(0);
 
   /* The page is cut where the table is filled, paged by the application's
      option or by this hook, and has a held height to measure against. */
@@ -96,22 +97,26 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     }
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
     /* A resize waits while focus is in the rows, so that it never pulls the row
-       from under the user; the focus leaving the rows cuts again. A density, a
-       search or a fold (`force`) applies at once. */
+       from under the user; the focus leaving the rows cuts again. A density (`force`)
+       applies at once. */
     if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
     if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
     if (registry.server) registry.setFitMeasured(next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
-     first measurement and the follow-up of a density, a search or a fold
-     never show a page that is cut wrong for a frame. */
+     first measurement and the follow-up of a density never show a page that
+     is cut wrong for a frame. A new line is cut for as well, but waits while
+     focus is in the rows like any resize. */
   const state = registry.hook?.tableState;
-  const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}|${registry.hook && !registry.server ? linesOf(registry) : 0}`;
+  const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}`;
+  const lines = registry.hook && !registry.server ? linesOf(registry) : 0;
   useLayoutEffect(() => {
-    if (seen.current === key) return;
+    const forced = seen.current !== key;
+    if (!forced && seenLines.current === lines) return;
     seen.current = key;
-    cut(true);
+    seenLines.current = lines;
+    cut(forced);
   });
 
   useLayoutEffect(() => {

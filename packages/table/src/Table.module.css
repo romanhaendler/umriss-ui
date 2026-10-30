@@ -66,6 +66,15 @@
     border-radius: inherit;
   }
 
+  /* The scroll area is as tall as its rows on paper, so a fitted page prints
+     whole. */
+  @media print {
+    .scroll {
+      height: auto;
+      overflow: visible;
+    }
+  }
+
   /* Columns beyond an edge where no block sticks: the edge fades out, so a
      value cut there reads as one that scrolls on (parts.tsx, `Beyond`). A
      mask reads only the alpha; the text colour is simply an opaque one. */
