@@ -153,6 +153,7 @@ export const GERMAN_WORDING: Wording = {
   pagination: "Seitennavigation",
   rows: "Zeilen",
   rowsPerPage: "Zeilen pro Seite",
+  fit: "Passend",
   pageOfPages: (page, total, formatted) => `Seite ${formatted?.page ?? page} von ${formatted?.total ?? total}`,
   pageRange: (from, to, total, formatted) => `${formatted?.from ?? from}–${formatted?.to ?? to} von ${formatted?.total ?? total}`,
   firstPage: "Erste Seite",

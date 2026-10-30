@@ -4,7 +4,7 @@
    fires by hand. */
 
 import { useState } from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Pagination, useTable } from "../src";
 import type { TableRequest } from "../src";
@@ -135,5 +135,18 @@ describe("Server mode in a filled frame", () => {
     resize(20 + 6 * 20);
     advance(300);
     expect(asked.at(-1)).toMatchObject({ page: 3, pageSize: 6 });
+  });
+
+  it("offers Fit in the selector and asks for the chosen size, then the fitted one again", () => {
+    render(<Server />);
+    advance(500);
+    const selector = screen.getByLabelText("Rows per page") as HTMLSelectElement;
+    expect(selector.value).toBe("fit");
+    act(() => void fireEvent.change(selector, { target: { value: "25" } }));
+    advance(500);
+    expect(asked.at(-1)).toMatchObject({ pageSize: 25 });
+    act(() => void fireEvent.change(selector, { target: { value: "fit" } }));
+    advance(500);
+    expect(asked.at(-1)).toMatchObject({ pageSize: 12 });
   });
 });
