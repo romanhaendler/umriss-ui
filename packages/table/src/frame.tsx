@@ -197,7 +197,7 @@ export function Frame({
      way. The page asked for is the option's or the chosen size, never the
      fitted one: the frame would feed itself. Without a page there is no
      held height: the rows are the height. */
-  const option = hook.tableState.chosenPageSize;
+  const option = hook.tableState.chosenPageSize ?? hook.tableState.defaultPageSize;
   const askedLines = pageSize
     ? Math.min(Math.max(shownNow, heldBefore, snapshot.pageCount > 1 ? option : 0), option) || (loading && !stale ? option : 0)
     : 0;

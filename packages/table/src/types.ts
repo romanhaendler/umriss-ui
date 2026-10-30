@@ -787,8 +787,10 @@ export interface TableSnapshot<Z> {
   pageSize: number;
   /** Changes the page, clamped to those that exist. */
   setPage: (page: number) => void;
-  /** Sets the rows per page; back to page one. */
-  setPageSize: (size: number) => void;
+  /** Sets the rows per page, a choice the view keeps; back to page one.
+      `"fit"` takes the choice back: in a filled frame the page is what the
+      frame holds again. */
+  setPageSize: (size: number | "fit") => void;
   /** The search text. */
   search: string;
   /** Sets the search text; back to page one. */
