@@ -204,7 +204,7 @@ export function GroupLine({
   line,
   index,
   absolute,
-  headRows = 1,
+  ariaRow,
   spanEntry,
   levelEntry,
   columns,
@@ -231,8 +231,8 @@ export function GroupLine({
   depth: number;
   index: number;
   absolute: number | undefined;
-  /** The rows of the head, for the ARIA row number of a virtual line. */
-  headRows?: number;
+  /** The ARIA row number: the place in the whole set, head rows counted. */
+  ariaRow?: number;
   spanEntry: ColumnEntry | undefined;
   /** The column or group key of the group's level. */
   levelEntry: ColumnEntry | undefined;
@@ -292,7 +292,7 @@ export function GroupLine({
       data-group={group.path}
       data-grid-line={grid ? `${line.kind}:${group.path}` : undefined}
       data-row={virtual ? absolute : undefined}
-      aria-rowindex={virtual ? absolute + 1 + headRows : undefined}
+      aria-rowindex={ariaRow}
       data-index={index}
       style={header ? ({ "--u-header-level": group.level } as CSSProperties) : undefined}
       aria-level={header ? group.level + 1 : depth}
