@@ -29,7 +29,7 @@ import {
   useStickyHeaderHeights,
   useVirtualPitch,
 } from "./frameEffects";
-import { errorBody, newRowBody, pageFiller, ReachRow, renderBody } from "./frameBody";
+import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
 import { columnRow } from "./pinned";
@@ -86,6 +86,23 @@ export function Frame({
     const height = columnRow(tableRef.current)?.getBoundingClientRect().height ?? 0;
     if (height && height !== pitch) setPitch(height);
   });
+  /* A change the render does not see - the reader's root font size, a theme -
+     moves the head, and the pitch with it. */
+  const headSeen = useRef<HTMLTableSectionElement | null>(null);
+  const headObserver = useRef<ResizeObserver | null>(null);
+  useLayoutEffect(() => {
+    const head = tableRef.current?.tHead ?? null;
+    if (head === headSeen.current || typeof ResizeObserver === "undefined") return;
+    headObserver.current?.disconnect();
+    headSeen.current = head;
+    if (!head) return;
+    headObserver.current = new ResizeObserver(() => {
+      const height = columnRow(tableRef.current)?.getBoundingClientRect().height ?? 0;
+      if (height) setPitch(height);
+    });
+    headObserver.current.observe(head);
+  });
+  useLayoutEffect(() => () => headObserver.current?.disconnect(), []);
   const grid = useGridState();
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
@@ -196,7 +213,7 @@ export function Frame({
     wording,
     pageSize,
     heldLines,
-    filler: footerAtEdge ? <ReachRow colSpan={columnCount} /> : pageFiller(heldLines, shownLines, pageSize, columnCount),
+    filler: pageFiller(heldLines, shownLines, pageSize, columnCount),
   };
   const shown = error !== undefined ? { body: errorBody(body, error, hook.retry), empty: true } : renderBody(body, loading, stale);
 

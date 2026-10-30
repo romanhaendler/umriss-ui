@@ -1765,6 +1765,14 @@
     min-height: 100%;
   }
 
+  /* The row that takes what the rows leave of that height - drawn, not in the
+     document, so that no row of the table is counted for it. */
+  .reaching > tbody::after {
+    content: "";
+    display: table-row;
+    height: 100%;
+  }
+
   /* ---- Grid mode (ADR-0034) --------------------------- */
 
   /* The Active cell rings itself with the shared ring, drawn inside its

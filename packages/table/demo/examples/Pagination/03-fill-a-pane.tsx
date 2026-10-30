@@ -42,7 +42,7 @@ export default function FillAPane() {
           maxHeight 200 px
         </Button>
       </div>
-      <div data-pane style={{ height }}>
+      <div data-pane style={{ height: `${height / 16}rem` }}>
         <Table aria-label="Stops" maxHeight={bounded ? "200px" : undefined}>
           <Toolbar>
             <Search placeholder="Stop or dock" />
