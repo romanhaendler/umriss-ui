@@ -15,11 +15,22 @@ const STEP = 7;
 
 function probe(frame: HTMLElement, registry: Registry) {
   const keep = frame.style.height;
+  const parent = frame.parentElement;
   const full = frame.getBoundingClientRect().height;
   frame.style.height = `calc(100% - ${STEP}px)`;
   const shorter = frame.getBoundingClientRect().height;
   frame.style.height = keep;
-  registry.setFramed(Math.abs(full - shorter - STEP) < 0.5);
+  /* The percentage resolving is not enough: a content-sized parent (a stretched
+     flex or grid item the table itself makes tall) resolves it too. The frame
+     is taken out of layout; a parent that keeps its height has one of its own.
+     The answer follows the neighbours and the page's natural height, never the
+     frame's own height, so it cannot flip back and forth. */
+  const before = parent?.getBoundingClientRect().height ?? 0;
+  const display = frame.style.display;
+  frame.style.display = "none";
+  const without = parent?.getBoundingClientRect().height ?? 0;
+  frame.style.display = display;
+  registry.setFramed(Math.abs(full - shorter - STEP) < 0.5 && Math.abs(before - without) < 0.5);
   registry.commit();
 }
 
