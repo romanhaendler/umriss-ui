@@ -160,7 +160,7 @@ test.describe("Scenarios › find a late shipment", () => {
     // 25 shipments out for delivery at page size 10: the third page has 5.
     await choose(page, "Status", "Out for delivery");
     await expect(dataRows(page)).toHaveCount(10);
-    const next = table(page).getByRole("button", { name: "Next", exact: true });
+    const next = table(page).getByRole("button", { name: "Next page", exact: true });
     const at = (await next.boundingBox())!.y;
     await next.click();
     await next.click();

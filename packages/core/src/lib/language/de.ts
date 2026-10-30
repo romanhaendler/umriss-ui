@@ -154,8 +154,11 @@ export const GERMAN_WORDING: Wording = {
   rows: "Zeilen",
   rowsPerPage: "Zeilen pro Seite",
   pageOfPages: (page, total, formatted) => `Seite ${formatted?.page ?? page} von ${formatted?.total ?? total}`,
-  previousPage: "Zurück",
-  nextPage: "Weiter",
+  pageRange: (from, to, total, formatted) => `${formatted?.from ?? from}–${formatted?.to ?? to} von ${formatted?.total ?? total}`,
+  firstPage: "Erste Seite",
+  previousPage: "Vorherige Seite",
+  nextPage: "Nächste Seite",
+  lastPage: "Letzte Seite",
   filterReset: "Zurücksetzen",
   filterDone: "Fertig",
 

@@ -106,6 +106,23 @@ export function AngleGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   );
 }
 
+/** The chevron against a bar: the last step of a sequence. Drawn pointing
+    right; turn it by 180 degrees for the first. */
+export function EndGlyph({ ref, size = 10, ...rest }: GlyphProps) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      <path
+        d="M1.5 1.5 5 5 1.5 8.5M8.5 1.5v7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** The grip a drag is taken by: two grooves. Dots are fill, and point 4 of
     the specification draws with the stroke. */
 export function GripGlyph({ ref, size = 10, ...rest }: GlyphProps) {

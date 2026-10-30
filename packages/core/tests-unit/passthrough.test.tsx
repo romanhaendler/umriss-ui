@@ -166,6 +166,7 @@ const CASES: Record<string, Case> = {
   PlusGlyph: (probe) => <core.PlusGlyph {...p(probe)} />,
   MinusGlyph: (probe) => <core.MinusGlyph {...p(probe)} />,
   AngleGlyph: (probe) => <core.AngleGlyph {...p(probe)} />,
+  EndGlyph: (probe) => <core.EndGlyph {...p(probe)} />,
   GripGlyph: (probe) => <core.GripGlyph {...p(probe)} />,
   GridGlyph: (probe) => <core.GridGlyph {...p(probe)} />,
   MeasureGlyph: (probe) => <core.MeasureGlyph {...p(probe)} />,
