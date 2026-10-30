@@ -572,22 +572,44 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   if (connection?.registry.tree) {
     warnOnce("tree-pagination", "`Pagination` is passed over with `childRows`: a page cut through a branch tears rows from their parent. A large tree uses `virtual`.");
   }
+  const current = connection?.snapshot;
+  // The rows this page holds: 13-24 of 120; 0-0 of 0 for none.
+  const count = current?.rowCount ?? 0;
+  const from = !current || count === 0 ? 0 : (current.page - 1) * current.pageSize + 1;
+  const to = current ? Math.min(current.page * current.pageSize, count) : 0;
+  const rangeText = current
+    ? wording.pageRange(from, to, count, { from: formats.count(from), to: formats.count(to), total: formats.count(count) })
+    : "";
+  /* Set by a step of the pager: the new range is spoken once the page has
+     changed. A page size change or a resize moves the page too, and says nothing.
+     The region mounts empty with the first step and takes the words a render
+     later - a region that appears with its text is often not heard - and it
+     stays in the bar, so that it is gone with the table. */
+  const stepped = useRef(false);
+  const [spoken, setSpoken] = useState<string | null>(null);
+  useEffect(() => {
+    if (!stepped.current) return;
+    stepped.current = false;
+    setSpoken(rangeText);
+  }, [current?.page]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!connection || connection.snapshot.virtual || connection.registry.tree) return null;
   const { snapshot } = connection;
-  const count = snapshot.rowCount;
   const sizes = pageSizes.includes(snapshot.pageSize)
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
-
-  // The rows this page holds: 13-24 of 120; 0-0 of 0 for none.
-  const from = count === 0 ? 0 : (snapshot.page - 1) * snapshot.pageSize + 1;
-  const to = Math.min(snapshot.page * snapshot.pageSize, count);
+  const goTo = (page: number) => {
+    stepped.current = true;
+    setSpoken((words) => words ?? "");
+    snapshot.setPage(page);
+  };
   const atFirst = snapshot.page <= 1;
   const atLast = snapshot.page >= snapshot.pageCount;
 
   const bar = (
     <nav {...rest} aria-label={wording.pagination} className={cx(styles.pagination, className)}>
-      <span>{wording.pageRange(from, to, count, { from: formats.count(from), to: formats.count(to), total: formats.count(count) })}</span>
+      <span>{rangeText}</span>
+      {spoken !== null && <VisuallyHidden role="status">{spoken}</VisuallyHidden>}
       <div className={styles.paginationControls}>
         <label className={styles.pageSize}>
           {wording.rows}
@@ -609,20 +631,20 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
         {/* The four steps and the page wrap as one: a step alone on a line
             of its own, split from its pair, read as a control of its own. */}
         <span className={styles.pageSteps}>
-          <IconButton size="sm" disabled={atFirst} aria-label={wording.firstPage} onClick={() => snapshot.setPage(1)}>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.firstPage} onClick={() => goTo(1)}>
             <EndGlyph className={styles.turned} />
           </IconButton>
-          <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={() => snapshot.setPage(snapshot.page - 1)}>
+          <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={() => goTo(snapshot.page - 1)}>
             <AngleGlyph className={styles.turned} />
           </IconButton>
           <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
               page: formats.count(snapshot.page),
               total: formats.count(snapshot.pageCount),
             })}</span>
-          <IconButton size="sm" disabled={atLast} aria-label={wording.nextPage} onClick={() => snapshot.setPage(snapshot.page + 1)}>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.nextPage} onClick={() => goTo(snapshot.page + 1)}>
             <AngleGlyph />
           </IconButton>
-          <IconButton size="sm" disabled={atLast} aria-label={wording.lastPage} onClick={() => snapshot.setPage(snapshot.pageCount)}>
+          <IconButton size="sm" disabled={atLast} aria-label={wording.lastPage} onClick={() => goTo(snapshot.pageCount)}>
             <EndGlyph />
           </IconButton>
         </span>

@@ -30,7 +30,7 @@ export function HeadRow({
   wording: Wording;
 }) {
   const { selectable = false, grid: gridMode = false } = props;
-  const { snapshot, virtual, spanEntry, dataColumns, expanderColumn, controlColumns, leading, rowMode, rowTools, trailing, columnCount, blocks } = layout;
+  const { snapshot, spanEntry, dataColumns, expanderColumn, controlColumns, leading, rowMode, rowTools, trailing, columnCount, blocks } = layout;
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
   /* The cells of a `ColumnGroup`: a run of neighbouring columns of one group
      and one pin side is one cell, so a group split by pinning shows its label
@@ -47,7 +47,7 @@ export function HeadRow({
   return (
     <thead>
       {grouped && (
-        <tr data-head-group="" aria-rowindex={virtual ? 1 : undefined}>
+        <tr data-head-group="" aria-rowindex={layout.numbered ? 1 : undefined}>
           {leading > 0 && <td colSpan={leading} className={cx(styles.th, pinAt(0, leading - 1).className)} style={pinAt(0, leading - 1).style} />}
           {runs.map(({ heading, from, to }) => {
             const pin = withEdge(pinAt(leading + from, leading + to), edges.has(dataColumns[from]!));
@@ -63,7 +63,7 @@ export function HeadRow({
           {trailing && <td className={cx(styles.th, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />}
         </tr>
       )}
-      <tr aria-rowindex={virtual ? (grouped ? 2 : 1) : undefined} data-grid-line={lineKey(gridMode, "head")}>
+      <tr aria-rowindex={layout.numbered ? (grouped ? 2 : 1) : undefined} data-grid-line={lineKey(gridMode, "head")}>
         {selectable && (
           <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
             <Checkbox
@@ -133,12 +133,12 @@ export function FootRow({
   formats: Formats;
   wording: Wording;
 }) {
-  const { projection, virtual, spanEntry, dataColumns, controlColumns, leading, trailing, columnCount, blocks } = layout;
+  const { projection, spanEntry, dataColumns, controlColumns, leading, trailing, columnCount, blocks } = layout;
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
   const edges = groupEdges(dataColumns);
   return (
     <tfoot>
-      <tr aria-rowindex={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + layout.headRows : undefined} data-grid-line={lineKey(gridMode, "foot")}>
+      <tr aria-rowindex={layout.numbered ? layout.rowTotal + 1 + layout.headRows : undefined} data-grid-line={lineKey(gridMode, "foot")}>
         {Array.from({ length: controlColumns }, (_, i) => (
           <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
         ))}
