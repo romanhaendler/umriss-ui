@@ -306,6 +306,25 @@ test.describe("a table fills a pane of fixed height", () => {
     });
   }
 
+  test("with 100 rows the page shows only whole rows and the scroll area has no vertical scrollbar", { tag: "@quick" }, async ({ page }) => {
+    await toggle(page, "100 rows").click();
+    let before = 0;
+    for (const height of [260, 360, 480]) {
+      await toggle(page, `${height} px`).click();
+      const area = pane(page).locator("table").locator("..");
+      const rows = pane(page).locator("tbody tr:not([data-filler])");
+      /* The page is cut anew once the size has held still. */
+      await expect.poll(async () => rows.count(), { message: `more rows at ${height} px` }).toBeGreaterThan(before);
+      await expect
+        .poll(async () => area.evaluate((el) => el.scrollHeight - el.clientHeight), { message: `no scrollbar at ${height} px` })
+        .toBeLessThanOrEqual(0);
+      const box = (await area.boundingBox())!;
+      const last = (await rows.last().boundingBox())!;
+      expect(last.y + last.height).toBeLessThanOrEqual(box.y + box.height + 1);
+      before = await rows.count();
+    }
+  });
+
   test("a pane of another height gives the frame that height", { tag: "@quick" }, async ({ page }) => {
     for (const height of [260, 480]) {
       await toggle(page, `${height} px`).click();

@@ -76,7 +76,11 @@ table needs a bound to render only its window. A parent of definite height - a
 dashboard widget's body, a pane, a grid cell - fills the table with no prop: the
 frame is exactly as tall as the parent, whether it holds no row, five or a
 hundred; the toolbar stays on top, the pager at the bottom edge, the rows scroll
-between them, and the surface under the last row is blank. The table asks its
+between them. With a pager a page holds as many whole lines as fit - twelve
+lines of room over a hundred rows is twelve rows, none cut, "1-12 of 100" -
+and the surface under the last row is blank only on a short last page, under the
+few rows a search leaves, and under the empty message; `pageSize` is the page in
+flow and the start value before the first measurement. The table asks its
 parent only for the height of its held page - never for the rows it shows - so
 beside a taller chart in a stretched grid row it fills the row, and the row
 shrinks back when the chart does. A wrapper between the two passes the height on
