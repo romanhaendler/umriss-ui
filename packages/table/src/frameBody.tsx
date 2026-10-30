@@ -39,6 +39,10 @@ export interface BodyContext {
   filler: ReactNode;
 }
 
+/** The ARIA row number of the line at `index` of the page or window: its place in the whole set, the head counted. */
+const ariaRow = (layout: FrameLayout, index: number) =>
+  layout.numbered ? (layout.virtual ? index : layout.pageStart + index) + 1 + layout.headRows : undefined;
+
 function renderRow(
   ctx: BodyContext,
   row: unknown,
@@ -53,7 +57,7 @@ function renderRow(
       row={row}
       index={index}
       absolute={layout.virtual ? absolute : undefined}
-      headRows={layout.headRows}
+      ariaRow={ariaRow(layout, absolute)}
       registry={registry}
       hook={hook}
       columns={layout.dataColumns}
@@ -195,13 +199,13 @@ function groupedBody(ctx: BodyContext, lines: readonly Line<unknown>[]) {
     : lines;
   const repeated = shown.length - lines.length;
   const perLine = virtual && virtual.from > 0 ? virtual.fillerBefore / virtual.from : 0;
-  const groupLine = (line: Exclude<Line<unknown>, { kind: "row" }>, key: string, index: number, absolute: number | undefined) => (
+  const groupLine = (line: Exclude<Line<unknown>, { kind: "row" }>, key: string, index: number, absolute: number | undefined, ariaAt: number | undefined) => (
     <GroupLine
       key={key}
       line={line}
       index={index}
       absolute={absolute}
-      headRows={layout.headRows}
+      ariaRow={ariaAt === undefined ? undefined : ariaRow(layout, ariaAt)}
       spanEntry={layout.spanEntry}
       levelEntry={layout.entryOf(grouping[line.group.level])}
       columns={layout.dataColumns}
@@ -222,7 +226,7 @@ function groupedBody(ctx: BodyContext, lines: readonly Line<unknown>[]) {
     const i = at - repeated;
     const absolute = virtual ? virtual.from + i : i;
     if (i < 0) {
-      return line.kind === "row" ? null : groupLine(line, `${line.kind}:${line.group.path}:repeated`, at, undefined);
+      return line.kind === "row" ? null : groupLine(line, `${line.kind}:${line.group.path}:repeated`, at, undefined, undefined);
     }
     if (line.kind === "row") return renderRow(ctx, line.row, i, absolute, line);
     return groupLine(
@@ -230,6 +234,7 @@ function groupedBody(ctx: BodyContext, lines: readonly Line<unknown>[]) {
       `${line.kind}:${line.group.path}${line.kind === "header" && line.continued ? ":continued" : ""}`,
       i,
       virtual ? absolute : undefined,
+      absolute,
     );
   };
   return virtual ? (

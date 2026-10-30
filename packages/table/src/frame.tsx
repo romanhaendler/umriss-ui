@@ -127,7 +127,7 @@ export function Frame({
 
   const drafting = grid.state.editing?.row === true;
   const layout = frameLayout({ registry, hook, props, drafting, sticking });
-  const { snapshot, projection, virtual, lines, entries, grouping, dataColumns, columnCount, pins, pinned, blocks, rows, footerShown } = layout;
+  const { snapshot, virtual, lines, entries, grouping, dataColumns, columnCount, pins, pinned, blocks, rows, footerShown } = layout;
 
   const { lines: gridLinesNow, fresh, ids: gridIds, events: gridEvents } = frameGrid({ registry, hook, props, layout, grid });
   // eslint-disable-next-line react-hooks/refs -- the table is read when a key is pressed, not while rendering
@@ -242,7 +242,7 @@ export function Frame({
           {...name}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */
-          aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + layout.headRows + (footerShown ? 1 : 0) : undefined}
+          aria-rowcount={layout.numbered ? layout.rowTotal + layout.headRows + (footerShown ? 1 : 0) : undefined}
           aria-busy={loading || undefined}
           data-stale={stale || undefined}
           className={cx(
