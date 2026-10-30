@@ -90,8 +90,19 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
    */
   toggleSort: (column: K, additive?: boolean) => void;
   setPage: (page: number) => void;
+  /** The rows a page holds now: the fitted size when the frame cut one,
+      otherwise the chosen size. */
   pageSize: number;
+  /** Sets the size the user or the application chose, and ends any fitted one. */
   setPageSize: (size: number) => void;
+  /** The chosen size - the option until someone chooses - which the view
+      carries and the frame's held height is made of; never the fitted one. */
+  chosenPageSize: number;
+  /** The option's size, the one a table starts with. */
+  defaultPageSize: number;
+  /** The size the frame holds, apart from the chosen one: `null` for none. It
+      keeps the page and the view as they are. */
+  setFittedPageSize: (size: number | null) => void;
   /** Ids of the columns switched away. */
   hidden: readonly K[];
   /** Switches a column away or back. Columns that are not hideable stay, even
@@ -158,6 +169,7 @@ export function useTableState<Z, K extends string = string>(
   const [pageSize, setPageSizeRaw] = useState(
     initialView?.pageSize ?? options.pageSize ?? 10,
   );
+  const [fitted, setFittedPageSize] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<readonly string[]>([]);
   const [hidden, setHidden] = useState<readonly K[]>(initialView?.hidden ?? []);
   const [order, setOrder] = useState<readonly K[]>(initialView?.order ?? []);
@@ -168,6 +180,7 @@ export function useTableState<Z, K extends string = string>(
     setSort(sortOf(view));
     setPageRaw(view.page ?? 1);
     setPageSizeRaw(view.pageSize ?? options.pageSize ?? 10);
+    setFittedPageSize(null);
     setHidden(view.hidden ?? []);
     setOrder(view.order ?? []);
     setWidths(widthsOf(view));
@@ -176,7 +189,7 @@ export function useTableState<Z, K extends string = string>(
   /* Virtualising means: no pages. The model is handed the size zero, which it
      reads as "everything on one page" - the same rule it already had for a
      table without paging. */
-  const modelPageSize = virtual || tree ? 0 : pageSize;
+  const modelPageSize = virtual || tree ? 0 : fitted ?? pageSize;
 
   /* The projection in the model's stages, each held while what it reads is
      unchanged: a page, a fold, a hidden or moved column does not filter and
@@ -253,6 +266,7 @@ export function useTableState<Z, K extends string = string>(
 
   const setPageSize = useCallback((size: number) => {
     setPageSizeRaw(size);
+    setFittedPageSize(null);
     setPageRaw(1);
   }, []);
 
@@ -396,8 +410,11 @@ export function useTableState<Z, K extends string = string>(
     sort,
     toggleSort,
     setPage,
-    pageSize,
+    pageSize: fitted ?? pageSize,
     setPageSize,
+    chosenPageSize: pageSize,
+    defaultPageSize,
+    setFittedPageSize,
     expanded,
     toggleRow,
     hidden,

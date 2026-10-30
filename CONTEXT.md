@@ -1007,6 +1007,14 @@ chooses the pitch, and not a **Control size**, which the pitch makes room for.
 _Avoid_: row height, slot, Zeilenhöhe, line height
 (the type's)
 
+**Fitted page**:
+The page of a paged table in a filled frame: as many whole lines as the scroll
+area has room for between the head and the pager, with repeated **Group
+header**s and the totals footer counted (ADR-0080). The `pageSize` option is the
+page in flow and the start value before the first measurement; the fitted size is
+kept apart from a size someone chose, and the view never carries it.
+_Avoid_: auto page size, page height
+
 **Tree rows**:
 A table whose rows have rows: the rows passed in are the roots, `childRows`
 names a row's children, and a **branch** opens its next level beneath it,

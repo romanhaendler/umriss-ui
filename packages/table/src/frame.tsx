@@ -32,6 +32,7 @@ import {
 import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
+import { useFit } from "./fit";
 import { columnRow } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
@@ -123,6 +124,7 @@ export function Frame({
   useCutValueWarnings(tableRef);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
+  useFit(registry, tableRef, loading, pitch);
   useCurrentRowInView(registry, currentRow);
   useRevealedRow(registry);
 
@@ -192,8 +194,13 @@ export function Frame({
      head, held lines, footer - never for the rows it shows now, so that a
      taller neighbour fills the table and a shrinking one gives the height
      back. Placeholders hold a page's worth while the first answer is on its
-     way. Without a page there is no held height: the rows are the height. */
-  const askedLines = heldLines || (loading && !stale ? pageSize : 0);
+     way. The page asked for is the option's or the chosen size, never the
+     fitted one: the frame would feed itself. Without a page there is no
+     held height: the rows are the height. */
+  const option = hook.tableState.chosenPageSize;
+  const askedLines = pageSize
+    ? Math.min(Math.max(shownNow, heldBefore, snapshot.pageCount > 1 ? option : 0), option) || (loading && !stale ? option : 0)
+    : 0;
   /* Without a page, in a frame, the totals footer stands at the frame's bottom
      edge: the table is at least the scroll area tall, and the last row of the
      body - 100% tall, in the body's own section - takes what the rows leave. */
