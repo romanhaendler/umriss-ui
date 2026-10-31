@@ -22,7 +22,7 @@ import { dropPlace } from "./columnDrag";
 import { orderColumns } from "./model/tableModel";
 import { rowsOf } from "./model/grouping";
 import type { ExportFormat, TableRef } from "./types";
-import { csv } from "./export";
+import { csv, safeFileName } from "./export";
 import type { Pin } from "./model/pinning";
 import styles from "./Table.module.css";
 
@@ -498,7 +498,8 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
     const url = URL.createObjectURL(new Blob([content as BlobPart], { type: format.mime }));
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = filename ?? `${wording.exportFileName.replace(/\.[^.]*$/, "")}.${format.extension}`;
+    const fallback = `${wording.exportFileName.replace(/\.[^.]*$/, "")}.${format.extension}`;
+    anchor.download = safeFileName(filename ?? fallback, fallback);
     anchor.click();
     /* Not at once: some browsers (Safari among them) fetch the address only
        after the click has returned, and a revoked one yields no file. */
