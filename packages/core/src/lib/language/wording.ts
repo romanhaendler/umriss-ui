@@ -76,6 +76,8 @@ export interface Wording {
   /** A value the multi-select took or gave away where no checkbox had the
       focus to say it - Enter in the search, a chip, Backspace. */
   optionAdded: (label: string) => string;
+  /** The last row of a creatable combobox: the typed text, offered as the value. */
+  createOption: (text: string) => string;
   optionRemoved: (label: string) => string;
   /** Said after a bulk action of the panel: how many values are chosen now. */
   selectionCount: (count: number) => string;
@@ -818,6 +820,7 @@ export const DEFAULT_WORDING: Wording = {
   optionActive: (label, { selected, disabled, group }) =>
     [label, group, selected && "selected", disabled && "unavailable"].filter(Boolean).join(", "),
   optionAdded: (label) => `${label} added`,
+  createOption: (text) => `Add "${text}"`,
   optionRemoved: (label) => `${label} removed`,
   selectionCount: (count) => `${count} selected`,
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { FormField, IconButton, Input, Stack } from "../../../src";
+import { FormField, IconButton, Input } from "../../../src";
 
 export const title = "Reveal a secret";
 export const lead =
-  "`Input` has no end slot, because `chars` counts the field's own chrome; the eye is your application's button beside it, and `type` is your state.";
+  "The eye sits in the field's `end` slot, inside its frame; `type` is your state. Any icon or `IconButton` goes there.";
 
 /* Stands for the application's own icon set. */
 function Eye({ crossed }: { crossed: boolean }) {
@@ -21,13 +21,18 @@ export default function RevealASecret() {
   const [shown, setShown] = useState(false);
 
   return (
-    <Stack direction="row" gap={2} align="flex-end" style={{ maxWidth: 420 }}>
-      <FormField label="API token" style={{ flex: 1 }}>
-        <Input type={shown ? "text" : "password"} autoComplete="off" value={token} onValueChange={setToken} />
-      </FormField>
-      <IconButton aria-label="Show the token" aria-pressed={shown} onClick={() => setShown(!shown)}>
-        <Eye crossed={shown} />
-      </IconButton>
-    </Stack>
+    <FormField label="API token" style={{ maxWidth: 420 }}>
+      <Input
+        type={shown ? "text" : "password"}
+        autoComplete="off"
+        value={token}
+        onValueChange={setToken}
+        end={
+          <IconButton aria-label="Show the token" aria-pressed={shown} onClick={() => setShown(!shown)}>
+            <Eye crossed={shown} />
+          </IconButton>
+        }
+      />
+    </FormField>
   );
 }
