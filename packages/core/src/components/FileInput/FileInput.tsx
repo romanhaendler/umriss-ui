@@ -6,7 +6,7 @@ import { CrossGlyph } from "../../lib/glyphs";
 import { useFormats, useWording } from "../../lib/language";
 import type { Formats } from "../../lib/language";
 import { useFormField } from "../FormField";
-import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { accepts } from "./accept";
 import type { RefProp } from "../../lib/refProp";
@@ -15,7 +15,7 @@ import styles from "./FileInput.module.css";
 /** The props of `FileInput`: a native file input's attributes, with the files
     as the value. */
 export interface FileInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement>, DeprecatedOnChange<(files: File[]) => void> {
   /** Controlled: the chosen files; `undefined` reads as none. Uncontrolled,
       the input keeps its own, from `defaultValue`. */
   value?: readonly File[];
@@ -25,8 +25,6 @@ export interface FileInputProps
   /** Reports the files after a choice, a drop or a removal - only those
       `accept` takes, and one where the input takes one. */
   onValueChange?: (files: File[]) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (files: File[]) => void;
   /** Marks the input as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;

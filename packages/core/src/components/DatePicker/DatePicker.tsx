@@ -8,7 +8,7 @@ import { VisuallyHidden } from "../VisuallyHidden";
 import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, isoDay, posted, type FormPostProps } from "../../lib/FormPost";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dayStart, dayShown, gridDay, zoneToday } from "./zoned";
@@ -29,7 +29,7 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * with it.
  */
 export interface DatePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date>, DeprecatedOnChange<(date: Date | null) => void> {
   /** The day, as a `Date` on midnight in the formats' zone (the reader's, unless the application names one); `null` means none. */
   value?: Date | null;
   /** Uncontrolled: the value to start at.
@@ -39,8 +39,6 @@ export interface DatePickerProps
       on clearing (`null`). Every one of these ways hands out
       midnight in the formats' zone; there is none that delivers a time along with it. */
   onValueChange?: (date: Date | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (date: Date | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** Locks the field and the panel. */

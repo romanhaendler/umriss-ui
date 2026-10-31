@@ -11,11 +11,23 @@ export interface FieldValueProps<V> {
   onChange?: unknown;
 }
 
+/** Whether a field's props give it a `value`; `value={undefined}` beside a `defaultValue` gives none, so the default shows. */
+export function isControlled(props: { value?: unknown; defaultValue?: unknown }): boolean {
+  return "value" in props && !(props.value === undefined && props.defaultValue != null);
+}
+
+/** The deprecated `onChange` alias of `onValueChange`, for a field prop type to extend. */
+export interface DeprecatedOnChange<T> {
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
+  onChange?: T;
+}
+
 /**
  * The value of a field that is controlled or uncontrolled, the one way to report a change, and whether it is controlled.
  *
  * A field is controlled by the presence of `value` among its props - a `value` that is `undefined`
- * or `null` reads as empty, so a field whose application has no value yet stays controlled. It is
+ * or `null` reads as empty, so a field whose application has no value yet stays controlled (unless
+ * it has a `defaultValue`, which then shows). It is
  * fixed by the first render; a later switch is warned of in development and then followed.
  * `legacy` marks a field whose `onChange` handed a value: it still works, and speaks once.
  *
@@ -29,7 +41,7 @@ export function useFieldValue<V, E = V>(
   empty: E,
   legacy = true,
 ): [V | E, (next: V) => void, boolean, (element: HTMLElement | null) => void] {
-  const present = "value" in props;
+  const present = isControlled(props);
   const [first] = useState(present);
   if (present !== first) {
     warnOnce(
@@ -83,9 +95,10 @@ export function useFormReset(input: RefObject<{ form: HTMLFormElement | null } |
   }, [input]);
 }
 
-const FIELD_KEYS =new Set(["value", "defaultValue", "onValueChange", "onChange"]);
+const FIELD_KEYS = ["value", "defaultValue", "onValueChange", "onChange"] as const;
+const FIELD_KEY_SET: ReadonlySet<string> = new Set(FIELD_KEYS);
 
 /** The props without the four `useFieldValue` reads, for the rest that goes on to an element. */
-export function withoutFieldProps<P extends object>(props: P): Omit<P, "value" | "defaultValue" | "onValueChange" | "onChange"> {
-  return Object.fromEntries(Object.entries(props).filter(([key]) => !FIELD_KEYS.has(key))) as never;
+export function withoutFieldProps<P extends object>(props: P): Omit<P, (typeof FIELD_KEYS)[number]> {
+  return Object.fromEntries(Object.entries(props).filter(([key]) => !FIELD_KEY_SET.has(key))) as never;
 }

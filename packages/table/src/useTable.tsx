@@ -760,9 +760,11 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   /* A row that leaves `rows` leaves the selection, and an id that comes back
      is not selected again. Only a flat table in automatic mode can tell: a
      server holds one page, a tree's rows lie in its branches. The effect
-     stands before the report, which then hears the pruned selection. */
+     stands before the report, which then hears the pruned selection. While
+     the table is `loading` the rows are not settled (a refetch may empty them
+     for a moment), and nothing is pruned. */
   useEffect(() => {
-    if (server || isTree || selection.selected.size === 0) return;
+    if (server || isTree || selection.selected.size === 0 || registry.busy) return;
     const present = new Set(rowsUnknown.map(rowKey));
     const gone = [...selection.selected].filter((key) => !present.has(key));
     if (gone.length > 0) selection.set(gone, false);
@@ -927,6 +929,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     branchStatus,
     retryBranch: askBranch,
     folded: foldedSet,
+    /* Sound: the connection is read type-erased; the hook's `Z`-typed table is rebuilt from it at the one place that knows `Z`. */
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown, RowKey>,
     rowKey,
     formats,
@@ -957,5 +960,6 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     scrollToRow: (key: RowKey) => scrollToRow(registry, key),
     focusCell: (key: RowKey, column: string) => focusCell(registry, key, column),
   };
+  /* Sound: `parts` and `snapshot` are built from the same `Z` rows; only the spread loses it. */
   return { ...snapshot, ...parts, ...reach } as unknown as Table<Z, false, RowKey>;
 }

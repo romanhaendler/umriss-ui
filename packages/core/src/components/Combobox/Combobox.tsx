@@ -3,7 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Listbox, optionId, WINDOW_ABOVE } from "../../lib/listbox";
@@ -31,7 +31,7 @@ export interface ComboboxOption<T extends string | number = string> {
 
 /** The props of `Combobox`. */
 export interface ComboboxProps<T extends string | number = string>
-  extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement>, FormPostProps<T> {
+  extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement>, FormPostProps<T>, DeprecatedOnChange<(value: T | null) => void> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
@@ -44,8 +44,6 @@ export interface ComboboxProps<T extends string | number = string>
   /** Runs on choosing and on clearing (`null`). Not while typing: what is
       typed is a search term and not yet a value. */
   onValueChange?: (value: T | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** `sm` for a toolbar and dense forms, `md` otherwise.

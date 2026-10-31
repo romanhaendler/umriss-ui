@@ -4,7 +4,7 @@ import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNod
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { mergeRefs } from "../../lib/mergeRefs";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import {
   clampNumber,
@@ -28,7 +28,7 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type" | "name">, RefProp<HTMLInputElement>, FormPostProps<number> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type" | "name">, RefProp<HTMLInputElement>, FormPostProps<number>, DeprecatedOnChange<(value: number | null) => void> {
   /** The number, or `null` (or `undefined`) for "not stated". An empty
       field is not zero: a quantity that was not measured is not a quantity
       of zero. With it the field is controlled; without it the field keeps
@@ -43,8 +43,6 @@ export interface NumberInputProps
       stand outside while typing; on leaving it is set to the clamped
       value. */
   onValueChange?: (value: number | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: number | null) => void;
   /** Lower bound. Every reported value is clamped; the text in the field
       follows on leaving. */
   min?: number;
@@ -274,7 +272,6 @@ export function NumberInput(props: NumberInputProps) {
         inputMode={negativeAllowed(min) ? "text" : decimalsAllowed(decimals) ? "decimal" : "numeric"}
         id={id ?? field?.id}
         disabled={disabled}
-        aria-describedby={describedBy}
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
         className={styles.input}
@@ -315,6 +312,8 @@ export function NumberInput(props: NumberInputProps) {
           onChange(out);
         }}
         {...rest}
+        /* After `rest`: `describedBy` already holds the caller's ids with the unit's. */
+        aria-describedby={describedBy}
         /* After `rest` and composed with the caller's: replacing the commit on
            leaving would leave the field counting as focused for good. */
         onKeyDown={handleKeyDown}

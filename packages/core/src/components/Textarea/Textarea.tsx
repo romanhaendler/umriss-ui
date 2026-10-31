@@ -24,7 +24,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./Textarea.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
-import { useFormReset } from "../../lib/useFieldValue";
+import { isControlled, useFormReset } from "../../lib/useFieldValue";
 
 /* The native `cols` is left out: the field's width is `chars`. */
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
@@ -85,7 +85,7 @@ export function Textarea(props: TextareaProps) {
     ...rest
   } = props;
   /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
-  const valueProps = "value" in props ? { value: valueGiven ?? "" } : {};
+  const valueProps = isControlled(props) ? { value: valueGiven ?? "" } : {};
   const size = useControlSize(ownSize);
   const field = useFormField();
   const isInvalid = invalid ?? field?.invalid ?? false;
@@ -126,7 +126,7 @@ export function Textarea(props: TextareaProps) {
   /* Uncontrolled, the browser holds the value and nothing re-renders while
      typing: a mirror of its own keeps the count current. */
   const [ownValue, setOwnValue] = useState(() => String(rest.defaultValue ?? ""));
-  const controlled = "value" in props;
+  const controlled = isControlled(props);
   const value = controlled ? String(valueGiven ?? "") : ownValue;
   // The browser puts the text back on a reset; the mirror that counts follows.
   useFormReset(innerRef, () => setOwnValue(String(rest.defaultValue ?? "")));

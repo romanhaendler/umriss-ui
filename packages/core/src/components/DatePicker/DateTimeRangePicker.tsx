@@ -7,7 +7,7 @@ import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { Checkbox } from "../Checkbox";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, isoWithOffset, rangeEntries, type FormPostRangeProps } from "../../lib/FormPost";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
@@ -77,7 +77,7 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  * DateTimePicker, separately per end of the range.
  */
 export interface DateTimeRangePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps, DeprecatedOnChange<(range: DateRange | null) => void> {
   /** The time span with times at both ends; `null` means none. The panel reads
       and sets days and wall clocks in the formats' zone (the reader's, unless
       the application names one). */
@@ -89,8 +89,6 @@ export interface DateTimeRangePickerProps
       clicks. If the end lies before the start, both swap on applying - there is
       no error state. */
   onValueChange?: (range: DateRange | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (range: DateRange | null) => void;
   /** Show the seconds fields. */
   withSeconds?: boolean;
   /** What stands in the empty field. */

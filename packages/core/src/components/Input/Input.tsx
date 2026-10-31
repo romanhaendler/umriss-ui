@@ -1,6 +1,7 @@
 import { useId } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { isControlled } from "../../lib/useFieldValue";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Input.module.css";
@@ -64,7 +65,7 @@ export function Input(props: InputProps) {
   const slotId = useId();
   const isInvalid = invalid ?? field?.invalid ?? false;
   /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
-  const controlled = "value" in props;
+  const controlled = isControlled(props);
   const valueProps = controlled ? { value: value ?? "" } : {};
   const hasContent = String(value ?? rest.defaultValue ?? "").length > 0;
   const hasStart = start !== undefined && start !== null && start !== false && start !== "";

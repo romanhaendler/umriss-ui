@@ -1,6 +1,7 @@
 import { Children, Fragment, isValidElement, useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode, SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import { isControlled } from "../../lib/useFieldValue";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Select.module.css";
@@ -82,7 +83,7 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
     ...rest
   } = props;
   /* `undefined` and `null` read as the empty option: the field stays controlled once it was given a `value`. */
-  const valueProps = "value" in props ? { value: value ?? "" } : defaultValue === undefined ? {} : { defaultValue: defaultValue ?? "" };
+  const valueProps = isControlled(props) ? { value: value ?? "" } : defaultValue === undefined ? {} : { defaultValue: defaultValue ?? "" };
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();

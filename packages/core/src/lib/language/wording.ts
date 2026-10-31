@@ -629,8 +629,8 @@ export interface Wording {
   /** The closed set of size names, worded once for every widget type. */
   dashboardSizes: { small: string; medium: string; wide: string; tall: string; large: string; full: string };
   /** A size's entry in a widget's menu: its name and its share of the width
-      (`share` is "¼" or "5/12", empty for the whole width); `current` marks the size the widget stands at. */
-  dashboardSizeEntry: (size: string, share: string) => string;
+      (`share` is "¼" or "5/12", empty for the whole width); `current` marks the size the widget stands at (no longer worded: the menu's radio state says it, so an entry may ignore it). */
+  dashboardSizeEntry: (size: string, share: string, current?: boolean) => string;
   /** The built-in heading type: its name, its sentence in the catalogue, the
       text a new heading starts with and the label of its text field. */
   dashboardHeadingLabel: string;

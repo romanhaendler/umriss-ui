@@ -11,48 +11,25 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent, RefObject, SyntheticEvent } from "react";
-import { firstTabStop } from "./firstTabStop";
+import { FOCUSABLE, firstTabStop } from "./firstTabStop";
+import { lockScroll, unlockScroll } from "./scrollLock";
 import { durationFrom, prefersReducedMotion } from "./motion";
-
-/* The page's scroll is locked while any dialog stands: a count, so a nested
-   dialog's closing does not free the page under the outer one. The browser
-   locks nothing itself; the scrollbar's width is made up in padding so the
-   page does not jump. */
-let scrollLocks = 0;
-let scrollRestore: (() => void) | null = null;
-function lockScroll() {
-  if (scrollLocks++ > 0) return;
-  const root = document.documentElement;
-  const { overflow, paddingRight } = root.style;
-  const bar = window.innerWidth - root.clientWidth;
-  root.style.overflow = "hidden";
-  if (bar > 0) root.style.paddingRight = `calc(${getComputedStyle(root).paddingRight} + ${bar}px)`;
-  scrollRestore = () => {
-    root.style.overflow = overflow;
-    root.style.paddingRight = paddingRight;
-  };
-}
-function unlockScroll() {
-  if (--scrollLocks > 0) return;
-  scrollLocks = 0;
-  scrollRestore?.();
-  scrollRestore = null;
-}
 
 /* The last pointer press, for an opener that took no focus: WebKit does not
    focus a button a mouse pressed, so `activeElement` is the body then - or the
    dialog the button stands in. Watched from the moment this module loads: the
-   press that opens the first dialog comes before any dialog exists. A key
+   press that opens the first dialog comes before any dialog exists. This is why
+   the listeners stand at module load, not when the first dialog opens: WebKit's
+   focus return needs the press from the very first one. A key
    press ends it: the focus is then the opener's own. */
-let pressed: Element | null = null;
+let lastPressTarget: Element | null = null;
 if (typeof document !== "undefined") {
-  document.addEventListener("pointerdown", (e) => (pressed = e.target as Element | null), true);
-  document.addEventListener("keydown", () => (pressed = null), true);
+  document.addEventListener("pointerdown", (e) => (lastPressTarget = e.target as Element | null), true);
+  document.addEventListener("keydown", () => (lastPressTarget = null), true);
 }
-const FOCUSABLE_ANCESTOR = "button, a[href], input, select, textarea, summary, [tabindex]";
-function openerNow(): HTMLElement | null {
+function openerToRestore(): HTMLElement | null {
   const active = document.activeElement;
-  const press = pressed?.closest(FOCUSABLE_ANCESTOR) as HTMLElement | null | undefined;
+  const press = lastPressTarget?.closest(FOCUSABLE) as HTMLElement | null | undefined;
   const none = !active || active === document.body || active === document.documentElement;
   if (press?.isConnected && (none || (active !== press && active.contains(press)))) return press;
   return none ? null : (active as HTMLElement);
@@ -187,7 +164,7 @@ export function useDialogChoreography(
 
   const openNow = (dialog: HTMLDialogElement) => {
     if (!dialog.open) {
-      opener.current = openerNow();
+      opener.current = openerToRestore();
       dialog.showModal();
     }
     if (!locked.current) {

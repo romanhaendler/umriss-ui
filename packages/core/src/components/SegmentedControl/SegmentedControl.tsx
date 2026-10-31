@@ -18,7 +18,7 @@ import { mergeRefs } from "../../lib/mergeRefs";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormField } from "../FormField";
 import { useRadioGroup } from "../RadioGroup/useRadioGroup";
-import { withoutFieldProps } from "../../lib/useFieldValue";
+import { withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./SegmentedControl.module.css";
 
@@ -39,7 +39,7 @@ export interface SegmentedOption<T extends string | number> {
 
 /** The props of `SegmentedControl`. */
 export interface SegmentedControlProps<T extends string | number>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement>, DeprecatedOnChange<(value: T) => void> {
   /** The possibilities, two to four, in the order in which they stand. */
   options: readonly SegmentedOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
@@ -49,8 +49,6 @@ export interface SegmentedControlProps<T extends string | number>
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
   onValueChange?: (value: T) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: T) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";

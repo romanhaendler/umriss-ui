@@ -6,7 +6,7 @@ import { cx } from "../../lib/cx";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, isoDay, rangeEntries, type FormPostRangeProps } from "../../lib/FormPost";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
@@ -34,7 +34,7 @@ export type { DateRange, RangePreset } from "./range";
  * Both ends count inclusively. There is no error state.
  */
 export interface DateRangePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps, DeprecatedOnChange<(range: DateRange | null) => void> {
   /** The time span, both ends on midnight in the formats' zone (the reader's, unless the application names one) and both inclusive; `null`
       means none. */
   value?: DateRange | null;
@@ -45,8 +45,6 @@ export interface DateRangePickerProps
       preset and on clearing (`null`). Ends dragged backwards swap silently;
       there is no error state to handle. */
   onValueChange?: (range: DateRange | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (range: DateRange | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** Locks the field and the panel. */
