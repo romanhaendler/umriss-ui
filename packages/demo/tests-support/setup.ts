@@ -8,6 +8,13 @@ import { cleanup } from "@testing-library/react";
    that the DOM would stay standing between the tests. */
 afterEach(cleanup);
 
+/* The announcer's region stands in the document between tests; it (a status
+   among the next test's) and its text must not reach the next one. The next
+   announcement builds it anew; a waiting one writes into the removed region. */
+afterEach(() => {
+  if (typeof document !== "undefined") document.querySelectorAll("[data-umriss-announcer]").forEach((region) => region.remove());
+});
+
 /* A server-rendering test runs in the node environment: no window, nothing to polyfill. */
 if (typeof window !== "undefined") {
   if (typeof window.matchMedia !== "function") {

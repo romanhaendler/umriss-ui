@@ -139,4 +139,11 @@
       inset: -2px 0;
     }
   }
+
+  /* A card does not break across two sheets where it fits on one. */
+  @media print {
+    .card {
+      break-inside: avoid;
+    }
+  }
 }

@@ -9,6 +9,7 @@
 
 import type { AnchorHTMLAttributes, ElementType, HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import { safeTarget } from "../../lib/safeTarget";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Typography.module.css";
 
@@ -157,13 +158,14 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, RefP
 
 /** A link in the size of its text; `external` opens it in a new tab with the
     protective attributes set. */
-export function Link({ ref, size = "md", external = false, className, children, ...rest }: LinkProps) {
+export function Link({ ref, size = "md", external = false, className, children, href, ...rest }: LinkProps) {
   return (
     <a
       ref={ref}
       className={cx(styles.link, styles[`size-${size}`], className)}
       // `noreferrer` keeps the opened page from reaching this one through `window.opener`.
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      href={safeTarget(href, "Link")}
       {...rest}
     >
       {children}

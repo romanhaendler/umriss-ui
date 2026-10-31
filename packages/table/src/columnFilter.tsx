@@ -547,7 +547,7 @@ function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCo
   const row = (index: 0 | 1) => {
     const term = shown.terms[index];
     return (
-      <div className={styles.textTerm}>
+      <div className={styles.textTerm} role="group" aria-label={wording.filterTerm(index + 1)}>
         <Select
           size="sm"
           aria-label={wording.filterOperator}

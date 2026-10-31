@@ -24,7 +24,7 @@
 
 import { createContext, useContext, useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
-import { DatePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, useFormats } from "@umriss-ui/core";
+import { DatePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, announce, useFormats } from "@umriss-ui/core";
 import type { Wording } from "@umriss-ui/core";
 import type { ColumnEntry } from "./registry";
 import { occurringValues } from "./columnFilter";
@@ -273,6 +273,11 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
   const error = editing.errors[id] ?? null;
   const setDraft = (value: unknown) => grid.setDraft(id, value);
   const label = grid.wording.editCell(spec.label, rowName);
+  /* The message is drawn in a popover hidden from a screen reader; this says it, again on every refused Enter. */
+  const errors = editing.errors;
+  useEffect(() => {
+    if (errors[id] !== undefined) announce(errors[id], anchor.current);
+  }, [errors, id]);
   let field: ReactNode;
   if (typeof spec.edit === "function") {
     field = (spec.edit as (editor: unknown) => ReactNode)({

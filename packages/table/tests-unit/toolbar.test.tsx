@@ -146,14 +146,14 @@ describe("Conditions in the table toolbar", () => {
     render(<List />);
     fireEvent.change(screen.getByRole("searchbox", { name: "Search table" }), { target: { value: "A-" } });
     expect(screen.queryByRole("list", { name: "Active filters" })).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe("2 of 5");
+    expect(screen.getByRole("status").textContent).toBe("2 of 5 entries");
   });
 
   it("the ratio stands in a status that is empty as long as nothing restricts", () => {
     render(<List />);
     expect(screen.getByRole("status").textContent).toBe("");
     act(() => current!.setFilter("line", ["L1"]));
-    expect(screen.getByRole("status").textContent).toBe("3 of 5");
+    expect(screen.getByRole("status").textContent).toBe("3 of 5 entries");
   });
 
   it("'reset' clears search and conditions and nothing else", () => {
@@ -209,7 +209,7 @@ describe("The table toolbar, even where none stands", () => {
     render(<SearchOutside />);
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "B-" } });
     expect(toolbars()).toBe(1);
-    expect(screen.getByRole("status").textContent).toBe("2 of 5");
+    expect(screen.getByRole("status").textContent).toBe("2 of 5 entries");
   });
 
   it("a table without a search and without a filter has none", () => {

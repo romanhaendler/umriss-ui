@@ -118,7 +118,10 @@ export function HeaderCell({
     <button
       type="button"
       className={cx(styles.sortButton, styles.headLine)}
-      onClick={(event: ReactMouseEvent) => snapshot.toggleSort(id, event.shiftKey || event.metaKey)}
+      onClick={(event: ReactMouseEvent) => {
+        registry.markSorted(id);
+        snapshot.toggleSort(id, event.shiftKey || event.metaKey);
+      }}
     >
       <span className={styles.headLabel}>{text}</span>
       {rank !== undefined && (

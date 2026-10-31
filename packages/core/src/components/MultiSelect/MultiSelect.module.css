@@ -516,4 +516,11 @@
       inset: -8px -8px -8px -3px;
     }
   }
+
+  /* Paper has no screen to float over: what opens above the page does not print. */
+  @media print {
+    .panel {
+      display: none;
+    }
+  }
 }

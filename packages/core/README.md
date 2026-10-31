@@ -472,7 +472,7 @@ The table is not part of this package. It lives in
 | `Divider` | a dividing line beside Stack and Grid: horizontal/vertical, two weights, optionally with a label |
 | `VisuallyHidden` | text for the screen reader only; `focusable` turns it into a skip link |
 | `ButtonGroup` / `SplitButton` | connected buttons; a main action plus variants through the existing menu |
-| `Text` / `Heading` / `Link` | typography on the token scale; for `Heading`, level and size are independent |
+| `Text` / `Heading` / `Link` | typography on the token scale; for `Heading`, level and size are independent; `Link` (and `Breadcrumb`) drop an `href` that is not `http:`, `https:`, `mailto:`, `tel:` or relative - `javascript:`, `vbscript:` and `data:` do nothing, with a DEV warning |
 | `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Select` a native `<select>` that opens the Combobox's list under a mouse and the keys and the system's picker under a finger (ADR-0043); `Checkbox indeterminate`; every field fills its place or is its natural width, never what it shows, and takes `chars` for a width in characters (ADR-0041) |
 | `Modal` / `ModalHeader` / `ModalBody` / `ModalFooter` | dialogs built on `<dialog>`; free space is distributed in the golden ratio (38 : 62) above and below the surface – small modals sit in the upper third, long ones use the full height, and only the body scrolls while head and foot stay put |
 | `ConfirmDialog` | a compact confirmation dialog, `tone="danger"` for destructive actions, loading state |

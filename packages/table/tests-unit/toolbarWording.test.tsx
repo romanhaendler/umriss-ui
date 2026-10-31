@@ -55,7 +55,7 @@ function TableWithSearch() {
 describe("Table toolbar and list filter from the wording", () => {
   it("writes the ratio in the default notation without a provider", () => {
     render(<TableWithSearch />);
-    expect(screen.getByRole("status").textContent).toBe("43 of 1,204");
+    expect(screen.getByRole("status").textContent).toBe("43 of 1,204 entries");
   });
 
   it("carries an overridden formatter into the table toolbar", () => {
@@ -64,7 +64,7 @@ describe("Table toolbar and list filter from the wording", () => {
         <TableWithSearch />
       </LanguageProvider>,
     );
-    expect(screen.getByRole("status").textContent).toBe("#43 of #1204");
+    expect(screen.getByRole("status").textContent).toBe("#43 of #1204 entries");
   });
 
   it("carries an overridden sentence structure into the table toolbar", () => {
@@ -122,6 +122,6 @@ describe("Table toolbar and list filter from the wording", () => {
         <TableWithSearch />
       </LanguageProvider>,
     );
-    expect(screen.getByRole("status").textContent).toBe("43 von 1.204");
+    expect(screen.getByRole("status").textContent).toBe("43 von 1.204 Einträge");
   });
 });

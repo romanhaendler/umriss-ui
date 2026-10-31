@@ -186,3 +186,14 @@ export function valueText(entry: ColumnEntry, raw: unknown, formats: Formats, wo
   const value = exportValue(raw, entry.spec.ownExportValue);
   return value === undefined ? "" : plain(value, conventionsOf(formats, wording));
 }
+
+/** A name that is safe to give `a.download`: no path, control characters or
+    characters Windows refuses, no leading dots, no device name (`CON`, `NUL`,
+    `COM1`...). What is left empty or reserved becomes the fallback. */
+export function safeFileName(name: string, fallback: string): string {
+  const clean = name
+    .replace(/[\u0000-\u001f\u007f-\u009f\\/:*?"<>|]/g, "_")
+    .replace(/^[.\s]+|[.\s]+$/g, "");
+  const stem = clean.split(".")[0]!.toUpperCase();
+  return clean === "" || /^(CON|PRN|AUX|NUL|COM\d|LPT\d)$/.test(stem) ? fallback : clean;
+}
