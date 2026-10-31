@@ -142,10 +142,9 @@ export function CommandPalette({
      the modal's `--u-duration-exit` is right for a sheet of paper and wrong
      here. If the entrance next to it seems too hard, the entrance gets shorter
      and the exit does not get longer. */
-  const { dialogRef, onDialogClose, onDialogCancel } = useDialogChoreography(open, 0, onClose);
+  const { dialogRef, mounted, onDialogClose, onDialogCancel } = useDialogChoreography(open, 0, onClose);
 
   const fieldRef = useRef<HTMLInputElement>(null);
-  const previouslyFocused = useRef<Element | null>(null);
 
   const [query, setQuery] = useState("");
 
@@ -157,8 +156,7 @@ export function CommandPalette({
   /* ---------------------------------------------------------------- */
 
   useEffect(() => {
-    if (!open) return;
-    previouslyFocused.current = document.activeElement;
+    if (!mounted) return;
     /* Every opening starts in the resting state: an empty field, no rows. That
        is what makes the growth on the first keystroke visible at all. */
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -166,7 +164,7 @@ export function CommandPalette({
     setHeld(null);
     keyboardTakesOver();
     fieldRef.current?.focus();
-  }, [open, setHeld, keyboardTakesOver]);
+  }, [mounted, setHeld, keyboardTakesOver]);
 
   /* So that the screen reader learns what the typing left, without having to
      arrow through it - on every query, even one that changed nothing, and on
@@ -175,8 +173,9 @@ export function CommandPalette({
      regions are silent (listbox-announcements). */
   /* Every find counts, the ones beyond `maxFinds` too. */
   const count = order.length + moreFinds;
+  const live = open && mounted;
   useEffect(() => {
-    if (!open) {
+    if (!live) {
       silence();
       return;
     }
@@ -187,7 +186,7 @@ export function CommandPalette({
        arrow keys just named. A wording that changes while the palette
        stands is heard with the next letter. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, query, searching, count]);
+  }, [live, query, searching, count]);
 
   /* The mark stays in view. `nearest` as in the combobox: that is the only
      value which does not shift half the list on every step. */
@@ -199,7 +198,7 @@ export function CommandPalette({
     document.getElementById(rowId(baseId, activeId))?.scrollIntoView({ block: "nearest" });
   }, [activeId, baseId]);
 
-  const { bodyRef, bodyHeight } = usePaletteGrowth(open);
+  const { bodyRef, bodyHeight } = usePaletteGrowth(mounted);
 
   const onKeyDown = usePaletteKeys({ order, activeId, setHeld, keyboardTakesOver, fieldRef, onChoose, onClose });
 
@@ -227,21 +226,9 @@ export function CommandPalette({
         onKeyDownCapture?.(event);
         callerKeyDown?.(event);
       }}
-      onClose={() => {
-        /* Reports only a close the browser triggered - every gesture of its own
-           has already called `onClose`. */
-        onDialogClose();
-        /* The focus goes back where it came from - and it does so HERE, in the
-           close event, and not in the cleanup of an effect. React lets all
-           cleanups run before all effect bodies; a cleanup would therefore
-           still call focus() while the modal dialog is open and the page behind
-           it inert, and the call would come to nothing. In the browser the
-           platform has already reset it at this point anyway - the call then
-           hits the same element. It stands there nonetheless: it is what keeps
-           the promise should this surface one day no longer be a modal
-           <dialog>, and it is the only part of this jsdom can observe. */
-        (previouslyFocused.current as HTMLElement | null)?.focus?.();
-      }}
+      /* Reports only a close the browser triggered - every gesture of its own
+         has already called `onClose`. The choreography gives the focus back. */
+      onClose={onDialogClose}
       onCancel={(event) => {
         onCancel?.(event);
         if (!event.defaultPrevented) onDialogCancel(event);
@@ -254,7 +241,7 @@ export function CommandPalette({
         if (!(event.target as HTMLElement).closest(`.${styles.pane}`)) onClose();
       }}
     >
-      <div className={styles.pane}>
+      {mounted && <div className={styles.pane}>
         {/* The cross is always in the markup; CSS shows it under a finger only. */}
         <div className={styles.head}>
           <input
@@ -356,7 +343,7 @@ export function CommandPalette({
             )}
           </div>
         </div>
-      </div>
+      </div>}
     </dialog>
   );
 }

@@ -17,14 +17,15 @@ function visible(el: HTMLElement): boolean {
 /* The first element in document order that a Tab press would reach: focusable,
    tabIndex 0 or more (so a roving -1 is skipped), rendered, visible, not inert.
    A named radio stands for its group - the chosen one, else the first enabled;
-   the group's other radios are skipped. Null when there is none. */
-export function firstTabStop(container: HTMLElement): HTMLElement | null {
+   the group's other radios are skipped. Elements matching `except` are skipped.
+   Null when there is none. */
+export function firstTabStop(container: HTMLElement, except?: string): HTMLElement | null {
   const radios = (name: string, form: HTMLFormElement | null) =>
     [...container.querySelectorAll<HTMLInputElement>('input[type="radio"]')].filter(
       (r) => r.name === name && r.form === form && !r.disabled && visible(r),
     );
   for (const el of container.querySelectorAll<HTMLElement>(FOCUSABLE)) {
-    if (el.tabIndex < 0 || !visible(el)) continue;
+    if (el.tabIndex < 0 || !visible(el) || (except && el.matches(except))) continue;
     if (el instanceof HTMLInputElement && el.type === "radio" && el.name) {
       const group = radios(el.name, el.form);
       const stop = group.find((r) => r.checked) ?? group[0];
