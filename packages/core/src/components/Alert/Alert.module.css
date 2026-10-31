@@ -10,6 +10,9 @@
     display: flex;
     align-items: flex-start;
     gap: var(--u-space-3);
+    /* Its words start beside the glyph, also where the alert stands in a
+       centred place (a table's empty state). */
+    text-align: start;
     padding: var(--u-space-3) var(--u-space-4);
     border-radius: var(--u-radius-md);
     /* The tone edge sits on the left margin; the full radius would cut into
