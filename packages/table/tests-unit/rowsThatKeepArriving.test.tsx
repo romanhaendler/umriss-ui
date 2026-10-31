@@ -140,19 +140,19 @@ describe("The selection", () => {
     expect(screen.getByText("1 selected")).toBeTruthy();
   });
 
-  it("counts only the rows that are there when a ticked one goes, keeps its key, and ticks it again if it returns", () => {
+  it("counts only the rows that are there when a ticked one goes, leaves the selection, and is not ticked again if it returns", () => {
     render(<Plant script={SCRIPT} selectable />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Loop a" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Loop b" }));
     expect(screen.getByText("2 selected")).toBeTruthy();
     second();
     second();
-    // The row a is gone: the count follows the rows, the key waits in the set.
+    // The row a is gone: the count follows the rows, the key leaves the set.
     expect(screen.getByText("1 selected")).toBeTruthy();
-    expect(current!.selection.selected.has("a")).toBe(true);
+    expect(current!.selection.selected.has("a")).toBe(false);
     second();
-    expect(tickedOf("Loop a")).toBe(true);
-    expect(screen.getByText("2 selected")).toBeTruthy();
+    expect(tickedOf("Loop a")).toBe(false);
+    expect(screen.getByText("1 selected")).toBeTruthy();
   });
 });
 

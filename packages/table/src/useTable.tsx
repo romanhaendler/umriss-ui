@@ -630,21 +630,44 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
   }, [matchKey, selection.allMatching]);
 
+  /* A row that leaves `rows` leaves the selection, and an id that comes back
+     is not selected again. Only a flat table in automatic mode can tell: a
+     server holds one page, a tree's rows lie in its branches. The effect
+     stands before the report, which then hears the pruned selection. */
+  useEffect(() => {
+    if (server || isTree || selection.selected.size === 0) return;
+    const present = new Set(rowsUnknown.map(rowKey));
+    const gone = [...selection.selected].filter((key) => !present.has(key));
+    if (gone.length > 0) selection.set(gone, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per new rows, with that render's selection
+  }, [rowsUnknown]);
+
+  /* The selection as a reader sees it: a key a search or a condition hides
+     stays in the set (the next search brings it back) but is neither counted,
+     reported nor acted on. A server holds the page only, so there every
+     selected key counts. */
+  const inView = useMemo(() => (server ? null : new Set(b.filtered.map(rowKey))), [server, b.filtered, rowKey]);
+  const seenSelected = inView ? [...selection.selected].filter((key) => inView.has(key)) : [...selection.selected];
+  const seenSignature = seenSelected.join("\u0000");
+  const reportedSelection = seenSelected.length === selection.selected.size ? selection : { ...selection, count: seenSelected.length };
+
   /* The application hears the selected keys after a change, from an effect and
-     never at mount; a new function each render does not repeat the report. A change of "all that match" or of its
-     exceptions counts as one too. */
-  const keysSeen = useRef({ selected: selection.selected, allMatching: selection.allMatching, except: selection.except });
+     never at mount; a new function each render does not repeat the report. A
+     change of "all that match" or of its exceptions counts as one too, and so
+     does a search that hides selected rows: the callback gets the keys a
+     reader sees, and as its second argument every key held. */
+  const keysSeen = useRef({ selected: selection.selected, allMatching: selection.allMatching, except: selection.except, signature: seenSignature });
   useEffect(() => {
     const seen = keysSeen.current;
-    if (seen.selected === selection.selected && seen.allMatching === selection.allMatching && seen.except === selection.except) return;
-    keysSeen.current = { selected: selection.selected, allMatching: selection.allMatching, except: selection.except };
+    if (seen.selected === selection.selected && seen.allMatching === selection.allMatching && seen.except === selection.except && seen.signature === seenSignature) return;
+    keysSeen.current = { selected: selection.selected, allMatching: selection.allMatching, except: selection.except, signature: seenSignature };
     /* A held selection may hand over a new set with the same keys; only a
        set that differs from the last one (by identity first) is compared. */
     const same = (a: ReadonlySet<unknown>, b: ReadonlySet<unknown>) => a === b || (a.size === b.size && [...a].every((k) => b.has(k)));
-    if (seen.allMatching === selection.allMatching && same(seen.selected, selection.selected) && same(seen.except, selection.except)) return;
-    options.onSelectionChange?.([...selection.selected]);
+    if (seen.allMatching === selection.allMatching && same(seen.selected, selection.selected) && same(seen.except, selection.except) && seen.signature === seenSignature) return;
+    options.onSelectionChange?.(seenSelected, [...selection.selected]);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the selection, with that render's callback
-  }, [selection.selected, selection.allMatching, selection.except]);
+  }, [selection.selected, selection.allMatching, selection.except, seenSignature]);
 
   /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds. It keeps the rows it has seen
@@ -724,7 +747,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     filter: Object.fromEntries(effective),
     setFilter: setFilter as SetFilter<Z>,
     conditionOf: <B,>(own: RowFilter<Z, B>) => (effective.find(([id]) => id === own.id)?.[1] ?? null) as B | null,
-    selection,
+    selection: reportedSelection,
     view: groupedView,
     grouping: groupingNow,
     setGrouping,

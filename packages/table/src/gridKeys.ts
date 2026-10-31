@@ -143,6 +143,13 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
     return;
   }
 
+  if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "a") {
+    if (input.selectAll) {
+      event.preventDefault();
+      input.selectAll();
+    }
+    return;
+  }
   if (event.altKey || event.metaKey) return;
   const move = event.ctrlKey ? { Home: "first", End: "last" }[event.key] : MOVES[event.key];
   if (move) {
