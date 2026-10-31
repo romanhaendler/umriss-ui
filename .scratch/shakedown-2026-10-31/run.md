@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 
-You coordinate an unattended run over `issues/01-…` to `issues/37-…` of `spec.md` beside this file. The
+You coordinate an unattended run over `issues/01-…` to `issues/42-…` of `spec.md` beside this file. The
 maintainer is away and trusts you: decide what a ticket leaves open yourself, write the decision into the
 ticket's `## Comments`, and go on. Stop only for something destructive or irreversible.
 
@@ -31,11 +31,25 @@ ticket's `## Comments`, and go on. Stop only for something destructive or irreve
   short delivery note under `## Comments`, and start the next frontier ticket.
 - A failure that is a timeout during a busy wave is rerun alone before it is believed.
 
+## The release (after ticket 41, before 42)
+
+The maintainer allowed it for this run (2026-10-31): release and push `main`.
+
+1. On a quiet machine, ports 4173-4177 free: `pnpm lint`, `pnpm typecheck`, `pnpm test:unit`, `pnpm build`,
+   `pnpm check:site`, then `pnpm test:visual`; fix what fails; review every changed screenshot before
+   updating it.
+2. Release 0.52.0 of all seven packages as `docs/releasing.md` says: versions, each package's `CHANGELOG.md`
+   from the commit bodies' `Changelog <pkg> …` and `Migration:` lines
+   (`git log --format=%B <last release>..HEAD | grep ^Changelog`), the root README table; `pnpm -r check:dist`
+   and `pnpm build:site` before the release commit.
+3. `git fetch origin`, check `origin/main` is an ancestor of `main`, `git push origin main`. Then verify:
+   `gh run list --repo romanhaendler/umriss-ui` (Publish waits for the maintainer's approval of the npm
+   environment - that is expected, do not wait for it).
+4. Then ticket 42 on `main`, merged and pushed too (it ships with the next release; no version bump).
+
 ## At the end
 
-1. On a quiet machine: `pnpm check`, `pnpm check:site`, `pnpm typecheck`, then `pnpm test:visual` (ports
-   4173-4177 free first); fix what fails; review every changed screenshot before updating it.
-2. Write the run's report under `spec.md` `## Comments`: what was delivered per ticket, every decision you took
-   alone, what is left and why. Set `spec.md` to `Status: done` only if all 37 are done.
-3. **No version bump, no release, no push** - the maintainer releases after reading the report.
-4. Delete the cron job, stop caffeinate, remove the worktrees you merged.
+1. Write the run's report under `spec.md` `## Comments`: what was delivered per ticket, every decision you
+   took alone, the release and its runs, what is left and why. Set `spec.md` to `Status: done` only if all 42
+   are done.
+2. Delete the cron job, stop caffeinate, remove the worktrees you merged.

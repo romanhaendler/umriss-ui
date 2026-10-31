@@ -31,11 +31,11 @@ Combobox, RangeSlider and TimeInput, keyboard lane change in the schedule, print
 
 ## Solution
 
-Thirty-seven tickets in `issues/`, numbered blockers first, each with its findings' sources (`README.md`
+Forty-two tickets in `issues/`, numbered blockers first, each with its findings' sources (`README.md`
 item numbers, `earlier-runs-open.md` ids, `reds/`) and a red test first. The field contract is a wide rename
 and runs expand-migrate-contract: 01 adds the new names beside the old (everything stays green), 02 and 03
-move core and table/alarms over, and the old names are removed in the minor after the release (ADR-0066),
-outside this run. Every ticket touching a core field builds on 01. The table, chart, schedule, calculation,
+move core and table/alarms over, the run releases 0.52.0, and 42 removes the old names on `main` for the
+next minor (ADR-0066). Ticket 41 sweeps what no host covered, on the finished code, before the release. Every ticket touching a core field builds on 01. The table, chart, schedule, calculation,
 dashboard, alarms, print, docs and security tickets are independent of it and of each other.
 
 ## Decisions (maintainer, 2026-10-31)
@@ -73,6 +73,15 @@ dashboard, alarms, print, docs and security tickets are independent of it and of
 8. **Wishes taken:** table date-time and boolean editors; `disabled`/`hidden` per row on `Action`; Cmd+Arrow
    on macOS; a sticky footer row; Avatar (roadmap P4); start/end slots on Input; a creatable Combobox for
    string values; RangeSlider and TimeInput.
+9. **Groups from the server and branches that load on opening** (taken; the API decided by the coordinator on
+   the maintainer's trust, 2026-10-31). In ADR-0072's terms - the table asks, the application answers and
+   names the answer: the request carries `grouping` and `folded`; the answer carries the page's group lines
+   (`groups`: `path`, `count`, `totals`, `at`) beside its rows; a page counts lines. A tree's `childRows` may
+   return `null` for a branch not yet loaded; opening it calls `onBranchOpen(key, row)`, which may return a
+   promise for the loading line and the failure's "Try again". One ADR (0081) for both.
+10. **Everything in one run** (maintainer, 2026-10-31): the run also sweeps what no host covered (ticket 41),
+    releases 0.52.0 and pushes `main` (npm's publish waits for the maintainer's approval on GitHub), then
+    removes the deprecated names on `main` for the next release (ticket 42).
 
 ## Implementation Decisions
 
@@ -99,10 +108,6 @@ Each ticket names its own. Shared rules:
 
 ## Out of Scope
 
-- **The contract step of the rename** - removing the deprecated `onChange(value)` names - belongs to the
-  minor after the release that ships 01-03 (ADR-0066); a ticket for it is written then.
-- **Server-side grouping and lazy tree branches** - taken, but as their own spec next (an ADR-0072
-  extension).
 - **Decided and kept:** rows that wrap (ADR-0042); custom header content and a per-column menu (2026-10-28,
   decision 8); Tab through grid cells (ADR-0034); more than two text-filter terms and conditions on range
   filters (2026-10-31); the 2026-10-25 "never" list
@@ -126,13 +131,13 @@ Each ticket names its own. Shared rules:
   copy of a range, undo/redo (a recipe), RTL. Alarms - a louder annunciator banner variant (10-28 p6-3).
 - **Not a defect:** a number column without `format` shows Intl's default, at most three decimals
   ("1,234,567.891" has exactly three).
-- **Not covered by any host, for the next shakedown:** WebKit, Firefox, touch devices, real screen readers, a
-  strict CSP, a long-lived tab, tree rows under live data, xlsx edge cases. `.scratch/touch-scale-opt-in/` is
+- **Firefox** (does not launch in the job sandbox), **real touch devices and real screen readers** - what
+  emulation can tell is ticket 41; the rest is listed in its report. `.scratch/touch-scale-opt-in/` is
   delivered (status set to done).
 - **Not reproduced at 0.51.0:** a chart's leftover listener, the schedule's empty plot of two lanes, the
   165 px plot, an overlapping Checkbox and Switch, the browser's ring on Checkbox/Switch/FileInput.
-- **Needs a device or a real screen reader** (`needs-info`): a Popover above the on-screen keyboard; the
-  Combobox's and the palette's double announcement; MultiSelect chips in WebKit.
+- **Needs a device or a real screen reader** beyond ticket 41's emulation: a Popover above a real on-screen
+  keyboard; the Combobox's and the palette's double announcement in NVDA/VoiceOver.
 
 ## Tickets
 
@@ -175,5 +180,10 @@ Each ticket names its own. Shared rules:
 | 35 | Core: start and end slots on Input | S | 01 |
 | 36 | Core: a creatable Combobox | S | 07 |
 | 37 | Core: RangeSlider and TimeInput | M | 01, 11 |
+| 38 | Server mode groups: the request carries the grouping, the answer the group lines (ADR) | L | 17 |
+| 39 | Server mode groups: fold, select, export and keyboard | M | 38 |
+| 40 | Tree rows: branches whose children load on opening | M | - |
+| 41 | The sweep: what no host covered, on the finished code | M | 01-40 |
+| 42 | The field contract: the old names go (contract step) | S | 41 and the release |
 
 ## Comments
