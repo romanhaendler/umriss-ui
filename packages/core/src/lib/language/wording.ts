@@ -447,10 +447,13 @@ export interface Wording {
   /* -------- Overlays and states ----------------------------------- */
   close: string;
   closeToast: string;
-  /** The count on the front toast of a closed deck; pressing it shows them all. */
+  /** The count on the front toast of a closed deck; pressing it shows them all.
+    The name starts with the visible text "1 / n". */
   toastDeckCount: (count: number) => string;
   /** The name of the toasts' region, which Alt+T moves the focus into. */
   toastRegion: string;
+  /** The visible hint at an open deck that Alt+T moves the focus into it. */
+  toastShortcutHint: string;
   confirm: string;
   cancel: string;
   loading: string;
@@ -1019,7 +1022,8 @@ export const DEFAULT_WORDING: Wording = {
 
   close: "Close",
   closeToast: "Close message",
-  toastDeckCount: (count) => `${count} messages, show all`,
+  toastDeckCount: (count) => `1 / ${count}, show all messages`,
+  toastShortcutHint: "Alt+T: jump to the messages",
   toastRegion: "Messages (Alt+T)",
   confirm: "Confirm",
   cancel: "Cancel",
