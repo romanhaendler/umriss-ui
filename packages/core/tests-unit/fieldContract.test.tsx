@@ -84,7 +84,7 @@ const cases: Case[] = [
     make: (p) => <MultiSelect aria-label="f" options={OPTIONS} {...(p as object)} />,
     act: () => {
       fireEvent.click(screen.getByRole("button"));
-      fireEvent.click(screen.getByRole("checkbox", { name: "Alpha" }));
+      fireEvent.click(screen.getByRole("option", { name: "Alpha" }));
     },
     expected: ["a"],
     legacy: true,

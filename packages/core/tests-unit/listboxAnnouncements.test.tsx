@@ -141,7 +141,7 @@ describe("MultiSelect - what it says", () => {
     render(<Harness />);
     fireEvent.click(main());
     heard();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Alpha" }));
+    fireEvent.click(screen.getByRole("option", { name: "Alpha" }));
     expect(heard()).toBe("4 options");
   });
 });

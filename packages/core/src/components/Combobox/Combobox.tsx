@@ -105,6 +105,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     onKeyDown,
     onClick,
     onBlur,
+    onFocus,
     name,
     formValue,
     ...fieldRest
@@ -184,6 +185,11 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     onKeyDown?.(event);
     // An input method's own keys (Enter ends the composition) are not ours.
     if (event.nativeEvent.isComposing || event.defaultPrevented) return;
+    /* The chosen label is selected, so that the first character typed
+       replaces it and does not join it; a click may have moved the caret. */
+    if (query === null && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.currentTarget.select();
+    }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!open) {
@@ -271,8 +277,14 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
             // After the opening's count, which is the old query's: the later wins.
             if (filter) sayCount(filterOptions(options, event.target.value).length);
           }}
+          onFocus={(event) => {
+            onFocus?.(event);
+            if (query === null) event.currentTarget.select();
+          }}
           onClick={(event) => {
             onClick?.(event);
+            // The press that focused the field put the caret down after the focus selected.
+            if (query === null) event.currentTarget.select();
             if (!open) openPanel();
           }}
           onKeyDown={handleKeyDown}

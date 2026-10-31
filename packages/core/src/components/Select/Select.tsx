@@ -287,6 +287,8 @@ export function Select(props: SelectProps) {
           onActivate={setActiveIndex}
           onChoose={choose}
           emptyText={wording.noMatches}
+          /* The panel is as wide as the field, as the system's list is. */
+          minWidth={0}
         />
       )}
     </span>

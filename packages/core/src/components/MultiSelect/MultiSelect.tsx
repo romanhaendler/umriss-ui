@@ -5,7 +5,6 @@ import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode, Re
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { Button } from "../Button";
-import { Checkbox } from "../Checkbox";
 import { Input } from "../Input";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
@@ -77,6 +76,9 @@ export interface MultiSelectProps<T extends string = string>
   clearable?: boolean;
 }
 
+/** The options a key can reach: the enabled ones. */
+const REACHABLE = '[role="option"]:not([aria-disabled])';
+
 type Scope = "all" | "selected";
 
 /**
@@ -139,6 +141,9 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  // The panel is named by the field: its label, else its placeholder.
+  const ownId = useId();
+  const triggerId = id ?? field?.id ?? ownId;
   /* The pointer of the gesture last made on the field, or "key" for a key -
      what decides where the focus goes when the panel opens. */
   const pointerType = useRef("mouse");
@@ -193,7 +198,6 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     if (target === "selected") {
       setSelectedSnapshot(new Set(value));
     }
-    searchRef.current?.focus();
     sayCount(target, search, chosenNow(target));
   };
 
@@ -205,7 +209,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
     if (touchOpened.current && !listRef.current?.dataset.windowed) {
-      listRef.current?.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus();
+      listRef.current?.querySelector<HTMLElement>(REACHABLE)?.focus();
     } else {
       searchRef.current?.focus();
     }
@@ -235,13 +239,18 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
 
   const filteredValues = useMemo(() => Options.selectableValues(filtered), [filtered]);
 
-  const selectAllOf = () => onChange(Options.selectAllOf(value, filteredValues));
-  const selectNoneOf = () => onChange(Options.selectNoneOf(value, filteredValues));
-  const invertSelection = () => onChange(Options.invertSelection(value, filteredValues));
+  /* A bulk action says how many are chosen now; its button keeps the focus. */
+  const bulk = (next: T[]) => {
+    onChange(next);
+    announce(wording.selectionCount(next.length), fieldRef.current);
+  };
+  const selectAllOf = () => bulk(Options.selectAllOf(value, filteredValues));
+  const selectNoneOf = () => bulk(Options.selectNoneOf(value, filteredValues));
+  const invertSelection = () => bulk(Options.invertSelection(value, filteredValues));
+  const keepFocus = (event: { preventDefault: () => void }) => event.preventDefault();
 
   /* ---- Keyboard in the panel ---- */
-  const optionInputs = () =>
-    Array.from(listRef.current?.querySelectorAll<HTMLInputElement>("input:not(:disabled)") ?? []);
+  const optionRows = () => Array.from(listRef.current?.querySelectorAll<HTMLElement>(REACHABLE) ?? []);
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     // An input method's own keys (Enter ends the composition) are not ours.
@@ -249,7 +258,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     if (event.key === "ArrowDown") {
       event.preventDefault();
       if (windowed) setWanted(enabled[0] ?? null);
-      else optionInputs()[0]?.focus();
+      else optionRows()[0]?.focus();
       return;
     }
     if (event.key === "Enter") {
@@ -270,12 +279,15 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
   const windowed = filtered.length > WINDOW_ABOVE;
 
   const handleListKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-    const inputs = optionInputs();
+    if (![" ", "Enter", "ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const row = document.activeElement?.closest<HTMLElement>("[data-index]");
-    const at = windowed ? enabled.indexOf(Number(row?.dataset.index)) : inputs.findIndex((input) => input === document.activeElement);
+    const at = enabled.indexOf(Number(row?.dataset.index));
     if (at === -1) return;
     event.preventDefault();
+    if (event.key === " " || event.key === "Enter") {
+      toggle(filtered[enabled[at]!]!.value);
+      return;
+    }
     const last = enabled.length - 1;
     if (event.key === "ArrowUp" && at === 0) {
       searchRef.current?.focus();
@@ -283,7 +295,41 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     }
     const to = { ArrowDown: Math.min(at + 1, last), ArrowUp: at - 1, Home: 0, End: last }[event.key]!;
     if (windowed) setWanted(enabled[to]!);
-    else inputs[to]?.focus();
+    else optionRows().find((each) => each.dataset.index === String(enabled[to]))?.focus();
+  };
+
+  /* The list's one Tab stop: the option last focused, else the first one a
+     key can reach. */
+  const [rover, setRover] = useState(0);
+  const tabStop = enabled.includes(rover) ? rover : (enabled[0] ?? -1);
+
+  const optionRow = (index: number) => {
+    const option = filtered[index]!;
+    const chosen = value.includes(option.value);
+    return (
+      <div
+        key={option.value}
+        role="option"
+        aria-selected={chosen}
+        aria-disabled={option.disabled || undefined}
+        data-index={index}
+        data-row={windowed ? "" : undefined}
+        aria-setsize={windowed ? filtered.length : undefined}
+        aria-posinset={windowed ? index + 1 : undefined}
+        tabIndex={index === tabStop ? 0 : -1}
+        className={cx(styles.option, windowed && styles.row, chosen && styles.optionChosen, option.disabled && styles.optionDisabled)}
+        onFocus={() => setRover(index)}
+        onClick={() => !option.disabled && toggle(option.value)}
+      >
+        {/* The box and its tick are drawn; the state is aria-selected's. */}
+        <span className={styles.box} aria-hidden="true">
+          <svg className={styles.tick} viewBox="0 0 10 8" width="10" height="8" aria-hidden="true">
+            <path d="M1 4l2.5 2.5L9 1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <span className={styles.optionLabel}>{option.label}</span>
+      </div>
+    );
   };
 
   /* ---- Roving tabindex in the field: only the main button lies in the tab
@@ -487,7 +533,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
           onBlur={(event) => fieldBlur(event, onBlur, fieldRef, panelId)}
           ref={mergeRefs(mainRef, ref)}
           type="button"
-          id={id ?? field?.id}
+          id={triggerId}
           disabled={disabled}
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -525,7 +571,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
       >
           {/* The role sits here, not on the popover: a dialog the popover
               names would take the focus for itself on opening. */}
-          <div ref={attachPanel} role="dialog" aria-label={placeholderText} id={panelId}>
+          <div ref={attachPanel} role="dialog" aria-labelledby={triggerId} id={panelId} className={styles.dialog}>
               <Input
                 ref={searchRef}
                 size="sm"
@@ -550,6 +596,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
                   type="button"
                   className={cx(styles.scope, scope === "all" && styles.scopeActive)}
                   aria-pressed={scope === "all"}
+                  onMouseDown={keepFocus}
                   onClick={() => switchScope("all")}
                 >
                   {wording.optionScopeAll}
@@ -558,6 +605,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
                   type="button"
                   className={cx(styles.scope, scope === "selected" && styles.scopeActive)}
                   aria-pressed={scope === "selected"}
+                  onMouseDown={keepFocus}
                   onClick={() => switchScope("selected")}
                 >
                   {wording.optionScopeSelected(value.length)}
@@ -565,13 +613,13 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
               </div>
               <div className={styles.qol}>
                 <div className={styles.qolButtons}>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={selectAllOf}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={selectAllOf}>
                     {wording.selectAll}
                   </Button>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={selectNoneOf}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={selectNoneOf}>
                     {wording.selectNone}
                   </Button>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={invertSelection}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={invertSelection}>
                     {wording.invertSelection}
                   </Button>
                 </div>
@@ -580,45 +628,31 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
                 </span>
               </div>
               {filtered.length === 0 ? (
-                <div ref={listRef} className={styles.list} role="group" aria-label={wording.options} onKeyDown={handleListKeyDown}>
+                <div ref={listRef} className={styles.list} role="group" aria-label={wording.options}>
                   <div className={styles.empty}>
                     {scope === "selected" && base.length === 0 ? wording.nothingSelected : emptyMessage}
                   </div>
                 </div>
               ) : windowed ? (
-                <WindowedChecks
+                <WindowedOptions
                   listRef={listRef}
                   count={filtered.length}
                   wanted={wanted}
                   onWanted={() => setWanted(null)}
                   onKeyDown={handleListKeyDown}
-                  row={(index) => {
-                    const option = filtered[index]!;
-                    return (
-                      <div key={option.value} className={styles.row} data-row="" data-index={index}>
-                        <Checkbox
-                          className={styles.option}
-                          label={option.label}
-                          checked={value.includes(option.value)}
-                          disabled={option.disabled}
-                          onChange={() => toggle(option.value)}
-                        />
-                      </div>
-                    );
-                  }}
+                  rover={tabStop}
+                  row={optionRow}
                 />
               ) : (
-                <div ref={listRef} className={styles.list} role="group" aria-label={wording.options} onKeyDown={handleListKeyDown}>
-                  {filtered.map((option) => (
-                    <Checkbox
-                      key={option.value}
-                      className={styles.option}
-                      label={option.label}
-                      checked={value.includes(option.value)}
-                      disabled={option.disabled}
-                      onChange={() => toggle(option.value)}
-                    />
-                  ))}
+                <div
+                  ref={listRef}
+                  className={styles.list}
+                  role="listbox"
+                  aria-multiselectable="true"
+                  aria-label={wording.options}
+                  onKeyDown={handleListKeyDown}
+                >
+                  {filtered.map((_, index) => optionRow(index))}
                 </div>
               )}
           </div>
@@ -627,30 +661,32 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
   );
 }
 
-interface WindowedChecksProps {
+interface WindowedOptionsProps {
   listRef: RefObject<HTMLDivElement | null>;
   count: number;
   /** An option to bring into view and focus; `onWanted` says it was done. */
   wanted: number | null;
   onWanted: () => void;
   onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
+  /** The option that holds the list's Tab stop: always drawn. */
+  rover: number;
   row: (index: number) => ReactNode;
 }
 
-/* The list of a long MultiSelect: the checkboxes in view and filler rows for
+/* The list of a long MultiSelect: the options in view and filler rows for
    the rest. The option holding the focus, or about to, is always drawn, so a
    scroll never drops the focused element. Mounted inside the panel, so the
    hook finds the list when it measures. */
-function WindowedChecks({ listRef, count, wanted, onWanted, onKeyDown, row }: WindowedChecksProps) {
+function WindowedOptions({ listRef, count, wanted, onWanted, onKeyDown, rover, row }: WindowedOptionsProps) {
   const { scrollRef, from, to, fillerBefore, fillerAfter, showRow, onScroll } = useVirtual(count, { rowHeight: 36 });
   const wording = useWording();
   const [focused, setFocused] = useState<number | null>(null);
-  const extra = wanted ?? focused;
+  const extra = wanted ?? focused ?? (rover >= 0 ? rover : null);
 
   useEffect(() => {
     if (wanted === null) return;
     showRow(wanted);
-    listRef.current?.querySelector<HTMLInputElement>(`[data-index="${wanted}"] input`)?.focus();
+    listRef.current?.querySelector<HTMLElement>(`[data-index="${wanted}"]`)?.focus();
     onWanted();
   }, [wanted, showRow, listRef, onWanted]);
 
@@ -680,7 +716,8 @@ function WindowedChecks({ listRef, count, wanted, onWanted, onKeyDown, row }: Wi
       }}
       data-windowed=""
       className={styles.list}
-      role="group"
+      role="listbox"
+      aria-multiselectable="true"
       aria-label={wording.options}
       onScroll={onScroll}
       onKeyDown={onKeyDown}

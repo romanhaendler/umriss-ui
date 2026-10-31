@@ -463,7 +463,8 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        aria-label={wording.dateTimeRangePanel}
+        /* Named after its field; the wording's name where the field has none. */
+        aria-label={rest["aria-label"] || field ? undefined : wording.dateTimeRangePanel}
         id={panelId}
         className={cx(styles.panel, styles.rangePanel)}
         closeOnTabOut

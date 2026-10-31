@@ -46,17 +46,17 @@ describe("MultiSelect - a long list", () => {
   it("opens with a window of the checkboxes, and End and Home reach the ends", () => {
     render(<Field n={10000} />);
     open();
-    expect(screen.getAllByRole("checkbox").length).toBeLessThan(100);
+    expect(screen.getAllByRole("option").length).toBeLessThan(100);
 
     fireEvent.keyDown(search(), { key: "ArrowDown" });
-    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Asset 1" }));
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Asset 1" }));
 
     fireEvent.keyDown(document.activeElement!, { key: "End" });
-    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Asset 10000" }));
-    expect(screen.getAllByRole("checkbox").length).toBeLessThan(100);
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Asset 10000" }));
+    expect(screen.getAllByRole("option").length).toBeLessThan(100);
 
     fireEvent.keyDown(document.activeElement!, { key: "Home" });
-    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Asset 1" }));
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Asset 1" }));
   });
 
   it("returns to the search on ArrowUp from the first option", () => {
@@ -81,12 +81,12 @@ describe("MultiSelect - a long list", () => {
   it("focuses the first enabled option when a touch opens it", () => {
     render(<Field n={10000} disabledFirst={3} />);
     open("touch");
-    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Asset 4" }));
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Asset 4" }));
   });
 
   it("draws all 500 options", () => {
     render(<Field n={500} />);
     open();
-    expect(screen.getAllByRole("checkbox")).toHaveLength(500);
+    expect(screen.getAllByRole("option")).toHaveLength(500);
   });
 });

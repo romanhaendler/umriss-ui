@@ -181,7 +181,8 @@ export function DatePicker(props: DatePickerProps) {
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        aria-label={wording.datePanel}
+        /* Named after its field; the wording's name where the field has none. */
+        aria-label={rest["aria-label"] || field ? undefined : wording.datePanel}
         id={panelId}
         className={styles.panel}
         closeOnTabOut

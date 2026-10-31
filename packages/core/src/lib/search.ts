@@ -123,25 +123,32 @@ export interface NameFind {
  * names are short, queries shorter, and completeness costs nothing here.
  */
 export function findInName(term: string, name: string): NameFind | null {
-  const wanted = term.trim().toLowerCase();
+  const wanted = fold(term.trim()).text;
   if (wanted === "") return null;
-  if (wanted.length > name.length) return null;
 
-  const lowerName = name.toLowerCase();
+  /* The name is searched folded; `origin[i]` is where folded character `i`
+     began in `name`, and `width[i]` how much of `name` it covers, so that a
+     span always indexes the name as it is written. */
+  const { text: lowerName, origin, width } = fold(name);
+  if (wanted.length > lowerName.length) return null;
+  const length = lowerName.length;
+  /* Only the first folded character of an original one can start a word. */
+  const startsWord = (position: number) =>
+    (position === 0 || origin[position] !== origin[position - 1]) && isWordStart(name, origin[position]!);
 
   /* best[position] = the best bonus for the query characters so far, if the last
      one considered sits at `position`. `origins` keeps its predecessor, so that the
      match spans can be traced back afterwards. */
-  let best: (number | null)[] = new Array<number | null>(name.length).fill(null);
+  let best: (number | null)[] = new Array<number | null>(length).fill(null);
   const origins: (number | null)[][] = [];
 
   for (let i = 0; i < wanted.length; i++) {
-    const next = new Array<number | null>(name.length).fill(null);
-    const trail = new Array<number | null>(name.length).fill(null);
+    const next = new Array<number | null>(length).fill(null);
+    const trail = new Array<number | null>(length).fill(null);
 
-    for (let position = 0; position < name.length; position++) {
+    for (let position = 0; position < length; position++) {
       if (lowerName[position] !== wanted[i]) continue;
-      const startBonus = isWordStart(name, position) ? BOUNDARY_BONUS : 0;
+      const startBonus = startsWord(position) ? BOUNDARY_BONUS : 0;
 
       if (i === 0) {
         next[position] = startBonus;
@@ -163,7 +170,7 @@ export function findInName(term: string, name: string): NameFind | null {
   }
 
   let end: number | null = null;
-  for (let position = 0; position < name.length; position++) {
+  for (let position = 0; position < length; position++) {
     if (best[position] === null) continue;
     if (end === null || best[position]! > best[end]!) end = position;
   }
@@ -179,18 +186,49 @@ export function findInName(term: string, name: string): NameFind | null {
   }
   positions.reverse();
 
-  const cost = (name.length - wanted.length) * COST_PER_CHARACTER;
-  return { rank: best[end]! - cost, finds: mergeAdjacent(positions) };
+  const cost = (length - wanted.length) * COST_PER_CHARACTER;
+  return {
+    rank: best[end]! - cost,
+    finds: mergeAdjacent(positions.map((at) => ({ from: origin[at]!, to: origin[at]! + width[at]! }))),
+  };
+}
+
+/**
+ * Case and diacritics folded away: "Café" is "cafe", "Straße" is "strasse",
+ * "Müller" is "muller". `origin` and `width` say, per folded character, where
+ * it began in `text` and how much of it it covers - folding may change the
+ * length ("İstanbul" folds to the same length of letters, "ß" to two).
+ */
+export function fold(text: string): { text: string; origin: number[]; width: number[] } {
+  let folded = "";
+  const origin: number[] = [];
+  const width: number[] = [];
+  let at = 0;
+  for (const character of text) {
+    const one = character
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .toLowerCase()
+      .replace(/ß/g, "ss")
+      .replace(/\p{M}/gu, "");
+    for (let i = 0; i < one.length; i++) {
+      origin.push(at);
+      width.push(character.length);
+    }
+    folded += one;
+    at += character.length;
+  }
+  return { text: folded, origin, width };
 }
 
 /** Consecutive places become one span - otherwise the rendering marks every
     character on its own and flickers at the edges. */
-function mergeAdjacent(positions: readonly number[]): readonly MatchSpan[] {
+function mergeAdjacent(positions: readonly MatchSpan[]): readonly MatchSpan[] {
   const spans: MatchSpan[] = [];
   for (const position of positions) {
     const last = spans[spans.length - 1];
-    if (last !== undefined && last.to === position) last.to = position + 1;
-    else spans.push({ from: position, to: position + 1 });
+    if (last !== undefined && last.to >= position.from) last.to = Math.max(last.to, position.to);
+    else spans.push({ ...position });
   }
   return spans;
 }
@@ -218,7 +256,7 @@ export function find<K extends Candidate>(
 ): readonly Find<K>[] {
   const wanted = term.trim();
   if (wanted === "") return [];
-  const lowerWanted = wanted.toLowerCase();
+  const lowerWanted = fold(wanted).text;
   const searchesKeywords = wanted.length >= KEYWORD_MINIMUM;
 
   /* The tier stands beside the find and not in it: 0 name, 1 group,
@@ -239,7 +277,7 @@ export function find<K extends Candidate>(
     }
     if (
       searchesKeywords &&
-      candidate.keywords?.some((keyword) => keyword.toLowerCase().includes(lowerWanted))
+      candidate.keywords?.some((keyword) => fold(keyword).text.includes(lowerWanted))
     ) {
       found.push({ tier: 2, find: { candidate, rank: weight, finds: [] } });
     }
