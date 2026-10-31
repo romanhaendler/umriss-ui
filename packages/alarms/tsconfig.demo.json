@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["demo", "tests-unit/demo-smoke*"],
+  "include": ["demo", "tests-unit/demo-smoke*", "tests-unit/fieldContract*"],
   "exclude": []
 }
