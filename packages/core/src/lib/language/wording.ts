@@ -592,6 +592,8 @@ export interface Wording {
   /** At the top of the menu, and in the name of a head the arrow keys move. */
   dashboardPlace: (place: number, of: number) => string;
   dashboardHead: (title: string, place: number, of: number) => string;
+  /** The description of a head in the editing mode: what the arrow keys do. */
+  dashboardHeadHint: string;
   /** The name of the head of a locked widget in the editing mode. */
   dashboardHeadLocked: (title: string, place: number, of: number) => string;
   /** The word beside a locked widget's size in the mode. */
@@ -607,7 +609,7 @@ export interface Wording {
   dashboardSizes: { small: string; medium: string; wide: string; tall: string; large: string; full: string };
   /** A size's entry in a widget's menu: its name and its share of the width
       (`share` is "¼" or "5/12", empty for the whole width); `current` marks the size the widget stands at. */
-  dashboardSizeEntry: (size: string, share: string, current: boolean) => string;
+  dashboardSizeEntry: (size: string, share: string) => string;
   /** The built-in heading type: its name, its sentence in the catalogue, the
       text a new heading starts with and the label of its text field. */
   dashboardHeadingLabel: string;
@@ -1102,6 +1104,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardMenu: (title) => `Actions for ${title}`,
   dashboardPlace: (place, of) => `Place ${place} of ${of}`,
   dashboardHead: (title, place, of) => `${title}, place ${place} of ${of}`,
+  dashboardHeadHint: "Left and right arrows move it one place, up and down one row",
   dashboardHeadLocked: (title, place, of) => `${title}, place ${place} of ${of}, locked`,
   dashboardLocked: "Locked",
   dashboardLockedLine: "Locked: keeps its size and options",
@@ -1111,7 +1114,7 @@ export const DEFAULT_WORDING: Wording = {
   dashboardMoveEnd: "Move to end",
   dashboardRemove: "Remove",
   dashboardSizes: { small: "Small", medium: "Medium", wide: "Wide", tall: "Tall", large: "Large", full: "Full width" },
-  dashboardSizeEntry: (size, share, current) => `${current ? "✓ " : ""}${size}${share ? `, ${share} wide` : ""}`,
+  dashboardSizeEntry: (size, share) => `${size}${share ? `, ${share} wide` : ""}`,
   dashboardHeadingLabel: "Heading",
   dashboardHeadingSentence: "A title across the full width.",
   dashboardHeadingText: "New section",

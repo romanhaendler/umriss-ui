@@ -41,7 +41,7 @@ const order = () => screen.getAllByRole("region").map((el) => el.getAttribute("d
 const press = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
 const button = (name: string) => screen.getByRole("button", { name }) as HTMLButtonElement;
 const menuOf = (title: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${title}` }));
-const item = (name: string | RegExp) => fireEvent.click(screen.getByRole("menuitem", { name }));
+const item = (name: string | RegExp) => fireEvent.click(screen.queryByRole("menuitemradio", { name }) ?? screen.getByRole("menuitem", { name }));
 const said = (text: string) => waitFor(() => expect(document.querySelector("[data-umriss-announcer]")?.textContent).toBe(text));
 const moveToEnd = (title: string) => {
   menuOf(title);

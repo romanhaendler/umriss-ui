@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Popover } from "../Popover";
-import { MenuContext, handleMenuKeyDown } from "../Menu/Menu";
+import { MENU_ITEMS, MenuContext, handleMenuKeyDown } from "../Menu/Menu";
 import styles from "../Menu/Menu.module.css";
 
 /* ------------------------------------------------------------------ */
@@ -63,7 +63,7 @@ export function ContextMenu({ open, onOpenChange, position, "aria-label": name, 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     panelRef.current = node;
-    node?.querySelector<HTMLButtonElement>('[role="menuitem"]:not([disabled])')?.focus();
+    node?.querySelector<HTMLButtonElement>(MENU_ITEMS)?.focus();
   }, []);
 
   const close = () => {
