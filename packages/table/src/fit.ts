@@ -11,7 +11,7 @@
 import { useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { warnOnce } from "./dev";
-import { linePitch } from "./pinned";
+import { layoutHeight, linePitch } from "./pinned";
 import { lineCount } from "./model/tableModel";
 import type { Registry } from "./registry";
 
@@ -50,8 +50,8 @@ const linesOf = (registry: Registry) => {
 /** The head, the foot and the room between them in a scroll area. */
 function measure(table: HTMLTableElement, scroll: HTMLElement) {
   const pitch = linePitch(table);
-  const head = table.tHead?.getBoundingClientRect().height ?? 0;
-  const foot = table.tFoot?.getBoundingClientRect().height ?? 0;
+  const head = table.tHead ? layoutHeight(table.tHead) : 0;
+  const foot = table.tFoot ? layoutHeight(table.tFoot) : 0;
   return { pitch, room: scroll.clientHeight - head - foot };
 }
 
