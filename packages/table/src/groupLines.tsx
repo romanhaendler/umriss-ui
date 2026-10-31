@@ -130,8 +130,19 @@ function Count({ value, formats }: { value: number; formats: Formats }) {
     indeterminate when some are. */
 function GroupCheckbox({ group, entry, hook, formats, wording }: { group: RowGroup<unknown>; entry: ColumnEntry | undefined; hook: HookSnapshot; formats: Formats; wording: Wording }) {
   const { selection, server } = hook.publicSnapshot;
-  /* A server's group holds rows the table does not: a box would select the page's part of it. */
-  if (server) return null;
+  /* A server's group holds rows the table does not: its box chooses the group,
+     as a state in the request's terms, not the page's part of it. */
+  if (server) {
+    const chosen = hook.chosenGroup?.path === group.path;
+    return (
+      <Checkbox
+        aria-label={wording.selectGroup(groupText(entry, group.value, formats, wording))}
+        checked={chosen && hook.chosenGroup!.except.length === 0}
+        indeterminate={chosen && hook.chosenGroup!.except.length > 0}
+        onCheckedChange={() => hook.chooseGroup(chosen ? null : { path: group.path, count: sizeOf(group) })}
+      />
+    );
+  }
   const keys = group.rows.map(hook.rowKey);
   const chosen = keys.filter((k) => selection.isSelected(k)).length;
   const all = chosen === keys.length;

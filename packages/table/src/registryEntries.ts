@@ -121,6 +121,15 @@ export interface HookSnapshot {
   /** Server mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
+  /** Server mode: how many rows match - `rowCount` while ungrouped, the
+      application's `matchCount` while grouped, null where it is not given. */
+  matches: number | null;
+  /** Server mode: the group whose box is ticked (its path and the rows it
+      holds over every match). A group is chosen instead of rows, never beside them. */
+  chosenGroup: { path: string; count: number; except: readonly RowKey[] } | null;
+  /** Whether the row is selected, a row of the chosen group included. */
+  isPicked: (key: RowKey) => boolean;
+  chooseGroup: (group: { path: string; count: number } | null) => void;
   /** A row's box or key: toggles the row, or with `range` ticks or clears the
       rows from the one toggled last to this one. */
   pick: (key: RowKey, range: boolean) => void;

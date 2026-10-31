@@ -130,7 +130,7 @@ export function Row({
       <tr
         {...data}
         ref={current.report && !fresh ? (el) => void (el && rowOfElement.set(el, row)) : undefined}
-        aria-selected={grid && selectable && !fresh ? snapshot.selection.isSelected(key) : undefined}
+        aria-selected={grid && selectable && !fresh ? hook.isPicked(key) : undefined}
         aria-current={!fresh && current.key === key ? "true" : undefined}
         data-current={!fresh && current.key === key ? "" : undefined}
         className={cx(
@@ -144,7 +144,7 @@ export function Row({
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-motion={key}
-        data-selected={selectable && snapshot.selection.isSelected(key) ? "" : undefined}
+        data-selected={selectable && hook.isPicked(key) ? "" : undefined}
         data-group-first={line?.first ? "" : undefined}
         data-group={group?.path}
         aria-level={line ? line.parents.length + 1 : entry ? entry.level + 1 : undefined}
@@ -170,7 +170,7 @@ export function Row({
           >
             <Checkbox
               aria-label={wording.selectRow(name)}
-              checked={snapshot.selection.isSelected(key)}
+              checked={hook.isPicked(key)}
               onChange={(event) => hook.pick(key, (event.nativeEvent as MouseEvent).shiftKey === true)}
               onKeyDown={(event) => {
                 /* A click from the keyboard carries Shift unreliably: the key is read itself. */

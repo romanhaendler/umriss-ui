@@ -296,6 +296,9 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     start?.grouping ? [...start.grouping] : listOf(options.defaultGrouping),
   );
   const [foldedState, setFoldedState] = useState<readonly string[]>(() => start?.folded ?? []);
+  /* Server mode: the group whose box is ticked. It stands for rows the table
+     does not hold, so it is a state of its own, ended by any other selection. */
+  const [chosenGroup, setChosenGroup] = useState<{ path: string; count: number; key: string; except: readonly RowKey[] } | null>(null);
   /* The pins the user chose, whole; `null` while the declared ones hold. They
      are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
@@ -583,7 +586,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   const setGrouping = (ids: readonly string[]) => {
     setGroupingState([...ids]);
     /* A fold names a group of the grouping it was made under. */
-    if (server) setFoldedState([]);
+    if (server) {
+      setFoldedState([]);
+      setChosenGroup(null);
+    }
     setPage(1);
   };
   const toggleFold = (path: string) => {
@@ -734,6 +740,22 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     if (server) selection.clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the search or the conditions, with that render's selection
   }, [matchKey, selection.allMatching]);
+  /* A group is chosen instead of rows: ticking a row, a page or all that match
+     ends it, and so does a new search or condition (the group is one of the old
+     request's). */
+  if (chosenGroup && (selection.count > 0 || selection.allMatching)) setChosenGroup(null);
+  const groupNow = chosenGroup?.key === matchKey ? chosenGroup : null;
+  /* The keys of the page's rows that stand in the chosen group. */
+  const inGroup = useMemo(() => {
+    const keys = new Set<RowKey>();
+    if (!groupNow || !server) return keys;
+    for (const line of b.lines ?? []) {
+      if (line.kind !== "row") continue;
+      if ([...line.parents, ...(line.span ? [line.span] : [])].some((g) => g.path === groupNow.path)) keys.add(rowKey(line.row));
+    }
+    return keys;
+  }, [groupNow, server, b.lines, rowKey]);
+  const picked = (key: RowKey) => (groupNow && inGroup.has(key) ? !groupNow.except.includes(key) : selection.isSelected(key));
 
   /* A row that leaves `rows` leaves the selection, and an id that comes back
      is not selected again. Only a flat table in automatic mode can tell: a
@@ -809,6 +831,11 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   };
   const pick = (key: RowKey, range: boolean) => {
     registry.markPicked();
+    /* A row of the chosen group is an exception to it, not a selection of its own. */
+    if (groupNow && inGroup.has(key)) {
+      setChosenGroup({ ...groupNow, except: groupNow.except.includes(key) ? groupNow.except.filter((k) => k !== key) : [...groupNow.except, key] });
+      return;
+    }
     const reach = (b.lines ? rowsOf(b.lines) : (b.shown ?? b.filtered)).map(rowKey);
     const from = anchor.current === null ? -1 : reach.indexOf(anchor.current);
     const to = reach.indexOf(key);
@@ -864,7 +891,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     toggleFold,
     foldAll: () => {
       registry.noteFocusBeforeFold();
-      setFoldedState(foldablePaths(b.groups));
+      /* A server's page names its own groups: the folds of the others stay. */
+      setFoldedState((old) => (server ? [...new Set([...old, ...foldablePaths(b.groups)])] : foldablePaths(b.groups)));
     },
     unfoldAll: () => {
       registry.noteFocusBeforeFold();
@@ -906,6 +934,13 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     filterOptions: server ? options.filterOptions : undefined,
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,
     selectedRows,
+    matches: server ? (groupingNow.length > 0 ? (options.server ? options.matchCount ?? null : null) : rowCount) : null,
+    chosenGroup: groupNow,
+    isPicked: picked,
+    chooseGroup: (group) => {
+      if (group) selection.clear();
+      setChosenGroup(group && { ...group, key: matchKey, except: [] });
+    },
     pick,
     pickAll,
     late,

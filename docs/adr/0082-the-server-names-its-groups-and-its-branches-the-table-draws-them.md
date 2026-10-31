@@ -40,8 +40,11 @@ Grouping is a view of the whole set, so the whole set's server answers it.
 - **The application names the answer; the table computes nothing.** It reads the
   lines out of `groups` (`answeredLines`) and draws them with the parts of the
   browser's grouping - level, fold, label, count, aggregates under their columns.
-  A group's selection box and the share bar are not drawn: a server group holds
-  rows the table does not, and a share needs the whole.
+  The share bar is not drawn: a share needs the whole. A group's box chooses the
+  group as a state in the request's terms - a bulk action receives
+  `{ request, except, group: path }` - with the group's rows ticked and an unticked
+  row an exception to it (the group's box goes indeterminate). Ticking a row
+  outside it, the page box or all that match ends it; one group at a time.
 - **A wrong answer is shown plain.** `groups` missing for a page that has rows, or
   not fitting the grouping (a path longer than the levels, an `at` out of order, a
   row outside every group), warns once in development with the first thing wrong
@@ -49,7 +52,12 @@ Grouping is a view of the whole set, so the whole set's server answers it.
   (`answers.grouping`) is the old one still standing and is drawn ungrouped
   without a word.
 - **A fold is a request.** Folding a group changes `folded` and asks the server;
-  the table keeps the folds of groups on other pages, which it cannot know.
+  the table keeps the folds of groups on other pages, which it cannot know, so
+  fold all, unfold all and Alt-click act on the groups of the page it holds.
+- **`matchCount` counts the rows.** `rowCount` counts lines while grouped, so
+  "all that match" and the entries read the application's `matchCount`; without
+  it a grouped table offers neither. The export asks with the grouping and
+  writes the rows as `exportRows` returns them, in the groups' order.
 
 ## Lazy branches
 
@@ -101,5 +109,4 @@ the owner of a cache and of the question of when it is stale.
 An application that passes no `grouping` sees no change, apart from two members
 in the request. A server that ignores `grouping` and `folded` answers ungrouped,
 and the table says nothing about it unless `groups` is also missing while a
-grouping is set. Selecting a group, folding all groups, and exporting a grouped
-page are the server groups' follow-up and are not part of this decision.
+grouping is set.

@@ -153,7 +153,7 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
 }
 
 /* Where a key stands among the row keys. The focus is read from the DOM, as text, so a number key is also found by its text. */
-const indexOfKey = (keys: readonly RowKey[], key: RowKey | null | undefined): number =>
+const indexOfKey = (keys: readonly (RowKey | null)[], key: RowKey | null | undefined): number =>
   key == null ? -1 : keys.findIndex((k) => k === key || String(k) === key);
 
 export function useTableState<Z, K extends string = string>(
@@ -299,7 +299,8 @@ export function useTableState<Z, K extends string = string>(
       /* Only the page's rows are known: the anchor stands at its offset on
          the page, the page's first row at the page's own offset. */
       const { focus, current } = anchorKey.current();
-      const keys = shown.visible.map(rowKey);
+      /* A grouped page's offset counts its lines, headers among them. */
+      const keys: (RowKey | null)[] = shown.visibleLines ? shown.visibleLines.map((l) => (l.kind === "row" ? rowKey(l.row) : null)) : shown.visible.map(rowKey);
       const offset = [focus, current].map((key) => indexOfKey(keys, key)).find((index) => index >= 0) ?? 0;
       return Math.floor(((shown.page - 1) * latest.current.size + offset) / size) + 1;
     }

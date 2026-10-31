@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ColumnMenu, Pagination, Toolbar, groupPath, useTable } from "../../../src";
-import type { ServerGroup, TableRequest } from "../../../src";
+import { ColumnMenu, Export, Pagination, Toolbar, groupPath, useTable } from "../../../src";
+import type { AllMatching, ServerGroup, TableRequest } from "../../../src";
 
 interface Order {
   id: string;
@@ -21,7 +21,7 @@ const ORDERS: readonly Order[] = Array.from({ length: 400 }, (_, i) => ({
 
 export const title = "Groups from the server";
 export const lead =
-  "The request carries `grouping` and `folded`; the answer names its group lines as `groups` - each with its path, its count and totals over every match, and the index in `rows` it stands before. A page counts lines, headers and rows alike, so `rowCount` counts lines too. The table computes nothing over the rows.";
+  "The request carries `grouping` and `folded`; the answer names its group lines as `groups` - each with its path, its count and totals over every match, and the index in `rows` it stands before. A page counts lines, headers and rows alike, so `rowCount` counts lines too, and `matchCount` says how many rows match. A group's box selects the group as a state, `{ request, group }`, which a bulk action receives; the export asks for every match in the groups' order. The table computes nothing over the rows.";
 
 interface Item {
   /** A header line, or a folded innermost group. */
@@ -36,17 +36,22 @@ interface Item {
 
 const sum = (rows: readonly Order[]) => rows.reduce((total, o) => total + o.amount, 0);
 
+/** The rows of a request in the groups' order: by the grouping's columns, the sort within. */
+function matches(request: TableRequest): Order[] {
+  const hits = [...ORDERS];
+  const by = (request.grouping ?? []) as (keyof Order)[];
+  const sort = request.sort[0];
+  const order = (key: keyof Order, sign: number) => (a: Order, b: Order) => (a[key] < b[key] ? -sign : a[key] > b[key] ? sign : 0);
+  if (sort) hits.sort(order(sort.column as keyof Order, sort.direction === "asc" ? 1 : -1));
+  for (const key of [...by].reverse()) hits.sort(order(key, 1));
+  return hits;
+}
+
 /** The fake server: filters and sorts, groups what is asked, folds what is
     folded and cuts the pages by lines, repeating the headers a page begins
     inside of, which take their room from the page. */
 function serve(request: TableRequest) {
-  const hits = [...ORDERS];
-  const sort = request.sort[0];
-  if (sort) {
-    const key = sort.column as keyof Order;
-    const sign = sort.direction === "asc" ? 1 : -1;
-    hits.sort((a, b) => (a[key] < b[key] ? -sign : a[key] > b[key] ? sign : 0));
-  }
+  const hits = matches(request);
   const by = (request.grouping ?? []) as (keyof Order)[];
   const folded = new Set(request.folded);
   const items: Item[] = [];
@@ -96,17 +101,20 @@ function serve(request: TableRequest) {
       rows.push(item.row!);
     }
   }
-  return { rows, groups, answers: request, rowCount: items.length, totals: { id: hits.length, amount: sum(hits) } };
+  return { rows, groups, answers: request, rowCount: items.length, matchCount: hits.length, totals: { id: hits.length, amount: sum(hits) } };
 }
 
 const FIRST: TableRequest = { search: "", conditions: {}, sort: [], page: 1, pageSize: 12, grouping: ["status"], folded: [] };
 
 export default function GroupsFromTheServer() {
   const [answer, setAnswer] = useState(() => serve(FIRST));
-  const { Table, Column } = useTable(answer.rows, {
+  const [released, setReleased] = useState("");
+  const { Table, Column, RowActions, Action } = useTable(answer.rows, {
     rowKey: (o) => o.id,
     server: true,
     rowCount: answer.rowCount,
+    matchCount: answer.matchCount,
+    exportRows: async (request) => matches(request),
     pageSize: FIRST.pageSize,
     defaultGrouping: ["status"],
     answers: answer.answers,
@@ -116,14 +124,25 @@ export default function GroupsFromTheServer() {
   });
 
   return (
-    <Table aria-label="Orders grouped on the server">
+    <Table selectable aria-label="Orders grouped on the server">
       <Toolbar>
         <ColumnMenu />
+        <Export />
+        <output aria-live="polite">{released}</output>
       </Toolbar>
       <Column value="id" label="Order" rowHeader aggregate="count" />
       <Column value="status" label="Status" />
       <Column value="region" label="Region" />
       <Column value="amount" label="Amount" aggregate="sum" />
+      <RowActions>
+        <Action
+          bulk
+          onSelect={(selected) =>
+            setReleased(Array.isArray(selected) ? `Released ${selected.length} rows` : `Released ${(selected as AllMatching).group ? `group ${(selected as AllMatching).group}` : "all that match"}`)}
+        >
+          Release
+        </Action>
+      </RowActions>
       <Pagination />
     </Table>
   );
