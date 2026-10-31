@@ -147,6 +147,7 @@ export function Listbox({
       }}
       anchorRef={anchorRef}
       insideRefs={insideRefs}
+      role="none"
       width="anchor"
       /* As wide as the field, and never narrower than a list can be read: a
          field of six characters would otherwise cut every option to an

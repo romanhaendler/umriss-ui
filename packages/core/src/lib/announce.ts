@@ -13,22 +13,23 @@
    voice and not a region of their own. */
 
 import { portalTargetFor } from "./portalTarget";
+import type { PortalTarget } from "./portalTarget";
 
 /** Announcements wait for the keys to rest this long - the charts' readout
     pause: a held arrow key speaks where it stops, and a typed word is
     counted once and not per letter. */
 export const ANNOUNCE_REST = 150;
 
-const regions = new WeakMap<Element, HTMLElement>();
+const regions = new WeakMap<PortalTarget, HTMLElement>();
 /* One timer across all places: the library has one voice, and a later
    announcement replaces a waiting one wherever either was to be spoken. */
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 /** The region of a place, built once and built anew when the page removed it. */
-function regionIn(host: Element): HTMLElement {
+function regionIn(host: PortalTarget): HTMLElement {
   const known = regions.get(host);
-  if (known?.parentElement === host) return known;
-  const region = document.createElement("div");
+  if (known?.parentNode === host) return known;
+  const region = host.ownerDocument.createElement("div");
   region.setAttribute("role", "status");
   region.setAttribute("aria-live", "polite");
   region.setAttribute("data-umriss-announcer", "");
@@ -67,7 +68,7 @@ export function announce(text: string, at?: Element | null): void {
     /* A new node every time: the same words twice - the count after a
        letter that changed nothing, the last option at the end of the list -
        are an addition, and only additions are spoken. */
-    const words = document.createElement("div");
+    const words = region.ownerDocument.createElement("div");
     words.textContent = text;
     region.replaceChildren(words);
   }, ANNOUNCE_REST);

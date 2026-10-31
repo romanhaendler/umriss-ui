@@ -509,6 +509,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
         }}
         anchorRef={fieldRef}
         focusRef={mainRef}
+        role="none"
         width="anchor"
         minWidth={260}
         className={styles.panel}

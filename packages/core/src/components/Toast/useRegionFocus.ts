@@ -15,24 +15,26 @@ export function useRegionFocus(regionRef: RefObject<HTMLDivElement | null>, seen
     const back = returnFocusRef.current;
     returnFocusRef.current = null;
     if (back?.isConnected) back.focus();
-    else (document.activeElement as HTMLElement | null)?.blur();
-  }, []);
+    else (regionRef.current?.ownerDocument.activeElement as HTMLElement | null)?.blur();
+  }, [regionRef]);
 
   useEffect(() => {
-    if (!seen) return;
+    /* The region's own document: in an iframe the global one is the top page's. */
+    const doc = regionRef.current?.ownerDocument;
+    if (!seen || !doc) return;
     const onKey = (event: globalThis.KeyboardEvent) => {
       /* `code`, not `key`: on a Mac, Alt+T types "†". */
       if (!event.altKey || event.ctrlKey || event.metaKey || event.code !== "KeyT") return;
       event.preventDefault();
-      const active = document.activeElement;
+      const active = doc.activeElement;
       if (!regionRef.current?.contains(active)) {
         returnFocusRef.current = active instanceof HTMLElement ? active : null;
       }
       regionRef.current?.focus();
       setByKeys(true);
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    doc.addEventListener("keydown", onKey);
+    return () => doc.removeEventListener("keydown", onKey);
   }, [seen, regionRef]);
 
   return { byKeys, setByKeys, returnFocusRef, leaveRegion };

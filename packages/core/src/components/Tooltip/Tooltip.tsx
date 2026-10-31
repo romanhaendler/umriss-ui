@@ -3,7 +3,8 @@ import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as Reac
 import { useLongPress } from "../../lib/longPress";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "../../lib/provider";
-import { portalTargetFor, topLayerPopover, useShownInTopLayer } from "../../lib/portalTarget";
+import { fixedOrigin, portalTargetFor, topLayerPopover, useShownInTopLayer } from "../../lib/portalTarget";
+import type { PortalTarget } from "../../lib/portalTarget";
 import { computePosition, motionOrigin, visibleViewport } from "../Popover/position";
 import { usePresence } from "../../lib/motion";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -31,7 +32,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   const open = wanted && !expanded;
   const [position, setPosition] = useState<CSSProperties | null>(null);
   // Portal target, set in an effect as in the popover: it reads the trigger's DOM.
-  const [target, setTarget] = useState<Element | null>(null);
+  const [target, setTarget] = useState<PortalTarget | null>(null);
   const portalTarget = usePortalTarget();
   const targetRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -86,7 +87,10 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     );
     /* The motion origin travels with the position: above its trigger it
        grows from its bottom edge, flipped below from its top. */
-    setPosition({ top: pos.top, left: pos.left, "--_origin": motionOrigin(pos.side, "center") } as CSSProperties);
+    /* A surface in the top layer counts from the window; one in a transformed
+       foreign dialog from the dialog. */
+    const origin = topLayerPopover(target) ? { x: 0, y: 0 } : fixedOrigin(target);
+    setPosition({ top: pos.top - origin.y, left: pos.left - origin.x, "--_origin": motionOrigin(pos.side, "center") } as CSSProperties);
   }, [open, target, content]);
 
   useEffect(() => {
@@ -94,11 +98,13 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") hide();
     };
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("scroll", hide, true);
+    /* The trigger's own window: in an iframe the global one is the top page's. */
+    const win = targetRef.current?.ownerDocument.defaultView ?? window;
+    win.addEventListener("keydown", handleKeyDown);
+    win.addEventListener("scroll", hide, true);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("scroll", hide, true);
+      win.removeEventListener("keydown", handleKeyDown);
+      win.removeEventListener("scroll", hide, true);
     };
   }, [open]);
 
