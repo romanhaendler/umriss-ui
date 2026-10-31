@@ -287,8 +287,6 @@ export interface Wording {
   groupOpened: (name: string) => string;
   /** Said when the file of an export has been handed over. */
   exportDone: string;
-  /** The noun after the count of matches, for a screen reader: "43 of 1,204" is read "entries". */
-  filteredNoun: (total: number) => string;
   /** The name of a term of the text filter: "Term 1". */
   filterTerm: (index: number) => string;
   /** The selection of every row in the filtered set. */
@@ -430,7 +428,7 @@ export interface Wording {
   /** The button under a server-mode table's error that sends the request once more. */
   tryAgain: string;
   /** "43 of 1.204" - the numbers come from the formats. */
-  filteredOfTotal: (matches: string, total: string) => string;
+  filteredOfTotal: (matches: string, total: string, count: number) => string;
 
   /* -------- Stat, verdict, freshness ------------------------------ */
   /** The four outcomes of an assessment, as a word beside the value. Colour
@@ -945,7 +943,6 @@ export const DEFAULT_WORDING: Wording = {
   groupFolded: (name) => `${name} folded`,
   groupOpened: (name) => `${name} opened`,
   exportDone: "Export done",
-  filteredNoun: (total) => (total === 1 ? "entry" : "entries"),
   filterTerm: (index) => `Term ${index}`,
   selectAllRows: "Select all",
   selectAllOnPage: "Select all on this page",
@@ -1029,7 +1026,7 @@ export const DEFAULT_WORDING: Wording = {
   textTerm: (operator, value) => `${operator} “${value}”`,
   resetAll: "Reset",
   tryAgain: "Try again",
-  filteredOfTotal: (matches, total) => `${matches} of ${total}`,
+  filteredOfTotal: (matches, total, count) => `${matches} of ${total} ${count === 1 ? "entry" : "entries"}`,
 
   verdictOk: "OK",
   verdictWarning: "Warning limit exceeded",

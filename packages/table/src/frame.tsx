@@ -25,7 +25,6 @@ import {
   useUnboundedVirtualWarning,
   useDraftOfVanishedRow,
   useFocusAfterFold,
-  useAnnouncerRetired,
   useHeldColumnWidths,
   useHeldWidthsWhenEmpty,
   useStickyHeaderHeights,
@@ -123,7 +122,6 @@ export function Frame({
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
   useHeldWidthsWhenEmpty(tableRef);
-  useAnnouncerRetired();
   useFlexWidths(tableRef, registry.hook?.tableState.filtered);
   useCutValueWarnings(tableRef);
   const unnamed = !name["aria-label"] && !name["aria-labelledby"];

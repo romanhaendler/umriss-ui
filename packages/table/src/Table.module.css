@@ -142,17 +142,6 @@
     white-space: nowrap;
   }
 
-  /* The noun a screen reader adds to "43 of 1,204": generated content, so the
-     status keeps the bare ratio as its text and the eye sees no more than before. */
-  .filteredCount[data-noun]::after {
-    content: " " attr(data-noun);
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
   /* A collapsed table's borders belong to its grid, not to a cell: the head's
      line would scroll away with the rows and leave them running out under the
      head with nothing between. The sticky head draws its line on the cell. */
@@ -926,7 +915,6 @@
   /* The ratio "43 of 1,204". The status remains in the document even when empty
      (toolbar.tsx); empty it takes no space. */
   .filteredCount {
-    position: relative;
     flex: none;
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);

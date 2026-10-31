@@ -94,13 +94,13 @@ export function TableToolbar({
     const idle = !restricted && selectedTotal === 0 && !registry.rowAdding;
     right = (
       <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>
-        <span role="status" className={styles.filteredCount} data-noun={restricted && !snapshot.server && !registry.skeleton ? wording.filteredNoun(hook.tableState.total ?? hook.admitted.length) : undefined}>
+        <span role="status" className={styles.filteredCount}>
           {!restricted || registry.skeleton
             ? ""
             : snapshot.server
               ? /* The server counts the matches only; a total beside them would be a second request. */
                 wording.entries(snapshot.rowCount, formats.count(snapshot.rowCount))
-              : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.tableState.total ?? hook.admitted.length))}
+              : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.tableState.total ?? hook.admitted.length), hook.tableState.total ?? hook.admitted.length)}
         </span>
         {restricted && (
           <Button size={size} variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>

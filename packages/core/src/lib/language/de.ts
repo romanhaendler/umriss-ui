@@ -196,7 +196,6 @@ export const GERMAN_WORDING: Wording = {
   groupFolded: (name) => `${name} zugeklappt`,
   groupOpened: (name) => `${name} aufgeklappt`,
   exportDone: "Export fertig",
-  filteredNoun: (total) => (total === 1 ? "Eintrag" : "Einträge"),
   filterTerm: (index) => `Bedingung ${index}`,
   selectAllRows: "Alle auswählen",
   selectAllOnPage: "Alle auf dieser Seite auswählen",
@@ -280,7 +279,7 @@ export const GERMAN_WORDING: Wording = {
   textTerm: (operator, value) => `${operator} „${value}“`,
   resetAll: "Zurücksetzen",
   tryAgain: "Erneut versuchen",
-  filteredOfTotal: (matches, total) => `${matches} von ${total}`,
+  filteredOfTotal: (matches, total, count) => `${matches} von ${total} ${count === 1 ? "Eintrag" : "Einträge"}`,
 
   verdictOk: "In Ordnung",
   verdictWarning: "Warngrenze überschritten",

@@ -107,7 +107,7 @@ describe("its condition is a condition like any other", () => {
   it("counts in the ratio, and Reset lifts it", () => {
     const { container } = render(<Shipments />);
     act(() => t!.setFilter(tours, ["T-02"]));
-    expect(screen.getByRole("status").textContent).toBe("1 of 4");
+    expect(screen.getByRole("status").textContent).toBe("1 of 4 entries");
     fireEvent.click(within(container).getByRole("button", { name: "Reset" }));
     expect(ids(container)).toEqual(["S-1", "S-2", "S-3", "S-4"]);
     expect(t!.conditionOf(tours)).toBeNull();
@@ -145,7 +145,7 @@ describe("its chip", () => {
     const { container } = render(<Shipments />);
     act(() => t!.setFilter(tours, ["T-01"]));
     expect(within(container).queryByRole("list", { name: "Active filters" })).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe("2 of 4");
+    expect(screen.getByRole("status").textContent).toBe("2 of 4 entries");
   });
 });
 
@@ -196,7 +196,7 @@ describe("found in review", () => {
     }
     const { container } = render(<Bare />);
     act(() => t!.setFilter(overdue, { before: 30, includeFailed: false }));
-    expect(screen.getByRole("status").textContent).toBe("1 of 4");
+    expect(screen.getByRole("status").textContent).toBe("1 of 4 entries");
     expect(within(container).getByRole("list", { name: "Active filters" }).textContent).toContain("Overdue");
   });
 

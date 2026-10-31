@@ -95,19 +95,6 @@ export function useHeldColumnWidths(registry: Registry, tableRef: TableRef, load
   });
 }
 
-/* The voice's region lives in the document and outlives the table that spoke
-   into it: with the last table gone, it goes too and is built anew by the next
-   announcement, so that a page that left its tables holds no stray status. */
-let framesMounted = 0;
-export function useAnnouncerRetired() {
-  useEffect(() => {
-    framesMounted++;
-    return () => {
-      if (--framesMounted === 0) document.querySelectorAll("[data-umriss-announcer]").forEach((region) => region.remove());
-    };
-  }, []);
-}
-
 /* A table that empties keeps the widths its columns had: with no row left, an
    automatic layout would size them to the head's labels and the message, and
    every column would jump. The head's cells are held at what they measured
