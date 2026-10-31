@@ -83,6 +83,10 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The invalid field's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Slider/Slider.module.css":
     "The invalid slider's track edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
+  "core/RangeSlider/RangeSlider.module.css":
+    "The invalid range's groove edge; the form field's error message is the word, and aria-invalid on both thumbs says it to a screen reader.",
+  "core/TimeInput/TimeInput.module.css":
+    "The invalid fields' edge; the form field's error message is the word and describes the group.",
   "core/Stat/Stat.module.css":
     "The verdict is written out beside the value, and the freshness beside the as-of time: the colour tints words that stand there anyway.",
   "core/Stepper/Stepper.module.css":

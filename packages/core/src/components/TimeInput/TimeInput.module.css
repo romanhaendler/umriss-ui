@@ -1,0 +1,32 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The DatePicker's time fields, standing alone: the group sets the height
+   they take (`--_time-height`) and wears the invalid edge on each of them. */
+
+@layer umriss.components {
+  .group {
+    --_time-height: var(--u-control-height);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-1);
+    vertical-align: middle;
+  }
+
+  .sm {
+    --_time-height: var(--u-control-height-sm);
+  }
+
+  .separator {
+    font-family: var(--u-font-mono);
+    color: var(--u-color-text-secondary);
+  }
+
+  .invalid > :not(.separator) {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid > :not(.separator):focus-within {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+}

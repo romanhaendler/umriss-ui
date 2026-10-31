@@ -110,6 +110,8 @@ export const GERMAN_WORDING: Wording = {
   second: "Sekunde",
   sideFrom: "Von",
   sideTo: "Bis",
+  rangeSliderFrom: "Unterer Wert",
+  rangeSliderTo: "Oberer Wert",
   startHour: "Startstunde",
   startMinute: "Startminute",
   startSecond: "Startsekunde",

@@ -20,6 +20,8 @@ const STYLES = import.meta.glob("../src/components/**/*.module.css", {
 const SHOWN_ELSEWHERE: Readonly<Record<string, string>> = {
   "Input/Input.tsx input":
     "The bare element is a hidden input (`type=\"hidden\"`): no field, never in the tab order. The field itself rings through `.wrapper:focus-within`.",
+  "RangeSlider/RangeSlider.tsx input":
+    "Both thumbs wear the Slider's `range` class by composition: `.range:focus-visible` rings the thumb, in its stylesheet.",
   "Select/Select.tsx select":
     "The element takes its classes from a variable; `.select:focus-visible` rings it.",
 };
