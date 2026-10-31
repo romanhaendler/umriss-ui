@@ -6,9 +6,9 @@
 
 import { createElement, useState, type ComponentType } from "react";
 
-export function keep<P extends { value: unknown }>(Component: ComponentType<P>) {
+export function keep<P extends { value?: unknown }>(Component: ComponentType<P>) {
   return function Kept(props: P) {
     const [value, setValue] = useState(props.value);
-    return createElement(Component, { ...props, value, onChange: setValue });
+    return createElement(Component, { ...props, value, onValueChange: setValue });
   };
 }

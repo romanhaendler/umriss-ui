@@ -1,8 +1,8 @@
-import { useState } from "react";
 import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormats } from "../../lib/language";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Slider.module.css";
 
@@ -12,12 +12,16 @@ export type SliderMark = number | { value: number; label?: ReactNode };
 /** The props of `Slider`. */
 export interface SliderProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step">, RefProp<HTMLInputElement> {
-  /** Controlled: the value. */
+  /** Controlled: the value; `undefined` reads as `min`. */
   value?: number;
   /** Uncontrolled: the value to start at.
       @default min */
   defaultValue?: number;
   /** Reports every change, by pointer or key, as a number on the step. */
+  onValueChange?: (value: number) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release,
+      and `onChange` is then the native input's event handler, as `register`
+      and Formik read it. @deprecated */
   onChange?: (value: number) => void;
   /** The smallest value. */
   min?: number;
@@ -83,12 +87,9 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
    the input. */
 /** One value on a track between `min` and `max`, on the native range input;
     `marks` set labelled points on the track. */
-export function Slider(
-  {
+export function Slider(props: SliderProps) {
+  const {
     ref,
-    value: valueProp,
-    defaultValue,
-    onChange,
     min = 0,
     max = 100,
     step = 1,
@@ -100,14 +101,15 @@ export function Slider(
     id,
     disabled,
     onKeyDown,
-    ...rest
-  }: SliderProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
   const formats = useFormats();
   const field = useFormField();
-  const [own, setOwn] = useState(() => snap(defaultValue ?? min, min, max, step));
-  const controlled = valueProp !== undefined;
-  const value = controlled ? valueProp : own;
+  const [given, report, controlled] = useFieldValue<number>("Slider", props, min);
+  // Uncontrolled, the start is put on the step grid; a controlled value is the caller's.
+  const value = controlled ? given : snap(given, min, max, step);
   const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step)));
   const text = show(value);
   // The readout's room is its longest value's: the track keeps its length as the figure changes.
@@ -116,8 +118,7 @@ export function Slider(
 
   const commit = (next: number) => {
     if (next === value) return;
-    if (!controlled) setOwn(next);
-    onChange?.(next);
+    report(next);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {

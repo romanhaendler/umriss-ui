@@ -13,6 +13,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./RadioGroup.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useRadioGroup } from "./useRadioGroup";
+import { withoutFieldProps } from "../../lib/useFieldValue";
 
 /** One possibility of a `RadioGroup`: its value, its label and an optional
     line of explanation. */
@@ -35,11 +36,13 @@ export interface RadioGroupProps<T extends string>
   /** The possibilities, in the order in which they are meant to stand. */
   options: readonly RadioOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
-      `onChange` the group is controlled. */
+      `onValueChange` the group is controlled. */
   value?: T | null;
   /** Initial value of an uncontrolled group. Not together with `value`. */
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
+  onValueChange?: (value: T) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (value: T) => void;
   /** Arrangement: one below the other, or side by side. */
   orientation?: "vertical" | "horizontal";
@@ -55,30 +58,27 @@ export interface RadioGroupProps<T extends string>
 }
 
 /** One choice out of a few possibilities, all of them visible. Controlled
-    through `value` and `onChange`, or uncontrolled from `defaultValue`; the
+    through `value` and `onValueChange`, or uncontrolled from `defaultValue`; the
     arrow keys move between the possibilities. */
-export function RadioGroup<T extends string>(
-  {
+export function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
+  const {
     ref,
     options,
-    value,
-    defaultValue,
-    onChange,
     orientation = "vertical",
     size: ownSize,
     disabled = false,
     name,
     className,
     onKeyDown,
-    ...rest
-  }: RadioGroupProps<T>,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
   const size = useControlSize(ownSize);
   const radio = useRadioGroup({
     options,
-    value,
-    defaultValue,
-    onChange,
+    props,
+    component: "RadioGroup",
     disabled,
     name,
     onKeyDown,
