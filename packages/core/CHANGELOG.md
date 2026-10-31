@@ -27,6 +27,65 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.52.0 – A form field says what it did: `onValueChange` everywhere, printing, a server table with groups (Oct. 2026)
+
+### Added
+
+- **`onValueChange`** on Input, Textarea, NumberInput, Select, Combobox, MultiSelect, SegmentedControl, RadioGroup, Slider, the four date pickers and FileInput; **`onCheckedChange`** on Checkbox and Switch. `defaultValue` on NumberInput, Combobox, MultiSelect, the four pickers and FileInput (uncontrolled use); `name` and `formValue` on Combobox, MultiSelect, NumberInput and the pickers post the value to a form, `startName` and `endName` on the range pickers post `<name>Start` and `<name>End`.
+- **`RangeSlider`** - a lower and an upper end on one track, posted as `<name>Start` and `<name>End`.
+- **`TimeInput`** - a time of day as hour, minute and optional second fields, the value as the text `HH:mm`.
+- **`Avatar`** - a round mark for a person or a team, a picture or initials, sizes `sm` and `md`.
+- **Input `start` and `end` slots** - a unit as text, an icon or an IconButton inside the field's frame.
+- **Combobox `creatable` and `onCreate`** - typed text as the value for string values (`createOption` in the wording).
+- **Menu and RowActions** open on ArrowDown/ArrowUp from the trigger and have typeahead; `MenuItem` takes a `role` of `menuitem`, `menuitemradio` or `menuitemcheckbox`; the Alert shows its tone by a glyph (`ToneGlyph`).
+- **Checkbox** takes `invalid` and reads FormField's error; **Popover** takes `onBlur`, `closeOnTabOut` and `role="none"`; `useCommandPaletteShortcut` takes a target window (an iframe's) and reads the real target inside a shadow root.
+- **Print styles**: overlays, toasts and the skip link do not print; cards and overlays print with a hard edge; a dark application prints in the light theme.
+- **`resetAnnouncer()`** is exported; call it in `afterEach` (README Testing). `API.md` ships in the package.
+- **The date pickers announce the pick**: the picked date, time or range is the trigger's description and is announced in the wording's language (`pickerPicked`).
+- **Wording** (English and German): `branchLoading`, `calculationMissingAll`, `dashboardHeadHint`, `ofSelected` ("2 of 3"), `selectionCount`, `toastShortcutHint`, `sortedAscending`, `sortedDescending`, `sortRemoved`, `groupFolded`, `groupOpened`, `exportDone`, `filterTerm`, `pickerPicked`, `createOption`.
+
+### Changed
+
+- **Every field reports its value through `onValueChange`, and Checkbox and Switch through `onCheckedChange`** (ADR-0081). `onChange(value)` on NumberInput, Combobox, MultiSelect, SegmentedControl, RadioGroup, Slider, the four date pickers and FileInput is deprecated and warns once in development; the docs, examples and README show the new names. A `value` of `undefined` reads as empty on every field, and a field switched between controlled and uncontrolled warns in development.
+  - Migration: replace `onChange={(value) => ...}` with `onValueChange={(value) => ...}` (and the value form of `onChange` with `onCheckedChange` on Checkbox and Switch) - the old name works in 0.52.0 and is removed in 0.53.0; on Slider `onChange` later becomes the native event handler.
+- **Select, Combobox, MultiSelect, SegmentedControl and RadioGroup take number values**; Select's `onValueChange` returns a number for an option written with one.
+  - Migration: nothing changes for string values; type your handler for the value type you write.
+- **Button `loading` sets `aria-disabled` and `aria-busy`, not `disabled`**, and keeps focus; a disabled button is repainted, not faded.
+  - Migration: `toBeDisabled()` and `:disabled` no longer match a loading button; test `aria-busy` instead.
+- **Badge wraps its text in a span** (`.text`) so that it ends in an ellipsis in a narrow parent.
+  - Migration: a direct-child selector on Badge may need the span.
+- **A Modal without `autoFocus` focuses its first tab stop other than the header's cross**, else the dialog; Modal and Drawer lock the page's scroll while open (inline `overflow` and `padding-right` on `<html>`, no padding under `scrollbar-gutter: stable`).
+  - Migration: a test that expected the focus on Close finds it on the first field; code that sets `overflow` on `<html>` while a dialog is open is overwritten.
+- **A Checkbox or Switch inside a FormField** has one accessible name, its own label.
+  - Migration: a test that found it by the FormField's label finds it by the Checkbox's own.
+- **Wording**: `toastDeckCount` reads "1 / n, show all messages"; the MultiSelect scope button reads "View all" (`optionScopeAll`); a toast's close button is named "<`closeToast`>: <title>"; `filteredOfTotal` takes the count of rows as a third argument for the noun's plural ("… entries"); `dashboardSizeEntry` ignores its `current` flag (still accepted) and writes no check mark - the size choice is a `menuitemradio` and draws its own.
+  - Migration: an application that overrides these entries adjusts `filteredOfTotal` (third argument) and drops the check mark from its `dashboardSizeEntry`; a test that found the buttons by the old text finds them by the new.
+- **Popover is a dialog named by its anchor by default**; its anchor gets `aria-expanded` and `aria-controls` where it has none, and it closes when its anchor scrolls out of a clipping box.
+  - Migration: set `role` to `none` or another role where the surface is not a dialog; a test that found the surface by another role finds it by `dialog`.
+- **`formats` writes dates in the Gregorian calendar for every locale**; search and `filterOptions` fold case and diacritics ("muller" finds "Müller", "strasse" finds "Straße").
+  - Migration: affects `fa` (Persian-calendar output is gone) and any test that expected a diacritic search to miss.
+- **The MultiSelect's options are a listbox of options** with `aria-selected` (`aria-multiselectable`), one Tab stop and roving focus, instead of a group of checkboxes; its panel and the date pickers' dialogs are named after their field and keep the focus where it was.
+  - Migration: a test that found the options as checkboxes finds them as options.
+- **A Combobox with a value selects its text on focus**, so typing replaces it.
+  - Migration: nothing to change; look at tests that type into a focused Combobox with a value.
+- **The muted text token reaches 4.5:1** on its grounds in light and dark; controls take `touch-action: manipulation`; field text follows a raised root size on touch; new tokens `--u-focus-row-color` and `--u-shadow-float`.
+  - Migration: an application that relied on the old, lighter muted grey sees darker text; nothing to change in code.
+- **`Tooltip.children` and `Menu.trigger` are typed** by their ref and attributes.
+  - Migration: a child or trigger that does not accept a ref and DOM attributes fails to compile; wrap it in an element that does.
+- **The published `package.json` carries no `scripts`.**
+  - Migration: nothing changes for a caller; a tool that read the package's scripts from `node_modules` finds none.
+
+### Fixed
+
+- Modal, Drawer, ConfirmDialog and CommandPalette: one inside a Modal or Drawer closes only itself; a Modal hidden by Activity or a re-suspending Suspense closes its dialog and reopens it; focus returns to the opener when an open Modal unmounts, after a mouse press and after a nested dialog, also in WebKit; a synthetic Escape closes a Modal; `ModalHeader` with children renders them as the heading (`title` is optional); a closed CommandPalette mounts nothing; ConfirmDialog calls `onConfirm` once per opening, can be confirmed again after a promise settles with the dialog open, and locks Escape and the backdrop while `loading`.
+- A Popover opened inside a Modal stays open when its container clips; Popover, Menu, ContextMenu and Tooltip open inside a foreign modal dialog instead of behind it, and Escape closes only the top layer; overlays, the announcer and their listeners stay in the shadow root or iframe of their anchor; on a pinch-zoomed page panels fit the visual viewport.
+- Toasts: a bottom toast no longer covers a Drawer's footer buttons; closing a toast by its action after Tab no longer drops focus to the body.
+- Fields: `value={undefined}` with a `defaultValue` is uncontrolled in Input, Textarea, Select and every field; a form's reset restores NumberInput, Combobox, MultiSelect, the four date pickers, RadioGroup, SegmentedControl, Slider, FileInput and Textarea's count and reports it through `onValueChange`; `onBlur` of MultiSelect and the pickers fires only when focus leaves the whole field; `ref.focus()` on RadioGroup and SegmentedControl focuses the checked option; RadioGroup draws the error look; a clearable Combobox emptied by hand gives `null`.
+- NumberInput reads its own output in es, sv, nb, hr, fi and for tiny values, refuses "0 5" where the group separator is a space, steps and rounds exactly (0.2 + 0.1, -2.5, 1.005), keeps an unreadable paste marked, follows a value set while focused, shows NaN and Infinity as empty and names its unit as a description; its declarations compile for a strict consumer.
+- Date pickers keep the focus on the active day across months, Tab out of an open panel closes it, an Invalid Date shows the field empty with a DEV warning, pasting into the hour or minute field sets it, the time fields are spinbuttons, typed dates are read in Arabic-Indic and Persian digits, a 30-minute daylight-saving change is flagged ambiguous, and the weekday heads stay apart at a large root font size.
+- Slider snaps on the grid from `min` with the decimals of `min` and `step`; TreeView checking under a filter touches only what the filter shows; Link and Breadcrumb no longer write an `href` with a `javascript:`, `vbscript:` or `data:` scheme (a DEV warning says so).
+- Looks: an Alert inside a centred place aligns its text to the start beside its glyph; disabled buttons reach 3:1 in both themes and a danger button's focus ring too; Radios draw as circles; Splitter's line holds 3:1; FileInput's crosses line up and its rows stand apart under a finger; Sparkline's `aria-label` sits on an img; VisuallyHidden causes no overflow in a non-positioned scroller; the skip link shows the library's focus ring; the Select's panel is as wide as its field and the MultiSelect panel has one scroll container at 320x256; a Stat as a dashboard widget's content is not a card in a card, and a Stat's ISO-string `asOf` warns in development.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 ### Added

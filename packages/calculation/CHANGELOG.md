@@ -14,6 +14,19 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.52.0 – Printed with every derivation open, long labels that fit, a reason badge that names every given (Oct. 2026)
+
+### Added
+
+- **Print**: a calculation prints with every derivation open and without its disclosure buttons. `API.md` ships in the package.
+
+### Fixed
+
+- Long unbreakable labels no longer run under their figure and long units are not cut at 320/375 px; deep levels keep a readable label width.
+- The reason badge names every missing given, not only the first.
+- Copying a row copies what is visible, and a double or triple click no longer toggles the row.
+- A derivation's disclosure button is described by its row's sentence, figure included.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 No change of its own; the number moves with the other packages (ADR-0066).

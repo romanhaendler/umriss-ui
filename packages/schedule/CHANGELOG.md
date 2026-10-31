@@ -18,6 +18,25 @@ moves from here under the rule above.
 
 ---
 
+## 0.52.0 – Lane headers that leave room, a lane intent from the keyboard, a schedule that prints (Oct. 2026)
+
+### Added
+
+- **Print styles**: a schedule prints without lane chevrons, resize grips, tooltip and focus ring.
+- **Alt+ArrowUp/ArrowDown** proposes a lane intent to the lane above or below, announced and listed in the key help (English and German). `API.md` ships in the package.
+
+### Changed
+
+- **The lane headers take at most 28 % of the width**, never under 120 px (was 40 %); on a phone the gutter is at most 28 %, never under 88 px.
+  - Migration: a test or screenshot that measured the lane column adjusts.
+
+### Fixed
+
+- A domain of Dates or strings, or layer data that is not an array, warns in DEV and renders without crashing the tree.
+- The tooltip gives the date (year included) and the duration; a dependency without lag is no longer read as "0 min".
+- Without a domain, and for fit, work wider than the widest zoom span shows its earliest part, not the empty middle.
+- A drop reports the subtask's current id where ids were reminted during the drag; a cut lane name shows in full as a title; a pinch over the plot zooms the page.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 No change of its own; the number moves with the other packages (ADR-0066).

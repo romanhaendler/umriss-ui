@@ -13,6 +13,26 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.52.0 – A dashboard that prints, widgets told apart by place, the focus kept in the edit bar (Oct. 2026)
+
+### Added
+
+- **Print**: a dashboard prints without its edit bar and head buttons, and a widget is not split across two sheets. `API.md` ships in the package.
+
+### Changed
+
+- **`WidgetType`'s `defaultOptions` is optional.**
+  - Migration: nothing to change; drop empty `defaultOptions` if you like.
+- **The size choice is a `menuitemradio` with `aria-checked`**, and widgets of one title are named "<title>, place N of M" in their menu and landmark names.
+  - Migration: a test that found the size choices as `menuitem` finds them as `menuitemradio`; a test that found a widget by its bare title adds the place.
+
+### Fixed
+
+- ArrowUp and ArrowDown on a widget head move it one row; the head says that arrows move it.
+- The focus stays in the bar through Edit, Done, Cancel and Reset; entering the editing mode is announced; Escape leaves it as Cancel.
+- `onDraftChange(false)` is called when a dashboard unmounts with an open draft.
+- The edit bar stands within the board's maximum width; a title cut by text spacing shows in full on hover and focus; the dispatcher example's open alerts scroll to a whole-pixel end.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 No change of its own; the number moves with the other packages (ADR-0066).

@@ -12,6 +12,17 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.52.0 – The priority first, the list printed (Oct. 2026)
+
+### Added
+
+- **Print**: the alarm list prints without the buttons of its bar. `API.md` ships in the package.
+
+### Changed
+
+- **The Priority column comes first**, so at 375 px the priority of every alarm row is in view without scrolling sideways; the snooze dialog and the controls use core's `onValueChange` and `onCheckedChange`.
+  - Migration: a test that read the first cell of a row as the alarm's text reads the priority; nothing changes for the handlers.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 ### Changed
