@@ -39,7 +39,7 @@ describe("MultiSelect - focus when the panel opens", () => {
   it("focuses the first enabled option when a touch opens it", () => {
     renderField();
     press("touch");
-    expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Beta" }));
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Beta" }));
   });
 
   it("focuses the search when a mouse opens it", () => {

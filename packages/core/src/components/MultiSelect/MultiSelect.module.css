@@ -396,10 +396,67 @@
   }
 
   .option {
+    composes: text from "#own-styles";
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
     width: 100%;
     padding: var(--u-space-2);
     border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+    cursor: pointer;
+    user-select: none;
     transition: background-color var(--u-transition);
+  }
+
+  .option:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .optionLabel {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .row .optionLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* The option's box, drawn as the Checkbox's is: the state it shows is
+     aria-selected's. */
+  .box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border-radius: var(--u-radius-xs);
+    background: var(--u-color-surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge-strong);
+    color: var(--u-color-on-accent);
+  }
+
+  .tick {
+    opacity: 0;
+  }
+
+  .optionChosen .box {
+    background: var(--u-color-accent);
+    box-shadow: 0 0 0 1px var(--u-color-accent);
+  }
+
+  .optionChosen .tick {
+    opacity: 1;
+  }
+
+  .optionDisabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   /* A row of a windowed list is as tall as every other: the hook measures one
@@ -412,11 +469,11 @@
     white-space: nowrap;
   }
 
-  .option:hover {
+  .option:hover:not([aria-disabled]) {
     background: var(--u-color-surface-sunken);
   }
 
-  .option:active {
+  .option:active:not([aria-disabled]) {
     background: var(--u-color-surface-pressed);
   }
 
