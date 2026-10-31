@@ -14,7 +14,7 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src", "tests-unit", "tests-visual"],
-  /* The demo and the smoke tests that render it are `typecheck:demo`'s: they read
+  /* The demo and the tests that render all of it (smoke, field contract) are `typecheck:demo`'s: they read
      `demo/.generated`, which `props` writes. */
-  "exclude": ["tests-unit/demo-smoke*"]
+  "exclude": ["tests-unit/demo-smoke*", "tests-unit/fieldContract*"]
 }
