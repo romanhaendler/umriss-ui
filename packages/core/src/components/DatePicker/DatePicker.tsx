@@ -8,6 +8,7 @@ import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, isoDay, posted, type FormPostProps } from "../../lib/FormPost";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dayStart, dayShown, gridDay, zoneToday } from "./zoned";
 import { clampDay, outside, useDayBounds } from "./bounds";
@@ -27,7 +28,7 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * with it.
  */
 export interface DatePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date> {
   /** The day, as a `Date` on midnight in the formats' zone (the reader's, unless the application names one); `null` means none. */
   value?: Date | null;
   /** Uncontrolled: the value to start at.
@@ -79,6 +80,8 @@ export function DatePicker(props: DatePickerProps) {
     min,
     max,
     className,
+    name,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -143,6 +146,8 @@ export function DatePicker(props: DatePickerProps) {
 
   return (
     <>
+      {/* `YYYY-MM-DD` of the day in the formats' zone. */}
+      <FormPost entries={[[name, posted(value, (date) => isoDay(date, timeZone), formValue)]]} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
         root={rest}
