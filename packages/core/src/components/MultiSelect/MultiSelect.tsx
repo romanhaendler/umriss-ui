@@ -8,6 +8,7 @@ import { Checkbox } from "../Checkbox";
 import { Input } from "../Input";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import { WINDOW_ABOVE } from "../../lib/listbox";
@@ -33,7 +34,7 @@ export interface MultiSelectOption<T extends string = string> {
 
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
@@ -106,6 +107,8 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     style,
     id,
     onClick,
+    name,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -384,6 +387,8 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
 
   return (
     <>
+      {/* One entry per value under the one name; none chosen posts one empty entry. */}
+      <FormPost entries={(value.length ? value : [null]).map((v) => [name, posted(v, String, formValue)] as const)} disabled={disabled} />
       {/* The class and the style dress the field, the element that carries
           the ring; the ref and the rest belong to the button that takes the
           focus (principle 1). Its key handler runs before the field's own and
