@@ -68,6 +68,27 @@ an x axis that reads such rows names their type: `<XAxis<Row> value="t" />`.
 A y axis reads no value: its series place the rows along y. `Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
 are imported as they are (ADR-0048).
 
+**In a generic wrapper** the row type is a parameter, and TypeScript cannot tell which of its keys hold numbers.
+Name the fields as the table's wrappers do, `Extract<keyof Z, string>`, and pass them on with `as never`,
+which leaves the check of the field to the caller of the wrapper:
+
+```tsx
+import { useChart } from "@umriss-ui/charts";
+
+function Course<Z extends object>({ rows, field }: { rows: Z[]; field: Extract<keyof Z, string> }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(rows);
+  return (
+    <Chart aria-label={field}>
+      <XAxis value={field as never} />
+      <YAxis />
+      <Line value={field as never} name={field} />
+    </Chart>
+  );
+}
+```
+
+A name that no row has is a gap in every row; in development the chart says so once, naming the field.
+
 The chart is a composite (ADR-0068): `ref`, `className`, `style`, `id` and `data-*` reach its root `<div>`; `aria-label` and `aria-labelledby` name the plot, and your `aria-describedby` is added after the plot's own summary.
 
 A series is an element, not an entry in a configuration object: the order in the
@@ -121,10 +142,11 @@ stylesheets by hand.
 `--u-chart-6`; core's README holds a brand file that sets them, light and dark. Where colour alone
 does not tell the series apart (printouts, colour-blind readers), `encoding="marks"` on `Chart` gives
 each series a dash and a marker shape, and a hatch on bars, states, cells and limit bands, by the same
-palette place; the default stays `encoding="color"`. **Light and
+palette place; the default stays `encoding="color"`, and `encoding="marks"` is the route for those readers. **Light and
 dark** follow the application's `color-scheme`: the canvas colours are resolved
-anew when the root element's attributes or the system preference change;
-`invalidateTheme()` covers a switch made on another ancestor. **Fonts** are not
+anew when the attributes of the root element or of an ancestor of a chart (a `.dark` class, a
+`color-scheme` on a container) or the system preference change; `invalidateTheme()` covers any other switch.
+The text sizes (`--uc-size-tick`, `-title`, `-legend`, `-tooltip`) are in `rem` and grow with the root size. **Fonts** are not
 loaded: Geist when the application has it, the system fonts otherwise.
 **Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer.
 

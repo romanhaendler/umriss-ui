@@ -186,7 +186,7 @@ describe("onRange", () => {
 
   it("takes touch-action pan-y where nothing zooms but onRange is given", async () => {
     const host = await mount({ onRange: () => undefined });
-    expect(plotOf(host).style.touchAction).toBe("pan-y");
+    expect(plotOf(host).style.touchAction).toBe("pan-y pinch-zoom");
     const without = await renderChart(<Course />);
     expect(plotOf(without.host).style.touchAction).toBe("");
     without.unmount();

@@ -71,8 +71,8 @@ export function sheetXml(sheet: ExportSheet, wall: Wall = localWall): string {
   if (columns.length > MAX_COLUMNS) throw new RangeError(`A worksheet holds at most ${MAX_COLUMNS.toLocaleString("en")} columns.`);
   if (rows.length + 1 > MAX_ROWS) throw new RangeError(`A worksheet holds at most ${MAX_ROWS.toLocaleString("en")} rows.`);
 
-  /* A column of dates is a date column when no date in it has a time - the CSV's rule. */
-  const styles = columns.map((_, c) => (allDays(rows.map((row) => row[c]), wall) ? 1 : 2));
+  /* A column of dates is a day column when its `day` says so, else when no date in it has a time - the CSV's rule. */
+  const styles = columns.map((col, c) => (!col.own && (col.day ?? allDays(rows.map((row) => row[c]), wall)) ? 1 : 2));
 
   const cols = columns
     .map((c, i) => (c.width === undefined ? "" : `<col min="${i + 1}" max="${i + 1}" width="${c.width / 7 + 1}" customWidth="1"/>`))

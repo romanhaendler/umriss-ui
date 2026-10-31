@@ -143,7 +143,11 @@ export function summaryText(s: ChartScene): string {
     const range = visibleRange(s, entry);
     if (range === null) continue;
     const name = s.nameFor(entry, all.indexOf(entry));
-    parts.push(w.seriesExtent(name, formatY(s, entry, range[0]), formatY(s, entry, range[1])));
+    // Over days or categories the extremes say which one they fall on: "1 (Mon) to 5 (Fri)".
+    const id = entry.config.xAxisId;
+    const placed = s.categoriesAt("x", id) !== undefined || s.dated.has(id);
+    const at = (v: number, x: number): string => (placed ? `${formatY(s, entry, v)} (${s.xLabel(id, x)})` : formatY(s, entry, v));
+    parts.push(w.seriesExtent(name, at(range[0], range[2]), at(range[1], range[3])));
   }
   const limits = limitTexts(s);
   if (limits.length > 0) parts.push(w.limitList(limits));
@@ -155,9 +159,9 @@ export function summaryText(s: ChartScene): string {
   return parts.join(" ");
 }
 
-/** The lowest and highest value of a series inside its x axis' domain; a
+/** The lowest and highest value of a series inside its x axis' domain, and the x each lies at; a
     cell's value, every other kind's y. */
-export function visibleRange(s: ChartScene, entry: SeriesEntry): [number, number] | null {
+export function visibleRange(s: ChartScene, entry: SeriesEntry): [number, number, number, number] | null {
   const mat = entry.materialized;
   const xAxis = s.findAxis("x", entry.config.xAxisId);
   if (mat === null || xAxis === null) return null;
@@ -166,15 +170,23 @@ export function visibleRange(s: ChartScene, entry: SeriesEntry): [number, number
   const values = mat.w ?? entry.stacked?.value ?? mat.y;
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
+  let minAt = from;
+  let maxAt = from;
   // ponytail: reads every visible point once per summary; debounced above,
   // so a zoom pays it once when it rests, not per frame.
   for (let i = lowerBound(mat.x, mat.length, from); i < mat.length && (mat.x[i] as number) <= to; i++) {
     const v = values[i] as number;
     if (!Number.isFinite(v) || Number.isNaN(mat.y[i] as number)) continue;
-    if (v < min) min = v;
-    if (v > max) max = v;
+    if (v < min) {
+      min = v;
+      minAt = mat.x[i] as number;
+    }
+    if (v > max) {
+      max = v;
+      maxAt = mat.x[i] as number;
+    }
   }
-  return min <= max ? [min, max] : null;
+  return min <= max ? [min, max, minAt, maxAt] : null;
 }
 
 /** A value as the tooltip writes it: the series' format, else its y axis'

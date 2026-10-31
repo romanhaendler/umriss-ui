@@ -16,7 +16,7 @@ import {
   firstDisorderedBox,
 } from "./materialize";
 import type { ChartScene } from "./scene";
-import { checkValues } from "./sceneChecks";
+import { checkField, checkValues } from "./sceneChecks";
 import { categoriesFrom, laneOf, forget, sameNames, boxChannelsOf, stackOf, normalizes, valueChannelOf, baselineOf } from "./sceneConfig";
 import { type SeriesEntry } from "./sceneModel";
 import { isHidden } from "./sceneView";
@@ -180,6 +180,8 @@ export function materialize(s: ChartScene): void {
     const misplaced = unlisted || (alongY !== undefined && config.kind !== "matrix" && config.kind !== "state");
     const rowOf = config.accessor as (d: unknown, index: number) => unknown;
     if (DEV) {
+      checkField(data, config.accessor, config.name);
+      checkField(data, xAxis.accessor, config.name);
       checkValues(s, config, data, xAxis, xAxis.accessor);
       if (config.kind === "matrix") checkValues(s, config, data, { orientation: "y", id: config.yAxisId }, rowOf);
       if (misplaced && !unlisted) {

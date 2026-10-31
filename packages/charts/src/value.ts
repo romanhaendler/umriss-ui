@@ -6,7 +6,7 @@
    say by its name. */
 
 const readers = new Map<string, (d: unknown) => unknown>();
-const fieldReaders = new WeakSet<object>();
+const fieldReaders = new WeakMap<object, string>();
 
 /** The function a value comes to: a field name's reader, or the function as
     it was given. */
@@ -18,10 +18,13 @@ export function readerOf<F>(value: string | F | undefined): F | undefined {
   if (reader === undefined) {
     reader = (d) => (d as Record<string, unknown>)[value];
     readers.set(value, reader);
-    fieldReaders.add(reader);
+    fieldReaders.set(reader, value);
   }
   return reader as F;
 }
 
 /** Was this function made from a field name? */
 export const isFieldReader = (fn: unknown): boolean => typeof fn === "function" && fieldReaders.has(fn);
+
+/** The field a reader was made from, or undefined for any other function. */
+export const fieldOf = (fn: unknown): string | undefined => (typeof fn === "function" ? fieldReaders.get(fn) : undefined);

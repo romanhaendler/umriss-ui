@@ -88,7 +88,7 @@ export function RadioGroup<T extends string | number>(props: RadioGroupProps<T>)
 
   return (
     <div
-      ref={mergeRefs(radio.groupRef, ref)}
+      ref={mergeRefs(radio.groupRef, ref, radio.formRef)}
       {...radio.groupProps}
       aria-orientation={orientation}
       className={cx(

@@ -324,6 +324,20 @@ export function twoLines(label: string, width: (text: string) => number): string
   return best;
 }
 
+/** Each line of a label cut to `max` px, ending in an ellipsis where it was cut; a line keeps one character at
+    least. */
+export function shortened(label: string, max: number, width: (text: string) => number): string {
+  return label
+    .split("\n")
+    .map((line) => {
+      let n = line.length;
+      if (width(line) <= max) return line;
+      while (n > 1 && width(`${line.slice(0, n)}…`) > max) n--;
+      return `${line.slice(0, n)}…`;
+    })
+    .join("\n");
+}
+
 /** The most of the chart's width a y band may take for its limit labels;
     beyond it they stand inside the plot. */
 export const LIMIT_SHARE = 0.2;
@@ -552,6 +566,7 @@ function placeXTicks(
   tickCount: number,
   keep: number,
   wrap = false,
+  cut = false,
 ): PlacedTicks {
   const { width, locale, measure } = cx;
   const all = tickValuesFor(axis, domain, tickCount);
@@ -560,7 +575,12 @@ function placeXTicks(
   // Labelled after thinning: a time label's date moves to the first tick
   // that is kept.
   const plain = labelsFor(axis, domain, tickCount, values, format, locale);
-  const labels = wrap ? plain.map((l) => twoLines(l, (t) => measure(t, CLASS_TICK).width)) : plain;
+  const widthOf = (t: string): number => measure(t, CLASS_TICK).width;
+  const broken = wrap ? plain.map((l) => twoLines(l, widthOf)) : plain;
+  // Cut to the room between two neighbours.
+  let room = Number.POSITIVE_INFINITY;
+  for (let i = 1; i < values.length; i++) room = Math.min(room, scale.toPx(values[i] as number) - scale.toPx(values[i - 1] as number));
+  const labels = cut && room - LABEL_GAP > widthOf("…") ? broken.map((l) => shortened(l, room - LABEL_GAP, widthOf)) : broken;
   const ticks: TickLayout[] = values.map((value, i) => {
     const label = labels[i] ?? "";
     const labelWidth = measure(label, CLASS_TICK).width;
@@ -583,8 +603,8 @@ function xTickLadder(
   startCount: number,
   tall: ReadonlySet<string> | null,
 ): { placed: PlacedTicks; wrapped: boolean } {
-  const place = (tickCount: number, keep: number, wrap = false) =>
-    placeXTicks(axis, domain, scale, cx, tickCount, keep, wrap);
+  const place = (tickCount: number, keep: number, wrap = false, cut = false) =>
+    placeXTicks(axis, domain, scale, cx, tickCount, keep, wrap, cut);
   let count = startCount;
   // Collision between the labels, measured and not guessed from a width
   // per tick. Generated ticks first ask for fewer, so their step stays
@@ -617,11 +637,14 @@ function xTickLadder(
     return { placed, wrapped: false };
   }
   // Named ticks are categories, and their names are the content: two
-  // lines before any is left out, and at every thinning again.
+  // lines, then two lines cut short with an ellipsis, before any is left
+  // out, and at every thinning again. The full names stay in the tooltip
+  // and the data table.
   const wrap = tall === null || tall.has(axis.key);
+  const modes: [boolean, boolean][] = wrap ? [[false, false], [true, false], [true, true]] : [[false, false]];
   for (let keep = 1; ; keep++) {
-    for (const lines of wrap ? [false, true] : [false]) {
-      placed = place(count, keep, lines);
+    for (const [lines, cut] of modes) {
+      placed = place(count, keep, lines, cut);
       if (apart(placed.ticks) || placed.ticks.length <= 1) return { placed, wrapped: lines };
     }
   }
