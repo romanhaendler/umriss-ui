@@ -699,11 +699,32 @@ interface AutomaticMode<Z, Key extends RowKey = string> {
   answers?: never;
   error?: never;
   totals?: never;
+  groups?: never;
+}
+
+/** One group line of a server's answer (`groups`): a group the page shows
+    rows of, or a folded one. */
+export interface ServerGroup {
+  /** The group's values from the outermost level to its own, one per level it
+      stands on: `["open"]` is a group of the first level, `["open", "high"]`
+      one of the second inside it. Dates are `Date`s, as the column's value is. */
+  path: readonly unknown[];
+  /** How many rows the group has over every match, not on this page. */
+  count: number;
+  /** By column id, what the column's declared `aggregate` comes to over the
+      group's rows, as the footer's `totals` do over the table's. */
+  totals?: Readonly<Record<string, unknown>>;
+  /** The index in `rows` before which the group's line stands; for a group
+      the page ends or folds before any row, `rows.length` or the next one's. */
+  at: number;
+  /** The group began on an earlier page: its header is repeated at the top of
+      this one, marked "continued", as a grouped table in the browser does. */
+  continued?: boolean;
 }
 
 /** Server mode: the rows are the page a server answered for the request the
     table reported. The table searches, filters, sorts, groups and pages nothing of
-    its own; there is no grouping. After a full page is ticked, select all
+    its own; a grouping is the server's, answered as `groups`. After a full page is ticked, select all
     offers every row that matches, as a state a bulk action receives as
     `AllMatching`; the export writes every match when `exportRows` is given and
     the page, saying so, when it is not; the footer shows `totals` or nothing,
@@ -718,8 +739,8 @@ interface ServerMode<Z> {
   rowCount: number;
   /** The request changed: search, conditions, sort, page or page size. Called
       once when the table first stands and once per change, with every one of
-      the five present - a width, an order, a pin, a fold or a hidden column
-      asks the server nothing; `onViewChange` hears those. */
+      the seven present - a width, an order, a pin or a hidden column asks the
+      server nothing; `onViewChange` hears those. */
   onRequest: (request: TableRequest) => void;
   /** The request the rows answer. While it is not the table's current request
       (compared by key) the table is busy as `loading` makes it: the rows dim,
@@ -744,6 +765,16 @@ interface ServerMode<Z> {
       own are taken as given). A missing key shows the absent value; while the
       table is busy the cells are skeleton. Without it there is no footer. */
   totals?: Readonly<Record<string, unknown>>;
+  /** The group lines of the page, when the request's `grouping` is not empty:
+      the application names the groups and the table draws them - their
+      counts and totals are over every match, and it computes nothing over
+      the rows. In the order of the lines, the outer group before the groups
+      inside it; the rows below each group follow it in `rows`. A page counts
+      lines, headers and rows alike, so `rowCount` counts lines while
+      grouped, and a folded group (`request.folded`) comes without its rows.
+      Missing or malformed, the rows are shown ungrouped and development
+      says why. Hand it back with the `answers` it belongs to. */
+  groups?: readonly ServerGroup[];
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];

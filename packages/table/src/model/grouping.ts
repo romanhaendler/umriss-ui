@@ -110,7 +110,27 @@ export interface RowGroup<Z> {
   groups: RowGroup<Z>[];
   /** Per column id, what its aggregate comes to over this group's rows. */
   aggregates: Record<string, unknown>;
+  /** Server mode: how many rows the group has over every match, of which
+      `rows` holds the ones on the page. */
+  size?: number;
 }
+
+/** How many rows a group has: the server's count, or its rows'. */
+export const sizeOf = (group: RowGroup<unknown>): number => group.size ?? group.rows.length;
+
+/** A group line of a server's answer: the group whose rows begin at `at` (see
+    `ServerGroup` in types.ts). */
+export interface AnsweredGroup {
+  path: readonly unknown[];
+  count: number;
+  totals?: Readonly<Record<string, unknown>>;
+  at: number;
+  continued?: boolean;
+}
+
+/** The path of a group as the view and a request name it: the keys of its
+    values, outermost first. */
+export const groupPath = (values: readonly unknown[]): string => JSON.stringify(values.map(filterKey));
 
 const comparable = (value: unknown): string | number | undefined => {
   if (isAbsent(value)) return undefined;
@@ -359,4 +379,81 @@ export function withContinuation<Z>(slice: readonly Line<Z>[]): Line<Z>[] {
   }));
   const first: Line<Z> = head.kind === "row" && head.span && !head.first ? { ...head, first: true, continued: true } : head;
   return [...repeated, first, ...slice.slice(1)];
+}
+
+/**
+ * The lines of a server's page. The answer names its groups beside the rows;
+ * the lines are read from it and nothing is computed over the rows: a header
+ * stands before the row at its `at`, the innermost of several levels is a span
+ * on its first row (one `folded` line when no row of the page belongs to it),
+ * and a `continued` group is the page's repeated header. A string is the first
+ * thing wrong with the answer - the rows are then shown ungrouped.
+ */
+export function answeredLines<Z>(
+  rows: readonly Z[],
+  answer: unknown,
+  depth: number,
+): { groups: RowGroup<Z>[]; lines: Line<Z>[] } | string {
+  if (!Array.isArray(answer)) return "`groups` is not an array";
+  const list = answer as readonly AnsweredGroup[];
+  const roots: RowGroup<Z>[] = [];
+  const made: RowGroup<Z>[] = [];
+  const stack: RowGroup<Z>[] = [];
+  let before = 0;
+  for (const [i, g] of list.entries()) {
+    const label = `groups[${i}]`;
+    if (!g || typeof g !== "object" || !Array.isArray(g.path) || g.path.length < 1 || g.path.length > depth) {
+      return `${label}.path must hold one value per level, 1 to ${depth}`;
+    }
+    if (typeof g.count !== "number" || !(g.count >= 0)) return `${label}.count must be a number`;
+    if (!Number.isInteger(g.at) || g.at < before || g.at > rows.length) {
+      return `${label}.at must be an index in rows, not before the one of the group above it`;
+    }
+    before = g.at;
+    const level = g.path.length - 1;
+    const parent = level > 0 ? stack[level - 1] : undefined;
+    if (level > 0 && (!parent || parent.path !== groupPath(g.path.slice(0, level)))) {
+      return `${label} is a group of level ${level + 1} that does not stand under the group above it`;
+    }
+    const value = g.path[level];
+    const group: RowGroup<Z> = {
+      path: groupPath(g.path),
+      value: isAbsent(value) ? undefined : value,
+      level,
+      rows: [],
+      groups: [],
+      aggregates: { ...g.totals },
+      size: g.count,
+    };
+    stack.length = level;
+    stack[level] = group;
+    (parent ? parent.groups : roots).push(group);
+    made.push(group);
+  }
+  const lines: Line<Z>[] = [];
+  const open: RowGroup<Z>[] = [];
+  let next = 0;
+  for (let at = 0; ; at++) {
+    for (; next < made.length && list[next]!.at === at; next++) {
+      const group = made[next]!;
+      open.length = group.level;
+      open[group.level] = group;
+      const parents = open.slice(0, group.level);
+      if (depth === 1 || group.level < depth - 1) {
+        lines.push({ kind: "header", group, parents, continued: list[next]!.continued === true });
+      } else if ((list[next + 1]?.at ?? rows.length) === at) {
+        lines.push({ kind: "folded", group, parents });
+      }
+    }
+    if (at === rows.length) break;
+    if (open.length < depth) return `the row at index ${at} stands in no group of the innermost level`;
+    const row = rows[at]!;
+    const span = depth > 1 ? open[depth - 1] : undefined;
+    for (const group of open) group.rows.push(row);
+    const parents = depth > 1 ? open.slice(0, depth - 1) : [open[0]!];
+    const index = span ? made.indexOf(span) : -1;
+    const first = span !== undefined && list[index]!.at === at;
+    lines.push({ kind: "row", row, parents, span, first, continued: first && list[index]!.continued === true });
+  }
+  return { groups: roots, lines };
 }

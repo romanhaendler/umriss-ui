@@ -49,7 +49,10 @@ export type { SortDirection, SortLevel } from "./model/tableModel";
 export { useTableSelection } from "./model/useTableSelection";
 export type { TableSelection } from "./model/useTableSelection";
 
-/* Grouping and aggregates. */
+/* Grouping and aggregates. In server mode `groupPath` names a group the way
+   `request.folded` does. */
+export { groupPath } from "./model/grouping";
+export type { ServerGroup } from "./types";
 export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
 
 /* Grid mode and editing in place (ADR-0034, ADR-0036). */

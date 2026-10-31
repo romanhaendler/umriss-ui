@@ -119,7 +119,7 @@ export function frameLayout({
   const first = projection.visibleLines?.find((l) => l.kind !== "header" || !l.continued);
   const pageStart = !paged
     ? 0
-    : projection.lines && first
+    : projection.lines && first && !snapshot.server
       ? Math.max(0, projection.lines.findIndex((l) => l === first || (l.kind === "row" && first.kind === "row" && l.row === first.row)))
       : (projection.page - 1) * snapshot.pageSize;
   /* In server mode the aggregates would be the page's, standing where the

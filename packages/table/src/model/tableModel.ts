@@ -85,8 +85,9 @@ export interface TableInput<Z = unknown, K extends string = string> {
       its filtered set. The model then searches, filters, sorts, groups and
       pages nothing - it would do it over one page and call that the whole.
       A total of 0 is "not answered yet" - a page of a view handed in stays -
-      unless `answered` says the server did answer: then it is page 1 of 1. */
-  server?: { rowCount: number; answered?: boolean };
+      unless `answered` says the server did answer: then it is page 1 of 1.
+      `grouped` is the lines its answer named: a page then counts lines. */
+  server?: { rowCount: number; answered?: boolean; grouped?: { groups: RowGroup<Z>[]; lines: Line<Z>[] } };
   /** Tree rows: the rows are the roots, and these read their children. The
       model then sorts every level on its own, filters by core's path rule and
       pages nothing. */
@@ -362,6 +363,13 @@ export function tableModel<Z, K extends string = string>(
       page: currentPage,
       pageCount,
       columnCount: visibleColumns.length,
+      /* The server's groups, read into lines (`answeredLines`): its page is
+         the lines of its answer. */
+      ...(input.server.grouped && {
+        groups: input.server.grouped.groups,
+        lines: input.server.grouped.lines,
+        visibleLines: input.server.grouped.lines,
+      }),
     };
   }
 

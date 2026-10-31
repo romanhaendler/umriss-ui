@@ -38,16 +38,20 @@ export interface TableView<K extends string = string> {
 }
 
 /** The request server mode reports to `onRequest`: the parts of the view that
-    decide the rows - search, conditions, sort, page and page size - and
-    nothing else, each at its default as well. A server has no default of the
+    decide the rows - search, conditions, sort, page, page size, the grouping
+    and the folded groups - and nothing else, each at its default as well
+    (`grouping` and `folded` are always present in the request the table
+    reports; they are optional only so that an `answers` written before them
+    still types, and read as empty). A server has no default of the
     table's to fall back on, and a request it has to complete is one it
-    completes wrongly. A width, an order, a pin or a fold is no part of it. */
-export type TableRequest<K extends string = string> = Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">>;
+    completes wrongly. A width, an order or a pin is no part of it. */
+export type TableRequest<K extends string = string> = Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">> &
+  Pick<TableView<K>, "grouping" | "folded">;
 
 /** What server mode compares to report a request once. Conditions are
     compared as JSON, which is what a server receives of them. */
 export const requestKey = (request: TableRequest): string =>
-  JSON.stringify([request.search, request.conditions, request.sort, request.page, request.pageSize]);
+  JSON.stringify([request.search, request.conditions, request.sort, request.page, request.pageSize, request.grouping ?? [], sorted(request.folded) ?? []]);
 
 /** What a view is compared by (ADR-0047): its content, not its identity - a
     view written in the call is a new object on every render.

@@ -262,7 +262,8 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   limit set. The library generates no alarms.
 * **A million rows on a server**: in server mode (`server: true`, `rowCount`)
   the rows are one page a server answered; the table reports the request -
-  search, conditions, sort, page, page size - through `onRequest` once per
+  search, conditions, sort, page, page size, grouping and folded groups -
+  through `onRequest` once per
   change and keeps the previous page, dimmed, while the next is on its way.
   Typing in `Search` is reported after a pause of 300 ms without a keystroke
   (the field and `t.search` take each letter at once); Enter, an emptied field,
@@ -277,7 +278,21 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   `{ request, except }` instead of rows (the one type a caller may have to
   answer); `totals` fill the footer over every match. What stays the
   application's: the cap on an export, the sums and the clearing of `error`.
-  Groups from the server are the next piece, with a spec of their own.
+  **Groups from the server** (ADR-0082): `request.grouping` (column ids,
+  outermost first) and `request.folded` (the paths of the folded groups; a
+  group's path is `groupPath(values)`) ask for them, and the answer names the
+  lines it computed over every match as `groups`, beside `rows`: per group on
+  the page its `path` (the values from the outermost level to its own), `count`
+  (the rows below it over every match), `totals` (by column id, as the footer's)
+  and `at` (the index in `rows` before which its line stands). A page counts
+  lines - headers and rows - so `rowCount` counts lines while grouped, and a
+  page that begins inside a group names that group again with `continued: true`,
+  its repeated header taking its room from the page. A folded group comes
+  without its rows; the innermost of several levels stands on its first row (a
+  folded one is a line of its own). A `groups` that is missing or does not fit
+  the grouping warns in development and shows the rows ungrouped; pass `answers`
+  so that the old groups are not drawn under a new grouping. The table computes
+  nothing over the rows: no selection box on a group, no share bar.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
