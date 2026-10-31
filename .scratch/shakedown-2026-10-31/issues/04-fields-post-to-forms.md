@@ -12,7 +12,7 @@ with its value, as a native control would.
 - [x] `name` is allowed in the types of every field (Combobox, MultiSelect and the pickers declare it, so spreading Formik's `field` compiles).
 - [x] With `name` a field renders a hidden input posting decision 3's formats: Combobox the value (not the label); MultiSelect one entry per value; DatePicker `YYYY-MM-DD`; DateTimePicker ISO with the offset; range pickers `<name>Start`/`<name>End`, both names overridable; NumberInput the plain number (not its display text); empty `""`.
 - [x] `formValue={(value) => string}` replaces the default format on every field.
-- [x] Unit tests: `FormData` of a form holding every field, names and values exactly as decision 3; a browser case driving a React 19 `<form action>`.
+- [ ] Unit tests: `FormData` of a form holding every field, names and values exactly as decision 3; a browser case driving a React 19 `<form action>`.
 - [x] `pnpm check core`, `pnpm typecheck`, `pnpm check:site`; a "Forms" example in core's demo (native form with an action) looked at as a user.
 
 ## Comments
@@ -26,3 +26,5 @@ action>`; demo "Post to a form" on FormField (looked at: the posted entries prin
 Decided: `formValue` is never called for empty (always `""`); empty MultiSelect posts one `""`; a disabled
 field posts nothing, as a native one. Left: no Playwright case - the jsdom form action test and the
 worker's Chromium run cover it; table/alarms editors get no `name` (not asked).
+
+**Coordinator, checkbox audit (2026-10-31):** the browser case is unticked - a jsdom test drives the React 19 form action; no Playwright case was written.

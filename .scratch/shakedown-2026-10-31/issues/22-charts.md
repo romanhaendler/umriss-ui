@@ -12,7 +12,7 @@ P11-8, P12-5, cross-package 11, settle 4, settle 6.
 - [x] Tick, title and legend sizes are in `rem` and grow with the root size (`charts.css:41-50`); limit labels too.
 - [x] An empty chart shows "No data" without legend and placeholder axes.
 - [x] Pinch zoom of the page works over the plot (`touch-action` allows `pinch-zoom`; `sceneLayout.ts:173`).
-- [x] The summary's extremes name their position (day or category); the legend comes before the plot in Tab order where it stands above it.
+- [ ] The summary's extremes name their position (day or category); the legend comes before the plot in Tab order where it stands above it.
 - [x] "Show all" is never covered by the tooltip, and hovering it leaves no empty tooltip stub.
 - [x] A waterfall at 375 px keeps every category readable (shortened, wrapped or turned labels) or says how to read the dropped ones.
 - [x] The docs say how generic wrappers name fields (`Extract<keyof Z, string>`), as the table's do.
@@ -30,3 +30,5 @@ generic wrapper (`as never`, compile-checked), `encoding="marks"`, ancestor them
 Decided: page pinch over a chart with `onRange` and no zoom (`pan-y pinch-zoom`, one test expectation
 moved); a zoomable chart keeps its own pinch. Left: Tab order before the plot only where
 `reading-flow` exists; numeric-axis extremes keep the old text (tests pin it).
+
+**Coordinator, checkbox audit (2026-10-31):** unticked - the extremes name their position on category and time axes only, and the legend precedes the plot in Tab order only where the browser supports reading-flow (Chromium).
