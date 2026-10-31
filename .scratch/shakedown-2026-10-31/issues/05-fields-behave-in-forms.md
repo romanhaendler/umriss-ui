@@ -34,3 +34,8 @@ libraries); the checkbox's own label wins over the FormField's. Left: the H11 ho
 **Coordinator, follow-up (2026-10-31).** Decision 3 says a form's reset restores *every* field; this
 ticket wired it into Slider and FileInput only, and ticket 14's README now promises every field. A
 follow-up worker wires `useFormReset` into the other uncontrolled fields.
+Delivered: `useFieldValue` hands each field a ref callback that finds its form (`.form` or
+`closest("form")`) and restores `defaultValue` on reset, reporting it (controlled fields only report);
+NumberInput, Combobox, MultiSelect, RadioGroup, SegmentedControl and the four pickers use it, Textarea's
+count follows; Input, Checkbox, Switch, Select keep no value in React and the browser restores them.
+`formResetEveryField.test.tsx`, red first.

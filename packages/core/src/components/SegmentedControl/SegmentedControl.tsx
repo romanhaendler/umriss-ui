@@ -105,7 +105,7 @@ export function SegmentedControl<T extends string | number>(props: SegmentedCont
 
   return (
     <div
-      ref={mergeRefs(radio.groupRef, ref)}
+      ref={mergeRefs(radio.groupRef, ref, radio.formRef)}
       {...radio.groupProps}
       className={cx(
         styles.control,

@@ -50,6 +50,8 @@ export interface RangeTriggerProps {
       focus; the class and the style dress the wrapper around button and
       cross (principle 1, the field shape). */
   rootRef?: ForwardedRef<HTMLButtonElement>;
+  /** The field's form-reset listener (`useFieldValue`), on the same button. */
+  formRef?: (element: HTMLElement | null) => void;
   root?: HTMLAttributes<HTMLButtonElement>;
   className?: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
@@ -87,6 +89,7 @@ export function naturalChars(length: (sample: Date) => number, placeholder: stri
 export function RangeTrigger({
   wrapRef,
   rootRef,
+  formRef,
   root,
   className,
   triggerRef,
@@ -136,7 +139,7 @@ export function RangeTrigger({
     >
       <button
         {...rest}
-        ref={mergeRefs(triggerRef, rootRef)}
+        ref={mergeRefs(triggerRef, rootRef, formRef)}
         type="button"
         id={id ?? field?.id}
         disabled={disabled}
