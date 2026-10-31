@@ -2053,4 +2053,72 @@
       border-left: 1px solid CanvasText;
     }
   }
+
+  /* ---- On paper --------------------------------------------------------- */
+
+  /* What a printed table is: the rows it holds, as they stand. Everything that
+     answers a pointer is left off - toolbar, search offer, pager, the selection
+     and expander column, the row actions and the width grips - and so is
+     everything that holds a row in place while it scrolls, because on paper
+     nothing scrolls. A paged or fitted table holds one page of rows and
+     prints that page; a virtualised one prints the rows it has rendered. The
+     head is a header group, which a sheet repeats on every page it breaks
+     across, and a row is not broken in two. The sticky rules above are
+     repeated here with their own selectors: a print rule has to outweigh them
+     to put the cells back into the flow. */
+  @media print {
+    .toolbar,
+    .pagination,
+    .matchOffer,
+    .control,
+    .actionsCell,
+    .grip,
+    .filterButton,
+    .sortIndicator:not(.sortActive),
+    .sticky .th::after,
+    .sticky tbody tr.groupHeader[data-stuck] > .td::after,
+    .pinStartEdge::before,
+    .pinEndEdge::before {
+      display: none;
+    }
+
+    .sticky .th,
+    .sticky .th.pinned,
+    .pinned,
+    .reaching tfoot .td,
+    .empty,
+    .sticky tbody tr.groupHeader > .td,
+    .sticky tbody tr[data-group-first] > .spanCell {
+      position: static;
+    }
+
+    .sticky .th {
+      border-bottom-color: var(--u-hairline-strong);
+    }
+
+    .scroll[data-beyond-start],
+    .scroll[data-beyond-end],
+    .scroll[data-beyond-start][data-beyond-end] {
+      mask-image: none;
+    }
+
+    .table thead {
+      display: table-header-group;
+    }
+
+    /* A button in a repeated head is not painted on the sheets after the first
+       (Chromium), and its label with it: the sort button gives up its box and
+       the label stands in the cell as plain text. */
+    .sortButton {
+      display: contents;
+    }
+
+    .table tfoot {
+      display: table-footer-group;
+    }
+
+    .table tr {
+      break-inside: avoid;
+    }
+  }
 }

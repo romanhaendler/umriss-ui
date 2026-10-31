@@ -14,3 +14,11 @@ print base the other packages build on in 28.
 - [ ] A print example per package; Chromium `page.pdf()` output looked at as a reader; `pnpm check core`, `pnpm check table`.
 
 ## Comments
+
+The pattern for 28 (and any package's print):
+1. The rules stand in the component's own `.module.css`, inside `@layer umriss.components`, as `@media print { … }` at the end of the file, with one comment saying what paper does with the thing. No global print sheet, no `data-print` attributes.
+2. What answers a pointer or floats above the page (overlays, toolbars, pagers, filters, grips, buttons) is `display: none`. What holds a thing in place while it scrolls (`position: sticky`, masks, pinned shadows) is put back with `position: static` - with the same selector as the screen rule, or it loses on specificity.
+3. Colour is already handled once for everyone: core's `tokens.css` prints cards and overlays with a hard edge instead of a shadow and opaque grey edges; `own.module.css` sets `color-scheme: light` on `.text` in print, so a dark application prints dark ink on white. A package whose root does not compose `text` must set `color-scheme: light` itself. A verdict keeps its word or glyph (Stat, Alert, VerdictColumn already do); do not rely on a background, Chromium drops it unless asked.
+4. A table-like block: `thead { display: table-header-group }` repeats the head, `tr { break-inside: avoid }`, and never a `<button>` in a repeated head - Chromium paints it on the first sheet only, so `display: contents` it (the label stays).
+5. Test: read the CSS (`?raw`) as in `packages/core/tests-unit/print.test.ts` and `packages/table/tests-unit/print.test.ts`; look at the PDF once. The check script: headless Chromium, `page.emulateMedia({ media: "print" })`, `page.pdf({ format: "A4" })`, then `pdftotext` to see the head on page 2.
+6. One example per package, `Print…` button calling `window.print()`, no props; the page's `about` gets a **Print.** paragraph.

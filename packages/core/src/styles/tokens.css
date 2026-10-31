@@ -393,4 +393,21 @@
       --u-color-edge-hover: light-dark(#424242, #cacace);
     }
   }
+
+  /* On paper there are no soft shadows to lift a card or an overlay off the
+     page, and a translucent edge or hairline is only as strong as the sheet
+     under it - white. Cards and overlays keep their hard edge, and the edges
+     and hairlines are opaque greys that survive a black-and-white printer.
+     The ink-and-paper text colours need no change: the print scheme is light
+     (own.module.css). */
+  @media print {
+    :root {
+      --u-shadow-card: var(--u-edge);
+      --u-shadow-overlay: var(--u-edge);
+      --u-edge-color: #c4c4c4;
+      --u-edge-color-strong: #8c8c8c;
+      --u-hairline: #c4c4c4;
+      --u-hairline-strong: #8c8c8c;
+    }
+  }
 }

@@ -166,4 +166,13 @@
     -webkit-text-fill-color: var(--u-color-text);
     caret-color: var(--u-color-accent);
   }
+
+  /* Paper is white whatever the screen was: a dark application would print its
+     light text on it. Every surface that takes the text context prints in the
+     light theme, and its tokens resolve to the light values. */
+  @media print {
+    .text {
+      color-scheme: light;
+    }
+  }
 }
