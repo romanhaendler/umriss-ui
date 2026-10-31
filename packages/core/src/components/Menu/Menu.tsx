@@ -24,6 +24,9 @@ interface MenuContextValue {
    leaves the package - `index.ts` names what does. */
 export const MenuContext = /* @__PURE__ */ createContext<MenuContextValue | null>(null);
 
+/** The entries a menu's keys move over: every role an entry can have, not the disabled. */
+export const MENU_ITEMS = '[role="menuitem"]:not([disabled]), [role="menuitemradio"]:not([disabled]), [role="menuitemcheckbox"]:not([disabled])';
+
 /** Arrow keys, Home and End over the enabled entries; Tab closes. `close`
     gives the focus back to where the menu came from, and the Tab then moves on
     from there; left in the panel, it would leave from the portal at the end
@@ -33,7 +36,7 @@ export function handleMenuKeyDown(
   panel: HTMLElement | null,
   close: () => void,
 ) {
-  const items = Array.from(panel?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not([disabled])') ?? []);
+  const items = Array.from(panel?.querySelectorAll<HTMLButtonElement>(MENU_ITEMS) ?? []);
   if (items.length === 0) return;
   const index = items.findIndex((item) => item === document.activeElement);
 
@@ -124,7 +127,7 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
      has found its portal target. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     panelRef.current = node;
-    const items = node?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not([disabled])') ?? [];
+    const items = node?.querySelectorAll<HTMLButtonElement>(MENU_ITEMS) ?? [];
     (enterAtLast ? items[items.length - 1] : items[0])?.focus();
   }, [enterAtLast]);
 
@@ -185,11 +188,15 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
   onSelect?: () => void;
   /** "danger" for destructive actions. */
   tone?: "default" | "danger";
+  /** What kind of entry it is: a plain one, one of a group of which one is chosen,
+      or one that is on or off. The last two are told by `aria-checked`.
+      @default "menuitem" */
+  role?: "menuitem" | "menuitemradio" | "menuitemcheckbox";
 }
 
 /** An entry of a `Menu` or a `ContextMenu`. It runs `onSelect` and closes the
     menu. */
-export function MenuItem({ ref, onSelect, tone = "default", className, children, onClick, ...rest }: MenuItemProps) {
+export function MenuItem({ ref, onSelect, tone = "default", role = "menuitem", className, children, onClick, ...rest }: MenuItemProps) {
   const menu = useContext(MenuContext);
 
   return (
@@ -199,7 +206,7 @@ export function MenuItem({ ref, onSelect, tone = "default", className, children,
       tabIndex={-1}
       className={cx(styles.item, tone === "danger" && styles.danger, className)}
       {...rest}
-      role="menuitem"
+      role={role}
       /* Composed, not overridden by `rest`: a caller's `onClick` would take
          the closing away from the entry. It runs first and can prevent it. */
       onClick={(event) => {

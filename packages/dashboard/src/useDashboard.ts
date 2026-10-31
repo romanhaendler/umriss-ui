@@ -6,7 +6,7 @@
    The state is the view and, in the editing mode, the draft: a view of its own
    that every step replaces by the result of an `Edit`. */
 
-import { createElement, useMemo, useRef, useSyncExternalStore } from "react";
+import { createElement, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { announce, useWording } from "@umriss-ui/core";
 import { DashboardOf } from "./Dashboard";
@@ -134,6 +134,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       if (!latest.current.allowEdit || own.state.draft) return;
       put({ ...own.state, draft: { steps: [read(own.state.view)], at: 0 } });
       latest.current.onDraftChange?.(true);
+      announce(latest.current.wording.dashboardEditing);
     };
     const leave = (keep: boolean) => {
       const { view, draft } = own.state;
@@ -218,6 +219,14 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       },
     };
   }, [own]);
+
+  /* A dashboard that goes while its draft stands closes the draft for the one who warns before navigation. */
+  useEffect(
+    () => () => {
+      if (store.current?.state.draft) latest.current.onDraftChange?.(false);
+    },
+    [],
+  );
 
   const { view, draft, known } = useSyncExternalStore(parts.subscribe, parts.get, parts.get);
   const current = draft ? draft.steps[draft.at]! : view;

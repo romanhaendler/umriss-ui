@@ -30,7 +30,7 @@ function Harness({ defaultView = LOCKED, initialView, onViewChange }: { defaultV
 const order = () => screen.getAllByRole("region").map((el) => el.getAttribute("data-widget"));
 const press = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
 const menuOf = (title: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${title}` }));
-const item = (name: string | RegExp) => fireEvent.click(screen.getByRole("menuitem", { name }));
+const item = (name: string | RegExp) => fireEvent.click(screen.queryByRole("menuitemradio", { name }) ?? screen.getByRole("menuitem", { name }));
 const items = () => screen.getAllByRole("menuitem").map((el) => el.textContent);
 
 function HeadingOnly() {

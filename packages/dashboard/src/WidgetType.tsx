@@ -31,8 +31,8 @@ export interface WidgetTypeProps<Options> {
   sizes: Partial<Record<WidgetSize, SizeSpan>>;
   /** The size a new widget of this type starts at. One of `sizes`. */
   start: WidgetSize;
-  /** The options a new widget starts with, and the ones a stored widget's missing keys are read from: stored plain options are spread over them, one level deep. Their type is the options type of `title` and of the content. */
-  defaultOptions: Options;
+  /** The options a new widget starts with, and the ones a stored widget's missing keys are read from: stored plain options are spread over them, one level deep. Their type is the options type of `title` and of the content. A widget without options leaves them out. */
+  defaultOptions?: Options;
   /** The title of a frame as a function of its options; the `label` without it. */
   title?: (options: NoInfer<Options>) => string;
   /** The form for the options, opened from the widget's menu. Without it the menu has no options entry. */
@@ -43,7 +43,7 @@ export interface WidgetTypeProps<Options> {
 
 /** Declares one widget type inside a `Dashboard`. It draws nothing itself: the
     dashboard reads its props. The options type is inferred from `defaultOptions`. */
-export function WidgetType<Options>(props: WidgetTypeProps<Options>): null {
+export function WidgetType<Options = undefined>(props: WidgetTypeProps<Options>): null {
   void props;
   return null;
 }

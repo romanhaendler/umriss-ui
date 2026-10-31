@@ -60,3 +60,29 @@ export function nearestPlace(spans: readonly Span[], columns: number, index: num
   }
   return best;
 }
+
+/** The place (counted from 0) to which moving the widget at `index` one row up (`-1`) or
+    down (`1`) puts it: of the places the move can reach, those in the nearest row on that
+    side of the widget's row, the one whose column is nearest to its own, the earlier on a
+    tie. `index` itself when there is no row on that side. */
+export function rowStep(spans: readonly Span[], columns: number, index: number, direction: -1 | 1): number {
+  const here = pack(spans, columns)[index]!;
+  let best = index;
+  let bestRow = Infinity;
+  let bestOff = Infinity;
+  for (let i = 0; i < spans.length; i++) {
+    if (i === index) continue;
+    const order = [...spans];
+    order.splice(i, 0, ...order.splice(index, 1));
+    const place = pack(order, columns)[i]!;
+    const away = (place.row - here.row) * direction;
+    if (away <= 0) continue;
+    const off = Math.abs(place.column - here.column);
+    if (away < bestRow || (away === bestRow && off < bestOff)) {
+      best = i;
+      bestRow = away;
+      bestOff = off;
+    }
+  }
+  return best;
+}
