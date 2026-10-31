@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { isSafeTarget, safeTarget } from "../../lib/safeTarget";
 import { AngleGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -31,18 +32,6 @@ export interface BreadcrumbProps extends HTMLAttributes<HTMLElement>, RefProp<HT
 }
 
 const separator = <AngleGlyph size={8} className={styles.separator} />;
-
-/* The menu follows an address by script, so it resolves it against the
-   document first and lets only these schemes through: `javascript:`, `data:`
-   and the like do nothing. */
-const SAFE_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"];
-function isSafeTarget(href: string): boolean {
-  try {
-    return SAFE_PROTOCOLS.includes(new URL(href, document.baseURI).protocol);
-  } catch {
-    return false;
-  }
-}
 
 /* Where a page stands: region, cluster, service. A navigation landmark with an
    ordered list, and the last level says `aria-current="page"`. When the trail
@@ -91,7 +80,7 @@ export function Breadcrumb({ ref, items, className, ...rest }: BreadcrumbProps) 
     if (item.href !== undefined) {
       return (
         <a
-          href={item.href}
+          href={safeTarget(item.href, "Breadcrumb")}
           aria-current={current}
           className={cx(styles.link, current && styles.current)}
           onClick={(event: MouseEvent<HTMLAnchorElement>) => {
