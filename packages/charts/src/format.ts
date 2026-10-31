@@ -60,7 +60,10 @@ export function formatFn(format: ValueFormat, locale: string): (value: number) =
     digits of their own. */
 export function tickFn(format: ValueFormat, locale: string, step: number): (value: number) => string {
   if (typeof format === "function") return (v) => format(v);
-  const f = build(locale, intl(format, Math.min(6, decimalsForStep(step))));
+  const places = decimalsForStep(step);
+  // Past six places a tick would read "0.000000": the step is told in scientific notation instead.
+  const scientific = places > 6 && format.notation === undefined && !DIGITS.some((k) => format[k] !== undefined);
+  const f = build(locale, scientific ? { ...format, notation: "scientific", maximumFractionDigits: 3 } : intl(format, places));
   return (v) => f.format(v);
 }
 
@@ -70,7 +73,10 @@ export function formatTick(v: number, step: number, locale: string): string {
   return tickFn({ useGrouping: true }, locale, step)(v);
 }
 
-/** Tooltip values: up to 3 places, without padded zeros. */
+/** Tooltip values: up to 3 places, without padded zeros; a value under a thousandth, which three places
+    would round to zero, in scientific notation. */
 export function formatValue(v: number, locale: string): string {
-  return Number.isFinite(v) ? build(locale, { maximumFractionDigits: 3, useGrouping: true }).format(v) : "–";
+  if (!Number.isFinite(v)) return "–";
+  const small = v !== 0 && Math.abs(v) < 1e-3;
+  return build(locale, small ? { notation: "scientific", maximumFractionDigits: 3 } : { maximumFractionDigits: 3, useGrouping: true }).format(v);
 }

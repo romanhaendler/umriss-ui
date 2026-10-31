@@ -56,6 +56,9 @@ function LegendInner({ scene, placement: asked }: { scene: ChartScene; placement
   );
   const table = snapshot.dataTable;
   if (snapshot.series.length === 0 && table === null) return null;
+  // Under "No data" the entries name nothing to read; but where series are hidden, the legend is how they come back.
+  const laidOut = snapshot.layout.plot.width > 0 && snapshot.layout.plot.height > 0;
+  if (laidOut && snapshot.empty && !snapshot.loading && !snapshot.series.some((item) => item.hidden)) return null;
   return (
     <div ref={setEl} className={`uc-legend uc-legend-${placement}`}>
       {snapshot.series.map((item) => {

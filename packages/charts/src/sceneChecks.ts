@@ -8,12 +8,26 @@ import type { ChartScene } from "./scene";
 import { widthOf } from "./sceneConfig";
 import type { AxisOrientation, SeriesConfig } from "./types";
 import { saysTime } from "./sceneMaterial";
+import { fieldOf } from "./value";
 
 
 
 
 
 
+
+/** DEV: a value named as a field that no row has - a misspelt name reads every row as a gap and the chart
+    shows nothing, without a word. Rows that are no objects are not asked. */
+export function checkField(data: readonly unknown[], accessor: unknown, seriesName: string | undefined): void {
+  const field = fieldOf(accessor);
+  if (field === undefined || data.length === 0) return;
+  if (data.some((row) => typeof row !== "object" || row === null || field in row)) return;
+  warnOnce(
+    `no-field-${seriesName ?? ""}-${field}`,
+    `${seriesName === undefined ? "A series" : `Series "${seriesName}"`} reads the field "${field}", which no row has. ` +
+      "Every value is a gap; check the name against the rows.",
+  );
+}
 
 /** Called from the Chart after the child effects; DEV only. */
 export function validate(s: ChartScene): void {

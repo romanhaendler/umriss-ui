@@ -1,12 +1,12 @@
 /* Theme module:
    Canvas knows no CSS variables. The resolved values are read **once** per chart
    root and cached as a ResolvedTheme. Invalidation:
-   (a) a global MutationObserver on document.documentElement (attribute
-       changes - a `style="color-scheme: dark"`, a `class="dark"`, a `data-*`
-       an application switches its mode with),
+   (a) a global MutationObserver on the document (attribute changes on <html>
+       or on an ancestor of a chart - a `style="color-scheme: dark"`, a
+       `class="dark"`, a `data-*` an application switches its mode with),
    (b) a subscription to `prefers-color-scheme`, for an application that
        follows the system with `color-scheme: light dark`,
-   (c) the explicit invalidateTheme() API, for a switch on another ancestor.
+   (c) the explicit invalidateTheme() API.
    After an invalidation all subscribers read anew and trigger a redraw.
    getComputedStyle never runs inside the draw loop - only here, outside it.
 
@@ -87,7 +87,10 @@ function readVar(style: CSSStyleDeclaration, name: string, fallback: string): st
 }
 
 function readSize(style: CSSStyleDeclaration): number {
-  const px = Number.parseFloat(readVar(style, "--uc-size-tick", ""));
+  const text = readVar(style, "--uc-size-tick", "");
+  // A size in rem is the root's, as the HTML labels beside the canvas have it.
+  const root = text.endsWith("rem") ? Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16 : 1;
+  const px = Number.parseFloat(text) * root;
   return px > 0 ? px : FALLBACK_THEME.sizeTick;
 }
 
@@ -176,11 +179,27 @@ function readTheme(root: Element): ResolvedTheme {
   });
 }
 
+const SCHEME = /color-scheme\s*:\s*([^;]*)/;
+
+/** Whether an attribute change can switch the theme of a chart: any attribute of <html>; below it only one on
+    an ancestor of a chart (never one inside a chart, which it changes itself), and of a style only a
+    changed `color-scheme`. */
+function changesTheme(r: MutationRecord): boolean {
+  const el = r.target as Element;
+  if (el === document.documentElement) return true;
+  if (el.closest(".uc-root") !== null || el.querySelector(".uc-root") === null) return false;
+  if (r.attributeName !== "style") return true;
+  return SCHEME.exec(r.oldValue ?? "")?.[1] !== SCHEME.exec(el.getAttribute("style") ?? "")?.[1];
+}
+
 function ensureObserver(): void {
   if (observer !== null) return;
   if (typeof MutationObserver === "undefined" || typeof document === "undefined") return;
-  observer = new MutationObserver(() => invalidateTheme());
-  observer.observe(document.documentElement, { attributes: true });
+  observer = new MutationObserver((records) => {
+    if (records.some(changesTheme)) invalidateTheme();
+  });
+  // The whole document: a `.dark` or a `color-scheme` on a container above the chart switches it as well.
+  observer.observe(document.documentElement, { attributes: true, subtree: true, attributeOldValue: true });
   if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => invalidateTheme());
     // Entering or leaving the contrast mode is a change of theme as well.
