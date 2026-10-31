@@ -252,9 +252,6 @@ export function buildParts(registry: Registry): Parts {
     registry.setStickyRowHeader(props.stickyRowHeader === true);
     registry.setTableGroupable(props.groupable !== false);
     registry.setRowAdding(props.grid === true && props.onRowAdd !== undefined);
-    if (registry.server && props.groupable === true) {
-      warnOnce("server-groupable", "`groupable` is passed over in server mode: the groups would be the page's, not the server's.");
-    }
     /* The frame takes ref, class, style and the rest; the three names go to
        the <table> (ADR-0068). What the table itself reads is taken out first. */
     const {

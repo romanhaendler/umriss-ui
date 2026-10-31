@@ -118,7 +118,7 @@ describe("Server mode - the request goes out", () => {
         <Server />
       </StrictMode>,
     );
-    expect(reports).toEqual([{ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }]);
+    expect(reports).toEqual([{ search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] }]);
   });
 
   it("asks the server for a view that setView applies exactly where a reader's change would", () => {
@@ -126,8 +126,8 @@ describe("Server mode - the request goes out", () => {
     settle();
     act(() => current!.setView({ search: "A-0", widths: { number: 200 } }));
     expect(reports).toEqual([
-      { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 },
-      { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10 },
+      { search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] },
     ]);
     // The same request again, with a width of its own: nothing to ask.
     act(() => current!.setView({ search: "A-0", widths: { number: 220 } }));
@@ -152,13 +152,13 @@ describe("Server mode - the request goes out", () => {
     act(() => t().setPage(2));
     // The request is the five parts that decide the rows, and nothing else.
     expect(reports).toEqual([
-      { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 },
-      { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10 },
-      { search: "A-0", conditions: {}, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10 },
-      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10 },
-      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 10 },
-      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 25 },
-      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 25 },
+      { search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: {}, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 10, grouping: [], folded: [] },
+      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 25, grouping: [], folded: [] },
+      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 25, grouping: [], folded: [] },
     ]);
   });
 
@@ -272,16 +272,16 @@ describe("Server mode - selection (M5)", () => {
 });
 
 describe("Server mode - what the table does not do over one page", () => {
-  it("has no footer, and no grouping - with a warning where one was asked for (M3)", () => {
+  it("has no footer, and offers grouping - the server answers it, nothing is passed over (M3)", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { container } = render(<Server groupable />);
     settle();
     expect(container.querySelector("tfoot")).toBeNull();
-    expect(warn.mock.calls.some(([m]) => String(m).includes("`groupable` is passed over"))).toBe(true);
+    expect(warn.mock.calls.some(([m]) => String(m).includes("`groupable` is passed over"))).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
-    expect(screen.queryByRole("region", { name: "Grouping" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Grouping" })).not.toBeNull();
     act(() => current!.setGrouping(["line"]));
-    expect(current!.grouping).toEqual([]);
+    expect(current!.grouping).toEqual(["line"]);
     warn.mockRestore();
   });
 

@@ -23,7 +23,7 @@ import type { Formats } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
 import { fitAllColumns } from "./flexWidths";
 import { declaredWidths, useTableState } from "./model/tableState";
-import { MOST_LEVELS, livePaths, rowsOf } from "./model/grouping";
+import { MOST_LEVELS, answeredLines, livePaths, rowsOf } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
@@ -251,7 +251,6 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   const reportCount = useRef(0);
   const [answered, setAnswered] = useState(false);
   if (rowCount > 0 && !answered) setAnswered(true);
-  const serverInput = useMemo(() => (server ? { rowCount, answered } : undefined), [server, rowCount, answered]);
   registry.setServer(server);
   if (server) {
     if (options.preFilter) {
@@ -259,9 +258,6 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     }
     if (options.virtual) {
       warnOnce("server-virtual", "`virtual` is passed over in server mode: the table pages instead.");
-    }
-    if (options.defaultGrouping !== undefined || start?.grouping?.length) {
-      warnOnce("server-grouping", "A grouping is passed over in server mode: the groups would be the page's, not the server's.");
     }
   }
 
@@ -407,14 +403,14 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   }
 
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
-  const groupingNow = server || isTree
+  const groupingNow = isTree
     ? []
     : registered
       ? registry.effectiveGrouping(groupingState, rowsUnknown)
       : groupingState.slice(0, MOST_LEVELS);
   const groupingPrefix = groupingNow.join("|");
   const foldedSet = useMemo(() => new Set(foldedState), [foldedState]);
-  const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown, formats.timeZone) : null;
+  const model = groupingNow.length && !server ? registry.groupingModel(groupingNow, rowsUnknown, formats.timeZone) : null;
   const grouping = useMemo(
     () => (model && model.levels.length ? { ...model, folded: foldedSet, compareText: formats.compareText } : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the model's identity carries the ids and the columns
@@ -430,6 +426,32 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
        the roots, if a caller needs that live. */
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the open keys by value; the rows the pre-filter admits stand for it
     [isTree, openKey, admitted, reader],
+  );
+  /* Server mode: the groups the answer names, read into lines. They belong to
+     the grouping they answered; an answer to another grouping (`answers`) is
+     the old one still standing and is not drawn grouped. A grouping with rows
+     and no groups, or groups that do not fit, is said once and shown
+     ungrouped. */
+  const answeredGroups = options.server ? options.groups : undefined;
+  const answeredGrouping = options.server ? options.answers?.grouping : undefined;
+  const answersOther = answeredGrouping !== undefined && answeredGrouping.join("|") !== groupingNow.join("|");
+  const grouped = useMemo(
+    () =>
+      server && groupingNow.length > 0 && !answersOther && (answeredGroups !== undefined || rowsUnknown.length > 0)
+        ? answeredLines(rowsUnknown, answeredGroups, groupingNow.length)
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the grouping by its ids
+    [server, groupingPrefix, answersOther, answeredGroups, rowsUnknown],
+  );
+  if (typeof grouped === "string" || (server && groupingNow.length > 0 && !answersOther && answeredGroups === undefined && rowsUnknown.length > 0)) {
+    warnOnce(
+      `server-groups:${typeof grouped === "string" ? grouped : "missing"}`,
+      `\`groups\` does not answer the grouping (${groupingNow.join(", ")}): ${typeof grouped === "string" ? grouped : "it is missing"}. The rows are shown ungrouped; hand back one group line per group the page shows, as ServerGroup describes.`,
+    );
+  }
+  const serverInput = useMemo(
+    () => (server ? { rowCount, answered, grouped: typeof grouped === "object" ? grouped : undefined } : undefined),
+    [server, rowCount, answered, grouped],
   );
   const b = useTableState(admitted, modelColumns, {
     rowKey,
@@ -526,12 +548,14 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
 
   /* The grouping's default is the application's; the view carries a deviation
      only, and of the folds only those whose group still occurs. */
-  const defaultGrouping = server || isTree
+  const defaultGrouping = isTree
     ? []
     : registered
     ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
     : listOf(options.defaultGrouping);
-  const folded = b.groups ? livePaths(b.groups, foldedState) : registered ? [] : [...foldedState];
+  /* A server's page holds the groups it shows, not all of them: a fold on
+     another page stays. */
+  const folded = server ? [...foldedState] : b.groups ? livePaths(b.groups, foldedState) : registered ? [] : [...foldedState];
   const declared = registry.declaredPins();
   const pinnedView = pinsForView(pinsChosen, declared, known);
   const groupedView: TableView = {
@@ -558,6 +582,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   };
   const setGrouping = (ids: readonly string[]) => {
     setGroupingState([...ids]);
+    /* A fold names a group of the grouping it was made under. */
+    if (server) setFoldedState([]);
     setPage(1);
   };
   const toggleFold = (path: string) => {
@@ -641,6 +667,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     sort,
     page: b.page,
     pageSize: b.pageSize,
+    grouping: groupingNow,
+    folded: [...folded].sort(),
   };
   const reportKey = server ? requestKey(request) : "";
   const reported = useRef<string | null>(null);

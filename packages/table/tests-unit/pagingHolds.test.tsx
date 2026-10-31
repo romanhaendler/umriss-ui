@@ -174,7 +174,7 @@ describe("the offer's place", () => {
 });
 
 describe("the answers warning", () => {
-  const placeholder: TableRequest = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 };
+  const placeholder: TableRequest = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] };
   function Server({ error }: { error?: string }) {
     const [answers, setAnswers] = useState<TableRequest>(placeholder);
     const t = useTable(rowsOf(3), {

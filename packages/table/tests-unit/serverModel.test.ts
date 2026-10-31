@@ -76,7 +76,7 @@ describe("tableModel – server mode", () => {
 });
 
 describe("requestKey - what is reported once", () => {
-  const view = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 };
+  const view = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] };
 
   it("changes with each of the five parts that decide the rows", () => {
     const changed = [

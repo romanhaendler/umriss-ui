@@ -270,7 +270,7 @@ export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): 
   const { layout, registry, hook } = ctx;
   const { virtual, lines, rows, projection } = layout;
   if (loading && !stale) return { body: loadingBody(ctx), empty: false };
-  if (projection.filtered.length === 0) return { body: emptyBody(ctx), empty: true };
+  if (projection.filtered.length === 0 && !lines?.length) return { body: emptyBody(ctx), empty: true };
   if (lines) return { body: groupedBody(ctx, lines), empty: false };
   if (virtual) {
     return {

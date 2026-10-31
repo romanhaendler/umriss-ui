@@ -18,7 +18,7 @@ import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useCountTo } from "./motion";
 import type { ColumnEntry, HookSnapshot } from "./registry";
-import { aggregate, periodText } from "./model/grouping";
+import { aggregate, periodText, sizeOf } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
 import { pinnedCell, withEdge } from "./pinned";
@@ -70,7 +70,7 @@ function Fold({
   wording: Wording;
 }) {
   const name = groupText(entry, group.value, formats, wording);
-  const count = formats.count(group.rows.length);
+  const count = formats.count(sizeOf(group));
   const toggle = (at: Element) => {
     announce(open ? wording.groupFolded(name) : wording.groupOpened(name), at);
     hook.publicSnapshot.toggleFold(group.path);
@@ -129,7 +129,9 @@ function Count({ value, formats }: { value: number; formats: Formats }) {
 /** The box that selects every row of a group - checked when all are,
     indeterminate when some are. */
 function GroupCheckbox({ group, entry, hook, formats, wording }: { group: RowGroup<unknown>; entry: ColumnEntry | undefined; hook: HookSnapshot; formats: Formats; wording: Wording }) {
-  const { selection } = hook.publicSnapshot;
+  const { selection, server } = hook.publicSnapshot;
+  /* A server's group holds rows the table does not: a box would select the page's part of it. */
+  if (server) return null;
   const keys = group.rows.map(hook.rowKey);
   const chosen = keys.filter((k) => selection.isSelected(k)).length;
   const all = chosen === keys.length;
@@ -195,7 +197,7 @@ export function SpanCell({
             <GroupValue entry={entry} group={group} formats={formats} wording={wording} />
             {line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
           </span>
-          <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>
+          <span className={styles.groupCount}>{formats.count(sizeOf(group))}</span>
         </span>
       )}
     </td>
@@ -269,7 +271,8 @@ export function GroupLine({
   const filler = (columnsCovered: number) =>
     lead - columnsCovered > 0 && <td className={styles.td} colSpan={lead - columnsCovered} />;
   /* One share bar per group header, under the first sum: the figure groups are
-     compared by. A bar under every sum would be decoration, not a statement. */
+     compared by. A bar under every sum would be decoration, not a statement.
+     A server's table has no filtered set to divide by. */
   const shareColumn = columns.find((e) => e.spec.aggregate === "sum" && e.spec.share !== false);
   const virtual = absolute !== undefined;
 
@@ -279,7 +282,7 @@ export function GroupLine({
       <span className={styles.groupValue}>
         <GroupValue entry={levelEntry} group={group} formats={formats} wording={wording} />
       </span>
-      <Count value={group.rows.length} formats={formats} />
+      <Count value={sizeOf(group)} formats={formats} />
       {header && line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
     </span>
   );
@@ -337,7 +340,7 @@ export function GroupLine({
               <span className={styles.spanText}>
                 <GroupValue entry={spanEntry} group={group} formats={formats} wording={wording} />
               </span>
-              <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>
+              <span className={styles.groupCount}>{formats.count(sizeOf(group))}</span>
             </span>
           </td>
           {countColumns > 0 && (
@@ -346,7 +349,7 @@ export function GroupLine({
               style={pinAt(before, before + countColumns - 1).style}
               colSpan={countColumns}
             >
-              {wording.entries(group.rows.length, formats.count(group.rows.length))}
+              {wording.entries(sizeOf(group), formats.count(sizeOf(group)))}
             </td>
           )}
           {filler(countColumns)}
@@ -358,7 +361,7 @@ export function GroupLine({
           pin={withEdge(pinAt(before + lead + i), edges.has(entry))}
           entry={entry}
           group={group}
-          share={header && entry === shareColumn}
+          share={header && entry === shareColumn && !hook.publicSnapshot.server}
           total={total}
           formats={formats}
           wording={wording}
@@ -415,15 +418,21 @@ function AggregateCell({
       );
     }
   }
+  /* A server's group has the value it was given, over rows the table does not hold - the
+     footer's way: aligned by the page's rows, the value taken as it is. */
+  const served = group.size !== undefined;
+  const value = { value: group.aggregates[spec.id] };
+  const rows = served ? total : group.rows;
+  const written = <AggregateValue entry={entry} rows={rows} {...(served ? { given: value } : { known: value })} formats={formats} wording={wording} />;
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows, { value: group.aggregates[spec.id] }) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, rows, served ? undefined : value) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
       {bar ? (
         <span className={styles.shareHost}>
-          <AggregateValue entry={entry} rows={group.rows} known={{ value: group.aggregates[spec.id] }} formats={formats} wording={wording} />
+          {written}
           {bar}
         </span>
       ) : (
-        <AggregateValue entry={entry} rows={group.rows} known={{ value: group.aggregates[spec.id] }} formats={formats} wording={wording} />
+        written
       )}
     </td>
   );

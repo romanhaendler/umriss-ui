@@ -386,7 +386,7 @@ export class Registry {
   /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
   tableGroupable = true;
 
-  /** Server mode: the rows are a server's page, and nothing groups them. */
+  /** Server mode: the rows are a server's page; its groups come with the answer. */
   server = false;
 
   /** The hook says during its render, before the table's, whether it is in
@@ -413,12 +413,6 @@ export class Registry {
   /** Everything a table can be grouped by: its columns, then its group keys. */
   groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
     if (!this.tableGroupable || this.tree) return [];
-    if (this.server) {
-      if (this.orderedColumns().some((e) => e.spec.groupable === true)) {
-        warnOnce("server-groupable-column", "`groupable` on a column is passed over in server mode: the groups would be the page's, not the server's.");
-      }
-      return [];
-    }
     const seen = new Set<string>();
     return [...this.orderedColumns(), ...this.groupKeys.ordered()].filter((e) => {
       if (seen.has(e.spec.id)) return false;

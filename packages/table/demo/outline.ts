@@ -262,7 +262,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "No pivot and no more than three levels (ADR-0032).",
           "No bar to drag headers onto: grouping is chosen in the column menu.",
-          "No groups in [server mode](#/server-mode): they would be made of one page.",
+          "In [server mode](#/server-mode) the server groups: the request carries `grouping`, the answer `groups`, and a page counts lines.",
         ],
         types: ["GroupByBase"],
         exports: ["useTable"],
@@ -521,16 +521,16 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Server mode",
         sentence: "A table over rows a server holds: the application hands in one page and the server's count, and the table reports what to fetch next (also called server-side paging, sorting and filtering).",
         about: [
-          "`onRequest` reports the request whenever what decides the rows changes – search, conditions, sort, page, page size – complete, defaults included, since a server has no default of the table's.",
+          "`onRequest` reports the request whenever what decides the rows changes – search, conditions, sort, page, page size, grouping, folded groups – complete, defaults included, since a server has no default of the table's.",
           "`answers` names the request the rows answer: while it is not the table's current request the table is loading, so a late answer is never shown as current. Without it the rows are taken as current.",
-          "`error` shows the application's message in place of the rows, with “Try again”; `totals` fill the footer over every match; `exportRows` writes every match. What to cap, what to sum and when to clear `error` stay the application's.",
+          "`error` shows the application's message in place of the rows, with “Try again”; `totals` fill the footer over every match; `groups` name the group lines of the page, with counts and totals over every match; `exportRows` writes every match. What to cap, what to sum and when to clear `error` stay the application's.",
         ],
         alternatives: [
           { when: "Thousands of rows that are all in the browser", use: "virtualisation" },
         ],
         keysOf: ["first-table", core("Input"), "columnmenu", core("Select"), core("Button"), core("Checkbox")],
         limits: [
-          "The table sorts, filters and pages nothing itself, and it shows no groups: they would be made of one page. Groups from the server are the next piece, with a spec of their own.",
+          "The table sorts, filters, groups and pages nothing itself. Groups come from the server as `groups`, one line per group the page shows, and a page counts lines; selecting, folding and exporting every group are the application's for now.",
           "The footer shows only `totals` the application hands in.",
           "Without `exportRows` the export acts on the page the table holds, and the export button says so.",
           "A list filter offers what `filterOptions` names; the table cannot count values it does not hold.",

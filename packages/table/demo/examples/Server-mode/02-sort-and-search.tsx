@@ -171,7 +171,7 @@ const serve = (view: TableRequest) => {
   return { view, rows: hits.slice(start, start + view.pageSize), rowCount: hits.length };
 };
 
-const FIRST: TableRequest = { search: "", conditions: {}, sort: [{ column: "id", direction: "asc" }], page: 1, pageSize: 10 };
+const FIRST: TableRequest = { search: "", conditions: {}, sort: [{ column: "id", direction: "asc" }], page: 1, pageSize: 10, grouping: [], folded: [] };
 
 export default function SortAndSearch() {
   const [answer, setAnswer] = useState(() => serve(FIRST));
