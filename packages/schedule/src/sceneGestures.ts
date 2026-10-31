@@ -828,10 +828,20 @@ export class SceneGestures {
     return toWallClock(toWorkingTimeClamped(snapped, calendar), calendar);
   }
 
+  /** The id to report: a host may have reminted its ids since the drag began,
+      so where the old id is gone the subtask is found again by what it is -
+      task, lane and times. */
+  private currentId(original: Subtask): string {
+    const data = this.host.data;
+    if (data.subtaskById.has(original.id)) return original.id;
+    const same = data.subtasks.find((s) => s.task === original.task && s.lane === original.lane && s.from === original.from && s.to === original.to);
+    return same?.id ?? original.id;
+  }
+
   private intentsOf(original: Subtask, ghost: Subtask, mode: EditMode): Intent[] {
     const intents: Intent[] = [];
     const allowed = this.host.view.options.intents;
-    const id = original.id;
+    const id = this.currentId(original);
     if (mode === "move") {
       if (ghost.from !== original.from && allowed.includes("move")) intents.push({ kind: "move", subtask: id, from: ghost.from, to: ghost.to });
       if (ghost.lane !== original.lane && allowed.includes("lane")) intents.push({ kind: "lane", subtask: id, lane: ghost.lane });

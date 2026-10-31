@@ -31,7 +31,7 @@ import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers 
 import { SceneKeys, type Spoken } from "./sceneKeys";
 import { SceneView, type SceneOptions } from "./sceneView";
 import { wallClockWithin } from "./timeAxis";
-import { defaultSpan, onlyKnown, viewKey, type ScheduleView } from "./view";
+import { defaultSpan, onlyKnown, validSpan, viewKey, type ScheduleView } from "./view";
 
 export type { GroupConfig, LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
@@ -192,7 +192,7 @@ export class ScheduleScene {
 
   constructor(initial: ScheduleView = {}) {
     this.folded = initial.folded ?? [];
-    this.domainInView = initial.domain ?? null;
+    this.domainInView = validSpan(initial.domain);
     /* No calendar is known yet: working time is the wall clock, and the first
        options carry the span over into theirs. */
     if (this.domainInView !== null) this.view.showWall(this.domainInView);
@@ -305,12 +305,13 @@ export class ScheduleScene {
     if (viewKey(view) === viewKey(this.viewNow)) return;
     this.actedOn = true;
     this.folded = view.folded ?? [];
-    this.setDomain(view.domain ?? null);
+    this.setDomain(view.domain === undefined ? null : validSpan(view.domain));
   }
 
   /** Puts a span of two wall-clock instants in view; null shows the
       subtasks' extent. */
-  setDomain = (span: readonly [number, number] | null): void => {
+  setDomain = (given: readonly [number, number] | null): void => {
+    const span = validSpan(given);
     /* A frame still to report a pan would overwrite the span just set. */
     if (this.domainFrame !== 0) cancelAnimationFrame(this.domainFrame);
     this.domainFrame = 0;
@@ -359,7 +360,7 @@ export class ScheduleScene {
       span - and the local day of today while there is no work to show. */
   private fit(): void {
     const calendar = this.view.options.calendar;
-    const span = defaultSpan(this.data.subtasks, this.view.options.zoomLimits, (v) => toWorkingTimeClamped(v, calendar));
+    const span = defaultSpan(this.data.subtasks, this.view.options.zoomLimits, (v) => toWorkingTimeClamped(v, calendar), "start");
     if (span !== null) {
       this.view.domain = span;
       this.fitted = true;
@@ -480,8 +481,10 @@ export class ScheduleScene {
     this.view.layout();
     /* The browser decides `touch-action` when a touch begins, so a gesture
        cannot be handed to the page halfway: the plot leaves the vertical swipe
-       to the page only while it has no lanes to scroll. */
-    if (this.plot !== null) this.plot.style.touchAction = this.view.maxScroll() === 0 ? "pan-y" : "none";
+       to the page only while it has no lanes to scroll. A pinch is always the
+       page's - it zooms the page, never the plot (the keys and Ctrl+wheel zoom
+       the plot). */
+    if (this.plot !== null) this.plot.style.touchAction = this.view.maxScroll() === 0 ? "pan-y pinch-zoom" : "pinch-zoom";
     this.moveSettled();
   }
 

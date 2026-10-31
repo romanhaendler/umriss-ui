@@ -4,6 +4,7 @@
    The schedule holds it and puts it nowhere; `useSchedule` takes a start
    through `initialView` and reports every change through `onViewChange`. */
 
+import { DEV, warnOnce } from "./dev";
 import type { Subtask } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 
@@ -33,15 +34,29 @@ export function onlyKnown(view: ScheduleView, known: ReadonlySet<string>): Sched
   return { ...(view.domain ? { domain: view.domain } : {}), ...(folded.length ? { folded } : {}) };
 }
 
+/** A span a caller handed in, if it is two finite, ordered numbers of
+    milliseconds; else null - the view then names none - and, in development,
+    a warning naming the shape (Dates and strings are not drawn). */
+export function validSpan(span: unknown): [number, number] | null {
+  if (span === null || span === undefined) return null;
+  const [from, to] = Array.isArray(span) ? span : [];
+  if (Array.isArray(span) && span.length === 2 && Number.isFinite(from) && Number.isFinite(to) && typeof from === "number" && typeof to === "number" && from < to) return [from, to];
+  if (DEV) warnOnce("domain", `the view's domain must be [from, to], two numbers in milliseconds since 1970 with from before to (as Date.getTime() gives), not ${JSON.stringify(span)}; the schedule shows its subtasks instead.`);
+  return null;
+}
+
 /** The span a schedule shows while its view names none: the extent of the
-    subtasks, lead-in and lead-out included, widened or narrowed around its
-    middle into the zoom limits. None without subtasks. `toAxis` maps a
-    wall-clock instant onto the axis the limits count on - working time, where
-    a calendar removes some. */
+    subtasks, lead-in and lead-out included, into the zoom limits - widened
+    around its middle, or, where the work is wider than the widest span, from
+    its earliest start, so the first window shows work and not the empty
+    middle. None without subtasks. `toAxis` maps a wall-clock instant onto the
+    axis the limits count on - working time, where a calendar removes some.
+    `wide: "middle"` narrows around the middle instead. */
 export function defaultSpan(
   subtasks: readonly Subtask[],
   limits: ZoomLimits,
   toAxis: (wallClock: number) => number = (v) => v,
+  wide: "start" | "middle" = "middle",
 ): [number, number] | null {
   if (subtasks.length === 0) return null;
   let from = Infinity;
@@ -53,6 +68,7 @@ export function defaultSpan(
   from = toAxis(from);
   to = toAxis(to);
   const span = Math.min(limits.max, Math.max(limits.min, to - from));
+  if (wide === "start" && to - from > span) return [from, from + span];
   const middle = (from + to) / 2;
   return [middle - span / 2, middle + span / 2];
 }
