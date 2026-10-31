@@ -77,6 +77,8 @@ export interface Wording {
       focus to say it - Enter in the search, a chip, Backspace. */
   optionAdded: (label: string) => string;
   optionRemoved: (label: string) => string;
+  /** Said after a bulk action of the panel: how many values are chosen now. */
+  selectionCount: (count: number) => string;
 
   /* -------- Command palette --------------------------------------- */
   /* Entries of its own, not the combobox's. `noMatches` belongs there: the
@@ -781,7 +783,7 @@ export const DEFAULT_WORDING: Wording = {
   searchOptions: "Search options",
   options: "Options",
   optionScope: "View",
-  optionScopeAll: "All",
+  optionScopeAll: "View all",
   optionScopeSelected: (count) => `Selected (${count})`,
   selectAll: "All",
   selectNone: "None",
@@ -795,6 +797,7 @@ export const DEFAULT_WORDING: Wording = {
     [label, group, selected && "selected", disabled && "unavailable"].filter(Boolean).join(", "),
   optionAdded: (label) => `${label} added`,
   optionRemoved: (label) => `${label} removed`,
+  selectionCount: (count) => `${count} selected`,
 
   palettePlaceholder: "Search …",
   paletteField: "Search",

@@ -50,7 +50,7 @@ export const GERMAN_WORDING: Wording = {
   searchOptions: "Optionen durchsuchen",
   options: "Optionen",
   optionScope: "Ansicht",
-  optionScopeAll: "Alle",
+  optionScopeAll: "Alle anzeigen",
   optionScopeSelected: (count) => `Gewählte (${count})`,
   selectAll: "Alle",
   selectNone: "Keine",
@@ -64,6 +64,7 @@ export const GERMAN_WORDING: Wording = {
     [label, group, selected && "ausgewählt", disabled && "nicht verfügbar"].filter(Boolean).join(", "),
   optionAdded: (label) => `${label} hinzugefügt`,
   optionRemoved: (label) => `${label} entfernt`,
+  selectionCount: (count) => `${count} ausgewählt`,
 
   palettePlaceholder: "Suchen …",
   paletteField: "Suchen",

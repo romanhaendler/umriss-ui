@@ -139,6 +139,9 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  // The panel is named by the field: its label, else its placeholder.
+  const ownId = useId();
+  const triggerId = id ?? field?.id ?? ownId;
   /* The pointer of the gesture last made on the field, or "key" for a key -
      what decides where the focus goes when the panel opens. */
   const pointerType = useRef("mouse");
@@ -193,7 +196,6 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     if (target === "selected") {
       setSelectedSnapshot(new Set(value));
     }
-    searchRef.current?.focus();
     sayCount(target, search, chosenNow(target));
   };
 
@@ -235,9 +237,15 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
 
   const filteredValues = useMemo(() => Options.selectableValues(filtered), [filtered]);
 
-  const selectAllOf = () => onChange(Options.selectAllOf(value, filteredValues));
-  const selectNoneOf = () => onChange(Options.selectNoneOf(value, filteredValues));
-  const invertSelection = () => onChange(Options.invertSelection(value, filteredValues));
+  /* A bulk action says how many are chosen now; its button keeps the focus. */
+  const bulk = (next: T[]) => {
+    onChange(next);
+    announce(wording.selectionCount(next.length), fieldRef.current);
+  };
+  const selectAllOf = () => bulk(Options.selectAllOf(value, filteredValues));
+  const selectNoneOf = () => bulk(Options.selectNoneOf(value, filteredValues));
+  const invertSelection = () => bulk(Options.invertSelection(value, filteredValues));
+  const keepFocus = (event: { preventDefault: () => void }) => event.preventDefault();
 
   /* ---- Keyboard in the panel ---- */
   const optionInputs = () =>
@@ -487,7 +495,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
           onBlur={(event) => fieldBlur(event, onBlur, fieldRef, panelId)}
           ref={mergeRefs(mainRef, ref)}
           type="button"
-          id={id ?? field?.id}
+          id={triggerId}
           disabled={disabled}
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -525,7 +533,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
       >
           {/* The role sits here, not on the popover: a dialog the popover
               names would take the focus for itself on opening. */}
-          <div ref={attachPanel} role="dialog" aria-label={placeholderText} id={panelId}>
+          <div ref={attachPanel} role="dialog" aria-labelledby={triggerId} id={panelId} className={styles.dialog}>
               <Input
                 ref={searchRef}
                 size="sm"
@@ -550,6 +558,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
                   type="button"
                   className={cx(styles.scope, scope === "all" && styles.scopeActive)}
                   aria-pressed={scope === "all"}
+                  onMouseDown={keepFocus}
                   onClick={() => switchScope("all")}
                 >
                   {wording.optionScopeAll}
@@ -558,6 +567,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
                   type="button"
                   className={cx(styles.scope, scope === "selected" && styles.scopeActive)}
                   aria-pressed={scope === "selected"}
+                  onMouseDown={keepFocus}
                   onClick={() => switchScope("selected")}
                 >
                   {wording.optionScopeSelected(value.length)}
@@ -565,13 +575,13 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
               </div>
               <div className={styles.qol}>
                 <div className={styles.qolButtons}>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={selectAllOf}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={selectAllOf}>
                     {wording.selectAll}
                   </Button>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={selectNoneOf}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={selectNoneOf}>
                     {wording.selectNone}
                   </Button>
-                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onClick={invertSelection}>
+                  <Button size="sm" variant="ghost" disabled={filteredValues.length === 0} onMouseDown={keepFocus} onClick={invertSelection}>
                     {wording.invertSelection}
                   </Button>
                 </div>

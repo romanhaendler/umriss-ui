@@ -2,6 +2,8 @@
    Shared by Combobox and MultiSelect - hence here and not in one of the two
    component folders. Pure functions, no React. */
 
+import { fold } from "./search";
+
 export interface SelectOption<T extends string = string> {
   value: T;
   label: string;
@@ -9,7 +11,7 @@ export interface SelectOption<T extends string = string> {
 }
 
 /**
- * Searches in the label, disregarding case; whitespace at the edges does not
+ * Searches in the label, disregarding case and diacritics ("cafe" finds "Café"); whitespace at the edges does not
  * count. An empty query returns the list unchanged. Disabled options stay
  * visible - they are merely not selectable.
  */
@@ -17,9 +19,9 @@ export function filterOptions<T extends string>(
   options: readonly SelectOption<T>[],
   search: string,
 ): readonly SelectOption<T>[] {
-  const term = search.trim().toLowerCase();
+  const term = fold(search.trim()).text;
   if (!term) return options;
-  return options.filter((option) => option.label.toLowerCase().includes(term));
+  return options.filter((option) => fold(option.label).text.includes(term));
 }
 
 /** The values that may be selected at all. */

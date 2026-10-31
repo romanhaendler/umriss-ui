@@ -39,6 +39,9 @@ export interface ListboxProps {
   /** A line that stands below the options - or in place of the empty text -
       and marks the list busy: "Loading" while results are on their way. */
   busyText?: ReactNode;
+  /** The narrowest the panel may be, in px; the field's width wins above it.
+      @default 200 */
+  minWidth?: number;
 }
 
 /** A list of more than this many options is drawn through a window. */
@@ -60,6 +63,7 @@ export function Listbox({
   onChoose,
   emptyText,
   busyText,
+  minWidth = 200,
 }: ListboxProps) {
   /* The list's element as state: on the first opening the popover finds its
      portal only after this render, and the list arrives a render later than
@@ -149,10 +153,9 @@ export function Listbox({
       insideRefs={insideRefs}
       role="none"
       width="anchor"
-      /* As wide as the field, and never narrower than a list can be read: a
-         field of six characters would otherwise cut every option to an
-         ellipsis. */
-      minWidth={200}
+      /* As wide as the field, and never narrower than `minWidth`: a field of
+         six characters would otherwise cut every option to an ellipsis. */
+      minWidth={minWidth}
       className={styles.panel}
     >
       {windowed ? (

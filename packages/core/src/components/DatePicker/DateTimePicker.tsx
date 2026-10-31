@@ -212,7 +212,8 @@ export function DateTimePicker(props: DateTimePickerProps) {
         anchorRef={triggerRef}
         insideRefs={[wrapRef]}
         role="dialog"
-        aria-label={wording.dateTimePanel}
+        /* Named after its field; the wording's name where the field has none. */
+        aria-label={rest["aria-label"] || field ? undefined : wording.dateTimePanel}
         id={panelId}
         className={styles.panel}
       >
