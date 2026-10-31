@@ -308,7 +308,9 @@ export function CalculationView({
            keyboard and a screen reader reach, and its click arrives here. */
         onClick={
           foldable
-            ? () => {
+            ? (event) => {
+                /* A double or triple click selects text; it is no second ask. */
+                if (event.detail > 1) return;
                 /* Selecting a figure to copy it is not asking for its derivation. */
                 if (window.getSelection()?.toString()) return;
                 toggle(key);
@@ -316,7 +318,7 @@ export function CalculationView({
             : undefined
         }
       >
-        <VisuallyHidden>
+        <VisuallyHidden id={foldable ? `${listId}-sentence` : undefined} className={styles.sentence}>
           {[
             metrics
               ? metricsSentence(quantity.label, readings.map((reading) => reading.text), metrics, wording, place.position)
@@ -334,6 +336,7 @@ export function CalculationView({
               className={styles.disclosure}
               aria-expanded={isOpen}
               aria-controls={listId}
+              aria-describedby={`${listId}-sentence`}
               aria-label={(isOpen ? wording.calculationHideDerivation : wording.calculationShowDerivation)(quantity.label)}
             >
               <AngleGlyph data-open={isOpen ? "" : undefined} />
