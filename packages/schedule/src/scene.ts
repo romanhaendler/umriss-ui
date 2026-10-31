@@ -481,10 +481,8 @@ export class ScheduleScene {
     this.view.layout();
     /* The browser decides `touch-action` when a touch begins, so a gesture
        cannot be handed to the page halfway: the plot leaves the vertical swipe
-       to the page only while it has no lanes to scroll. A pinch is always the
-       page's - it zooms the page, never the plot (the keys and Ctrl+wheel zoom
-       the plot). */
-    if (this.plot !== null) this.plot.style.touchAction = this.view.maxScroll() === 0 ? "pan-y pinch-zoom" : "pinch-zoom";
+       to the page only while it has no lanes to scroll. */
+    if (this.plot !== null) this.plot.style.touchAction = this.view.maxScroll() === 0 ? "pan-y" : "none";
     this.moveSettled();
   }
 

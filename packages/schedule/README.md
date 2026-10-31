@@ -140,7 +140,7 @@ off. `now` draws the present across the lanes. The wheel over the schedule,
 lane headers included, scrolls the lanes and releases the page at their end,
 Ctrl or ⌘ and a pinch zoom, Shift pans; on the focused plot `+` (or `=`) zooms in, `-` zooms out and `0` fits the work, and the live region says the new span; on a touch screen one finger pans, a
 tap selects and a long press on a bar grabs it (with `"move"` or `"lane"` in `intents`), and a vertical swipe scrolls the page while all lanes fit (when they
-overflow, the lane names scroll the page). The lane headers take at most 40 % of the width, so that on a
+overflow, the lane names scroll the page). A pinch over the plot zooms time; the page zooms by a pinch outside the plot or by the browser's zoom. The lane headers take at most 28 % (never under 88 px) of the width, so that on a
 phone the plot keeps the larger part; `positionAt` and `clientPointOf`, on what
 `useSchedule` hands back, turn a client point into a time and a lane and back.
 
