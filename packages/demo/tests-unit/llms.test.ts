@@ -88,7 +88,7 @@ describe("llms.txt", () => {
 
   it("lists the scenarios first, with their lead and a link to the scenarios page's twin", () => {
     expect(index).toContain("## Scenarios\n");
-    expect(index).toContain("- [Watch a service's latency](http://localhost:4170/umriss-ui/fixture/index.md): An on-call engineer keeps it open beside the incident channel.\n");
+    expect(index).toContain("- [Watch a service's latency](http://localhost:4170/umriss-ui/fixture/index.md#watch-a-services-latency): An on-call engineer keeps it open beside the incident channel.\n");
     expect(index.indexOf("## Scenarios")).toBeLessThan(index.indexOf("## Instruments"));
   });
 
@@ -107,7 +107,7 @@ describe("llms-full.txt", () => {
 
   it("sets the install command under the import line of the page that installs, and of no other", () => {
     expect(full).toContain('import { Gauge } from "@umriss-ui/fixture";\n```\n\n```sh\nnpm install @umriss-ui/fixture @umriss-ui/core\n```\n');
-    expect(full.slice(full.indexOf("### Meter"))).not.toContain("```sh");
+    expect(full.slice(full.indexOf("### Meter"), full.indexOf("\n## Scenarios"))).not.toContain("```sh");
   });
 
   it("carries every example's source as the demo shows it - title gone, package name in", () => {
@@ -143,13 +143,13 @@ describe("llms-full.txt", () => {
       "| `Tab` | Moves focus to the gauge. |\n\nThe keys of [Select](http://localhost:4170/umriss-ui/core/select/#keyboard-select) apply here.\n\n#### Accessibility\n\nAn `img` named by its `ariaLabel`.\n\nA new reading is announced politely.\n\n#### API",
     );
     /* A page with no table of its own has the section all the same. */
-    const meter = full.slice(full.indexOf("### Meter"));
+    const meter = full.slice(full.indexOf("### Meter"), full.indexOf("\n## Scenarios"));
     expect(meter).toContain("#### Keyboard\n\nThe keys of [Gauge](#/gauge/keyboard-gauge) apply here.\n");
     expect(meter).not.toContain("#### Accessibility");
   });
 
   it("carries each scenario with its callouts, what it is built from, and its source", () => {
-    const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("## Instruments"));
+    const scenarios = full.slice(full.indexOf("## Scenarios"));
     expect(scenarios).toContain("### Watch a service's latency\n\nAn on-call engineer keeps it open beside the incident channel.");
     expect(scenarios).toContain("1. The needle: latency, in ms.\n2. Red above the limit, as the SLA says: 300 ms.");
     expect(scenarios).toContain("Built from: Gauge, Trend.");
@@ -166,7 +166,7 @@ describe("llms-full.txt", () => {
   });
 
   it("says so where a page has no example and no table", () => {
-    const meter = full.slice(full.indexOf("### Meter"));
+    const meter = full.slice(full.indexOf("### Meter"), full.indexOf("\n## Scenarios"));
     expect(meter).toContain("There is no example for this page yet.");
     expect(meter).not.toContain("#### API");
   });
@@ -283,7 +283,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
   it("is the page's cut of the full text, lifted so that the page's name is the `#`, with the header under it", () => {
     const gauge = asTwin(full.slice(full.indexOf("### Gauge"), full.indexOf("\n### Meter")).trimEnd());
     expect(byPath.get("gauge.md")).toBe(`# Gauge\n\n${header("gauge/")}\n${gauge.slice("# Gauge\n".length)}\n`);
-    const meter = asTwin(full.slice(full.indexOf("### Meter")).trimEnd());
+    const meter = asTwin(full.slice(full.indexOf("### Meter"), full.indexOf("\n## Scenarios")).trimEnd());
     expect(byPath.get("meter.md")).toBe(`# Meter\n\n${header("meter/")}\n${meter.slice("# Meter\n".length)}\n`);
   });
 
@@ -302,7 +302,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
   });
 
   it("gives the scenarios page the scenarios' cut under the package's name", () => {
-    const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("\n## Instruments")).trimEnd();
+    const scenarios = full.slice(full.indexOf("## Scenarios")).trimEnd();
     expect(byPath.get("index.md")).toBe(
       `# @umriss-ui/fixture\n\n${header("")}\n\nA fixture package for the llms.txt generator.\n\n\`\`\`sh\nnpm install @umriss-ui/fixture @umriss-ui/core\n\`\`\`\n\n[Start with Meter →](http://localhost:4170/umriss-ui/fixture/meter/)\n\n${scenarios}\n`,
     );
@@ -483,7 +483,7 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
   });
 
   it("names the pages that mention an export in code - import line, examples, scenarios - and not their tables", () => {
-    expect(entry("Gauge")).toContain("Used on [Scenarios](#/) and [Gauge](#/gauge).");
+    expect(entry("Gauge")).toContain("Used on [Gauge](#/gauge) and [Scenarios](#/).");
     /* The Gauge page's table is `GaugeProps`; its text never names it. */
     expect(entry("GaugeProps")).not.toContain("Used on");
     expect(entry("fraction")).toContain("Used on [Meter](#/meter).");

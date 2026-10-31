@@ -21,9 +21,8 @@ export interface SliderProps
   defaultValue?: number;
   /** Reports every change, by pointer or key, as a number on the step. */
   onValueChange?: (value: number) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release,
-      and `onChange` is then the native input's event handler, as `register`
-      and Formik read it. @deprecated */
+  /** The former name of `onValueChange`; @deprecated since 0.52 - use `onValueChange`; the name then
+      belongs to the native input's event handler, as `register` and Formik read it. */
   onChange?: (value: number) => void;
   /** The smallest value. */
   min?: number;
