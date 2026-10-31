@@ -18,11 +18,13 @@ import {
   MultiSelect,
   NumberInput,
   RadioGroup,
+  RangeSlider,
   SegmentedControl,
   Select,
   Slider,
   Switch,
   Textarea,
+  TimeInput,
 } from "../src";
 
 const OPTIONS = [
@@ -109,6 +111,20 @@ const cases: Case[] = [
     act: () => fireEvent.keyDown(screen.getByRole("slider"), { key: "End" }),
     expected: 100,
     legacy: true,
+  },
+  {
+    name: "RangeSlider",
+    make: (p) => <RangeSlider aria-label="f" {...(p as object)} />,
+    act: () => fireEvent.keyDown(screen.getAllByRole("slider")[0]!, { key: "End" }),
+    expected: [100, 100],
+    legacy: false,
+  },
+  {
+    name: "TimeInput",
+    make: (p) => <TimeInput aria-label="f" {...(p as object)} />,
+    act: () => fireEvent.keyDown(screen.getByRole("spinbutton", { name: "Hour" }), { key: "ArrowUp" }),
+    expected: "01:00",
+    legacy: false,
   },
   {
     name: "DatePicker",

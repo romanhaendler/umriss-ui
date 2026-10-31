@@ -1,0 +1,123 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* Two native range inputs lie over one drawn track. The inputs wear the
+   Slider's thumb and focus ring (composed from its stylesheet) but draw no
+   track and take no pointer except on a thumb, so that the nearer thumb is
+   grabbed and the bare track below is ours. `--_from` and `--_to` are the
+   shares (0 to 1) of the track the ends stand at. */
+
+@layer umriss.components {
+  .rangeSlider {
+    composes: slider from "../Slider/Slider.module.css";
+  }
+
+  .control {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .rail {
+    position: absolute;
+    inset: 8px 0 auto;
+    height: var(--_track);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge);
+    pointer-events: none;
+  }
+
+  /* The stretch between the ends, in a strip inset by half a thumb on each
+     side: where a thumb's centre lies at its value. */
+  .fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--_thumb) / 2 + (100% - var(--_thumb)) * var(--_from));
+    width: calc((100% - var(--_thumb)) * (var(--_to) - var(--_from)));
+    background: var(--u-color-accent);
+  }
+
+  .thumb {
+    composes: range from "../Slider/Slider.module.css";
+  }
+
+  .rangeSlider .thumb {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .raised {
+    z-index: 1;
+  }
+
+  /* The thumbs only: the track the composed rules draw is hidden, the
+     specificity of the extra class puts these above them. */
+  .rangeSlider .thumb::-webkit-slider-runnable-track {
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .rangeSlider .thumb::-moz-range-track,
+  .rangeSlider .thumb::-moz-range-progress {
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .rangeSlider .thumb::-webkit-slider-thumb {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .rangeSlider .thumb::-moz-range-thumb {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .rangeSlider .thumb:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+  }
+
+  .rangeSlider .thumb:disabled::-moz-range-thumb {
+    cursor: not-allowed;
+  }
+
+  /* The invalid range takes the fields' danger edge on its groove. */
+  .rangeSlider:has([aria-invalid="true"]) .rail {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .readout {
+    composes: readout from "../Slider/Slider.module.css";
+  }
+
+  @media (forced-colors: active) {
+    .rail {
+      forced-color-adjust: none;
+      background: Canvas;
+      outline-color: CanvasText;
+    }
+
+    .fill {
+      background: Highlight;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .control {
+      height: 24px;
+    }
+
+    .rail {
+      top: 10px;
+    }
+  }
+}

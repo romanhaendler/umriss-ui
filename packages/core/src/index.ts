@@ -63,11 +63,13 @@ export type { LongPress, PressPoint, PressPointer } from "./lib/longPress";
    move by its place; the rule is kept anyway, so that nobody has to check. */
 export * from "./components/ContextMenu";
 
-/* Switch, Slider, ProgressBar, Accordion and Breadcrumb stand at the end for the same rule:
+/* Switch, Slider, RangeSlider, TimeInput, ProgressBar, Accordion and Breadcrumb stand at the end for the same rule:
    filed in alphabetically, their stylesheets would land between older ones
    and could decide a tie the older ones decide today. */
 export * from "./components/Switch";
 export * from "./components/Slider";
+export * from "./components/RangeSlider";
+export * from "./components/TimeInput";
 export * from "./components/ProgressBar";
 export * from "./components/Accordion";
 export * from "./components/Breadcrumb";

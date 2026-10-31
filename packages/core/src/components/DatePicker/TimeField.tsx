@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { pad2 } from "./time";
 import styles from "./DatePicker.module.css";
@@ -19,9 +19,13 @@ export interface TimeFieldProps {
   disabled?: boolean;
   /** Which number of a pasted "14:30" the field takes: the hour's is the first, the minute's and second's the last. */
   pasteTakes?: "first" | "last";
+  /** Shown while the value is empty; an empty field then stays empty when focus passes through it. */
+  placeholder?: string;
+  /** Attributes for the input element itself, under the field's own. */
+  inputProps?: InputHTMLAttributes<HTMLInputElement>;
 }
 
-export function TimeField({ value, onValue, max, label, next, own, disabled = false, pasteTakes = "last" }: TimeFieldProps) {
+export function TimeField({ value, onValue, max, label, next, own, disabled = false, pasteTakes = "last", placeholder, inputProps }: TimeFieldProps) {
   const wording = useWording();
   // The ref mirrors the current value, so that the hold repetition never
   // calculates on stale closures.
@@ -70,7 +74,9 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
   return (
     <span className={cx(styles.timeFieldWrap, disabled && styles.timeFieldDisabled)}>
       <input
+        {...inputProps}
         ref={own}
+        placeholder={placeholder}
         type="text"
         inputMode="numeric"
         role="spinbutton"
@@ -117,6 +123,7 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
         onBlur={(event) => {
           // Always clamp the actual content of the field, never the (possibly
           // not yet re-rendered) prop.
+          if (placeholder !== undefined && event.currentTarget.value === "") return;
           const number = Math.min(max, Number.parseInt(event.currentTarget.value, 10) || 0);
           onValue(pad2(number));
         }}
