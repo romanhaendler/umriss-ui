@@ -207,8 +207,9 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
     offset: (d) => offsetFormat.formatToParts(d).find((part) => part.type === "timeZoneName")?.value ?? "",
     number: (n, decimals) => {
       // Without a digit count a non-zero value never reads as 0: what the default
-      // places would round to zero is written in scientific notation instead.
-      if (decimals === undefined && n !== 0 && Math.abs(n) < 0.5 * 10 ** -DEFAULT_PLACES) return scientificFormat.format(n);
+      // places would round to zero is written in scientific notation instead,
+      // always with "E" (Swedish writes "1×10^−11"), which a field can read back.
+      if (decimals === undefined && n !== 0 && Math.abs(n) < 0.5 * 10 ** -DEFAULT_PLACES) return scientificFormat.format(n).replace("×10^", "E");
       let f = numberFormats.get(decimals);
       if (!f) {
         f = new Intl.NumberFormat(locale, {
@@ -261,10 +262,12 @@ export interface Separators {
 
     A field that formats a number must be able to read its own output back, and
     an application may have replaced `number` with anything. So the
-    separators are measured: one number with one decimal place, digits struck
-    out, and what remains is the notation's own punctuation. */
+    separators are measured: one large number with one decimal place, digits struck
+    out, and what remains is the notation's own punctuation. The number is one
+    that every locale groups (Spanish and Polish leave four digits alone), and
+    both minus signs, "-" and U+2212, are struck with the digits. */
 export function separatorsOf(formats: Formats): Separators {
-  const punctuation = [...formats.number(1234.5, 1).replace(/[\d-]/g, "")];
+  const punctuation = [...formats.number(1234567.5, 1).replace(/[\d\-\u2212]/g, "")];
   const decimal = punctuation[punctuation.length - 1] ?? ".";
   return { group: punctuation.length > 1 ? (punctuation[0] as string) : "", decimal };
 }

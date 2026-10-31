@@ -1,5 +1,5 @@
 import { useShapeWarning } from "../../lib/useShapeWarning";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
@@ -9,6 +9,7 @@ import {
   clampNumber,
   decimalsAllowed,
   filterInput,
+  isReadable,
   negativeAllowed,
   parseNumber,
   stepNumber,
@@ -118,8 +119,9 @@ export function NumberInput(props: NumberInputProps) {
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
   const [valueGiven, onChange] = useFieldValue<number | null>("NumberInput", props, null);
-  const value = typeof valueGiven === "number" ? valueGiven : null;
-  useShapeWarning("NumberInput", "value", valueGiven != null && typeof valueGiven !== "number", "a number or null");
+  // NaN and ±Infinity are no number a field can show: it stays empty.
+  const value = typeof valueGiven === "number" && Number.isFinite(valueGiven) ? valueGiven : null;
+  useShapeWarning("NumberInput", "value", valueGiven != null && value === null, "a number or null, and a finite one");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
@@ -143,31 +145,41 @@ export function NumberInput(props: NumberInputProps) {
     },
     [],
   );
-  const isInvalid = (invalid ?? field?.invalid ?? false) || refused;
+  // A paste that cannot be read stays in the field, marked, until the next valid input.
+  const [unreadable, setUnreadable] = useState(false);
+  const pasted = useRef(false);
+  const isInvalid = (invalid ?? field?.invalid ?? false) || refused || unreadable;
+  const unitId = useId();
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
 
   // In the notation of the formats from the first render on, not after the effect.
   const [text, setText] = useState(() => (value === null ? "" : write(value)));
   const [focused, setFocused] = useState(false);
+  // The last number this field reported: a different `value` came from outside.
+  const emitted = useRef<number | null>(value);
 
-  // Adopt values set from outside, as long as nobody is typing.
+  // Adopt values set from outside; while typing only one that is not what the
+  // field itself just reported.
   useEffect(() => {
-    if (focused) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if ((focused || unreadable) && value === emitted.current) return;
+    emitted.current = value;
+    setUnreadable(false);
     setText(value === null ? "" : write(value));
     // `write` is created anew on every render and reads only `decimals`,
     // `grouping` and `formats` - all are in the list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, focused, decimals, grouping, formats]);
+  }, [value, focused, unreadable, decimals, grouping, formats]);
 
   const commit = (next: number | null) => {
     if (next === null) {
       setText("");
+      emitted.current = null;
       onChange(null);
       return;
     }
     const clamped = clampNumber(next, constraints);
     setText(write(clamped));
+    emitted.current = clamped;
     onChange(clamped);
   };
 
@@ -182,7 +194,7 @@ export function NumberInput(props: NumberInputProps) {
 
   const stepBy = (direction: 1 | -1, factor = 1) => {
     const base = read(textRef.current) ?? valueRef.current ?? 0;
-    commit(stepNumber(base, direction, step, factor));
+    commit(stepNumber(base, direction, step, factor, min));
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -213,6 +225,12 @@ export function NumberInput(props: NumberInputProps) {
     };
     repeat(400);
   };
+
+  // A unit given as text is read with the field, as its description.
+  const describedBy =
+    [rest["aria-describedby"] ?? field?.describedBy, adornmentChars(prefix) ? `${unitId}-prefix` : "", adornmentChars(suffix) ? `${unitId}-suffix` : ""]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   const current = read(text) ?? value;
   const canIncrease = !disabled && (max === undefined || current === null || current < max);
@@ -250,7 +268,7 @@ export function NumberInput(props: NumberInputProps) {
       )}
       style={{ ...extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) }), ...style }}
     >
-      {prefix && <span className={styles.adornment}>{prefix}</span>}
+      {prefix && <span className={styles.adornment} id={`${unitId}-prefix`}>{prefix}</span>}
       {/* The plain number is posted, not the text the field shows in the reader's notation. */}
       <FormPost entries={[[name, posted(value, String, formValue)]]} disabled={disabled} />
       <input
@@ -261,28 +279,45 @@ export function NumberInput(props: NumberInputProps) {
         inputMode={negativeAllowed(min) ? "text" : decimalsAllowed(decimals) ? "decimal" : "numeric"}
         id={id ?? field?.id}
         disabled={disabled}
-        aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
+        aria-describedby={describedBy}
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
         className={styles.input}
         value={text}
+        onPaste={() => {
+          pasted.current = true;
+        }}
         onChange={(event) => {
+          const wasPasted = pasted.current;
+          pasted.current = false;
           const raw = filterInput(event.target.value, constraints, separators);
-          /* A character the field cannot read refuses the whole edit: the
-             field keeps its text instead of reading the rest as another
-             value. */
-          if (raw.length !== event.target.value.length) {
+          const readable = raw.length === event.target.value.length && isReadable(raw, separators);
+          if (!readable) {
             announce(wording.numberRefused, event.target);
+            if (wasPasted) {
+              /* A paste is kept as it came, marked: dropping or emptying it
+                 would lose what the user brought. */
+              setText(event.target.value);
+              setUnreadable(true);
+              return;
+            }
+            /* A character the field cannot read refuses the whole edit: the
+               field keeps its text instead of reading the rest as another
+               value. */
             setRefused(true);
             if (refusedTimer.current !== null) clearTimeout(refusedTimer.current);
             refusedTimer.current = setTimeout(() => setRefused(false), 1200);
             return;
           }
+          setUnreadable(false);
+          setRefused(false);
           setText(raw);
           /* One contract for every route: what goes out is clamped. The
              text stays local so that typing does not stutter over it. */
           const parsed = read(raw);
-          onChange(parsed === null ? null : clampNumber(parsed, constraints));
+          const out = parsed === null ? null : clampNumber(parsed, constraints);
+          emitted.current = out;
+          onChange(out);
         }}
         {...rest}
         /* After `rest` and composed with the caller's: replacing the commit on
@@ -296,10 +331,16 @@ export function NumberInput(props: NumberInputProps) {
           onBlur?.(event);
           setFocused(false);
           // Adopt the actual field content, not the state (which may be one render stale).
-          commit(read(event.currentTarget.value));
+          const shown = event.currentTarget.value;
+          // An unreadable paste or a dangling exponent stays to be corrected, not emptied.
+          if (shown.trim() !== "" && shown.trim() !== "-" && read(shown) === null) {
+            setUnreadable(true);
+            return;
+          }
+          commit(read(shown));
         }}
       />
-      {suffix && <span className={styles.adornment}>{suffix}</span>}
+      {suffix && <span className={styles.adornment} id={`${unitId}-suffix`}>{suffix}</span>}
       <span className={styles.stepper}>
         {stepperButton(-1, canDecrease, wording.decreaseValue, <MinusGlyph />)}
         {stepperButton(1, canIncrease, wording.increaseValue, <PlusGlyph />)}
