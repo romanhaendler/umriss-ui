@@ -93,6 +93,56 @@ holds the first of them under 1.5 kB in every package.
 
 umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: the visual suite opens every demo page of every package under that policy, and an HTML sink reached while a page renders fails it.
 
+### Forms
+
+Every field takes `value` or `defaultValue` and reports its finished value through `onValueChange(value)`
+(Checkbox and Switch: `checked`, `defaultChecked` and `onCheckedChange(boolean)`). With `name`, a field
+posts its value into a `<form>` as a native control would: the Combobox its value, not its label, and
+`""` when it is empty. A form's `reset` restores every field. `onChange(event)` stays on Input, Textarea,
+Checkbox, Switch and Slider, the fields a library such as `register` reads.
+
+A native form with a React 19 `action` needs no library:
+
+```tsx
+<form action={(data) => save(data.get("centre"), data.get("amount"))}>
+  <FormField label="Cost centre">
+    <Combobox name="centre" options={CENTRES} defaultValue="CC-2200" />
+  </FormField>
+  <FormField label="Amount">
+    <NumberInput name="amount" defaultValue={4860.5} decimals={2} />
+  </FormField>
+  <Button type="submit">Send</Button>
+</form>
+```
+
+With react-hook-form, the value fields go through `Controller`, and `Input` through `register`:
+
+```tsx
+const { control, register, handleSubmit, formState: { errors } } = useForm<Booking>({
+  defaultValues: { name: "", centre: null, amount: null },
+});
+
+<form onSubmit={handleSubmit(save)}>
+  <FormField label="Name" error={errors.name?.message}>
+    <Input {...register("name", { required: "Required" })} />
+  </FormField>
+  <FormField label="Cost centre">
+    <Controller control={control} name="centre" render={({ field }) => (
+      <Combobox ref={field.ref} options={CENTRES} value={field.value} onValueChange={field.onChange} />
+    )} />
+  </FormField>
+  <FormField label="Amount">
+    <Controller control={control} name="amount" render={({ field }) => (
+      <NumberInput ref={field.ref} value={field.value} onValueChange={field.onChange} decimals={2} />
+    )} />
+  </FormField>
+  <Button type="submit">Send</Button>
+</form>
+```
+
+Empty is `null` for a choice or a number (`""` for text), so the form's defaults say so. The demo's "Post to a form"
+example shows what the posted entries look like.
+
 ## Styles
 
 **They load themselves.** `dist/core.js` imports its stylesheet, and the
