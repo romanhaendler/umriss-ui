@@ -1,8 +1,10 @@
+import { useRef } from "react";
 import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormats } from "../../lib/language";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
+import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Slider.module.css";
 
@@ -105,6 +107,7 @@ export function Slider(props: SliderProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
+  const input = useRef<HTMLInputElement>(null);
   const formats = useFormats();
   const field = useFormField();
   const [given, report, controlled] = useFieldValue<number>("Slider", props, min);
@@ -121,7 +124,10 @@ export function Slider(props: SliderProps) {
     report(next);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  // A reset puts the value back to where the field started; a native range input would only move its thumb.
+  useFormReset(input, () => commit(snap(props.defaultValue ?? min, min, max, step)));
+
+  const handleKeyDown =(event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented || disabled) return;
     const next = keyed(event.key, value, min, max, step);
@@ -134,7 +140,7 @@ export function Slider(props: SliderProps) {
     <div className={cx(styles.slider, className)} style={style}>
       <div className={styles.control}>
         <input
-          ref={ref}
+          ref={mergeRefs(ref, input)}
           type="range"
           id={id ?? field?.id}
           aria-describedby={rest["aria-describedby"] ?? field?.describedBy}

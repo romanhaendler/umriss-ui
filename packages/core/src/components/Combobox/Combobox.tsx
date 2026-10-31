@@ -263,6 +263,8 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
           className={cx(styles.input, size === "sm" && styles.sm, clearable && styles.inputClearable, isInvalid && styles.invalid)}
           onChange={(event) => {
             setQuery(event.target.value);
+            // Text erased in a clearable field is the choice erased, as the cross does it; leaving would otherwise bring the old choice back.
+            if (clearable && event.target.value === "" && value !== null) onChange(null);
             setActiveIndex(0);
             onSearch?.(event.target.value);
             if (!open) openPanel(!filter);

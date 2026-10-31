@@ -5,9 +5,9 @@ import { cx } from "../../lib/cx";
 import { CrossGlyph } from "../../lib/glyphs";
 import { useFormats, useWording } from "../../lib/language";
 import type { Formats } from "../../lib/language";
-import { mergeRefs } from "../../lib/mergeRefs";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { accepts } from "./accept";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./FileInput.module.css";
@@ -89,6 +89,15 @@ export function FileInput(props: FileInputProps) {
       for (const file of files) transfer.items.add(file);
       element.files = transfer.files;
     } else if (files.length === 0) element.value = "";
+  });
+
+  // A reset empties the input itself; the list follows it, to the files the field started with.
+  useFormReset(input, () => {
+    const start = props.defaultValue ?? NO_FILES;
+    if (files.length !== start.length || files.some((file, index) => file !== start[index])) {
+      setRejected([]);
+      commit([...start]);
+    }
   });
 
   const take = (offered: File[]) => {

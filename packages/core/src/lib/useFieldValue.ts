@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { warnDeprecated, warnOnce } from "./dev";
 
 /** What a field's contract reads of its props (ADR-0081): the state prop and its callback. */
@@ -43,7 +44,26 @@ export function useFieldValue<V, E = V>(component: string, props: FieldValueProp
   ];
 }
 
-const FIELD_KEYS = new Set(["value", "defaultValue", "onValueChange", "onChange"]);
+/**
+ * Runs `restore` when the form around the field's input is reset. A native input follows a reset by
+ * itself; a field that keeps its value in React (Slider, the file list) does not, and a form that
+ * resets through the DOM would leave it out of step.
+ */
+export function useFormReset(input: RefObject<HTMLInputElement | null>, restore: () => void): void {
+  const latest = useRef(restore);
+  useEffect(() => {
+    latest.current = restore;
+  });
+  useEffect(() => {
+    const form = input.current?.form;
+    if (!form) return;
+    const onReset = () => latest.current();
+    form.addEventListener("reset", onReset);
+    return () => form.removeEventListener("reset", onReset);
+  }, [input]);
+}
+
+const FIELD_KEYS =new Set(["value", "defaultValue", "onValueChange", "onChange"]);
 
 /** The props without the four `useFieldValue` reads, for the rest that goes on to an element. */
 export function withoutFieldProps<P extends object>(props: P): Omit<P, "value" | "defaultValue" | "onValueChange" | "onChange"> {

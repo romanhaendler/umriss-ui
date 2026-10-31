@@ -1,3 +1,4 @@
+import { fieldBlur } from "../../lib/fieldBlur";
 import { useShapeWarning, isDate } from "../../lib/useShapeWarning";
 import { useId, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
@@ -172,6 +173,7 @@ export function DatePicker(props: DatePickerProps) {
         natural={naturalChars((sample) => measure.date(sample).length, placeholderText)}
       />
       <Popover
+        onBlur={(event) => fieldBlur(event, rest.onBlur, wrapRef)}
         open={open}
         onOpenChange={(isOpen) => {
           if (!isOpen) setOpen(false);
