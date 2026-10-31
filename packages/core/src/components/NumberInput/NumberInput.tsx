@@ -28,7 +28,7 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement>, FormPostProps<number> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type" | "name">, RefProp<HTMLInputElement>, FormPostProps<number> {
   /** The number, or `null` (or `undefined`) for "not stated". An empty
       field is not zero: a quantity that was not measured is not a quantity
       of zero. With it the field is controlled; without it the field keeps
@@ -43,7 +43,7 @@ export interface NumberInputProps
       stand outside while typing; on leaving it is set to the clamped
       value. */
   onValueChange?: (value: number | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: number | null) => void;
   /** Lower bound. Every reported value is clamped; the text in the field
       follows on leaving. */

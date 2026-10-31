@@ -27,7 +27,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "installation",
         name: "Installation",
-        sentence: "Install the package, draw a first chart and size it in its container. Read this once before the component pages; everything after it assumes it.",
+        sentence: "Install the package, draw a first chart and size it in its container; light and dark follow the page. Read this once before the component pages; everything after it assumes it.",
         about: [
           "The command installs the package alone: React 19 or newer is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand. Its colours, type and sizes are `--uc-` tokens that fall back onto core's; [core's Theming page](" + SITE + "core/theming/#charts-tokens) lists them all.",
           "A chart takes its container's width and follows it; give it a `height` (300 px without one). `useChart(rows)` hands out `Chart`, its axes and its series, typed at the row; each reads its value from a row through `value`, a field name or a function - a value that is `null`, `undefined` or not finite is a gap, never a zero. The rows are one object per row in an array (also a series' own `data`); anything else is read as no rows, so the chart says \"No data\" and warns once in development, and `Array.from` makes rows of an Arrow table or a typed array. `undefined` while the rows load draws empty without a word.",
@@ -98,7 +98,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "zoom-and-pan",
         name: "Zoom and pan",
-        sentence: "Look closer at a stretch of a long series and move along it (zoom, pan, a viewport), by wheel, pinch, drag or key, and keep several charts on the same stretch.",
+        sentence: "Look closer at a stretch of a long series and move along it (zoom, pan, a viewport), mark a stretch with a brush (`onRange`), follow the live edge of a stream, by wheel, pinch, drag or key, and keep several charts on the same stretch.",
         about: [
           "`zoomable` on an x axis turns the gestures and keys on; nothing else is needed. The span shown is part of the chart's view (ADR-0047): `useChart(rows, { initialView, onViewChange })` takes a start and reports what the reader does, whole, at most once per frame; `setView(view)`, `domains` and `setDomain(axisId, span | null)` stand on what the hook returns. A lone x axis is `\"x\"`.",
           "Once an axis is zoomed, the chart offers 'Show all' over a corner of its plot - a button of its own, a tab stop beside the plot's, that brings every zoomed axis back and goes. Its words are the wording's `showAll`.",
@@ -222,7 +222,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "limitline",
         name: "LimitLine",
-        sentence: "The limits a course is read against (a threshold, a reference line): a line above the series, a band beneath them. Reach for it for objectives, budgets and alert levels.",
+        sentence: "The limits a course is read against (a threshold, a reference line, an annotation): a line above the series, a band beneath them. Reach for it for objectives, budgets and alert levels.",
         about: ["A limit's tone follows its `severity`, never a colour of its own. The model is the one `@umriss-ui/core` uses for its verdicts, so a chart and a tile agree (ADR-0006)."],
         alternatives: [{ when: "Limits computed from the process itself", use: "controlchart" }],
         keysOf: ["chart"],

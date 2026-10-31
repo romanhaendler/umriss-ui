@@ -396,7 +396,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "formfield",
         name: "FormField",
-        sentence: "The frame around a field: its label, a hint below it and the error that replaces the hint. Wrap every field in one, so the question, the help and the problem are read out together.",
+        sentence: "The frame around a field: its label, a hint below it and the error that replaces the hint (validation messages). Wrap every field in one, so the question, the help and the problem are read out together.",
         about: [
           "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",

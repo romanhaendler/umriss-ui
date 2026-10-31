@@ -150,7 +150,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "appearances",
         name: "Appearances",
-        sentence: "What a bar says besides its colour: provisional, fixed, muted, running on past the view, and how far the work has got. Each takes one channel of the drawing, so several on one bar stay readable.",
+        sentence: "What a bar says besides its colour: provisional, fixed, muted, running on past the view, and how far the work has got (progress; a baseline is not drawn). Each takes one channel of the drawing, so several on one bar stay readable.",
         about: [
           "`\"provisional\"` owns the fill (none at all), `\"fixed\"` the ends (a cap inside each), `\"muted\"` the saturation, `\"open\"` a fade at the edge of the view, and `progress` a rail inside the main time. The faint, outlined fill belongs to a lead-in and a lead-out and to nothing else.",
           "`\"provisional\"` and `\"fixed\"` contradict, and the later one in the list wins. `resolveAppearance` is that rule, exported for the application to read as well.",
@@ -483,7 +483,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "ripple",
         name: "Ripple",
-        sentence: "Works out which later work has to move when one piece moves: every successor whose dependency no longer fits, pushed by exactly what is missing (also called a cascade). The schedule never runs it; your application decides.",
+        sentence: "Works out which later work has to move when one piece moves: every successor whose dependency no longer fits, pushed by exactly what is missing (also called a cascade or critical path). The schedule never runs it; your application decides.",
         about: [
           "`ripple(subtasks, dependencies, intent)` returns move intents down the whole chain, in the order they were pushed. A successor keeps its length and is never pulled earlier: room that opens up is the planner's.",
           "`shiftTask` moves every subtask of one task by the same amount, so all its dependencies keep fitting.",

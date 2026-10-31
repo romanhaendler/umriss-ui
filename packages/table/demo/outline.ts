@@ -157,7 +157,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "width-and-pinning",
         name: "Width and pinning",
-        sentence: "How wide a column stands, which columns stay in view while the table scrolls sideways (frozen or sticky columns), and a header that stays while it scrolls down.",
+        sentence: "How wide a column stands (resize it by drag or key), which columns stay in view while the table scrolls sideways (frozen or sticky columns), and a header that stays while it scrolls down.",
         keys: [
           { key: "Alt + → / Alt + ←", action: "On a resizable header: wider or narrower. Alt + Shift + → and Alt + Shift + ← take larger steps." },
           { key: "Alt + Home", action: "On a resizable header: fits the width to the content." },
@@ -573,10 +573,10 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Edits",
         sentence: "Let people change a value in its cell. The table reports each edit, and the application writes it into its rows.",
         about: [
-          "An edit is reported, never applied: the application owns the rows. `validate` keeps the editor open with its message until the draft passes.",
+          "An edit is reported, never applied: the application owns the rows. A date edits with `\"date\"`, or `\"dateTime\"` when it carries a time of day; a yes or no with `\"boolean\"`. `validate` keeps the editor open with its message until the draft passes.",
           "By default each cell is reported as it is left (`onCellEdit`) - for another cell, or by a click outside the table. `editMode=\"row\"` opens a whole row as one draft and reports it only when it is saved (`onRowSave`); a row with a draft is left only by saving or discarding it (ADR-0036).",
           "`onRowAdd` puts up \"New row\" - in the toolbar, or beneath the table without one - and `onRowDelete` a Delete that asks inside its row. Both work in either mode.",
-          "Undo and redo are not built in. The last example keeps the history of the reported edits in the application and writes the replaced value back on Ctrl+Z - about twenty lines, and the recipe of the README.",
+          "Undo and redo are not built in. The undo and redo example keeps the history of the reported edits in the application and writes the replaced value back on Ctrl+Z - about twenty lines, and the recipe of the README.",
         ],
         keys: [
           { key: "Tab (while editing)", action: "Commits the edit and moves to the next cell that edits; in a row draft, walks its fields and buttons." },

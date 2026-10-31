@@ -122,11 +122,14 @@ export type NumberField<Z> = {
 
 /** What a column accepts as `edit`: the core field for its value - `"text"`
     for text, `"number"` for numbers, `"date"` for points in time, `"select"`
-    for text and numbers - or an editor of one's own. */
+    for text and numbers, `"dateTime"` for points in time with a time of day,
+    `"boolean"` for a checkbox - or an editor of one's own. A `"date"` over
+    values that carry a time of day edits as `"dateTime"`. */
 export type EditFor<W, Z> =
   | ([Present<W>] extends [string] ? "text" | "select" : never)
   | ([Present<W>] extends [number] ? "number" | "select" : never)
-  | ([Present<W>] extends [Date] ? "date" : never)
+  | ([Present<W>] extends [Date] ? "date" | "dateTime" : never)
+  | ([Present<W>] extends [boolean] ? "boolean" : never)
   | ((editor: CellEditorProps<W, Z>) => ReactNode);
 
 /** What an editor of one's own receives. The table holds the draft; Enter,
@@ -166,7 +169,8 @@ export interface CellEdit<Z, Key extends RowKey = string> {
   rowKey: Key;
   columnId: string;
   /** The editor's value: text for `"text"`, a number or null for
-      `"number"`, a day or null for `"date"`, an option for `"select"`. */
+      `"number"`, a day or null for `"date"`, an instant or null for `"dateTime"`, a boolean
+      for `"boolean"`, an option for `"select"`. */
   value: unknown;
   row: Z;
 }
@@ -298,7 +302,7 @@ export type Computed<Z, W> = ColumnBase &
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the condition belongs to the filter
     filter?: "list" | "range" | "text" | ColumnFilter<Present<W>, any>;
     /** Edits the column's cells in place in grid mode - see a field column's `edit`. */
-    edit?: "text" | "number" | "select" | "date" | ((editor: CellEditorProps<W, Z>) => ReactNode);
+    edit?: "text" | "number" | "select" | "date" | "dateTime" | "boolean" | ((editor: CellEditorProps<W, Z>) => ReactNode);
     /** What `edit="select"` offers.
       @default the values that occur */
     editOptions?: readonly Present<W>[];

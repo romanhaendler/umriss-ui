@@ -83,6 +83,25 @@ for (const file of entries) {
 const documentation = readFileSync(join("docs", "llms-full.md"), "utf8");
 if (documentation.includes(new URL(SITE).host) || documentation.includes(HOSTED_HOST)) problems.push("docs/llms-full.md names a site address");
 
+/* What `pnpm pack` makes of the manifest: the props reference travels, and no script of the
+   repository does (`scripts/packManifest.mjs`). */
+{
+  const scratch = mkdtempSync(join(tmpdir(), "check-dist-pack-"));
+  try {
+    const made = spawnSync("pnpm", ["pack", "--pack-destination", scratch], { encoding: "utf8" });
+    if (made.status !== 0) problems.push(`pnpm pack failed:\n${made.stderr}`);
+    else {
+      const tarball = join(scratch, readdirSync(scratch).find((file) => file.endsWith(".tgz"))!);
+      const read = (file: string) => spawnSync("tar", ["-xzOf", tarball, `package/${file}`], { encoding: "utf8" });
+      if (read("API.md").status !== 0) problems.push("the packed package has no API.md");
+      const packed = JSON.parse(read("package.json").stdout) as { scripts?: object };
+      if (packed.scripts !== undefined) problems.push(`the packed package.json carries scripts: ${Object.keys(packed.scripts).join(", ")}`);
+    }
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
 const js = readFileSync(join("dist", entry), "utf8");
 if (clientFile) {
   if (!js.includes(`from "./${clientFile}"`)) problems.push(`dist/${entry} does not import ./${clientFile}`);
