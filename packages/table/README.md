@@ -293,8 +293,9 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   the grouping warns in development and shows the rows ungrouped; pass `answers`
   so that the old groups are not drawn under a new grouping. The table computes
   nothing over the rows: no share bar. A group's box chooses the group as a
-  state, and a bulk action receives `{ request, except: [], group }` with the
-  group's path; ticking a row, a page or all that match ends it. While grouped
+  state, and a bulk action receives `{ request, except, group }` with the
+  group's path, its rows ticked and an unticked one an exception; ticking a row
+  outside it, the page or all that match ends it. While grouped
   `matchCount` says how many rows match - "select all that match" and the
   counts read it, and without it none is offered. Fold all, unfold all and
   Alt-click act on the groups of the page the table holds, the folds of other

@@ -81,7 +81,7 @@ export function TableToolbar({
     /* In server mode "all that match" is a state, not rows: the count is the
        server's less the exceptions, and an action gets the request instead. */
     const all = snapshot.server && snapshot.selection.allMatching && !own;
-    const selectedTotal = group ? group.count : all ? (hook.matches ?? 0) - snapshot.selection.except.size : selected.length;
+    const selectedTotal = group ? group.count - group.except.length : all ? (hook.matches ?? 0) - snapshot.selection.except.size : selected.length;
     const chosen = all || group !== null;
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
 
@@ -131,7 +131,7 @@ export function TableToolbar({
                   onClick={() =>
                     (spec.onSelect as (rows: readonly unknown[] | AllMatching<RowKey>) => void)(
                       group
-                        ? { request: snapshot.request!, except: [], group: group.path }
+                        ? { request: snapshot.request!, except: [...group.except], group: group.path }
                         : all
                           ? { request: snapshot.request!, except: [...snapshot.selection.except] }
                           : applies!,

@@ -137,7 +137,8 @@ function GroupCheckbox({ group, entry, hook, formats, wording }: { group: RowGro
     return (
       <Checkbox
         aria-label={wording.selectGroup(groupText(entry, group.value, formats, wording))}
-        checked={chosen}
+        checked={chosen && hook.chosenGroup!.except.length === 0}
+        indeterminate={chosen && hook.chosenGroup!.except.length > 0}
         onCheckedChange={() => hook.chooseGroup(chosen ? null : { path: group.path, count: sizeOf(group) })}
       />
     );

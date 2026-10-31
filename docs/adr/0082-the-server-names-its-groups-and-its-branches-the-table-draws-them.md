@@ -42,8 +42,9 @@ Grouping is a view of the whole set, so the whole set's server answers it.
   browser's grouping - level, fold, label, count, aggregates under their columns.
   The share bar is not drawn: a share needs the whole. A group's box chooses the
   group as a state in the request's terms - a bulk action receives
-  `{ request, except: [], group: path }` - and is ended by any selection of rows;
-  one group at a time.
+  `{ request, except, group: path }` - with the group's rows ticked and an unticked
+  row an exception to it (the group's box goes indeterminate). Ticking a row
+  outside it, the page box or all that match ends it; one group at a time.
 - **A wrong answer is shown plain.** `groups` missing for a page that has rows, or
   not fitting the grouping (a path longer than the levels, an `at` out of order, a
   row outside every group), warns once in development with the first thing wrong

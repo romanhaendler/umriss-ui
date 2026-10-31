@@ -98,6 +98,22 @@ describe("selecting a group", () => {
     expect(got.request).toMatchObject({ grouping: ["status"] });
   });
 
+  it("ticks the rows of the chosen group; unticking one is an exception to it", () => {
+    render(<Server />);
+    fireEvent.click(screen.getByRole("checkbox", { name: /open/i }));
+    expect((screen.getByRole("checkbox", { name: "Select a" }) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByRole("checkbox", { name: "Select c" }) as HTMLInputElement).checked).toBe(false);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select a" }));
+    expect((screen.getByRole("checkbox", { name: "Select a" }) as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByText(/29 selected/i)).toBeTruthy();
+    expect((screen.getByRole("checkbox", { name: /open/i }) as HTMLInputElement).indeterminate).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Release" }));
+    expect((received[0] as AllMatching).except).toEqual(["a"]);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select a" }));
+    expect(screen.getByText(/30 selected/i)).toBeTruthy();
+    expect((screen.getByRole("checkbox", { name: /open/i }) as HTMLInputElement).checked).toBe(true);
+  });
+
   it("ends when another group is chosen or a row is ticked", () => {
     render(<Server />);
     fireEvent.click(screen.getByRole("checkbox", { name: /open/i }));

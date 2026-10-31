@@ -15,7 +15,7 @@ export function MatchOffer({ hook }: { hook: HookSnapshot }) {
   /* The rows that match: a grouped page's `rowCount` counts lines. */
   const rowCount = hook.matches ?? 0;
   const matching = selection.allMatching;
-  const pageTicked = rows.length > 0 && rows.every((row) => selection.isSelected(hook.rowKey(row)));
+  const pageTicked = rows.length > 0 && rows.every((row) => hook.isPicked(hook.rowKey(row)));
   if (!matching && !(pageTicked && rowCount > rows.length)) return null;
   const left = rowCount - selection.except.size;
   return (

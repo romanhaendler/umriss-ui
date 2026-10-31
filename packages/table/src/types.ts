@@ -500,7 +500,7 @@ export interface AllMatching<Key extends RowKey = string> {
   except: readonly Key[];
   /** Set when a group's box was ticked instead: the group's path (`groupPath`)
       under the request's grouping. The rows of that group that match are
-      selected, `except` is empty. */
+      selected, less those in `except`. */
   group?: string;
 }
 
