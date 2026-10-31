@@ -37,7 +37,9 @@
     --u-color-surface-pressed: light-dark(#e9e9eb, #28282c);
     --u-color-text: light-dark(#171717, #ededed);
     --u-color-text-secondary: light-dark(#565656, #a5a5ab);
-    --u-color-text-muted: light-dark(#8b8b8b, #77777e);
+    /* 4.5:1 on every ground it stands on in both themes, the pressed surface
+       included (contrast.test.ts). */
+    --u-color-text-muted: light-dark(#666666, #909096);
 
     /* ---- Edges as shadows (instead of borders) ---- */
     --u-edge-color: light-dark(rgba(23, 23, 23, 0.08), rgba(255, 255, 255, 0.10));
@@ -105,6 +107,9 @@
        border. On a field the ring lies where its edge lies, so the edge seems
        to grow. `-danger` for an invalid field, which keeps its colour. */
     --u-focus-ring: 0 0 0 2px var(--u-color-accent);
+    /* The ring of a focused virtual row, drawn as inset lines on its cells: the
+       focus colour, named apart so that a host can set the row's ring alone. */
+    --u-focus-row-color: var(--u-color-accent);
     --u-focus-ring-danger: 0 0 0 2px var(--u-color-danger);
 
     /* ---- Typography ---- */
@@ -187,6 +192,9 @@
     /* How far a button gives way under the pointer or a finger. `1` turns the
        press off. */
     --u-button-press-scale: 0.98;
+    /* The look of a button that cannot be used: it greys out, unless it is
+       loading (then it says "running", not "not possible here"). */
+    --u-button-disabled-opacity: 0.5;
 
     /* The width of a drawer A token rather than a size
        prop: a detail beside a process picture wants one width across an
@@ -233,6 +241,8 @@
        from. Dark is black at a higher opacity: the text colour at 9 % read as
        a glow on the dark ground. */
     --u-shadow-sticky: light-dark(rgba(23, 23, 23, 0.09), rgba(0, 0, 0, 0.5));
+    /* A floating piece of a chart (its tooltip): a soft lift, no edge. */
+    --u-shadow-float: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08);
 
     /* ---- Translucent material and scrim (ADR-0012) ----
 

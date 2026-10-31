@@ -57,7 +57,7 @@
     --uc-radius: 6px;
     /* The colour chips of legend and tooltip, and the legend entry's focus. */
     --uc-radius-chip: 2px;
-    --uc-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08);
+    --uc-shadow: var(--u-shadow-float);
     --uc-focus-ring: var(--u-focus-ring, 0 0 0 2px #0e7d72);
     /* A legend entry under the pointer and pressed: core's quiet surfaces, and
        core's motion for a change in place (the interaction-state canon). */
