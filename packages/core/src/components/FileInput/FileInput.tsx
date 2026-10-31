@@ -6,7 +6,7 @@ import { CrossGlyph } from "../../lib/glyphs";
 import { useFormats, useWording } from "../../lib/language";
 import type { Formats } from "../../lib/language";
 import { useFormField } from "../FormField";
-import { useFieldValue, useFormReset, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { accepts } from "./accept";
 import type { RefProp } from "../../lib/refProp";
@@ -15,7 +15,7 @@ import styles from "./FileInput.module.css";
 /** The props of `FileInput`: a native file input's attributes, with the files
     as the value. */
 export interface FileInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement>, DeprecatedOnChange<(files: File[]) => void> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement> {
   /** Controlled: the chosen files; `undefined` reads as none. Uncontrolled,
       the input keeps its own, from `defaultValue`. */
   value?: readonly File[];

@@ -4,7 +4,7 @@ import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNod
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { mergeRefs } from "../../lib/mergeRefs";
-import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import {
   clampNumber,
@@ -28,7 +28,7 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type" | "name">, RefProp<HTMLInputElement>, FormPostProps<number>, DeprecatedOnChange<(value: number | null) => void> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type" | "name">, RefProp<HTMLInputElement>, FormPostProps<number> {
   /** The number, or `null` (or `undefined`) for "not stated". An empty
       field is not zero: a quantity that was not measured is not a quantity
       of zero. With it the field is controlled; without it the field keeps

@@ -15,16 +15,5 @@
   "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
   "FileInputProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
   "DateTimePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "DateTimeRangePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "NumberInputProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "SliderProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "RadioGroupProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "SegmentedControlProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "FileInputProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "ComboboxProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "MultiSelectProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "DatePickerProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "DateTimePickerProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "DateRangePickerProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange",
-  "DateTimeRangePickerProps.onChange": "(g) deprecated alias: the former name of onValueChange, which the field contract makes the callback (ADR-0081); it works one minor and warns once in development, and the examples show onValueChange"
+  "DateTimeRangePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration"
 }

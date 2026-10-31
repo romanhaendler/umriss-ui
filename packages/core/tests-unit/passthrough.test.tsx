@@ -91,14 +91,14 @@ const CASES: Record<string, Case> = {
   CommandPalette: (probe) => (
     <core.CommandPalette open={false} onClose={noop} items={[]} onChoose={noop} {...p(probe)} />
   ),
-  Combobox: (probe) => <core.Combobox options={[]} value={null} onChange={noop} {...p(probe)} />,
+  Combobox: (probe) => <core.Combobox options={[]} value={null} onValueChange={noop} {...p(probe)} />,
   Meter: (probe) => <core.Meter value={0.5} {...p(probe)} />,
   Sparkline: (probe) => <core.Sparkline data={[1, 2]} {...p(probe)} />,
-  DatePicker: (probe) => <core.DatePicker value={null} onChange={noop} {...p(probe)} />,
-  DateTimePicker: (probe) => <core.DateTimePicker value={null} onChange={noop} {...p(probe)} />,
-  DateRangePicker: (probe) => <core.DateRangePicker value={null} onChange={noop} {...p(probe)} />,
+  DatePicker: (probe) => <core.DatePicker value={null} onValueChange={noop} {...p(probe)} />,
+  DateTimePicker: (probe) => <core.DateTimePicker value={null} onValueChange={noop} {...p(probe)} />,
+  DateRangePicker: (probe) => <core.DateRangePicker value={null} onValueChange={noop} {...p(probe)} />,
   DateTimeRangePicker: (probe) => (
-    <core.DateTimeRangePicker value={null} onChange={noop} {...p(probe)} />
+    <core.DateTimeRangePicker value={null} onValueChange={noop} {...p(probe)} />
   ),
   Divider: (probe) => <core.Divider {...p(probe)} />,
   EmptyState: (probe) => <core.EmptyState title="Nothing" {...p(probe)} />,
@@ -113,7 +113,7 @@ const CASES: Record<string, Case> = {
   MenuItem: (probe) => <core.MenuItem {...p(probe)}>Export</core.MenuItem>,
   MenuSeparator: (probe) => <core.MenuSeparator {...p(probe)} />,
   NumberInput: (probe) => (
-    <core.NumberInput aria-label="Count" value={null} onChange={noop} {...p(probe)} />
+    <core.NumberInput aria-label="Count" value={null} onValueChange={noop} {...p(probe)} />
   ),
   Modal: (probe) => <core.Modal open={false} onClose={noop} {...p(probe)} />,
   ModalHeader: (probe) => <core.ModalHeader title="Title" {...p(probe)} />,
@@ -122,7 +122,7 @@ const CASES: Record<string, Case> = {
   ConfirmDialog: (probe) => (
     <core.ConfirmDialog open={false} onClose={noop} onConfirm={noop} title="Sure?" {...p(probe)} />
   ),
-  MultiSelect: (probe) => <core.MultiSelect options={[]} value={[]} onChange={noop} {...p(probe)} />,
+  MultiSelect: (probe) => <core.MultiSelect options={[]} value={[]} onValueChange={noop} {...p(probe)} />,
   RadioGroup: (probe) => (
     <core.RadioGroup aria-label="Choice" options={[{ value: "a", label: "A" }]} {...p(probe)} />
   ),
@@ -287,7 +287,7 @@ describe("The pickers are fields", () => {
         data-testid="city"
         options={[{ value: "a", label: "Aachen" }, { value: "b", label: "Berlin" }]}
         value={null}
-        onChange={noop}
+        onValueChange={noop}
       />,
     );
     const input = getByTestId("city") as HTMLInputElement;
@@ -300,7 +300,7 @@ describe("The pickers are fields", () => {
     const { getByLabelText } = render(
       <>
         <label htmlFor="d">Day</label>
-        <core.DatePicker id="d" value={null} onChange={noop} />
+        <core.DatePicker id="d" value={null} onValueChange={noop} />
       </>,
     );
     expect(getByLabelText("Day").getAttribute("aria-haspopup")).toBe("dialog");

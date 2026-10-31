@@ -18,7 +18,7 @@ import { mergeRefs } from "../../lib/mergeRefs";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormField } from "../FormField";
 import { useRadioGroup } from "../RadioGroup/useRadioGroup";
-import { withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { withoutFieldProps } from "../../lib/useFieldValue";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./SegmentedControl.module.css";
 
@@ -39,7 +39,7 @@ export interface SegmentedOption<T extends string | number> {
 
 /** The props of `SegmentedControl`. */
 export interface SegmentedControlProps<T extends string | number>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement>, DeprecatedOnChange<(value: T) => void> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, two to four, in the order in which they stand. */
   options: readonly SegmentedOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with

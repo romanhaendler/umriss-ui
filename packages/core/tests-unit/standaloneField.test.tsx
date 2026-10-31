@@ -19,15 +19,15 @@ describe("A field without FormField", () => {
   it.each<[string, ReactElement, string]>([
     ["Input", <core.Input key="c" {...own} />, "textbox"],
     ["Textarea", <core.Textarea key="c" {...own} />, "textbox"],
-    ["NumberInput", <core.NumberInput key="c" value={null} onChange={noop} {...own} />, "textbox"],
+    ["NumberInput", <core.NumberInput key="c" value={null} onValueChange={noop} {...own} />, "textbox"],
     ["Select", <core.Select key="c" {...own}><option>A</option></core.Select>, "combobox"],
     ["Switch", <core.Switch key="c" {...own} />, "switch"],
-    ["Combobox", <core.Combobox key="c" options={[]} value={null} onChange={noop} {...own} />, "combobox"],
-    ["MultiSelect", <core.MultiSelect key="c" options={[]} value={[]} onChange={noop} {...own} />, "button"],
-    ["DatePicker", <core.DatePicker key="c" value={null} onChange={noop} {...own} />, "button"],
-    ["DateTimePicker", <core.DateTimePicker key="c" value={null} onChange={noop} {...own} />, "button"],
-    ["DateRangePicker", <core.DateRangePicker key="c" value={null} onChange={noop} {...own} />, "button"],
-    ["DateTimeRangePicker", <core.DateTimeRangePicker key="c" value={null} onChange={noop} {...own} />, "button"],
+    ["Combobox", <core.Combobox key="c" options={[]} value={null} onValueChange={noop} {...own} />, "combobox"],
+    ["MultiSelect", <core.MultiSelect key="c" options={[]} value={[]} onValueChange={noop} {...own} />, "button"],
+    ["DatePicker", <core.DatePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
+    ["DateTimePicker", <core.DateTimePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
+    ["DateRangePicker", <core.DateRangePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
+    ["DateTimeRangePicker", <core.DateTimeRangePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
   ])("%s takes its name and the caller's message on the field", (_name, field, role) => {
     render(
       <>

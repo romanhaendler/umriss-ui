@@ -4,7 +4,7 @@ import { Slider } from "../src";
 afterEach(cleanup);
 const press = (key: string, props: Record<string, unknown>) => {
   const onChange = vi.fn();
-  render(<Slider aria-label="s" onChange={onChange} {...props} />);
+  render(<Slider aria-label="s" onValueChange={onChange} {...props} />);
   fireEvent.keyDown(screen.getByRole("slider"), { key });
   return onChange;
 };

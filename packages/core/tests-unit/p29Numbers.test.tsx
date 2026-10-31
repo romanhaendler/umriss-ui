@@ -29,13 +29,13 @@ describe("p29 number round trip", () => {
   });
   it("step 0.1 thrice gives 0.3", () => {
     const onChange = vi.fn();
-    render(<NumberInput aria-label="v" value={0.2} step={0.1} onChange={onChange} />);
+    render(<NumberInput aria-label="v" value={0.2} step={0.1} onValueChange={onChange} />);
     fireEvent.keyDown(screen.getByRole("textbox"), { key: "ArrowUp" });
     expect(onChange).toHaveBeenLastCalledWith(0.3);
   });
   it("es: focus + blur keeps 12345.6", () => {
     const onChange = vi.fn();
-    render(<LanguageProvider formats={formatsFor("es")}><NumberInput aria-label="v" value={12345.6} onChange={onChange} /></LanguageProvider>);
+    render(<LanguageProvider formats={formatsFor("es")}><NumberInput aria-label="v" value={12345.6} onValueChange={onChange} /></LanguageProvider>);
     const f = screen.getByRole("textbox") as HTMLInputElement;
     const shown = f.value;
     fireEvent.focus(f); fireEvent.blur(f);
@@ -43,7 +43,7 @@ describe("p29 number round trip", () => {
   });
   it("tiny value is editable", () => {
     const onChange = vi.fn();
-    render(<NumberInput aria-label="v" value={1e-11} onChange={onChange} />);
+    render(<NumberInput aria-label="v" value={1e-11} onValueChange={onChange} />);
     const f = screen.getByRole("textbox") as HTMLInputElement;
     fireEvent.change(f, { target: { value: f.value + "5" } });
     expect(f.value).toBe("1E-115");
@@ -54,17 +54,17 @@ describe("p29 number round trip", () => {
     expect(stepNumber(0.2, 1, 0.1)).toBe(0.3);
   });
   it("a value set while focused replaces the text", () => {
-    const { rerender } = render(<NumberInput aria-label="v" value={1} onChange={() => {}} />);
+    const { rerender } = render(<NumberInput aria-label="v" value={1} onValueChange={() => {}} />);
     const f = screen.getByRole("textbox") as HTMLInputElement;
     fireEvent.focus(f);
-    rerender(<NumberInput aria-label="v" value={7} onChange={() => {}} />);
+    rerender(<NumberInput aria-label="v" value={7} onValueChange={() => {}} />);
     expect(f.value).toBe("7");
     fireEvent.blur(f);
     expect(f.value).toBe("7");
   });
   it("an unreadable paste stays, marked, and is not emitted", () => {
     const onChange = vi.fn();
-    render(<LanguageProvider formats={formatsFor("fr-CH")}><NumberInput aria-label="v" value={null} onChange={onChange} /></LanguageProvider>);
+    render(<LanguageProvider formats={formatsFor("fr-CH")}><NumberInput aria-label="v" value={null} onValueChange={onChange} /></LanguageProvider>);
     const f = screen.getByRole("textbox") as HTMLInputElement;
     fireEvent.focus(f);
     fireEvent.paste(f);
@@ -79,18 +79,18 @@ describe("p29 number round trip", () => {
     expect(f.getAttribute("aria-invalid")).toBeNull();
   });
   it('"0,5" in en is refused', () => {
-    render(<NumberInput aria-label="v" value={null} onChange={() => {}} />);
+    render(<NumberInput aria-label="v" value={null} onValueChange={() => {}} />);
     const f = screen.getByRole("textbox") as HTMLInputElement;
     fireEvent.change(f, { target: { value: "0,5" } });
     expect(f.value).toBe("");
     expect(f.getAttribute("aria-invalid")).toBe("true");
   });
   it("NaN shows empty", () => {
-    render(<NumberInput aria-label="v" value={NaN} onChange={() => {}} />);
+    render(<NumberInput aria-label="v" value={NaN} onValueChange={() => {}} />);
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
   });
   it("the unit describes the field", () => {
-    render(<NumberInput aria-label="v" value={1} suffix="€" onChange={() => {}} />);
+    render(<NumberInput aria-label="v" value={1} suffix="€" onValueChange={() => {}} />);
     const f = screen.getByRole("textbox");
     expect(document.getElementById(f.getAttribute("aria-describedby") ?? "")?.textContent).toBe("€");
   });

@@ -1,7 +1,6 @@
 /* The field contract (ADR-0081): the state prop names its callback and the callback hands over the
-   finished value. Each field is held to the same four things - controlled, uncontrolled, a `value` of
-   `undefined` that reads as empty, and, where `onChange(value)` was the callback, the old name that
-   still works and speaks once. */
+   finished value. Each field is held to the same three things - controlled, uncontrolled, and a `value`
+   of `undefined` that reads as empty. */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
@@ -37,7 +36,6 @@ interface Handlers {
   value?: unknown;
   defaultValue?: unknown;
   onValueChange?: (value: never) => void;
-  onChange?: (value: never) => void;
 }
 
 interface Case {
@@ -47,8 +45,6 @@ interface Case {
   act: () => void;
   /** What it reports. */
   expected: unknown;
-  /** Whether `onChange(value)` was this field's callback before the contract. */
-  legacy: boolean;
 }
 
 const cases: Case[] = [
@@ -57,7 +53,6 @@ const cases: Case[] = [
     make: (p) => <NumberInput aria-label="f" {...(p as object)} />,
     act: () => fireEvent.change(screen.getByRole("textbox"), { target: { value: "5" } }),
     expected: 5,
-    legacy: true,
   },
   {
     name: "Select",
@@ -69,7 +64,6 @@ const cases: Case[] = [
     ),
     act: () => fireEvent.change(screen.getByRole("combobox"), { target: { value: "a" } }),
     expected: "a",
-    legacy: false,
   },
   {
     name: "Combobox",
@@ -79,7 +73,6 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("option", { name: "Beta" }));
     },
     expected: "b",
-    legacy: true,
   },
   {
     name: "MultiSelect",
@@ -89,42 +82,36 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("option", { name: "Alpha" }));
     },
     expected: ["a"],
-    legacy: true,
   },
   {
     name: "SegmentedControl",
     make: (p) => <SegmentedControl aria-label="f" options={OPTIONS} {...(p as object)} />,
     act: () => fireEvent.click(screen.getByRole("radio", { name: "Beta" })),
     expected: "b",
-    legacy: true,
   },
   {
     name: "RadioGroup",
     make: (p) => <RadioGroup aria-label="f" options={OPTIONS} {...(p as object)} />,
     act: () => fireEvent.click(screen.getByRole("radio", { name: "Beta" })),
     expected: "b",
-    legacy: true,
   },
   {
     name: "Slider",
     make: (p) => <Slider aria-label="f" {...(p as object)} />,
     act: () => fireEvent.keyDown(screen.getByRole("slider"), { key: "End" }),
     expected: 100,
-    legacy: true,
   },
   {
     name: "RangeSlider",
     make: (p) => <RangeSlider aria-label="f" {...(p as object)} />,
     act: () => fireEvent.keyDown(screen.getAllByRole("slider")[0]!, { key: "End" }),
     expected: [100, 100],
-    legacy: false,
   },
   {
     name: "TimeInput",
     make: (p) => <TimeInput aria-label="f" {...(p as object)} />,
     act: () => fireEvent.keyDown(screen.getByRole("spinbutton", { name: "Hour" }), { key: "ArrowUp" }),
     expected: "01:00",
-    legacy: false,
   },
   {
     name: "DatePicker",
@@ -134,7 +121,6 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("button", { name: "Today" }));
     },
     expected: expect.any(Date),
-    legacy: true,
   },
   {
     name: "DateTimePicker",
@@ -144,7 +130,6 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("button", { name: "Now" }));
     },
     expected: expect.any(Date),
-    legacy: true,
   },
   {
     name: "DateRangePicker",
@@ -154,7 +139,6 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("button", { name: "Today" }));
     },
     expected: { from: expect.any(Date), to: expect.any(Date) },
-    legacy: true,
   },
   {
     name: "DateTimeRangePicker",
@@ -164,7 +148,6 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("button", { name: "Today" }));
     },
     expected: { from: expect.any(Date), to: expect.any(Date) },
-    legacy: true,
   },
   {
     name: "FileInput",
@@ -174,13 +157,12 @@ const cases: Case[] = [
       fireEvent.change(input, { target: { files: [FILE] } });
     },
     expected: [FILE],
-    legacy: true,
   },
 ];
 
 afterEach(() => vi.restoreAllMocks());
 
-describe.each(cases)("$name", ({ make, act: change, expected, legacy, name }) => {
+describe.each(cases)("$name", ({ make, act: change, expected }) => {
   it("reports through onValueChange when controlled", () => {
     const onValueChange = vi.fn();
     render(make({ value: undefined, onValueChange }));
@@ -202,18 +184,6 @@ describe.each(cases)("$name", ({ make, act: change, expected, legacy, name }) =>
     expect(error).not.toHaveBeenCalled();
   });
 
-  if (legacy) {
-    it("still reports through the old onChange and says once that it is going", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const onChange = vi.fn();
-      render(make({ onChange }));
-      change();
-      expect(onChange).toHaveBeenCalledWith(expected);
-      expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn.mock.calls[0]![0]).toContain(`${name} onChange(value)`);
-      expect(warn.mock.calls[0]![0]).toContain("onValueChange");
-    });
-  }
 });
 
 describe("a field that starts uncontrolled and is later given a value", () => {

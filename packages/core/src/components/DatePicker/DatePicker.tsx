@@ -8,7 +8,7 @@ import { VisuallyHidden } from "../VisuallyHidden";
 import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { FormPost, isoDay, posted, type FormPostProps } from "../../lib/FormPost";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dayStart, dayShown, gridDay, zoneToday } from "./zoned";
@@ -29,7 +29,7 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * with it.
  */
 export interface DatePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date>, DeprecatedOnChange<(date: Date | null) => void> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date> {
   /** The day, as a `Date` on midnight in the formats' zone (the reader's, unless the application names one); `null` means none. */
   value?: Date | null;
   /** Uncontrolled: the value to start at.

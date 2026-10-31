@@ -85,7 +85,7 @@ export function RangeSlider(props: RangeSliderProps) {
   const formats = useFormats();
   const wording = useWording();
   const field = useFormField();
-  const [given, report, controlled, formRef] = useFieldValue<RangeSliderValue, readonly [number, number]>("RangeSlider", props, [min, max], false);
+  const [given, report, controlled, formRef] = useFieldValue<RangeSliderValue, readonly [number, number]>("RangeSlider", props, [min, max]);
   useShapeWarning("RangeSlider", "value", props.value != null && !isPair(props.value), "a pair [from, to] of numbers");
   const pair = isPair(given) ? given : ([min, max] as const);
   // Uncontrolled, the start is put on the step grid; a controlled value is the caller's, only ordered and inside the bounds.
