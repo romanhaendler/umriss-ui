@@ -39,7 +39,7 @@ export interface DatePickerProps
       on clearing (`null`). Every one of these ways hands out
       midnight in the formats' zone; there is none that delivers a time along with it. */
   onValueChange?: (date: Date | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (date: Date | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;

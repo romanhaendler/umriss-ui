@@ -43,7 +43,7 @@ export interface ComboboxProps<T extends string | number = string>
   /** Runs on choosing and on clearing (`null`). Not while typing: what is
       typed is a search term and not yet a value. */
   onValueChange?: (value: T | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;

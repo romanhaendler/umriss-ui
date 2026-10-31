@@ -49,7 +49,7 @@ export interface SegmentedControlProps<T extends string | number>
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
   onValueChange?: (value: T) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: T) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */

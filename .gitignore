@@ -33,3 +33,6 @@ blob-report/
 # Worktrees of the agent sessions. Every parallel ticket runs in one; they are
 # checkouts of this repository, never content of it.
 .claude/worktrees/
+
+# The manifest kept while a package is packed (scripts/packManifest.mjs).
+packages/*/package.json.packed-backup
