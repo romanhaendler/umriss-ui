@@ -85,7 +85,7 @@ export function Toolbar({ children, className, size = "sm", of, ref, ...rest }: 
 
 /** The props of `Search`. */
 export interface SearchProps
-  extends Omit<InputProps, "size" | "type" | "value" | "onChange" | "clearable" | "onClear" | "children" | "invalid" | "numeric"> {
+  extends Omit<InputProps, "size" | "type" | "value" | "onChange" | "clearable" | "onClear" | "children" | "invalid" | "numeric" | "start" | "end"> {
   /** The placeholder in the field.
       @default the wording's "Search …" */
   placeholder?: string;

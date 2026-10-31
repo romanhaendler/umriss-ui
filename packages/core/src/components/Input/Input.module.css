@@ -48,6 +48,34 @@
     padding-right: var(--u-space-2);
   }
 
+  /* A slot stands in the frame beside the value: the value's own padding
+     gives way on that side, the slot keeps the space (the wrapper's gap
+     and its padding make the rest). */
+  .wrapperStart .inner {
+    padding-left: 0;
+  }
+
+  .wrapperEnd .inner {
+    padding-right: 0;
+  }
+
+  .slot {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    color: var(--u-color-text-muted);
+    user-select: none;
+  }
+
+  .slotStart {
+    padding-left: var(--u-space-3);
+    padding-right: var(--u-space-1);
+  }
+
+  .slotEnd {
+    padding-right: var(--u-space-1);
+  }
+
   .wrapperInvalid,
   .wrapperInvalid:hover:not(.wrapperDisabled):not(:focus-within) {
     box-shadow: 0 0 0 1px var(--u-color-danger);

@@ -13,7 +13,7 @@
    width without fixing the field. `extra` is what the field shows beside its
    value - a number's prefix and suffix - and is counted either way. */
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface ExtentOptions {
   /** The field's natural count when the caller names none; without it, the
@@ -24,6 +24,12 @@ export interface ExtentOptions {
 }
 
 const whole = (count: number) => Math.max(1, Math.round(count));
+
+/* What a text adornment adds to the natural width, in characters: its text and
+   the gap beside it (8 px, about one character). An adornment that is not text
+   - an icon - is not counted; `chars` makes room for it. */
+export const textChars = (adornment: ReactNode) =>
+  typeof adornment === "string" || typeof adornment === "number" ? String(adornment).length + 1 : 0;
 
 export function extentStyle(chars: number | undefined, { natural, extra }: ExtentOptions = {}): CSSProperties | undefined {
   const given = chars !== undefined && Number.isFinite(chars);

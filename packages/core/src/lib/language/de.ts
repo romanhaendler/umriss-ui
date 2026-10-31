@@ -63,6 +63,7 @@ export const GERMAN_WORDING: Wording = {
   optionActive: (label, { selected, disabled, group }) =>
     [label, group, selected && "ausgewählt", disabled && "nicht verfügbar"].filter(Boolean).join(", "),
   optionAdded: (label) => `${label} hinzugefügt`,
+  createOption: (text) => `„${text}“ hinzufügen`,
   optionRemoved: (label) => `${label} entfernt`,
   selectionCount: (count) => `${count} ausgewählt`,
 
