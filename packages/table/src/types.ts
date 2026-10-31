@@ -661,8 +661,10 @@ interface TableOptionsCommon<Z> {
   /** Called with the selected keys after each change – the user's or the API's,
       its own selection or the one handed in – from an effect, never at mount.
       Under "all that match" (server mode) the keys are the ones ticked
-      before it; `selection.allMatching` and `selection.except` tell the rest. */
-  onSelectionChange?: (keys: string[]) => void;
+      before it; `selection.allMatching` and `selection.except` tell the rest.
+      `keys` are the selected rows a reader sees - the toolbar's count - and
+      `all` every key held, those a search or a condition hides included. */
+  onSelectionChange?: (keys: string[], all: string[]) => void;
 }
 
 /** The table holds every row and does the work itself. */
