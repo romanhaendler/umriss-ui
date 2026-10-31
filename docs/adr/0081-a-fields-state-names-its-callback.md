@@ -26,7 +26,7 @@ made React complain on the RadioGroup.
 | MultiSelect | `T[]` | `[]` |
 | Slider | `number` | `min` |
 | DatePicker, DateTimePicker | `Date \| null` | `null` |
-| DateRangePicker, DateTimeRangePicker | `{ start, end } \| null` | `null` |
+| DateRangePicker, DateTimeRangePicker | `DateRange` (`{ from, to }`) \| `null` | `null` |
 | FileInput | `File[]` | `[]` |
 | Checkbox, Switch | `boolean` | `false` |
 
@@ -50,10 +50,10 @@ in the minor after the release. `onChange` on Slider is the exception that shows
 a number today, and from the minor that removes the deprecated name it is the native input's
 event handler.
 
-Two points are carried by later steps and stand as the contract's target. The range pickers' value is
-`{ start, end }`; in the expand step it is still `DateRange`'s `{ from, to }`, which the table's
-`columnFilter` reads too, and both move together. A `Select`'s `onChange` is the native select's
-event and stays working; `onValueChange` reports its option's value, `null` for the empty option.
+The range pickers keep `DateRange`'s `{ from, to }`, which the table's `columnFilter` reads too:
+renaming the pair's keys would break every range a host stores, for no gain in the contract. A
+`Select`'s `onChange` is the native select's event and stays; `onValueChange` reports its option's
+value, `null` for the empty option.
 
 ## Considered and rejected
 
