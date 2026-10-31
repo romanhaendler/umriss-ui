@@ -19,7 +19,7 @@ import type { NumberConstraints } from "./number";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./NumberInput.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { extentStyle } from "../../lib/extent";
+import { extentStyle, textChars } from "../../lib/extent";
 import { useFormats, useWording } from "../../lib/language";
 import { separatorsOf } from "../../lib/language/formats";
 import { announce } from "../../lib/announce";
@@ -76,12 +76,6 @@ export interface NumberInputProps
       carries an `error` – by hand only needed without `FormField`. */
   invalid?: boolean;
 }
-
-/* What an adornment adds to the natural width, in characters: its text and
-   the gap beside it (8 px, about one character). An adornment that is not text
-   - an icon - is not counted; `chars` makes room for it. */
-const adornmentChars = (adornment: ReactNode) =>
-  typeof adornment === "string" || typeof adornment === "number" ? String(adornment).length + 1 : 0;
 
 /**
  * Number input in the notation of the formats (`useFormats`): its decimal and
@@ -229,7 +223,7 @@ export function NumberInput(props: NumberInputProps) {
 
   // A unit given as text is read with the field, as its description.
   const describedBy =
-    [rest["aria-describedby"] ?? field?.describedBy, adornmentChars(prefix) ? `${unitId}-prefix` : "", adornmentChars(suffix) ? `${unitId}-suffix` : ""]
+    [rest["aria-describedby"] ?? field?.describedBy, textChars(prefix) ? `${unitId}-prefix` : "", textChars(suffix) ? `${unitId}-suffix` : ""]
       .filter(Boolean)
       .join(" ") || undefined;
 
@@ -267,7 +261,7 @@ export function NumberInput(props: NumberInputProps) {
         disabled && styles.disabled,
         className,
       )}
-      style={{ ...extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) }), ...style }}
+      style={{ ...extentStyle(chars, { extra: textChars(prefix) + textChars(suffix) }), ...style }}
     >
       {prefix && <span className={styles.adornment} id={`${unitId}-prefix`}>{prefix}</span>}
       {/* The plain number is posted, not the text the field shows in the reader's notation. */}
