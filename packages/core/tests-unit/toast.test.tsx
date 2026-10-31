@@ -71,7 +71,7 @@ describe("Toast – leaving", () => {
       </ToastProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Report" }));
-    fireEvent.click(screen.getByRole("button", { name: DEFAULT_WORDING.closeToast }));
+    fireEvent.click(screen.getByRole("button", { name: `${DEFAULT_WORDING.closeToast}: Away with it` }));
   };
 
   it("takes the message away after the duration of the token, not before", () => {
@@ -181,7 +181,7 @@ describe("Toast – action and close reason", () => {
     const call = mount();
     const onClose = vi.fn();
     call((t) => t.toast({ title: "Saved", onClose }));
-    fireEvent.click(screen.getByRole("button", { name: DEFAULT_WORDING.closeToast }));
+    fireEvent.click(screen.getByRole("button", { name: `${DEFAULT_WORDING.closeToast}: Saved` }));
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledWith("dismiss");
   });
@@ -214,7 +214,7 @@ describe("Toast – loading and update", () => {
     call((t) => t.toast({ title: "Saving report…", tone: "loading" }));
     act(() => vi.advanceTimersByTime(60_000));
     expect(screen.getByText("Saving report…")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: DEFAULT_WORDING.closeToast })).toBeNull();
+    expect(screen.queryByRole("button", { name: `${DEFAULT_WORDING.closeToast}: Saving report…` })).toBeNull();
     expect(screen.getByText("Saving report…").closest("[role]")?.getAttribute("role")).toBe("status");
   });
 
@@ -226,7 +226,7 @@ describe("Toast – loading and update", () => {
     call((t) => t.update(id, { title: "Report saved", tone: "success" }));
     expect(screen.queryByText("Saving report…")).toBeNull();
     expect(screen.getByText("Report saved")).toBeTruthy();
-    expect(screen.getByRole("button", { name: DEFAULT_WORDING.closeToast })).toBeTruthy();
+    expect(screen.getByRole("button", { name: `${DEFAULT_WORDING.closeToast}: Report saved` })).toBeTruthy();
     act(() => vi.advanceTimersByTime(999));
     expect(screen.queryByText("Report saved")).not.toBeNull();
     act(() => vi.advanceTimersByTime(1));
@@ -392,7 +392,7 @@ describe("Toast – the deck", () => {
     call((t) => t.toast({ title: "First" }));
     call((t) => t.toast({ title: "Second" }));
     call((t) => t.toast({ title: "Third" }));
-    const close = screen.getAllByRole("button", { name: DEFAULT_WORDING.closeToast }).at(-1)!;
+    const close = screen.getAllByRole("button", { name: new RegExp(`^${DEFAULT_WORDING.closeToast}`) }).at(-1)!;
     act(() => close.focus());
     expect(screen.queryByRole("button", { name: DEFAULT_WORDING.toastDeckCount(3) })).toBeNull();
     fireEvent.click(close);
