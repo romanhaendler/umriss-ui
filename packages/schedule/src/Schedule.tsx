@@ -486,7 +486,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         data-schedule-clip="schedule"
         {...name}
         className={className ? `${styles.root} ${className}` : styles.root}
-        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, max(88px, 28%)) minmax(0, 1fr)`, ...style }}
+        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, max(120px, 28%)) minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner}>
           {zoneLabel !== null && (
