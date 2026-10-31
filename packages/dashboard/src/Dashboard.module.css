@@ -39,6 +39,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: var(--u-space-2);
+    max-width: var(--u-dashboard-max-width, 1560px);
     padding-block: var(--u-space-3);
   }
 
@@ -99,6 +100,21 @@
     line-height: var(--u-leading-normal);
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  /* A title the text spacing of a reader cuts shows in full while the head is pointed at or holds the focus. */
+  .head:hover .title,
+  .head:focus-within .title {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    background: var(--u-color-surface);
+    white-space: normal;
+  }
+
+  .editingHead:hover .title,
+  .editingHead:focus-within .title {
+    background: var(--u-color-surface-pressed);
   }
 
   .size {

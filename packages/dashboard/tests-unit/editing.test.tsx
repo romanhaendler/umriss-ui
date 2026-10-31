@@ -40,7 +40,7 @@ function Harness({ allowEdit, onViewChange, onDraftChange }: { allowEdit?: boole
 const order = () => screen.getAllByRole("region").map((el) => el.getAttribute("data-widget"));
 const press = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
 const menuOf = (title: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${title}` }));
-const item = (name: string | RegExp) => fireEvent.click(screen.getByRole("menuitem", { name }));
+const item = (name: string | RegExp) => fireEvent.click(screen.queryByRole("menuitemradio", { name }) ?? screen.getByRole("menuitem", { name }));
 const said = (text: string) => waitFor(() => expect(document.querySelector("[data-umriss-announcer]")?.textContent).toBe(text));
 
 describe("the editing mode", () => {
@@ -82,9 +82,9 @@ describe("the editing mode", () => {
     expect((screen.getByRole("menuitem", { name: "Move to start" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("menuitem", { name: "Move earlier" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("menuitem", { name: "Move later" }) as HTMLButtonElement).disabled).toBe(false);
-    const sizes = screen.getAllByRole("menuitem").map((el) => el.textContent ?? "").filter((t) => /wide/i.test(t));
-    expect(sizes).toEqual(["✓ Small, ¼ wide", "Wide, ½ wide"]);
-    expect(screen.getByRole("menuitem", { name: /Small/ }).getAttribute("aria-current")).toBe("true");
+    const sizes = screen.getAllByRole("menuitemradio").map((el) => el.getAttribute("aria-checked") + " " + el.textContent);
+    expect(sizes).toEqual(["true ✓Small, ¼ wide", "false Wide, ½ wide"]);
+    expect(screen.getByRole("menuitemradio", { name: "Small, ¼ wide" })).toBeTruthy();
   });
 
   it("moves a widget by the menu, announces it and returns the focus to the menu button", async () => {
@@ -132,14 +132,17 @@ describe("the editing mode", () => {
     expect(head().getAttribute("aria-label")).toBe("Orders, place 1 of 3");
     fireEvent.keyDown(head(), { key: "ArrowRight" });
     expect(order()).toEqual(["b", "a", "c"]);
+    /* The three widgets stand in one row: there is no row below or above to move to. */
     fireEvent.keyDown(head(), { key: "ArrowDown" });
+    fireEvent.keyDown(head(), { key: "ArrowUp" });
+    expect(order()).toEqual(["b", "a", "c"]);
+    fireEvent.keyDown(head(), { key: "ArrowRight" });
     expect(order()).toEqual(["b", "c", "a"]);
     await said("Orders: moved from place 2 to place 3 of 3");
     fireEvent.keyDown(head(), { key: "ArrowLeft" });
     expect(order()).toEqual(["b", "a", "c"]);
     fireEvent.keyDown(head(), { key: "End" });
     expect(order()).toEqual(["b", "c", "a"]);
-    fireEvent.keyDown(head(), { key: "ArrowUp" });
     fireEvent.keyDown(head(), { key: "Home" });
     expect(order()).toEqual(["a", "b", "c"]);
   });
