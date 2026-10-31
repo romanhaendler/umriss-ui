@@ -21,7 +21,7 @@ const ORDERS: readonly Order[] = Array.from({ length: 400 }, (_, i) => ({
 
 export const title = "Groups from the server";
 export const lead =
-  "The request carries `grouping` and `folded`; the answer names its group lines as `groups` - each with its path, its count and totals over every match, and the index in `rows` it stands before. A page counts lines, headers and rows alike, so `rowCount` counts lines too, and `matchCount` says how many rows match. A group's box selects the group as a state, `{ request, group }`, which a bulk action receives; the export asks for every match in the groups' order. The table computes nothing over the rows.";
+  "The request carries `grouping` and `folded`; the answer names its group lines as `groups` - each with its path, its count and totals over every match, and the index in `rows` it stands before. A page counts lines, headers and rows alike, so `rowCount` counts lines too, and `matchCount` says how many rows match. A group's box selects the group as a state, `{ request, except, group }`, which a bulk action receives; the export asks for every match in the groups' order. The table computes nothing over the rows.";
 
 interface Item {
   /** A header line, or a folded innermost group. */
