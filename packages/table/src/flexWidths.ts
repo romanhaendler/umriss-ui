@@ -15,6 +15,8 @@ export function flexShares(free: number, items: readonly { flex: number; min?: n
   let rest = free;
   for (;;) {
     const total = open.reduce((sum, i) => sum + items[i]!.flex, 0);
+    // A flex of 0 takes no share (and a total of 0 would divide by it).
+    if (total <= 0) return out;
     const held = open.filter((i) => (rest * items[i]!.flex) / total < out[i]!);
     if (held.length === 0 || held.length === open.length) {
       if (held.length === 0) for (const i of open) out[i] = (rest * items[i]!.flex) / total;
@@ -98,6 +100,7 @@ export function contentWidth(cell: HTMLTableCellElement): number {
   cell.style.minWidth = "";
   table.style.width = "auto";
   let widest = 0;
+  const released: HTMLElement[] = [];
   for (const tableRow of Array.from(table.rows)) {
     if (tableRow.cells.length !== count || tableRow.dataset.headGroup !== undefined) continue;
     const c = tableRow.cells[index];
@@ -105,6 +108,12 @@ export function contentWidth(cell: HTMLTableCellElement): number {
     /* A value cut at the cap is wider than its box: its whole width, and
        the cell's padding beside it. */
     const box = c.querySelector<HTMLElement>(`.${styles.value}`);
+    /* A box of a column with a width holds that width by containment (its
+       size is the declared one whatever the text); released, it measures the text. */
+    if (box) {
+      box.style.contain = "none";
+      released.push(box);
+    }
     const style = getComputedStyle(c);
     const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
     /* A head's label gives way with an ellipsis: what it hides counts. */
@@ -112,6 +121,7 @@ export function contentWidth(cell: HTMLTableCellElement): number {
     const hidden = label ? label.scrollWidth - label.clientWidth : 0;
     widest = Math.max(widest, c.scrollWidth + hidden, box ? box.scrollWidth + padding : 0);
   }
+  for (const box of released) box.style.contain = "";
   cell.style.width = before.cell;
   cell.style.minWidth = before.min;
   table.style.width = before.table;

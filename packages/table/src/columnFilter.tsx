@@ -339,7 +339,8 @@ const upperBound = (bound: number | Date | undefined, timeZone?: string): { valu
       : undefined;
 
 function rangeMatches(value: unknown, condition: Range, timeZone: string | undefined): boolean {
-  const number = isDate(value) ? value.getTime() : isNumber(value) ? value : undefined;
+  // An infinite value is a value: an open bound keeps it.
+  const number = isDate(value) ? value.getTime() : typeof value === "number" && !Number.isNaN(value) ? value : undefined;
   if (number === undefined) return false;
   const from = lowerBound(condition.from, timeZone);
   const to = upperBound(condition.to, timeZone);
@@ -594,7 +595,7 @@ const TEXT = /* @__PURE__ */ builtIn<TextCondition>(
     isCondition: (condition): condition is TextCondition =>
       typeof condition === "object" &&
       condition !== null &&
-      (!("join" in condition) || condition.join === "and" || condition.join === "or") &&
+      (!("join" in condition) || condition.join === undefined || condition.join === "and" || condition.join === "or") &&
       "terms" in condition &&
       Array.isArray(condition.terms) &&
       condition.terms.length >= 1 &&

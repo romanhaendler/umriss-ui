@@ -36,6 +36,8 @@ import type { ModelColumn, TableProjection, TableInput } from "./model/tableMode
 import { windowed } from "./model/tableState";
 import { DEV, probeStale, warnOnce } from "./dev";
 import { columnKind, isDateFormat, sortValue } from "./values";
+import type { Format } from "./values";
+import { allDays } from "./model/day";
 import type { ValueKind } from "./values";
 import type { AggregateColumn, GroupLevel } from "./model/grouping";
 import { MOST_LEVELS, periodStart } from "./model/grouping";
@@ -494,8 +496,39 @@ export class Registry {
     if (remembered && remembered.rows === rows && remembered.value === entry.spec.value) return remembered.kind;
     const kind = columnKind(rows, entry.read);
     this.kinds.set(entry.key, { rows, value: entry.spec.value, kind });
-    if (DEV) this.warnFormat(entry, kind);
+    if (DEV) {
+      this.warnFormat(entry, kind);
+      this.warnMixed(entry, rows, kind);
+    }
     return kind;
+  }
+
+  /** A numeric column or aggregate that meets a string in any row: the table does not coerce - it sorts the
+      string apart from the numbers and leaves it out of a sum - so the data's shape is the application's. */
+  private warnMixed(entry: ColumnEntry, rows: readonly unknown[], kind: ValueKind) {
+    const { id, aggregate, ownSortValue } = entry.spec;
+    const summed = typeof aggregate === "string" && ["sum", "avg", "min", "max", "range"].includes(aggregate);
+    if (ownSortValue && !summed) return;
+    if (kind !== "number" && !summed) return;
+    if (!rows.some((row) => typeof entry.read(row) === "string")) return;
+    warnOnce(
+      `mixed:${id}:${summed}`,
+      `The column "${id}" ${summed ? `has the aggregate "${String(aggregate)}"` : "sorts as numbers"}, but a row holds a string: it is not coerced, so it is left out of the figures and sorts apart. Put \`Number\` in the rows${ownSortValue ? "" : ", or give the column `sortValue={Number}`"}.`,
+    );
+  }
+
+  private shown = new Map<string, { rows: readonly unknown[]; value: unknown; zone: string | undefined; format: Format | undefined }>();
+
+  /** The format a column's cells are written in. A date column without a format shows only the day when every
+      value lies at midnight of the zone: a time of 00:00 in each cell says nothing. */
+  shownFormat(entry: ColumnEntry, rows: readonly unknown[], timeZone: string | undefined): Format | undefined {
+    const { format } = entry.spec;
+    if (format !== undefined || this.kindOf(entry, rows) !== "date") return format;
+    const held = this.shown.get(entry.key);
+    if (held && held.rows === rows && held.value === entry.spec.value && held.zone === timeZone) return held.format;
+    const days = allDays(rows.map(entry.read), timeZone);
+    this.shown.set(entry.key, { rows, value: entry.spec.value, zone: timeZone, format: days ? "date" : undefined });
+    return days ? "date" : undefined;
   }
 
   /** A format whose kind the column's first value does not have: the cells print
