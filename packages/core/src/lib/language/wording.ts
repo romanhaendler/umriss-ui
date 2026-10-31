@@ -676,6 +676,8 @@ export interface Wording {
   /** Why a quantity has no number - the label is the given at the root of it,
       or the divisor that is zero. */
   calculationMissing: (label: string) => string;
+  /** The same for several: every missing given, as a list. */
+  calculationMissingAll: (labels: readonly string[]) => string;
   calculationDivisionByZero: (label: string) => string;
   /** The target beside the result, with the target's number and unit. */
   calculationAboveTarget: (target: string) => string;
@@ -1168,6 +1170,7 @@ export const DEFAULT_WORDING: Wording = {
   calculationApproximateNote: "The rounded figures do not give this exactly; it is computed from the unrounded ones.",
   calculationPercent: "percent",
   calculationMissing: (label) => `${label} is missing`,
+  calculationMissingAll: (labels) => `${new Intl.ListFormat("en").format(labels)} are missing`,
   calculationDivisionByZero: (label) => `Division by zero: ${label} is 0`,
   calculationAboveTarget: (target) => `above target ${target}`,
   calculationBelowTarget: (target) => `below target ${target}`,

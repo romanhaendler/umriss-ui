@@ -421,6 +421,7 @@ export const GERMAN_WORDING: Wording = {
   calculationApproximateNote: "Die gerundeten Zahlen ergeben das nicht genau; gerechnet ist mit den ungerundeten.",
   calculationPercent: "Prozent",
   calculationMissing: (label) => `${label} fehlt`,
+  calculationMissingAll: (labels) => `${new Intl.ListFormat("de").format(labels)} fehlen`,
   calculationDivisionByZero: (label) => `Division durch null: ${label} ist 0`,
   calculationAboveTarget: (target) => `über Ziel ${target}`,
   calculationBelowTarget: (target) => `unter Ziel ${target}`,
