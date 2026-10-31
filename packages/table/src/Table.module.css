@@ -1659,9 +1659,15 @@
     transition: color var(--u-transition);
   }
 
-  tbody tr:hover .actions button:not(.toned),
-  tbody tr:focus-within .actions button:not(.toned) {
+  tbody tr:hover .actions button:not(.toned):not(:disabled),
+  tbody tr:focus-within .actions button:not(.toned):not(:disabled) {
     color: var(--u-color-accent-text);
+  }
+
+  /* An action that does not apply to its row: dimmed (about 3:1), so that at
+     rest it stands apart from the quiet actions that do, and it takes no hover. */
+  .actions button:disabled:not(.toned) {
+    opacity: 0.65;
   }
 
   /* The widest the actions column gets - a Row draft's buttons, a delete's

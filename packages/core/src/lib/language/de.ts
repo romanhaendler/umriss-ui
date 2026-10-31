@@ -244,6 +244,7 @@ export const GERMAN_WORDING: Wording = {
   calendarWeek: (week, year) => `KW ${week}/${year}`,
   entries: (count, formatted) => (count === 1 ? "1 Eintrag" : `${formatted} Einträge`),
   selectedCount: (_count, formatted) => `${formatted} ausgewählt`,
+  ofSelected: (count, total) => `${count} von ${total}`,
   selectedOnPage: (count, formatted) => (count === 1 ? "Die 1 Zeile dieser Seite ist ausgewählt." : `Alle ${formatted} Zeilen dieser Seite sind ausgewählt.`),
   selectAllMatching: (_count, formatted) => `Alle ${formatted} Treffer auswählen`,
   allMatchingSelected: (_count, formatted) => `Alle ${formatted} Treffer sind ausgewählt.`,

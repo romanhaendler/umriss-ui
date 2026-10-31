@@ -80,6 +80,8 @@ interface RuntimeActionProps {
   children: string;
   bulk?: boolean;
   tone?: "default" | "danger";
+  disabled?: boolean | ((row: never) => boolean);
+  hidden?: boolean | ((row: never) => boolean);
   onSelect: (target: never) => void;
 }
 
@@ -207,6 +209,8 @@ export function buildParts(registry: Registry): Parts {
       label: props.children,
       bulk: props.bulk === true,
       tone: props.tone ?? "default",
+      disabled: props.disabled,
+      hidden: props.hidden,
       onSelect: props.onSelect,
     } as const;
     registry.registerAction(key, spec);

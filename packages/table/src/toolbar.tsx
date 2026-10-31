@@ -17,6 +17,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { Button, ControlSizeProvider, useFormats, useWording } from "@umriss-ui/core";
 import type { RefProp } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
+import { holds } from "./rowActions";
 import type { AllMatching, RowKey } from "./types";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
@@ -110,19 +111,30 @@ export function TableToolbar({
         {selectedTotal > 0 && (
           <>
             <span className={styles.toolbarInfo}>{wording.selectedCount(selectedTotal, formats.count(selectedTotal))}</span>
-            {bulkActions.map(({ key, spec }) => (
-              <Button
-                key={key}
-                size={size}
-                variant={spec.tone === "danger" ? "danger" : "secondary"}
-                onClick={() =>
-                  (spec.onSelect as (rows: readonly unknown[] | AllMatching<RowKey>) => void)(
-                    all ? { request: snapshot.request!, except: [...snapshot.selection.except] } : selected,
-                  )}
-              >
-                {spec.label}
-              </Button>
-            ))}
+            {bulkActions.map(({ key, spec }) => {
+              /* Acts on the selected rows where it is shown and enabled. In server
+                 mode "all that match" has no rows to ask, so only the booleans count. */
+              const applies = all ? undefined : selected.filter((row) => !holds(spec.hidden, row) && !holds(spec.disabled, row));
+              if (all ? holds(spec.hidden) : selected.every((row) => holds(spec.hidden, row))) return null;
+              const count = applies?.length;
+              const label = count !== undefined && count < selected.length
+                ? `${spec.label} (${wording.ofSelected(formats.count(count), formats.count(selected.length))})`
+                : spec.label;
+              return (
+                <Button
+                  key={key}
+                  size={size}
+                  variant={spec.tone === "danger" ? "danger" : "secondary"}
+                  disabled={all ? holds(spec.disabled) : count === 0}
+                  onClick={() =>
+                    (spec.onSelect as (rows: readonly unknown[] | AllMatching<RowKey>) => void)(
+                      all ? { request: snapshot.request!, except: [...snapshot.selection.except] } : applies!,
+                    )}
+                >
+                  {label}
+                </Button>
+              );
+            })}
           </>
         )}
         {registry.rowAdding && <NewRowButton registry={registry} />}
