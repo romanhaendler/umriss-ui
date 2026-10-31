@@ -175,7 +175,7 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **A chart follows the printed page**: when the page goes to print, the chart
   measures its plot as the print layout gives it and draws there, its axes
   included, and returns to its screen width afterwards. Proved in Chromium
-  (`page.pdf()`); hiding controls and page breaks stay with your print
+  (`page.pdf()`); the tooltip and the show-all button do not print, and page breaks stay with your print
   stylesheet.
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
   rule violations, `pareto()` with a collected remainder, `bin()` for a

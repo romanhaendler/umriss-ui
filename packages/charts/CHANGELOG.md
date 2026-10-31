@@ -30,6 +30,30 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.52.0 – Printed, announced and in rem: a chart prints cleanly and its text grows with the root size (Oct. 2026)
+
+### Added
+
+- **Print styles**: a chart prints without tooltip and show-all button, and its legend keeps its colour chips.
+- A series naming a field no row has warns once in development; `API.md` ships in the package.
+
+### Changed
+
+- **Axis ticks and tooltip values under a thousandth** read in scientific notation.
+  - Migration: nothing to change; a test that read "0.0004" reads "4e-4".
+- **The text size tokens (`--uc-size-*`) are in rem** and grow with the root size; the tooltip shadow comes from `--u-shadow-float`.
+  - Migration: an application that set a `--uc-size-*` token in px keeps it; one that read the computed size expects rem.
+- **A chart with no data** shows "No data" without legend and tick labels.
+  - Migration: a test that looked for axis labels on an empty chart finds none.
+- **The summary names where a series' extremes fall** on a category or time axis, and category labels that do not fit are shortened with an ellipsis before any is left out.
+  - Migration: a test that read the summary text adjusts.
+
+### Fixed
+
+- A theme switch on an ancestor of a chart repaints it, not only one on the html element.
+- Show all is no longer covered by the tooltip and leaves no empty tooltip stub; a legend above the plot comes before it in Tab order (browsers with reading-flow).
+- A chart with `onRange` and no zoom lets the page pinch-zoom over the plot.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 No change of its own; the number moves with the other packages (ADR-0066).

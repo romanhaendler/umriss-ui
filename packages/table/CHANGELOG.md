@@ -26,6 +26,43 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.52.0 – Server mode with groups, a printed table, announcements for a screen reader, keys that can be numbers (Oct. 2026)
+
+### Added
+
+- **Server mode groups**: `request.grouping` and `request.folded`, the answer's groups (`ServerGroup`), `groupPath()`, `matchCount` while the request is grouped, a group's box chooses the group and a bulk action receives `AllMatching.group`; a server-mode example with groups and "Fill a pane from a server".
+- **Lazy branches**: `childRows` may return `null` for a branch whose children are not loaded, and `onBranchOpen(key, row)` is called when it opens; a returned promise shows a loading line, a rejection its message with "Try again".
+- **Print styles**: the table prints its rows without toolbar, pager, selection, row actions and scroll box, and repeats its head on each sheet; a paged or fitted table prints the page shown, a virtualised one its rendered rows.
+- **Announcements and names**: a sort, a folded or opened group, a refused cell edit and a finished export are announced to a screen reader in the wording's language; the match count carries its noun for a screen reader; a table without `aria-label` or `aria-labelledby` warns once in development.
+- `Action` takes `disabled` and `hidden`, per row; `edit="dateTime"` and `edit="boolean"` for a column's cell editor; with `stickyHeader` the totals footer sticks to the bottom; `onSelectionChange` gets every key held as a second argument and Ctrl/Cmd+A selects all rows in grid mode.
+- **Export**: `ExportSheet` columns may carry `day`; DEV warnings for an unexportable object column and a column without label; a mixed column is exported when any row has a writable value. In grid mode ArrowUp from the head reaches the column-group row, and Cmd+Arrow and Cmd+Home/End move to the grid's edges on macOS. A DEV warning for a numeric column or aggregate that meets a string value. `API.md` ships in the package.
+
+### Changed
+
+- **`TableRequest` carries `grouping` and `folded`**, required (empty when not grouped); the three "passed over in server mode" warnings for grouping and `groupable` are gone.
+  - Migration: a server that builds a `TableRequest` itself (a test, a mock) adds `grouping: []` and `folded: []`; a server that ignores groups changes nothing.
+- **`onSelectionChange(keys, all)`**: `keys` are the visible selected rows, `all` every held key; a row that leaves `rows` leaves the selection (not while `loading`), and `selection.count` no longer counts rows a search hides.
+  - Migration: read `all` for every held key (hidden by search or a condition included) where you used `keys` as the whole selection.
+- **The match count carries its noun as text** ("43 of 1,204 entries") and the text filter's two terms are groups named "Term 1" and "Term 2"; the scroll frame is focusable (`tabIndex=-1`).
+  - Migration: a test that read the count as "43 of 1,204" or found the terms by another name adjusts; core's `filteredOfTotal` takes the row count as third argument if you override it.
+- **`rowKey` may return a number**; `Table`, `TableProps`, `TableOptions`, `TableSnapshot`, `CellEdit`, `RowSave`, `RowDelete`, `ActionProps` and `AllMatching` take an optional `Key` type (default `string`); `RowKey` is exported.
+  - Migration: nothing changes for string keys.
+- **A Date column without `format` shows only the day** when every value is local midnight; a date column's CSV and XLSX export follows the column's format.
+  - Migration: set `format` to keep the time of day on a column of midnights.
+- **A fitted page refits when the frame grows or shrinks** while focus is in the grid; the focused row stays on the page and keeps focus; the pager's page text takes the type of its neighbours instead of the monospace face; a focused virtual row draws its ring in `--u-focus-row-color`.
+  - Migration: nothing to change; a screenshot test of the pager or a focused virtual row differs.
+- **Cell editors, filters and toolbar controls use core's `onValueChange` and `onCheckedChange`.**
+  - Migration: nothing changes for a caller; the demos raise no deprecation warning.
+
+### Fixed
+
+- **Selection**: kept while the table is `loading`; a row removed from `rows` is not selected again when its id returns; in server mode a chosen group shows its rows ticked and takes unticked rows as exceptions; Ctrl/Cmd+C copies the selected rows after a click on a cell; "select all" in a fitted server page changes neither the page size nor the ticked row and sends no request.
+- **Server paging**: fold all keeps the folds of groups on other pages; a fitted page keeps its anchor by lines while grouped; `rowCount: 0` after an answer is page 1 of 1; a page clamped because rows shrank is written back; a loading table shows no "0" count and no "Page 1 of 1"; the pager's status region follows a shrink of the data; the `answers` warning no longer fires for the placeholder answer; a paged table in a Modal no longer loops in WebKit.
+- **Columns**: "Fit all columns" and the grip's double-click no longer widen a fitted column by a pixel each time and shrink columns that have a width or flex; a flex column with flex 0 gets no NaN width; dragging cannot go below `minWidth` and Escape cancels a resize; the columns keep their widths when a search empties the table; a numeric header sits flush with its figures; the sort button's focus ring is drawn inside it.
+- **Editing**: `edit="date"` on a date-time column keeps the time of day; a click that opens an editor selects the value; an edit whose row a live update removes is reported and the focus moves to the neighbouring cell; the focus of a row leaving a virtual window moves to the cell now at its place; Ctrl+Home in a virtual grid scrolls to the top; Space on a grid header no longer scrolls the area.
+- **Export**: a grouped table's `asCsv`/`exportAs`/`selectionAsText` write the rows in the groups' order; the CSV writes NaN and the infinities as empty and numbers in plain notation; `selectionAsText` of a tree carries the level column; `filename` is reduced to a safe file name.
+- **Other**: ISO week numbers around New Year; a cleared sort survives view -> initialView with `defaultSort`; a text condition with `join` undefined is valid and a range with an open bound keeps infinite values; `editOptions` that is not an array warns instead of crashing; a disabled row action is dimmed at rest and does not light up on hover; aria: `aria-colcount` on the grid, `aria-rowindex` on a new-row draft, a tree row header named without its fold's label, blank column-group cells are not gridcells, draft and editor message popovers take no dialog role; the last table to unmount takes the announcer's region with it.
+
 ## 0.51.0 – A page is what its frame holds: a table fills its pane, the pager says the range (Oct. 2026)
 
 ### Changed
