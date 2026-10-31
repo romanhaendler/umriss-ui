@@ -1,5 +1,5 @@
 import { cloneElement, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactElement, ReactNode } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactElement, ReactNode, Ref } from "react";
 import { useLongPress } from "../../lib/longPress";
 import { createPortal } from "react-dom";
 import { usePortalTarget } from "../../lib/provider";
@@ -18,7 +18,7 @@ export interface TooltipProps {
   content: ReactNode;
   /** Exactly one element that triggers the tooltip (must accept refs). Its
       own ref keeps its element: the tooltip holds the same one beside it. */
-  children: ReactElement<Record<string, unknown>>;
+  children: ReactElement<{ ref?: Ref<HTMLElement>; "aria-expanded"?: boolean; "aria-describedby"?: string; "aria-label"?: string } & Record<string, unknown>>;
   /** Delay in ms before the tooltip appears. */
   delay?: number;
 }

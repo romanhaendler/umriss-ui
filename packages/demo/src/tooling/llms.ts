@@ -374,7 +374,7 @@ function fullHead({ manifest, install }: Run): string[] {
 }
 
 /** The scenarios' section of the full text. */
-function scenariosSection({ scenarios, pages }: Run, parts: string[]): Cut {
+function scenariosSection({ manifest, scenarios, pages }: Run, parts: string[]): Cut {
   const from = parts.length;
   parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
   for (const scenario of scenarios) {
@@ -384,7 +384,13 @@ function scenariosSection({ scenarios, pages }: Run, parts: string[]): Cut {
       if (typeof entry !== "string") return entry.name;
       return pages.find((page) => page.id === entry)?.name ?? entry;
     });
-    parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
+    parts.push("", `Built from: ${built.join(", ")}.`);
+    // A page of another package is in the screen only if that package is installed beside this one.
+    const others = [...new Set(scenario.builtFrom.flatMap((entry) => (typeof entry === "string" ? [] : [entry.page.split("#")[0]!])))];
+    if (others.length > 0) {
+      parts.push("", "Install the packages it is built from with:", "", fenced("sh", `npm install ${[manifest.name, ...others].join(" ")}`));
+    }
+    parts.push("", fenced("tsx", scenario.source));
   }
   return { from, to: parts.length };
 }
