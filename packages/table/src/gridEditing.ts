@@ -57,7 +57,9 @@ export function editingActions(input: GridInput) {
   const keys = lines.map((l) => l.key);
   const editing = grid.state.editing;
 
-  const lineRow = (key: string) => (key === NEW_LINE ? editing?.fresh : lines.find((l) => l.key === key)?.row);
+  const lineRow = (key: string) => (key === NEW_LINE ? editing?.fresh : (lines.find((l) => l.key === key)?.row ?? editing?.source));
+  /** The edited row is no longer among the lines: a live update removed it. */
+  const gone = () => editing !== null && editing.line !== NEW_LINE && !keys.includes(editing.line);
   /** The row of a row line - not of its detail, nor of a group line. */
   const rowAt = (p: GridPosition) => {
     const line = lines[p.line];
@@ -79,7 +81,7 @@ export function editingActions(input: GridInput) {
     setState((s) => ({
       ...s,
       active: { line: line.key, column: entry.spec.id, lineIndex: p.line, columnIndex: p.column },
-      editing: { line: line.key, column: entry.spec.id, row: rowMode, drafts, errors: {}, refused: false },
+      editing: { line: line.key, column: entry.spec.id, row: rowMode, drafts, errors: {}, refused: false, source: line.row },
     }));
   };
 
@@ -102,6 +104,13 @@ export function editingActions(input: GridInput) {
       if (message) errors[id] = message;
     }
     const invalid = Object.keys(drafts).find((id) => errors[id] !== undefined);
+    /* A row that is gone has no editor to show the message in: the draft is
+       reported when it is right, and ends with the row when it is not. */
+    if (invalid !== undefined && gone()) {
+      grid.focus.want("cell");
+      setState((s) => ({ ...s, editing: null }));
+      return true;
+    }
     if (invalid !== undefined) {
       const column = editing.row ? invalid : editing.column;
       if (focus) grid.focus.want("editor");
@@ -176,5 +185,5 @@ export function editingActions(input: GridInput) {
     }));
   };
 
-  return { rowAt, editable, startEdit, save, commit, discard, refuse, setDraft, addRow };
+  return { rowAt, editable, startEdit, save, commit, discard, refuse, setDraft, addRow, gone };
 }

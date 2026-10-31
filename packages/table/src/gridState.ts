@@ -30,6 +30,9 @@ export interface Editing {
   refused: boolean;
   /** A new row's values before anything is typed (`newRow`). */
   fresh?: unknown;
+  /** The row as it stood when the edit began: what is reported if a live
+      update removes the row from under the editor. */
+  source?: unknown;
 }
 
 export interface GridState {
@@ -46,6 +49,20 @@ type Wish = "cell" | "editor" | "open";
     the key that walked to it; the DOM effect grants the wish then. */
 class FocusWish {
   private wish: Wish | null = null;
+  /** The cell the focus last stood in: where it went when that cell left the
+      document (a virtual window scrolled its row away, a live update removed it). */
+  private held: HTMLElement | null = null;
+
+  hold(cell: HTMLElement) {
+    this.held = cell;
+  }
+
+  /** True once, when the cell the focus stood in has left the document. */
+  lost(): boolean {
+    const lost = this.held !== null && !this.held.isConnected;
+    if (lost) this.held = null;
+    return lost;
+  }
 
   /** `open`: the editor, with its list or calendar open - a click asked for it. */
   want(wish: Wish | null) {

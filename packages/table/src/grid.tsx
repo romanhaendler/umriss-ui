@@ -35,7 +35,7 @@ import { NEW_LINE, useGridState } from "./gridState";
 import type { Active, Editing, GridHandle, GridState } from "./gridState";
 import { editingActions, same } from "./gridEditing";
 import type { GridInput } from "./gridEditing";
-import { FOCUSABLE, cellsOf, onBlur, onClick, onFocus, onKeyDown } from "./gridKeys";
+import { FOCUSABLE, GROUP_LINE, cellsOf, onBlur, onClick, onFocus, onKeyDown } from "./gridKeys";
 import styles from "./Table.module.css";
 
 export { NEW_LINE, useGridState };
@@ -46,7 +46,7 @@ export type { Editing, GridHandle, GridInput, GridState };
 export function gridHandlers(input: GridInput) {
   const { grid, rowKey, onRowDelete } = input;
   const actions = editingActions(input);
-  const { save, discard, commit, setDraft, editable, addRow } = actions;
+  const { save, discard, commit, setDraft, editable, addRow, gone } = actions;
 
   const context: Omit<GridContextValue, "hook" | "wording"> = {
     editing: grid.state.editing,
@@ -72,6 +72,8 @@ export function gridHandlers(input: GridInput) {
     editable,
     addRow,
     outside,
+    /* The edited row left the lines: its draft is reported or ended now. */
+    settle: gone() ? () => void save() : undefined,
   };
 }
 
@@ -131,6 +133,7 @@ export function GridFocus({
   ids,
   editable,
   outside,
+  settle,
 }: {
   table: RefObject<HTMLTableElement | null>;
   grid: GridHandle;
@@ -141,6 +144,8 @@ export function GridFocus({
   editable?: (p: GridPosition) => boolean;
   /** While a cell's edit is open: what a click outside the grid does. */
   outside?: () => void;
+  /** While the row of an edit is gone: ends the edit. */
+  settle?: () => void;
 }) {
   /* A click outside the grid - not in it, and not in a panel one of its
      controls opened (a day's calendar names its panel by `aria-controls`). */
@@ -165,6 +170,7 @@ export function GridFocus({
   useLayoutEffect(() => {
     const table = tableRef.current;
     if (!table) return;
+    settle?.();
     const { active, widget, editing } = grid.state;
     const at = resolve(active, lines, ids);
     const key = lines[at.line]?.key;
@@ -176,6 +182,12 @@ export function GridFocus({
        one; a pass over the changed lines only is the upgrade if it shows. */
     for (const row of Array.from(table.querySelectorAll<HTMLTableRowElement>("tr[data-grid-line]"))) {
       const line = row.dataset.gridLine!;
+      /* The column groups' row is reached by arrows from the head; it holds no
+         tab stop, and its blank cells are no cells to stand on. */
+      if (line === GROUP_LINE) {
+        for (const { cell } of cellsOf(row)) if (!cell.hasAttribute("data-blank")) cell.tabIndex = -1;
+        continue;
+      }
       const cells = cellsOf(row);
       for (const { cell, start, end } of cells) {
         const covers = (at.column >= start && at.column < end) || (cell === cells.at(-1)!.cell && at.column >= end);
@@ -201,7 +213,12 @@ export function GridFocus({
     if (wish === "editor" || wish === "open") {
       const field = (stop as HTMLTableCellElement | null)?.querySelector<HTMLElement>("input, select, textarea, button");
       field?.focus();
-      if (field instanceof HTMLInputElement && field.type === "text") field.setSelectionRange(field.value.length, field.value.length);
+      /* A click that opens the editor selects the value, so that typing
+         replaces it; a key that opens it leaves the caret at the end. */
+      if (field instanceof HTMLInputElement && field.type === "text") {
+        if (wish === "open") field.select();
+        else field.setSelectionRange(field.value.length, field.value.length);
+      }
       /* Clicked open, a select shows its list and a day its calendar at once:
          the click was the choice to edit (ADR-0036). The picker needs the
          click's activation, which the frame after it still has. */
@@ -213,6 +230,10 @@ export function GridFocus({
         }
       } else if (wish === "open" && field instanceof HTMLButtonElement) field.click();
     } else if (wish === "cell") (stop as HTMLTableCellElement | null)?.focus();
+    /* The cell the focus stood in left the document - its row scrolled out of
+       a virtual window, or was removed: the focus goes to the cell now at its
+       place, in view, not to the body. */
+    if (grid.focus.lost() && document.activeElement === document.body) (stop ?? fallback)?.focus({ preventScroll: true });
   });
   return null;
 }

@@ -13,8 +13,12 @@ import { HeaderCell } from "./headerCell";
 import { groupEdges } from "./columnGroup";
 import type { Heading } from "./columnGroup";
 import { lineKey } from "./frameLayout";
+import { GROUP_LINE } from "./gridKeys";
 import type { FrameLayout } from "./frameLayout";
 import styles from "./Table.module.css";
+
+/* A cell of the group row over no group: no gridcell to read, none to stand on. */
+const BLANK = { role: "presentation", "data-blank": "" } as const;
 
 export function HeadRow({
   registry,
@@ -47,8 +51,8 @@ export function HeadRow({
   return (
     <thead>
       {grouped && (
-        <tr data-head-group="" aria-rowindex={layout.numbered ? 1 : undefined}>
-          {leading > 0 && <td colSpan={leading} className={cx(styles.th, pinAt(0, leading - 1).className)} style={pinAt(0, leading - 1).style} />}
+        <tr data-head-group="" aria-rowindex={layout.numbered ? 1 : undefined} data-grid-line={lineKey(gridMode, GROUP_LINE)}>
+          {leading > 0 && <td {...BLANK} colSpan={leading} className={cx(styles.th, pinAt(0, leading - 1).className)} style={pinAt(0, leading - 1).style} />}
           {runs.map(({ heading, from, to }) => {
             const pin = withEdge(pinAt(leading + from, leading + to), edges.has(dataColumns[from]!));
             const cell = cx(styles.th, heading && styles.headGroup, pin.className);
@@ -57,10 +61,10 @@ export function HeadRow({
                 {heading.label}
               </th>
             ) : (
-              <td key={from} colSpan={to - from + 1} className={cell} style={pin.style} />
+              <td key={from} {...BLANK} colSpan={to - from + 1} className={cell} style={pin.style} />
             );
           })}
-          {trailing && <td className={cx(styles.th, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />}
+          {trailing && <td {...BLANK} className={cx(styles.th, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />}
         </tr>
       )}
       <tr aria-rowindex={layout.numbered ? (grouped ? 2 : 1) : undefined} data-grid-line={lineKey(gridMode, "head")}>

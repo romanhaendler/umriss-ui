@@ -106,6 +106,7 @@ export function newRowBody(ctx: BodyContext, fresh: { fresh?: unknown }) {
         formats={ctx.formats}
         wording={ctx.wording}
         grid
+        ariaRow={layout.numbered ? layout.headRows + 1 : undefined}
       />
     </tbody>
   );
