@@ -44,7 +44,7 @@ describe("idPart", () => {
 describe("Tabs – a value with a space", () => {
   it("names the panel after its tab and points at the right one", () => {
     render(
-      <Tabs value="first page" onChange={() => undefined}>
+      <Tabs value="first page" onValueChange={() => undefined}>
         <TabList>
           <Tab value="first page">First</Tab>
           <Tab value="second">Second</Tab>
@@ -97,7 +97,7 @@ describe("TreeView – two trees on one page", () => {
         { id: "a", name: `${name} A` },
         { id: "b", name: `${name} B` },
       ],
-      { reader: READER, onChecked },
+      { reader: READER, onCheckedChange: onChecked },
     );
     return (
       <TreeView tree={tree} aria-label={name} checkable>

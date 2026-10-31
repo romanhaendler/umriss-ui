@@ -1,6 +1,7 @@
 import { createContext, useContext, useId, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { warnDeprecated } from "../../lib/dev";
 import type { RefProp } from "../../lib/refProp";
 import { AngleGlyph } from "../../lib/glyphs";
 import styles from "./Accordion.module.css";
@@ -30,6 +31,8 @@ export interface AccordionProps
   defaultValue?: readonly string[];
   /** Reports the open sections after a header's click. Controlled, the
       accordion follows once `value` does; uncontrolled it is a message. */
+  onValueChange?: (value: string[]) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (value: string[]) => void;
   /** The level of the heading each header stands in - the one that fits the
       page's outline. */
@@ -46,6 +49,7 @@ export function Accordion({
   type = "single",
   value: valueProp,
   defaultValue = [],
+  onValueChange,
   onChange,
   headingLevel = 3,
   className,
@@ -61,7 +65,11 @@ export function Accordion({
     const isOpen = open.includes(item);
     const next = isOpen ? open.filter((v) => v !== item) : type === "single" ? [item] : [...open, item];
     if (!controlled) setOwn(next);
-    onChange?.(next);
+    onValueChange?.(next);
+    if (onChange) {
+      warnDeprecated("Accordion onChange", "onValueChange");
+      onChange(next);
+    }
   };
 
   /* Only a header's key moves the focus: a field inside an open panel keeps

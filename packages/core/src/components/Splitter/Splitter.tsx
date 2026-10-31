@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { warnDeprecated } from "../../lib/dev";
 import { GripGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -19,6 +20,8 @@ export interface SplitterProps
   /** Uncontrolled: the share to start at. */
   defaultValue?: number;
   /** Reports every move, by pointer or key, as the first pane's share. */
+  onValueChange?: (value: number) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (value: number) => void;
   /** The smallest share of the first pane, and where Enter collapses it to. */
   min?: number;
@@ -49,6 +52,7 @@ export function Splitter({
   orientation = "horizontal",
   value: valueProp,
   defaultValue = 50,
+  onValueChange,
   onChange,
   min = 0,
   max = 100,
@@ -80,7 +84,11 @@ export function Splitter({
     const share = clamp(next);
     if (share === value) return;
     if (!controlled) setOwn(share);
-    onChange?.(share);
+    onValueChange?.(share);
+    if (onChange) {
+      warnDeprecated("Splitter onChange", "onValueChange");
+      onChange(share);
+    }
   };
 
   /* On the root, so that a caller's handler runs first and can keep a key;

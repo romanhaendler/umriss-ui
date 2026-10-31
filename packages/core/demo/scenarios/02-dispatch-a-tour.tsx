@@ -262,7 +262,7 @@ function Content() {
     reader: READER,
     defaultExpanded: DEPOTS.map((one) => one.id),
     active: vehicleId,
-    onActive: (next) => {
+    onActiveChange: (next) => {
       /* A depot is a heading, not a vehicle. */
       if (next === null || VEHICLES.some((one) => one.id === next)) {
         const nextDepot = VEHICLES.find((one) => one.id === next)?.depot;

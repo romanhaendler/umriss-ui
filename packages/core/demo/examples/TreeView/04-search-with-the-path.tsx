@@ -45,7 +45,7 @@ const READER: NodeReader<Node> = { key: (n) => n.id, children: (n) => n.children
 
 export default function SearchWithThePath() {
   const [term, setTerm] = useState("check");
-  const tree = useTree(TEAMS, { reader: READER, search: term, onSearch: setTerm });
+  const tree = useTree(TEAMS, { reader: READER, search: term, onSearchChange: setTerm });
 
   return (
     <Stack gap={2} style={{ maxWidth: 320 }}>

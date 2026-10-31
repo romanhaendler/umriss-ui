@@ -55,6 +55,17 @@ event handler.
 
 The contract step was taken in the minor after 0.52.0: the deprecated `onChange(value)` and its warning are gone.
 
+The rule is not only for fields. The next minor extends it to the other components that hold a state
+of their own: `Tabs`, `Accordion` and `Splitter` hand their finished value to `onValueChange` (their
+`onChange(value)` is deprecated and warns once), and `useTree` names each of its controlled values'
+callback after it - `onExpandedChange`, `onCheckedChange`, `onActiveChange`, `onAnchorChange`,
+`onSearchChange`, beside a new `defaultSearch` (`onExpanded` and the rest are deprecated). What is
+already `<state>`/`on<State>Change` stays: `open`/`onOpenChange`, `collapsed`/`onCollapsedChange`,
+`view`/`onViewChange` and `selection`/`onSelectionChange`. `Modal`, `Drawer`, `CommandPalette` and
+`ConfirmDialog` keep `open` with `onClose`: it is a request to close, not a report of a state the
+component holds. A callback that reports an event and not a state (`Combobox`'s `onSearch`,
+`onActivate`, `onChoose`, `onSelect`) is no field's state callback and keeps its name.
+
 The range pickers keep `DateRange`'s `{ from, to }`, which the table's `columnFilter` reads too:
 renaming the pair's keys would break every range a host stores, for no gain in the contract. A
 `Select`'s `onChange` is the native select's event and stays; `onValueChange` reports its option's

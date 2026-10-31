@@ -49,7 +49,7 @@ function Fixture({
     defaultActive,
     defaultExpanded,
     onActivate,
-    onChecked,
+    onCheckedChange: onChecked,
   });
   return (
     <TreeView tree={tree} aria-label="Ablage" checkable={checkable}>
@@ -361,7 +361,7 @@ function EdgeFixture({
     reader: EDGE_READER,
     defaultExpanded: ["g"],
     defaultActive: "g",
-    onChecked,
+    onCheckedChange: onChecked,
     onLoadChildren,
     onActivate,
   });
@@ -374,7 +374,7 @@ function EdgeFixture({
 
 describe("The anchor", () => {
   function AnchorFixture({ onAnchor = vi.fn() }) {
-    const tree = useTree(TREE, { reader: READER, defaultActive: "a", onAnchor });
+    const tree = useTree(TREE, { reader: READER, defaultActive: "a", onAnchorChange: onAnchor });
     return (
       <TreeView tree={tree} aria-label="Anker" checkable>
         {(e) => e.node.name}
@@ -414,8 +414,8 @@ describe("Shift with an arrow key", () => {
     const tree = useTree(TREE, {
       reader: READER,
       defaultActive: "a",
-      onActive,
-      onChecked,
+      onActiveChange: onActive,
+      onCheckedChange: onChecked,
     });
     return (
       <TreeView tree={tree} aria-label="Zaehlen" checkable>

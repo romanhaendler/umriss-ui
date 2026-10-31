@@ -99,7 +99,7 @@ describe("Splitter", () => {
       const [share, setShare] = useState(30);
       return (
         <>
-          <Splitter value={share} onChange={(v) => { reported(v); setShare(v); }} step={10}>
+          <Splitter value={share} onValueChange={(v) => { reported(v); setShare(v); }} step={10}>
             <div>A</div>
             <div>B</div>
           </Splitter>

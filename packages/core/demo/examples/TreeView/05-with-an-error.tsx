@@ -34,7 +34,7 @@ const READER: NodeReader<Node> = { key: (n) => n.id, children: (n) => n.children
 
 export default function WithAnError() {
   const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set());
-  const tree = useTree(TEAMS, { reader: READER, checked, onChecked: setChecked, defaultExpanded: ["payments"] });
+  const tree = useTree(TEAMS, { reader: READER, checked, onCheckedChange: setChecked, defaultExpanded: ["payments"] });
   const messageId = useId();
   const error = checked.size === 0 ? "Tick at least one service, or the alert rule watches nothing." : undefined;
 

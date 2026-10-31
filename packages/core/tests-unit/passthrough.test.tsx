@@ -134,21 +134,21 @@ const CASES: Record<string, Case> = {
   Spinner: (probe) => <core.Spinner {...p(probe)} />,
   Tag: (probe) => <core.Tag {...p(probe)}>Backend</core.Tag>,
   TagGroup: (probe) => <core.TagGroup aria-label="Tags" {...p(probe)} />,
-  Tabs: (probe) => <core.Tabs value="a" onChange={noop} {...p(probe)} />,
+  Tabs: (probe) => <core.Tabs value="a" onValueChange={noop} {...p(probe)} />,
   TabList: (probe) => (
-    <core.Tabs value="a" onChange={noop}>
+    <core.Tabs value="a" onValueChange={noop}>
       <core.TabList aria-label="Views" {...p(probe)} />
     </core.Tabs>
   ),
   Tab: (probe) => (
-    <core.Tabs value="a" onChange={noop}>
+    <core.Tabs value="a" onValueChange={noop}>
       <core.Tab value="a" {...p(probe)}>
         A
       </core.Tab>
     </core.Tabs>
   ),
   TabPanel: (probe) => (
-    <core.Tabs value="a" onChange={noop}>
+    <core.Tabs value="a" onValueChange={noop}>
       <core.TabPanel value="a" {...p(probe)} />
     </core.Tabs>
   ),
