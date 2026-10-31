@@ -29,3 +29,6 @@ open range bounds keep ±Infinity; a non-array `editOptions` warns and offers no
 without `format` shows only the day when every value (all rows, so a search cannot flip it) is midnight.
 Decided: the day-only rule covers body cells; group heads, footers and filter text keep the datetime.
 Left: drag floor, Escape mid-drag and the fit shrink are not exercised by a test (jsdom has no layout).
+Browser check (coordinator, Chromium, Width and pinning): fit shrinks a wide column (414 → 176,
+652 → 535), a drag stops at the floor, Escape mid-drag restores the width. An already fitted column
+still grows by 1 px on fit (371 → 372) - left to the review's fix pass.
