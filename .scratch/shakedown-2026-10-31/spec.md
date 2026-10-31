@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Date:   2026-10-31
 
 # Every open defect of three shakedowns is fixed, the fields share one contract, and the chosen wishes are built
@@ -187,3 +187,55 @@ Each ticket names its own. Shared rules:
 | 42 | The field contract: the old names go (contract step) | S | 41 and the release |
 
 ## Comments
+
+**Run report (2026-10-31, coordinator - the unattended run of `run.md`).**
+
+*Delivered.* All 42 tickets, each merged into `shakedown-2026-10-31` after its diff was read, its checks
+rerun and every visible change looked at in Chromium (both themes where colour changed, 375 px where
+layout did); each ticket's `## Comments` says what it delivered and what was decided there. Ticket 41
+(the sweep) found and fixed three WebKit defects; CSP, an 8-hour tab, trees under live data and XLSX
+edge cases were green. Ticket 42 went to `main` after the release.
+
+*Decisions taken alone (details in the tickets).* ADR numbers 0081 (field contract) and 0082 (server
+groups and lazy branches, one ADR); the range pickers keep `DateRange { from, to }` (spec said
+`{ start, end }`); a Modal without `autoFocus` focuses its first tab stop other than the header's cross
+(a footer button counts); `formats` writes the Gregorian calendar for every locale (`fa` changes);
+server mode clears the selection on a new search (an "all that match" belongs to its query); the
+selection count is announced in grid mode only (the toolbar's status says it otherwise); a plot with
+its own zoom keeps the pinch (charts with zoom, the schedule), page pinch elsewhere; the schedule's lane
+gutter is `max(120px, 28%)`, not narrower, so ten-letter group names stay readable; the stacked-FormField
+margin of ticket 12 was taken back (it doubled every app's flex gap - seen in a consumer application); a chosen
+server group works like "all that match" scoped to it (`except`); `matchCount` as a new server option;
+the MultiSelect panel is a listbox; Cmd+Arrow is not gated to macOS. Existing tests were changed in
+tickets 07, 11, 13, 16, 17, 20, 21, 22, 25, 29, 38 and in the visual fix pass, each only where the
+ticket reversed the rule the test pinned - the spec allowed that in 02 and 03 only, so the maintainer may
+want to look at them (each ticket names them).
+
+*Review.* `code-review` against `main` on three axes (standards, spec, and - at the maintainer's
+request - consumer regressions, with a consumer application as the test bench). One fix pass: selection kept while
+`loading`; `value={undefined}` with a `defaultValue` is uncontrolled; ConfirmDialog retries after a
+settled promise; the scroll lock respects `scrollbar-gutter`; the wording type of `dashboardSizeEntry`
+kept; the browser cases of 09 and 19 written and run; "0 5" refused under fr/sv; a fitted column no
+longer grows by 1 px; NumberInput keeps a caller's `aria-describedby`; the deprecation note defined once;
+13 `Migration:` lines. A checkbox audit unticked items only partly delivered (each with a note).
+A consumer application (core ^0.48) ran against the candidate in copies: no library regression; it
+follows two renames and one test; its migration guides are with the maintainer.
+
+*The release.* Lint, types, 6,338 unit tests, build, `check:site`, `pnpm semgrep` (0 findings), the full
+visual suite (4,546 tests in both themes; every changed screenshot reviewed in contact sheets before the
+update; 28 behaviour failures fixed first), `pnpm -r check:dist` (all seven) and `pnpm build:site` - then
+0.52.0 of all seven packages, `main` fast-forwarded and pushed. The first CI on `main` failed: the new
+field-contract tests of table and alarms render the whole demo and needed `demo/.generated`, which a
+fresh clone lacks - fixed (they join `typecheck:demo`) and pushed; CI green. Publish run 41245894841
+(`ea315625`, 0.52.0) waits for the npm environment's approval. A later Publish run (`1eaff48b`, ticket
+42) is queued behind it; once 0.52.0 is on npm it publishes nothing - approve the earlier one, not only
+the latest. Still the maintainer's: the XLSX writer changed (date columns), so open one file of the "An
+Excel file" example in Excel, Numbers, LibreOffice and Google Sheets before approving (`docs/releasing.md`).
+
+*Left, and why.* Real devices and screen readers (the spec's Out of Scope; ticket 41 lists what only a
+device can settle); the H11 host drivers (need packed hosts - unit tests cover it); a shadow-root browser
+case (the demo cannot host one); Tab order before a chart's plot only where `reading-flow` exists; DOM
+comparisons by text when a table holds both `1` and `"1"`; the alarm list is wider than portrait A4
+(print it landscape). After the release the maintainer asked to make the remaining components consistent
+with ADR-0081 (Tabs, Accordion, Splitter still take `onChange(value)`): a follow-up pass, merged into
+local `main` and pushed only after 0.52.0 is on npm (a push now would queue another Publish run).
