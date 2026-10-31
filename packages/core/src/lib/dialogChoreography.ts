@@ -40,18 +40,22 @@ function unlockScroll() {
 }
 
 /* The last pointer press, for an opener that took no focus: WebKit does not
-   focus a button a mouse pressed, so `activeElement` is the body then. Watched
-   from the moment this module loads: the press that opens the first dialog
-   comes before any dialog exists. */
+   focus a button a mouse pressed, so `activeElement` is the body then - or the
+   dialog the button stands in. Watched from the moment this module loads: the
+   press that opens the first dialog comes before any dialog exists. A key
+   press ends it: the focus is then the opener's own. */
 let pressed: Element | null = null;
 if (typeof document !== "undefined") {
   document.addEventListener("pointerdown", (e) => (pressed = e.target as Element | null), true);
+  document.addEventListener("keydown", () => (pressed = null), true);
 }
 const FOCUSABLE_ANCESTOR = "button, a[href], input, select, textarea, summary, [tabindex]";
 function openerNow(): HTMLElement | null {
   const active = document.activeElement;
-  if (active && active !== document.body && active !== document.documentElement) return active as HTMLElement;
-  return (pressed?.closest(FOCUSABLE_ANCESTOR) as HTMLElement | null) ?? null;
+  const press = pressed?.closest(FOCUSABLE_ANCESTOR) as HTMLElement | null | undefined;
+  const none = !active || active === document.body || active === document.documentElement;
+  if (press?.isConnected && (none || (active !== press && active.contains(press)))) return press;
+  return none ? null : (active as HTMLElement);
 }
 
 export interface DialogChoreography {
@@ -131,11 +135,14 @@ export function useDialogChoreography(
       unlockScroll();
     }
   };
-  /* The focus goes back when the close left it on the body. */
+  /* The focus goes back when the close left it on the body, in the dialog, or
+     on the dialog this one stands in: WebKit hands it to that one, as the
+     button that opened this one took none. */
   const returnFocus = (dialog: HTMLDialogElement) => {
     const target = opener.current;
     const active = document.activeElement;
-    if (target?.isConnected && (!active || active === document.body || dialog.contains(active))) target.focus();
+    const outer = active instanceof HTMLDialogElement && active !== dialog && active.contains(target);
+    if (target?.isConnected && (!active || active === document.body || dialog.contains(active) || outer)) target.focus();
   };
   /* Closes an open dialog and gives the page back: scroll and focus. */
   const closeNow = (dialog: HTMLDialogElement) => {
