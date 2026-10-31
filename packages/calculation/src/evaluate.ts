@@ -16,7 +16,7 @@ import type { Assessment, Quality, Verdict } from "@umriss-ui/core";
 import type { CalculationModel, Operator, Quantity } from "./model";
 
 /** Why a quantity has no number: a given is missing, or a divisor is zero. */
-export type Absence = { kind: "missing"; label: string } | { kind: "zero"; label: string };
+export type Absence = { kind: "missing"; label: string; labels: readonly string[] } | { kind: "zero"; label: string };
 
 export interface Evaluation {
   /** The number in full precision, or `null`. */
@@ -113,7 +113,7 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
     if (quantity.given) {
       const given = quantity.given.value;
       if (typeof given === "number" && Number.isFinite(given)) value = given;
-      else absence = { kind: "missing", label: quantity.label };
+      else absence = { kind: "missing", label: quantity.label, labels: [quantity.label] };
       quality = quantity.given.quality ?? "good";
     } else {
       const operands = quantity.operands.map((operand) => ({ operand, ...run(operand.key) }));
@@ -124,7 +124,10 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
         const here = operand.reference ? verdict : worse(verdict, inside);
         worst = worse(worst, here);
       }
-      absence = operands.find((o) => o.absence)?.absence;
+      /* Every missing given is named, once, in operand order; a zero divisor
+         only where nothing is missing. */
+      const missing = [...new Set(operands.flatMap((o) => (o.absence?.kind === "missing" ? o.absence.labels : [])))];
+      absence = missing.length > 0 ? { kind: "missing", label: missing[0]!, labels: missing } : operands.find((o) => o.absence)?.absence;
       const divisor = operands[1];
       if (!absence && quantity.operator === "quotient" && divisor!.value === 0) {
         absence = { kind: "zero", label: model.quantities.get(divisor!.operand.key)!.label };
