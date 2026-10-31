@@ -174,12 +174,16 @@
     display: block;
   }
 
+  /* On a whole pixel: the region's measured height may be fractional, and
+     the hint's words would otherwise land on a different sub-pixel each time. */
   .region[data-edge="bottom"] .hint {
     bottom: calc(100% + var(--u-space-1));
+    bottom: round(calc(100% + var(--u-space-1)), 1px);
   }
 
   .region[data-edge="top"] .hint {
     top: calc(100% + var(--u-space-1));
+    top: round(calc(100% + var(--u-space-1)), 1px);
   }
 
   /* A card lies at the region's edge and is moved to its place in the deck
