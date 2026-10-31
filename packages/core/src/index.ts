@@ -82,7 +82,7 @@ export * from "./components/FileInput";
 export { ControlSizeProvider } from "./lib/controlSize";
 export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
 
-export { announce } from "./lib/announce";
+export { announce, resetAnnouncer } from "./lib/announce";
 export type { RefProp } from "./lib/refProp";
 
 /* The development warning of the packages that depend on core: once per package and reason, silent in

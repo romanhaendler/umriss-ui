@@ -9,10 +9,51 @@
    Internal. The library offers Modal and CommandPalette, not the mechanics
    they share - the same decision as for `computePosition`. */
 
-import { useEffect, useRef, useState } from "react";
-import type { RefObject, SyntheticEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { KeyboardEvent, RefObject, SyntheticEvent } from "react";
 import { firstTabStop } from "./firstTabStop";
 import { durationFrom, prefersReducedMotion } from "./motion";
+
+/* The page's scroll is locked while any dialog stands: a count, so a nested
+   dialog's closing does not free the page under the outer one. The browser
+   locks nothing itself; the scrollbar's width is made up in padding so the
+   page does not jump. */
+let scrollLocks = 0;
+let scrollRestore: (() => void) | null = null;
+function lockScroll() {
+  if (scrollLocks++ > 0) return;
+  const root = document.documentElement;
+  const { overflow, paddingRight } = root.style;
+  const bar = window.innerWidth - root.clientWidth;
+  root.style.overflow = "hidden";
+  if (bar > 0) root.style.paddingRight = `calc(${getComputedStyle(root).paddingRight} + ${bar}px)`;
+  scrollRestore = () => {
+    root.style.overflow = overflow;
+    root.style.paddingRight = paddingRight;
+  };
+}
+function unlockScroll() {
+  if (--scrollLocks > 0) return;
+  scrollLocks = 0;
+  scrollRestore?.();
+  scrollRestore = null;
+}
+
+/* The last pointer press, for an opener that took no focus: WebKit does not
+   focus a button a mouse pressed, so `activeElement` is the body then. */
+let pressed: Element | null = null;
+let watching = false;
+function watchPointer() {
+  if (watching) return;
+  watching = true;
+  document.addEventListener("pointerdown", (e) => (pressed = e.target as Element | null), true);
+}
+const FOCUSABLE_ANCESTOR = "button, a[href], input, select, textarea, summary, [tabindex]";
+function openerNow(): HTMLElement | null {
+  const active = document.activeElement;
+  if (active && active !== document.body && active !== document.documentElement) return active as HTMLElement;
+  return (pressed?.closest(FOCUSABLE_ANCESTOR) as HTMLElement | null) ?? null;
+}
 
 export interface DialogChoreography {
   /** Belongs on the <dialog> element. */
@@ -32,7 +73,7 @@ export interface DialogChoreography {
    * dialog, and swallows it when the choreography did: the gesture that
    * triggered the closing has then already reported it.
    */
-  onDialogClose: () => void;
+  onDialogClose: (event?: SyntheticEvent<HTMLDialogElement>) => void;
   /**
    * Belongs on the <dialog> element's `onCancel`. Escape runs through the same
    * choreography instead of closing hard. Where the browser does not permit
@@ -40,6 +81,12 @@ export interface DialogChoreography {
    * `onDialogClose` reports that, and nothing is reported here.
    */
   onDialogCancel: (event: SyntheticEvent<HTMLDialogElement>) => void;
+  /**
+   * Belongs on the <dialog> element's `onKeyDown`. A synthetic Escape - one a
+   * test tool dispatches, which the browser never turns into a cancel - runs
+   * the same choreography as the native cancel.
+   */
+  onDialogKeyDown: (event: KeyboardEvent<HTMLDialogElement>) => void;
 }
 
 /**
@@ -73,7 +120,45 @@ export function useDialogChoreography(
      certain to come. */
   const closedByUs = useRef(false);
 
-  const onDialogClose = () => {
+  /* Where the focus goes back to. Remembered on opening: the platform's own
+     return fails for a dialog that unmounts, and for an opener that took no
+     focus. */
+  const opener = useRef<HTMLElement | null>(null);
+  const locked = useRef(false);
+
+  const release = () => {
+    if (locked.current) {
+      locked.current = false;
+      unlockScroll();
+    }
+  };
+  /* The focus goes back when the close left it on the body. */
+  const returnFocus = (dialog: HTMLDialogElement) => {
+    const target = opener.current;
+    const active = document.activeElement;
+    if (target?.isConnected && (!active || active === document.body || dialog.contains(active))) target.focus();
+  };
+  /* Closes an open dialog and gives the page back: scroll and focus. */
+  const closeNow = (dialog: HTMLDialogElement) => {
+    if (dialog.open) {
+      closedByUs.current = true;
+      dialog.close();
+    }
+    release();
+    returnFocus(dialog);
+  };
+
+  /* A close or cancel from a dialog nested inside this one - a React child
+     whose events bubble through the React tree - is not this dialog's. */
+  const own = (event?: SyntheticEvent<HTMLDialogElement>) => !event || event.target === event.currentTarget;
+
+  const onDialogClose = (event?: SyntheticEvent<HTMLDialogElement>) => {
+    if (!own(event)) return;
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) {
+      release();
+      returnFocus(dialog);
+    }
     if (closedByUs.current) {
       closedByUs.current = false;
       return;
@@ -82,10 +167,47 @@ export function useDialogChoreography(
   };
 
   const onDialogCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
-    if (!event.cancelable) return;
+    if (!own(event) || !event.cancelable) return;
     event.preventDefault();
     onClose();
   };
+
+  const onDialogKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key !== "Escape" || event.nativeEvent.isTrusted || event.defaultPrevented) return;
+    if ((event.target as Element).closest("dialog") !== event.currentTarget) return;
+    event.preventDefault();
+    onClose();
+  };
+
+  const openNow = (dialog: HTMLDialogElement) => {
+    if (!dialog.open) {
+      watchPointer();
+      opener.current = openerNow();
+      dialog.showModal();
+    }
+    if (!locked.current) {
+      locked.current = true;
+      lockScroll();
+    }
+  };
+
+  /* The state the platform cannot keep: a dialog whose React tree is hidden
+     (`<Activity mode="hidden">`, a Suspense that suspends again) or removed
+     stays open and blocks the page, and nothing in the tree closes it. This
+     layout effect closes it when the tree goes and opens it again when the
+     tree returns; `open` is read through a ref, as the effect runs once per
+     showing and not per change. */
+  const openRef = useRef(open);
+  useLayoutEffect(() => {
+    openRef.current = open;
+  });
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (openRef.current) openNow(dialog);
+    return () => closeNow(dialog);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -96,9 +218,7 @@ export function useDialogChoreography(
          the exit choreography has to be reset before showModal() runs. */
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setClosing(false);
-      if (!dialog.open) {
-        dialog.showModal();
-      }
+      openNow(dialog);
       /* The children mount only now: a field with `autoFocus` focuses itself
          on mounting, which needs the dialog visible. */
       setMounted(true);
@@ -111,8 +231,7 @@ export function useDialogChoreography(
     }
     const exitMs = typeof exit === "number" ? exit : durationFrom(getComputedStyle(dialog), exit);
     if (exitMs <= 0 || prefersReducedMotion()) {
-      closedByUs.current = true;
-      dialog.close();
+      closeNow(dialog);
       setMounted(false);
       return;
     }
@@ -121,23 +240,24 @@ export function useDialogChoreography(
     setClosing(true);
     const timer = window.setTimeout(() => {
       setClosing(false);
-      closedByUs.current = true;
-      dialog.close();
+      closeNow(dialog);
       setMounted(false);
     }, exitMs);
     return () => window.clearTimeout(timer);
+    /* `openNow` and `closeNow` read refs only. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, exit]);
 
-  /* showModal() found no children to focus and put the focus on the dialog
-     itself. Unless a field took it by `autoFocus`, the first tab stop gets it,
-     as the platform's own focusing steps would have given it. */
+  /* Unless a field took the focus by `autoFocus`, the first field gets it - not
+     the header's close cross, which the platform's focusing steps would pick -
+     and a dialog without one is focused itself. */
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!mounted || !dialog) return;
     const active = document.activeElement;
     if (active !== dialog && dialog.contains(active)) return;
-    firstTabStop(dialog)?.focus();
+    (firstTabStop(dialog, "[data-dialog-close]") ?? dialog).focus();
   }, [mounted]);
 
-  return { dialogRef, mounted, closing, onDialogClose, onDialogCancel };
+  return { dialogRef, mounted, closing, onDialogClose, onDialogCancel, onDialogKeyDown };
 }

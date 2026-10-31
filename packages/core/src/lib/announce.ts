@@ -74,6 +74,14 @@ export function announce(text: string, at?: Element | null): void {
   }, ANNOUNCE_REST);
 }
 
+/** For tests: drops a waiting announcement and empties every region, so that no
+    text carries into the next test. Call it in `afterEach`. */
+export function resetAnnouncer(): void {
+  silence();
+  if (typeof document === "undefined") return;
+  document.querySelectorAll("[data-umriss-announcer]").forEach((region) => region.replaceChildren());
+}
+
 /** Drops an announcement still waiting - a list that closed has nothing
     more to count. */
 export function silence(): void {

@@ -282,6 +282,10 @@ module.exports = {
 **Next.js** with `next/jest`: put the umriss packages in `transpilePackages`; the preset stubs the
 stylesheets and compiles the packages itself.
 
+**The announcer** (`announce`, the polite live region that speaks for lists and counts) keeps its
+region and a 150 ms timer between tests. Call `resetAnnouncer()` from `@umriss-ui/core` in
+`afterEach`: it drops a waiting announcement and empties every region.
+
 **The setup file** gives jsdom the five browser APIs that core's components use. It is the same file
 for both runners:
 
