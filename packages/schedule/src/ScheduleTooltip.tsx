@@ -21,6 +21,26 @@ export function useDuration(): (ms: number) => string {
   };
 }
 
+/** A span as one reading, the year included: the times on one day under that
+    day's date, otherwise each end with its own date - across a year boundary
+    or a leap day the times alone ("22:00-03:00") would not say which. */
+export function useSpanText(): (from: number, to: number) => string {
+  const formats = useFormats();
+  const wording = useWording();
+  return (from, to) => {
+    const [a, b] = [new Date(from), new Date(to)];
+    const day = formats.date(a);
+    if (day === formats.date(b)) return `${day} ${wording.scheduleGhostTimes(timeText(formats, from), timeText(formats, to))}`;
+    return wording.scheduleGhostTimes(`${day} ${timeText(formats, from)}`, `${formats.date(b)} ${timeText(formats, to)}`);
+  };
+}
+
+/** The dependency's lag, or nothing where it has none: "0 min" would read as a
+    lag of its own. */
+export function lagText(wording: { scheduleDependency: string }, duration: (ms: number) => string, lag: number): string {
+  return Math.round(lag / MINUTE) === 0 ? wording.scheduleDependency : `${wording.scheduleDependency} ${duration(lag)}`;
+}
+
 /** What the live region reads after the keys rest: the
     lane, the task and the subtask, the day and the times, and every finding
     by its name - the findings are spoken, never only coloured. The lane's
@@ -60,7 +80,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
   const { dependency, task, from, to, violated } = target;
   return [
     task?.name ?? task?.id ?? dependency.id,
-    `${wording.scheduleDependency} ${duration(dependency.lag)}`,
+    lagText(wording, duration, dependency.lag),
     wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to),
     ...(violated === undefined ? [] : [wording.scheduleViolatedBy(duration(violated.shortBy))]),
   ].join(", ");
@@ -71,6 +91,7 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
   const wording = useWording();
   const time = (instant: number) => timeText(formats, instant);
   const duration = useDuration();
+  const spanText = useSpanText();
 
   if (target.kind === "subtask") {
     const { subtask, task } = target;
@@ -78,7 +99,8 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
       <>
         <span className={styles.tooltipHead}>{task?.name ?? subtask.task}</span>
         <span>{subtask.name ?? subtask.id}</span>
-        <span className={styles.tooltipTimes}>{wording.scheduleGhostTimes(time(subtask.from), time(subtask.to))}</span>
+        <span className={styles.tooltipTimes}>{spanText(subtask.from, subtask.to)}</span>
+        <span>{duration(subtask.to - subtask.from)}</span>
         {(subtask.leadIn ?? 0) > 0 && <span>{`${wording.scheduleLeadIn} ${duration(subtask.leadIn!)}`}</span>}
         {(subtask.leadOut ?? 0) > 0 && <span>{`${wording.scheduleLeadOut} ${duration(subtask.leadOut!)}`}</span>}
         {target.overlapping.map((other) => (
@@ -115,7 +137,7 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
     <>
       <span className={styles.tooltipHead}>{task?.name ?? task?.id ?? dependency.id}</span>
       <span>{wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to)}</span>
-      <span>{`${wording.scheduleDependency} ${duration(dependency.lag)}`}</span>
+      <span>{lagText(wording, duration, dependency.lag)}</span>
       {violated !== undefined && <span className={styles.finding}>{wording.scheduleViolatedBy(duration(violated.shortBy))}</span>}
     </>
   );

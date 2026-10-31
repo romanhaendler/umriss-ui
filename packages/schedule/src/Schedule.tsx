@@ -76,8 +76,8 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
       is above 1, so lane names keep their room in a reader's larger font.
       @default 44 */
   laneHeight?: number;
-  /** Width of the lane headers in pixels - at most 40 % of the schedule, so
-      that on a phone the plot keeps the larger part.
+  /** Width of the lane headers in pixels - at most 28 % of the schedule
+      (never under 88 pixels), so that on a phone the plot keeps the larger part.
       @default 160 */
   headerWidth?: number;
   /** A working calendar: the intervals in which time counts. Nights and
@@ -486,7 +486,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         data-schedule-clip="schedule"
         {...name}
         className={className ? `${styles.root} ${className}` : styles.root}
-        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
+        style={{ ...(height === undefined ? { height: "100%", minHeight: 400 } : { height: `${height}px` }), gridTemplateColumns: `min(${headerWidth}px, max(88px, 28%)) minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner}>
           {zoneLabel !== null && (
@@ -559,7 +559,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                     <AngleGlyph size={9} data-open={header.collapsed === false ? "" : undefined} />
                   </button>
                 )}
-                <span className={styles.headerLabel} data-schedule-overlay="header label">
+                <span className={styles.headerLabel} data-schedule-overlay="header label" title={typeof header.label === "string" ? header.label : undefined}>
                   {header.label}
                 </span>
                 {header.kind !== "lane" && (

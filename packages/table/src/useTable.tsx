@@ -745,7 +745,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     sort,
     toggleSort: b.toggleSort,
     hidden: b.hidden,
-    toggleColumn: b.toggleColumn,
+    /* A row header cannot be hidden, so it does not enter `hidden` either. */
+    toggleColumn: (column: string) => {
+      if (!registry.columnById(column)?.spec.rowHeader) b.toggleColumn(column);
+    },
     order: b.order,
     setOrder: b.setOrder,
     pinned: pinsChosen ?? declared,

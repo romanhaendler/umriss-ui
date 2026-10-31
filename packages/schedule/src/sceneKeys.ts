@@ -183,12 +183,14 @@ export class SceneKeys {
   }
 
   /** Alt+←/→ proposes a move by one step of the raster, Alt+Shift+←/→ a new
-      end - the intents a drag of that length reports (ADR-0023), and only
-      where the caller handles them. Nothing is applied here. */
+      end, Alt+↑/↓ a change to the lane above or below - the intents a drag
+      reports (ADR-0023), and only where the caller handles them. Nothing is
+      applied here. */
   private edit(event: KeyboardEvent): boolean {
     const hover = this.host.gestures.hover;
     const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (direction === 0) return false;
+    const vertical = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+    if (direction === 0 && vertical === 0) return false;
     /* A plan on its way is moved by nobody; the key stays the plot's. */
     if (this.host.gestures.loading) return true;
     /* From here on the key is the plot's even where it proposes nothing:
@@ -198,6 +200,15 @@ export class SceneKeys {
     const s = hover.subtask;
     const gestures = this.host.gestures;
     const intents = this.host.view.options.intents;
+    if (vertical !== 0) {
+      const lane = this.laneBeside(s.lane, vertical);
+      if (lane !== null && intents.includes("lane") && (this.host.handlers().canMoveTo?.(s, lane) ?? true)) {
+        gestures.byKeyboard = true;
+        this.host.handlers().onIntent?.({ kind: "lane", subtask: s.id, lane });
+        this.scheduleReadout();
+      }
+      return true;
+    }
     /* Without a raster a key still needs a step: the fine band's. */
     const raster = gestures.snapStep();
     const step = raster.step > 0 ? raster : { step: this.host.view.step(), offset: 0 };
@@ -228,6 +239,14 @@ export class SceneKeys {
     /* The caller applies it, or not; either way the readout says what stands. */
     this.scheduleReadout();
     return true;
+  }
+
+  /** The lane drawn one row above (-1) or below (1) a lane - group heads and
+      folded groups are passed over; null at the first or last lane. */
+  private laneBeside(lane: string, step: -1 | 1): string | null {
+    const lanes = this.host.view.rows.rows.flatMap((row) => (row.kind === "lane" && row.lane !== undefined ? [row.lane] : []));
+    const at = lanes.indexOf(lane);
+    return at < 0 ? null : (lanes[at + step] ?? null);
   }
 
   /** The keys stand on this target: brought into view, drawn as the hover. */

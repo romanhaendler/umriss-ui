@@ -1081,7 +1081,7 @@ export const DEFAULT_WORDING: Wording = {
     (milestones === 0 ? "" : ` ${milestones === 1 ? "1 milestone" : `${milestones} milestones`}.`),
   scheduleVisibleRange: (from, to) => `From ${from} to ${to}.`,
   scheduleKeyHelp:
-    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Plus zooms in, minus zooms out, zero fits all the work. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Plus zooms in, minus zooms out, zero fits all the work. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end, Alt with up or down another lane. Escape clears.",
   scheduleShowData: "Show data",
   scheduleHideData: "Hide data",
   scheduleTableCaption: (from, to) => `Subtasks from ${from} to ${to}.`,

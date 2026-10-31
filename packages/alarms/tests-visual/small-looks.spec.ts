@@ -45,6 +45,21 @@ test("@quick In a narrow list a long state ends in an ellipsis with its text as 
   expect(await duration.evaluate((node) => getComputedStyle(node).whiteSpace)).toBe("nowrap");
 });
 
+test("@quick At 375 px every row's priority mark is in view without scrolling sideways", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openExample(page, "alarmlist", "show-the-alerts");
+  const marks = page.locator('[data-example="show-the-alerts"] tbody tr[data-alarm-id] [role="img"][data-priority]');
+  await marks.first().waitFor({ state: "visible" });
+  const inView = await marks.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const scroller = node.closest("table")!.parentElement!.getBoundingClientRect();
+      return node.getBoundingClientRect().right <= scroller.right && node.getBoundingClientRect().left >= scroller.left;
+    }),
+  );
+  expect(inView.length).toBeGreaterThan(0);
+  expect(inView.every(Boolean)).toBe(true);
+});
+
 test("@quick At 375 px the banner's time is one line", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await openExample(page, "alarmbanner", "banner-over-the-list");
