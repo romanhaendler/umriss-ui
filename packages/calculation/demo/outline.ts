@@ -88,7 +88,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "chain",
         name: "Chain",
-        sentence: "A sheet read top to bottom (a running calculation): each line worked into the value before it, and interims naming the value where they stand. Reach for it for invoices, budgets and cost sheets.",
+        sentence: "A sheet read top to bottom (a running calculation, step by step): each line, a step, worked into the value before it, and interims naming the value where they stand. Reach for it for invoices, budgets and cost sheets.",
         about: [
           "A chain has no precedence: every line works into the value before it, strictly in order. So `Times` and `DividedBy` stand alone between two named values; anything else fails on the first render.",
           "A chain in view stands open – it is the working itself. What should show only on request goes into one line as a tree, which folds. Only an `Interim` shows the running value (ADR-0028).",
@@ -117,7 +117,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "given",
         name: "Given",
-        sentence: "The numbers a calculation starts from (inputs, leaves): where they came from, when they were true, and whether they are still fresh.",
+        sentence: "The numbers a calculation starts from (inputs, variables, leaves): where they came from, when they were true, and whether they are still fresh.",
         about: [
           "A given with `asOf` and `ages` carries a freshness through core, as a `Stat` does – beside the number, never instead of its verdict. There are no default ages.",
           "`quality` (`good`, `uncertain`, `bad`) says how far the source vouches for the number. It is carried up: every line built on the given shows the worst quality of its operands. The freshness is not.",

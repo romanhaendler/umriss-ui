@@ -45,7 +45,7 @@ export interface DateRangePickerProps
       preset and on clearing (`null`). Ends dragged backwards swap silently;
       there is no error state to handle. */
   onValueChange?: (range: DateRange | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (range: DateRange | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;

@@ -24,8 +24,9 @@
 
 import { createContext, useContext, useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
-import { DatePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, announce, useFormats } from "@umriss-ui/core";
+import { Checkbox, DatePicker, DateTimePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, announce, useFormats } from "@umriss-ui/core";
 import type { Wording } from "@umriss-ui/core";
+import { allDays } from "./model/day";
 import type { ColumnEntry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
@@ -229,7 +230,7 @@ export function GridFocus({
         } catch {
           /* Not in every browser: the select stays focused, one more click opens it. */
         }
-      } else if (wish === "open" && field instanceof HTMLButtonElement) field.click();
+      } else if (wish === "open" && (field instanceof HTMLButtonElement || (field instanceof HTMLInputElement && field.type === "checkbox"))) field.click();
     } else if (wish === "cell") (stop as HTMLTableCellElement | null)?.focus();
     /* The cell the focus stood in left the document - its row scrolled out of
        a virtual window, or was removed: the focus goes to the cell now at its
@@ -290,10 +291,22 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
     });
   } else if (spec.edit === "number") {
     field = <NumberInput size="sm" value={typeof draft === "number" ? draft : null} onValueChange={setDraft} />;
-  } else if (spec.edit === "date") {
+  } else if (spec.edit === "boolean") {
+    /* A toggle is a decision: it commits - in a Row draft it is one of the row's, saved with it. */
+    field = <Checkbox checked={draft === true} onCheckedChange={(checked) => (editing.row ? setDraft(checked) : grid.commit(id, checked))} />;
+  } else if (spec.edit === "date" || spec.edit === "dateTime") {
     /* A day picked is a decision: it commits, as Enter does in a text - in a
-       Row draft it is one of the row's, saved with it. */
-    field = <DatePicker size="sm" value={draft instanceof Date ? draft : null} onValueChange={(date) => (editing.row ? setDraft(date) : grid.commit(id, date))} />;
+       Row draft it is one of the row's, saved with it. A "date" editor over
+       values that carry a time of day is the date-time one: the day alone
+       would write midnight over the time. */
+    const format = spec.format;
+    const withTime = spec.edit === "dateTime" || (format !== undefined ? format !== "date" : !allDays(grid.hook.rows.map(entry.read), formats.timeZone));
+    const done = (date: Date | null) => (editing.row ? setDraft(date) : grid.commit(id, date));
+    field = withTime ? (
+      <DateTimePicker size="sm" withSeconds={typeof format === "string" && format.endsWith("Seconds")} value={draft instanceof Date ? draft : null} onValueChange={done} />
+    ) : (
+      <DatePicker size="sm" value={draft instanceof Date ? draft : null} onValueChange={done} />
+    );
   } else if (spec.edit === "select") {
     let options: readonly unknown[] = spec.editOptions ?? occurringValues(grid.hook.admitted, entry.read, formats).values;
     if (!Array.isArray(options)) {

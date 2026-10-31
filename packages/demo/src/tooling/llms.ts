@@ -348,7 +348,7 @@ function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): str
           "",
           "Composed, realistic screens built from the package.",
           "",
-          ...scenarios.map((scenario) => `- [${scenario.title}](${twinUrl(manifest.place, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
+          ...scenarios.map((scenario) => `- [${scenario.title}](${twinUrl(manifest.place, `/${SCENARIOS}/${scenario.id}`)}#${slug(scenario.title)}): ${scenario.lead}`),
           "",
         ]),
     ...outline.flatMap((rubric) => [
@@ -359,6 +359,11 @@ function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): str
       ...rubric.pages.map((page) => `- [${page.name}](${twinUrl(manifest.place, `/${page.id}`)}): ${page.sentence}`),
       "",
     ]),
+    /* llmstxt.org: what a reader short of room may skip. */
+    "## Optional",
+    "",
+    `- [Every page in full](${fullUrl}): the whole documentation in one file, examples' source and props tables included.`,
+    "",
   ].join("\n");
 }
 
@@ -597,6 +602,9 @@ function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): 
   return { sitePages, twins };
 }
 
+/** A heading as the anchor a Markdown reader makes of it. */
+const slug = (title: string) => title.toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/ /g, "-");
+
 /** The full text as it travels in the npm package, read without any site: a
     link to another page of the package points at that page's heading in the
     same file, the one document it names (ADR-0032) at its file on GitHub, and
@@ -604,7 +612,6 @@ function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): 
     the site and go. Applied to the text after it is made, so that the site's
     pages and twins, cut from the unchanged text, keep their addresses. */
 export function packagedText({ manifest, pages, scenarios }: Pick<Run, "manifest" | "pages" | "scenarios">, full: string): string {
-  const slug = (title: string) => title.toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/ /g, "-");
   const own = manifest.place;
   const root = own.replace(/[^/]+\/$/, "");
   const adr = readdirSync(fileURLToPath(new URL("../../../../docs/adr/", import.meta.url))).find((name) => name.startsWith("0032-"));
@@ -716,7 +723,6 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   /* The full text. */
   const parts = fullHead(run);
   const cuts: Cut[] = [];
-  if (scenarios.length > 0) cuts.push(scenariosSection(run, parts));
   /* The props tables each page shows, for the search (`propEntries`). */
   const propsOfPages: PropsOfPage[] = [];
   /* Where the API index's body goes: it is written once every other page is,
@@ -730,6 +736,9 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       cuts.push(cut);
     }
   }
+
+  /* The scenarios follow the pages: what a consumer reads first is the install, the provider and the components. */
+  if (scenarios.length > 0) cuts.push(scenariosSection(run, parts));
 
   const apiIndex = indexAt === undefined ? undefined : apiIndexOf(run, packageDir, link, parts, cuts, indexAt);
 

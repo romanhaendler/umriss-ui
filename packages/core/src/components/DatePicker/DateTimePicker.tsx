@@ -46,7 +46,7 @@ export interface DateTimePickerProps
       the click on a day: a day without a time would be a half-set value here,
       and a half value is no value. */
   onValueChange?: (date: Date | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (date: Date | null) => void;
   /** Show the seconds field. */
   withSeconds?: boolean;

@@ -47,7 +47,7 @@ export interface MultiSelectProps<T extends string | number = string>
   /** Runs on every change of the selection, with the complete new list –
       not with the one value that moved. */
   onValueChange?: (value: T[]) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: T[]) => void;
   /** What stands in the empty field. */
   placeholder?: string;

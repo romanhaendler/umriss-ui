@@ -89,7 +89,7 @@ export interface DateTimeRangePickerProps
       clicks. If the end lies before the start, both swap on applying - there is
       no error state. */
   onValueChange?: (range: DateRange | null) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (range: DateRange | null) => void;
   /** Show the seconds fields. */
   withSeconds?: boolean;

@@ -25,7 +25,7 @@ export interface FileInputProps
   /** Reports the files after a choice, a drop or a removal - only those
       `accept` takes, and one where the input takes one. */
   onValueChange?: (files: File[]) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (files: File[]) => void;
   /** Marks the input as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
