@@ -729,6 +729,18 @@ export class Registry {
     this.structure++;
   }
 
+  /** Whether the body stands as placeholders: loading with no row to keep.
+      The counts and the pager say nothing then - a 0 or a "Page 1 of 1"
+      under the skeleton would be a total nobody has answered. */
+  skeleton = false;
+
+  setSkeleton(skeleton: boolean) {
+    if (this.skeleton === skeleton) return;
+    this.skeleton = skeleton;
+    this.structure++;
+    this.commit();
+  }
+
   /** Server mode: the page size the frame last measured, `null` before the
       first measurement. A request waits while the page in the state is not it. */
   fitMeasured: number | null = null;

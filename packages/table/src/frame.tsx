@@ -124,7 +124,7 @@ export function Frame({
   useCutValueWarnings(tableRef);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
-  useFit(registry, tableRef, loading, pitch);
+  useFit(registry, tableRef, loading, pitch, registry.server && selectable);
   /* The anchor of a page-size change: the row with focus, and the current row. */
   const setAnchor = registry.hook?.tableState.setAnchor;
   useLayoutEffect(() => {
@@ -148,6 +148,11 @@ export function Frame({
     if (registry.takePicked() && gridMode && selectable && chosen && !chosen.allMatching) announce(wording.tableSelectedCount(chosen.count), tableRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of the selection is said
   }, [chosen?.selected, chosen?.except]);
+
+  /* Placeholders stand where loading has no row to keep: the counts and the
+     pager then say nothing. */
+  const skeleton = loading && error === undefined && (registry.hook?.publicSnapshot.visible.length ?? 0) === 0;
+  useLayoutEffect(() => registry.setSkeleton(skeleton), [registry, skeleton]);
 
   const hook = registry.hook;
   if (!hook) return null;

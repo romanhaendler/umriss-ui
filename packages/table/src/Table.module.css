@@ -796,11 +796,11 @@
     }
   }
 
+  /* The type of the range beside it: figures that hold their width, not a
+     face of their own. */
   .paginationStatus {
     white-space: nowrap;
-    font-family: var(--u-font-mono);
-    font-size: var(--u-text-xs);
-    letter-spacing: var(--u-tracking-figures);
+    font-variant-numeric: tabular-nums;
   }
 
   /* ---- Column filters --------------------------------------------------- */

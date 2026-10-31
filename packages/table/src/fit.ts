@@ -55,7 +55,24 @@ function measure(table: HTMLTableElement, scroll: HTMLElement) {
   return { pitch, room: scroll.clientHeight - head - foot };
 }
 
-export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement | null>, loading: boolean, pitch: number) {
+/** The height the offer to select all that match takes when it appears, while it
+    does not stand: a probe of the line's own size, measured beside the scroll area. */
+function offerHeight(scroll: HTMLElement): number {
+  const frame = scroll.parentElement;
+  if (!frame || frame.querySelector("[data-select-matching]")) return 0;
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText = "position:absolute;visibility:hidden;border-bottom:1px solid transparent;min-height:calc(var(--u-control-height-sm) + 2 * var(--u-space-1) + 1px)";
+  frame.appendChild(probe);
+  const height = probe.getBoundingClientRect().height;
+  probe.remove();
+  return height;
+}
+
+/* `offer`: a server table with a selection column, where the offer's line may
+   come with a tick. The fit leaves room for it, so that it takes a spare line
+   of the body and the page keeps its size. */
+export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement | null>, loading: boolean, pitch: number, offer: boolean) {
   const latest = useRef({ loading });
   useLayoutEffect(() => {
     latest.current = { loading };
@@ -65,7 +82,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
 
   /* The page is cut where the table is filled, paged by the application's
      option or by this hook, and has a held height to measure against. */
-  const cut = (force = false) => {
+  const cut = () => {
     const hook = registry.hook;
     const table = tableRef.current;
     const scroll = table?.parentElement;
@@ -80,8 +97,9 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     if (!scroll.style.getPropertyValue("--_table-held")) return;
     /* A scroll area that is not laid out (display: none) has no room to read. */
     if (!scroll.clientHeight) return;
-    const { pitch: line, room } = measure(table, scroll);
+    const { pitch: line, room: area } = measure(table, scroll);
     if (!line) return;
+    const room = offer ? area - offerHeight(scroll) : area;
     const total = linesOf(registry);
     const now = state.pageSize;
     const next = fittedLines(room, line, now);
@@ -96,18 +114,13 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
       if (total > 0 && next >= total && now >= total) return;
     }
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
-    /* A resize waits while focus is in the rows, so that it never pulls the row
-       from under the user; the focus leaving the rows cuts again. A density (`force`)
-       applies at once. */
-    if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
     if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
     if (registry.server) registry.setFitMeasured(next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
      first measurement and the follow-up of a density never show a page that
-     is cut wrong for a frame. A new line is cut for as well, but waits while
-     focus is in the rows like any resize. */
+     is cut wrong for a frame. A new line is cut for as well. */
   const state = registry.hook?.tableState;
   const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}`;
   const lines = registry.hook && !registry.server ? linesOf(registry) : 0;
@@ -116,7 +129,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     if (!forced && seenLines.current === lines) return;
     seen.current = key;
     seenLines.current = lines;
-    cut(forced);
+    cut();
   });
 
   useLayoutEffect(() => {
@@ -136,14 +149,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
       else timer = setTimeout(cut, registry.server ? SERVER_SETTLE_MS : SETTLE_MS);
     });
     observer.observe(scroll);
-    /* Focus leaving the rows: the activeElement is the new one a tick later. */
-    const table = tableRef.current;
-    const left = (event: FocusEvent) => {
-      if (!table?.tBodies[0]?.contains(event.relatedTarget as Node | null)) setTimeout(cut, 0);
-    };
-    table?.addEventListener("focusout", left);
     return () => {
-      table?.removeEventListener("focusout", left);
       clearTimeout(timer);
       observer.disconnect();
     };

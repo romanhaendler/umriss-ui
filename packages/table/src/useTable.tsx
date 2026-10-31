@@ -245,7 +245,13 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      whole, so it is passed over, and said so once in development. */
   const server = options.server === true;
   const rowCount = options.server ? options.rowCount : 0;
-  const serverInput = useMemo(() => (server ? { rowCount } : undefined), [server, rowCount]);
+  /* How many requests were reported: a total of 0 stands for "not answered
+     yet" until a total was seen or a second request was reported - that one
+     is of a view whose total is known. */
+  const reportCount = useRef(0);
+  const [answered, setAnswered] = useState(false);
+  if (rowCount > 0 && !answered) setAnswered(true);
+  const serverInput = useMemo(() => (server ? { rowCount, answered } : undefined), [server, rowCount, answered]);
   registry.setServer(server);
   if (server) {
     if (options.preFilter) {
@@ -577,6 +583,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      pruned; a cap if a session types for hours. */
   const reportedKeys = useRef(new Set<string>());
   const answersKey = options.server && options.answers ? requestKey(options.answers) : null;
+  /* The `answers` of the first render is a placeholder - the application has
+     not been asked yet - and so is one that stands beside an `error`: neither
+     is told off for matching no request. */
+  const firstAnswers = useRef(answersKey);
   const late = answersKey !== null && answersKey !== reportKey;
   /* A typed search is reported after a pause of PAUSE_MS without a keystroke;
      anything else that changes the request reports it - with the text typed so
@@ -593,6 +603,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     const typed = registry.takeTyped();
     if (reported.current !== reportKey) {
       reported.current = reportKey;
+      if (++reportCount.current > 1) setAnswered(true);
       if (DEV) reportedKeys.current.add(reportKey);
       if (typed) {
         registry.holdSearch(() => onRequestNow.current?.(request), PAUSE_MS);
@@ -601,7 +612,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
         options.onRequest?.(request);
       }
     }
-    if (DEV && answersKey !== null && !reportedKeys.current.has(answersKey)) {
+    if (DEV && answersKey !== null && answersKey !== firstAnswers.current && options.error === undefined && !reportedKeys.current.has(answersKey)) {
       warnOnce("server-answers", "`answers` matches none of the requests `onRequest` received; the table stays busy. Hand back the request object you were given, or one with the same search, conditions, sort, page and page size.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
