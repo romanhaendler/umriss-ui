@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { warnDeprecated, warnOnce } from "./dev";
 
@@ -18,8 +18,17 @@ export interface FieldValueProps<V> {
  * or `null` reads as empty, so a field whose application has no value yet stays controlled. It is
  * fixed by the first render; a later switch is warned of in development and then followed.
  * `legacy` marks a field whose `onChange` handed a value: it still works, and speaks once.
+ *
+ * The fourth item is a ref callback for any element of the field: when the form around it resets,
+ * the field goes back to its `defaultValue` (or empty) and reports that - a controlled field only
+ * reports, its owner decides.
  */
-export function useFieldValue<V, E = V>(component: string, props: FieldValueProps<V | E>, empty: E, legacy = true): [V | E, (next: V) => void, boolean] {
+export function useFieldValue<V, E = V>(
+  component: string,
+  props: FieldValueProps<V | E>,
+  empty: E,
+  legacy = true,
+): [V | E, (next: V) => void, boolean, (element: HTMLElement | null) => void] {
   const present = "value" in props;
   const [first] = useState(present);
   if (present !== first) {
@@ -34,14 +43,25 @@ export function useFieldValue<V, E = V>(component: string, props: FieldValueProp
   const callback = (props.onValueChange ?? (legacy ? props.onChange : undefined)) as ((value: V) => void) | undefined;
   if (legacy && props.onChange && !props.onValueChange) warnDeprecated(`${component} onChange(value)`, "onValueChange");
   const value = controlled ? (props.value ?? empty) : own;
-  return [
-    value,
-    (next) => {
-      if (!controlled) setOwn(next);
-      callback?.(next);
-    },
-    controlled,
-  ];
+  const report = (next: V) => {
+    if (!controlled) setOwn(next);
+    callback?.(next);
+  };
+  const toDefault = useRef(() => {});
+  useEffect(() => {
+    toDefault.current = () => report((props.defaultValue ?? empty) as V);
+  });
+  const stopListening = useRef<(() => void) | null>(null);
+  const bind = useCallback((element: HTMLElement | null) => {
+    stopListening.current?.();
+    stopListening.current = null;
+    const form = (element as HTMLInputElement | null)?.form ?? element?.closest("form");
+    if (!form) return;
+    const onReset = () => toDefault.current();
+    form.addEventListener("reset", onReset);
+    stopListening.current = () => form.removeEventListener("reset", onReset);
+  }, []);
+  return [value, report, controlled, bind];
 }
 
 /**
@@ -49,7 +69,7 @@ export function useFieldValue<V, E = V>(component: string, props: FieldValueProp
  * itself; a field that keeps its value in React (Slider, the file list) does not, and a form that
  * resets through the DOM would leave it out of step.
  */
-export function useFormReset(input: RefObject<HTMLInputElement | null>, restore: () => void): void {
+export function useFormReset(input: RefObject<{ form: HTMLFormElement | null } | null>, restore: () => void): void {
   const latest = useRef(restore);
   useEffect(() => {
     latest.current = restore;

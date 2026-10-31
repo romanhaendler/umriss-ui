@@ -117,7 +117,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [valueGiven, onChange] = useFieldValue<T[], readonly T[]>("MultiSelect", props, NONE as readonly T[]);
+  const [valueGiven, onChange, , formRef] = useFieldValue<T[], readonly T[]>("MultiSelect", props, NONE as readonly T[]);
   const optionsOk = areOptions(optionsGiven);
   const options = optionsOk ? optionsGiven : (NONE as readonly MultiSelectOption<T>[]);
   useShapeWarning("MultiSelect", "options", !optionsOk, "an array of { value, label } objects, not strings");
@@ -532,7 +532,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
         <button
           {...rest}
           onBlur={(event) => fieldBlur(event, onBlur, fieldRef, panelId)}
-          ref={mergeRefs(mainRef, ref)}
+          ref={mergeRefs(mainRef, ref, formRef)}
           type="button"
           id={triggerId}
           disabled={disabled}

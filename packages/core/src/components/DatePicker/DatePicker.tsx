@@ -87,7 +87,7 @@ export function DatePicker(props: DatePickerProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [valueGiven, onChange] = useFieldValue<Date | null>("DatePicker", props, null);
+  const [valueGiven, onChange, , formRef] = useFieldValue<Date | null>("DatePicker", props, null);
   const value = isDate(valueGiven) ? valueGiven : null;
   useShapeWarning("DatePicker", "value", valueGiven != null && !isDate(valueGiven), "a Date or null");
   const size = useControlSize(ownSize);
@@ -151,6 +151,7 @@ export function DatePicker(props: DatePickerProps) {
       <FormPost entries={[[name, posted(value, (date) => isoDay(date, timeZone), formValue)]]} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
+        formRef={formRef}
         root={rest}
         className={className}
         wrapRef={wrapRef}
