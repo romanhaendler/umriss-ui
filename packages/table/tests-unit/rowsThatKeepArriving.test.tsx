@@ -147,9 +147,9 @@ describe("The selection", () => {
     expect(screen.getByText("2 selected")).toBeTruthy();
     second();
     second();
-    // The row a is gone: the count follows the rows, the key waits in the set.
+    // The row a is gone: the count follows the rows, the key leaves the set.
     expect(screen.getByText("1 selected")).toBeTruthy();
-    expect(current!.selection.selected.has("a")).toBe(true);
+    expect(current!.selection.selected.has("a")).toBe(false);
     second();
     expect(tickedOf("Loop a")).toBe(false);
     expect(screen.getByText("1 selected")).toBeTruthy();
