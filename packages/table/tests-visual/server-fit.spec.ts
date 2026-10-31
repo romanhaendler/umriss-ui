@@ -23,5 +23,5 @@ test("a fitted server page holds still when the page is ticked", { tag: "@quick"
   expect(await rows.count()).toBe(before.rows);
   expect(await range.textContent()).toBe(before.range);
   expect(await requests.getAttribute("data-requests")).toBe(before.asked);
-  await expect(example.locator("tbody tr[aria-selected=true]")).toHaveCount(before.rows);
+  await expect(example.locator("tbody tr input[type=checkbox]:checked")).toHaveCount(before.rows);
 });
