@@ -70,7 +70,7 @@ function Rows({ rows }: { rows: ReadonlyArray<{ verdict: Verdict; text: string; 
   return (
     <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
       {rows.map(({ verdict, text, meta }, i) => (
-        <li key={text} style={{ display: "flex", alignItems: "center", gap: "var(--u-space-3)", padding: "6px 0", borderTop: i ? hairline : undefined }}>
+        <li key={text} style={{ display: "flex", alignItems: "center", gap: "var(--u-space-3)", padding: "6px 0", minHeight: 20, borderTop: i ? hairline : undefined }}>
           <Dot verdict={verdict} />
           <Text as="span" size="sm" style={{ flex: "1 1 0", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{text}</Text>
           {meta && <Text as="span" size="xs" tone="muted" style={{ whiteSpace: "nowrap" }}>{meta}</Text>}
