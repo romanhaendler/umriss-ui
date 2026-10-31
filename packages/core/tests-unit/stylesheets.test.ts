@@ -416,6 +416,12 @@ const CANON_EXCEPTIONS: Readonly<Record<string, string>> = {
   "core/VisuallyHidden/VisuallyHidden.module.css: .focusable:focus-within": "The same skip link, reached through a focusable child.",
   "core/TreeView/TreeView.module.css: .disabled":
     "The row is not disabled, only its checkbox is: the row stays focusable and navigable, and opacity would fade its focus ring with it. The type is muted instead; the checkbox dims by its own disabled state.",
+  "core/Button/Button.module.css: .button:disabled":
+    "A disabled button must reach 3:1, which opacity cannot give, and a dimmed accent stays the brightest block in the dark theme: sunken ground and muted type instead.",
+  "core/Button/Button.module.css: .ghost:disabled": "The same repaint for the ghost button: no ground, muted type, 4.5:1 on the surface.",
+  "core/Button/Button.module.css: .plain:disabled": "The same repaint for the plain button: no ground, muted type, 4.5:1 on the surface.",
+  "core/Button/Button.module.css: .button.danger:focus-visible":
+    "A danger fill next to a red-adjacent accent ring reads as one shape (1.3:1); a surface-coloured gap separates them so the ring reaches 3:1.",
 };
 
 function canonFinds(check: CanonCheck): string[] {

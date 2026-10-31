@@ -192,9 +192,6 @@
     /* How far a button gives way under the pointer or a finger. `1` turns the
        press off. */
     --u-button-press-scale: 0.98;
-    /* The look of a button that cannot be used: it greys out, unless it is
-       loading (then it says "running", not "not possible here"). */
-    --u-button-disabled-opacity: 0.5;
 
     /* The width of a drawer A token rather than a size
        prop: a detail beside a process picture wants one width across an

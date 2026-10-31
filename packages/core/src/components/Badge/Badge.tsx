@@ -21,7 +21,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTM
 export function Badge({ ref, tone = "neutral", pill = false, className, children, ...rest }: BadgeProps) {
   return (
     <span ref={ref} className={cx(styles.badge, pill && styles.pill, styles[tone], className)} {...rest}>
-      {children}
+      <span className={styles.text}>{children}</span>
     </span>
   );
 }

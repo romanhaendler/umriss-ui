@@ -36,15 +36,23 @@ export function resolveLocalTime(
     return { kind: "missing", date: d };
   }
 
-  // The doubled hour: the same wall-clock time exists again an hour away.
-  const oneHour = 3_600_000;
-  const before = new Date(d.getTime() - oneHour);
-  if (matchesWallTime(before, h, m, s, timeZone)) {
-    return { kind: "ambiguous", earlier: before, later: d };
+  /* The doubled time: when the clocks fall back, the same wall-clock time exists
+     again one change of the zone's offset away - an hour in most zones, half an
+     hour in Lord Howe. The change is read from the zone's offsets a day either
+     side, not assumed. */
+  const oneDay = 86_400_000;
+  const offsetAt = (t: number) => {
+    const f = zoneFields(new Date(t), timeZone);
+    return Date.UTC(f.year, f.month, f.day, f.hours, f.minutes, f.seconds) - Math.floor(t / 1000) * 1000;
+  };
+  const here = offsetAt(d.getTime());
+  const fellBackSince = offsetAt(d.getTime() - oneDay) - here;
+  if (fellBackSince > 0 && matchesWallTime(new Date(d.getTime() - fellBackSince), h, m, s, timeZone)) {
+    return { kind: "ambiguous", earlier: new Date(d.getTime() - fellBackSince), later: d };
   }
-  const after = new Date(d.getTime() + oneHour);
-  if (matchesWallTime(after, h, m, s, timeZone)) {
-    return { kind: "ambiguous", earlier: d, later: after };
+  const fallsBackAfter = here - offsetAt(d.getTime() + oneDay);
+  if (fallsBackAfter > 0 && matchesWallTime(new Date(d.getTime() + fallsBackAfter), h, m, s, timeZone)) {
+    return { kind: "ambiguous", earlier: d, later: new Date(d.getTime() + fallsBackAfter) };
   }
 
   return { kind: "ok", date: d };

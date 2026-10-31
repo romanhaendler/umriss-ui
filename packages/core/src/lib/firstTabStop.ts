@@ -36,3 +36,10 @@ export function firstTabStop(container: HTMLElement, except?: string): HTMLEleme
   }
   return null;
 }
+
+/* The last element a Tab press would reach in the container: as `firstTabStop`, from the
+   other end, and without its radio grouping (no surface that closes on a Tab out holds radios). */
+export function lastTabStop(container: HTMLElement): HTMLElement | null {
+  const stops = [...container.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.tabIndex >= 0 && visible(el));
+  return stops.at(-1) ?? null;
+}

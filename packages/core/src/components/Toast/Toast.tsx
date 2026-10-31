@@ -11,7 +11,7 @@ import { motionOrigin } from "../Popover/position";
 import { Spinner } from "../Spinner";
 import styles from "./Toast.module.css";
 import { useWording } from "../../lib/language";
-import { CrossGlyph } from "../../lib/glyphs";
+import { CrossGlyph, ToneGlyph } from "../../lib/glyphs";
 import { usePortalTarget, useToastConfig } from "../../lib/provider";
 import type { ToastPosition } from "../../lib/provider";
 import { useCardMeasure } from "./useCardMeasure";
@@ -99,36 +99,13 @@ export function useToast(): ToastContextValue {
   return context;
 }
 
-function ToneGlyph({ tone }: { tone: ToastTone }) {
+function ToastGlyph({ tone }: { tone: ToastTone }) {
   if (tone === "loading") {
     /* A spinner is not a glyph (CONTEXT.md). Its own status role stays out of
        hearing: the title says what is at work. */
     return <Spinner size={16} aria-hidden="true" />;
   }
-  return (
-    /* The dots of ! and i are strokes of no length: a round cap alone is a dot
-       as wide as the stem, and the glyph stays drawn with the stroke. */
-    <svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true">
-      {tone === "success" && (
-        <path d="M2.2 5.3 4.2 7.3l3.6-4.1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      )}
-      {tone === "danger" && (
-        <>
-          <circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M5 3v1.9M5 7v0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </>
-      )}
-      {tone === "warning" && (
-        <path d="M5 1.2 9.2 8.6H.8ZM5 4.1v1.4M5 7.1v0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      )}
-      {tone === "neutral" && (
-        <>
-          <circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M5 3v0M5 5v2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </>
-      )}
-    </svg>
-  );
+  return <ToneGlyph tone={tone} />;
 }
 
 /** How many providers stand in the document now (development message only). */
@@ -412,7 +389,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
             <div className={styles.text}>
               <p className={styles.title}>
                 <span className={styles.glyph}>
-                  <ToneGlyph tone={tone} />
+                  <ToastGlyph tone={tone} />
                 </span>
                 {item.title}
               </p>

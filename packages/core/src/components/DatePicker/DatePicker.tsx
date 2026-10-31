@@ -184,6 +184,7 @@ export function DatePicker(props: DatePickerProps) {
         aria-label={wording.datePanel}
         id={panelId}
         className={styles.panel}
+        closeOnTabOut
       >
           <div>
             <Calendar

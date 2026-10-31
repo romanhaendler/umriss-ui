@@ -47,6 +47,8 @@ export function Sparkline({ ref, data, width = 96, height = 28, tone = "ink", cl
     <span
       ref={ref}
       className={cx(styles.sparkline, fill && styles.sparklineFill, tone === "accent" && styles.sparklineAccent, className)}
+      // A name needs a role to stand on: the drawing is one picture.
+      role={rest["aria-label"] || rest["aria-labelledby"] ? "img" : undefined}
       {...rest}
       style={fill ? { height, ...rest.style } : rest.style}
     >

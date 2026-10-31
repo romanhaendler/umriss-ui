@@ -163,6 +163,8 @@ export interface Wording {
   /** Stepper buttons of a time field; the label comes from above. */
   timeFieldIncrease: (feld: string) => string;
   timeFieldDecrease: (feld: string) => string;
+  /** Said when a picker takes a new value; the text is the value as the field shows it. */
+  pickerPicked: (value: string) => string;
   /** Footer of the range panels. */
   chooseStartDate: string;
   chooseEndDate: string;
@@ -847,6 +849,7 @@ export const DEFAULT_WORDING: Wording = {
   endSecond: "End second",
   timeFieldIncrease: (feld) => `Increase ${feld}`,
   timeFieldDecrease: (feld) => `Decrease ${feld}`,
+  pickerPicked: (value) => `Selected ${value}`,
   chooseStartDate: "Select start date",
   chooseEndDate: "Select end date – backwards is allowed",
   days: (count) => `${count} ${count === 1 ? "day" : "days"}`,

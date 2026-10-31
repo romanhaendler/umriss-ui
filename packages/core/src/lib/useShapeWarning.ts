@@ -11,7 +11,8 @@ export function useShapeWarning(component: string, prop: string, wrong: boolean,
   }, [id, component, prop, wrong, expected]);
 }
 
-export const isDate = (v: unknown): v is Date => v instanceof Date;
+/** A `Date` that names an instant: an Invalid Date is none, and formatting it throws. */
+export const isDate = (v: unknown): v is Date => v instanceof Date && !Number.isNaN(v.getTime());
 /** Whether options are objects (`{ value, label }`) and not bare strings. */
 export const areOptions = (v: unknown): boolean => Array.isArray(v) && v.every((o) => typeof o === "object" && o !== null);
 

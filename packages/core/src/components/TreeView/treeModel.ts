@@ -377,6 +377,26 @@ function indexNodes<K, S extends Key>(
   return index;
 }
 
+/** The keys the filter shows - a match, the path to one, and everything under
+    a match - or `null` where no filter runs and everything is shown. */
+function shownByFilter<K, S extends Key>(
+  roots: readonly K[],
+  reader: NodeReader<K, S>,
+  snapshot: TreeSnapshot<S>,
+): Set<S> | null {
+  if (reader.matches === undefined && snapshot.search.trim() === "") return null;
+  const { survives, matches } = prepare(roots, reader, snapshot);
+  const shown = new Set<S>();
+  function walk(n: K, insideMatch: boolean): void {
+    const id = reader.key(n);
+    if (!insideMatch && !survives.has(id)) return;
+    shown.add(id);
+    for (const child of reader.children(n) ?? []) walk(child, insideMatch || matches.has(id));
+  }
+  for (const root of roots) walk(root, false);
+  return shown;
+}
+
 /**
  * Sets a set of nodes to checked or unchecked - and does not toggle.
  *
@@ -396,14 +416,19 @@ export function setChecked<K, S extends Key = string>(
   if (targets.length === 0) return snapshot;
   const index = indexNodes(roots, reader);
   const next = new Set(snapshot.checked);
+  const shown = shownByFilter(roots, reader, snapshot);
 
+  /* Under a filter the cascade stops at what the filter shows; the hidden
+     nodes keep their state, and the reconciliation below still reads them. */
   function cascade(n: K): void {
     if (mayBeChecked(reader, n)) {
       const id = reader.key(n);
       if (on) next.add(id);
       else next.delete(id);
     }
-    for (const child of reader.children(n) ?? []) cascade(child);
+    for (const child of reader.children(n) ?? []) {
+      if (shown === null || shown.has(reader.key(child))) cascade(child);
+    }
   }
 
   /** Reconciles a whole subtree from the bottom up.
@@ -489,8 +514,11 @@ export function toggleAll<K, S extends Key = string>(
   snapshot: TreeSnapshot<S>,
 ): TreeSnapshot<S> {
   const index = indexNodes(roots, reader);
+  const shown = shownByFilter(roots, reader, snapshot);
   const checkable: S[] = [];
-  for (const [id, n] of index.nodes) if (mayBeChecked(reader, n)) checkable.push(id);
+  for (const [id, n] of index.nodes) {
+    if (mayBeChecked(reader, n) && (shown === null || shown.has(id))) checkable.push(id);
+  }
   if (checkable.length === 0) return snapshot;
   return toggleKeys(roots, reader, snapshot, checkable);
 }
