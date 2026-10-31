@@ -752,9 +752,11 @@ export type TableOptions<Z, Key extends RowKey = string> = TableOptionsCommon<Z,
 
 /** What a format writes: the header labels, the widths the table holds, whether
     a column's own `exportValue` made its values (`own`: written as they come),
+    whether a date column is a column of days (`day`, from its `format`; unset: the
+    writer decides by whether every date lies at midnight),
     and the rows as typed cells. A tree's level is its first column, a number. */
 export interface ExportSheet {
-  columns: readonly { label: string; width?: number; own?: true }[];
+  columns: readonly { label: string; width?: number; own?: true; day?: boolean }[];
   rows: readonly (readonly ExportCell[])[];
 }
 
@@ -873,7 +875,8 @@ export interface TableSnapshot<Z, Key extends RowKey = string> {
       the options set it up is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet - in
-      server mode the page. */
+      server mode the page. A grouped table writes its rows in the groups' order,
+      folded groups' rows too, with no group line; a tree adds its level column. */
   asCsv: () => string;
   /** The same rows and columns written by a format: `csv` for text, a format
       of one's own for anything else. `asCsv()` is `exportAs(csv)`. With

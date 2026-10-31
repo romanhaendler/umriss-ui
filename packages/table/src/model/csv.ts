@@ -43,7 +43,21 @@ const BOM = "﻿";
     inside the field - readable only by luck. Deliberately without `Intl`: the
     value is meant to be read back exactly, not to look pretty. */
 export const plain = (value: string | number | boolean, c: Pick<CsvConventions, "decimal" | "yes" | "no">): string =>
-  typeof value === "number" ? String(value).replace(".", c.decimal) : typeof value === "boolean" ? (value ? c.yes : c.no) : value;
+  typeof value === "number" ? numberText(value).replace(".", c.decimal) : typeof value === "boolean" ? (value ? c.yes : c.no) : value;
+
+/** A number in plain notation, in the shortest form that reads back as the same number - no exponent, which a
+    spreadsheet would not read as the number; NaN and the infinities are no number and write empty. */
+function numberText(n: number): string {
+  if (!Number.isFinite(n)) return "";
+  const [mantissa = "", exponent] = String(n).split("e");
+  if (exponent === undefined) return mantissa;
+  const sign = mantissa.startsWith("-") ? "-" : "";
+  const [whole = "", fraction = ""] = mantissa.replace("-", "").split(".");
+  const digits = whole + fraction;
+  const point = whole.length + Number(exponent);
+  const text = point <= 0 ? `0.${"0".repeat(-point)}${digits}` : point >= digits.length ? digits + "0".repeat(point - digits.length) : `${digits.slice(0, point)}.${digits.slice(point)}`;
+  return sign + text;
+}
 
 /** Quotes only where it is needed. A quotation mark inside the value is
     doubled - otherwise the field ends where it should not. */
