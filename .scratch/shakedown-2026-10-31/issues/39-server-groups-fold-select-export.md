@@ -15,3 +15,5 @@ user does with groups.
 - [ ] Unit tests and a `@quick` browser case; `pnpm check table`, `pnpm check:site`.
 
 ## Comments
+
+**From ticket 38.** Left to this ticket: (1) `foldAll`, `unfoldAll` and Alt+click on a fold act only on the groups of the page the table holds; (2) no group selection box is drawn in server mode (GroupCheckbox returns null; the group holds rows the table does not); (3) export of a grouped page and of all matches under a grouping; (4) keyboard for server groups was not touched, and the fitted-page anchor (`pageKeeping` in server mode) counts rows, not lines. Groups are read by `answeredLines` (model/grouping.ts) into the browser's `Line` model; `request.folded` uses the view's path strings, `groupPath(values)` writes them.
