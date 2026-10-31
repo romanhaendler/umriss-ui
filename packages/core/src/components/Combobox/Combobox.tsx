@@ -15,6 +15,7 @@ import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce, silence } from "../../lib/announce";
+import { fold } from "../../lib/search";
 
 /** One possibility of a `Combobox`: the value it stands for and the label it
     is found by. */
@@ -79,6 +80,15 @@ export interface ComboboxProps<T extends string | number = string>
       where it would show the empty text, below any `options` given, and is
       `aria-busy`. */
   loading?: boolean;
+  /** For string values: typed text that fits no option's label is offered as a
+      last row, `Add "text"`, and Enter or a click makes it the value - reported
+      through `onValueChange` like a choice. The field then shows the text
+      itself, and the form posts it.
+      @default false */
+  creatable?: boolean;
+  /** With `creatable`: runs when the typed text was taken as the value, so the
+      application can add it to `options`. */
+  onCreate?: (text: string) => void;
 }
 
 /** A searchable select field (the combobox pattern with a listbox panel).
@@ -99,6 +109,8 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
     onSearch,
     filter = true,
     loading = false,
+    creatable = false,
+    onCreate,
     className,
     style,
     id,
@@ -139,13 +151,32 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
   if (selected && (kept?.value !== selected.value || kept.label !== selected.label)) {
     setKept({ value: selected.value, label: selected.label });
   }
-  const chosenLabel = selected?.label ?? (value != null && kept?.value === value ? kept.label : "");
+  // A created value stands in no option: the text is its label.
+  const chosenLabel =
+    selected?.label ?? (value != null && kept?.value === value ? kept.label : creatable && value != null ? String(value) : "");
+
+  /* The row that takes the typed text as the value: only for text that is no
+     option's label as it stands. */
+  const typed = (query ?? "").trim();
+  const adding =
+    creatable && typed !== "" && !options.some((option) => fold(option.label).text === fold(typed).text) ? typed : null;
+  const rowCount = filtered.length + (adding === null ? 0 : 1);
+  const addLabel = adding === null ? "" : wording.createOption(adding);
 
   /* What VoiceOver does not read of an active descendant - how many options
      stand, and an option's state - the field says itself. The count on every
      opening, the pointer's too; the option moved onto only for the keys. */
   const sayCount = (count: number) =>
     announce(count === 0 ? emptyLabel : wording.optionCount(count), inputRef.current);
+
+  // The count of the rows the text would show, the Add row too.
+  const countFor = (text: string) => {
+    const found = filter ? filterOptions(options, text).length : options.length;
+    const clean = text.trim();
+    const add =
+      creatable && clean !== "" && !options.some((option) => fold(option.label).text === fold(clean).text);
+    return found + (add ? 1 : 0);
+  };
 
   const openPanel = (quiet = false) => {
     setActiveIndex(startIndex(filtered, value));
@@ -181,6 +212,20 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
     inputRef.current?.focus();
   };
 
+  const create = (text: string) => {
+    onChange(text as T);
+    onCreate?.(text);
+    announce(wording.optionAdded(text), inputRef.current);
+    closePanel();
+    inputRef.current?.focus();
+  };
+
+  const chooseRow = (index: number) => {
+    const option = filtered[index];
+    if (option) choose(option);
+    else if (adding !== null) create(adding);
+  };
+
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
     // An input method's own keys (Enter ends the composition) are not ours.
@@ -196,14 +241,15 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
         openPanel();
         return;
       }
-      const index = nextIndex(activeIndex, filtered.length, event.key === "ArrowDown" ? 1 : -1);
-      const next = filtered[index];
-      if (next === undefined) return;
+      const index = nextIndex(activeIndex, rowCount, event.key === "ArrowDown" ? 1 : -1);
       setActiveIndex(index);
-      announce(
-        wording.optionActive(next.label, { selected: next.value === value, disabled: next.disabled }),
-        inputRef.current,
-      );
+      const next = filtered[index];
+      if (next !== undefined) {
+        announce(
+          wording.optionActive(next.label, { selected: next.value === value, disabled: next.disabled }),
+          inputRef.current,
+        );
+      } else if (adding !== null) announce(addLabel, inputRef.current);
       return;
     }
     /* Home and End are the caret's in a short list; in a windowed one the
@@ -220,9 +266,9 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
       return;
     }
     if (event.key === "Enter") {
-      if (open && filtered[activeIndex]) {
+      if (open && activeIndex < rowCount) {
         event.preventDefault();
-        choose(filtered[activeIndex]);
+        chooseRow(activeIndex);
       }
       return;
     }
@@ -260,7 +306,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
-          aria-activedescendant={open && filtered[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
+          aria-activedescendant={open && activeIndex < rowCount ? optionId(listboxId, activeIndex) : undefined}
           aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
           aria-required={field?.required || undefined}
           aria-invalid={isInvalid || undefined}
@@ -275,7 +321,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
             onSearch?.(event.target.value);
             if (!open) openPanel(!filter);
             // After the opening's count, which is the old query's: the later wins.
-            if (filter) sayCount(filterOptions(options, event.target.value).length);
+            if (filter || creatable) sayCount(countFor(event.target.value));
           }}
           onFocus={(event) => {
             onFocus?.(event);
@@ -339,10 +385,13 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
         insideRefs={[toggleRef]}
         id={listboxId}
         ariaLabel={placeholderText}
-        items={filtered.map((option) => ({ ...option, selected: option.value === value }))}
+        items={[
+          ...filtered.map((option) => ({ ...option, selected: option.value === value })),
+          ...(adding === null ? [] : [{ label: addLabel }]),
+        ]}
         activeIndex={activeIndex}
         onActivate={setActiveIndex}
-        onChoose={(index) => choose(filtered[index]!)}
+        onChoose={chooseRow}
         emptyText={emptyLabel}
         busyText={loading ? wording.loading : undefined}
       />
