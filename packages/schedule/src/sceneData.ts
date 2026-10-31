@@ -133,7 +133,16 @@ export class SceneData {
     const inOrder = <C>(entries: Map<number, C>) => [...entries.keys()].sort((a, b) => a - b).map((id) => entries.get(id)!);
     this.lanes = inOrder(this.laneEntries);
     this.groups = inOrder(this.groupEntries);
-    this.layers = inOrder(this.layerEntries);
+    /* A layer whose data is not an array is drawn as none, with a warning in
+       development: one wrong prop must not unmount the whole tree. */
+    const arrayed = (layer: LayerConfig): LayerConfig => {
+      const wrong = !Array.isArray(layer.data) || (layer.kind === "subtasks" && !Array.isArray(layer.tasks));
+      if (!wrong) return layer;
+      if (DEV) warnOnce(`array:${layer.kind}`, `the ${layer.kind} layer's data${layer.kind === "subtasks" ? " and tasks" : ""} must be arrays, not ${typeof layer.data}; what is not an array is not drawn.`);
+      const data = Array.isArray(layer.data) ? layer.data : [];
+      return layer.kind === "subtasks" ? { ...layer, data, tasks: Array.isArray(layer.tasks) ? layer.tasks : [] } : ({ ...layer, data } as LayerConfig);
+    };
+    this.layers = inOrder(this.layerEntries).map(arrayed);
     this.subtasks = [];
     this.dependencies = [];
     this.blocked = [];
