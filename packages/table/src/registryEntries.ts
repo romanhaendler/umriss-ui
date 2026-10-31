@@ -54,7 +54,7 @@ export interface ColumnSpec {
   group?: DatePeriod;
   groupable?: boolean;
   /** Edited in place in grid mode: by a core field of this kind, or by the column's own editor. */
-  edit?: "text" | "number" | "select" | "date" | ((editor: never) => ReactNode);
+  edit?: "text" | "number" | "select" | "date" | "dateTime" | "boolean" | ((editor: never) => ReactNode);
   /** What `edit="select"` offers. */
   editOptions?: readonly unknown[];
   /** Checks a draft before it is reported. */
