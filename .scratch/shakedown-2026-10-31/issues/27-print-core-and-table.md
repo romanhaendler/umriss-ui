@@ -1,6 +1,6 @@
 # 27: Print - core and the table
 
-Status:     ready-for-agent
+Status:     done
 Blocked by: None (can start immediately)
 
 Spec: `../spec.md`, decision 7; roadmap P3 (`.scratch/open-points-roadmap/spec.md:55`). Sources:
@@ -9,9 +9,9 @@ earlier-runs-open table.md 8, operator-screens 5.
 **What to build:** a page of core components and tables prints as a reader would want it on paper; the
 print base the other packages build on in 28.
 
-- [ ] Core under `@media print`: overlays, toasts and the skip link do not print; cards and fields print without shadows; verdicts keep their glyph or word, so colour is not the only sign in black and white.
-- [ ] The table hides toolbar, search, pager, selection boxes and row actions and prints the rows it holds without its scroll box; the head repeats on each sheet; a paged or fitted table prints the page shown and a virtual one its rendered rows, both said in the docs.
-- [ ] A print example per package; Chromium `page.pdf()` output looked at as a reader; `pnpm check core`, `pnpm check table`.
+- [x] Core under `@media print`: overlays, toasts and the skip link do not print; cards and fields print without shadows; verdicts keep their glyph or word, so colour is not the only sign in black and white.
+- [x] The table hides toolbar, search, pager, selection boxes and row actions and prints the rows it holds without its scroll box; the head repeats on each sheet; a paged or fitted table prints the page shown and a virtual one its rendered rows, both said in the docs.
+- [x] A print example per package; Chromium `page.pdf()` output looked at as a reader; `pnpm check core`, `pnpm check table`.
 
 ## Comments
 
@@ -22,3 +22,11 @@ The pattern for 28 (and any package's print):
 4. A table-like block: `thead { display: table-header-group }` repeats the head, `tr { break-inside: avoid }`, and never a `<button>` in a repeated head - Chromium paints it on the first sheet only, so `display: contents` it (the label stays).
 5. Test: read the CSS (`?raw`) as in `packages/core/tests-unit/print.test.ts` and `packages/table/tests-unit/print.test.ts`; look at the PDF once. The check script: headless Chromium, `page.emulateMedia({ media: "print" })`, `page.pdf({ format: "A4" })`, then `pdftotext` to see the head on page 2.
 6. One example per package, `Print…` button calling `window.print()`, no props; the page's `about` gets a **Print.** paragraph.
+
+**Delivered (2026-10-31, run coordinator).** Per-component `@media print` in core (overlays, toasts,
+panels, palette hidden; cards unbroken; soft shadows to hard edges in `tokens.css`; `color-scheme:
+light` on `.text`, so a dark app prints dark ink) and in the table (chrome left off, sticky/pinned back
+in flow, rows unbroken, head repeats - its sort button `display: contents`, Chromium paints no button
+in a repeated head); docs in core Theming and table Export; red-first CSS-reading tests; examples
+"Print the page" (core Theming) and "Print the rows" (table Export). Looked at the worker's A4 PDFs
+(light, dark, a two-sheet table with the head repeated): right. The pattern for ticket 28 stands above.
