@@ -70,6 +70,7 @@ const noop = () => undefined;
 
 const CASES: Record<string, Case> = {
   Alert: (probe) => <core.Alert {...p(probe)}>Text</core.Alert>,
+  Avatar: (probe) => <core.Avatar name="Ada Lovelace" {...p(probe)} />,
   Badge: (probe) => <core.Badge {...p(probe)}>New</core.Badge>,
   Button: (probe) => <core.Button {...p(probe)}>Save</core.Button>,
   IconButton: (probe) => (

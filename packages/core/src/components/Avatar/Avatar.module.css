@@ -1,0 +1,58 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  .avatar {
+    composes: text from "#own-styles";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    overflow: clip;
+    border-radius: var(--u-radius-full);
+    /* A circle and not the library's squircle, which the build adds to every
+       radius: this small a squircle is a rounded square. */
+    corner-shape: round;
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-none);
+    letter-spacing: 0.02em;
+    user-select: none;
+    /* The ring is the tone's text colour: it holds 3:1 against the page in
+       both themes where the ground alone (a sunken surface) does not. */
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+
+  .sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--u-text-xs);
+  }
+
+  .md {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--u-text-sm);
+  }
+
+  .neutral {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text-secondary);
+  }
+
+  .accent {
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent-text);
+  }
+
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Forced colours repaint the ground with the page's: an edge keeps the mark. */
+  @media (forced-colors: active) {
+    .avatar {
+      outline: 1px solid CanvasText;
+    }
+  }
+}
