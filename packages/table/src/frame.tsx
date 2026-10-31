@@ -32,7 +32,7 @@ import {
 import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
-import { awaitsFit, fits, useFit } from "./fit";
+import { awaitsFit, useFit } from "./fit";
 import { linePitch } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
@@ -124,7 +124,7 @@ export function Frame({
   useCutValueWarnings(tableRef);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
-  useFit(registry, tableRef, loading, pitch);
+  useFit(registry, tableRef, loading, pitch, registry.server && selectable);
   /* The anchor of a page-size change: the row with focus, and the current row. */
   const setAnchor = registry.hook?.tableState.setAnchor;
   useLayoutEffect(() => {
@@ -239,7 +239,7 @@ export function Frame({
 
   return (
     <>
-      {snapshot.server && selectable && <MatchOffer hook={hook} reserve={fits(registry)} />}
+      {snapshot.server && selectable && <MatchOffer hook={hook} />}
       <div
         ref={virtual?.scrollRef}
         onScroll={(event) => {

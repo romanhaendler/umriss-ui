@@ -4,7 +4,7 @@
    `answers` placeholder is not told off. */
 
 import { useState } from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Pagination, Toolbar, useTable } from "../src";
 import type { ModelColumn } from "../src/model/tableModel";
@@ -139,26 +139,37 @@ describe("the pager's status region", () => {
 });
 
 describe("the offer's place", () => {
-  it("stands empty in a fitted server table, and the tick fills it", () => {
+  /* The first request carries the fitted page size; the offer's line, 40 px
+     here, is taken out of the room the rows are cut into. */
+  const pageSizeAsked = (selectable: boolean) => {
+    const asked: number[] = [];
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
       const row = this.tagName === "TR" || this.tagName === "THEAD" || this.tagName === "TFOOT";
-      const height = row ? 20 : this.style.height.startsWith("calc(100% - ") ? 93 : 100;
+      const height = row ? 20 : this.getAttribute("aria-hidden") === "true" ? 40 : this.style.height.startsWith("calc(100% - ") ? 93 : 100;
       return { height, top: 0, left: 0, bottom: height, right: 0, width: 0, x: 0, y: 0, toJSON: () => ({}) };
     });
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.querySelector(":scope > table") ? 260 : 0;
+    });
     function Fitted() {
-      const t = useTable(rowsOf(5), { rowKey: (r) => r.id, server: true, rowCount: 100, pageSize: 5, onRequest: () => {} });
+      const t = useTable(rowsOf(5), { rowKey: (r) => r.id, server: true, rowCount: 100, pageSize: 5, onRequest: (request) => asked.push(request.pageSize) });
       return (
-        <t.Table aria-label="Rows" selectable>
+        <t.Table aria-label="Rows" selectable={selectable}>
           <t.Column value="id" label="Id" rowHeader />
           <Pagination />
         </t.Table>
       );
     }
-    const { container } = render(<Fitted />);
-    const reserved = () => container.querySelectorAll("div[role=status]:not([data-select-matching])").length;
-    expect(reserved()).toBe(1);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select all on this page" }));
-    expect(document.querySelector("[data-select-matching]")).not.toBeNull();
+    render(<Fitted />);
+    return asked;
+  };
+
+  it("is left in the fit of a selectable server table, and not drawn while empty", () => {
+    const withOffer = pageSizeAsked(true);
+    expect(document.querySelector("div[role=status]")).toBeNull();
+    cleanup();
+    const without = pageSizeAsked(false);
+    expect(without[0]! - withOffer[0]!).toBe(2);
   });
 });
 

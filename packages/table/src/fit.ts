@@ -55,7 +55,24 @@ function measure(table: HTMLTableElement, scroll: HTMLElement) {
   return { pitch, room: scroll.clientHeight - head - foot };
 }
 
-export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement | null>, loading: boolean, pitch: number) {
+/** The height the offer to select all that match takes when it appears, while it
+    does not stand: a probe of the line's own size, measured beside the scroll area. */
+function offerHeight(scroll: HTMLElement): number {
+  const frame = scroll.parentElement;
+  if (!frame || frame.querySelector("[data-select-matching]")) return 0;
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText = "position:absolute;visibility:hidden;border-bottom:1px solid transparent;min-height:calc(var(--u-control-height-sm) + 2 * var(--u-space-1) + 1px)";
+  frame.appendChild(probe);
+  const height = probe.getBoundingClientRect().height;
+  probe.remove();
+  return height;
+}
+
+/* `offer`: a server table with a selection column, where the offer's line may
+   come with a tick. The fit leaves room for it, so that it takes a spare line
+   of the body and the page keeps its size. */
+export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement | null>, loading: boolean, pitch: number, offer: boolean) {
   const latest = useRef({ loading });
   useLayoutEffect(() => {
     latest.current = { loading };
@@ -80,8 +97,9 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     if (!scroll.style.getPropertyValue("--_table-held")) return;
     /* A scroll area that is not laid out (display: none) has no room to read. */
     if (!scroll.clientHeight) return;
-    const { pitch: line, room } = measure(table, scroll);
+    const { pitch: line, room: area } = measure(table, scroll);
     if (!line) return;
+    const room = offer ? area - offerHeight(scroll) : area;
     const total = linesOf(registry);
     const now = state.pageSize;
     const next = fittedLines(room, line, now);

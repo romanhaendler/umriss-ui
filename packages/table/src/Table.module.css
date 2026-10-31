@@ -736,13 +736,6 @@
     font-size: var(--u-text-sm);
   }
 
-  /* The place of the offer while it has nothing to say: the height it will
-     have, its hairline unseen. */
-  .matchReserved {
-    min-height: calc(var(--u-control-height-sm) + 2 * var(--u-space-1) + 1px);
-    border-bottom-color: transparent;
-  }
-
   .toolbarInfo {
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
