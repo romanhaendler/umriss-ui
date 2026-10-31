@@ -244,7 +244,7 @@ export function ModalFooter({
   ...rest
 }: HTMLAttributes<HTMLDivElement> & RefProp<HTMLDivElement>) {
   return (
-    <div ref={ref} className={cx(styles.footer, className)} {...rest}>
+    <div ref={ref} data-umriss-footer="" className={cx(styles.footer, className)} {...rest}>
       {children}
     </div>
   );

@@ -18,6 +18,7 @@ import { keyboardFocus, useDeckOpen } from "./useDeckOpen";
 import type { Place } from "./useDeckPlaces";
 import { useDeckPlaces } from "./useDeckPlaces";
 import { useGlideAcross } from "./useGlideAcross";
+import { useFooterLift } from "./useFooterLift";
 import { useHold } from "./useHold";
 import { useRegionFocus } from "./useRegionFocus";
 import { leavesByItself, useCountdowns, useTimerStore } from "./useToastTimers";
@@ -294,7 +295,13 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   };
   /* The deck opens for the keyboard's focus, not for the focus a click
      leaves on a button: a closed toast would otherwise hold it open. */
-  const onFocus = (event: FocusEvent<HTMLDivElement>) => setFocused(keyboardFocus(event.target, event.currentTarget));
+  const onFocus = (event: FocusEvent<HTMLDivElement>) => {
+    setFocused(keyboardFocus(event.target, event.currentTarget));
+    /* A focus that came in by Tab has a place to go back to as well: a card
+       that closes under it must not leave the focus on the body. */
+    const from = event.relatedTarget;
+    if (returnFocusRef.current === null && from instanceof HTMLElement && !event.currentTarget.contains(from)) returnFocusRef.current = from;
+  };
   /* What the focus held open, and the focus to give back: given up when the
      focus leaves the region by other means than Escape, and when the region
      moves. */
@@ -364,6 +371,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   if (held && ages.size > 0) setAges(new Map());
 
   useShownInTopLayer(regionRef);
+  const lift = useFooterLift(target, edge, items);
 
   const pinOpen = () => {
     setPinned(true);
@@ -460,6 +468,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
     "--_origin": motionOrigin(edge === "bottom" ? "top" : "bottom", along),
     ...from,
     height: regionHeight,
+    "--_lift": lift ? `${lift}px` : undefined,
     /* Held back, its box is no wall over what lies beneath. */
     pointerEvents: held ? "none" : undefined,
   } as CSSProperties;
@@ -496,6 +505,10 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
           <div role="alert" className={styles.live}>
             {items.filter((item) => entered(item) && roleFromTone[item.tone ?? "neutral"].role === "alert").map(message)}
           </div>
+          {/* Said by the region's name already: for the eye only. */}
+          <p className={styles.hint} aria-hidden="true">
+            {wording.toastShortcutHint}
+          </p>
         </div>,
         target,
       )}
