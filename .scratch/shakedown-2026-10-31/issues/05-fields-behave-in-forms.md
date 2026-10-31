@@ -30,3 +30,7 @@ their own label only; a cleared Combobox text gives `null`. 16 tests in `fieldsI
 Decided: only Slider and FileInput restore on a DOM reset (the matrix shows the others reset through the
 libraries); the checkbox's own label wins over the FormField's. Left: the H11 host drivers were not rerun
 (they need packed tarballs) - unit tests cover each checkbox; ticket 41 can rerun them.
+
+**Coordinator, follow-up (2026-10-31).** Decision 3 says a form's reset restores *every* field; this
+ticket wired it into Slider and FileInput only, and ticket 14's README now promises every field. A
+follow-up worker wires `useFormReset` into the other uncontrolled fields.
