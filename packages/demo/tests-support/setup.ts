@@ -3,17 +3,15 @@
 
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
-import { resetAnnouncer } from "../../core/src/lib/announce";
 
 /* Without globals:true the testing library does not hook itself in; without
    that the DOM would stay standing between the tests. */
 afterEach(cleanup);
 
-/* The announcer's region stands in the document between tests; its text, its
-   waiting timer and the region itself (a status among the next test's) must not
-   reach the next one. The next announcement builds it anew. */
+/* The announcer's region stands in the document between tests; it (a status
+   among the next test's) and its text must not reach the next one. The next
+   announcement builds it anew; a waiting one writes into the removed region. */
 afterEach(() => {
-  resetAnnouncer();
   if (typeof document !== "undefined") document.querySelectorAll("[data-umriss-announcer]").forEach((region) => region.remove());
 });
 
