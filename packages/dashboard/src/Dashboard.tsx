@@ -1,4 +1,4 @@
-import { Children, isValidElement, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Children, isValidElement, Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Skeleton, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
@@ -8,7 +8,7 @@ import styles from "./Dashboard.module.css";
 import { Failed } from "./Failed";
 import { readView } from "./model";
 import type { DashboardView, DashboardWidget, WidgetSize } from "./model";
-import { pack } from "./pack";
+import { pack, rowStep } from "./pack";
 import type { Place } from "./pack";
 import { shareOf } from "./share";
 import { useDrag } from "./useDrag";
@@ -121,6 +121,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   const total = view.widgets.length;
   /* Widgets of one title are told apart by their place: a name is what a menu, a figure landmark and a tab stop are found by. */
   const titles = shown.map(({ widget, type }) => titleOf(type, widget.options));
+  const hint = useId();
   const nameOf = (title: string, at: number) => (titles.filter((one) => one === title).length > 1 ? wording.dashboardHead(title, at + 1, total) : title);
   const moveTo = (id: string, title: string, to: number) => {
     const from = view.widgets.findIndex((widget) => widget.id === id);
@@ -192,9 +193,13 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           role: "group",
           tabIndex: 0,
           "aria-label": (locked ? wording.dashboardHeadLocked : wording.dashboardHead)(title, at + 1, total),
+          "aria-describedby": hint,
           onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
             if (event.target !== event.currentTarget) return;
-            const to = { ArrowLeft: at - 1, ArrowUp: at - 1, ArrowRight: at + 1, ArrowDown: at + 1, Home: 0, End: total - 1 }[event.key];
+            const rows = { ArrowUp: -1, ArrowDown: 1 }[event.key] as -1 | 1 | undefined;
+            const to = rows
+              ? view.widgets.findIndex((one) => one.id === shown[rowStep(shown.map((s) => s.span), COLUMNS, i, rows)]?.widget.id)
+              : { ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: total - 1 }[event.key];
             if (to === undefined) return;
             event.preventDefault();
             moveTo(widget.id, title, to);
@@ -233,13 +238,15 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             {sizes.map(([name, span]) => (
               <MenuItem
                 key={name}
-                aria-current={name === widget.size || undefined}
+                role="menuitemradio"
+                aria-checked={name === widget.size}
                 onSelect={() => {
                   editor.step(resize(widget.id, name as WidgetSize));
                   announce(wording.dashboardResized(title, wording.dashboardSizes[name as WidgetSize]));
                 }}
               >
-                {wording.dashboardSizeEntry(wording.dashboardSizes[name as WidgetSize], shareOf(span), name === widget.size)}
+                <span aria-hidden="true" style={{ display: "inline-block", width: "1.25em" }}>{name === widget.size ? "✓" : ""}</span>
+                {wording.dashboardSizeEntry(wording.dashboardSizes[name as WidgetSize], shareOf(span))}
               </MenuItem>
             ))}
           </>
@@ -303,6 +310,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           )}
         </div>
       )}
+      {editing && <span id={hint} hidden>{wording.dashboardHeadHint}</span>}
       {editing && total === 0 && <Text>{wording.dashboardEmptyEditing}</Text>}
       {!editing && total === 0 && <Text>{wording.dashboardEmpty}</Text>}
       <div className={styles.grid} ref={grid}>

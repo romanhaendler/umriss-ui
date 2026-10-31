@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Stat } from "@umriss-ui/core";
 import { useDashboard } from "../src";
+import { rowStep } from "../src/pack";
 import type { DashboardView } from "../src";
 
 const TWINS: DashboardView = {
@@ -77,5 +78,38 @@ describe("a widget without options", () => {
   it("needs no defaultOptions, and its Stat marks the body it stands in", () => {
     render(<Harness />);
     expect(screen.getByRole("group", { name: "Load: 3" }).parentElement?.hasAttribute("data-widget-body")).toBe(true);
+  });
+});
+
+describe("moving by row", () => {
+  const s = (columns: number, rows = 1) => ({ columns, rows });
+  it("goes to the place in the next row nearest to the column, and stays where no row is", () => {
+    const spans = [s(6), s(6), s(4), s(4), s(4)];
+    expect(rowStep(spans, 12, 0, 1)).toBe(2);
+    expect(rowStep(spans, 12, 1, 1)).toBe(3);
+    expect(rowStep(spans, 12, 3, -1)).toBe(1);
+    expect(rowStep(spans, 12, 0, -1)).toBe(0);
+    expect(rowStep(spans, 12, 4, 1)).toBe(4);
+  });
+
+  it("is what ArrowDown does on a head, and its name says that arrows move it", () => {
+    const Rows = () => {
+      const { Dashboard, WidgetType } = useDashboard({
+        defaultView: { widgets: ["a", "b", "c"].map((id) => ({ id, type: "half", size: "small", options: { n: id } })) },
+      });
+      return (
+        <Dashboard aria-label="Rows">
+          <WidgetType name="half" label="Half" sentence="." sizes={{ small: { columns: 6, rows: 1 } }} start="small" defaultOptions={{ n: "" }} title={(o) => o.n}>
+            {() => null}
+          </WidgetType>
+        </Dashboard>
+      );
+    };
+    render(<Rows />);
+    press("Edit");
+    const head = screen.getByRole("group", { name: "a, place 1 of 3" });
+    expect(document.getElementById(head.getAttribute("aria-describedby")!)?.textContent).toMatch(/arrows move it/);
+    fireEvent.keyDown(head, { key: "ArrowDown" });
+    expect(screen.getAllByRole("region").map((el) => el.getAttribute("data-widget"))).toEqual(["b", "c", "a"]);
   });
 });
