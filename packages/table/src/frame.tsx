@@ -16,7 +16,7 @@ import { rowLine } from "./model/gridWalk";
 import { frameGrid } from "./frameGrid";
 import { copyKeyHandler } from "./copyKey";
 import { CurrentRowContext, chooseRow } from "./currentRow";
-import { warnOnce } from "./dev";
+import { DEV, warnOnce } from "./dev";
 import { CutValueTip } from "./cutValueTip";
 import {
   useCurrentRowInView,
@@ -26,6 +26,7 @@ import {
   useDraftOfVanishedRow,
   useFocusAfterFold,
   useHeldColumnWidths,
+  useHeldWidthsWhenEmpty,
   useStickyHeaderHeights,
   useVirtualPitch,
 } from "./frameEffects";
@@ -120,8 +121,13 @@ export function Frame({
   useStickyHeaderHeights(tableRef, stickyHeader);
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
+  useHeldWidthsWhenEmpty(tableRef);
   useFlexWidths(tableRef, registry.hook?.tableState.filtered);
   useCutValueWarnings(tableRef);
+  const unnamed = !name["aria-label"] && !name["aria-labelledby"];
+  useEffect(() => {
+    if (DEV && unnamed) warnOnce("table-unnamed", "A table has no name. Give it `aria-label` or `aria-labelledby`: a screen reader lists tables by name, and an unnamed one is just \"table\".");
+  }, [unnamed]);
   useUnboundedVirtualWarning(registry.hook?.tableState.virtual);
   useVirtualPitch(registry, tableRef);
   useFit(registry, tableRef, loading, pitch, registry.server && selectable);
@@ -148,6 +154,17 @@ export function Frame({
     if (registry.takePicked() && gridMode && selectable && chosen && !chosen.allMatching) announce(wording.tableSelectedCount(chosen.count), tableRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of the selection is said
   }, [chosen?.selected, chosen?.except]);
+
+  /* A sort the user changed is said with its column and direction; one handed in is not. */
+  const sortKey = JSON.stringify(registry.hook?.publicSnapshot.sort ?? []);
+  useEffect(() => {
+    const column = registry.takeSorted();
+    if (column === null) return;
+    const level = registry.hook?.publicSnapshot.sort.find((s) => s.column === column);
+    const label = registry.columns.ordered().find((e) => e.spec.id === column)?.spec.label ?? column;
+    announce(level ? (level.direction === "asc" ? wording.sortedAscending(label) : wording.sortedDescending(label)) : wording.sortRemoved(label), tableRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of the sort is said
+  }, [sortKey]);
 
   /* Placeholders stand where loading has no row to keep: the counts and the
      pager then say nothing. */

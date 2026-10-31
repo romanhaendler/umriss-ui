@@ -8,7 +8,7 @@
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, useId } from "react";
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { AngleGlyph, Button, Checkbox, EndGlyph, GripGlyph, IconButton, Input, Popover, Select, Tooltip, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, Button, Checkbox, EndGlyph, GripGlyph, IconButton, Input, Popover, Select, Tooltip, VisuallyHidden, announce, useFormats, useWording } from "@umriss-ui/core";
 import type { ButtonProps, InputProps, RefProp } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
@@ -493,6 +493,7 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
   const deliver = (content: R) => {
     if (onExport) {
       onExport(content);
+      announce(wording.exportDone);
       return;
     }
     const url = URL.createObjectURL(new Blob([content as BlobPart], { type: format.mime }));
@@ -504,6 +505,7 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
     /* Not at once: some browsers (Safari among them) fetch the address only
        after the click has returned, and a revoked one yields no file. */
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    announce(wording.exportDone);
   };
 
   const exportFile = () => {

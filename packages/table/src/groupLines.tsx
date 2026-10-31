@@ -12,7 +12,7 @@
 
 import { useRef } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
-import { Checkbox } from "@umriss-ui/core";
+import { Checkbox, announce } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
@@ -71,7 +71,10 @@ function Fold({
 }) {
   const name = groupText(entry, group.value, formats, wording);
   const count = formats.count(group.rows.length);
-  const toggle = () => hook.publicSnapshot.toggleFold(group.path);
+  const toggle = (at: Element) => {
+    announce(open ? wording.groupFolded(name) : wording.groupOpened(name), at);
+    hook.publicSnapshot.toggleFold(group.path);
+  };
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
     /* With Alt the arrows fold or unfold every group of the level, as Alt-click does. */
     if (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
@@ -81,10 +84,10 @@ function Fold({
     }
     if (event.key === "ArrowRight" && !open) {
       event.preventDefault();
-      toggle();
+      toggle(event.currentTarget);
     } else if (event.key === "ArrowLeft") {
       event.preventDefault();
-      if (open) toggle();
+      if (open) toggle(event.currentTarget);
       else if (parent) {
         const table = event.currentTarget.closest("table");
         const target = Array.from(table?.querySelectorAll<HTMLButtonElement>("[data-fold-path]") ?? []).find(
@@ -103,7 +106,7 @@ function Fold({
       aria-label={open ? wording.foldGroup(name, count) : wording.unfoldGroup(name, count)}
       onKeyDown={handleKeyDown}
       onClick={(event) => {
-        if (!event.altKey) return toggle();
+        if (!event.altKey) return toggle(event.currentTarget);
         foldSiblings(group, open, hook);
       }}
     >

@@ -95,6 +95,38 @@ export function useHeldColumnWidths(registry: Registry, tableRef: TableRef, load
   });
 }
 
+/* A table that empties keeps the widths its columns had: with no row left, an
+   automatic layout would size them to the head's labels and the message, and
+   every column would jump. The head's cells are held at what they measured
+   while rows stood, and let go when rows return. */
+export function useHeldWidthsWhenEmpty(tableRef: TableRef) {
+  const widths = useRef<number[] | null>(null);
+  useLayoutEffect(() => {
+    const table = tableRef.current;
+    const lastHeadRow = table?.tHead?.rows?.[table.tHead.rows.length - 1];
+    const heads = lastHeadRow ? Array.from(lastHeadRow.cells) : [];
+    if (!table || heads.length === 0) return;
+    const empty = table.tBodies[0]?.querySelector(`:scope > tr > td.${styles.emptyCell}`) != null;
+    if (!empty) {
+      for (const th of heads) {
+        if (!th.dataset.held) continue;
+        th.style.width = "";
+        th.style.boxSizing = "";
+        delete th.dataset.held;
+      }
+      widths.current = heads.map((th) => th.offsetWidth);
+      return;
+    }
+    if (widths.current?.length !== heads.length) return;
+    heads.forEach((th, i) => {
+      if (th.style.width) return;
+      th.style.width = `${widths.current![i]}px`;
+      th.style.boxSizing = "border-box";
+      th.dataset.held = "";
+    });
+  });
+}
+
 /* A value taller than a row is cut at the row's edge (ADR-0042); in
    development the table says so once per column, so that a component of the
    application's own is not cut unnoticed. */

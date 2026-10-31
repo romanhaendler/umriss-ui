@@ -135,7 +135,7 @@ describe("D4: a pre-filter may stand in the call", () => {
 describe("D3: the table's rows are the ones the pre-filter admits", () => {
   it("the ratio counts only admitted rows", () => {
     render(<List plant="Plant A" start={{ search: "A-2" }} />);
-    expect(screen.getByText("1 of 3")).toBeTruthy();
+    expect(screen.getByText("1 of 3 entries")).toBeTruthy();
   });
 
   it("if the pre-filter admits nothing the table is empty - not 'nothing matches', even with a search", () => {
