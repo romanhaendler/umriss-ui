@@ -59,6 +59,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Lanes stand in the order they are declared; a subtask on a lane that is not declared is not drawn. Declare `Dependencies` before `Subtasks` and its lines run beneath the bars.",
           "What cannot work is drawn, never repaired: two subtasks on one lane at once, a dependency whose lag does not fit, work in blocked time. [Findings as data](#/findings) returns the same list for the application to act on.",
           "The plot is one tab stop. The keys walk the subtasks as the pointer would hover them, the tooltip names the active one, and a live region reads it once the keys rest (ADR-0030, ADR-0033).",
+          "**Print.** The schedule prints as the plot shows it: lanes and bars, without the lane chevrons, resize grips, tooltip and focus ring. The plot is not broken across two sheets, and a dark application prints dark ink on white.",
         ],
         keys: [
           { key: "Tab", action: "Moves the focus into the plot; the first subtask in view becomes the active one." },

@@ -927,4 +927,25 @@
   .uc-break > i:last-child {
     left: 4px;
   }
+
+  /* On paper the chart is its picture and its legend: the "show all" button
+     answers a pointer, the tooltip follows one, and a chart is not broken
+     across two sheets. The canvas is redrawn at the print layout (Chart.tsx). */
+  @media print {
+    .uc-show-all,
+    .uc-tooltip {
+      display: none;
+    }
+
+    /* A legend's colour is a background, which paper drops unless asked: the
+       key is what tells the series apart. */
+    .uc-legend-chip,
+    .uc-legend-step {
+      print-color-adjust: exact;
+    }
+
+    .uc-root {
+      break-inside: avoid;
+    }
+  }
 }

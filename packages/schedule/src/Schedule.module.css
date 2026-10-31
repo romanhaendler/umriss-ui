@@ -539,4 +539,24 @@
       outline: 1px solid CanvasText;
     }
   }
+
+  /* On paper the schedule is its lanes and bars: the lane chevrons, the resize
+     grips, the tooltip, the ghost of a drag and the focus ring answer a
+     pointer or a key and are left off; the plot is not broken across two
+     sheets. */
+  @media print {
+    .chevron,
+    .grip,
+    .tooltip,
+    .ghostLabel,
+    .focusRing {
+      display: none;
+    }
+
+    .root {
+      box-shadow: none;
+      break-inside: avoid;
+      color-scheme: light;
+    }
+  }
 }
