@@ -13,7 +13,7 @@ All reds named here are in `../reds/` (`../reds/README.md`).
 - [x] A visible column of kind "other" without `exportValue` warns in DEV instead of vanishing silently; a mixed column is judged by its declared kind, not its first value; a column without label exports a readable header (or warns).
 - [x] A tree search exports ancestors with their level; `selectionAsText` carries the level column for trees.
 - [x] `toggleColumn` on a row-header column leaves it out of `hidden`.
-- [x] The H8 oracle cases rerun green; `pnpm check table`.
+- [ ] The H8 oracle cases rerun green; `pnpm check table`.
 
 ## Comments
 
@@ -26,3 +26,5 @@ a tree's `selectionAsText` carries the level column; `toggleColumn` ignores a ro
 Decided: the ticket reverses two old expectations (`copyRows` level column, `csv` plain `1e-7`) - moved
 by coordinator's call; `0.1+0.2` stays its shortest round-trip form. Left: H8 host scripts not rerun
 (their cases are unit tests now).
+
+**Coordinator, checkbox audit (2026-10-31):** unticked - the H8 oracle cases became unit tests and pass; the host scripts themselves were not rerun.

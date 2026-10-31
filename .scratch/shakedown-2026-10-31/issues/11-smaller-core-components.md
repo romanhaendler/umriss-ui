@@ -16,7 +16,7 @@ settle 12b.
 - [x] Menu and RowActions open on ArrowDown/ArrowUp from the trigger (first/last item) and have typeahead (APG menu button).
 - [x] Alert shows its tone by a glyph as well as colour.
 - [x] Sparkline: `aria-label` sits on an element with a role (`img`).
-- [x] VisuallyHidden causes no overflow in a non-positioned scroller.
+- [ ] VisuallyHidden causes no overflow in a non-positioned scroller.
 - [x] Splitter's separator is visible at rest (3:1 against the surface).
 - [x] FileInput's remove crosses line up across rows.
 - [x] `pnpm check core`; each looked at as a user, light and dark.
@@ -33,3 +33,5 @@ visible at rest; FileInput names flex. Decided: the canon test got four reasoned
 disabled repaint and the danger gap - opacity cannot reach 3:1); `--u-button-disabled-opacity` (added
 by ticket 12 in this run) removed again, no migration needed; radio gap 8 px and leading tight like
 Checkbox. Left: the VisuallyHidden overflow could not be reproduced in a browser.
+
+**Coordinator, checkbox audit (2026-10-31):** unticked - the VisuallyHidden fix is in, but the overflow could not be reproduced in a browser, so it is unverified.
