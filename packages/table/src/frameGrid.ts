@@ -64,6 +64,11 @@ export function frameGrid({
         newRow: props.newRow,
         onRowDelete: props.onRowDelete,
         select: selectable ? (row, range) => hook.pick(hook.rowKey(row), range) : undefined,
+        selectAll: selectable
+          ? () => {
+              if (!hook.publicSnapshot.selection.allSelected) hook.pickAll();
+            }
+          : undefined,
         report: props.onCurrentRowChange && ((row) => props.onCurrentRowChange!(hook.rowKey(row), row)),
       })
     : undefined;
