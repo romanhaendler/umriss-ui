@@ -173,4 +173,13 @@
     flex-direction: column;
     gap: var(--u-space-3);
   }
+
+  /* On paper the list is its alarms: the bar's buttons (acknowledge, shelve,
+     unshelve) answer a pointer and are left off; the table prints its rows
+     (the table's own print rules). */
+  @media print {
+    .bar button {
+      display: none;
+    }
+  }
 }

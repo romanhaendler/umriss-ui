@@ -25,6 +25,7 @@ export const OUTLINE: readonly Rubric[] = [
           "`useDashboard` takes the arrangement the application gives a reader and, optionally, the one the reader kept (`initialView`, read once). It hands back `Dashboard`, `WidgetType`, the view and `setView`.",
           "A widget type is declared as JSX: its name, a sentence, the sizes it offers with the columns and rows each takes, the size to start from, its default options and its content as a function of the size and the options. The options type is inferred from the default options.",
           "The widgets are packed in the stored order, each at the first place at or after the one before it where it fits; room left behind stays free. The columns never change in number, under a maximum width. Below the width at which a column would be too narrow to read, the dashboard is a list in the same order. The height follows the size and never the content.",
+          "**Print.** The widgets print as they stand; the edit bar and the buttons of a head (menu, grip) are left off, and a widget is not broken across two sheets.",
         ],
         alternatives: [{ when: "A layout the developer fixes, which the reader does not arrange", use: "`Grid`, `Stack` and `Splitter` from @umriss-ui/core" }],
         keys: [

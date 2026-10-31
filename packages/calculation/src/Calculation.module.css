@@ -753,4 +753,31 @@
       color: GrayText;
     }
   }
+
+  /* Paper cannot unfold a level: every derivation prints open, so the working
+     stands under its figure, and the disclosure that opened it is left off.
+     A level is not broken across two sheets, and the frame is as tall as its
+     lines rather than a scroll box. */
+  @media print {
+    .frame {
+      overflow: visible;
+      box-shadow: none;
+    }
+
+    .frame .disclosure {
+      display: none;
+    }
+
+    .derivation[hidden] {
+      display: grid;
+    }
+
+    .derivation::before {
+      display: none;
+    }
+
+    .line {
+      break-inside: avoid;
+    }
+  }
 }

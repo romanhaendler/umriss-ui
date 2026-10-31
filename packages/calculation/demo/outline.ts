@@ -48,6 +48,7 @@ export const OUTLINE: readonly Rubric[] = [
           "There is no prop for a result. Every derived number is computed with the operator its line names, at full precision; only the screen rounds.",
           "The nesting is the fold structure and the child order is the operand order. What TypeScript cannot check – a `Ref` to nothing, a circle through references, a wrong operand count, a duplicate id, a component of your own wrapping `Given`, `emphasis` or `rule` on the Result – fails on the first render with a message saying which (ADR-0027). `emphasis` and `rule` set any other line apart without CSS (ADR-0049).",
           "Every line is read as one sentence by a screen reader, and every derivation is a disclosure: its button says whether it shows or hides how the line is derived.",
+          "**Print.** Paper cannot unfold a level: every derivation prints open, under its figure, and the disclosure buttons are left off. A level is not broken across two sheets.",
         ],
         alternatives: [
           { when: "A single figure with its verdict, without the working", use: "`Stat` from @umriss-ui/core" },

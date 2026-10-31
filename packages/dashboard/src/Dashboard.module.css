@@ -251,4 +251,23 @@
   .entryText {
     display: grid;
   }
+
+  /* On paper the dashboard is its widgets: the edit bar and the buttons of a
+     head (menu, grip) are left off, and a widget is not broken across two
+     sheets. */
+  @media print {
+    .bar,
+    .grip,
+    .head button {
+      display: none;
+    }
+
+    .root {
+      color-scheme: light;
+    }
+
+    .item {
+      break-inside: avoid;
+    }
+  }
 }

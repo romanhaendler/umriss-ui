@@ -53,6 +53,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "Series and axes are children, and their order in the JSX is the drawing order and the colour order. The marks are drawn on canvas; axes, legend and tooltip are elements a screen reader and a test can read (ADR-0001).",
           "With a `Tooltip` the plot is one tab stop: the keys walk its values and a screen reader hears them (ADR-0030). `syncId` shares the pointer between charts; zoom is shared through the view, on [Zoom and pan](#/zoom-and-pan).",
+          "**Print.** The chart redraws at the width of the sheet; the tooltip and the \"show all\" button are left off, and a chart is not broken across two sheets. Series are told apart by more than colour (dash, marks), which is what survives black and white.",
         ],
         alternatives: [
           { when: "A single number with a small trend beside it", use: "`Sparkline` or `Stat` from @umriss-ui/core" },
