@@ -7,14 +7,15 @@
    trigger by hand - exactly the drift the popover seam had described. */
 
 import { fieldBlur } from "../../lib/fieldBlur";
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { extentStyle } from "../../lib/extent";
 import styles from "./DatePicker.module.css";
 import { CrossGlyph } from "../../lib/glyphs";
-import { useTimeZoneLabel } from "../../lib/language";
+import { useTimeZoneLabel, useWording } from "../../lib/language";
+import { announce } from "../../lib/announce";
 import { VisuallyHidden } from "../VisuallyHidden";
 
 /* The props came in one by one at first - seventeen of them. Three of those were
@@ -105,7 +106,27 @@ export function RangeTrigger({
   const { style, id, onClick, onBlur, ...rest } = root ?? {};
   const zone = useTimeZoneLabel();
   const zoneId = useId();
-  const describedBy = [rest["aria-describedby"] ?? field?.describedBy, zone ? zoneId : undefined].filter(Boolean).join(" ");
+  const valueId = useId();
+  const wording = useWording();
+  /* A field named from outside (its label, `aria-label`) no longer carries the
+     value in its name, which is the button's content: the value is then its description. */
+  const named = !!(field || rest["aria-label"] || rest["aria-labelledby"]);
+  const describedBy = [
+    rest["aria-describedby"] ?? field?.describedBy,
+    named && hasValue ? valueId : undefined,
+    zone ? zoneId : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  /* A new value is said, in the wording's language: a day picked in a panel that closes
+     at once is otherwise heard nowhere. The first text is not said - nothing was picked. */
+  const shown = useRef<HTMLSpanElement>(null);
+  const said = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const text = hasValue ? (shown.current?.textContent ?? "") : null;
+    if (said.current !== undefined && text && text !== said.current) announce(wording.pickerPicked(text), triggerRef.current);
+    said.current = text;
+  });
   return (
     <span
       ref={wrapRef}
@@ -136,11 +157,16 @@ export function RangeTrigger({
           if (!event.defaultPrevented) panel.onToggle();
         }}
       >
-        <span className={cx(styles.value, !hasValue && styles.placeholder)}>
+        <span ref={shown} className={cx(styles.value, !hasValue && styles.placeholder)}>
           {hasValue ? display : placeholder}
         </span>
         {icon}
       </button>
+      {named && hasValue && (
+        <VisuallyHidden>
+          <span id={valueId}>{display}</span>
+        </VisuallyHidden>
+      )}
       {zone && (
         <VisuallyHidden>
           <span id={zoneId}>{zone}</span>

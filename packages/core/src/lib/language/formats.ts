@@ -145,13 +145,18 @@ export function weekStartOf(locale: string): number {
 }
 
 function buildFormats(locale: string, timeZone: string | undefined): Formats {
+  /* Dates are written in the Gregorian calendar, the one the calendar grids
+     draw: a locale whose own calendar differs (fa: Persian) would otherwise
+     show a year the grid does not have, and a typed date could not be read. */
+  const calendar = "gregory";
   // An unknown zone throws Intl's RangeError, naming it, in the first formatter.
-  const dateFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit", year: "numeric" });
-  const dateShortFormat = new Intl.DateTimeFormat(locale, { timeZone, day: "2-digit", month: "2-digit" });
-  const monthFormat = new Intl.DateTimeFormat(locale, { timeZone, month: "long", year: "numeric" });
+  const dateFormat = new Intl.DateTimeFormat(locale, { calendar, timeZone, day: "2-digit", month: "2-digit", year: "numeric" });
+  const dateShortFormat = new Intl.DateTimeFormat(locale, { calendar, timeZone, day: "2-digit", month: "2-digit" });
+  const monthFormat = new Intl.DateTimeFormat(locale, { calendar, timeZone, month: "long", year: "numeric" });
   /* A calendar month, named from a calendar-day Date: no zone applies. */
-  const monthNameFormat = new Intl.DateTimeFormat(locale, { month: "long" });
+  const monthNameFormat = new Intl.DateTimeFormat(locale, { calendar, month: "long" });
   const dateLongFormat = new Intl.DateTimeFormat(locale, {
+    calendar,
     timeZone,
     weekday: "long",
     day: "numeric",
@@ -167,8 +172,9 @@ function buildFormats(locale: string, timeZone: string | undefined): Formats {
     with: new Intl.DateTimeFormat(locale, { ...clock, second: "2-digit" }),
   };
   const dateTimeFormats = {
-    without: new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric", ...clock }),
+    without: new Intl.DateTimeFormat(locale, { calendar, day: "2-digit", month: "2-digit", year: "numeric", ...clock }),
     with: new Intl.DateTimeFormat(locale, {
+      calendar,
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
