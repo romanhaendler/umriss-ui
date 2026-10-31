@@ -353,6 +353,8 @@ export interface Wording {
       not `expandRowNamed`, which names the row detail's expander on the same row. */
   foldBranch: (row: string) => string;
   unfoldBranch: (row: string) => string;
+  /** The line under a branch whose rows are being loaded - also announced. */
+  branchLoading: (row: string) => string;
   /** The first column of a tree's export. */
   levelColumn: string;
   /** A row shown only because a descendant matches the search or a filter. */
@@ -989,6 +991,7 @@ export const DEFAULT_WORDING: Wording = {
   unfoldGroup: (name, count) => `Unfold ${name}, ${count}`,
   foldBranch: (row) => `Fold rows under ${row}`,
   unfoldBranch: (row) => `Unfold rows under ${row}`,
+  branchLoading: (row) => `Loading rows under ${row}`,
   levelColumn: "Level",
   pathRow: "on the path to a match",
   footerTopLevel: "Top level only",

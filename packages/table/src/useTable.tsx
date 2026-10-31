@@ -179,9 +179,9 @@ function branchesTo(rows: readonly unknown[], reader: NodeReader<unknown, RowKey
     if (level >= levels) return;
     for (const row of list) {
       const children = reader.children(row);
-      if (children?.length) {
+      if (children?.length || reader.unloaded?.(row)) {
         out.push(reader.key(row));
-        walk(children, level + 1);
+        walk(children ?? [], level + 1);
       }
     }
   };
@@ -311,16 +311,19 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
      children function is read through a holder the commit updates: written in
      the call it is new on every render, and the model would recalculate on
      every scroll. */
-  const childRows = options.server ? undefined : (options.childRows as ((row: unknown) => readonly unknown[] | undefined) | undefined);
+  const childRows = options.server ? undefined : (options.childRows as ((row: unknown) => readonly unknown[] | null | undefined) | undefined);
   const isTree = childRows !== undefined;
   registry.setTree(isTree);
   const latest = useRef({ children: childRows, key: rowKey });
   useLayoutEffect(() => {
     latest.current = { children: childRows, key: rowKey };
   });
+  /* `null` is a branch not loaded yet: the reader knows it as unloaded, with
+     no rows - core's flattening gives it a fold and nothing under it. */
   const [reader] = useState<NodeReader<unknown, RowKey>>(() => ({
     key: (row) => latest.current.key(row),
-    children: (row) => latest.current.children?.(row),
+    children: (row) => latest.current.children?.(row) ?? undefined,
+    unloaded: (row) => latest.current.children?.(row) === null,
     label: () => "",
   }));
   const [defaultBranches] = useState<readonly RowKey[]>(() => {
@@ -330,7 +333,70 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   });
   const [branchesState, setBranchesState] = useState<readonly RowKey[]>(() => start?.branches ?? defaultBranches);
   const liveBranches = useMemo(() => (isTree ? new Set(allBranches(rowsUnknown, reader)) : new Set<RowKey>()), [isTree, rowsUnknown, reader]);
-  const branches = isTree ? branchesState.filter((key) => liveBranches.has(key)) : [];
+  /* The branches not loaded, with their rows: they open like any, but "open
+     all" leaves them shut - one click would otherwise ask for every one. */
+  const unloadedRows = useMemo(() => {
+    const out = new Map<RowKey, unknown>();
+    if (!isTree) return out;
+    const walk = (list: readonly unknown[]) => {
+      for (const row of list) {
+        if (reader.unloaded?.(row)) out.set(reader.key(row), row);
+        else walk(reader.children(row) ?? []);
+      }
+    };
+    walk(rowsUnknown);
+    return out;
+  }, [isTree, rowsUnknown, reader]);
+  const branches = isTree ? branchesState.filter((key) => liveBranches.has(key) || unloadedRows.has(key)) : [];
+
+  /* Opening an unloaded branch asks the application once; a promise it
+     returns puts the branch in `loading` (null) until it settles, a rejection
+     in `failed` (its message). A branch that closes, or that gets its rows,
+     is forgotten - the next opening asks again. A late answer to an earlier
+     asking is ignored. */
+  const [branchStatus, setBranchStatus] = useState<ReadonlyMap<RowKey, string | null>>(() => new Map());
+  const asked = useRef(new Map<RowKey, number>());
+  const askBranch = (key: RowKey) => {
+    const row = unloadedRows.get(key);
+    const token = (asked.current.get(key) ?? 0) + 1;
+    asked.current.set(key, token);
+    const settle = (message: string | null | undefined) =>
+      setBranchStatus((old) => {
+        if (asked.current.get(key) !== token) return old;
+        const next = new Map(old);
+        if (message === undefined) next.delete(key);
+        else next.set(key, message);
+        return next;
+      });
+    const failure = (error: unknown) => settle(error instanceof Error ? error.message : String(error));
+    let result: unknown;
+    try {
+      result = (options.server ? undefined : options.onBranchOpen)?.(key, row as never);
+    } catch (error) {
+      return failure(error);
+    }
+    if (result && typeof (result as Promise<unknown>).then === "function") {
+      settle(null);
+      (result as Promise<unknown>).then(() => settle(undefined), failure);
+    }
+  };
+  const openUnloaded = branches.filter((key) => unloadedRows.has(key));
+  const openUnloadedKey = openUnloaded.join("\u0000");
+  useEffect(() => {
+    for (const key of [...asked.current.keys()]) {
+      if (!openUnloaded.includes(key)) {
+        asked.current.delete(key);
+        setBranchStatus((old) => {
+          if (!old.has(key)) return old;
+          const next = new Map(old);
+          next.delete(key);
+          return next;
+        });
+      }
+    }
+    for (const key of openUnloaded) if (!asked.current.has(key)) askBranch(key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the open, unloaded branches
+  }, [openUnloadedKey]);
   useMemo(() => {
     if (!isTree) return;
     const twice = duplicateKey(rowsUnknown, reader);
@@ -357,7 +423,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
 
   const openKey = branches.join("\u0000");
   const tree = useMemo(
-    () => (isTree ? { key: rowKey, children: reader.children, open: new Set(branches), admit: preFilter } : undefined),
+    () => (isTree ? { key: rowKey, children: reader.children, unloaded: reader.unloaded, open: new Set(branches), admit: preFilter } : undefined),
     /* ponytail: the pre-filter is read through the roots it admits - a new
        pre-filter that only drops children takes hold with the next change of
        rows or branches. Compare its admitted children, as useAdmitted does
@@ -778,10 +844,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     },
     branches,
     toggleBranch: (key: RowKey) => {
-      if (!liveBranches.has(key)) return;
+      if (!liveBranches.has(key) && !unloadedRows.has(key)) return;
       setBranchesState((old) => (old.includes(key) ? old.filter((k) => k !== key) : [...old, key]));
     },
-    unfoldAllBranches: () => setBranchesState([...liveBranches]),
+    unfoldAllBranches: () => setBranchesState([...liveBranches, ...openUnloaded]),
     foldAllBranches: () => setBranchesState([]),
     asCsv: () => exportAs(csv),
     exportAs,
@@ -802,6 +868,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     filter,
     grouping,
     tree,
+    branchStatus,
+    retryBranch: askBranch,
     folded: foldedSet,
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown, RowKey>,
     rowKey,

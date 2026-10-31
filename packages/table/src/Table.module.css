@@ -1621,6 +1621,21 @@
     border-left: 1px solid var(--u-hairline-strong);
   }
 
+  /* The line under a branch whose rows are loading, or whose loading failed. */
+  .branchLine {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    padding-block: var(--u-space-1);
+    color: var(--u-color-text-muted);
+  }
+
+  .branchLoading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+  }
+
   .treeDetailRail .frame {
     background: none;
     box-shadow: none;

@@ -687,8 +687,16 @@ interface AutomaticMode<Z, Key extends RowKey = string> {
       branch. The rows passed in are then the roots, and every branch gets a
       fold in its row header. Every level sorts on its own, a search shows a
       match with the rows above it, and the footer sums the top level. Not
-      with grouping or pagination. */
-  childRows?: (row: Z) => readonly Z[] | undefined;
+      with grouping or pagination. `null` is a branch whose children are not
+      loaded yet: it gets a fold, and opening it calls `onBranchOpen`. Until
+      they are loaded, search, sort, selection and export see it without rows. */
+  childRows?: (row: Z) => readonly Z[] | null | undefined;
+  /** Tree rows: a branch that `childRows` answers `null` for was opened - by
+      the user, by `defaultBranches` or by a view. Load its children and answer
+      through `childRows`. A returned promise puts a loading line under the
+      branch while it is pending; a rejection shows its message there with
+      "Try again", which calls this again. The table fetches nothing itself. */
+  onBranchOpen?: (key: Key, row: Z) => void | Promise<unknown>;
   /** Tree rows: the branches open on the first render - their keys, or how
       many levels stand open (`1` = the roots open). It is the default `view` leaves out. */
   defaultBranches?: readonly Key[] | number;
@@ -712,6 +720,7 @@ interface ServerMode<Z> {
   /** Server mode: the rows are one page a server answered. */
   server: true;
   childRows?: never;
+  onBranchOpen?: never;
   defaultBranches?: never;
   /** How many rows the server's filtered set has - the pages and the counts
       read it. */

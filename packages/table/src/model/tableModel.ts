@@ -99,6 +99,8 @@ export interface TreeInput<Z> {
   key: (row: Z) => RowKey;
   /** `undefined` a leaf, an array a branch - the rule of core's reader. */
   children: (row: Z) => readonly Z[] | undefined;
+  /** A branch whose children are not loaded yet: it has a fold and no rows. */
+  unloaded?: (row: Z) => boolean;
   /** The keys of the open branches. */
   open: ReadonlySet<RowKey>;
   /** The pre-filter: a row it does not admit is gone with its subtree. */
@@ -400,6 +402,7 @@ function treeProjection<Z, K extends string>(
       return childrenOf.get(row);
     },
     label: () => "",
+    unloaded: tree.unloaded,
     matches,
   };
   const roots = level(rows);

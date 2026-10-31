@@ -236,6 +236,7 @@ export const GERMAN_WORDING: Wording = {
   unfoldGroup: (name, count) => `${name} aufklappen, ${count}`,
   foldBranch: (row) => `Zeilen unter ${row} zuklappen`,
   unfoldBranch: (row) => `Zeilen unter ${row} aufklappen`,
+  branchLoading: (row) => `Zeilen unter ${row} werden geladen`,
   levelColumn: "Ebene",
   pathRow: "auf dem Weg zu einem Treffer",
   footerTopLevel: "Nur oberste Ebene",
