@@ -91,7 +91,7 @@ describe("Demo smoke test", () => {
      (.scratch/configurator). */
   it("has a configurator on every page that can be configured", () => {
     expect(DEMO.configurators.map((one) => one.name).sort()).toEqual([
-      "Alert", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",
+      "Alert", "Avatar", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",
       "DateTimeRangePicker", "Divider", "FormField", "IconButton", "Input", "Meter", "MultiSelect", "NumberInput",
       "ProgressBar", "RadioGroup", "SegmentedControl", "Select", "Skeleton", "Slider", "Sparkline", "Stat", "Switch", "Tag", "Text",
       "Textarea",

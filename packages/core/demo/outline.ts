@@ -1222,6 +1222,23 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "Single values and labels, read at a glance.",
     pages: [
       {
+        id: "avatar",
+        name: "Avatar",
+        sentence: "A round mark for a person or a team: a picture, or initials taken from the name. Reach for it at the head of a lane or beside a name in a table cell.",
+        about: [
+          "The name is required: it names the mark for a screen reader, and the initials are derived from it - the first letters of the first and the last word. `initials` overrides them, for a team.",
+          "A picture that fails to load gives way to the initials.",
+        ],
+        alternatives: [
+          { when: "A status or a count at the edge of something", use: "badge" },
+        ],
+        limits: [
+          "No stack of avatars and no presence dot.",
+        ],
+        types: ["AvatarProps"],
+        exports: ["Avatar"],
+      },
+      {
         id: "badge",
         name: "Badge",
         sentence: "A small word or number at the edge of something else: a status, a count (also called a label or chip). Reach for it to mark the state of a row, or how many items wait behind a button.",
