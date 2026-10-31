@@ -290,7 +290,7 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
       </FormField>
       {/* Held open while the draft does not validate: an outside click or
           Escape does not take the message away - Escape cancels the edit. */}
-      <Popover open={error !== null} onOpenChange={() => undefined} anchorRef={anchor} restoreFocus={false} offset={4} className={styles.editorMessage}>
+      <Popover open={error !== null} onOpenChange={() => undefined} anchorRef={anchor} role="none" restoreFocus={false} offset={4} className={styles.editorMessage}>
         <span aria-hidden="true">{error}</span>
       </Popover>
     </div>

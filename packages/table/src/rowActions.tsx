@@ -131,6 +131,7 @@ export function RowDraftButtons({ name, wording }: { name: string; wording: Word
         open={grid.editing?.refused === true}
         onOpenChange={() => undefined}
         anchorRef={anchor}
+        role="none"
         restoreFocus={false}
         offset={4}
         className={styles.draftMessage}

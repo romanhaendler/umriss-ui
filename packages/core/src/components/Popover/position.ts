@@ -151,3 +151,22 @@ export function visibleViewport(): Viewport {
   if (!v) return { width: window.innerWidth, height: window.innerHeight };
   return { top: v.offsetTop, left: v.offsetLeft, width: v.width, height: v.height };
 }
+
+/**
+ * Whether the anchor lies wholly outside a container that clips it (an
+ * `overflow` other than visible): scrolled away, the panel would float over
+ * the page with nothing to point at. A fixed anchor is clipped by nothing.
+ */
+export function clippedAway(anchor: Element): boolean {
+  const doc = anchor.ownerDocument;
+  const win = doc.defaultView;
+  if (!win || win.getComputedStyle(anchor).position === "fixed") return false;
+  const rect = anchor.getBoundingClientRect();
+  for (let el = anchor.parentElement; el && el !== doc.body && el !== doc.documentElement; el = el.parentElement) {
+    const { overflowX, overflowY } = win.getComputedStyle(el);
+    if (overflowX === "visible" && overflowY === "visible") continue;
+    const clip = el.getBoundingClientRect();
+    if (rect.bottom < clip.top || rect.top > clip.bottom || rect.right < clip.left || rect.left > clip.right) return true;
+  }
+  return false;
+}

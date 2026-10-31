@@ -127,23 +127,31 @@
     box-shadow: var(--u-focus-ring);
   }
 
+  /* A tap on a control is a click, not the first half of a double tap that
+     zooms the page: steppers and calendar days would otherwise zoom under a
+     quick finger. Pinching still zooms. */
+  .control {
+    touch-action: manipulation;
+  }
+
   /* Safari on iOS zooms the page into every text field whose type is smaller
      than 16px - and every field here is (13px). A zoomed page stays zoomed,
      and panels measured against it stand in the wrong place. On a touch screen a
-     field therefore writes at 16px. In px and not rem, against ADR-0021: Safari
-     checks the computed size, and a smaller root font would slip under it again.
-     The doubled class outweighs the size each component sets on its own single
-     class, whichever stylesheet comes last. */
+     field therefore writes at 16px or the root size, whichever is larger: a
+     raised root font is the user's choice and the field follows it. Safari
+     checks the computed size, which `max()` still resolves to, so the floor
+     holds. The doubled class outweighs the size each component sets on its own
+     single class, whichever stylesheet comes last. */
   @media (pointer: coarse) {
     .field.field {
-      font-size: 16px;
+      font-size: max(16px, 1rem);
     }
 
     /* The root around such a field writes at the field's size as well, so
        that a character of its width (`.extent`, ADR-0041) is a character of
        the text in it: sixteen characters stay sixteen under a finger. */
     .fieldRoot.fieldRoot {
-      font-size: 16px;
+      font-size: max(16px, 1rem);
     }
   }
 

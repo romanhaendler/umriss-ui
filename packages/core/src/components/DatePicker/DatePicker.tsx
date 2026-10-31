@@ -7,6 +7,7 @@ import { VisuallyHidden } from "../VisuallyHidden";
 import { readTypedDate, sampleDate } from "./typed";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dayStart, dayShown, gridDay, zoneToday } from "./zoned";
 import { clampDay, outside, useDayBounds } from "./bounds";
@@ -28,11 +29,16 @@ import { CalendarGlyph } from "../../lib/glyphs";
 export interface DatePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The day, as a `Date` on midnight in the formats' zone (the reader's, unless the application names one); `null` means none. */
-  value: Date | null;
+  value?: Date | null;
+  /** Uncontrolled: the value to start at.
+      @default null */
+  defaultValue?: Date | null;
   /** Runs as soon as a day is settled - on a click in the grid, on "Today" and
       on clearing (`null`). Every one of these ways hands out
       midnight in the formats' zone; there is none that delivers a time along with it. */
-  onChange: (date: Date | null) => void;
+  onValueChange?: (date: Date | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (date: Date | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** Locks the field and the panel. */
@@ -61,11 +67,9 @@ export interface DatePickerProps
 
 /** A date selection with a calendar panel; weeks begin on Monday. The panel's
     foot takes a typed date, read in the order the formats in use write one. */
-export function DatePicker(
-  {
+export function DatePicker(props: DatePickerProps) {
+  const {
     ref,
-    value: valueGiven,
-    onChange,
     placeholder,
     disabled = false,
     invalid,
@@ -75,9 +79,11 @@ export function DatePicker(
     min,
     max,
     className,
-    ...rest
-  }: DatePickerProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [valueGiven, onChange] = useFieldValue<Date | null>("DatePicker", props, null);
   const value = isDate(valueGiven) ? valueGiven : null;
   useShapeWarning("DatePicker", "value", valueGiven != null && !isDate(valueGiven), "a Date or null");
   const size = useControlSize(ownSize);

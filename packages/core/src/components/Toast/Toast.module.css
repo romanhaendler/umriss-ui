@@ -100,27 +100,34 @@
   .region {
     --_safe-start: env(safe-area-inset-left);
     --_safe-end: env(safe-area-inset-right);
+    /* On a pinch-zoomed page the component writes the visible part as
+       `--_vv-*` (visualViewport.ts) and each distance is counted from the
+       visible edge; unzoomed they are zero. Physical like `env()`. */
+    --_vv-start: var(--_vv-x, 0px);
+    --_vv-end: var(--_vv-r, 0px);
   }
 
   .region:dir(rtl) {
     --_safe-start: env(safe-area-inset-right);
     --_safe-end: env(safe-area-inset-left);
+    --_vv-start: var(--_vv-r, 0px);
+    --_vv-end: var(--_vv-x, 0px);
   }
 
   .region[data-edge="bottom"] {
-    bottom: calc(var(--_toast-bottom) + env(safe-area-inset-bottom) + var(--_lift, 0px));
+    bottom: calc(var(--_toast-bottom) + env(safe-area-inset-bottom) + var(--_lift, 0px) + var(--_vv-b, 0px));
   }
 
   .region[data-edge="top"] {
-    top: calc(var(--_toast-top) + env(safe-area-inset-top));
+    top: calc(var(--_toast-top) + env(safe-area-inset-top) + var(--_vv-y, 0px));
   }
 
   .region[data-along="start"] {
-    inset-inline-start: calc(var(--_toast-start) + var(--_safe-start));
+    inset-inline-start: calc(var(--_toast-start) + var(--_safe-start) + var(--_vv-start));
   }
 
   .region[data-along="end"] {
-    inset-inline-end: calc(var(--_toast-end) + var(--_safe-end));
+    inset-inline-end: calc(var(--_toast-end) + var(--_safe-end) + var(--_vv-end));
   }
 
   .region[data-along="center"] {
@@ -135,7 +142,7 @@
   @media (max-width: 600px) {
     .region.region {
       width: auto;
-      inset-inline: calc(var(--_toast-start) + var(--_safe-start)) calc(var(--_toast-end) + var(--_safe-end));
+      inset-inline: calc(var(--_toast-start) + var(--_safe-start) + var(--_vv-start)) calc(var(--_toast-end) + var(--_safe-end) + var(--_vv-end));
       margin-inline: 0;
     }
   }

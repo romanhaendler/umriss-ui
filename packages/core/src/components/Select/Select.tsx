@@ -19,7 +19,16 @@ import type { ListboxItem } from "../../lib/listbox";
    it (ADR-0041). */
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
-export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">, RefProp<HTMLSelectElement> {
+export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size" | "value" | "defaultValue">, RefProp<HTMLSelectElement> {
+  /** The chosen option's value; `null` and `undefined` mean the empty option.
+      With it the field is controlled; `defaultValue` starts an uncontrolled one. */
+  value?: string | number | readonly string[] | null;
+  /** Uncontrolled: the value to start at. */
+  defaultValue?: string | number | readonly string[] | null;
+  /** Runs with the chosen option's value on every choice, `null` for the
+      empty option. Not for a `multiple` select, which reports through
+      `onChange` as the platform does. */
+  onValueChange?: (value: string | null) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -48,8 +57,8 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * Combobox's - and under a finger the system's picker (ADR-0043). The arrow is
  * drawn in CSS and therefore follows the theme tokens.
  */
-export function Select(
-  {
+export function Select(props: SelectProps) {
+  const {
     ref,
     size: ownSize,
     chars,
@@ -65,14 +74,19 @@ export function Select(
     onMouseDown,
     onKeyDown,
     onBlur,
+    onChange,
+    onValueChange,
+    value,
+    defaultValue,
     ...rest
-  }: SelectProps,
-) {
+  } = props;
+  /* `undefined` and `null` read as the empty option: the field stays controlled once it was given a `value`. */
+  const valueProps = "value" in props ? { value: value ?? "" } : defaultValue === undefined ? {} : { defaultValue: defaultValue ?? "" };
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;
-  const hasSelection = clearable && !rest.multiple && String(rest.value ?? "") !== "";
+  const hasSelection = clearable && !rest.multiple && String(value ?? defaultValue ?? "") !== "";
 
   /* `multiple` is a list box without a popup, and a disabled select opens
      nothing: both stay the system's. */
@@ -215,7 +229,16 @@ export function Select(
           clearable && styles.selectClearable,
           isInvalid && styles.invalid,
         )}
+        {...valueProps}
         {...rest}
+        onChange={
+          onChange || onValueChange
+            ? (event) => {
+                onChange?.(event);
+                if (!rest.multiple) onValueChange?.(event.target.value === "" ? null : event.target.value);
+              }
+            : undefined
+        }
         /* The caller's handlers run first and can prevent the field's own. */
         onPointerDown={(event) => {
           onPointerDown?.(event);

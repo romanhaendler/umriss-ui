@@ -28,7 +28,13 @@ import { extentStyle } from "../../lib/extent";
 /* The native `cols` is left out: the field's width is `chars`. */
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
     place of `cols`. */
-export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols">, RefProp<HTMLTextAreaElement> {
+export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols" | "value">, RefProp<HTMLTextAreaElement> {
+  /** The text; `null` and `undefined` mean empty. With it the field is
+      controlled; `defaultValue` starts an uncontrolled one. */
+  value?: string | number | readonly string[] | null;
+  /** Runs with the new text on every edit. `onChange` stays for the event -
+      what `register` and Formik read. */
+  onValueChange?: (value: string) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -56,8 +62,8 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
     `autoGrow` lets it grow with its content up to `maxRows`, `showCount` counts
     against `maxLength`. Inside a `FormField` it takes the field's id,
     description and invalid state. */
-export function Textarea(
-  {
+export function Textarea(props: TextareaProps) {
+  const {
     ref,
     size: ownSize,
     chars,
@@ -72,9 +78,13 @@ export function Textarea(
     disabled,
     rows = 3,
     onInput,
+    onChange,
+    onValueChange,
+    value: valueGiven,
     ...rest
-  }: TextareaProps,
-) {
+  } = props;
+  /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
+  const valueProps = "value" in props ? { value: valueGiven ?? "" } : {};
   const size = useControlSize(ownSize);
   const field = useFormField();
   const isInvalid = invalid ?? field?.invalid ?? false;
@@ -97,7 +107,7 @@ export function Textarea(
   /* Before painting, so that no intermediate state flashes up. Hangs on the
      value so that a text set from outside also carries the height along -
      not only typing. */
-  useLayoutEffect(measure, [measure, rest.value, rest.defaultValue]);
+  useLayoutEffect(measure, [measure, valueGiven, rest.defaultValue]);
 
   /* The font arrives later than the first layout; until then the line
      height measures itself wrongly. One re-measurement once it is there. */
@@ -115,8 +125,8 @@ export function Textarea(
   /* Uncontrolled, the browser holds the value and nothing re-renders while
      typing: a mirror of its own keeps the count current. */
   const [ownValue, setOwnValue] = useState(() => String(rest.defaultValue ?? ""));
-  const controlled = rest.value !== undefined;
-  const value = controlled ? String(rest.value ?? "") : ownValue;
+  const controlled = "value" in props;
+  const value = controlled ? String(valueGiven ?? "") : ownValue;
   const remaining = remainingChars(value, rest.maxLength);
   const countVisible = showCount && remaining !== undefined;
 
@@ -145,7 +155,17 @@ export function Textarea(
           if (!controlled) setOwnValue(event.currentTarget.value);
           measure();
         }}
+        {...valueProps}
         {...rest}
+        /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
+        onChange={
+          onChange || onValueChange
+            ? (event) => {
+                onChange?.(event);
+                onValueChange?.(event.target.value);
+              }
+            : undefined
+        }
       />
       {countVisible && (
         // Announced politely: the count changes on every keystroke.

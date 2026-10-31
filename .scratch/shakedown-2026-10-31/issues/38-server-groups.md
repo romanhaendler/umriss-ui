@@ -19,3 +19,6 @@ table in the browser.
 - [ ] Unit tests for the request, the drawing from `groups`, paging by lines; `pnpm check table`, `pnpm check alarms`, `pnpm check:site`; the example looked at as a user, light and dark.
 
 ## Comments
+
+**Coordinator, 2026-10-31.** ADR-0081 went to the field contract (ticket 01, the next free number when it
+was written); this ticket's ADR is 0082.

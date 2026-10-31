@@ -5,6 +5,7 @@ import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { Checkbox } from "../Checkbox";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
 import { MonthPair, PresetColumn } from "./RangePanel";
@@ -77,11 +78,16 @@ export interface DateTimeRangePickerProps
   /** The time span with times at both ends; `null` means none. The panel reads
       and sets days and wall clocks in the formats' zone (the reader's, unless
       the application names one). */
-  value: DateRange | null;
+  value?: DateRange | null;
+  /** Uncontrolled: the value to start at.
+      @default null */
+  defaultValue?: DateRange | null;
   /** Runs only on "Apply" and on clearing (`null`), never between the two
       clicks. If the end lies before the start, both swap on applying - there is
       no error state. */
-  onChange: (range: DateRange | null) => void;
+  onValueChange?: (range: DateRange | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (range: DateRange | null) => void;
   /** Show the seconds fields. */
   withSeconds?: boolean;
   /** What stands in the empty field. */
@@ -133,11 +139,9 @@ export interface DateTimeRangePickerProps
  * - Missing and doubled hours of the daylight-saving change are recognised per
  *   end and treated honestly, as in the DateTimePicker.
  */
-export function DateTimeRangePicker(
-  {
+export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
+  const {
     ref,
-    value,
-    onChange,
     withSeconds = false,
     placeholder,
     disabled = false,
@@ -149,9 +153,11 @@ export function DateTimeRangePicker(
     min,
     max,
     className,
-    ...rest
-  }: DateTimeRangePickerProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [value, onChange] = useFieldValue<DateRange | null>("DateTimeRangePicker", props, null);
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();

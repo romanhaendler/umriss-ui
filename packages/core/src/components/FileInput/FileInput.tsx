@@ -7,6 +7,7 @@ import { useFormats, useWording } from "../../lib/language";
 import type { Formats } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { accepts } from "./accept";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./FileInput.module.css";
@@ -15,16 +16,23 @@ import styles from "./FileInput.module.css";
     as the value. */
 export interface FileInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size">, RefProp<HTMLInputElement> {
-  /** Controlled: the chosen files. Uncontrolled, the input keeps its own and
-      starts empty. */
+  /** Controlled: the chosen files; `undefined` reads as none. Uncontrolled,
+      the input keeps its own, from `defaultValue`. */
   value?: readonly File[];
+  /** Uncontrolled: the files to start with.
+      @default [] */
+  defaultValue?: readonly File[];
   /** Reports the files after a choice, a drop or a removal - only those
       `accept` takes, and one where the input takes one. */
+  onValueChange?: (files: File[]) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (files: File[]) => void;
   /** Marks the input as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
 }
+
+const NO_FILES: readonly File[] = [];
 
 /** A size as a reader says it: kilobytes up to a megabyte, then megabytes
     with one decimal; never "0 kB" for a file that has content. */
@@ -45,16 +53,27 @@ const sizeOf = (bytes: number, formats: Formats) =>
    and rest on the input. */
 /** A file field with a drop zone: choose or drop files, and remove them from
     the list again. Nothing is uploaded - that is the application's. */
-export function FileInput({ ref, value, onChange, invalid, accept, multiple = false, disabled = false, className, style, id, ...rest }: FileInputProps) {
+export function FileInput(props: FileInputProps) {
+  const {
+    ref,
+    invalid,
+    accept,
+    multiple = false,
+    disabled = false,
+    className,
+    style,
+    id,
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [files, commit] = useFieldValue<File[], readonly File[]>("FileInput", props, NO_FILES);
   const wording = useWording();
   const formats = useFormats();
   const field = useFormField();
   const input = useRef<HTMLInputElement>(null);
-  const [own, setOwn] = useState<readonly File[]>([]);
   const [rejected, setRejected] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
-  const controlled = value !== undefined;
-  const files = controlled ? value : own;
   const isInvalid = invalid ?? field?.invalid ?? false;
 
   /* The input holds what the list shows. `DataTransfer` is how a script
@@ -71,11 +90,6 @@ export function FileInput({ ref, value, onChange, invalid, accept, multiple = fa
       element.files = transfer.files;
     } else if (files.length === 0) element.value = "";
   });
-
-  const commit = (next: File[]) => {
-    if (!controlled) setOwn(next);
-    onChange?.(next);
-  };
 
   const take = (offered: File[]) => {
     const taken = offered.filter((file) => accepts(file, accept));

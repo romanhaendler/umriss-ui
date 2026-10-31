@@ -134,7 +134,7 @@
   }
 
   .day {
-    composes: ring from "#own-styles";
+    composes: ring control from "#own-styles";
     display: flex;
     align-items: center;
     justify-content: center;

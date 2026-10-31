@@ -15,10 +15,14 @@
     margin: 0;
     padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
       max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-    width: 100vw;
-    max-width: 100vw;
-    height: 100dvh;
-    max-height: 100dvh;
+    /* On a pinch-zoomed page the dialog is the visible part and not the
+       layout viewport (`--_vv-*`, visualViewport.ts), so the sheet stays in
+       sight; unzoomed the properties are absent and it is the window. */
+    width: var(--_vv-w, 100vw);
+    max-width: var(--_vv-w, 100vw);
+    height: var(--_vv-h, 100dvh);
+    max-height: var(--_vv-h, 100dvh);
+    translate: var(--_vv-x, 0px) var(--_vv-y, 0px);
     background: transparent;
     display: flex;
     flex-direction: column;

@@ -4,6 +4,7 @@ import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
@@ -35,11 +36,16 @@ export interface DateTimePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The instant; `null` means none. The panel reads and sets its day and
       wall clock in the formats' zone (the reader's, unless the application names one). */
-  value: Date | null;
+  value?: Date | null;
+  /** Uncontrolled: the value to start at.
+      @default null */
+  defaultValue?: Date | null;
   /** Runs only on completion - "Apply", "Now" or "Clear" - and not already on
       the click on a day: a day without a time would be a half-set value here,
       and a half value is no value. */
-  onChange: (date: Date | null) => void;
+  onValueChange?: (date: Date | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (date: Date | null) => void;
   /** Show the seconds field. */
   withSeconds?: boolean;
   /** What stands in the empty field. */
@@ -72,11 +78,9 @@ export interface DateTimePickerProps
     an exact instant and is reported only on "Apply", "Now" or "Clear"; the
     missing and doubled hours of a daylight-saving change are asked about, not
     guessed. */
-export function DateTimePicker(
-  {
+export function DateTimePicker(props: DateTimePickerProps) {
+  const {
     ref,
-    value: valueGiven,
-    onChange,
     withSeconds = false,
     placeholder,
     disabled = false,
@@ -87,9 +91,11 @@ export function DateTimePicker(
     min,
     max,
     className,
-    ...rest
-  }: DateTimePickerProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [valueGiven, onChange] = useFieldValue<Date | null>("DateTimePicker", props, null);
   const value = isDate(valueGiven) ? valueGiven : null;
   useShapeWarning("DateTimePicker", "value", valueGiven != null && !isDate(valueGiven), "a Date or null");
   const size = useControlSize(ownSize);

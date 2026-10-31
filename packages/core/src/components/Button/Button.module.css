@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .button {
-    composes: ring from "#own-styles";
+    composes: ring control from "#own-styles";
     composes: text from "#own-styles";
     display: inline-flex;
     align-items: center;
@@ -38,7 +38,7 @@
      "not possible here". */
   .button:disabled:not([aria-busy="true"]) {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: var(--u-button-disabled-opacity);
   }
 
   .button[aria-busy="true"] {

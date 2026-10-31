@@ -5,6 +5,7 @@ import { cx } from "../../lib/cx";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
 import { MonthPair, PresetColumn } from "./RangePanel";
@@ -34,11 +35,16 @@ export interface DateRangePickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
   /** The time span, both ends on midnight in the formats' zone (the reader's, unless the application names one) and both inclusive; `null`
       means none. */
-  value: DateRange | null;
+  value?: DateRange | null;
+  /** Uncontrolled: the value to start at.
+      @default null */
+  defaultValue?: DateRange | null;
   /** Runs as soon as both ends are settled - after the second click, on a
       preset and on clearing (`null`). Ends dragged backwards swap silently;
       there is no error state to handle. */
-  onChange: (range: DateRange | null) => void;
+  onValueChange?: (range: DateRange | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (range: DateRange | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** Locks the field and the panel. */
@@ -87,11 +93,9 @@ export interface DateRangePickerProps
  * - Two chained months: paging on the outside, no day appears twice.
  * - The same day clicked twice = a one-day time span.
  */
-export function DateRangePicker(
-  {
+export function DateRangePicker(props: DateRangePickerProps) {
+  const {
     ref,
-    value: valueGiven,
-    onChange,
     placeholder,
     disabled = false,
     invalid,
@@ -102,9 +106,11 @@ export function DateRangePicker(
     min,
     max,
     className,
-    ...rest
-  }: DateRangePickerProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [valueGiven, onChange] = useFieldValue<DateRange | null>("DateRangePicker", props, null);
   const rangeOk = valueGiven != null && isDate(valueGiven.from) && isDate(valueGiven.to);
   const value = rangeOk ? valueGiven : null;
   useShapeWarning("DateRangePicker", "value", valueGiven != null && !rangeOk, "{ from: Date, to: Date } or null");
