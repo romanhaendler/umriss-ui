@@ -12,7 +12,7 @@ export default function ASpanOfDays() {
   return (
     <Stack gap={3} style={{ maxWidth: 340 }}>
       <FormField label="Leave">
-        <DateRangePicker value={leave} onChange={setLeave} clearable />
+        <DateRangePicker value={leave} onValueChange={setLeave} clearable />
       </FormField>
       <Text size="xs" tone="muted" mono>
         {leave === null

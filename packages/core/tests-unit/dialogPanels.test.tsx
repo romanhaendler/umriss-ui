@@ -34,7 +34,7 @@ const contents: Record<string, { node: ReactNode; open?: string; target: string 
     target: "item",
   },
   DatePicker: {
-    node: <DatePicker value={new Date(2026, 0, 15)} onChange={() => undefined} />,
+    node: <DatePicker value={new Date(2026, 0, 15)} onValueChange={() => undefined} />,
     open: "15/01/2026",
     target: "20",
   },

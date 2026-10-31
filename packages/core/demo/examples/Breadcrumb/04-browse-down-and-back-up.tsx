@@ -134,7 +134,7 @@ export default function BrowseDownAndBackUp() {
   return (
     <Stack gap={4}>
       <FormField label="Width of the trail" style={{ maxWidth: 360 }}>
-        <Slider min={200} max={640} step={20} value={width} onChange={setWidth} format={(v) => `${v} px`} />
+        <Slider min={200} max={640} step={20} value={width} onValueChange={setWidth} format={(v) => `${v} px`} />
       </FormField>
       <Card>
         <CardBody>

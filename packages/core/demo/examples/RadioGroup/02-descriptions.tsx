@@ -11,7 +11,7 @@ export default function Descriptions() {
     <FormField label="Delivery service" style={{ maxWidth: 480 }}>
       <RadioGroup
         value={service}
-        onChange={setService}
+        onValueChange={setService}
         options={[
           { value: "standard", label: "Standard", description: "Within two working days, at no extra charge." },
           { value: "next-day", label: "Next day", description: "Booked before 14:00, delivered the next working day." },

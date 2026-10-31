@@ -45,7 +45,7 @@ export default function UnsavedChanges() {
         <ModalHeader title="Maya Lindgren" description="Product manager · Web" />
         <ModalBody>
           <FormField label="Hours a week">
-            <NumberInput value={hours} onChange={setHours} min={0} max={40} />
+            <NumberInput value={hours} onValueChange={setHours} min={0} max={40} />
           </FormField>
         </ModalBody>
         <ModalFooter>

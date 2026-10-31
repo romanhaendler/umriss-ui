@@ -14,7 +14,7 @@ export default function WithAnError() {
       <NumberInput
         aria-label="Quantity"
         value={quantity}
-        onChange={setQuantity}
+        onValueChange={setQuantity}
         min={0}
         decimals={0}
         invalid={error !== undefined}

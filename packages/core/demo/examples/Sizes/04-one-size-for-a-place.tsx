@@ -30,7 +30,7 @@ export default function OneSizeForAPlace() {
           <option value="billing">Billing</option>
           <option value="accounts">Accounts</option>
         </Select>
-        <DatePicker aria-label="Opened on" value={day} onChange={setDay} />
+        <DatePicker aria-label="Opened on" value={day} onValueChange={setDay} />
         <ButtonGroup aria-label="State">
           <Button>Open</Button>
           <Button>Waiting</Button>

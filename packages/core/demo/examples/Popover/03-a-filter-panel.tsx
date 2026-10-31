@@ -37,7 +37,7 @@ export default function AFilterPanel() {
       <Popover open={open} onOpenChange={setOpen} anchorRef={anchor} role="dialog" aria-label="Filter by depot" restoreFocus width={260}>
         <Stack gap={3} style={{ padding: "var(--u-space-4)" }}>
           {DEPOTS.map((depot) => (
-            <Checkbox key={depot} label={depot} checked={draft.includes(depot)} onChange={() => toggle(depot)} />
+            <Checkbox key={depot} label={depot} checked={draft.includes(depot)} onCheckedChange={() => toggle(depot)} />
           ))}
           <Stack direction="row" gap={2} justify="flex-end">
             <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>

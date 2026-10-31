@@ -16,7 +16,7 @@ export default function ThousandsOfAssets() {
   return (
     <Stack gap={3} style={{ maxWidth: 320 }}>
       <FormField label="Assets">
-        <MultiSelect value={assets} onChange={setAssets} options={ASSETS} clearable placeholder="Choose assets" searchPlaceholder="Search assets" />
+        <MultiSelect value={assets} onValueChange={setAssets} options={ASSETS} clearable placeholder="Choose assets" searchPlaceholder="Search assets" />
       </FormField>
       <Text size="xs" tone="muted" mono>
         chosen: {assets.length}

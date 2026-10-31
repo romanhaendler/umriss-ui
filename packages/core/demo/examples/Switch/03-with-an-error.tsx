@@ -14,7 +14,7 @@ export default function WithAnError() {
       <Switch
         label="Page on-call, Checkout (tier 1)"
         checked={paging}
-        onChange={(event) => setPaging(event.target.checked)}
+        onCheckedChange={setPaging}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

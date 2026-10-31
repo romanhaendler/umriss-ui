@@ -13,7 +13,7 @@ export default function WithSeconds() {
 
   return (
     <FormField label="Objective breached, Checkout" style={{ maxWidth: 420 }}>
-      <DateTimeRangePicker value={breach} onChange={setBreach} withSeconds presets={[]} />
+      <DateTimeRangePicker value={breach} onValueChange={setBreach} withSeconds presets={[]} />
     </FormField>
   );
 }

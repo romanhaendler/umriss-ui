@@ -20,7 +20,7 @@ export default function SizedToTheValue() {
             inputMode="numeric"
             autoComplete="postal-code"
             value={postcode}
-            onChange={(event) => setPostcode(event.target.value)}
+            onValueChange={setPostcode}
           />
         </FormField>
         <FormField label="City">
@@ -31,10 +31,10 @@ export default function SizedToTheValue() {
         <Input chars={27} defaultValue="DE89 3704 0044 0532 0130 00" />
       </FormField>
       <FormField label="Amount">
-        <NumberInput chars={9} value={amount} onChange={setAmount} decimals={2} suffix="€" />
+        <NumberInput chars={9} value={amount} onValueChange={setAmount} decimals={2} suffix="€" />
       </FormField>
       <FormField label="Due">
-        <DatePicker value={due} onChange={setDue} clearable />
+        <DatePicker value={due} onValueChange={setDue} clearable />
       </FormField>
     </Stack>
   );

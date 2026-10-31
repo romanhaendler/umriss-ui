@@ -13,5 +13,5 @@ export const controls = ["withSeconds", "size", "chars", "clearable", "invalid",
 export const required = {
   "aria-label": "Planned downtime, Billing",
   value: { node: { from: new Date(2026, 9, 14, 22, 0), to: new Date(2026, 9, 15, 2, 30) }, code: "downtime" },
-  onChange: { node: undefined, code: "setDowntime" },
+  onValueChange: { node: undefined, code: "setDowntime" },
 };

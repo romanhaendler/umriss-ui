@@ -16,7 +16,7 @@ export default function PutTheLabelsInAColumn() {
         <Input defaultValue="CC-2100" />
       </FormField>
       <FormField label="Budget" labelPlacement="start" error="The budget must be above zero.">
-        <NumberInput value={budget} onChange={setBudget} />
+        <NumberInput value={budget} onValueChange={setBudget} />
       </FormField>
       <FormField label="Owner" labelPlacement="start">
         <Select defaultValue="finance">

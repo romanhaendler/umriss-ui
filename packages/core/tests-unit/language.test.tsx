@@ -118,7 +118,7 @@ describe("Wording that used to stand as a literal", () => {
             { value: "b", label: "Beta" },
           ]}
           value={["a"]}
-          onChange={() => undefined}
+          onValueChange={() => undefined}
         />
       </LanguageProvider>,
     );
@@ -155,7 +155,7 @@ describe("Wording of the range with time", () => {
   it("names the panel with an entry of its own", () => {
     render(
       <LanguageProvider wording={{ dateTimeRangePanel: "Range with time" }}>
-        <DateTimeRangePicker value={null} onChange={() => undefined} />
+        <DateTimeRangePicker value={null} onValueChange={() => undefined} />
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Select range" }));
@@ -166,8 +166,8 @@ describe("Wording of the range with time", () => {
     const range = { from: new Date(2026, 2, 17, 8, 0), to: new Date(2026, 2, 17, 17, 0) };
     render(
       <LanguageProvider wording={{ dateTimeRangeClear: "Clear range with time" }}>
-        <DateTimeRangePicker value={range} onChange={() => undefined} clearable />
-        <DateRangePicker value={range} onChange={() => undefined} clearable />
+        <DateTimeRangePicker value={range} onValueChange={() => undefined} clearable />
+        <DateRangePicker value={range} onValueChange={() => undefined} clearable />
       </LanguageProvider>,
     );
     expect(screen.getByLabelText("Clear range with time")).toBeTruthy();

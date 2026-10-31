@@ -9,7 +9,7 @@ export default function WithSeconds() {
 
   return (
     <FormField label="Alert fired" style={{ maxWidth: 320 }}>
-      <DateTimePicker value={fired} onChange={setFired} withSeconds />
+      <DateTimePicker value={fired} onValueChange={setFired} withSeconds />
     </FormField>
   );
 }

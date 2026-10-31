@@ -30,10 +30,10 @@ export default function AboveAForm() {
         <Input defaultValue="Customer service" />
       </FormField>
       <FormField label="Owner" required fieldId="cc-owner" error={showErrors && owner === "" ? "Name the person responsible." : undefined}>
-        <Input value={owner} onChange={(event) => setOwner(event.target.value)} />
+        <Input value={owner} onValueChange={setOwner} />
       </FormField>
       <FormField label="Monthly budget (€)" required fieldId="cc-budget" error={showErrors && budget === "" ? "Enter an amount." : undefined}>
-        <Input numeric value={budget} onChange={(event) => setBudget(event.target.value)} />
+        <Input numeric value={budget} onValueChange={setBudget} />
       </FormField>
       <Button variant="primary" onClick={() => setTried(true)} style={{ alignSelf: "flex-start" }}>
         Save the cost centre

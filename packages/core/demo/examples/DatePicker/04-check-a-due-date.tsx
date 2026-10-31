@@ -17,10 +17,10 @@ export default function CheckADueDate() {
   return (
     <Grid minItemWidth="220px" gap={4} style={{ maxWidth: 520 }}>
       <FormField label="Invoice date">
-        <DatePicker value={issued} onChange={setIssued} />
+        <DatePicker value={issued} onValueChange={setIssued} />
       </FormField>
       <FormField label="Due" hint={hint} error={error}>
-        <DatePicker value={due} onChange={setDue} />
+        <DatePicker value={due} onValueChange={setDue} />
       </FormField>
     </Grid>
   );

@@ -11,16 +11,16 @@ export default function States() {
   return (
     <Grid minItemWidth="220px" gap={4}>
       <FormField label="Pick-up" hint="Small size.">
-        <DatePicker size="sm" value={pickUp} onChange={setPickUp} clearable />
+        <DatePicker size="sm" value={pickUp} onValueChange={setPickUp} clearable />
       </FormField>
       <FormField label="Delivery" error="The delivery date cannot lie before today.">
-        <DatePicker value={delivery} onChange={setDelivery} clearable />
+        <DatePicker value={delivery} onValueChange={setDelivery} clearable />
       </FormField>
       <FormField label="Delivered on" hint="Set by the driver's scan.">
-        <DatePicker value={null} onChange={() => {}} disabled />
+        <DatePicker value={null} onValueChange={() => {}} disabled />
       </FormField>
       <FormField label="Return by" hint="Empty, with its own placeholder.">
-        <DatePicker value={null} onChange={() => {}} placeholder="No return planned" />
+        <DatePicker value={null} onValueChange={() => {}} placeholder="No return planned" />
       </FormField>
     </Grid>
   );

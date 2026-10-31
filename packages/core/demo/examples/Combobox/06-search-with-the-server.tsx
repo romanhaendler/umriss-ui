@@ -64,7 +64,7 @@ export default function SearchWithTheServer() {
       <FormField label="Customer">
         <Combobox
           value={customer}
-          onChange={setCustomer}
+          onValueChange={setCustomer}
           options={options}
           filter={false}
           loading={loading}

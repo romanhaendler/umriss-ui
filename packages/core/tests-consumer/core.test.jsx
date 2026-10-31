@@ -24,7 +24,7 @@ function Screen() {
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalHeader title="Settings" />
         <ModalBody>
-          <Combobox options={OPTIONS} value={letter} onChange={setLetter} aria-label="Letter" />
+          <Combobox options={OPTIONS} value={letter} onValueChange={setLetter} aria-label="Letter" />
         </ModalBody>
       </Modal>
       <button type="button" onClick={() => toast({ title: "Saved", duration: 0 })}>Save</button>

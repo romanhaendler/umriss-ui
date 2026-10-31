@@ -13,7 +13,7 @@ const OPTIONS = [
 describe("MultiSelect - clearable", () => {
   it("empties the whole selection without opening the panel", () => {
     const onChange = vi.fn();
-    render(<MultiSelect options={OPTIONS} value={["a", "b"]} onChange={onChange} aria-label="Letters" clearable />);
+    render(<MultiSelect options={OPTIONS} value={["a", "b"]} onValueChange={onChange} aria-label="Letters" clearable />);
     fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
     expect(onChange).toHaveBeenCalledWith([]);
     expect(screen.getByRole("button", { expanded: false })).toBe(document.activeElement);
@@ -21,10 +21,10 @@ describe("MultiSelect - clearable", () => {
 
   it("stands only with a selection, and only when asked for", () => {
     const { rerender } = render(
-      <MultiSelect options={OPTIONS} value={[]} onChange={vi.fn()} aria-label="Letters" clearable />,
+      <MultiSelect options={OPTIONS} value={[]} onValueChange={vi.fn()} aria-label="Letters" clearable />,
     );
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
-    rerender(<MultiSelect options={OPTIONS} value={["a"]} onChange={vi.fn()} aria-label="Letters" />);
+    rerender(<MultiSelect options={OPTIONS} value={["a"]} onValueChange={vi.fn()} aria-label="Letters" />);
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
   });
 
@@ -34,16 +34,16 @@ describe("MultiSelect - clearable", () => {
     const options = [...OPTIONS, { value: "c", label: "Gamma", disabled: true }];
     const onChange = vi.fn();
     const { rerender } = render(
-      <MultiSelect options={options} value={["a", "c"]} onChange={onChange} aria-label="Letters" clearable />,
+      <MultiSelect options={options} value={["a", "c"]} onValueChange={onChange} aria-label="Letters" clearable />,
     );
     fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
     expect(onChange).toHaveBeenCalledWith(["c"]);
-    rerender(<MultiSelect options={options} value={["c"]} onChange={onChange} aria-label="Letters" clearable />);
+    rerender(<MultiSelect options={options} value={["c"]} onValueChange={onChange} aria-label="Letters" clearable />);
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
   });
 
   it("is not there on a disabled field", () => {
-    render(<MultiSelect options={OPTIONS} value={["a"]} onChange={vi.fn()} aria-label="Letters" clearable disabled />);
+    render(<MultiSelect options={OPTIONS} value={["a"]} onValueChange={vi.fn()} aria-label="Letters" clearable disabled />);
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
   });
 });

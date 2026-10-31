@@ -20,7 +20,7 @@ export default function WithAnError() {
       <Combobox
         aria-label="Vehicle"
         value={vehicle}
-        onChange={setVehicle}
+        onValueChange={setVehicle}
         options={VEHICLES}
         placeholder="Choose a vehicle"
         invalid={error !== undefined}

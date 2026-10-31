@@ -14,7 +14,7 @@ export default function ClearTheField() {
         <Input
           clearable
           value={tracking}
-          onChange={(event) => setTracking(event.target.value)}
+          onValueChange={setTracking}
           onClear={() => setTracking("")}
         />
       </FormField>
@@ -23,7 +23,7 @@ export default function ClearTheField() {
           clearable
           placeholder="Name, street or number"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onValueChange={setSearch}
           onClear={() => setSearch("")}
         />
       </FormField>

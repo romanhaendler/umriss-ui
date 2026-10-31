@@ -9,7 +9,7 @@ export default function NumberField() {
 
   return (
     <FormField label="Parcel weight" style={{ maxWidth: 240 }}>
-      <NumberInput value={weight} onChange={setWeight} min={0} decimals={1} suffix="kg" />
+      <NumberInput value={weight} onValueChange={setWeight} min={0} decimals={1} suffix="kg" />
     </FormField>
   );
 }

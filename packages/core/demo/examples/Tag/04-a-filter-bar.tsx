@@ -44,8 +44,8 @@ export default function AFilterBar() {
             size="sm"
             aria-label="Add a filter"
             value=""
-            onChange={(event) => {
-              const picked = OPTIONS[Number(event.target.value)];
+            onValueChange={(value) => {
+              const picked = OPTIONS[Number(value)];
               if (picked && !filters.some((f) => f.value === picked.value)) setFilters([...filters, picked]);
             }}
           >

@@ -14,10 +14,10 @@ const to = new Date(2026, 2, 19, 18, 30);
 const noop = () => {};
 
 const pickers: [string, () => ReactElement, RegExp][] = [
-  ["DatePicker", () => <DatePicker aria-label="Due" value={from} onChange={noop} />, /17\/03\/2026/],
-  ["DateRangePicker", () => <DateRangePicker aria-label="Span" value={{ from, to }} onChange={noop} />, /19\/03\/2026/],
-  ["DateTimePicker", () => <DateTimePicker aria-label="At" value={from} onChange={noop} />, /09:05/],
-  ["DateTimeRangePicker", () => <DateTimeRangePicker aria-label="Window" value={{ from, to }} onChange={noop} />, /18:30/],
+  ["DatePicker", () => <DatePicker aria-label="Due" value={from} onValueChange={noop} />, /17\/03\/2026/],
+  ["DateRangePicker", () => <DateRangePicker aria-label="Span" value={{ from, to }} onValueChange={noop} />, /19\/03\/2026/],
+  ["DateTimePicker", () => <DateTimePicker aria-label="At" value={from} onValueChange={noop} />, /09:05/],
+  ["DateTimeRangePicker", () => <DateTimeRangePicker aria-label="Window" value={{ from, to }} onValueChange={noop} />, /18:30/],
 ];
 
 describe.each(pickers)("%s with a value", (_name, picker, shown) => {

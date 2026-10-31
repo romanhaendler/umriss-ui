@@ -549,7 +549,7 @@ export default function ControlRoom() {
           data-callout="7"
           aria-label="Time shown in"
           value={plantTime ? "plant" : "reader"}
-          onChange={(value) => setPlantTime(value === "plant")}
+          onValueChange={(value) => setPlantTime(value === "plant")}
           options={[
             { value: "plant", label: "Plant time" },
             { value: "reader", label: "Your time" },

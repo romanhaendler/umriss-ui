@@ -16,7 +16,7 @@ export default function WithAnError() {
       <DatePicker
         aria-label="Delivery"
         value={delivery}
-        onChange={setDelivery}
+        onValueChange={setDelivery}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

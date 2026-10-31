@@ -30,7 +30,7 @@ afterEach(() => {
 describe("Combobox - onSearch", () => {
   it("reports each typed text and the clearing cross's empty one", () => {
     const onSearch = vi.fn();
-    render(<Combobox options={ROWS} value="a" onChange={vi.fn()} onSearch={onSearch} clearable aria-label="Customer" />);
+    render(<Combobox options={ROWS} value="a" onValueChange={vi.fn()} onSearch={onSearch} clearable aria-label="Customer" />);
     const input = screen.getByRole("combobox");
     fireEvent.click(input);
     expect(onSearch).not.toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe("Combobox - onSearch", () => {
 describe("Combobox - filter={false}", () => {
   it("shows and lets choose an option that does not contain the text", () => {
     const onChange = vi.fn();
-    render(<Combobox options={ROWS} value={null} onChange={onChange} filter={false} aria-label="Customer" />);
+    render(<Combobox options={ROWS} value={null} onValueChange={onChange} filter={false} aria-label="Customer" />);
     const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "ac" } });
     expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(["Acme", "Zeta"]);
@@ -84,7 +84,7 @@ describe("Combobox - filter={false}", () => {
 
 describe("Combobox - loading", () => {
   it("shows Loading where the empty text would stand and marks the list busy", () => {
-    render(<Combobox options={[]} value={null} onChange={vi.fn()} loading aria-label="Customer" />);
+    render(<Combobox options={[]} value={null} onValueChange={vi.fn()} loading aria-label="Customer" />);
     fireEvent.click(screen.getByRole("combobox"));
     expect(screen.getByText("Loading")).toBeTruthy();
     expect(screen.queryByText("No matches")).toBeNull();
@@ -92,7 +92,7 @@ describe("Combobox - loading", () => {
   });
 
   it("keeps given options above the line", () => {
-    render(<Combobox options={ROWS} value={null} onChange={vi.fn()} loading aria-label="Customer" />);
+    render(<Combobox options={ROWS} value={null} onValueChange={vi.fn()} loading aria-label="Customer" />);
     fireEvent.click(screen.getByRole("combobox"));
     expect(screen.getAllByRole("option")).toHaveLength(2);
     expect(screen.getByText("Loading")).toBeTruthy();
@@ -106,7 +106,7 @@ describe("Combobox - the chosen label", () => {
       const [options, setOptions] = useState(ROWS);
       return (
         <>
-          <Combobox options={options} value={value} onChange={setValue} filter={false} aria-label="Customer" />
+          <Combobox options={options} value={value} onValueChange={setValue} filter={false} aria-label="Customer" />
           <button onClick={() => setOptions([{ value: "q", label: "Qux" }])}>replace</button>
         </>
       );
@@ -126,7 +126,7 @@ describe("Combobox - a server's 5,000 matches", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(240);
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ height: 32 } as DOMRect);
     const many = Array.from({ length: 5000 }, (_, i) => ({ value: `v${i}`, label: `Customer ${i}` }));
-    render(<Combobox options={many} value={null} onChange={vi.fn()} filter={false} aria-label="Customer" />);
+    render(<Combobox options={many} value={null} onValueChange={vi.fn()} filter={false} aria-label="Customer" />);
     fireEvent.click(screen.getByRole("combobox"));
     expect(screen.getAllByRole("option").length).toBeLessThan(100);
   });

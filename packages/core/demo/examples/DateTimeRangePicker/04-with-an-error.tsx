@@ -22,7 +22,7 @@ export default function WithAnError() {
       <DateTimeRangePicker
         aria-label="Planned downtime, Search"
         value={downtime}
-        onChange={setDowntime}
+        onValueChange={setDowntime}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

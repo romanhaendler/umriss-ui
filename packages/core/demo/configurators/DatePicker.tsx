@@ -12,5 +12,5 @@ export const controls = ["size", "chars", "clearable", "invalid", "disabled"];
 export const required = {
   "aria-label": "Delivery date",
   value: { node: new Date(2026, 9, 14), code: "delivery" },
-  onChange: { node: undefined, code: "setDelivery" },
+  onValueChange: { node: undefined, code: "setDelivery" },
 };

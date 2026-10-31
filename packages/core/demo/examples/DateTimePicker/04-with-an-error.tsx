@@ -17,7 +17,7 @@ export default function WithAnError() {
       <DateTimePicker
         aria-label="Resolved"
         value={resolved}
-        onChange={setResolved}
+        onValueChange={setResolved}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

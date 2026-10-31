@@ -12,7 +12,7 @@ export default function SideBySide() {
       <RadioGroup
         orientation="horizontal"
         value={part}
-        onChange={setPart}
+        onValueChange={setPart}
         options={[
           { value: "morning", label: "Morning" },
           { value: "afternoon", label: "Afternoon" },

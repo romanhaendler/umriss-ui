@@ -10,7 +10,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("the typed field", () => {
   it("opens the text keyboard, which has the separators a date is typed with", () => {
-    render(<DatePicker value={null} onChange={vi.fn()} />);
+    render(<DatePicker value={null} onValueChange={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Select date" }));
     expect(screen.getByRole("textbox", { name: "Type a date" }).hasAttribute("inputmode")).toBe(false);
   });
@@ -19,7 +19,7 @@ describe("the typed field", () => {
 describe("the midnight warning", () => {
   it("is silent when no zone is named", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    render(<DatePicker value={new Date()} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date()} onValueChange={vi.fn()} />);
     expect(warn).not.toHaveBeenCalled();
   });
 });
@@ -31,14 +31,14 @@ describe("min and max under a named zone", () => {
   const disabled = (label: string) => screen.getByLabelText(label).getAttribute("aria-disabled") === "true";
 
   it("takes max as the zone's day, not the reader's", () => {
-    zoned(<DatePicker value={new Date("2026-06-10T04:00:00Z")} onChange={vi.fn()} max={new Date("2026-06-16T00:00:00Z")} />);
+    zoned(<DatePicker value={new Date("2026-06-10T04:00:00Z")} onValueChange={vi.fn()} max={new Date("2026-06-16T00:00:00Z")} />);
     fireEvent.click(screen.getByRole("button", { name: "10/06/2026" }));
     expect(disabled("Monday, 15 June 2026")).toBe(false);
     expect(disabled("Tuesday, 16 June 2026")).toBe(true);
   });
 
   it("takes min as the zone's day, not the reader's", () => {
-    zoned(<DatePicker value={new Date("2026-06-10T04:00:00Z")} onChange={vi.fn()} min={new Date("2026-06-09T02:00:00Z")} />);
+    zoned(<DatePicker value={new Date("2026-06-10T04:00:00Z")} onValueChange={vi.fn()} min={new Date("2026-06-09T02:00:00Z")} />);
     fireEvent.click(screen.getByRole("button", { name: "10/06/2026" }));
     expect(disabled("Sunday, 7 June 2026")).toBe(true);
     expect(disabled("Monday, 8 June 2026")).toBe(false);

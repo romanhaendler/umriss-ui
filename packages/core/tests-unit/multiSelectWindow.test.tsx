@@ -15,7 +15,7 @@ function Field({ n, disabledFirst = 0, onChange }: { n: number; disabledFirst?: 
     <MultiSelect
       options={options}
       value={value}
-      onChange={(v) => {
+      onValueChange={(v) => {
         setValue(v);
         onChange?.(v);
       }}

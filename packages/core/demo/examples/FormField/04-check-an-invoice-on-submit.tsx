@@ -85,16 +85,16 @@ export default function CheckAnInvoiceOnSubmit() {
         )}
         <Grid minItemWidth="220px" gap={4}>
           <FormField label="Invoice number" required error={errors.number}>
-            <Input ref={numberRef} numeric value={invoice.number} onChange={(event) => set({ number: event.target.value })} />
+            <Input ref={numberRef} numeric value={invoice.number} onValueChange={(value) => set({ number: value })} />
           </FormField>
           <FormField label="Cost centre" required error={errors.centre}>
-            <Combobox ref={centreRef} options={CENTRES} value={invoice.centre} onChange={(centre) => set({ centre })} placeholder="Choose a cost centre" />
+            <Combobox ref={centreRef} options={CENTRES} value={invoice.centre} onValueChange={(centre) => set({ centre })} placeholder="Choose a cost centre" />
           </FormField>
           <FormField label="Net amount" required error={errors.amount}>
-            <NumberInput ref={amountRef} value={invoice.amount} onChange={(amount) => set({ amount })} min={0} decimals={2} suffix="€" />
+            <NumberInput ref={amountRef} value={invoice.amount} onValueChange={(amount) => set({ amount })} min={0} decimals={2} suffix="€" />
           </FormField>
           <FormField label="Due" required error={errors.due}>
-            <DatePicker ref={dueRef} value={invoice.due} onChange={(due) => set({ due })} clearable />
+            <DatePicker ref={dueRef} value={invoice.due} onValueChange={(due) => set({ due })} clearable />
           </FormField>
         </Grid>
         <Stack direction="row" gap={3} align="center">

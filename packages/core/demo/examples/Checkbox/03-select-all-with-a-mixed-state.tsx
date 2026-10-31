@@ -17,7 +17,7 @@ export default function SelectAllWithAMixedState() {
         label="Tell team Web about my leave"
         checked={all}
         indeterminate={!all && !none}
-        onChange={(event) => setNotified(notified.map(() => event.target.checked))}
+        onCheckedChange={(checked) => setNotified(notified.map(() => checked))}
       />
       <Stack gap={2} style={{ paddingLeft: "var(--u-space-6)" }}>
         {TEAM.map((name, i) => (
@@ -25,8 +25,8 @@ export default function SelectAllWithAMixedState() {
             key={name}
             label={name}
             checked={notified[i]}
-            onChange={(event) =>
-              setNotified((previous) => previous.map((on, j) => (i === j ? event.target.checked : on)))
+            onCheckedChange={(checked) =>
+              setNotified((previous) => previous.map((on, j) => (i === j ? checked : on)))
             }
           />
         ))}

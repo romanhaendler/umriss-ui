@@ -20,7 +20,7 @@ const renderField = (options = OPTIONS) =>
     <MultiSelect
       options={options}
       value={[]}
-      onChange={() => {}}
+      onValueChange={() => {}}
       aria-label="Letters"
       searchPlaceholder="Find"
     />,

@@ -452,7 +452,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Slider",
         sentence: "A value set roughly between two bounds (range slider): a share of traffic, an alert threshold, weekly hours. The position on the track says as much as the figure.",
         about: [
-          "`onChange` reports a number already on the step and inside the bounds, by pointer and by key alike. Pair it with a [NumberInput](#/numberinput) on the same state when the exact figure matters too.",
+          "`onValueChange` reports a number already on the step and inside the bounds, by pointer and by key alike. Pair it with a [NumberInput](#/numberinput) on the same state when the exact figure matters too.",
         ],
         alternatives: [{ when: "An exact figure, or a range without sensible bounds", use: "numberinput" }],
         keys: [

@@ -19,7 +19,7 @@ afterEach(() => {
 describe("The value seam", () => {
   it("gives the zone's midnight for a clicked day", () => {
     const onChange = vi.fn();
-    inZone("Europe/Berlin", <DatePicker value={null} onChange={onChange} />);
+    inZone("Europe/Berlin", <DatePicker value={null} onValueChange={onChange} />);
     open("Select date");
     fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "2026" } });
     fireEvent.change(screen.getByRole("combobox", { name: "Month" }), { target: { value: "2" } });
@@ -29,7 +29,7 @@ describe("The value seam", () => {
 
   it("is not the reader's midnight under another zone", () => {
     const onChange = vi.fn();
-    inZone("America/New_York", <DatePicker value={null} onChange={onChange} />);
+    inZone("America/New_York", <DatePicker value={null} onValueChange={onChange} />);
     open("Select date");
     fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "2026" } });
     fireEvent.change(screen.getByRole("combobox", { name: "Month" }), { target: { value: "2" } });
@@ -40,7 +40,7 @@ describe("The value seam", () => {
   it("opens a value on the zone's day, and the typed date goes out the same way", () => {
     const onChange = vi.fn();
     // Midnight in Kolkata on 17 March is the evening of the 16th for the reader.
-    inZone("Asia/Kolkata", <DatePicker value={new Date("2026-03-16T18:30:00Z")} onChange={onChange} />);
+    inZone("Asia/Kolkata", <DatePicker value={new Date("2026-03-16T18:30:00Z")} onValueChange={onChange} />);
     open(/17\/03\/2026/);
     expect(screen.getByLabelText("Tuesday, 17 March 2026").getAttribute("aria-pressed")).toBe("true");
     const typed = screen.getByLabelText("Type a date");
@@ -50,7 +50,7 @@ describe("The value seam", () => {
   });
 
   it("shows the typed date's placeholder as the 25th", () => {
-    inZone("Pacific/Kiritimati", <DatePicker value={null} onChange={vi.fn()} />);
+    inZone("Pacific/Kiritimati", <DatePicker value={null} onValueChange={vi.fn()} />);
     open("Select date");
     expect(screen.getByPlaceholderText("25/12/2031")).toBeTruthy();
   });
@@ -71,14 +71,14 @@ describe("The doubled and the missing hour, in the zone", () => {
   };
 
   it("reports 02:30 on 8 March as missing in New York", () => {
-    inZone("America/New_York", <DateTimePicker value={null} onChange={vi.fn()} />);
+    inZone("America/New_York", <DateTimePicker value={null} onValueChange={vi.fn()} />);
     pickTime("2|Sunday, 8 March 2026", "02", "30");
     expect(screen.getByText(/does not exist/i)).toBeTruthy();
   });
 
   it("offers both occurrences of 01:30 on 1 November in New York, and keeps the later", () => {
     const onChange = vi.fn();
-    inZone("America/New_York", <DateTimePicker value={null} onChange={onChange} />);
+    inZone("America/New_York", <DateTimePicker value={null} onValueChange={onChange} />);
     pickTime("10|Sunday, 1 November 2026", "01", "30");
     expect(screen.getByRole("button", { name: /GMT-4/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /GMT-5/ }));
@@ -90,7 +90,7 @@ describe("The doubled and the missing hour, in the zone", () => {
     cleanup();
     render(
       <LanguageProvider formats={{ timeZone: "America/New_York" }}>
-        <DateTimePicker value={later} onChange={onChange} />
+        <DateTimePicker value={later} onValueChange={onChange} />
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: /01\/11\/2026, 01:30/ }));
@@ -105,7 +105,7 @@ describe("The zone's today", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-06-10T21:30:00Z"));
     const onChange = vi.fn();
-    inZone("Asia/Kolkata", <DateRangePicker value={null} onChange={onChange} />);
+    inZone("Asia/Kolkata", <DateRangePicker value={null} onValueChange={onChange} />);
     open("Select range");
     expect(document.querySelector('[aria-current="date"]')?.getAttribute("aria-label")).toBe("Thursday, 11 June 2026");
     fireEvent.click(screen.getByRole("button", { name: "Last 7 days" }));
@@ -122,7 +122,7 @@ describe("The label and the warning", () => {
       const options = original.call(this);
       return options.locale === "en" ? options : { ...options, timeZone: "America/Chicago" };
     });
-    inZone("Europe/Berlin", <DatePicker value={null} onChange={vi.fn()} />);
+    inZone("Europe/Berlin", <DatePicker value={null} onValueChange={vi.fn()} />);
     const trigger = screen.getByRole("button", { name: "Select date" });
     expect(document.getElementById(trigger.getAttribute("aria-describedby")!)?.textContent).toBe("CET");
     open("Select date");
@@ -133,10 +133,10 @@ describe("The label and the warning", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     // The reader's midnight in Berlin is 18:00 the evening before in New York.
     const value = new Date(2026, 5, 15);
-    const { rerender } = inZone("America/New_York", <DatePicker value={value} onChange={vi.fn()} />);
+    const { rerender } = inZone("America/New_York", <DatePicker value={value} onValueChange={vi.fn()} />);
     rerender(
       <LanguageProvider formats={{ timeZone: "America/New_York" }}>
-        <DatePicker value={new Date(2026, 5, 16)} onChange={vi.fn()} />
+        <DatePicker value={new Date(2026, 5, 16)} onValueChange={vi.fn()} />
       </LanguageProvider>,
     );
     expect(warn).toHaveBeenCalledTimes(1);
@@ -147,7 +147,7 @@ describe("The label and the warning", () => {
   it("does not warn in a production build", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.stubEnv("NODE_ENV", "production");
-    inZone("America/New_York", <DatePicker value={new Date(2026, 5, 15)} onChange={vi.fn()} />);
+    inZone("America/New_York", <DatePicker value={new Date(2026, 5, 15)} onValueChange={vi.fn()} />);
     vi.unstubAllEnvs();
     expect(warn).not.toHaveBeenCalled();
   });

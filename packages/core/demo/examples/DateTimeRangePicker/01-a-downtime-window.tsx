@@ -12,7 +12,7 @@ export default function ADowntimeWindow() {
   return (
     <Stack gap={3} style={{ maxWidth: 360 }}>
       <FormField label="Planned downtime, Billing">
-        <DateTimeRangePicker value={downtime} onChange={setDowntime} clearable />
+        <DateTimeRangePicker value={downtime} onValueChange={setDowntime} clearable />
       </FormField>
       <Text size="xs" tone="muted" mono>
         {downtime === null

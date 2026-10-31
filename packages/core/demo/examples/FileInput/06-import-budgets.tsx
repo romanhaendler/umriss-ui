@@ -33,7 +33,7 @@ export default function ImportBudgets() {
         <Stack gap={5}>
           <Stepper aria-label="Import" steps={[{ label: "Choose file" }, { label: "Check" }, { label: "Import" }]} current={current} />
           <FormField label="Budget sheet" hint="CSV, one cost centre per row, with a head line.">
-            <FileInput accept=".csv" value={files} onChange={(next) => void choose(next)} />
+            <FileInput accept=".csv" value={files} onValueChange={(next) => void choose(next)} />
           </FormField>
           {reading && !imported && (
             <Stack direction="row" gap={3} align="center">
