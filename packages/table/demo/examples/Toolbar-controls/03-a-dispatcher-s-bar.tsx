@@ -214,7 +214,7 @@ export default function ADispatchersBar() {
             placeholder="All tours"
             options={TOUR_OPTIONS}
             value={t.conditionOf(tours) ?? []}
-            onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
+            onValueChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
           />
           <Select
             aria-label="Status"
@@ -231,7 +231,7 @@ export default function ADispatchersBar() {
             placeholder="Any customer"
             options={CUSTOMER_OPTIONS}
             value={t.conditionOf(customer)}
-            onChange={(name) => t.setFilter(customer, name)}
+            onValueChange={(name) => t.setFilter(customer, name)}
           />
           <ColumnMenu />
           <Export />

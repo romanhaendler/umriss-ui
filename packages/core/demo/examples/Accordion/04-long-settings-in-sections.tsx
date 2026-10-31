@@ -44,14 +44,14 @@ export default function LongSettingsInSections() {
           <AccordionItem value="thresholds" title="Thresholds - second signature, reminders">
             <Stack gap={4}>
               <FormField label="Finance signs from" hint="Net amount; below it the cost centre's owner signs alone.">
-                <NumberInput value={limit} onChange={setLimit} min={0} step={500} suffix="€" />
+                <NumberInput value={limit} onValueChange={setLimit} min={0} step={500} suffix="€" />
               </FormField>
               <FormField label="Remind the approver after">
                 <Slider
                   min={1}
                   max={10}
                   value={reminder}
-                  onChange={setReminder}
+                  onValueChange={setReminder}
                   format={(v) => `${v} working days`}
                   marks={[{ value: 3, label: "Default" }]}
                 />
@@ -72,7 +72,7 @@ export default function LongSettingsInSections() {
           <AccordionItem value="archive" title="Archive - retention">
             <Stack gap={3}>
               <FormField label="Keep invoices for">
-                <NumberInput value={10} onChange={() => undefined} suffix="years" />
+                <NumberInput value={10} onValueChange={() => undefined} suffix="years" />
               </FormField>
               <Switch label="Archive rejected invoices as well" />
             </Stack>

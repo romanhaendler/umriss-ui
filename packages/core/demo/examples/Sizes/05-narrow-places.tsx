@@ -24,10 +24,10 @@ export default function NarrowPlaces() {
             <Input chars={34} defaultValue="GB33 BUKB 2020 1555 5555 55" />
           </FormField>
           <FormField label="Window">
-            <DateTimeRangePicker value={slot} onChange={setSlot} />
+            <DateTimeRangePicker value={slot} onValueChange={setSlot} />
           </FormField>
           <FormField label="On call">
-            <MultiSelect options={TEAM} value={team} onChange={setTeam} />
+            <MultiSelect options={TEAM} value={team} onValueChange={setTeam} />
           </FormField>
         </Stack>
       </CardBody>

@@ -13,5 +13,5 @@ export const controls = ["withSeconds", "size", "chars", "clearable", "invalid",
 export const required = {
   "aria-label": "Customer impact began",
   value: { node: new Date(2026, 9, 14, 9, 42, 15), code: "started" },
-  onChange: { node: undefined, code: "setStarted" },
+  onValueChange: { node: undefined, code: "setStarted" },
 };

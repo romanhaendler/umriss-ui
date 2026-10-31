@@ -40,7 +40,7 @@ export default function ARowThatHoldsStill() {
           aria-label="Search shipments"
           placeholder="Search shipments"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onValueChange={setSearch}
           clearable
           onClear={() => setSearch("")}
         />
@@ -49,8 +49,8 @@ export default function ARowThatHoldsStill() {
           <option>Out for delivery</option>
           <option>Held at customs until the papers of origin are checked</option>
         </Select>
-        <MultiSelect ref={carriersRef} aria-label="Carriers" placeholder="Every carrier" options={CARRIERS} value={carriers} onChange={setCarriers} clearable />
-        <DateRangePicker aria-label="Shipped" value={period} onChange={setPeriod} clearable />
+        <MultiSelect ref={carriersRef} aria-label="Carriers" placeholder="Every carrier" options={CARRIERS} value={carriers} onValueChange={setCarriers} clearable />
+        <DateRangePicker aria-label="Shipped" value={period} onValueChange={setPeriod} clearable />
         <Switch label="Late only" />
       </Stack>
       <Text size="xs" tone="muted" mono>

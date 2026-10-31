@@ -60,7 +60,7 @@ export default function ProgressAndThumbnails() {
   return (
     <Stack gap={4} style={{ maxWidth: 480 }}>
       <FormField label="Photos of the damage" hint="Choose, drop or take a photo. The third file fails, to show that state.">
-        <FileInput multiple accept="image/*" capture="environment" value={[]} onChange={add} />
+        <FileInput multiple accept="image/*" capture="environment" value={[]} onValueChange={add} />
       </FormField>
       {entries.length > 0 && (
         <ul aria-label="Files to send" style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--u-space-3)" }}>

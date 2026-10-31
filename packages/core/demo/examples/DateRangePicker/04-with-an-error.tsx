@@ -18,7 +18,7 @@ export default function WithAnError() {
       <DateRangePicker
         aria-label="Leave, Noah Fischer"
         value={leave}
-        onChange={setLeave}
+        onValueChange={setLeave}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

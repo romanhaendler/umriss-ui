@@ -11,7 +11,7 @@ const TODAY = new Date(2026, 2, 17);
 const overdue = columnFilter<Date, true>({
   matches: (due) => due.getTime() < TODAY.getTime(),
   Input: ({ condition, setCondition }) => (
-    <Checkbox label="Overdue only" checked={condition === true} onChange={(event) => setCondition(event.target.checked ? true : null)} />
+    <Checkbox label="Overdue only" checked={condition === true} onCheckedChange={(checked) => setCondition(checked ? true : null)} />
   ),
   describe: () => "overdue",
 });

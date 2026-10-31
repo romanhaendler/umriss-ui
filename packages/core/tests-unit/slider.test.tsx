@@ -103,18 +103,18 @@ describe("Slider", () => {
 
   it("controlled: reports and waits until value follows", () => {
     const changed = vi.fn();
-    const { rerender } = render(<Slider aria-label="Speed" value={30} onChange={changed} />);
+    const { rerender } = render(<Slider aria-label="Speed" value={30} onValueChange={changed} />);
     press("ArrowRight");
     expect(changed).toHaveBeenCalledWith(31);
     expect(slider()).toHaveProperty("value", "30");
-    rerender(<Slider aria-label="Speed" value={31} onChange={changed} />);
+    rerender(<Slider aria-label="Speed" value={31} onValueChange={changed} />);
     expect(slider()).toHaveProperty("value", "31");
   });
 
   it("reports a pointer's change as a number", () => {
     function Controlled() {
       const [value, setValue] = useState(10);
-      return <Slider aria-label="Speed" value={value} onChange={setValue} showValue />;
+      return <Slider aria-label="Speed" value={value} onValueChange={setValue} showValue />;
     }
     render(<Controlled />);
     fireEvent.change(slider(), { target: { value: "64" } });

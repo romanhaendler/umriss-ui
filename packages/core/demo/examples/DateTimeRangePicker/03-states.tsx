@@ -15,18 +15,18 @@ export default function States() {
   return (
     <Grid minItemWidth="260px" gap={4}>
       <FormField label="Release freeze" hint="Small size.">
-        <DateTimeRangePicker size="sm" value={freeze} onChange={setFreeze} clearable />
+        <DateTimeRangePicker size="sm" value={freeze} onValueChange={setFreeze} clearable />
       </FormField>
       <FormField label="Planned downtime, Search" error="Overlaps the downtime of Checkout, 03:00 to 04:00.">
-        <DateTimeRangePicker value={downtime} onChange={setDowntime} clearable />
+        <DateTimeRangePicker value={downtime} onValueChange={setDowntime} clearable />
       </FormField>
       <FormField label="Maintenance window, Payments" hint="Empty, with its own placeholder.">
-        <DateTimeRangePicker value={null} onChange={() => {}} placeholder="Not scheduled yet" />
+        <DateTimeRangePicker value={null} onValueChange={() => {}} placeholder="Not scheduled yet" />
       </FormField>
       <FormField label="Downtime, last quarter" hint="Closed.">
         <DateTimeRangePicker
           value={{ from: new Date(2025, 11, 6, 1, 0), to: new Date(2025, 11, 6, 3, 30) }}
-          onChange={() => {}}
+          onValueChange={() => {}}
           disabled
         />
       </FormField>

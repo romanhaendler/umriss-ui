@@ -12,7 +12,7 @@ const atLeast = columnFilter<number, number>({
       size="sm"
       options={values.map((hours) => ({ value: String(hours), label: `${hours} h and more` }))}
       value={condition === null ? null : String(condition)}
-      onChange={(hours) => setCondition(Number(hours))}
+      onValueChange={(hours) => setCondition(Number(hours))}
     />
   ),
   describe: (least) => `${least} h and more`,

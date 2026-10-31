@@ -16,16 +16,16 @@ export default function States() {
   return (
     <Grid minItemWidth="240px" gap={4}>
       <FormField label="Skills" hint="Search for “zz” to see the empty result.">
-        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" emptyText="No skill matches. Ask the team lead to add it." />
+        <MultiSelect value={[]} onValueChange={() => {}} options={SKILLS} placeholder="Choose skills" emptyText="No skill matches. Ask the team lead to add it." />
       </FormField>
       <FormField label="Skills" error="Choose at least one skill for the sprint.">
-        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" />
+        <MultiSelect value={[]} onValueChange={() => {}} options={SKILLS} placeholder="Choose skills" />
       </FormField>
       <FormField label="Skills" hint="Set by the team lead.">
-        <MultiSelect value={["react", "qa"]} onChange={() => {}} options={SKILLS} disabled />
+        <MultiSelect value={["react", "qa"]} onValueChange={() => {}} options={SKILLS} disabled />
       </FormField>
       <FormField label="Skills" hint="More than fits: the rest as +N.">
-        <MultiSelect value={["react", "ios", "android", "design", "a11y"]} onChange={() => {}} options={SKILLS} />
+        <MultiSelect value={["react", "ios", "android", "design", "a11y"]} onValueChange={() => {}} options={SKILLS} />
       </FormField>
     </Grid>
   );

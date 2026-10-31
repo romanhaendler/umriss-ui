@@ -135,7 +135,7 @@ function GroupCheckbox({ group, entry, hook, formats, wording }: { group: RowGro
       aria-label={wording.selectGroup(groupText(entry, group.value, formats, wording))}
       checked={all}
       indeterminate={chosen > 0 && !all}
-      onChange={() => {
+      onCheckedChange={() => {
         for (const key of keys) if (selection.isSelected(key) === all) selection.toggle(key);
       }}
     />

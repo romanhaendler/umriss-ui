@@ -492,10 +492,10 @@ The table is not part of this package. It lives in
    The component's own `role`, the `aria-*` it computes and its handlers are not
    replaced by `rest`: a caller's handler runs first and can `preventDefault`.
    Held by `tests-unit/passthrough.test.tsx`, which renders every export.
-2. Support controlled **and** uncontrolled use (`value`/`defaultValue`).
-   Deliberately controlled only: `Combobox` and `MultiSelect` – the field keeps
-   no second state beside the caller's – as well as `Modal`, `Drawer` and
-   `CommandPalette`, because opening is the caller's decision.
+2. Support controlled **and** uncontrolled use (`value`/`defaultValue`), with
+   the callback named for the state (`onValueChange`, `onCheckedChange`; ADR-0081).
+   Every field does both. `Modal`, `Drawer` and `CommandPalette` are controlled
+   only, because opening is the caller's decision.
 3. Keyboard operation and `aria` attributes are part of the definition of done.
 4. No business logic: a mapping such as "status X is green" is the application's
    to make.

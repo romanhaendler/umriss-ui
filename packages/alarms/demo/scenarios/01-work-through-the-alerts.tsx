@@ -169,7 +169,7 @@ export default function WorkThroughTheAlerts() {
 
       <Stack direction="row" gap={3} align="center" wrap>
         <span data-callout="3">
-          <Switch label="Hidden alerts only" checked={hiddenOnly} onChange={(e) => setHiddenOnly(e.target.checked)} />
+          <Switch label="Hidden alerts only" checked={hiddenOnly} onCheckedChange={(checked) => setHiddenOnly(checked)} />
         </span>
         <span data-callout="4">
           <Button

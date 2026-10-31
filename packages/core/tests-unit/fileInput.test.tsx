@@ -69,7 +69,7 @@ describe("FileInput", () => {
 
   it("lists the chosen files with their size, and reports them", () => {
     const changed = vi.fn();
-    render(<FileInput multiple onChange={changed} />);
+    render(<FileInput multiple onValueChange={changed} />);
     fireEvent.change(screen.getByLabelText("Choose files"), { target: { files: [CSV, PNG] } });
     expect(listed()).toEqual([expect.stringContaining("recipe-0412.csv"), expect.stringContaining("label.png")]);
     expect(listed()[0]).toContain("12 kB");
@@ -79,7 +79,7 @@ describe("FileInput", () => {
 
   it("takes files dropped on the zone, and only those it accepts", () => {
     const changed = vi.fn();
-    const { container } = render(<FileInput multiple accept=".csv,image/*" onChange={changed} />);
+    const { container } = render(<FileInput multiple accept=".csv,image/*" onValueChange={changed} />);
     drop(container, [CSV, PDF, PNG]);
     expect(changed).toHaveBeenCalledWith([CSV, PNG]);
     expect(listed()).toHaveLength(2);
@@ -88,7 +88,7 @@ describe("FileInput", () => {
 
   it("takes the first file of a drop where it takes one", () => {
     const changed = vi.fn();
-    const { container } = render(<FileInput onChange={changed} />);
+    const { container } = render(<FileInput onValueChange={changed} />);
     drop(container, [CSV, PNG]);
     expect(changed).toHaveBeenCalledWith([CSV]);
   });
@@ -103,7 +103,7 @@ describe("FileInput", () => {
 
   it("removes a listed file by its key", () => {
     const changed = vi.fn();
-    render(<FileInput multiple onChange={changed} />);
+    render(<FileInput multiple onValueChange={changed} />);
     fireEvent.change(screen.getByLabelText("Choose files"), { target: { files: [CSV, PNG] } });
     fireEvent.click(screen.getByRole("button", { name: "Remove recipe-0412.csv" }));
     expect(changed).toHaveBeenLastCalledWith([PNG]);
@@ -115,8 +115,8 @@ describe("FileInput", () => {
       const [files, setFiles] = useState<File[]>([CSV]);
       return (
         <>
-          <FileInput aria-label="Held" value={[PDF]} onChange={() => undefined} />
-          <FileInput aria-label="Following" value={files} onChange={setFiles} multiple />
+          <FileInput aria-label="Held" value={[PDF]} onValueChange={() => undefined} />
+          <FileInput aria-label="Following" value={files} onValueChange={setFiles} multiple />
         </>
       );
     }
@@ -130,7 +130,7 @@ describe("FileInput", () => {
 
   it("takes no drop and no removal while disabled", () => {
     const changed = vi.fn();
-    const { container } = render(<FileInput disabled value={[CSV]} onChange={changed} />);
+    const { container } = render(<FileInput disabled value={[CSV]} onValueChange={changed} />);
     drop(container, [PNG]);
     expect(changed).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Remove recipe-0412.csv" })).toHaveProperty("disabled", true);

@@ -18,13 +18,13 @@ function warnings(ui: React.ReactElement, rerenderTo?: React.ReactElement): stri
 }
 
 const cases: [string, React.ReactElement, RegExp][] = [
-  ["DatePicker", <DatePicker value={bad("2024-03-04")} onChange={noop} aria-label="d" />, /DatePicker value must be a Date or null/],
-  ["DateTimePicker", <DateTimePicker value={bad("2024-03-04")} onChange={noop} aria-label="d" />, /DateTimePicker value must be a Date or null/],
-  ["DateRangePicker", <DateRangePicker value={bad("2024-03-04")} onChange={noop} aria-label="d" />, /DateRangePicker value must be \{ from: Date, to: Date \} or null/],
-  ["MultiSelect value", <MultiSelect options={[{ value: "a", label: "A" }]} value={bad("a")} onChange={noop} aria-label="m" />, /MultiSelect value must be an array/],
-  ["MultiSelect options", <MultiSelect options={bad(["a", "b"])} value={[]} onChange={noop} aria-label="m" />, /MultiSelect options must be an array of \{ value, label \}/],
-  ["Combobox options", <Combobox options={bad(["a", "b"])} value={null} onChange={noop} aria-label="c" />, /Combobox options must be an array of \{ value, label \}/],
-  ["NumberInput", <NumberInput value={bad("12")} onChange={noop} aria-label="n" />, /NumberInput value must be a number or null/],
+  ["DatePicker", <DatePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DatePicker value must be a Date or null/],
+  ["DateTimePicker", <DateTimePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DateTimePicker value must be a Date or null/],
+  ["DateRangePicker", <DateRangePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DateRangePicker value must be \{ from: Date, to: Date \} or null/],
+  ["MultiSelect value", <MultiSelect options={[{ value: "a", label: "A" }]} value={bad("a")} onValueChange={noop} aria-label="m" />, /MultiSelect value must be an array/],
+  ["MultiSelect options", <MultiSelect options={bad(["a", "b"])} value={[]} onValueChange={noop} aria-label="m" />, /MultiSelect options must be an array of \{ value, label \}/],
+  ["Combobox options", <Combobox options={bad(["a", "b"])} value={null} onValueChange={noop} aria-label="c" />, /Combobox options must be an array of \{ value, label \}/],
+  ["NumberInput", <NumberInput value={bad("12")} onValueChange={noop} aria-label="n" />, /NumberInput value must be a number or null/],
   ["Stat", <Stat label="L" value={bad("3.42")} />, /Stat value must be a number, null or undefined/],
 ];
 
@@ -37,11 +37,11 @@ describe("shape warnings", () => {
   it("stays quiet for the right shapes", () => {
     const w = warnings(
       <>
-        <DatePicker value={new Date()} onChange={noop} aria-label="d" />
-        <DatePicker value={null} onChange={noop} aria-label="d" />
-        <MultiSelect options={[{ value: "a", label: "A" }]} value={["a"]} onChange={noop} aria-label="m" />
-        <Combobox options={[{ value: "a", label: "A" }]} value={null} onChange={noop} aria-label="c" />
-        <NumberInput value={null} onChange={noop} aria-label="n" />
+        <DatePicker value={new Date()} onValueChange={noop} aria-label="d" />
+        <DatePicker value={null} onValueChange={noop} aria-label="d" />
+        <MultiSelect options={[{ value: "a", label: "A" }]} value={["a"]} onValueChange={noop} aria-label="m" />
+        <Combobox options={[{ value: "a", label: "A" }]} value={null} onValueChange={noop} aria-label="c" />
+        <NumberInput value={null} onValueChange={noop} aria-label="n" />
         <Stat label="L" value={null} />
       </>,
     );

@@ -22,7 +22,7 @@ export default function DisabledUntilSelected() {
           key={shipment.id}
           label={`${shipment.id} · ${shipment.customer}`}
           checked={selected.includes(shipment.id)}
-          onChange={() => toggle(shipment.id)}
+          onCheckedChange={() => toggle(shipment.id)}
         />
       ))}
       <SplitButton

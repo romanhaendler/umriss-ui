@@ -400,7 +400,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
                   checked={!snapshot.hidden.includes(column.id)}
                   /* The row header names the row and stays. */
                   disabled={column.hideable === false}
-                  onChange={() => snapshot.toggleColumn(column.id)}
+                  onCheckedChange={() => snapshot.toggleColumn(column.id)}
                 />
                 <Tooltip content={wording.columnForwardHint}>
                   <button
@@ -583,14 +583,15 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   const before = !projection?.lines || current?.server ? -1 : rowsOf(projection.lines).indexOf(onPage[0] as never);
   const from = !current || count === 0 ? 0 : before >= 0 ? before + 1 : (current.page - 1) * current.pageSize + 1;
   const to = !current ? 0 : before >= 0 ? before + onPage.length : Math.min(current.page * current.pageSize, count);
-  const rangeText = current
+  const rangeText = current && !connection?.registry.skeleton
     ? wording.pageRange(from, to, count, { from: formats.count(from), to: formats.count(to), total: formats.count(count) })
     : "";
   /* Set by a step of the pager: the new range is spoken once the page has
      changed. A page size change or a resize moves the page too, and says nothing.
      The region mounts empty with the first step and takes the words a render
      later - a region that appears with its text is often not heard - and it
-     stays in the bar, so that it is gone with the table. */
+     stays in the bar, so that it is gone with the table, and then shows the
+     range the bar shows - after a shrink of the data too. */
   const stepped = useRef(false);
   const [spoken, setSpoken] = useState<string | null>(null);
   useEffect(() => {
@@ -635,7 +636,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
   const bar = (
     <nav {...rest} aria-label={wording.pagination} className={cx(styles.pagination, className)}>
       <span>{rangeText}</span>
-      {spoken !== null && <VisuallyHidden role="status">{spoken}</VisuallyHidden>}
+      {spoken !== null && <VisuallyHidden role="status">{spoken && rangeText}</VisuallyHidden>}
       <div className={styles.paginationControls}>
         <label className={styles.pageSize}>
           {wording.rows}
@@ -664,7 +665,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
           <IconButton size="sm" disabled={atFirst} aria-label={wording.previousPage} onClick={(event) => goTo(snapshot.page - 1, 1, event.currentTarget)}>
             <AngleGlyph className={styles.turned} />
           </IconButton>
-          <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
+          <span className={styles.paginationStatus}>{connection.registry.skeleton ? "" : wording.pageOfPages(snapshot.page, snapshot.pageCount, {
               page: formats.count(snapshot.page),
               total: formats.count(snapshot.pageCount),
             })}</span>

@@ -24,12 +24,12 @@ export default function Shortcut() {
       <Text size="sm" tone="secondary">
         Press Cmd-K, Ctrl-K or “/” to jump to a project. Current: {project}
       </Text>
-      <Switch label="“/” opens the palette" checked={slash} onChange={(event) => setSlash(event.target.checked)} />
+      <Switch label="“/” opens the palette" checked={slash} onCheckedChange={setSlash} />
       <Input
         size="sm"
         aria-label="Here a slash stays a slash"
         value={text}
-        onChange={(event) => setText(event.target.value)}
+        onValueChange={setText}
         placeholder="Type “/” here"
       />
       <CommandPalette

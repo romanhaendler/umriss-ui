@@ -15,7 +15,7 @@ export default function WithAnError() {
         aria-label="Postmortem"
         accept=".pdf,.md"
         value={files}
-        onChange={setFiles}
+        onValueChange={setFiles}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

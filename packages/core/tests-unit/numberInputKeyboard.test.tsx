@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 const inputMode = (props: Record<string, unknown>) => {
   cleanup();
-  render(<NumberInput aria-label="Value" value={null} onChange={vi.fn()} {...props} />);
+  render(<NumberInput aria-label="Value" value={null} onValueChange={vi.fn()} {...props} />);
   return screen.getByRole("textbox", { name: "Value" }).getAttribute("inputmode");
 };
 

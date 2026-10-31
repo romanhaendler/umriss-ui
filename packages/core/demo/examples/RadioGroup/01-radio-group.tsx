@@ -11,7 +11,7 @@ export default function RadioGroupExample() {
     <FormField label="If nobody is home">
       <RadioGroup
         value={attempt}
-        onChange={setAttempt}
+        onValueChange={setAttempt}
         options={[
           { value: "door", label: "Leave at the door" },
           { value: "neighbour", label: "Hand to a neighbour" },

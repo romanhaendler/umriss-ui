@@ -55,6 +55,10 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The badge's children are the word - its props say there is always one beside the colour. The caller's: an empty badge would be colour alone.",
   "core/Button/Button.module.css":
     "The danger button's label names the destructive action. A deliberate departure from ISA-101: colour here marks a consequence, not an abnormal state.",
+  "core/Checkbox/Checkbox.module.css":
+    "The invalid box's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
+  "core/RadioGroup/RadioGroup.module.css":
+    "The invalid group's empty dots' edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Combobox/Combobox.module.css":
     "The invalid field's edge; the form field's error message is the word (FormField), and aria-invalid says it to a screen reader.",
   "core/DataViz/DataViz.module.css":

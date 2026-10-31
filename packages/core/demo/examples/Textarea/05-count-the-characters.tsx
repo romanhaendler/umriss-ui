@@ -13,10 +13,10 @@ export default function CountTheCharacters() {
   return (
     <Grid minItemWidth="260px" gap={4}>
       <FormField label="Status page headline">
-        <Textarea showCount maxLength={80} rows={2} value={status} onChange={(event) => setStatus(event.target.value)} />
+        <Textarea showCount maxLength={80} rows={2} value={status} onValueChange={setStatus} />
       </FormField>
       <FormField label="Text message to on-call" hint="Set from outside, past the limit.">
-        <Textarea showCount maxLength={100} rows={3} value={sms} onChange={(event) => setSms(event.target.value)} />
+        <Textarea showCount maxLength={100} rows={3} value={sms} onValueChange={setSms} />
       </FormField>
     </Grid>
   );

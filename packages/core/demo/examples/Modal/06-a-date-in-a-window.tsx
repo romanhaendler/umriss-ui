@@ -15,7 +15,7 @@ export default function ADateInAWindow() {
         <ModalHeader title="Due date" />
         <ModalBody>
           <FormField label="Due">
-            <DatePicker value={due} onChange={setDue} clearable />
+            <DatePicker value={due} onValueChange={setDue} clearable />
           </FormField>
         </ModalBody>
         <ModalFooter>

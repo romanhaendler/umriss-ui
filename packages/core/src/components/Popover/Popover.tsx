@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, ReactNode, RefObject } from "react";
+import type { CSSProperties, FocusEvent, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
@@ -70,6 +70,9 @@ export interface PopoverProps {
   id?: string;
   /** Additional class on the surface. */
   className?: string;
+  /** Runs when the focus leaves any element of the surface (it bubbles from
+      the panel and from what is portalled out of it). */
+  onBlur?: (event: FocusEvent<HTMLDivElement>) => void;
   /** What stands in the surface. */
   children: ReactNode;
 }
@@ -105,6 +108,7 @@ export function Popover({
   "aria-label": name,
   id,
   className,
+  onBlur,
   children,
 }: PopoverProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -339,6 +343,7 @@ export function Popover({
       aria-label={name}
       aria-labelledby={namedByAnchor ? anchorId : undefined}
       className={cx(styles.panel, className)}
+      onBlur={onBlur}
       data-closing={closing || undefined}
       /* A panel that is leaving is gone for assistive technology at once: its
          fade is for the eye. `inert` takes it out of reach, `aria-hidden` out

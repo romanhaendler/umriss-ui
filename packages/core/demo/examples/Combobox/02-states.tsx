@@ -14,16 +14,16 @@ export default function States() {
   return (
     <Grid minItemWidth="240px" gap={4}>
       <FormField label="Vehicle" hint="Type “zz” to see the empty result.">
-        <Combobox value={null} onChange={() => {}} options={VEHICLES} emptyText="No vehicle matches. Check the plate." />
+        <Combobox value={null} onValueChange={() => {}} options={VEHICLES} emptyText="No vehicle matches. Check the plate." />
       </FormField>
       <FormField label="Vehicle" error="Tour T-04 needs a vehicle before it can be released.">
-        <Combobox value={null} onChange={() => {}} options={VEHICLES} placeholder="Choose a vehicle" />
+        <Combobox value={null} onValueChange={() => {}} options={VEHICLES} placeholder="Choose a vehicle" />
       </FormField>
       <FormField label="Vehicle" hint="The tour is on the road.">
-        <Combobox value="v2" onChange={() => {}} options={VEHICLES} disabled />
+        <Combobox value="v2" onValueChange={() => {}} options={VEHICLES} disabled />
       </FormField>
       <FormField label="Vehicle" hint="A long label is cut at the field's edge.">
-        <Combobox value="v3" onChange={() => {}} options={VEHICLES} />
+        <Combobox value="v3" onValueChange={() => {}} options={VEHICLES} />
       </FormField>
     </Grid>
   );

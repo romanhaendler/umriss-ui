@@ -15,7 +15,7 @@ export default function ThousandsOfCostCentres() {
   return (
     <Stack gap={3} style={{ maxWidth: 320 }}>
       <FormField label="Cost centre">
-        <Combobox value={centre} onChange={setCentre} clearable options={CENTRES} placeholder="Type a number or a name" />
+        <Combobox value={centre} onValueChange={setCentre} clearable options={CENTRES} placeholder="Type a number or a name" />
       </FormField>
       <Text size="xs" tone="muted" mono>
         value: {centre === null ? "null" : `"${centre}"`}

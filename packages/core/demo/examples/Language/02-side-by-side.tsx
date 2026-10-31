@@ -27,7 +27,7 @@ function Surface() {
       <Stat label="Search p95" value={null} unit="ms" limits={OBJECTIVE} />
       <Stat label="Requests today" value={1284311} decimals={0} />
       <FormField label="Assignee">
-        <Combobox value={null} onChange={() => {}} clearable options={ENGINEERS} />
+        <Combobox value={null} onValueChange={() => {}} clearable options={ENGINEERS} />
       </FormField>
     </Stack>
   );

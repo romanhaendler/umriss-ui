@@ -20,5 +20,5 @@ export const required = {
   "aria-label": "Driver",
   options: { node: DRIVERS, code: "drivers" },
   value: { node: "d2", code: "driver" },
-  onChange: { node: undefined, code: "setDriver" },
+  onValueChange: { node: undefined, code: "setDriver" },
 };

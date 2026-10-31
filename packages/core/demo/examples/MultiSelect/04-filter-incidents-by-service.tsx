@@ -62,7 +62,7 @@ export default function FilterIncidentsByService() {
       <FormField label="Services">
         <MultiSelect
           value={services}
-          onChange={setServices}
+          onValueChange={setServices}
           placeholder="All services"
           searchPlaceholder="Search services"
           options={SERVICES.map((s) => ({ value: s.id, label: s.name }))}

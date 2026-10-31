@@ -6,6 +6,7 @@
    At first only the two range pickers used it, and the other two drew the same
    trigger by hand - exactly the drift the popover seam had described. */
 
+import { fieldBlur } from "../../lib/fieldBlur";
 import { useId } from "react";
 import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
@@ -101,7 +102,7 @@ export function RangeTrigger({
   natural,
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
-  const { style, id, onClick, ...rest } = root ?? {};
+  const { style, id, onClick, onBlur, ...rest } = root ?? {};
   const zone = useTimeZoneLabel();
   const zoneId = useId();
   const describedBy = [rest["aria-describedby"] ?? field?.describedBy, zone ? zoneId : undefined].filter(Boolean).join(" ");
@@ -123,6 +124,7 @@ export function RangeTrigger({
         aria-controls={panel.open ? panel.id : undefined}
         aria-describedby={describedBy || undefined}
         aria-invalid={invalid || undefined}
+        onBlur={(event) => fieldBlur(event, onBlur, wrapRef, panel.id)}
         className={cx(
           styles.trigger,
           size === "sm" && styles.sm,

@@ -20,5 +20,5 @@ export const required = {
   "aria-label": "Project team",
   options: { node: PEOPLE, code: "people" },
   value: { node: ["arjun", "noah"], code: "team" },
-  onChange: { node: undefined, code: "setTeam" },
+  onValueChange: { node: undefined, code: "setTeam" },
 };

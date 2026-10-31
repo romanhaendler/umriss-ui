@@ -1,3 +1,4 @@
+import { fieldBlur } from "../../lib/fieldBlur";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
@@ -449,6 +450,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
         natural={naturalChars((sample) => 2 * (measure.date(sample).length + 2 + measure.time(sample, withSeconds).length) + 3, placeholderText)}
       />
       <Popover
+        onBlur={(event) => fieldBlur(event, rest.onBlur, wrapRef)}
         open={open}
         onOpenChange={(isOpen) => {
           if (!isOpen) setOpen(false);

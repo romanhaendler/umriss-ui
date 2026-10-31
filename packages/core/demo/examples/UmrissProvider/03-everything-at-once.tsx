@@ -31,7 +31,7 @@ function DeliveryDate() {
   return (
     <Stack gap={3} align="flex-start">
       <FormField label="Delivery date">
-        <DatePicker value={date} onChange={setDate} clearable />
+        <DatePicker value={date} onValueChange={setDate} clearable />
       </FormField>
       <Button size="sm" disabled={date === null} onClick={rebookNow}>
         Rebook

@@ -19,13 +19,13 @@ export default function PriceAnInvoiceLine() {
         <Stack gap={4}>
           <Grid minItemWidth="140px" gap={3}>
             <FormField label="Quantity">
-              <NumberInput value={quantity} onChange={setQuantity} min={0} decimals={0} />
+              <NumberInput value={quantity} onValueChange={setQuantity} min={0} decimals={0} />
             </FormField>
             <FormField label="Unit price">
-              <NumberInput value={unitPrice} onChange={setUnitPrice} min={0} decimals={2} step={0.1} suffix="€" />
+              <NumberInput value={unitPrice} onValueChange={setUnitPrice} min={0} decimals={2} step={0.1} suffix="€" />
             </FormField>
             <FormField label="Discount">
-              <NumberInput value={discount} onChange={setDiscount} min={0} max={100} decimals={1} suffix="%" />
+              <NumberInput value={discount} onValueChange={setDiscount} min={0} max={100} decimals={1} suffix="%" />
             </FormField>
           </Grid>
           <Text size="sm">

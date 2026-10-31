@@ -10,7 +10,7 @@ export default function FromTheFirstReadingToToday() {
   return (
     <div style={{ maxWidth: 320 }}>
       <FormField label="Reading" hint="From 1 March 2020 to today.">
-        <DatePicker value={day} onChange={setDay} min={new Date(2020, 2, 1)} max={new Date()} clearable />
+        <DatePicker value={day} onValueChange={setDay} min={new Date(2020, 2, 1)} max={new Date()} clearable />
       </FormField>
     </div>
   );

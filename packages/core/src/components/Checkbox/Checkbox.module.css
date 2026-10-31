@@ -124,6 +124,18 @@
     box-shadow: var(--u-focus-ring);
   }
 
+  /* Invalid keeps its colour as a field does, under the pointer and under the
+     focus. The word is the form field's error message. */
+  .invalid:not(:checked):not(:indeterminate) + .box,
+  .wrapper:hover .invalid:not(:disabled):not(:checked):not(:indeterminate):not(:focus-visible) + .box {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid:focus-visible + .box {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
   /* Disabled dims the whole control, box and label, as the radio does. */
   .wrapper:has(.input:disabled) {
     cursor: not-allowed;

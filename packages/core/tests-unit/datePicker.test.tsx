@@ -35,7 +35,7 @@ describe("DateTimePicker - Now", () => {
     vi.setSystemTime(new Date(LATER_0230.getTime() + 40_000));
 
     const onChange = vi.fn();
-    render(<DateTimePicker value={null} onChange={onChange} />);
+    render(<DateTimePicker value={null} onValueChange={onChange} />);
     openPanel("Select date and time");
     fireEvent.click(screen.getByRole("button", { name: "Now" }));
 
@@ -47,7 +47,7 @@ describe("DateTimePicker - Now", () => {
 describe("Reopening a later value", () => {
   it("DateTimePicker: Apply gives back the same instant", () => {
     const onChange = vi.fn();
-    render(<DateTimePicker value={LATER_0230} onChange={onChange} />);
+    render(<DateTimePicker value={LATER_0230} onValueChange={onChange} />);
     openPanel("25/10/2026, 02:30");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect((lastValue(onChange) as Date).getTime()).toBe(LATER_0230.getTime());
@@ -55,7 +55,7 @@ describe("Reopening a later value", () => {
 
   it("DateTimePicker: the earlier one stays the earlier one", () => {
     const onChange = vi.fn();
-    render(<DateTimePicker value={EARLIER_0230} onChange={onChange} />);
+    render(<DateTimePicker value={EARLIER_0230} onValueChange={onChange} />);
     openPanel("25/10/2026, 02:30");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect((lastValue(onChange) as Date).getTime()).toBe(EARLIER_0230.getTime());
@@ -65,7 +65,7 @@ describe("Reopening a later value", () => {
     const onChange = vi.fn();
     // 02:30 CEST to 02:45 CET: the start earlier, the end later.
     const to = new Date("2026-10-25T01:45:00Z");
-    render(<DateTimeRangePicker value={{ from: EARLIER_0230, to }} onChange={onChange} presets={[]} />);
+    render(<DateTimeRangePicker value={{ from: EARLIER_0230, to }} onValueChange={onChange} presets={[]} />);
     fireEvent.click(screen.getByRole("button", { name: /25\/10\/2026, 02:30/ }));
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     const range = lastValue(onChange) as { from: Date; to: Date };
@@ -78,7 +78,7 @@ describe("Enter in the time field", () => {
   it("applies in the DateTimePicker as in the DateTimeRangePicker", () => {
     const onChange = vi.fn();
     const value = new Date(2026, 5, 15, 10, 15);
-    render(<DateTimePicker value={value} onChange={onChange} />);
+    render(<DateTimePicker value={value} onValueChange={onChange} />);
     openPanel("15/06/2026, 10:15");
     fireEvent.keyDown(screen.getByLabelText("Minute"), { key: "Enter" });
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe("Enter in the time field", () => {
 describe("Typing into the time fields", () => {
   it("takes each digit itself, whatever the caret: 0930 gives 09:30", () => {
     const onChange = vi.fn();
-    render(<DateTimePicker value={new Date(2026, 5, 15, 10, 15)} onChange={onChange} />);
+    render(<DateTimePicker value={new Date(2026, 5, 15, 10, 15)} onValueChange={onChange} />);
     openPanel("15/06/2026, 10:15");
     const field = (label: string) => screen.getByLabelText(label) as HTMLInputElement;
     const type = (label: string, value: string) => {
@@ -118,7 +118,7 @@ describe("An overridden preset", () => {
   it("reaches the DateRangePicker", () => {
     render(
       <LanguageProvider wording={WORDING}>
-        <DateRangePicker value={null} onChange={() => undefined} />
+        <DateRangePicker value={null} onValueChange={() => undefined} />
       </LanguageProvider>,
     );
     openPanel("Select range");
@@ -128,7 +128,7 @@ describe("An overridden preset", () => {
   it("reaches the DateTimeRangePicker as well", () => {
     render(
       <LanguageProvider wording={WORDING}>
-        <DateTimeRangePicker value={null} onChange={() => undefined} />
+        <DateTimeRangePicker value={null} onValueChange={() => undefined} />
       </LanguageProvider>,
     );
     openPanel("Select range");
@@ -142,7 +142,7 @@ describe("An overridden preset", () => {
    Tab went past the grid. The active day now travels along. */
 describe("Paging with the arrows", () => {
   it("takes the active day - and the tab stop - into the new month", () => {
-    render(<DatePicker value={new Date(2026, 0, 31)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 0, 31)} onValueChange={vi.fn()} />);
     openPanel("31/01/2026");
     const next = screen.getByRole("button", { name: "Next month" });
     next.focus();
@@ -154,7 +154,7 @@ describe("Paging with the arrows", () => {
   });
 
   it("leaves the focus on the arrow in a range picker too", () => {
-    render(<DateRangePicker value={null} onChange={vi.fn()} />);
+    render(<DateRangePicker value={null} onValueChange={vi.fn()} />);
     openPanel("Select range");
     const next = screen.getByRole("button", { name: "Next month" });
     next.focus();
@@ -170,7 +170,7 @@ const key = (k: string, init: object = {}) =>
 
 describe("The calendar's head jumps to a month and a year", () => {
   it("shows the chosen year and month with the tab stop in it", () => {
-    render(<DatePicker value={new Date(2026, 9, 31)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 9, 31)} onValueChange={vi.fn()} />);
     openPanel("31/10/2026");
     fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "1985" } });
     fireEvent.change(screen.getByRole("combobox", { name: "Month" }), { target: { value: "1" } });
@@ -179,7 +179,7 @@ describe("The calendar's head jumps to a month and a year", () => {
   });
 
   it("lists 100 years either side of today and always the year in view", () => {
-    render(<DatePicker value={new Date(2500, 0, 1)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2500, 0, 1)} onValueChange={vi.fn()} />);
     openPanel("01/01/2500");
     const years = Array.from((screen.getByRole("combobox", { name: "Year" }) as HTMLSelectElement).options).map((o) => o.value);
     const now = new Date().getFullYear();
@@ -189,7 +189,7 @@ describe("The calendar's head jumps to a month and a year", () => {
   });
 
   it("is carried by the left month of a pair, which the right follows", () => {
-    render(<DateRangePicker value={null} onChange={vi.fn()} />);
+    render(<DateRangePicker value={null} onValueChange={vi.fn()} />);
     openPanel("Select range");
     expect(screen.getAllByRole("combobox", { name: "Year" })).toHaveLength(1);
     fireEvent.change(screen.getByRole("combobox", { name: "Year" }), { target: { value: "1985" } });
@@ -199,7 +199,7 @@ describe("The calendar's head jumps to a month and a year", () => {
   });
 
   it("opens no own list of its year under a finger", () => {
-    render(<DatePicker value={new Date(2026, 9, 31)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 9, 31)} onValueChange={vi.fn()} />);
     openPanel("31/10/2026");
     const year = screen.getByRole("combobox", { name: "Year" });
     fireEvent.pointerDown(year, { pointerType: "touch", button: 0 });
@@ -211,7 +211,7 @@ describe("The calendar's head jumps to a month and a year", () => {
     const { GERMAN_WORDING, GERMAN_FORMATS } = await import("../src/lib/language/de");
     render(
       <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
-        <DatePicker value={new Date(2026, 2, 17)} onChange={vi.fn()} />
+        <DatePicker value={new Date(2026, 2, 17)} onValueChange={vi.fn()} />
       </LanguageProvider>,
     );
     openPanel("17.03.2026");
@@ -223,7 +223,7 @@ describe("The calendar's head jumps to a month and a year", () => {
     const formats = { monthName: () => "Mmm" };
     render(
       <LanguageProvider formats={formats}>
-        <DatePicker value={new Date(2026, 2, 17)} onChange={vi.fn()} />
+        <DatePicker value={new Date(2026, 2, 17)} onValueChange={vi.fn()} />
       </LanguageProvider>,
     );
     openPanel("17/03/2026");
@@ -233,7 +233,7 @@ describe("The calendar's head jumps to a month and a year", () => {
 
 describe("The grid's keys", () => {
   it("PageUp and PageDown move a month, keeping the day, across a year", () => {
-    render(<DatePicker value={new Date(2026, 0, 31)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 0, 31)} onValueChange={vi.fn()} />);
     openPanel("31/01/2026");
     key("PageUp");
     expect(stop()).toBe("Wednesday, 31 December 2025");
@@ -243,7 +243,7 @@ describe("The grid's keys", () => {
   });
 
   it("Shift with them moves a year", () => {
-    render(<DatePicker value={new Date(2024, 1, 29)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2024, 1, 29)} onValueChange={vi.fn()} />);
     openPanel("29/02/2024");
     key("PageDown", { shiftKey: true });
     expect(stop()).toBe("Friday, 28 February 2025");
@@ -252,7 +252,7 @@ describe("The grid's keys", () => {
   });
 
   it("Home and End go to Monday and Sunday of the week, across a month", () => {
-    render(<DatePicker value={new Date(2026, 2, 1)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 2, 1)} onValueChange={vi.fn()} />);
     openPanel("01/03/2026"); // a Sunday
     key("Home");
     expect(stop()).toBe("Monday, 23 February 2026");

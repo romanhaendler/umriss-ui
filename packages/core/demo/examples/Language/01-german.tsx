@@ -13,10 +13,10 @@ export default function German() {
     <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
       <Stack direction="row" gap={3} wrap>
         <FormField label="Delivery date">
-          <DatePicker value={date} onChange={setDate} clearable />
+          <DatePicker value={date} onValueChange={setDate} clearable />
         </FormField>
         <FormField label="Weight">
-          <NumberInput value={weight} onChange={setWeight} decimals={1} suffix="kg" />
+          <NumberInput value={weight} onValueChange={setWeight} decimals={1} suffix="kg" />
         </FormField>
       </Stack>
     </LanguageProvider>

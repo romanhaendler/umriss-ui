@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Combobox, FormField, Stack, Text } from "../../../src";
 
 export const title = "Combobox";
-export const lead = "Typing filters the `options`; `onChange` runs only when a row is chosen or cleared, with one value or `null`.";
+export const lead = "Typing filters the `options`; `onValueChange` runs only when a row is chosen or cleared, with one value or `null`.";
 
 const DRIVERS = [
   { value: "d1", label: "Martin Hale" },
@@ -21,7 +21,7 @@ export default function PickADriver() {
   return (
     <Stack gap={3} style={{ maxWidth: 320 }}>
       <FormField label="Driver, tour T-04">
-        <Combobox value={driver} onChange={setDriver} clearable options={DRIVERS} placeholder="Type a name" />
+        <Combobox value={driver} onValueChange={setDriver} clearable options={DRIVERS} placeholder="Type a name" />
       </FormField>
       <Text size="xs" tone="muted" mono>
         value: {driver === null ? "null" : `"${driver}"`}

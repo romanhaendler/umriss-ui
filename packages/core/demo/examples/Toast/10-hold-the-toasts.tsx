@@ -27,9 +27,9 @@ export default function HoldTheToasts() {
       <Switch
         label="Hold the toasts"
         checked={held}
-        onChange={(event) => {
-          setHeld(event.target.checked);
-          pageToast({ held: event.target.checked });
+        onCheckedChange={(checked) => {
+          setHeld(checked);
+          pageToast({ held: checked });
         }}
       />
       <SendButton />
@@ -39,7 +39,7 @@ export default function HoldTheToasts() {
   // return (
   //   <ToastProvider held={held}>
   //     <Stack direction="row" gap={4} align="center">
-  //       <Switch label="Hold the toasts" checked={held} onChange={(event) => setHeld(event.target.checked)} />
+  //       <Switch label="Hold the toasts" checked={held} onCheckedChange={setHeld} />
   //       <SendButton />
   //     </Stack>
   //   </ToastProvider>

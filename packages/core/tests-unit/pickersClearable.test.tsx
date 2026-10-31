@@ -9,12 +9,12 @@ const day = new Date(2026, 5, 10);
 const range = { from: new Date(2026, 5, 10), to: new Date(2026, 5, 12) };
 
 const cases: [string, (clearable: boolean, onChange: () => void) => React.ReactElement][] = [
-  ["DatePicker", (clearable, onChange) => <DatePicker value={day} onChange={onChange} clearable={clearable} />],
-  ["DateTimePicker", (clearable, onChange) => <DateTimePicker value={day} onChange={onChange} clearable={clearable} />],
-  ["DateRangePicker", (clearable, onChange) => <DateRangePicker value={range} onChange={onChange} clearable={clearable} />],
+  ["DatePicker", (clearable, onChange) => <DatePicker value={day} onValueChange={onChange} clearable={clearable} />],
+  ["DateTimePicker", (clearable, onChange) => <DateTimePicker value={day} onValueChange={onChange} clearable={clearable} />],
+  ["DateRangePicker", (clearable, onChange) => <DateRangePicker value={range} onValueChange={onChange} clearable={clearable} />],
   [
     "DateTimeRangePicker",
-    (clearable, onChange) => <DateTimeRangePicker value={range} onChange={onChange} clearable={clearable} presets={[]} />,
+    (clearable, onChange) => <DateTimeRangePicker value={range} onValueChange={onChange} clearable={clearable} presets={[]} />,
   ],
 ];
 

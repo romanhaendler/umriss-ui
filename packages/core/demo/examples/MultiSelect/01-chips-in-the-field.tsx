@@ -21,7 +21,7 @@ export default function ChipsInTheField() {
   return (
     <Stack gap={3} style={{ maxWidth: 360 }}>
       <FormField label="Project team">
-        <MultiSelect value={team} onChange={setTeam} placeholder="Choose people" options={PEOPLE} />
+        <MultiSelect value={team} onValueChange={setTeam} placeholder="Choose people" options={PEOPLE} />
       </FormField>
       <Text size="xs" tone="muted" mono>
         value: [{team.join(", ")}]

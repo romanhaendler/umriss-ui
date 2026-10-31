@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Button, FileInput, FormField, Stack, Text } from "../../../src";
 
 export const title = "Require a file before sending";
-export const lead = "Hold the files with `value` and `onChange`, and turn an empty choice into the field's error on submit.";
+export const lead = "Hold the files with `value` and `onValueChange`, and turn an empty choice into the field's error on submit.";
 
 export default function RequireAFileBeforeSending() {
   const [files, setFiles] = useState<File[]>([]);
@@ -21,7 +21,7 @@ export default function RequireAFileBeforeSending() {
     <form onSubmit={send} noValidate style={{ maxWidth: 420 }}>
       <Stack gap={3}>
         <FormField label="Receipts" required error={tried && files.length === 0 ? "Attach at least one receipt." : undefined}>
-          <FileInput multiple accept=".pdf,image/*" value={files} onChange={setFiles} name="receipts" />
+          <FileInput multiple accept=".pdf,image/*" value={files} onValueChange={setFiles} name="receipts" />
         </FormField>
         <Stack direction="row" gap={3} align="center">
           <Button type="submit" size="sm" variant="primary">

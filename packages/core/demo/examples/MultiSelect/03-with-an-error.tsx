@@ -21,7 +21,7 @@ export default function WithAnError() {
       <MultiSelect
         aria-label="Skills"
         value={skills}
-        onChange={setSkills}
+        onValueChange={setSkills}
         options={SKILLS}
         placeholder="Choose skills"
         invalid={error !== undefined}

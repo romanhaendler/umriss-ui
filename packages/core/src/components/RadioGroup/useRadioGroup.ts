@@ -12,7 +12,7 @@
 
    Not exported from the package. */
 
-import { useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { idPart } from "../../lib/idPart";
 import { useFormField } from "../FormField";
@@ -60,6 +60,23 @@ export function useRadioGroup<T extends string>({
      of `undefined` is controlled and empty. */
   const [value, report, controlled] = useFieldValue<T, null>(component, props, null);
   const defaultValue = props.defaultValue;
+
+  /* `ref.focus()` on the group - what a form library calls on the first invalid field - lands on the
+     operable part: the checked option, else the first one that can be chosen. The ref stays the group
+     element, so this is its own `focus`. */
+  useEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+    group.focus = (focusOptions) => {
+      const inputs = Array.from(group.querySelectorAll<HTMLInputElement>('input[type="radio"]:not(:disabled)'));
+      const target = inputs.find((input) => input.checked) ?? inputs[0];
+      if (target) target.focus(focusOptions);
+      else HTMLElement.prototype.focus.call(group, focusOptions);
+    };
+    return () => {
+      Reflect.deleteProperty(group, "focus");
+    };
+  }, []);
 
   const selectable = options.filter((option) => !option.disabled && !disabled);
 

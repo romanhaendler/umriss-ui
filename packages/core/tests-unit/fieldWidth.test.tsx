@@ -35,13 +35,13 @@ const FIELDS: Record<string, (props: { chars?: number; style?: object }) => Reac
       <option>A</option>
     </Select>
   ),
-  NumberInput: (p) => <NumberInput aria-label="Field" value={null} onChange={() => {}} {...p} />,
-  Combobox: (p) => <Combobox aria-label="Field" value={null} onChange={() => {}} options={[]} {...p} />,
-  MultiSelect: (p) => <MultiSelect aria-label="Field" value={[]} onChange={() => {}} options={[]} {...p} />,
-  DatePicker: (p) => <DatePicker aria-label="Field" value={null} onChange={() => {}} {...p} />,
-  DateTimePicker: (p) => <DateTimePicker aria-label="Field" value={null} onChange={() => {}} {...p} />,
-  DateRangePicker: (p) => <DateRangePicker aria-label="Field" value={null} onChange={() => {}} {...p} />,
-  DateTimeRangePicker: (p) => <DateTimeRangePicker aria-label="Field" value={null} onChange={() => {}} {...p} />,
+  NumberInput: (p) => <NumberInput aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
+  Combobox: (p) => <Combobox aria-label="Field" value={null} onValueChange={() => {}} options={[]} {...p} />,
+  MultiSelect: (p) => <MultiSelect aria-label="Field" value={[]} onValueChange={() => {}} options={[]} {...p} />,
+  DatePicker: (p) => <DatePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
+  DateTimePicker: (p) => <DateTimePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
+  DateRangePicker: (p) => <DateRangePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
+  DateTimeRangePicker: (p) => <DateTimeRangePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
 };
 
 describe("chars on every field", () => {
@@ -105,7 +105,7 @@ describe("rendered on a server", () => {
     const html = renderToString(
       <ControlSizeProvider size="sm">
         <Input aria-label="Postcode" chars={5} />
-        <DatePicker aria-label="Due" value={null} onChange={() => {}} />
+        <DatePicker aria-label="Due" value={null} onValueChange={() => {}} />
       </ControlSizeProvider>,
     );
     expect(html).toContain("--_chars:5");
@@ -118,12 +118,12 @@ describe("rendered on a server", () => {
 
 describe("a field's own count", () => {
   it("NumberInput counts a prefix and a suffix given as text, with their gap", () => {
-    const element = root(<NumberInput aria-label="Weight" value={null} onChange={() => {}} suffix="kg" />);
+    const element = root(<NumberInput aria-label="Weight" value={null} onValueChange={() => {}} suffix="kg" />);
     expect(element.style.getPropertyValue("--_extra")).toBe("3");
   });
 
   it("NumberInput does not count an adornment that is no text", () => {
-    const element = root(<NumberInput aria-label="Weight" value={null} onChange={() => {}} suffix={<svg />} />);
+    const element = root(<NumberInput aria-label="Weight" value={null} onValueChange={() => {}} suffix={<svg />} />);
     expect(element.style.getPropertyValue("--_extra")).toBe("");
   });
 
@@ -138,7 +138,7 @@ describe("a field's own count", () => {
 
   it("a placeholder longer than the value sets the count", () => {
     const element = root(
-      <DatePicker aria-label="Due" value={null} onChange={() => {}} placeholder="Pick the day the invoice is due" />,
+      <DatePicker aria-label="Due" value={null} onValueChange={() => {}} placeholder="Pick the day the invoice is due" />,
     );
     expect(chars(element)).toBe(String("Pick the day the invoice is due".length));
   });

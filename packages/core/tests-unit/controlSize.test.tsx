@@ -46,19 +46,19 @@ const isSmall = (root: HTMLElement) =>
 const CONTROLS: Record<string, (size?: ControlSize) => ReactElement> = {
   Input: (size) => <Input aria-label="Field" size={size} />,
   Textarea: (size) => <Textarea aria-label="Field" size={size} />,
-  NumberInput: (size) => <NumberInput aria-label="Field" size={size} value={null} onChange={() => {}} />,
+  NumberInput: (size) => <NumberInput aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
   Select: (size) => (
     <Select aria-label="Field" size={size}>
       <option>A</option>
     </Select>
   ),
-  Combobox: (size) => <Combobox aria-label="Field" size={size} value={null} onChange={() => {}} options={[]} />,
-  MultiSelect: (size) => <MultiSelect aria-label="Field" size={size} value={[]} onChange={() => {}} options={[]} />,
-  DatePicker: (size) => <DatePicker aria-label="Field" size={size} value={null} onChange={() => {}} />,
-  DateTimePicker: (size) => <DateTimePicker aria-label="Field" size={size} value={null} onChange={() => {}} />,
-  DateRangePicker: (size) => <DateRangePicker aria-label="Field" size={size} value={null} onChange={() => {}} />,
+  Combobox: (size) => <Combobox aria-label="Field" size={size} value={null} onValueChange={() => {}} options={[]} />,
+  MultiSelect: (size) => <MultiSelect aria-label="Field" size={size} value={[]} onValueChange={() => {}} options={[]} />,
+  DatePicker: (size) => <DatePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
+  DateTimePicker: (size) => <DateTimePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
+  DateRangePicker: (size) => <DateRangePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
   DateTimeRangePicker: (size) => (
-    <DateTimeRangePicker aria-label="Field" size={size} value={null} onChange={() => {}} />
+    <DateTimeRangePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />
   ),
   Button: (size) => <Button size={size}>Go</Button>,
   IconButton: (size) => (
@@ -74,10 +74,10 @@ const CONTROLS: Record<string, (size?: ControlSize) => ReactElement> = {
   ),
   Switch: (size) => <Switch label="On" size={size} />,
   RadioGroup: (size) => (
-    <RadioGroup aria-label="Choice" size={size} value="a" onChange={() => {}} options={[{ value: "a", label: "A" }]} />
+    <RadioGroup aria-label="Choice" size={size} value="a" onValueChange={() => {}} options={[{ value: "a", label: "A" }]} />
   ),
   SegmentedControl: (size) => (
-    <SegmentedControl aria-label="Choice" size={size} value="a" onChange={() => {}} options={[{ value: "a", label: "A" }]} />
+    <SegmentedControl aria-label="Choice" size={size} value="a" onValueChange={() => {}} options={[{ value: "a", label: "A" }]} />
   ),
 };
 

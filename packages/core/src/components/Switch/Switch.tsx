@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
@@ -33,6 +34,10 @@ export function Switch({ ref, label, size: ownSize, invalid, className, style, i
   const field = useFormField();
   const inputId = id ?? field?.id;
   const isInvalid = invalid ?? field?.invalid ?? false;
+  /* Inside a FormField the input has two labels, its own and the field's, and
+     a screen reader would read both joined. The switch's own words name it. */
+  const labelId = useId();
+  const ownName = field && label && !rest["aria-label"] && !rest["aria-labelledby"] ? labelId : undefined;
 
   return (
     <label className={cx(styles.wrapper, size === "sm" && styles.sm, field && styles.field, className)} style={style} htmlFor={inputId}>
@@ -43,6 +48,7 @@ export function Switch({ ref, label, size: ownSize, invalid, className, style, i
         aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
+        aria-labelledby={ownName}
         className={cx(styles.input, isInvalid && styles.invalid)}
         {...rest}
         /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
@@ -60,7 +66,11 @@ export function Switch({ ref, label, size: ownSize, invalid, className, style, i
       <span className={styles.track} aria-hidden="true">
         <span className={styles.thumb} />
       </span>
-      {label && <span className={styles.label}>{label}</span>}
+      {label && (
+        <span id={labelId} className={styles.label}>
+          {label}
+        </span>
+      )}
     </label>
   );
 }

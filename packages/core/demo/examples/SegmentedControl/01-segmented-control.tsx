@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SegmentedControl, Text, Stack } from "../../../src";
 
 export const title = "Segmented control";
-export const lead = "Pass `options`, `value` and `onChange`; `value` is `null` until something is chosen.";
+export const lead = "Pass `options`, `value` and `onValueChange`; `value` is `null` until something is chosen.";
 
 export default function SegmentedControlExample() {
   const [period, setPeriod] = useState<"hour" | "day" | "week" | null>("day");
@@ -12,7 +12,7 @@ export default function SegmentedControlExample() {
       <SegmentedControl
         aria-label="Period"
         value={period}
-        onChange={setPeriod}
+        onValueChange={setPeriod}
         options={[
           { value: "hour", label: "Hour" },
           { value: "day", label: "Day" },

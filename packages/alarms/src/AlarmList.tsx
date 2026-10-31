@@ -156,7 +156,7 @@ function SnoozePanel({
         <RadioGroup
           ref={group}
           value={ms}
-          onChange={setMs}
+          onValueChange={setMs}
           options={durations.map((d) => ({ value: String(d), label: durationWord(d, wording) }))}
         />
       </FormField>
@@ -164,7 +164,7 @@ function SnoozePanel({
         <FormField label={wording.alarmSnoozeReason} required={required}>
           <RadioGroup
             value={chosen}
-            onChange={(value) => {
+            onValueChange={(value) => {
               setChosen(value);
               setReason("");
             }}
@@ -430,7 +430,7 @@ function Body({
           <Checkbox
             className={styles.hidden}
             checked={hiddenOnly}
-            onChange={(event) => onHiddenOnlyChange(event.currentTarget.checked)}
+            onCheckedChange={(checked) => onHiddenOnlyChange(checked)}
             label={<span className={styles.hiddenLabel}>{hiddenCount}</span>}
           />
         ) : (

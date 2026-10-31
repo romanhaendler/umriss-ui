@@ -19,7 +19,7 @@ const spoken = () =>
 
 describe("NumberInput - refusing a character", () => {
   it("announces once and marks the field invalid for a moment", () => {
-    render(<NumberInput aria-label="Value" value={12} onChange={vi.fn()} />);
+    render(<NumberInput aria-label="Value" value={12} onValueChange={vi.fn()} />);
     const field = screen.getByRole("textbox", { name: "Value" });
     fireEvent.change(field, { target: { value: "12a" } });
     expect((field as HTMLInputElement).value).toBe("12");
@@ -31,7 +31,7 @@ describe("NumberInput - refusing a character", () => {
   });
 
   it("announces nothing for a key it reads", () => {
-    render(<NumberInput aria-label="Value" value={12} onChange={vi.fn()} />);
+    render(<NumberInput aria-label="Value" value={12} onValueChange={vi.fn()} />);
     const field = screen.getByRole("textbox", { name: "Value" });
     fireEvent.change(field, { target: { value: "123" } });
     act(() => void vi.advanceTimersByTime(ANNOUNCE_REST));

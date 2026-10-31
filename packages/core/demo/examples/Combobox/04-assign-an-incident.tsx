@@ -58,7 +58,7 @@ export default function AssignAnIncident() {
           <FormField label="Service">
             <Combobox
               value={service}
-              onChange={(next) => {
+              onValueChange={(next) => {
                 setService(next);
                 setOwner(null);
               }}
@@ -68,7 +68,7 @@ export default function AssignAnIncident() {
           <FormField label="Incident lead" hint={team ? `Engineers of ${team} first.` : undefined}>
             <Combobox
               value={owner}
-              onChange={setOwner}
+              onValueChange={setOwner}
               clearable
               placeholder="Type a name or team"
               options={[...ENGINEERS]
