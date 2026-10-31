@@ -169,8 +169,8 @@ function barsOn(s: ChartScene, axis: AxisConfig): boolean {
 export function updateLayout(s: ChartScene): void {
   const measurer = s.measurer;
   // A zooming chart keeps the horizontal drag and the pinch; the page keeps
-  // the vertical scroll.
-  if (s.container !== null) s.container.style.touchAction = hasZoom(s) || s.onRange !== null ? "pan-y" : "";
+  // the vertical scroll. A chart that only brushes a range uses one finger, so the page's pinch stays.
+  if (s.container !== null) s.container.style.touchAction = hasZoom(s) ? "pan-y" : s.onRange !== null ? "pan-y pinch-zoom" : "";
   const grid = gridDefault(s);
   const inputs: AxisInput[] = [];
   for (const [id, entry] of [...s.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
