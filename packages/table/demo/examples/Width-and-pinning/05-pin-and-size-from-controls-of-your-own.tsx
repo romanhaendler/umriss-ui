@@ -40,7 +40,7 @@ export default function PinAndSizeFromControls() {
         <Switch
           label="Keep the customer in view"
           checked={t.pinned.customer === "start"}
-          onChange={(event) => t.setPin("customer", event.target.checked ? "start" : null)}
+          onCheckedChange={(checked) => t.setPin("customer", checked ? "start" : null)}
         />
         <Button size="sm" onClick={() => t.setWidth("note", wide ? undefined : 420)}>
           {wide ? "Note back to its width" : "Widen the note"}

@@ -177,7 +177,7 @@ export default function ALargerToolbar() {
           placeholder="All tours"
           options={TOUR_OPTIONS}
           value={t.conditionOf(tours) ?? []}
-          onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
+          onValueChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
         />
         <ColumnMenu />
         <Export />

@@ -185,7 +185,7 @@ export default function ControlsAtTheToolbarsSize() {
           placeholder="All tours"
           options={TOUR_OPTIONS}
           value={t.conditionOf(tours) ?? []}
-          onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
+          onValueChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
         />
         <Select
           aria-label="Status"

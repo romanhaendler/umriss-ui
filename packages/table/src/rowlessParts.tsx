@@ -400,7 +400,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
                   checked={!snapshot.hidden.includes(column.id)}
                   /* The row header names the row and stays. */
                   disabled={column.hideable === false}
-                  onChange={() => snapshot.toggleColumn(column.id)}
+                  onCheckedChange={() => snapshot.toggleColumn(column.id)}
                 />
                 <Tooltip content={wording.columnForwardHint}>
                   <button

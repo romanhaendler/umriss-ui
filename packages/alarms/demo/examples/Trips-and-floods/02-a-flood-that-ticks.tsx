@@ -58,7 +58,7 @@ export default function AFloodThatTicks() {
     <Stack gap={3}>
       <Stack direction="row" gap={3} align="center" wrap>
         <Button size="sm" onClick={() => setTicks((n) => n + 1)}>Tick</Button>
-        <Switch label="Tick every second" checked={running} onChange={(event) => setRunning(event.target.checked)} />
+        <Switch label="Tick every second" checked={running} onCheckedChange={(checked) => setRunning(checked)} />
       </Stack>
       <AlarmList
         view={view}

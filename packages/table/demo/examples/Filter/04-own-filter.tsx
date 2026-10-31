@@ -14,7 +14,7 @@ const LOADS = [
 const workload = columnFilter<number, Load>({
   matches: (hours, load) => (load === "part-time" ? hours < 32 : hours >= 32),
   Input: ({ condition, setCondition, column }) => (
-    <RadioGroup aria-label={column.label} size="sm" options={LOADS} value={condition} onChange={(load) => setCondition(load)} />
+    <RadioGroup aria-label={column.label} size="sm" options={LOADS} value={condition} onValueChange={(load) => setCondition(load)} />
   ),
   describe: (load) => load,
 });

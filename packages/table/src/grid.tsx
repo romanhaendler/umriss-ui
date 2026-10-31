@@ -262,11 +262,11 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
       label,
     });
   } else if (spec.edit === "number") {
-    field = <NumberInput size="sm" value={typeof draft === "number" ? draft : null} onChange={setDraft} />;
+    field = <NumberInput size="sm" value={typeof draft === "number" ? draft : null} onValueChange={setDraft} />;
   } else if (spec.edit === "date") {
     /* A day picked is a decision: it commits, as Enter does in a text - in a
        Row draft it is one of the row's, saved with it. */
-    field = <DatePicker size="sm" value={draft instanceof Date ? draft : null} onChange={(date) => (editing.row ? setDraft(date) : grid.commit(id, date))} />;
+    field = <DatePicker size="sm" value={draft instanceof Date ? draft : null} onValueChange={(date) => (editing.row ? setDraft(date) : grid.commit(id, date))} />;
   } else if (spec.edit === "select") {
     const options = spec.editOptions ?? occurringValues(grid.hook.admitted, entry.read, formats).values;
     const index = options.findIndex((o) => same(o, draft));

@@ -68,7 +68,7 @@ function OwnControls({ size, own }: { size?: "sm" | "md"; own?: "sm" | "md" }) {
         <Select aria-label="Status" size={own}>
           <option>Open</option>
         </Select>
-        <MultiSelect aria-label="Carriers" value={[]} onChange={() => {}} options={[]} />
+        <MultiSelect aria-label="Carriers" value={[]} onValueChange={() => {}} options={[]} />
         <Button>Assign</Button>
       </Toolbar>
       <Column value="number" label="Order" rowHeader />
