@@ -24,6 +24,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./Textarea.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
+import { useFormReset } from "../../lib/useFieldValue";
 
 /* The native `cols` is left out: the field's width is `chars`. */
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
@@ -127,6 +128,8 @@ export function Textarea(props: TextareaProps) {
   const [ownValue, setOwnValue] = useState(() => String(rest.defaultValue ?? ""));
   const controlled = "value" in props;
   const value = controlled ? String(valueGiven ?? "") : ownValue;
+  // The browser puts the text back on a reset; the mirror that counts follows.
+  useFormReset(innerRef, () => setOwnValue(String(rest.defaultValue ?? "")));
   const remaining = remainingChars(value, rest.maxLength);
   const countVisible = showCount && remaining !== undefined;
 

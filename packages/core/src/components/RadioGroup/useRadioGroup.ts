@@ -58,7 +58,7 @@ export function useRadioGroup<T extends string | number>({
 
   /* Uncontrolled, the DOM state of the inputs leads: the browser holds the choice anyway. A `value`
      of `undefined` is controlled and empty. */
-  const [value, report, controlled] = useFieldValue<T, null>(component, props, null);
+  const [value, report, controlled, formRef] = useFieldValue<T, null>(component, props, null);
   const defaultValue = props.defaultValue;
 
   /* `ref.focus()` on the group - what a form library calls on the first invalid field - lands on the
@@ -138,6 +138,8 @@ export function useRadioGroup<T extends string | number>({
     /** The group's root; merge it with a forwarded ref in the JSX, where a
         ref may be passed during render. */
     groupRef,
+    /** Merged into the group root with the forwarded ref: a reset of the form puts the group back. */
+    formRef,
     /** Spread onto the group's root, before the caller's own attributes. */
     groupProps: {
       /* The surrounding field's id is carried by the group itself, so that

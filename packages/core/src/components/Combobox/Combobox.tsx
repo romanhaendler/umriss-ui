@@ -112,7 +112,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [value, onChange] = useFieldValue<T | null>("Combobox", props, null);
+  const [value, onChange, , formRef] = useFieldValue<T | null>("Combobox", props, null);
   const optionsOk = areOptions(optionsGiven);
   const options = optionsOk ? optionsGiven : NONE;
   useShapeWarning("Combobox", "options", !optionsOk, "an array of { value, label } objects, not strings");
@@ -252,7 +252,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
           autoComplete="off"
           enterKeyHint="done"
           {...rest}
-          ref={mergeRefs(ref, inputRef)}
+          ref={mergeRefs(ref, inputRef, formRef)}
           type="text"
           role="combobox"
           id={id ?? field?.id}
