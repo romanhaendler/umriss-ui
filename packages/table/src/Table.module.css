@@ -602,12 +602,20 @@
     font-weight: var(--u-weight-semibold);
   }
 
-  /* A footer in a filled frame without a page stays at the frame's bottom edge
-     while the rows scroll under it (above a pinned cell, which sticks too). */
-  .reaching tfoot .td {
+  /* A footer in a filled frame without a page, and the footer of a table with a
+     sticky head, stays at the scroll area's bottom edge while the rows scroll
+     under it (above a pinned cell, which sticks too). */
+  .reaching tfoot .td,
+  .sticky tfoot .td {
     position: sticky;
     bottom: 0;
     z-index: 2;
+  }
+
+  /* A pinned footer cell stands above the footer cells that scroll under it. */
+  .reaching tfoot .td.pinned,
+  .sticky tfoot .td.pinned {
+    z-index: 3;
   }
 
   /* The sign of the arithmetic before the number: a sum or an average. The word
@@ -2108,6 +2116,7 @@
     .sticky .th.pinned,
     .pinned,
     .reaching tfoot .td,
+    .sticky tfoot .td,
     .empty,
     .sticky tbody tr.groupHeader > .td,
     .sticky tbody tr[data-group-first] > .spanCell {
