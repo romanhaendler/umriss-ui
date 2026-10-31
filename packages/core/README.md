@@ -120,6 +120,25 @@ Each component carries what it needs itself: its type, `box-sizing` on its own
 elements, a focus ring on what it makes focusable. A caller's content inside
 `Stack` or `Grid` keeps the caller's type.
 
+**Other libraries' dialogs, shadow roots and iframes.** A `Popover`, `Menu`,
+`Tooltip` and `ContextMenu` opened inside a modal `role="dialog"` with
+`aria-modal="true"` (Radix, Headless UI) open inside it, above and clickable,
+and Escape closes the topmost layer only. Inside a shadow root the surfaces and
+the announcer stay in that root, inside an iframe in the frame's document, and
+their listeners bind to the anchor's own document. Two things are yours:
+
+- The stylesheet must be in the root or frame: a `<link rel="stylesheet">` to
+  `@umriss-ui/core/styles.css` (or its text in a `<style>`), as the shadow
+  root's first child. The tokens inherit through the host; in an iframe copy
+  your token overrides too.
+- The toast region has no anchor: give the provider a container that stands in
+  the root or frame, `<UmrissProvider portalTarget={() => container}>`.
+
+`useCommandPaletteShortcut(onOpen, { target: iframe.contentWindow })` binds the
+keys to a frame's window; a "/" typed in a shadow root's input never opens the
+palette. On a pinch-zoomed page the panels fit the visual viewport, and the
+toasts, `Modal` and `Drawer` stand against it.
+
 **Everything can be overridden.** The library's rules lie in three cascade
 layers, `umriss.tokens`, `umriss.base` and `umriss.components`, and CSS written
 outside a layer wins over all of them, whatever the order of loading:

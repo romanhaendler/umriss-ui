@@ -1,14 +1,15 @@
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
-import { computePosition, motionOrigin, visibleViewport } from "./position";
+import { clippedAway, computePosition, motionOrigin, visibleViewport } from "./position";
 import type { Align, PopoverPosition } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
-import { portalTargetFor } from "../../lib/portalTarget";
+import { FOREIGN_MODAL, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
+import type { PortalTarget } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
 import { firstTabStop } from "../../lib/firstTabStop";
 
@@ -17,8 +18,12 @@ import { firstTabStop } from "../../lib/firstTabStop";
    popover registers its "contains" with the popover around it, at any depth. */
 const ParentPanel = createContext<((contains: (node: Node) => boolean) => () => void) | null>(null);
 
-/* The open popovers, outermost first: Escape belongs to the last one. */
-const openStack: object[] = [];
+/* The open popovers, outermost first: Escape belongs to the last one. The list
+   hangs on the global object, so that a second copy of the library on the same
+   page (two bundles, a microfrontend) shares it and one Escape closes one
+   layer, not one per copy. */
+const STACK_KEY = Symbol.for("umriss.openPopovers");
+const openStack: object[] = ((globalThis as { [STACK_KEY]?: object[] })[STACK_KEY] ??= []);
 
 /** The props of `Popover`. */
 export interface PopoverProps {
@@ -51,10 +56,15 @@ export interface PopoverProps {
   restoreFocus?: boolean;
   /** Close on scrolling instead of travelling along – for tooltips. */
   hideOnScroll?: boolean;
-  /** Role of the surface. Omit where an inner element carries it. */
-  role?: "dialog" | "listbox" | "menu" | "tooltip";
+  /**
+   * Role of the surface. `"none"` where an inner element carries the role.
+   *
+   * @default "dialog"
+   */
+  role?: "dialog" | "listbox" | "menu" | "tooltip" | "none";
   /** Accessible name of the surface. Needed as soon as it carries a `role`:
-      a named role without a name is a riddle for a screen reader. */
+      a named role without a name is a riddle for a screen reader. Left out,
+      the anchor names the surface. */
   "aria-label"?: string;
   /** Fixed id of the surface – for `aria-controls` on the trigger. */
   id?: string;
@@ -91,13 +101,17 @@ export function Popover({
   minWidth,
   restoreFocus = true,
   hideOnScroll = false,
-  role,
+  role: roleProp,
   "aria-label": name,
   id,
   className,
   children,
 }: PopoverProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const role = roleProp === "none" ? undefined : (roleProp ?? "dialog");
+  const generatedId = useId();
+  const panelId = id ?? generatedId;
+  const anchorNameId = useId();
   const registerInParent = useContext(ParentPanel);
   const nested = useRef(new Set<(node: Node) => boolean>());
   const registerNested = useCallback((contains: (node: Node) => boolean) => {
@@ -110,7 +124,7 @@ export function Popover({
   });
   const [position, setPosition] = useState<PopoverPosition | null>(null);
   /* Portal target, set in an effect: no ref may be read during the render. */
-  const [target, setTarget] = useState<Element | null>(null);
+  const [target, setTarget] = useState<PortalTarget | null>(null);
   const portalTarget = usePortalTarget();
   /* Closed, it stays for its exit - inert, and no longer listening. */
   const present = usePresence(open, panelRef, "--u-duration-exit-fast");
@@ -145,10 +159,16 @@ export function Popover({
       panel.style.width = `${width}px`;
     }
 
+
+    /* Never wider than the visible part of the window: on a pinch-zoomed
+       page that is narrower than the 100vw the stylesheet limits it to. */
+    const viewport = visibleViewport();
+    panel.style.maxWidth = `${viewport.width - 16}px`;
     /* The previous cut goes first, or a panel cut to its room measures as if
-       it fitted. Set by hand like the width: it must hold before the height
-       is read. */
-    panel.style.maxHeight = "";
+       it fitted: back to the visible part of the window (the stylesheet's
+       100dvh is the layout viewport's). Set by hand like the width: it must
+       hold before the height is read. */
+    panel.style.maxHeight = `${viewport.height - 16}px`;
 
     // The exact size, not offsetWidth/-Height: those round.
     const size = panel.getBoundingClientRect();
@@ -160,12 +180,15 @@ export function Popover({
     const next = computePosition(
       anchorRect,
       { width: size.width / scale, height: size.height / scale },
-      visibleViewport(),
+      viewport,
       { align, offset },
     );
     if (next.maxHeight !== undefined) panel.style.maxHeight = `${next.maxHeight}px`;
-    setPosition(next);
-  }, [anchorRef, align, offset, width, minWidth]);
+    /* A fixed box counts from an ancestor that transforms (a foreign dialog
+       centred by a translate), not from the window. */
+    const origin = fixedOrigin(target);
+    setPosition({ ...next, top: next.top - origin.y, left: next.left - origin.x });
+  }, [anchorRef, align, offset, width, minWidth, target]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -204,6 +227,14 @@ export function Popover({
       event.preventDefault();
       closeRef.current(true);
     };
+    /* A foreign dialog listens for Escape in the capture phase of the
+       document and would close with the panel. The window's capture comes
+       first: the key is taken there, before anything else sees it. */
+    const claimKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || openStack.at(-1) !== self) return;
+      event.stopPropagation();
+      handleKeyDown(event);
+    };
 
     // One recomputation per frame instead of one per scroll event.
     let requested = 0;
@@ -211,7 +242,10 @@ export function Popover({
       if (requested) return;
       requested = requestAnimationFrame(() => {
         requested = 0;
-        measure();
+        /* An anchor scrolled out of a clipping container leaves the panel
+           floating over the page: it closes. */
+        if (anchorRef.current && clippedAway(anchorRef.current)) closeRef.current(false);
+        else measure();
       });
     };
     const handleScroll = (event: Event) => {
@@ -224,13 +258,19 @@ export function Popover({
     /* The on-screen keyboard and a zoom change the visible part of the window
        without a scroll or resize of the window itself: the keyboard comes up
        only after the field has the focus and the panel already stands. */
-    const visualViewport = window.visualViewport;
+    /* The anchor's own document and window: in an iframe the global ones
+       are the top page's. */
+    const doc = anchorRef.current?.ownerDocument ?? document;
+    const win = doc.defaultView ?? window;
+    const visualViewport = win.visualViewport;
+    const inForeignModal = !!anchorRef.current?.closest(FOREIGN_MODAL);
 
     const unregister = registerInParent?.(isInside);
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("scroll", handleScroll, true);
-    window.addEventListener("resize", handleScroll);
+    doc.addEventListener("mousedown", handlePointerDown);
+    doc.addEventListener("keydown", handleKeyDown);
+    if (inForeignModal) win.addEventListener("keydown", claimKeyDown, true);
+    win.addEventListener("scroll", handleScroll, true);
+    win.addEventListener("resize", handleScroll);
     visualViewport?.addEventListener("resize", reposition);
     visualViewport?.addEventListener("scroll", reposition);
     return () => {
@@ -238,10 +278,11 @@ export function Popover({
       visualViewport?.removeEventListener("scroll", reposition);
       unregister?.();
       openStack.splice(openStack.indexOf(self), 1);
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("scroll", handleScroll, true);
-      window.removeEventListener("resize", handleScroll);
+      doc.removeEventListener("mousedown", handlePointerDown);
+      doc.removeEventListener("keydown", handleKeyDown);
+      win.removeEventListener("keydown", claimKeyDown, true);
+      win.removeEventListener("scroll", handleScroll, true);
+      win.removeEventListener("resize", handleScroll);
       if (requested) cancelAnimationFrame(requested);
     };
     // insideRefs deliberately not in the dependencies: it is read through a ref
@@ -256,21 +297,47 @@ export function Popover({
     const panel = panelRef.current;
     if (!standing || !open || role !== "dialog" || !panel) return;
     const root = panel.getRootNode();
-    const active = root instanceof ShadowRoot ? root.activeElement : document.activeElement;
+    const active = isShadowRoot(root) ? root.activeElement : panel.ownerDocument.activeElement;
     if (active && panel.contains(active)) return;
     (firstTabStop(panel) ?? panel).focus({ preventScroll: true });
   }, [standing, open, role]);
+
+  /* The anchor says it has a panel, and which: only where it does not say so
+     already (a field's own attributes win). */
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    if (!open || !role || !anchor || anchor.getAttribute("aria-hidden") === "true") return;
+    const added = ["aria-expanded", "aria-controls"].filter((name) => !anchor.hasAttribute(name));
+    if (added.includes("aria-expanded")) anchor.setAttribute("aria-expanded", "true");
+    if (added.includes("aria-controls")) anchor.setAttribute("aria-controls", panelId);
+    return () => added.forEach((name) => anchor.removeAttribute(name));
+  }, [open, role, anchorRef, panelId]);
+
+  /* A surface with a role and no name of its own is named by its anchor. */
+  const namedByAnchor = !!role && !name;
+  const [anchorId, setAnchorId] = useState<string | undefined>();
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    if (!open || !namedByAnchor || !anchor) return;
+    const given = !anchor.id;
+    if (given) anchor.id = anchorNameId;
+    setAnchorId(anchor.id);
+    return () => {
+      if (given) anchor.removeAttribute("id");
+    };
+  }, [open, namedByAnchor, anchorRef, anchorNameId]);
 
   if (!standing) return null;
 
   return createPortal(
     <div
       ref={panelRef}
-      id={id}
+      id={panelId}
       role={role}
       /* Focusable by script, so a dialog without a control can take the focus. */
       tabIndex={role === "dialog" ? -1 : undefined}
       aria-label={name}
+      aria-labelledby={namedByAnchor ? anchorId : undefined}
       className={cx(styles.panel, className)}
       data-closing={closing || undefined}
       /* A panel that is leaving is gone for assistive technology at once: its

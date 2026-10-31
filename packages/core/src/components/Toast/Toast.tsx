@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { isDev } from "../../lib/dev";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
+import { useVisualViewportBox } from "../../lib/visualViewport";
 import { isDialog, toastTargetFor, topLayerPopover, useShownInTopLayer, useTopmostModalDialog } from "../../lib/portalTarget";
 import { roleFromTone } from "../../lib/roleFromTone";
 import { motionOrigin } from "../Popover/position";
@@ -228,7 +229,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
          It stays in the deck while another toast stands, and goes back where
          it came from otherwise. */
       const region = regionRef.current;
-      const active = document.activeElement;
+      const active = (region?.ownerDocument ?? document).activeElement;
       if (region && active instanceof HTMLElement && region.querySelector(`[data-toast="${id}"]`)?.contains(active) && keyboardFocus(active, region)) {
         if (itemsRef.current.some((entry) => entry.id !== id && !entry.leaving)) region.focus();
         else leaveRegion();
@@ -364,6 +365,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
   if (held && ages.size > 0) setAges(new Map());
 
   useShownInTopLayer(regionRef);
+  useVisualViewportBox(regionRef, !!target, target);
 
   const pinOpen = () => {
     setPinned(true);

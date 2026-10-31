@@ -1,5 +1,6 @@
 import { createContext, useContext, useId, useRef } from "react";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
+import { useVisualViewportBox } from "../../lib/visualViewport";
 import type { DialogHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
@@ -128,6 +129,8 @@ function DialogFrame({
      an exit. */
   const { dialogRef, mounted, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
+
+  useVisualViewportBox(dialogRef, true);
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
     onMouseDown?.(event);

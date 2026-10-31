@@ -15,6 +15,13 @@ export interface CommandPaletteShortcutOptions {
    * @default true
    */
   slash?: boolean;
+  /**
+   * The window the keys are bound to - an iframe's `contentWindow`, when the
+   * palette lives in the frame's document.
+   *
+   * @default window
+   */
+  target?: Window | null;
 }
 
 const TEXT_ENTRY = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"], [role="combobox"]';
@@ -51,6 +58,7 @@ function isModalDialog(dialog: Element): boolean {
  * current version rather than unsubscribing and resubscribing the listener each time.
  */
 export function useCommandPaletteShortcut(onOpen: () => void, options: CommandPaletteShortcutOptions = {}): void {
+  const win = options.target ?? null;
   const latest = useRef({ onOpen, options });
   useEffect(() => {
     latest.current = { onOpen, options };
@@ -58,7 +66,9 @@ export function useCommandPaletteShortcut(onOpen: () => void, options: CommandPa
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (inModal(event.target)) return;
+      /* The real target: inside a shadow root `event.target` is the host. */
+      const target = event.composedPath()[0] ?? event.target;
+      if (inModal(target)) return;
       if ((event.key === "k" || event.key === "K") && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         latest.current.onOpen();
@@ -69,13 +79,14 @@ export function useCommandPaletteShortcut(onOpen: () => void, options: CommandPa
         latest.current.options.slash !== false &&
         !event.metaKey &&
         !event.ctrlKey &&
-        !inTextEntry(event.target)
+        !inTextEntry(target)
       ) {
         event.preventDefault();
         latest.current.onOpen();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+    const bound = win ?? window;
+    bound.addEventListener("keydown", onKeyDown);
+    return () => bound.removeEventListener("keydown", onKeyDown);
+  }, [win]);
 }

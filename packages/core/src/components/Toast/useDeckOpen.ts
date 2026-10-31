@@ -30,22 +30,23 @@ export function useDeckOpen(regionRef: RefObject<HTMLDivElement | null>, items: 
   /* A pinned deck closes on a press anywhere else - and gives up the focus it
      was given, or it would stay open by that. */
   useEffect(() => {
-    if (!pinned) return;
+    const doc = regionRef.current?.ownerDocument;
+    if (!pinned || !doc) return;
     const onDown = (event: globalThis.PointerEvent) => {
       const region = regionRef.current;
       if (!region || region.contains(event.target as Node)) return;
       setPinned(false);
-      if (region.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+      if (region.contains(doc.activeElement)) (doc.activeElement as HTMLElement).blur();
     };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
+    doc.addEventListener("pointerdown", onDown);
+    return () => doc.removeEventListener("pointerdown", onDown);
   }, [pinned, regionRef]);
 
   /* An element that leaves the document takes the focus with it and sends no
      blur: after every change the focus is read again. */
   useEffect(() => {
     const region = regionRef.current;
-    const active = document.activeElement;
+    const active = region?.ownerDocument.activeElement;
     setFocused(!!region && active instanceof HTMLElement && region.contains(active) && keyboardFocus(active, region));
   }, [items, regionRef]);
 
