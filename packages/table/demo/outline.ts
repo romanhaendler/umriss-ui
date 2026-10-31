@@ -85,11 +85,11 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Provider",
         sentence: "Set the table's wording, formats and density once for the whole application, at the core package's `UmrissProvider`.",
         about: [
-          "The table has no provider of its own: it reads the one of @umriss-ui/core (ADR-0016). German wording ships as `@umriss-ui/core/wording/de` (ADR-0019).",
+          "The table has no provider of its own: it reads the one of @umriss-ui/core (ADR-0016). German wording ships as `@umriss-ui/core/wording/de` (ADR-0019). Import it from there: `import { UmrissProvider } from \"@umriss-ui/core\"`.",
         ],
         keysOf: ["first-table", core("Input"), "columnmenu", core("Button"), core("DatePicker")],
         types: [],
-        exports: ["UmrissProvider"],
+        exports: [],
       },
     ],
   },
@@ -220,7 +220,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["first-table", core("Popover"), core("Checkbox"), core("Input"), core("MultiSelect"), core("Select"), core("Button")],
         limits: [
-          "No text filter per column: the search covers text.",
           "In [server mode](#/server-mode) a list filter offers what the application names; the table cannot count values it does not hold.",
         ],
         types: ["ColumnFilter", "FilterInputProps", "RowFilter"],
@@ -452,7 +451,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A button that writes the rows the user sees into a CSV file for a spreadsheet (also called download or export to Excel). Hand the application the text instead where it wants the clipboard or a file of its own.",
         about: [
           "It writes the filtered set across all pages, in the visible columns, in the order and sorting on screen – and the values, not their presentation: numbers with the decimal mark of the formats, yes and no from the wording, a column of days as its day (2026-03-17), any other point in time as an ISO timestamp, an absent value as an empty field. The separator follows the mark – a comma, or a semicolon where the mark is a comma – and a byte order mark tells the spreadsheet it is UTF-8. English gets commas and a point; the German wording and formats from `@umriss-ui/core/wording/de` get the file the table always wrote, and German wording with English formats gets German words with comma and point – take both halves (ADR-0061).",
-          "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so; with `exportRows` it asks the application for every match and writes those. The same text is `t.asCsv()`, without a button. `format={xlsx}` from `@umriss-ui/table/xlsx` writes an Excel workbook instead - numbers, dates and booleans as what they are, the table's column widths, dates in the reader's local time - and `label` lets two buttons stand side by side; `onExport` then gets the bytes. A sheet over 1,048,576 rows throws a `RangeError`, and a text over 32,767 characters is cut.",
+          "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so; with `exportRows` it asks the application for every match and writes those. The same text is `t.asCsv()`, without a button. `format={xlsx}` from `@umriss-ui/table/xlsx` writes an Excel workbook instead - numbers, dates and booleans as what they are, the table's column widths, dates in the reader's local time - and `label` lets two buttons stand side by side; `onExport` then gets the bytes. In a shell with no browser download - Electron, Tauri - `onExport` is the way to a file: it gets the content and the application writes it. A sheet over 1,048,576 rows throws a `RangeError`, and a text over 32,767 characters is cut.",
           "Ctrl or Cmd with C copies the selected rows – the visible columns under a header line, tab-separated, with the same values and the formats' decimal mark – and in a grid with no selection the Active cell. What was copied flashes once in an accent tint (shown without the fade under reduced motion), and a screen reader is told how many rows were copied, or that the copy failed. Marked text and a focused field keep the browser's own copy; in an open cell editor with nothing marked the key copies the value that stands in the field. `t.selectionAsText()` is the same text for a button of your own, as in the last example.",
         ],
         keysOf: ["first-table", core("Input"), core("Button")],

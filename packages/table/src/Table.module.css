@@ -142,6 +142,17 @@
     white-space: nowrap;
   }
 
+  /* The noun a screen reader adds to "43 of 1,204": generated content, so the
+     status keeps the bare ratio as its text and the eye sees no more than before. */
+  .filteredCount[data-noun]::after {
+    content: " " attr(data-noun);
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
   /* A collapsed table's borders belong to its grid, not to a cell: the head's
      line would scroll away with the rows and leave them running out under the
      head with nothing between. The sticky head draws its line on the cell. */
@@ -482,6 +493,14 @@
     transition: color var(--u-transition);
   }
 
+  /* Drawn inside the button: the scroll area cuts what lies outside the table's
+     first head, and the ring of its first sort button was cut with it. */
+  .sortButton:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    box-shadow: inset var(--u-focus-ring);
+  }
+
   /* The header's label, not a key: it has no surface to change, so hover
      darkens the type and shows the arrow, and the press sorts, which the arrow
      answers. */
@@ -526,6 +545,20 @@
     font-variant-numeric: tabular-nums;
     line-height: var(--u-leading-none);
     color: var(--u-color-accent);
+  }
+
+  /* The arrow of a numeric head hangs in the cell's padding, past the label,
+     whether hidden or not: it holds no slot, so the label ends where the
+     figures end. The cell's padding is wider than the arrow. */
+  .numeric .sortButton {
+    position: relative;
+  }
+
+  .numeric .sortIndicator {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    translate: 0 -50%;
   }
 
   .thFlex {
@@ -893,6 +926,7 @@
   /* The ratio "43 of 1,204". The status remains in the document even when empty
      (toolbar.tsx); empty it takes no space. */
   .filteredCount {
+    position: relative;
     flex: none;
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);

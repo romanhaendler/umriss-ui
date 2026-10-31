@@ -94,7 +94,7 @@ export function TableToolbar({
     const idle = !restricted && selectedTotal === 0 && !registry.rowAdding;
     right = (
       <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>
-        <span role="status" className={styles.filteredCount}>
+        <span role="status" className={styles.filteredCount} data-noun={restricted && !snapshot.server && !registry.skeleton ? wording.filteredNoun(hook.tableState.total ?? hook.admitted.length) : undefined}>
           {!restricted || registry.skeleton
             ? ""
             : snapshot.server

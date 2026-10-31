@@ -655,6 +655,16 @@ export class Registry {
   markPicked() {
     this.picked = true;
   }
+  /** The column whose sort the user just changed; the frame says the outcome once. */
+  private sorted: string | null = null;
+  markSorted(column: string) {
+    this.sorted = column;
+  }
+  takeSorted() {
+    const was = this.sorted;
+    this.sorted = null;
+    return was;
+  }
   takePicked() {
     const was = this.picked;
     this.picked = false;

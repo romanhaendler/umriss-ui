@@ -277,6 +277,20 @@ export interface Wording {
   selectRow: (row: string) => string;
   /** Said after the user changes the selection of a table in grid mode: the count. */
   tableSelectedCount: (count: number) => string;
+  /** Said after the user sorts by a column: "Sorted by Name, ascending". */
+  sortedAscending: (column: string) => string;
+  sortedDescending: (column: string) => string;
+  /** Said when a column's sort is taken away. */
+  sortRemoved: (column: string) => string;
+  /** Said after the user folds or opens a group: "Berlin folded". */
+  groupFolded: (name: string) => string;
+  groupOpened: (name: string) => string;
+  /** Said when the file of an export has been handed over. */
+  exportDone: string;
+  /** The noun after the count of matches, for a screen reader: "43 of 1,204" is read "entries". */
+  filteredNoun: (total: number) => string;
+  /** The name of a term of the text filter: "Term 1". */
+  filterTerm: (index: number) => string;
   /** The selection of every row in the filtered set. */
   selectAllRows: string;
   /** The same checkbox in server mode, where the table holds one page of a server's. */
@@ -925,6 +939,14 @@ export const DEFAULT_WORDING: Wording = {
   filterHint: "Filter",
   selectRow: (row) => `Select ${row}`,
   tableSelectedCount: (count) => `${count} selected`,
+  sortedAscending: (column) => `Sorted by ${column}, ascending`,
+  sortedDescending: (column) => `Sorted by ${column}, descending`,
+  sortRemoved: (column) => `Sort by ${column} removed`,
+  groupFolded: (name) => `${name} folded`,
+  groupOpened: (name) => `${name} opened`,
+  exportDone: "Export done",
+  filteredNoun: (total) => (total === 1 ? "entry" : "entries"),
+  filterTerm: (index) => `Term ${index}`,
   selectAllRows: "Select all",
   selectAllOnPage: "Select all on this page",
   expandRowNamed: (row) => `Expand ${row}`,
