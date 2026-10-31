@@ -23,7 +23,7 @@ const pageOf = (view: TableRequest) => ORDERS.slice((view.page - 1) * view.pageS
 
 export default function AFailedFetch() {
   const [answer, setAnswer] = useState<{ rows: readonly Order[]; answers: TableRequest; error?: string }>(() => {
-    const first: TableRequest = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 };
+    const first: TableRequest = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] };
     return { rows: pageOf(first), answers: first };
   });
   const [failed, setFailed] = useState(false);

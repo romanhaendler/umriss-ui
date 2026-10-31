@@ -39,14 +39,10 @@ export interface TableView<K extends string = string> {
 
 /** The request server mode reports to `onRequest`: the parts of the view that
     decide the rows - search, conditions, sort, page, page size, the grouping
-    and the folded groups - and nothing else, each at its default as well
-    (`grouping` and `folded` are always present in the request the table
-    reports; they are optional only so that an `answers` written before them
-    still types, and read as empty). A server has no default of the
+    and the folded groups - and nothing else, each at its default as well. A server has no default of the
     table's to fall back on, and a request it has to complete is one it
     completes wrongly. A width, an order or a pin is no part of it. */
-export type TableRequest<K extends string = string> = Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">> &
-  Pick<TableView<K>, "grouping" | "folded">;
+export type TableRequest<K extends string = string> = Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize" | "grouping" | "folded">>;
 
 /** What server mode compares to report a request once. Conditions are
     compared as JSON, which is what a server receives of them. */

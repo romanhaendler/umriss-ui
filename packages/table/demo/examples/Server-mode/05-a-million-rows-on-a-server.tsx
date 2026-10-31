@@ -82,7 +82,7 @@ const everyMatch = async (view: TableRequest) => {
   return rows;
 };
 
-const FIRST: TableRequest = { search: "", conditions: {}, sort: [BY_ID], page: 1, pageSize: 10 };
+const FIRST: TableRequest = { search: "", conditions: {}, sort: [BY_ID], page: 1, pageSize: 10, grouping: [], folded: [] };
 const same = (a: TableRequest, b: TableRequest) =>
   JSON.stringify([a.search, a.conditions, a.sort, a.page, a.pageSize]) ===
   JSON.stringify([b.search, b.conditions, b.sort, b.page, b.pageSize]);

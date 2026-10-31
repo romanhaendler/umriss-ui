@@ -167,7 +167,7 @@ const serve = (view: TableRequest) => {
 };
 
 export default function ListFilter() {
-  const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }));
+  const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] }));
   const { Table, Column } = useTable(answer.rows, {
     rowKey: (s) => s.id,
     server: true,

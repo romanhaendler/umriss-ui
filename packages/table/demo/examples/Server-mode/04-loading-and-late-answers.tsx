@@ -166,7 +166,7 @@ const serve = (view: TableRequest) => {
 };
 
 export default function LoadingAndLateAnswers() {
-  const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }));
+  const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10, grouping: [], folded: [] }));
   const asked = useRef(0);
 
   const { Table, Column, request } = useTable(answer.rows, {
