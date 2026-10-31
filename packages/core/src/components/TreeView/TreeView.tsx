@@ -316,7 +316,7 @@ export function TreeView<K, S extends Key = string>({
               </span>
             ) : null}
 
-            <span className={styles.content}>{children(entry)}</span>
+            <span className={styles.content} title={entry.label}>{children(entry)}</span>
             {/* Open and still unloaded: something is yet to come. The state is
                 derived and not owned – as soon as the caller adds the children
                 and `unloaded` falls away, it disappears by itself. */}

@@ -191,6 +191,40 @@ export function CalendarGlyph({ ref, size = 12, range = false, ...rest }: GlyphP
   );
 }
 
+/** What a tone looks like beside its colour: a tick for success, an
+    exclamation in a circle for danger, in a triangle for warning, and an "i" in
+    a circle for the neutral and accent tones. The dots of ! and i are strokes of
+    no length: a round cap alone is a dot as wide as the stem. */
+export function ToneGlyph({
+  ref,
+  tone,
+  size = 16,
+  ...rest
+}: GlyphProps & { tone: "neutral" | "accent" | "success" | "warning" | "danger" }) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      {tone === "success" && (
+        <path d="M2.2 5.3 4.2 7.3l3.6-4.1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      )}
+      {tone === "danger" && (
+        <>
+          <circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M5 3v1.9M5 7v0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      )}
+      {tone === "warning" && (
+        <path d="M5 1.2 9.2 8.6H.8ZM5 4.1v1.4M5 7.1v0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      )}
+      {(tone === "neutral" || tone === "accent") && (
+        <>
+          <circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M5 3v0M5 5v2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 /** A clock face at a quarter past - the time pickers' character. */
 export function ClockGlyph({ ref, size = 12, ...rest }: GlyphProps) {
   return (

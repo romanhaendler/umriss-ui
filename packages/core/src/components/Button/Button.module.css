@@ -30,19 +30,38 @@
   }
 
   /* The press point: the surface gives way minimally - no relief. */
-  .button:active:not(:disabled) {
+  .button:active:not(:disabled, [aria-disabled="true"]) {
     transform: scale(var(--u-button-press-scale));
   }
 
   /* Loading locks the button but does not grey it out: it says "running", not
      "not possible here". */
-  .button:disabled:not([aria-busy="true"]) {
-    cursor: not-allowed;
-    opacity: var(--u-button-disabled-opacity);
-  }
-
   .button[aria-busy="true"] {
     cursor: progress;
+  }
+
+  /* A button that cannot be used: the sunken ground and the muted type, which
+     hold 4.5:1 against each other (and the type against the surface 3:1) in
+     both themes. Fading the live colours instead left a ghost at 1.6:1 and
+     made a primary in the dark theme the brightest block on the bar. */
+  .button:disabled {
+    cursor: not-allowed;
+    background: var(--u-color-surface-sunken);
+    box-shadow: none;
+    color: var(--u-color-text-muted);
+  }
+
+  .ghost:disabled,
+  .plain:disabled {
+    background: transparent;
+  }
+
+  /* Danger's ring lies a gap away from the button, so that the accent is not
+     drawn on the red it would measure 1.3:1 against. */
+  .button.danger:focus-visible {
+    box-shadow:
+      0 0 0 2px var(--u-color-surface),
+      0 0 0 4px var(--u-color-accent);
   }
 
   .sm {
@@ -92,10 +111,10 @@
     background: var(--u-color-primary-bg);
     color: var(--u-color-primary-fg);
   }
-  .primary:hover:not(:disabled) {
+  .primary:hover:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-primary-hover);
   }
-  .primary:active:not(:disabled) {
+  .primary:active:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-primary-active);
   }
 
@@ -103,10 +122,10 @@
     background: var(--u-color-danger);
     color: var(--u-color-on-danger);
   }
-  .danger:hover:not(:disabled) {
+  .danger:hover:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-danger-hover);
   }
-  .danger:active:not(:disabled) {
+  .danger:active:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-danger-active);
   }
 
@@ -120,14 +139,14 @@
     box-shadow: var(--u-edge-strong);
     color: var(--u-color-text);
   }
-  .secondary:hover:not(:disabled) {
+  .secondary:hover:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-surface-sunken);
   }
   /* The hover edge outweighs the ring - on a focused button it stays away. */
-  .secondary:hover:not(:disabled):not(:focus-visible) {
+  .secondary:hover:not(:disabled, [aria-disabled="true"]):not(:focus-visible) {
     box-shadow: 0 0 0 1px var(--u-color-edge-hover);
   }
-  .secondary:active:not(:disabled) {
+  .secondary:active:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-surface-pressed);
   }
 
@@ -135,10 +154,10 @@
     background: transparent;
     color: var(--u-color-accent-text);
   }
-  .ghost:hover:not(:disabled) {
+  .ghost:hover:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-accent-subtle);
   }
-  .ghost:active:not(:disabled) {
+  .ghost:active:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-accent-subtle-pressed);
   }
 
@@ -148,11 +167,11 @@
     background: transparent;
     color: var(--u-color-text-secondary);
   }
-  .plain:hover:not(:disabled) {
+  .plain:hover:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
   }
-  .plain:active:not(:disabled) {
+  .plain:active:not(:disabled, [aria-disabled="true"]) {
     background: var(--u-color-surface-pressed);
   }
 
@@ -196,7 +215,7 @@
         color var(--u-transition);
     }
 
-    .button:active:not(:disabled) {
+    .button:active:not(:disabled, [aria-disabled="true"]) {
       transform: none;
     }
   }

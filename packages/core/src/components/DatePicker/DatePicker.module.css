@@ -81,12 +81,14 @@
   }
 
   /* Panel */
-  /* One month width for all calendar components. It is measured so that even the
+  /* One month width for all calendar components. It grows with the root's font
+     size (266px is 16.625rem at the default 16px), so that the weekday heads of a
+     larger root stay apart and the week is not cut. It is measured so that even the
      widest time row (from/to with seconds) fits exactly under its month column -
      panels thereby have their final width from the start and never jump. */
   .panel {
     composes: text from "#own-styles";
-    --_calendar-month: 266px;
+    --_calendar-month: max(266px, 16.625rem);
     width: calc(var(--_calendar-month) + 2 * var(--u-space-3));
     padding: var(--u-space-3);
     background: var(--u-color-surface);
@@ -116,7 +118,7 @@
   .weekdays,
   .grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
   .weekdays {

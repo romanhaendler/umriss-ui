@@ -116,6 +116,7 @@ export const GERMAN_WORDING: Wording = {
   endSecond: "Endsekunde",
   timeFieldIncrease: (field) => `${field} erhöhen`,
   timeFieldDecrease: (field) => `${field} verringern`,
+  pickerPicked: (value) => `Gewählt: ${value}`,
   chooseStartDate: "Startdatum wählen",
   chooseEndDate: "Enddatum wählen – rückwärts ist erlaubt",
   days: (count) => `${count} ${count === 1 ? "Tag" : "Tage"}`,

@@ -93,6 +93,56 @@ holds the first of them under 1.5 kB in every package.
 
 umriss writes no HTML into the document and runs under `require-trusted-types-for 'script'`: the visual suite opens every demo page of every package under that policy, and an HTML sink reached while a page renders fails it.
 
+### Forms
+
+Every field takes `value` or `defaultValue` and reports its finished value through `onValueChange(value)`
+(Checkbox and Switch: `checked`, `defaultChecked` and `onCheckedChange(boolean)`). With `name`, a field
+posts its value into a `<form>` as a native control would: the Combobox its value, not its label, and
+`""` when it is empty. A form's `reset` restores every field. `onChange(event)` stays on Input, Textarea,
+Checkbox, Switch and Slider, the fields a library such as `register` reads.
+
+A native form with a React 19 `action` needs no library:
+
+```tsx
+<form action={(data) => save(data.get("centre"), data.get("amount"))}>
+  <FormField label="Cost centre">
+    <Combobox name="centre" options={CENTRES} defaultValue="CC-2200" />
+  </FormField>
+  <FormField label="Amount">
+    <NumberInput name="amount" defaultValue={4860.5} decimals={2} />
+  </FormField>
+  <Button type="submit">Send</Button>
+</form>
+```
+
+With react-hook-form, the value fields go through `Controller`, and `Input` through `register`:
+
+```tsx
+const { control, register, handleSubmit, formState: { errors } } = useForm<Booking>({
+  defaultValues: { name: "", centre: null, amount: null },
+});
+
+<form onSubmit={handleSubmit(save)}>
+  <FormField label="Name" error={errors.name?.message}>
+    <Input {...register("name", { required: "Required" })} />
+  </FormField>
+  <FormField label="Cost centre">
+    <Controller control={control} name="centre" render={({ field }) => (
+      <Combobox ref={field.ref} options={CENTRES} value={field.value} onValueChange={field.onChange} />
+    )} />
+  </FormField>
+  <FormField label="Amount">
+    <Controller control={control} name="amount" render={({ field }) => (
+      <NumberInput ref={field.ref} value={field.value} onValueChange={field.onChange} decimals={2} />
+    )} />
+  </FormField>
+  <Button type="submit">Send</Button>
+</form>
+```
+
+Empty is `null` for a choice or a number (`""` for text), so the form's defaults say so. The demo's "Post to a form"
+example shows what the posted entries look like.
+
 ## Styles
 
 **They load themselves.** `dist/core.js` imports its stylesheet, and the
@@ -451,7 +501,7 @@ The table is not part of this package. It lives in
 | `TreeView` / `TreeSearch` / `useTree` | a tree with exactly one active node and optional ticking (cascade, indeterminate, locked, unloaded); arrow keys, type to jump, range selection, virtualisation. The search keeps its term in the tree |
 | `Stat` | a metric: one value, read against its limits – the verdict as a word and a colour, the deviation from the target value, history, freshness and the source's quality |
 | `CommandPalette` / `useCommandPaletteShortcut` | a command palette: subsequence search with rank and highlighted finds, groups, keywords a candidate is found by, at most `maxFinds` finds with a line for the rest, a populated resting state; opens on Ctrl/⌘+K and `/` (`slash: false` switches the single key off, WCAG 2.1.4; neither opens inside a modal dialog) |
-| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `EndGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` / `MoreGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
+| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `EndGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph`  / `MoreGlyph` / `ToneGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |
 | `Switch` | on or off, taking effect at once: a native checkbox under `role="switch"`, the label beside it, two sizes, invalid through `FormField`; the thumb travels on the path transition |

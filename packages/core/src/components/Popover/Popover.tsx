@@ -11,7 +11,7 @@ import { usePortalTarget } from "../../lib/provider";
 import { FOREIGN_MODAL, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
 import type { PortalTarget } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
-import { firstTabStop } from "../../lib/firstTabStop";
+import { firstTabStop, lastTabStop } from "../../lib/firstTabStop";
 
 /* A surface opened from inside a panel belongs to it: the panel portals
    elsewhere, so the DOM cannot tell, and the React tree does. Each open
@@ -70,6 +70,9 @@ export interface PopoverProps {
   id?: string;
   /** Additional class on the surface. */
   className?: string;
+  /** A Tab past the last control of the panel, or a Shift+Tab before its first, closes it and
+      moves on from the anchor, so that the focus never falls to the page's end. */
+  closeOnTabOut?: boolean;
   /** Runs when the focus leaves any element of the surface (it bubbles from
       the panel and from what is portalled out of it). */
   onBlur?: (event: FocusEvent<HTMLDivElement>) => void;
@@ -108,6 +111,7 @@ export function Popover({
   "aria-label": name,
   id,
   className,
+  closeOnTabOut = false,
   onBlur,
   children,
 }: PopoverProps) {
@@ -344,6 +348,21 @@ export function Popover({
       aria-labelledby={namedByAnchor ? anchorId : undefined}
       className={cx(styles.panel, className)}
       onBlur={onBlur}
+      onKeyDown={
+        closeOnTabOut
+          ? (event) => {
+              const panel = panelRef.current;
+              if (event.key !== "Tab" || !panel) return;
+              const at = event.target as Element;
+              const edge = event.shiftKey ? firstTabStop(panel) : lastTabStop(panel);
+              if (at !== edge && !(event.shiftKey && at === panel)) return;
+              /* Forward: the browser's own Tab then goes on from the anchor. Back: the anchor itself. */
+              if (event.shiftKey) event.preventDefault();
+              onOpenChange(false);
+              (focusRef ?? anchorRef).current?.focus();
+            }
+          : undefined
+      }
       data-closing={closing || undefined}
       /* A panel that is leaving is gone for assistive technology at once: its
          fade is for the eye. `inert` takes it out of reach, `aria-hidden` out
