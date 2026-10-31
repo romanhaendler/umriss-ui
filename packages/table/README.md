@@ -289,7 +289,9 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   It gets the selected rows a reader sees - the toolbar's count, `selection.count`
   and the rows a bulk action takes - and, as a second argument, every key held,
   those a search or a condition hides included (they stay selected and come back
-  with the search; a server clears them at a new search).
+  with the search). A server clears the selection at a new search or condition on
+  purpose: it can be "all N that match", which belongs to its query, and a new query
+  voids it.
 * **Rows that change every second** (`tests-unit/rowsThatKeepArriving.test.tsx`):
   `rows` may be a new array each second - values move, a row appears, one goes.
   The sort stays and the rows stand in its order; a row keeps its place in the
