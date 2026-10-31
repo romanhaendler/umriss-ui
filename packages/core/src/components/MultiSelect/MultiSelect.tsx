@@ -1,3 +1,4 @@
+import { fieldBlur } from "../../lib/fieldBlur";
 import { useShapeWarning, areOptions, NONE } from "../../lib/useShapeWarning";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode, RefObject } from "react";
@@ -106,6 +107,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
     style,
     id,
     onClick,
+    onBlur,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -477,6 +479,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
         )}
         <button
           {...rest}
+          onBlur={(event) => fieldBlur(event, onBlur, fieldRef, panelId)}
           ref={mergeRefs(mainRef, ref)}
           type="button"
           id={id ?? field?.id}
@@ -513,6 +516,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
         width="anchor"
         minWidth={260}
         className={styles.panel}
+        onBlur={(event) => fieldBlur(event, onBlur, fieldRef)}
       >
           {/* The role sits here, not on the popover: a dialog the popover
               names would take the focus for itself on opening. */}

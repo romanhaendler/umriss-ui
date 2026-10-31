@@ -118,6 +118,18 @@
     box-shadow: var(--u-focus-ring);
   }
 
+  /* A group marked invalid - by its FormField or by hand - draws its empty dots in the error colour, under
+     the pointer and under the focus as well. */
+  .group[aria-invalid="true"] .input:not(:checked) + .dot,
+  .group[aria-invalid="true"] .option:hover .input:not(:disabled):not(:checked):not(:focus-visible) + .dot {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .group[aria-invalid="true"] .input:focus-visible + .dot {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
   .texts {
     display: flex;
     flex-direction: column;
