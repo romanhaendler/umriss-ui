@@ -39,6 +39,17 @@ describe("toast", () => {
     expect(count.getAttribute("aria-label")).toContain(count.textContent);
   });
 
+  it("names each close button by its toast", () => {
+    render(
+      <ToastProvider>
+        <Probe />
+      </ToastProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Go" }));
+    expect(screen.getByRole("button", { name: `${DEFAULT_WORDING.closeToast}: One` })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Close message: Two" })).toBeTruthy();
+  });
+
   it("shows the Alt+T shortcut as visible text", () => {
     render(
       <ToastProvider>

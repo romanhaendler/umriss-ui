@@ -450,7 +450,7 @@ export function ToastProvider({ children, held = false }: ToastProviderProps) {
                   <button
                     type="button"
                     className={styles.close}
-                    aria-label={wording.closeToast}
+                    aria-label={`${wording.closeToast}: ${item.title}`}
                     onClick={() => beginLeave(item.id, "dismiss")}
                   >
                     <CrossGlyph size={10} />
