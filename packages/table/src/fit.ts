@@ -65,7 +65,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
 
   /* The page is cut where the table is filled, paged by the application's
      option or by this hook, and has a held height to measure against. */
-  const cut = (force = false) => {
+  const cut = () => {
     const hook = registry.hook;
     const table = tableRef.current;
     const scroll = table?.parentElement;
@@ -96,18 +96,13 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
       if (total > 0 && next >= total && now >= total) return;
     }
     if (next < 3) warnOnce("fit-few-lines", `The table's frame holds fewer than three lines (${next}); give it more height or let it flow.`);
-    /* A resize waits while focus is in the rows, so that it never pulls the row
-       from under the user; the focus leaving the rows cuts again. A density (`force`)
-       applies at once. */
-    if (next !== now && !force && table.tBodies[0]?.contains(document.activeElement)) return;
     if (next !== now) state.setFittedPageSize(next === state.defaultPageSize ? null : next);
     if (registry.server) registry.setFitMeasured(next);
   };
 
   /* After every render that changes what the cut depends on, at once: the
      first measurement and the follow-up of a density never show a page that
-     is cut wrong for a frame. A new line is cut for as well, but waits while
-     focus is in the rows like any resize. */
+     is cut wrong for a frame. A new line is cut for as well. */
   const state = registry.hook?.tableState;
   const key = `${registry.framed}|${pitch}|${state?.pageSize}|${state?.chosenPageSize}`;
   const lines = registry.hook && !registry.server ? linesOf(registry) : 0;
@@ -116,7 +111,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
     if (!forced && seenLines.current === lines) return;
     seen.current = key;
     seenLines.current = lines;
-    cut(forced);
+    cut();
   });
 
   useLayoutEffect(() => {
@@ -136,14 +131,7 @@ export function useFit(registry: Registry, tableRef: RefObject<HTMLTableElement 
       else timer = setTimeout(cut, registry.server ? SERVER_SETTLE_MS : SETTLE_MS);
     });
     observer.observe(scroll);
-    /* Focus leaving the rows: the activeElement is the new one a tick later. */
-    const table = tableRef.current;
-    const left = (event: FocusEvent) => {
-      if (!table?.tBodies[0]?.contains(event.relatedTarget as Node | null)) setTimeout(cut, 0);
-    };
-    table?.addEventListener("focusout", left);
     return () => {
-      table?.removeEventListener("focusout", left);
       clearTimeout(timer);
       observer.disconnect();
     };

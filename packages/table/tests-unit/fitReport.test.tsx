@@ -1,4 +1,4 @@
-/* A fit reports nothing to onViewChange, and a new line does not re-cut a
+/* A fit reports nothing to onViewChange, and a re-cut keeps the focused row and its focus on a
    page the user holds focus in. Same layout as pageAnchor.test.tsx. */
 
 import { act, render, screen } from "@testing-library/react";
@@ -75,14 +75,17 @@ describe("a frame resize", () => {
 });
 
 describe("a new line", () => {
-  it("does not re-cut the page while focus is in the rows", () => {
+  it("re-cuts the page while focus is in the rows, and the focused row keeps focus", () => {
     const { rerender } = render(<Case n={100} />);
     const row = document.querySelector<HTMLElement>('tr[data-motion="r10"]')!;
     row.tabIndex = 0;
     row.focus();
     resize(20 + 8 * 20);
-    expect(rowsOnPage()).toHaveLength(5);
+    expect(rowsOnPage()).toHaveLength(8);
+    expect(rowsOnPage()).toContain("r10");
+    expect(document.activeElement).toBe(row);
     rerender(<Case n={101} />);
-    expect(rowsOnPage()).toHaveLength(5);
+    expect(rowsOnPage()).toContain("r10");
+    expect(document.activeElement).toBe(row);
   });
 });
