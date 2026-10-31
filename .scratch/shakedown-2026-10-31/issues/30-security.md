@@ -7,7 +7,7 @@ Sources: earlier-runs-open security.md 2, 3.
 
 - [x] `Link` refuses `javascript:`, `vbscript:` and `data:` targets like Breadcrumb's `isSafeTarget` (one shared helper), with a DEV warning; README says which targets pass.
 - [x] `Export`'s `filename` is reduced to a safe file name (no path separators, control characters or reserved names) before it reaches `a.download`.
-- [ ] Unit tests; `pnpm check core`, `pnpm check table`, `pnpm semgrep` if Docker runs.
+- [x] Unit tests; `pnpm check core`, `pnpm check table`, `pnpm semgrep` if Docker runs.
 
 ## Comments
 
@@ -17,3 +17,5 @@ https, mailto, tel, relative and fragment pass; a refused href is not written, w
 back to the default). Left: `pnpm semgrep` not run by the worker (Docker down) - run at the release.
 
 **Coordinator, checkbox audit (2026-10-31):** unticked until the release runs pnpm semgrep (Docker was down for the worker).
+
+**Coordinator, at the release (2026-10-31):** `pnpm semgrep` - 122 rules on 423 files, 0 findings; ticked again.
