@@ -1,10 +1,11 @@
-import type { InputHTMLAttributes } from "react";
+import { useId } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Input.module.css";
 import { useControlSize } from "../../lib/controlSize";
-import { extentStyle } from "../../lib/extent";
+import { extentStyle, textChars } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 
@@ -21,10 +22,18 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the value; the field adds its own
-      padding and cross. Given, the field is that wide wherever it stands, and
-      never wider than its place. Without it the field fills its place, and is
-      20 characters wide where the place asks - in a toolbar or a row. */
+      padding, cross and a text `start` or `end` (an icon is not counted:
+      `chars` makes room for it). Given, the field is that wide wherever it
+      stands, and never wider than its place. Without it the field fills its
+      place, and is 20 characters wide where the place asks - in a toolbar or a row. */
   chars?: number;
+  /** Inside the frame before the value: a unit as text ("kg"), or an icon.
+      Text is read with the field, as its description. */
+  start?: ReactNode;
+  /** Inside the frame after the value, after the cross: a unit as text ("%"),
+      or an icon or an `IconButton`. Text is read with the field, as its
+      description. */
+  end?: ReactNode;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
@@ -48,19 +57,28 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
     sets figures right-aligned and tabular, `clearable` offers a cross. Inside
     a `FormField` it takes the field's id, description and invalid state. */
 export function Input(props: InputProps) {
-  const { ref, size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, onChange, onValueChange, value, ...rest } = props;
+  const { ref, size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, start, end, className, style, id, disabled, onChange, onValueChange, value, "aria-describedby": callerDescribedBy, ...rest } = props;
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
+  const slotId = useId();
   const isInvalid = invalid ?? field?.invalid ?? false;
   /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
   const controlled = "value" in props;
   const valueProps = controlled ? { value: value ?? "" } : {};
   const hasContent = String(value ?? rest.defaultValue ?? "").length > 0;
+  const hasStart = start !== undefined && start !== null && start !== false && start !== "";
+  const hasEnd = end !== undefined && end !== null && end !== false && end !== "";
 
   /* A hidden input is no field: it carries a value and nothing to see, and a
      wrapper around it would draw an empty frame. */
   if (rest.type === "hidden") return <input ref={ref} id={id} className={className} style={style} {...valueProps} {...rest} onChange={onChange} />;
+
+  /* A text slot is read with the field, after what the caller and FormField say. */
+  const describedBy =
+    [callerDescribedBy ?? field?.describedBy, textChars(start) ? `${slotId}-start` : "", textChars(end) ? `${slotId}-end` : ""]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   return (
     <span
@@ -68,17 +86,24 @@ export function Input(props: InputProps) {
         styles.wrapper,
         size === "sm" && styles.wrapperSm,
         clearable && styles.wrapperClearable,
+        hasStart && styles.wrapperStart,
+        hasEnd && styles.wrapperEnd,
         isInvalid && styles.wrapperInvalid,
         disabled && styles.wrapperDisabled,
         className,
       )}
-      style={{ ...extentStyle(chars), ...style }}
+      style={{ ...extentStyle(chars, { extra: textChars(start) + textChars(end) }), ...style }}
     >
+      {hasStart && (
+        <span className={cx(styles.slot, styles.slotStart)} id={`${slotId}-start`}>
+          {start}
+        </span>
+      )}
       <input
         ref={ref}
         id={id ?? field?.id}
         disabled={disabled}
-        aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
+        aria-describedby={describedBy}
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
         className={cx(styles.inner, numeric && styles.numeric)}
@@ -105,6 +130,11 @@ export function Input(props: InputProps) {
         >
           <CrossGlyph />
         </button>
+      )}
+      {hasEnd && (
+        <span className={cx(styles.slot, styles.slotEnd)} id={`${slotId}-end`}>
+          {end}
+        </span>
       )}
     </span>
   );
