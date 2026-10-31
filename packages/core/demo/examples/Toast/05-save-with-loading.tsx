@@ -36,7 +36,7 @@ function Content() {
   return (
     <Stack direction="row" gap={4} align="center" wrap>
       <Button onClick={publish}>Publish release notes</Button>
-      <Switch label="Let it fail" checked={fail} onChange={(event) => setFail(event.target.checked)} />
+      <Switch label="Let it fail" checked={fail} onCheckedChange={setFail} />
     </Stack>
   );
 }

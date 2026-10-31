@@ -30,7 +30,7 @@ function Controlled({ start = "standard" as Value, onChange = vi.fn() }) {
     <RadioGroup
       options={OPTIONS}
       value={value}
-      onChange={(next) => {
+      onValueChange={(next) => {
         setValue(next);
         onChange(next);
       }}
@@ -52,37 +52,37 @@ const descriptionOf = (element: Element): string =>
 
 describe("RadioGroup – structure and roles", () => {
   it("reports itself as a radio group with its orientation", () => {
-    render(<RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />);
     const group = screen.getByRole("radiogroup");
     expect(group.getAttribute("aria-orientation")).toBe("vertical");
   });
 
   it("reports horizontal orientation where it is wanted", () => {
     render(
-      <RadioGroup orientation="horizontal" options={OPTIONS} value="standard" onChange={vi.fn()} />,
+      <RadioGroup orientation="horizontal" options={OPTIONS} value="standard" onValueChange={vi.fn()} />,
     );
     expect(screen.getByRole("radiogroup").getAttribute("aria-orientation")).toBe("horizontal");
   });
 
   it("reads the line of explanation together with the option", () => {
     // The reason this component exists instead of a segmented control.
-    render(<RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />);
     expect(descriptionOf(radio("Standard"))).toBe("Three working days.");
   });
 
   it("marks the chosen option", () => {
-    render(<RadioGroup options={OPTIONS} value="express" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="express" onValueChange={vi.fn()} />);
     expect((radio("Express") as HTMLInputElement).checked).toBe(true);
     expect((radio("Standard") as HTMLInputElement).checked).toBe(false);
   });
 
   it("disables single options", () => {
-    render(<RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />);
     expect((radio("Freight") as HTMLInputElement).disabled).toBe(true);
   });
 
   it("disables the whole group", () => {
-    render(<RadioGroup disabled options={OPTIONS} value="standard" onChange={vi.fn()} />);
+    render(<RadioGroup disabled options={OPTIONS} value="standard" onValueChange={vi.fn()} />);
     for (const option of OPTIONS) {
       expect((radio(option.label) as HTMLInputElement).disabled).toBe(true);
     }
@@ -91,19 +91,19 @@ describe("RadioGroup – structure and roles", () => {
 
 describe("RadioGroup – exactly one tab stop", () => {
   it("puts the tab stop on the chosen option", () => {
-    render(<RadioGroup options={OPTIONS} value="express" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="express" onValueChange={vi.fn()} />);
     expect(radio("Express").getAttribute("tabindex")).toBe("0");
     expect(radio("Standard").getAttribute("tabindex")).toBe("-1");
     expect(radio("Collection in person").getAttribute("tabindex")).toBe("-1");
   });
 
   it("puts it on the first selectable option where nothing is chosen", () => {
-    render(<RadioGroup options={OPTIONS} value={null} onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value={null} onValueChange={vi.fn()} />);
     expect(radio("Standard").getAttribute("tabindex")).toBe("0");
   });
 
   it("never gives disabled options a tab stop", () => {
-    render(<RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />);
     expect(radio("Freight").getAttribute("tabindex")).toBe("-1");
   });
 
@@ -111,7 +111,7 @@ describe("RadioGroup – exactly one tab stop", () => {
      stayed on the initial option. The browser's own rule for a radio group -
      Tab lands on the checked one - follows the choice, so none is written. */
   it("leaves the tab stop to the browser where it is uncontrolled", () => {
-    render(<RadioGroup options={OPTIONS} defaultValue="express" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} defaultValue="express" onValueChange={vi.fn()} />);
     fireEvent.click(radio("Standard"));
     for (const option of OPTIONS) {
       expect(radio(option.label).hasAttribute("tabindex")).toBe(false);
@@ -180,7 +180,7 @@ describe("RadioGroup – the arrow keys move and choose", () => {
 
   it("does nothing where no option is selectable", () => {
     const reported = vi.fn();
-    render(<RadioGroup disabled options={OPTIONS} value="standard" onChange={reported} />);
+    render(<RadioGroup disabled options={OPTIONS} value="standard" onValueChange={reported} />);
     fireEvent.keyDown(screen.getByRole("radiogroup"), { key: "ArrowDown" });
     expect(reported).not.toHaveBeenCalled();
   });
@@ -197,7 +197,7 @@ describe("RadioGroup – click and form field", () => {
   it("takes on the description of the surrounding field", () => {
     render(
       <FormField label="Zustellung" hint="Please choose.">
-        <RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />
+        <RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />
       </FormField>,
     );
     expect(descriptionOf(screen.getByRole("radiogroup"))).toBe("Please choose.");
@@ -207,7 +207,7 @@ describe("RadioGroup – click and form field", () => {
     // `label htmlFor` names no group; it was nameless inside a field.
     render(
       <FormField label="Zustellung">
-        <RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />
+        <RadioGroup options={OPTIONS} value="standard" onValueChange={vi.fn()} />
       </FormField>,
     );
     expect(screen.getByRole("radiogroup", { name: "Zustellung" })).toBeTruthy();
@@ -216,7 +216,7 @@ describe("RadioGroup – click and form field", () => {
   it("keeps a caller's own aria-label over the field's label", () => {
     render(
       <FormField label="Zustellung">
-        <RadioGroup aria-label="If nobody is home" options={OPTIONS} value="standard" onChange={vi.fn()} />
+        <RadioGroup aria-label="If nobody is home" options={OPTIONS} value="standard" onValueChange={vi.fn()} />
       </FormField>,
     );
     expect(screen.getByRole("radiogroup", { name: "If nobody is home" })).toBeTruthy();
@@ -225,14 +225,14 @@ describe("RadioGroup – click and form field", () => {
   it("reports itself as invalid where the field shows an error", () => {
     render(
       <FormField label="Zustellung" error="Please choose.">
-        <RadioGroup options={OPTIONS} value={null} onChange={vi.fn()} />
+        <RadioGroup options={OPTIONS} value={null} onValueChange={vi.fn()} />
       </FormField>,
     );
     expect(screen.getByRole("radiogroup").getAttribute("aria-invalid")).toBe("true");
   });
 
   it("holds the choice even without a controlled value", () => {
-    render(<RadioGroup options={OPTIONS} defaultValue="express" onChange={vi.fn()} />);
+    render(<RadioGroup options={OPTIONS} defaultValue="express" onValueChange={vi.fn()} />);
     expect((radio("Express") as HTMLInputElement).checked).toBe(true);
     fireEvent.click(radio("Standard"));
     expect((radio("Standard") as HTMLInputElement).checked).toBe(true);

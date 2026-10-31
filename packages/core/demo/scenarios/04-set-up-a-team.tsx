@@ -175,7 +175,7 @@ function Content() {
                       aria-label={`Role of ${one.name}`}
                       data-callout={i === 0 ? "2" : undefined}
                       value={one.role}
-                      onChange={(event) => setMember(one.id, { role: event.target.value as Role })}
+                      onValueChange={(value) => setMember(one.id, { role: value as Role })}
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
@@ -189,7 +189,7 @@ function Content() {
                       size="sm"
                       aria-label={`Hours a week of ${one.name}`}
                       value={one.capacity}
-                      onChange={(value) => setMember(one.id, { capacity: value ?? 0 })}
+                      onValueChange={(value) => setMember(one.id, { capacity: value ?? 0 })}
                       min={0}
                       max={40}
                       decimals={0}
@@ -207,7 +207,7 @@ function Content() {
             <FormField label="Add someone" style={{ flex: "0 1 280px" }}>
               <Combobox
                 value={null}
-                onChange={(id) => {
+                onValueChange={(id) => {
                   const person = PEOPLE.find((one) => one.id === id);
                   if (person) set("members", [...draft.members, { id: person.id, name: person.name, role: person.role, capacity: person.capacity }]);
                 }}
@@ -229,7 +229,7 @@ function Content() {
             <FormField label="Sprint length">
               <RadioGroup
                 value={draft.length}
-                onChange={(value) => set("length", value)}
+                onValueChange={(value) => set("length", value)}
                 options={[
                   { value: "1", label: "One week" },
                   { value: "2", label: "Two weeks", description: "Planning on the first Monday, review on the second Friday." },
@@ -239,7 +239,7 @@ function Content() {
             </FormField>
             <Stack gap={4}>
               <FormField label="Next sprint starts" hint={`${NEXT.name}: ${NEXT.goal}.`}>
-                <DatePicker value={new Date(draft.start)} onChange={(date) => date && set("start", date.getTime())} />
+                <DatePicker value={new Date(draft.start)} onValueChange={(date) => date && set("start", date.getTime())} />
               </FormField>
               <FormField label="Working days">
                 <Stack direction="row" gap={3} wrap>
@@ -248,8 +248,8 @@ function Content() {
                       key={d}
                       label={d}
                       checked={draft.days.includes(d)}
-                      onChange={(event) =>
-                        set("days", event.target.checked ? DAYS.filter((x) => x === d || draft.days.includes(x)) : draft.days.filter((x) => x !== d))
+                      onCheckedChange={(checked) =>
+                        set("days", checked ? DAYS.filter((x) => x === d || draft.days.includes(x)) : draft.days.filter((x) => x !== d))
                       }
                     />
                   ))}
@@ -262,7 +262,7 @@ function Content() {
               >
                 <Slider
                   value={draft.focus}
-                  onChange={(value) => set("focus", value)}
+                  onValueChange={(value) => set("focus", value)}
                   min={40}
                   max={100}
                   step={5}
@@ -282,17 +282,17 @@ function Content() {
             <Switch
               label="Tell the team when work waits for review"
               checked={draft.notify.review}
-              onChange={(event) => set("notify", { ...draft.notify, review: event.target.checked })}
+              onCheckedChange={(checked) => set("notify", { ...draft.notify, review: checked })}
             />
             <Switch
               label="Tell me when someone is planned beyond their hours"
               checked={draft.notify.overbooked}
-              onChange={(event) => set("notify", { ...draft.notify, overbooked: event.target.checked })}
+              onCheckedChange={(checked) => set("notify", { ...draft.notify, overbooked: checked })}
             />
             <Switch
               label="Tell me when leave overlaps planned work"
               checked={draft.notify.leave}
-              onChange={(event) => set("notify", { ...draft.notify, leave: event.target.checked })}
+              onCheckedChange={(checked) => set("notify", { ...draft.notify, leave: checked })}
             />
           </Stack>
         </CardBody>

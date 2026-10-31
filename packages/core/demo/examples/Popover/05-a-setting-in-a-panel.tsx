@@ -20,7 +20,7 @@ export default function ASettingInAPanel() {
             <SegmentedControl
               fill
               value={density}
-              onChange={setDensity}
+              onValueChange={setDensity}
               options={[
                 { value: "compact", label: "Compact" },
                 { value: "regular", label: "Regular" },

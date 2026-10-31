@@ -12,13 +12,13 @@ export default function UnitsAndDecimals() {
   return (
     <Grid minItemWidth="200px" gap={4}>
       <FormField label="Monthly budget" hint="Whole euros, step 500.">
-        <NumberInput value={budget} onChange={setBudget} min={0} decimals={0} step={500} suffix="€" />
+        <NumberInput value={budget} onValueChange={setBudget} min={0} decimals={0} step={500} suffix="€" />
       </FormField>
       <FormField label="Early payment discount" hint="One decimal place.">
-        <NumberInput value={discount} onChange={setDiscount} min={0} max={10} decimals={1} step={0.5} suffix="%" />
+        <NumberInput value={discount} onValueChange={setDiscount} min={0} max={10} decimals={1} step={0.5} suffix="%" />
       </FormField>
       <FormField label="Forecast variance" hint="Negative allowed.">
-        <NumberInput value={variance} onChange={setVariance} decimals={2} step={0.25} prefix="±" suffix="%" />
+        <NumberInput value={variance} onValueChange={setVariance} decimals={2} step={0.25} prefix="±" suffix="%" />
       </FormField>
     </Grid>
   );

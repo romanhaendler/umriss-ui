@@ -31,14 +31,14 @@ describe("keyboard hints", () => {
   });
 
   it("the combobox says done and keeps autofill off", () => {
-    render(<Combobox options={OPTIONS} value={null} onChange={vi.fn()} aria-label="Letter" />);
+    render(<Combobox options={OPTIONS} value={null} onValueChange={vi.fn()} aria-label="Letter" />);
     const input = screen.getByRole("combobox");
     expect(input.getAttribute("enterkeyhint")).toBe("done");
     expect(input.getAttribute("autocomplete")).toBe("off");
   });
 
   it("the multiselect's search says done and keeps autofill off", () => {
-    render(<MultiSelect options={OPTIONS} value={[]} onChange={vi.fn()} aria-label="Letters" />);
+    render(<MultiSelect options={OPTIONS} value={[]} onValueChange={vi.fn()} aria-label="Letters" />);
     fireEvent.click(screen.getByRole("button", { expanded: false }));
     const input = screen.getByRole("textbox", { name: "Search options" });
     expect(input.getAttribute("enterkeyhint")).toBe("done");

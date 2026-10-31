@@ -15,7 +15,7 @@ function Field({ n, onChange }: { n: number; onChange?: (v: string | null) => vo
     <Combobox
       options={make(n)}
       value={value}
-      onChange={(v) => {
+      onValueChange={(v) => {
         setValue(v);
         onChange?.(v);
       }}

@@ -15,7 +15,7 @@ export default function WithAnError() {
       <Select
         aria-label="VAT rate, Alpenholz GmbH (Austria)"
         value={rate}
-        onChange={(event) => setRate(event.target.value)}
+        onValueChange={(value) => setRate(value ?? "")}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       >

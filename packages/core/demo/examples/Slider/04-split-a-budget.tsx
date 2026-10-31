@@ -31,7 +31,7 @@ export default function SplitABudget() {
               <Slider
                 step={5}
                 value={shares[c.id] ?? 0}
-                onChange={(v) => setShares((previous) => ({ ...previous, [c.id]: v }))}
+                onValueChange={(v) => setShares((previous) => ({ ...previous, [c.id]: v }))}
                 format={(v) => `${v} % · ${formats.number((BUDGET * v) / 100, 0)} €`}
                 marks={[0, 50, 100, { value: c.plan, label: "Plan" }]}
               />

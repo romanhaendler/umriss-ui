@@ -46,7 +46,7 @@ describe("the calendar by weekStart", () => {
   const open = () => {
     render(
       <LanguageProvider formats={{ weekStart: 7 }}>
-        <DatePicker value={new Date(2026, 2, 17)} onChange={vi.fn()} />
+        <DatePicker value={new Date(2026, 2, 17)} onValueChange={vi.fn()} />
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "17/03/2026" }));
@@ -72,8 +72,8 @@ describe("the calendar by weekStart", () => {
 });
 
 describe.each([
-  ["DateRangePicker", () => <DateRangePicker value={{ from: new Date(2026, 2, 17), to: new Date(2026, 2, 17) }} onChange={vi.fn()} />],
-  ["DateTimePicker", () => <DateTimePicker value={new Date(2026, 2, 17, 9, 30)} onChange={vi.fn()} />],
+  ["DateRangePicker", () => <DateRangePicker value={{ from: new Date(2026, 2, 17), to: new Date(2026, 2, 17) }} onValueChange={vi.fn()} />],
+  ["DateTimePicker", () => <DateTimePicker value={new Date(2026, 2, 17, 9, 30)} onValueChange={vi.fn()} />],
 ])("the %s calendar by weekStart", (_name, picker) => {
   const open = () => {
     render(<LanguageProvider formats={{ weekStart: 7 }}>{picker()}</LanguageProvider>);

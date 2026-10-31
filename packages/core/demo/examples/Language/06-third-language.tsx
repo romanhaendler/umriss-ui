@@ -14,10 +14,10 @@ function Surface() {
   return (
     <Stack gap={3}>
       <FormField label="Delivery date">
-        <DatePicker value={date} onChange={setDate} />
+        <DatePicker value={date} onValueChange={setDate} />
       </FormField>
       <FormField label="Weight">
-        <NumberInput value={weight} onChange={setWeight} decimals={1} suffix="kg" />
+        <NumberInput value={weight} onValueChange={setWeight} decimals={1} suffix="kg" />
       </FormField>
     </Stack>
   );

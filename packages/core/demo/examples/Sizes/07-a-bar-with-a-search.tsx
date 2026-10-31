@@ -30,15 +30,15 @@ export default function ABarWithASearch() {
           aria-label="Search"
           placeholder="Search invoices"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onValueChange={setSearch}
         />
-        <Select aria-label="Status" value={status} onChange={(event) => setStatus(event.target.value)}>
+        <Select aria-label="Status" value={status} onValueChange={(value) => setStatus(value ?? "")}>
           <option value="">Any status</option>
           <option>Open</option>
           <option>Paid</option>
           <option>Overdue</option>
         </Select>
-        <Select aria-label="Region" value={region} onChange={(event) => setRegion(event.target.value)}>
+        <Select aria-label="Region" value={region} onValueChange={(value) => setRegion(value ?? "")}>
           <option value="">Any region</option>
           <option>North</option>
           <option>South</option>

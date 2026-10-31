@@ -92,7 +92,7 @@ describe("NumberInput without grouping", () => {
           aria-label="Year"
           value={v}
           grouping={false}
-          onChange={(n) => {
+          onValueChange={(n) => {
             setV(n);
             onValue(n);
           }}
@@ -113,7 +113,7 @@ describe("NumberInput without grouping", () => {
   it("still groups by default", () => {
     render(
       <LanguageProvider formats={GERMAN_FORMATS}>
-        <NumberInput aria-label="Year" value={2024} onChange={() => {}} />
+        <NumberInput aria-label="Year" value={2024} onValueChange={() => {}} />
       </LanguageProvider>,
     );
     expect((screen.getByLabelText("Year") as HTMLInputElement).value).toBe("2.024");
@@ -123,7 +123,7 @@ describe("NumberInput without grouping", () => {
 describe("NumberInput refuses a character it cannot read", () => {
   it("keeps text and value as they were", () => {
     const seen: Array<number | null> = [];
-    render(<NumberInput aria-label="n" value={12} onChange={(v) => seen.push(v)} />);
+    render(<NumberInput aria-label="n" value={12} onValueChange={(v) => seen.push(v)} />);
     const input = screen.getByLabelText("n") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "12a" } });
     expect(input.value).toBe("12");

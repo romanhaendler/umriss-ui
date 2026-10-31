@@ -39,8 +39,8 @@ describe("FormField required", () => {
     ],
     ["RadioGroup", <RadioGroup key="r" options={[{ value: "a", label: "A" }]} />, "radiogroup"],
     ["Textarea", <Textarea key="t" />, "textbox"],
-    ["NumberInput", <NumberInput key="n" value={null} onChange={() => undefined} />, "textbox"],
-    ["Combobox", <Combobox key="c" options={[{ value: "a", label: "A" }]} value={null} onChange={() => undefined} />, "combobox"],
+    ["NumberInput", <NumberInput key="n" value={null} onValueChange={() => undefined} />, "textbox"],
+    ["Combobox", <Combobox key="c" options={[{ value: "a", label: "A" }]} value={null} onValueChange={() => undefined} />, "combobox"],
     ["Checkbox", <Checkbox key="x" />, "checkbox"],
   ])("sets aria-required on %s", (_name, field, role) => {
     renderRequired(field);

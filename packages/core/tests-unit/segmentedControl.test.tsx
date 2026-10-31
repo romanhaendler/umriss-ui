@@ -21,7 +21,7 @@ const radio = (name: string) => screen.getByRole("radio", { name }) as HTMLInput
 
 describe("SegmentedControl – what it says", () => {
   it("is a radio group, each segment a radio named by its label", () => {
-    render(<SegmentedControl aria-label="State of the data" options={OPTIONS} value="raw" onChange={vi.fn()} />);
+    render(<SegmentedControl aria-label="State of the data" options={OPTIONS} value="raw" onValueChange={vi.fn()} />);
     expect(screen.getByRole("radiogroup", { name: "State of the data" })).toBeTruthy();
     expect(screen.getAllByRole("radio").map((r) => r.getAttribute("value"))).toEqual(["raw", "cleaned", "archived", "forecast"]);
     expect(radio("Raw").checked).toBe(true);
@@ -29,18 +29,18 @@ describe("SegmentedControl – what it says", () => {
   });
 
   it("keeps a disabled possibility visible but closed", () => {
-    render(<SegmentedControl aria-label="State" options={OPTIONS} value="raw" onChange={vi.fn()} />);
+    render(<SegmentedControl aria-label="State" options={OPTIONS} value="raw" onValueChange={vi.fn()} />);
     expect(radio("Archived").disabled).toBe(true);
     expect(radio("Forecast").disabled).toBe(false);
   });
 
   it("closes every possibility when disabled as a whole", () => {
-    render(<SegmentedControl aria-label="State" options={OPTIONS} value="raw" onChange={vi.fn()} disabled />);
+    render(<SegmentedControl aria-label="State" options={OPTIONS} value="raw" onValueChange={vi.fn()} disabled />);
     expect(screen.getAllByRole("radio").every((r) => (r as HTMLInputElement).disabled)).toBe(true);
   });
 
   it("takes part in a form under its name", () => {
-    render(<SegmentedControl aria-label="State" name="state" options={OPTIONS} value="raw" onChange={vi.fn()} />);
+    render(<SegmentedControl aria-label="State" name="state" options={OPTIONS} value="raw" onValueChange={vi.fn()} />);
     expect(screen.getAllByRole("radio").every((r) => r.getAttribute("name") === "state")).toBe(true);
   });
 });
@@ -55,7 +55,7 @@ describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
           { value: "dark", label: "Dark" },
         ]}
         value="light"
-        onChange={vi.fn()}
+        onValueChange={vi.fn()}
       />,
     );
     expect(radio("Light").value).toBe("light");
@@ -65,7 +65,7 @@ describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
 
   it("draws no icon box for an icon that is not there", () => {
     const { container } = render(
-      <SegmentedControl aria-label="Theme" options={[{ value: "light", label: "Light", icon: false }]} value="light" onChange={vi.fn()} />,
+      <SegmentedControl aria-label="Theme" options={[{ value: "light", label: "Light", icon: false }]} value="light" onValueChange={vi.fn()} />,
     );
     expect(container.querySelector("[aria-hidden='true']")).toBeNull();
   });
@@ -73,12 +73,12 @@ describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
 
 describe("SegmentedControl – the keys", () => {
   it("is one tab stop, on the chosen possibility", () => {
-    render(<SegmentedControl aria-label="State" options={OPTIONS} value="cleaned" onChange={vi.fn()} />);
+    render(<SegmentedControl aria-label="State" options={OPTIONS} value="cleaned" onValueChange={vi.fn()} />);
     expect(screen.getAllByRole("radio").map((r) => r.tabIndex)).toEqual([-1, 0, -1, -1]);
   });
 
   it("puts the tab stop on the first selectable possibility where none is chosen", () => {
-    render(<SegmentedControl aria-label="State" options={OPTIONS} value={null} onChange={vi.fn()} />);
+    render(<SegmentedControl aria-label="State" options={OPTIONS} value={null} onValueChange={vi.fn()} />);
     expect(radio("Raw").tabIndex).toBe(0);
     expect(screen.getAllByRole("radio").every((r) => !(r as HTMLInputElement).checked)).toBe(true);
   });
@@ -92,7 +92,7 @@ describe("SegmentedControl – the keys", () => {
           aria-label="State"
           options={OPTIONS}
           value={value}
-          onChange={(next) => {
+          onValueChange={(next) => {
             setValue(next);
             onChange(next);
           }}
@@ -112,7 +112,7 @@ describe("SegmentedControl – the keys", () => {
 
   it("chooses uncontrolled, starting from its default", () => {
     const onChange = vi.fn();
-    render(<SegmentedControl aria-label="State" options={OPTIONS} defaultValue="raw" onChange={onChange} />);
+    render(<SegmentedControl aria-label="State" options={OPTIONS} defaultValue="raw" onValueChange={onChange} />);
     expect(radio("Raw").checked).toBe(true);
     fireEvent.click(radio("Forecast"));
     expect(radio("Forecast").checked).toBe(true);
@@ -126,7 +126,7 @@ describe("SegmentedControl – inset and filling, the same radio group", () => {
   it("is one tab stop whose arrow keys move, choose, skip and wrap", () => {
     function Controlled() {
       const [value, setValue] = useState<(typeof OPTIONS)[number]["value"]>("cleaned");
-      return <SegmentedControl aria-label="State" variant="inset" fill options={OPTIONS} value={value} onChange={setValue} />;
+      return <SegmentedControl aria-label="State" variant="inset" fill options={OPTIONS} value={value} onValueChange={setValue} />;
     }
     render(<Controlled />);
     expect(screen.getByRole("radiogroup", { name: "State" })).toBeTruthy();
@@ -144,7 +144,7 @@ describe("SegmentedControl – in a field", () => {
   it("takes the field's label, hint, required and invalid state", () => {
     render(
       <FormField label="State of the data" error="Choose cleaned data for a report." required>
-        <SegmentedControl options={OPTIONS} value="raw" onChange={vi.fn()} />
+        <SegmentedControl options={OPTIONS} value="raw" onValueChange={vi.fn()} />
       </FormField>,
     );
     const group = screen.getByRole("radiogroup", { name: "State of the data" });
@@ -158,7 +158,7 @@ describe("SegmentedControl – in a field", () => {
     const onChange = vi.fn();
     render(
       <FormField label="State of the data">
-        <SegmentedControl options={OPTIONS} value={null} onChange={onChange} />
+        <SegmentedControl options={OPTIONS} value={null} onValueChange={onChange} />
       </FormField>,
     );
     fireEvent.click(screen.getByText("State of the data"));

@@ -10,7 +10,7 @@ export default function ClearTheChoice() {
   return (
     <Stack gap={3} style={{ maxWidth: 320 }}>
       <FormField label="Filter by budget owner">
-        <Select clearable value={owner} onChange={(event) => setOwner(event.target.value)} onClear={() => setOwner("")}>
+        <Select clearable value={owner} onValueChange={(value) => setOwner(value ?? "")} onClear={() => setOwner("")}>
           <option value="" disabled>
             All owners
           </option>

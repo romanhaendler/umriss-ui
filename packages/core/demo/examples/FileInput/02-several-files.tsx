@@ -20,7 +20,7 @@ export default function SeveralFiles() {
         <FileInput multiple accept="image/*,.pdf" />
       </FormField>
       <FormField label="Attachments" hint="Shipment 100829, failed attempt.">
-        <FileInput multiple accept="image/*,.pdf" value={attached} onChange={setAttached} />
+        <FileInput multiple accept="image/*,.pdf" value={attached} onValueChange={setAttached} />
       </FormField>
     </Grid>
   );

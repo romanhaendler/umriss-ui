@@ -112,7 +112,7 @@ describe("A caller's handler runs beside the component's own", () => {
       <RadioGroup
         aria-label="Delivery"
         value="a"
-        onChange={chosen}
+        onValueChange={chosen}
         onKeyDown={pressed}
         options={[
           { value: "a", label: "A" },
@@ -135,7 +135,7 @@ describe("A caller's handler runs beside the component's own", () => {
           aria-label="Quantity"
           value={value}
           max={10}
-          onChange={(next) => {
+          onValueChange={(next) => {
             changed(next);
             setValue(next);
           }}
@@ -239,7 +239,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
           { value: "b", label: "B" },
         ]}
         value={["a", "b"]}
-        onChange={changed}
+        onValueChange={changed}
         onKeyDown={pressed}
       />,
     );
@@ -251,7 +251,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
 
   it("Combobox: an onKeyDown that prevents keeps the panel shut", () => {
     const pressed = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
-    render(<Combobox aria-label="Line" options={[{ value: "a", label: "A" }]} value={null} onChange={vi.fn()} onKeyDown={pressed} />);
+    render(<Combobox aria-label="Line" options={[{ value: "a", label: "A" }]} value={null} onValueChange={vi.fn()} onKeyDown={pressed} />);
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
     expect(pressed).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("combobox").getAttribute("aria-expanded")).toBe("false");
@@ -259,7 +259,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
 
   it("Combobox: onKeyDown, and the arrow key still opens", () => {
     const pressed = vi.fn();
-    render(<Combobox options={[{ value: "a", label: "A" }]} value={null} onChange={vi.fn()} onKeyDown={pressed} />);
+    render(<Combobox options={[{ value: "a", label: "A" }]} value={null} onValueChange={vi.fn()} onKeyDown={pressed} />);
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
     expect(pressed).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("combobox").getAttribute("aria-expanded")).toBe("true");
@@ -308,7 +308,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
       <MultiSelect
         options={[{ value: "a", label: "A" }]}
         value={["a"]}
-        onChange={changed}
+        onValueChange={changed}
         onKeyDown={(event) => event.preventDefault()}
       />,
     );

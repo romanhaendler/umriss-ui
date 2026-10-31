@@ -12,7 +12,7 @@ export default function GrowWithTheText() {
   return (
     <FormField label="Responder notes" hint="Grows to at most eight lines." style={{ maxWidth: 520 }}>
       <Stack gap={2}>
-        <Textarea autoGrow maxRows={8} value={notes} onChange={(event) => setNotes(event.target.value)} />
+        <Textarea autoGrow maxRows={8} value={notes} onValueChange={setNotes} />
         <Stack direction="row" gap={2}>
           <Button size="sm" onClick={() => setNotes(LONG)}>
             Paste a long log

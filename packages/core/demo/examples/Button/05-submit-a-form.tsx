@@ -19,7 +19,7 @@ export default function SubmitAForm() {
     <form onSubmit={submit}>
       <Stack direction="row" gap={3} align="flex-end" wrap>
         <FormField label="Project name">
-          <Input value={name} onChange={(event) => setName(event.target.value)} />
+          <Input value={name} onValueChange={setName} />
         </FormField>
         <Button type="submit" variant="primary" loading={saving} disabled={name.trim() === ""}>
           Create project

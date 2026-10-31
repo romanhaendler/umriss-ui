@@ -21,7 +21,7 @@ export default function Presets() {
       <FormField label="Sprint" hint="Presets of your own.">
         <DateRangePicker
           value={sprint}
-          onChange={setSprint}
+          onValueChange={setSprint}
           clearable
           placeholder="Choose a sprint"
           presets={[
@@ -31,10 +31,10 @@ export default function Presets() {
         />
       </FormField>
       <FormField label="Workshop" hint="No presets.">
-        <DateRangePicker value={workshop} onChange={setWorkshop} presets={[]} />
+        <DateRangePicker value={workshop} onValueChange={setWorkshop} presets={[]} />
       </FormField>
       <FormField label="Report" hint="The default presets.">
-        <DateRangePicker value={report} onChange={setReport} />
+        <DateRangePicker value={report} onValueChange={setReport} />
       </FormField>
     </Grid>
   );

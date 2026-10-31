@@ -323,7 +323,7 @@ function Content() {
               <FormField label="Driver" required data-callout="2">
                 <Combobox
                   value={driver}
-                  onChange={setDriver}
+                  onValueChange={setDriver}
                   clearable
                   disabled={vehicle === undefined}
                   placeholder="Type a name"
@@ -331,17 +331,17 @@ function Content() {
                 />
               </FormField>
               <FormField label="Departure" required>
-                <DateTimePicker value={departure} onChange={setDeparture} />
+                <DateTimePicker value={departure} onValueChange={setDeparture} />
               </FormField>
               <FormField label="Loading" hint="Minutes at the depot before departure.">
-                <NumberInput value={loading} onChange={setLoading} min={0} step={5} decimals={0} suffix="min" />
+                <NumberInput value={loading} onValueChange={setLoading} min={0} step={5} decimals={0} suffix="min" />
               </FormField>
             </Grid>
 
             <FormField label="Parcels" hint="Failed attempts first, then the depot's open deliveries." data-callout="3">
               <MultiSelect
                 value={parcels}
-                onChange={setParcels}
+                onValueChange={setParcels}
                 placeholder="Choose parcels"
                 disabled={vehicle === undefined}
                 options={open.map((one) => ({
@@ -372,7 +372,7 @@ function Content() {
               </div>
             )}
 
-            <Switch label="Text customers their new delivery window" checked={notify} onChange={(event) => setNotify(event.target.checked)} />
+            <Switch label="Text customers their new delivery window" checked={notify} onCheckedChange={setNotify} />
           </Stack>
         </CardBody>
       </Card>

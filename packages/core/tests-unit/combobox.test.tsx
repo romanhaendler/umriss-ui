@@ -14,7 +14,7 @@ const OPTIONS = [
 
 describe("Combobox - a disabled option", () => {
   it("does not take the cursor from the pointer, but from the keys", () => {
-    render(<Combobox options={OPTIONS} value={null} onChange={vi.fn()} aria-label="Letter" />);
+    render(<Combobox options={OPTIONS} value={null} onValueChange={vi.fn()} aria-label="Letter" />);
     const input = screen.getByRole("combobox");
     fireEvent.click(input);
     const [, beta, gamma] = screen.getAllByRole("option");
@@ -34,7 +34,7 @@ describe("Combobox - a disabled option", () => {
    opens the panel and closes it again, and the focus stays in the field. */
 describe("Combobox - the chevron", () => {
   it("opens and closes the panel, with the focus in the field", () => {
-    render(<Combobox options={OPTIONS} value={null} onChange={vi.fn()} aria-label="Letter" />);
+    render(<Combobox options={OPTIONS} value={null} onValueChange={vi.fn()} aria-label="Letter" />);
     const input = screen.getByRole("combobox");
     const chevron = input.parentElement!.lastElementChild as HTMLElement;
 
@@ -49,7 +49,7 @@ describe("Combobox - the chevron", () => {
   });
 
   it("does nothing when the field is disabled", () => {
-    render(<Combobox options={OPTIONS} value={null} onChange={vi.fn()} aria-label="Letter" disabled />);
+    render(<Combobox options={OPTIONS} value={null} onValueChange={vi.fn()} aria-label="Letter" disabled />);
     const input = screen.getByRole("combobox");
     fireEvent.click(input.parentElement!.lastElementChild!);
     expect(input.getAttribute("aria-expanded")).toBe("false");

@@ -15,7 +15,7 @@ export default function WithAnError() {
         aria-label="Root cause"
         rows={3}
         value={rootCause}
-        onChange={(event) => setRootCause(event.target.value)}
+        onValueChange={setRootCause}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
       />

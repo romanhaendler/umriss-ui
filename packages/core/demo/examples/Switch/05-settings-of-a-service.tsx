@@ -41,7 +41,7 @@ export default function SettingsOfAService() {
                     checked={on[s.id] === true}
                     disabled={locked}
                     aria-describedby={`${base}-${s.id}`}
-                    onChange={(event) => setOn((previous) => ({ ...previous, [s.id]: event.target.checked }))}
+                    onCheckedChange={(checked) => setOn((previous) => ({ ...previous, [s.id]: checked }))}
                   />
                   <Text id={`${base}-${s.id}`} size="xs" tone="muted" style={{ paddingLeft: 36 }}>
                     {locked ? "Locked while INC-1048 is open. " : ""}

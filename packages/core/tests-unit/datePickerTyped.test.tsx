@@ -13,7 +13,7 @@ const enter = () => fireEvent.keyDown(field(), { key: "Enter" });
 describe("A date typed in the panel", () => {
   it("hands out local midnight on Enter and closes the panel", () => {
     const onChange = vi.fn();
-    render(<DatePicker value={null} onChange={onChange} />);
+    render(<DatePicker value={null} onValueChange={onChange} />);
     open("Select date");
     type("17.03.1985");
     enter();
@@ -23,7 +23,7 @@ describe("A date typed in the panel", () => {
   });
 
   it("shows the date in the grid as soon as it is complete", () => {
-    render(<DatePicker value={new Date(2026, 9, 14)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 9, 14)} onValueChange={vi.fn()} />);
     open("14/10/2026");
     type("17031985");
     expect(screen.getByLabelText("Sunday, 17 March 1985")).toBeTruthy();
@@ -32,7 +32,7 @@ describe("A date typed in the panel", () => {
 
   it("marks a text that is no date, announces it and hands out nothing", () => {
     const onChange = vi.fn();
-    render(<DatePicker value={null} onChange={onChange} />);
+    render(<DatePicker value={null} onValueChange={onChange} />);
     open("Select date");
     type("31/02/2026");
     enter();
@@ -45,7 +45,7 @@ describe("A date typed in the panel", () => {
   });
 
   it("takes a digit typed on the grid into the field", () => {
-    render(<DatePicker value={new Date(2026, 9, 14)} onChange={vi.fn()} />);
+    render(<DatePicker value={new Date(2026, 9, 14)} onValueChange={vi.fn()} />);
     open("14/10/2026");
     const day = document.querySelector<HTMLButtonElement>('[data-active="true"]')!;
     expect(document.activeElement).toBe(day);
@@ -55,7 +55,7 @@ describe("A date typed in the panel", () => {
   });
 
   it("does not focus itself on opening, and its placeholder is a sample date", () => {
-    render(<DatePicker value={null} onChange={vi.fn()} />);
+    render(<DatePicker value={null} onValueChange={vi.fn()} />);
     open("Select date");
     expect(document.activeElement).not.toBe(field());
     expect(field().placeholder).toBe("25/12/2031");
@@ -66,7 +66,7 @@ describe("A date typed in the panel", () => {
     const onChange = vi.fn();
     render(
       <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
-        <DatePicker value={null} onChange={onChange} />
+        <DatePicker value={null} onValueChange={onChange} />
       </LanguageProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Datum wählen" }));
@@ -77,7 +77,7 @@ describe("A date typed in the panel", () => {
   });
 
   it("is not offered by the range picker", () => {
-    render(<DateRangePicker value={null} onChange={vi.fn()} />);
+    render(<DateRangePicker value={null} onValueChange={vi.fn()} />);
     open("Select range");
     expect(screen.queryByRole("textbox", { name: "Type a date" })).toBeNull();
   });

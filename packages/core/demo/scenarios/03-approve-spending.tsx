@@ -267,7 +267,7 @@ function Content() {
             <RadioGroup
               aria-label="Invoices waiting for approval"
               value={chosen}
-              onChange={setChosen}
+              onValueChange={setChosen}
               options={WAITING.map((one) => {
                 const step = APPROVALS.find((a) => a.invoice === one.id && a.decision === "pending");
                 const mine = step?.approver === ME;
@@ -372,7 +372,7 @@ function Content() {
         <ModalHeader title={`Reject ${invoice.id}`} description={`The reason goes to ${centre.owner}, who owns ${centre.name}.`} />
         <ModalBody>
           <FormField label="Reason" required error={tried && reason.trim() === "" ? "Say why, so the owner can act on it." : undefined}>
-            <Textarea autoGrow maxRows={6} value={reason} onChange={(event) => setReason(event.target.value)} />
+            <Textarea autoGrow maxRows={6} value={reason} onValueChange={setReason} />
           </FormField>
         </ModalBody>
         <ModalFooter>

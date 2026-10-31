@@ -9,7 +9,7 @@ export default function YearWithoutGrouping() {
 
   return (
     <FormField label="Model year" style={{ maxWidth: 240 }}>
-      <NumberInput value={year} onChange={setYear} min={1900} max={2100} decimals={0} grouping={false} />
+      <NumberInput value={year} onValueChange={setYear} min={1900} max={2100} decimals={0} grouping={false} />
     </FormField>
   );
 }

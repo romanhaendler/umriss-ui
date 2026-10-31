@@ -34,7 +34,7 @@ function Field({ control, value, onChange }: { control: Control; value: Value; o
           aria-label={prop}
           orientation="horizontal"
           value={String(value)}
-          onChange={(text) => onChange(back(text))}
+          onValueChange={(text) => onChange(back(text))}
           options={values.map((one) => ({ value: String(one), label: label(one) }))}
         />
       ) : kind === "select" ? (
@@ -48,7 +48,7 @@ function Field({ control, value, onChange }: { control: Control; value: Value; o
       ) : kind === "number" ? (
         <NumberInput
           value={typeof value === "number" ? value : null}
-          onChange={onChange}
+          onValueChange={onChange}
           min={control.min}
           max={control.max}
           step={control.step}

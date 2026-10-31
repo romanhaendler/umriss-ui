@@ -9,7 +9,7 @@ export default function SelectExample() {
 
   return (
     <FormField label="Cost centre" style={{ maxWidth: 320 }}>
-      <Select value={centre} onChange={(event) => setCentre(event.target.value)}>
+      <Select value={centre} onValueChange={(value) => setCentre(value ?? "")}>
         <option value="" disabled>
           Choose a cost centre
         </option>

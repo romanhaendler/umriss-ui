@@ -16,7 +16,7 @@ export default function InAField() {
     >
       <SegmentedControl
         value={state}
-        onChange={setState}
+        onValueChange={setState}
         options={[
           { value: "raw", label: "Raw data" },
           { value: "cleaned", label: "Cleaned data" },

@@ -436,7 +436,7 @@ function Content() {
         <ModalBody>
           <Stack gap={4}>
             <FormField label="Cause" required error={tried && cause === "" ? "Choose what caused it." : undefined}>
-              <Select value={cause} onChange={(event) => setCause(event.target.value)}>
+              <Select value={cause} onValueChange={(value) => setCause(value ?? "")}>
                 <option value="" disabled>
                   Choose a cause
                 </option>
@@ -455,7 +455,7 @@ function Content() {
                 autoGrow
                 maxRows={6}
                 value={summary}
-                onChange={(event) => setSummary(event.target.value)}
+                onValueChange={setSummary}
                 placeholder="What happened, and what brought it back"
               />
             </FormField>

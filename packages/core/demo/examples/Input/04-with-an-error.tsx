@@ -14,7 +14,7 @@ export default function WithAnError() {
       <Input
         aria-label="Postcode"
         value={postcode}
-        onChange={(event) => setPostcode(event.target.value)}
+        onValueChange={setPostcode}
         invalid={error !== undefined}
         aria-describedby={error ? messageId : undefined}
         inputMode="numeric"

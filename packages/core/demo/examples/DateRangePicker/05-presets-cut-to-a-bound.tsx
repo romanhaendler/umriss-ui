@@ -12,7 +12,7 @@ export default function PresetsCutToABound() {
   return (
     <div style={{ maxWidth: 320 }}>
       <FormField label="Report" hint="This month, up to today.">
-        <DateRangePicker value={report} onChange={setReport} min={new Date(today.getFullYear(), today.getMonth(), 1)} max={today} clearable />
+        <DateRangePicker value={report} onValueChange={setReport} min={new Date(today.getFullYear(), today.getMonth(), 1)} max={today} clearable />
       </FormField>
     </div>
   );

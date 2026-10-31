@@ -42,7 +42,7 @@ const OPTIONS = [
 
 describe("Combobox - what it says", () => {
   const setup = (value: string | null = null) => {
-    render(<Combobox options={OPTIONS} value={value} onChange={vi.fn()} aria-label="Letter" />);
+    render(<Combobox options={OPTIONS} value={value} onValueChange={vi.fn()} aria-label="Letter" />);
     return screen.getByRole("combobox");
   };
 
@@ -87,7 +87,7 @@ describe("Combobox - what it says", () => {
   it("speaks German under a German wording", () => {
     render(
       <LanguageProvider wording={GERMAN_WORDING}>
-        <Combobox options={OPTIONS} value="a" onChange={vi.fn()} aria-label="Buchstabe" />
+        <Combobox options={OPTIONS} value="a" onValueChange={vi.fn()} aria-label="Buchstabe" />
       </LanguageProvider>,
     );
     const input = screen.getByRole("combobox");
@@ -102,7 +102,7 @@ describe("Combobox - what it says", () => {
 describe("MultiSelect - what it says", () => {
   function Harness({ initial = [] as string[] }) {
     const [value, setValue] = useState<string[]>(initial);
-    return <MultiSelect options={OPTIONS} value={value} onChange={setValue} aria-label="Letters" />;
+    return <MultiSelect options={OPTIONS} value={value} onValueChange={setValue} aria-label="Letters" />;
   }
   const main = () => screen.getAllByRole("button").find((b) => b.getAttribute("aria-haspopup") === "dialog")!;
   const search = () => screen.getByRole("textbox", { name: "Search options" });

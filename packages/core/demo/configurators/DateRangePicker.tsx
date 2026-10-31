@@ -12,5 +12,5 @@ export const controls = ["size", "chars", "clearable", "invalid", "disabled"];
 export const required = {
   "aria-label": "Leave",
   value: { node: { from: new Date(2026, 9, 12), to: new Date(2026, 9, 16) }, code: "leave" },
-  onChange: { node: undefined, code: "setLeave" },
+  onValueChange: { node: undefined, code: "setLeave" },
 };
