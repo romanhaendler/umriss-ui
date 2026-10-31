@@ -13,7 +13,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./RadioGroup.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useRadioGroup } from "./useRadioGroup";
-import { withoutFieldProps } from "../../lib/useFieldValue";
+import { withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 
 /** One possibility of a `RadioGroup`: its value, its label and an optional
     line of explanation. */
@@ -32,7 +32,7 @@ export interface RadioOption<T extends string | number> {
 
 /** The props of `RadioGroup`. */
 export interface RadioGroupProps<T extends string | number>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement>, DeprecatedOnChange<(value: T) => void> {
   /** The possibilities, in the order in which they are meant to stand. */
   options: readonly RadioOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
@@ -42,8 +42,6 @@ export interface RadioGroupProps<T extends string | number>
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
   onValueChange?: (value: T) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: T) => void;
   /** Arrangement: one below the other, or side by side. */
   orientation?: "vertical" | "horizontal";
   /** `sm` for a toolbar and dense forms, `md` otherwise.

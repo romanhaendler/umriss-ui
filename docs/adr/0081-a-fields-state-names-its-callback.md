@@ -39,7 +39,8 @@ else `onChange` is not part of the contract.
 **Empty is `null`** (a text field `""`), and an `undefined` from the caller reads as empty: a field
 given a `value` key stays controlled when its value goes away, so an application that has no value
 yet neither crashes the field nor flips it between controlled and uncontrolled. A field that is
-given a `value` after its first render, or loses the key, is warned of in development.
+given a `value` after its first render, or loses the key, is warned of in development. The one
+exception: `value={undefined}` beside a `defaultValue` is uncontrolled, and the default shows.
 
 **Every field is controlled or uncontrolled**, by `value` or by `defaultValue`.
 

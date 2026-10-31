@@ -27,3 +27,5 @@ reachable by arrows, its blanks skipped; Space on a header neither sorts nor scr
 click-opened editor selects its value; `aria-colcount`, a draft's `aria-rowindex`, a tree rowheader named
 by its row. Decided: an invalid draft on a removed row is dropped (no editor left to say why); Cmd keys
 are not platform-gated (like Ctrl+A). Left: no Playwright case; virtual focus loss checked in jsdom only.
+
+Review fix pass: the browser cases now exist - `table/tests-visual/virtual-grid-focus.spec.ts` (Ctrl+Home to the head; a focused row scrolled out hands the focus on).

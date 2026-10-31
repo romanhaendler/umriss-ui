@@ -16,7 +16,8 @@ validates on blur, takes focus on error and shows its error like a native contro
 - [x] Checkbox takes `invalid` and reads `FormField`'s error (`aria-invalid`, the error border); RadioGroup's options draw the error look.
 - [x] A Checkbox or Switch inside a `FormField` has one accessible name, not "Terms I accept the terms".
 - [x] Combobox with `clearable`: clearing the text and leaving the field gives `null`, not the old choice.
-- [x] Unit tests for each; the H11 drivers rerun green against all four libraries.
+- [x] Unit tests for each.
+- [ ] The H11 drivers rerun green against all four libraries.
 - [x] `pnpm check core`, `pnpm typecheck`.
 
 ## Comments
@@ -39,3 +40,5 @@ Delivered: `useFieldValue` hands each field a ref callback that finds its form (
 NumberInput, Combobox, MultiSelect, RadioGroup, SegmentedControl and the four pickers use it, Textarea's
 count follows; Input, Checkbox, Switch, Select keep no value in React and the browser restores them.
 `formResetEveryField.test.tsx`, red first.
+
+Not rerun (review fix pass): the H11 drivers need packed hosts; covered by unit tests.

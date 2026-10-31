@@ -767,6 +767,14 @@ export class Registry {
     this.structure++;
   }
 
+  /** The table's `loading` as the frame last rendered it. The hook leaves the selection alone while it is
+      set: the application says its rows are not settled. Read in an effect, so it needs no re-render. */
+  busy = false;
+
+  setBusy(busy: boolean) {
+    this.busy = busy;
+  }
+
   /** Whether the body stands as placeholders: loading with no row to keep.
       The counts and the pager say nothing then - a 0 or a "Page 1 of 1"
       under the skeleton would be a total nobody has answered. */

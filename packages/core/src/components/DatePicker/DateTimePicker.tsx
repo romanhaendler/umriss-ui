@@ -5,7 +5,7 @@ import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, isoWithOffset, posted, type FormPostProps } from "../../lib/FormPost";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
@@ -35,7 +35,7 @@ import { ClockGlyph } from "../../lib/glyphs";
  * with "Apply", "Now" or "Clear", not already on the click on a day.
  */
 export interface DateTimePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date>, DeprecatedOnChange<(date: Date | null) => void> {
   /** The instant; `null` means none. The panel reads and sets its day and
       wall clock in the formats' zone (the reader's, unless the application names one). */
   value?: Date | null;
@@ -46,8 +46,6 @@ export interface DateTimePickerProps
       the click on a day: a day without a time would be a half-set value here,
       and a half value is no value. */
   onValueChange?: (date: Date | null) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (date: Date | null) => void;
   /** Show the seconds field. */
   withSeconds?: boolean;
   /** What stands in the empty field. */

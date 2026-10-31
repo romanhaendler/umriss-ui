@@ -3,7 +3,7 @@ import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode } fro
 import { cx } from "../../lib/cx";
 import { useFormats } from "../../lib/language";
 import { useFormField } from "../FormField";
-import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Slider.module.css";
@@ -13,7 +13,7 @@ export type SliderMark = number | { value: number; label?: ReactNode };
 
 /** The props of `Slider`. */
 export interface SliderProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step">, RefProp<HTMLInputElement> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step">, RefProp<HTMLInputElement>, DeprecatedOnChange<(value: number) => void> {
   /** Controlled: the value; `undefined` reads as `min`. */
   value?: number;
   /** Uncontrolled: the value to start at.
@@ -21,9 +21,6 @@ export interface SliderProps
   defaultValue?: number;
   /** Reports every change, by pointer or key, as a number on the step. */
   onValueChange?: (value: number) => void;
-  /** The former name of `onValueChange`; @deprecated since 0.52 - use `onValueChange`; the name then
-      belongs to the native input's event handler, as `register` and Formik read it. */
-  onChange?: (value: number) => void;
   /** The smallest value. */
   min?: number;
   /** The largest value. */

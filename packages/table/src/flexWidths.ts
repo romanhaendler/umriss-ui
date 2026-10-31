@@ -101,19 +101,27 @@ export function contentWidth(cell: HTMLTableCellElement): number {
   table.style.width = "auto";
   let widest = 0;
   const released: HTMLElement[] = [];
+  const cells: HTMLTableCellElement[] = [];
   for (const tableRow of Array.from(table.rows)) {
     if (tableRow.cells.length !== count || tableRow.dataset.headGroup !== undefined) continue;
     const c = tableRow.cells[index];
-    if (!c) continue;
-    /* A value cut at the cap is wider than its box: its whole width, and
-       the cell's padding beside it. */
+    if (c) cells.push(c);
+  }
+  /* A box of a column with a width holds that width by containment (its
+     size is the declared one whatever the text); released, it measures the
+     text. Every box first: while one still holds the width, the column, and
+     so every cell measured, stays as wide as it was. */
+  for (const c of cells) {
     const box = c.querySelector<HTMLElement>(`.${styles.value}`);
-    /* A box of a column with a width holds that width by containment (its
-       size is the declared one whatever the text); released, it measures the text. */
     if (box) {
       box.style.contain = "none";
       released.push(box);
     }
+  }
+  for (const c of cells) {
+    /* A value cut at the cap is wider than its box: its whole width, and
+       the cell's padding beside it. */
+    const box = c.querySelector<HTMLElement>(`.${styles.value}`);
     const style = getComputedStyle(c);
     const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
     /* A head's label gives way with an ellipsis: what it hides counts. */

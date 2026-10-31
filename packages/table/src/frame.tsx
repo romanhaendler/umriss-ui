@@ -69,6 +69,9 @@ export function Frame({
   } = props;
 
   useSyncExternalStore(registry.subscribe, registry.bodyVersion, registry.bodyVersion);
+  useLayoutEffect(() => {
+    registry.setBusy(given.loading ?? false);
+  }, [registry, given.loading]);
   const wording = useWording();
   const formats = useFormats();
   const resolvedDensity = useDensityFor(density, "regular");

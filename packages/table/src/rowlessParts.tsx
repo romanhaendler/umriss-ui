@@ -488,6 +488,7 @@ export function Export<R = string>({ format: given, filename, onExport, label, s
   const { snapshot, registry } = connection;
   const all = registry.hook?.exportRows;
   /* Without a format the text is the CSV, and `R` is `string`. */
+  /* Sound: `R` defaults to `string`, which is what `csv` writes. */
   const format = given ?? (csv as unknown as ExportFormat<R>);
 
   const deliver = (content: R) => {
@@ -601,7 +602,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
     if (!stepped.current) return;
     stepped.current = false;
     setSpoken(rangeText);
-  }, [current?.page]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [current?.page]); // eslint-disable-line react-hooks/exhaustive-deps -- spoken once per page step; `rangeText` is that render's
 
   /* A step that lands on an edge disables itself, and focus would fall to the
      body: it moves to the nearest step still enabled. */

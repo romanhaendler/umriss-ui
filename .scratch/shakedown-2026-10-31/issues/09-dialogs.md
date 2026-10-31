@@ -29,3 +29,5 @@ Decided: a Modal without `autoFocus` focuses its first tab stop other than the h
 button counts), else the dialog - checked by keyboard in the demo, the ring shows. Left: a Toast action
 as opener whose toast is gone gets no focus back (nothing sensible to fall back to); the browser case for
 nesting and Activity is not written - jsdom units cover both; ticket 41's sweep checks them in Chromium.
+
+Review fix pass: the browser cases now exist - `core/tests-visual/dialogs-nested.spec.ts` (a ConfirmDialog inside a Modal closes alone; a Modal under `Activity` closes and reopens), hosted by the Modal example "A question inside a window".

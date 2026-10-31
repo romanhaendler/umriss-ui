@@ -32,7 +32,9 @@ const plainOf = (raw: string, separators: Separators): string =>
  * lone minus can stand: they are "no value".
  */
 export function isReadable(raw: string, separators: Separators = DEFAULT_SEPARATORS): boolean {
-  const text = dotAsDecimal(raw, separators).replace(/\s/g, "");
+  /* Where the group separator is itself a space (fr, sv), a space between digits is that separator and
+     is judged as one; elsewhere spaces carry no meaning. */
+  const text = dotAsDecimal(raw, separators).trim().replace(/\s/g, /^\s$/.test(separators.group) ? separators.group : "");
   const [mantissa = "", exponent, ...more] = text.split(/e/i);
   if (more.length > 0 || (exponent !== undefined && !/^[+-]?\d*$/.test(exponent))) return false;
   const parts = mantissa.split(separators.decimal);

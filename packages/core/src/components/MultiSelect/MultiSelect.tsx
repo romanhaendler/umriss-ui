@@ -7,7 +7,7 @@ import { mergeRefs } from "../../lib/mergeRefs";
 import { Button } from "../Button";
 import { Input } from "../Input";
 import { useFormField } from "../FormField";
-import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { useFieldValue, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
@@ -34,7 +34,7 @@ export interface MultiSelectOption<T extends string | number = string> {
 
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string | number = string>
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T>, DeprecatedOnChange<(value: T[]) => void> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
@@ -47,8 +47,6 @@ export interface MultiSelectProps<T extends string | number = string>
   /** Runs on every change of the selection, with the complete new list –
       not with the one value that moved. */
   onValueChange?: (value: T[]) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: T[]) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** What stands in the panel's search field. */

@@ -218,12 +218,12 @@ export function useTableState<Z, K extends string = string>(
   const groups = useMemo(
     () => (sortedSet && groupLevels ? groupStage(sortedSet.filtered, sortedSet.levels, groupLevels) : undefined),
     // The fold is not an input of the grouping: it only chooses lines.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the grouping's other fields are read through `groupLevels`, whose parts stand in the list
     [sortedSet, groupLevels?.levels, groupLevels?.aggregates, groupLevels?.compareText],
   );
   const lines = useMemo(
     () => (groups && groupLevels ? linesOf(groups, groupLevels.folded) : undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the lines follow the groups and the fold only; the rest of `groupLevels` is read with that render
     [groups, groupLevels?.folded],
   );
   const projection = useMemo(

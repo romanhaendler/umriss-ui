@@ -17,8 +17,10 @@ export interface ConfirmDialogProps
   /** Agreeing. Called once per opening - a second press, however quick, does
       nothing, until `loading` ends with the dialog still open. The dialog does
       not close itself from that – whoever wants to show a confirmation in
-      progress still needs it. */
-  onConfirm: () => void;
+      progress still needs it. A promise returned from it that settles (also
+      by failing) with the dialog still open lets the confirmation be given
+      again, without `loading`. */
+  onConfirm: () => void | Promise<unknown>;
   /** The question, as a statement: "Delete invoice 2041?". */
   title: ReactNode;
   /** What about it cannot be taken back. The most important line of the
@@ -68,10 +70,26 @@ export function ConfirmDialog({
     const active = document.activeElement;
     if (!dialog.contains(active) || (active as HTMLElement).matches(":disabled")) dialog.focus();
   }, [loading]);
+  const stillOpen = useRef(open);
+  useEffect(() => {
+    stillOpen.current = open;
+  }, [open]);
   const confirm = () => {
     if (!open || agreed.current) return;
     agreed.current = true;
-    onConfirm();
+    const result = onConfirm();
+    /* A confirmation that settles with the dialog still open (it failed) can be given again. */
+    if (result && typeof result.then === "function") {
+      void result.then(
+        () => {
+          if (stillOpen.current) agreed.current = false;
+        },
+        (error: unknown) => {
+          if (stillOpen.current) agreed.current = false;
+          throw error;
+        },
+      );
+    }
   };
   return (
     <Modal
