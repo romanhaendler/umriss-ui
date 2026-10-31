@@ -25,6 +25,8 @@ made React complain on the RadioGroup.
 | Select, Combobox, SegmentedControl, RadioGroup | `T \| null` | `null` |
 | MultiSelect | `T[]` | `[]` |
 | Slider | `number` | `min` |
+| RangeSlider | `[from, to]` | `[min, max]` |
+| TimeInput | `"HH:mm"` or `"HH:mm:ss"` \| `null` | `null` |
 | DatePicker, DateTimePicker | `Date \| null` | `null` |
 | DateRangePicker, DateTimeRangePicker | `DateRange` (`{ from, to }`) \| `null` | `null` |
 | FileInput | `File[]` | `[]` |
