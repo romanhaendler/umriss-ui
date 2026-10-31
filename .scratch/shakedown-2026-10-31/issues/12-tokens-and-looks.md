@@ -22,3 +22,7 @@ it does not depend on core); `touch-action: manipulation` on Button, NumberInput
 touch field text `max(16px, 1rem)`. Decided: the stacked-field gap is a sibling margin that yields inside
 containers with their own gap - Stack and Grid carry `data-umriss-gap` (a plain margin doubled the
 configurator's spacing, seen in the screenshot); touch-action only on the controls the finding named.
+**Coordinator, later the same day:** the stacked-field margin is gone again. Checked against a real
+consumer (a dialog laid out as a flex column with `gap: 16px`), it doubled the space to 32 px -
+the opt-out reached only core's Stack and Grid. Decision: a FormField keeps no space around itself; its
+container spaces the fields, and the FormField page says so.
