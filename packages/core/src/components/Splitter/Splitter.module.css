@@ -44,7 +44,7 @@
     content: "";
     position: absolute;
     inset: 0 calc(50% - 0.5px);
-    background: var(--u-hairline-strong);
+    background: var(--u-color-text-muted);
     transition: background-color var(--u-transition);
   }
 
@@ -52,15 +52,15 @@
     inset: calc(50% - 0.5px) 0;
   }
 
-  /* Hover darkens the line as it darkens a field's edge; held, the line takes
+  /* The line at rest holds 3:1 against the surface (WCAG 1.4.11). Hover darkens it; held, it takes
      the ink, which is the press's stronger change (the interaction-state
      canon). */
   .separator:hover::before {
-    background: var(--u-color-edge-hover);
+    background: var(--u-color-text-secondary);
   }
 
   .separator:active::before {
-    background: var(--u-color-text-secondary);
+    background: var(--u-color-text);
   }
 
   /* The grip on the line's middle says the line can be taken hold of: quiet

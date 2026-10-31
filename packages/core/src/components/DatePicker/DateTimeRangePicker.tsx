@@ -1,4 +1,5 @@
 import { fieldBlur } from "../../lib/fieldBlur";
+import { useShapeWarning, isDate } from "../../lib/useShapeWarning";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
@@ -163,7 +164,10 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [value, onChange] = useFieldValue<DateRange | null>("DateTimeRangePicker", props, null);
+  const [valueGiven, onChange] = useFieldValue<DateRange | null>("DateTimeRangePicker", props, null);
+  const rangeOk = valueGiven != null && isDate(valueGiven.from) && isDate(valueGiven.to);
+  const value = rangeOk ? valueGiven : null;
+  useShapeWarning("DateTimeRangePicker", "value", valueGiven != null && !rangeOk, "{ from: Date, to: Date } or null");
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
@@ -353,6 +357,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
             max={23}
             label={side === "from" ? wording.startHour : wording.endHour}
             next={minuteRef}
+            pasteTakes="first"
             disabled={allDay}
           />
           <span className={styles.timeSeparator}>:</span>
@@ -462,6 +467,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
         aria-label={rest["aria-label"] || field ? undefined : wording.dateTimeRangePanel}
         id={panelId}
         className={cx(styles.panel, styles.rangePanel)}
+        closeOnTabOut
       >
           <div ref={panelRef}>
             <div className={styles.rangeBody}>

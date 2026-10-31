@@ -19,6 +19,23 @@
     white-space: nowrap;
   }
 
+  /* In a parent narrower than the word, the word ends in an ellipsis and the
+     dot keeps its place; text-overflow needs one run of text, not the flex
+     container's anonymous item. */
+  .badge {
+    max-width: 100%;
+  }
+
+  .text {
+    min-width: 0;
+    overflow-x: clip;
+    text-overflow: ellipsis;
+  }
+
+  .badge::before {
+    flex: none;
+  }
+
   .pill {
     border-radius: var(--u-radius-full);
     padding-inline: var(--u-space-3);

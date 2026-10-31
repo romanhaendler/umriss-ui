@@ -185,6 +185,7 @@ export function DatePicker(props: DatePickerProps) {
         aria-label={rest["aria-label"] || field ? undefined : wording.datePanel}
         id={panelId}
         className={styles.panel}
+        closeOnTabOut
       >
           <div>
             <Calendar

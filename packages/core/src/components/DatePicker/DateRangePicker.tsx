@@ -255,6 +255,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
         aria-label={rest["aria-label"] || field ? undefined : wording.dateRangePanel}
         id={panelId}
         className={cx(styles.panel, styles.rangePanel)}
+        closeOnTabOut
       >
           <div ref={panelRef}>
             <div className={styles.rangeBody}>
