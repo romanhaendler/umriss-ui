@@ -40,12 +40,11 @@ function unlockScroll() {
 }
 
 /* The last pointer press, for an opener that took no focus: WebKit does not
-   focus a button a mouse pressed, so `activeElement` is the body then. */
+   focus a button a mouse pressed, so `activeElement` is the body then. Watched
+   from the moment this module loads: the press that opens the first dialog
+   comes before any dialog exists. */
 let pressed: Element | null = null;
-let watching = false;
-function watchPointer() {
-  if (watching) return;
-  watching = true;
+if (typeof document !== "undefined") {
   document.addEventListener("pointerdown", (e) => (pressed = e.target as Element | null), true);
 }
 const FOCUSABLE_ANCESTOR = "button, a[href], input, select, textarea, summary, [tabindex]";
@@ -181,7 +180,6 @@ export function useDialogChoreography(
 
   const openNow = (dialog: HTMLDialogElement) => {
     if (!dialog.open) {
-      watchPointer();
       opener.current = openerNow();
       dialog.showModal();
     }

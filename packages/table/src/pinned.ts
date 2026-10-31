@@ -54,5 +54,18 @@ export function pinnedCell(blocks: PinBlocks, first: number, last = first): Pinn
     `ColumnGroup`'s cells when there is one. */
 export const columnRow = (table: HTMLTableElement | null | undefined) => table?.tHead?.rows?.[table.tHead.rows.length - 1];
 
-/** What one line of the table is tall: the column row's height, 0 where there is none. */
-export const linePitch = (table: HTMLTableElement | null | undefined) => columnRow(table)?.getBoundingClientRect().height ?? 0;
+/** An element's height in layout px. A box reads smaller under a transform
+    (a window that opens with `scale(0.96)`) and moves with every frame of it;
+    the element's own width, laid out and as drawn, gives the scale back. Where
+    nothing is laid out (no width) the box is taken as it is. */
+export function layoutHeight(element: HTMLElement): number {
+  const box = element.getBoundingClientRect();
+  const laidOut = element.offsetWidth;
+  return laidOut > 0 && box.width > 0 ? (box.height * laidOut) / box.width : box.height;
+}
+
+/** What one line of the table is tall: the column row's layout height, 0 where there is none. */
+export const linePitch = (table: HTMLTableElement | null | undefined) => {
+  const row = columnRow(table);
+  return row ? layoutHeight(row) : 0;
+};
