@@ -285,13 +285,19 @@ stylesheets by hand. Under a finger the toolbar, pagination and row actions are
   mount or during render, so `onSelectionChange: setKeys` cannot loop. It works
   with the table's own selection, with one handed in as `selection`, and in
   server mode (there, under "all that match", `selection.allMatching` and
-  `selection.except` tell the rest).
+  `selection.except` tell the rest.
+  It gets the selected rows a reader sees - the toolbar's count, `selection.count`
+  and the rows a bulk action takes - and, as a second argument, every key held,
+  those a search or a condition hides included (they stay selected and come back
+  with the search). A server clears the selection at a new search or condition on
+  purpose: it can be "all N that match", which belongs to its query, and a new query
+  voids it.
 * **Rows that change every second** (`tests-unit/rowsThatKeepArriving.test.tsx`):
   `rows` may be a new array each second - values move, a row appears, one goes.
   The sort stays and the rows stand in its order; a row keeps its place in the
   markup by its `rowKey`; the selection holds by key (the count follows the rows
-  there are, and a key whose row is gone waits in the set and ticks again if the
-  row returns; an application that holds the selection outside, with
+  there are: a key whose row is gone leaves the set and is not ticked again if
+  the row returns; an application that holds the selection outside, with
   `useTableSelection`, stores `allMatching` and `except` with the keys - in
   server mode a change of search or conditions clears them through `clear()`);
   an open Row draft stays open with what was typed and shows its
