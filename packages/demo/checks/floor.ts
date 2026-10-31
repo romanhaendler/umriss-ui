@@ -198,6 +198,8 @@ export async function expectOnTheFloor(
   example: string,
 ): Promise<void> {
   expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches), "touch emulation").toBe(true);
+  /* A surface scales in as it opens: measured mid-way, a 24 px target is 23.5. */
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().endTime !== Infinity).map((a) => a.finished.catch(() => undefined))));
   const raw = (await within.evaluateAll(probe, FLOOR)).map((f) => ({ ...f, example: f.example || example }));
   const { found, stale } = judge(demo, pageId, raw, true);
   expect(found, `${pageId} / ${example} under a finger`).toEqual([]);

@@ -232,7 +232,7 @@ test.describe("The other configurators", () => {
     const field = configurator.locator(".exampleStage").getByRole("textbox", { name: "Parcel weight" });
     await configurator.getByRole("radiogroup", { name: "size" }).getByText("sm", { exact: true }).click();
     expect(await code(page, "numberinput")).toBe(
-      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onChange={setWeight} size="sm" />',
+      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onValueChange={setWeight} size="sm" />',
     );
     await field.press("ArrowUp");
     await expect(field).toHaveValue("19.5");
@@ -240,7 +240,7 @@ test.describe("The other configurators", () => {
        never move. */
     await configurator.getByLabel("step", { exact: true }).press("Shift+ArrowDown");
     expect(await code(page, "numberinput")).toBe(
-      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onChange={setWeight} size="sm" step={0.1} />',
+      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onValueChange={setWeight} size="sm" step={0.1} />',
     );
     await field.press("ArrowUp");
     await expect(field).toHaveValue("19.6");

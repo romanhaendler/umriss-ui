@@ -24,8 +24,9 @@
      colour alone is not a statement. Its box is as tall as that line. */
   .glyph {
     flex: none;
-    box-sizing: content-box;
-    padding-block: calc((var(--u-text-sm) * var(--u-leading-tight) - 16px) / 2);
+    box-sizing: border-box;
+    width: 16px;
+    height: calc(var(--u-text-sm) * var(--u-leading-tight));
     color: var(--_tone);
   }
 

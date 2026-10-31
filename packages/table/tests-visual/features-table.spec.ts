@@ -86,7 +86,7 @@ test.describe("Scenarios › find a late shipment", () => {
 
   test("The table toolbar names the ratio of finds to the total set", async ({ page }) => {
     await searchField(page).fill("Northfold");
-    await expect(table(page).getByRole("status").filter({ hasText: " of " })).toHaveText("6 of 70");
+    await expect(table(page).getByRole("status").filter({ hasText: " of " })).toHaveText("6 of 70 entries");
   });
 
   test("Removing one condition leaves the others standing", async ({ page }) => {

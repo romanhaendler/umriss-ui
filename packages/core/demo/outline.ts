@@ -97,6 +97,9 @@ export const OUTLINE: readonly Rubric[] = [
           "**Print.** Under `@media print` the components print for a reader, and nothing is set: overlays, toasts and the skip link are left off the sheet; cards and overlays keep a hard grey edge instead of a shadow; a dark application prints in the light theme (every surface that carries the library's text context takes `color-scheme: light`); and a verdict keeps its word or glyph beside its colour. Text you set yourself outside the components keeps your own colours. The paper size and the page breaks of your own layout are your `@page` and `break-*` rules.",
           "Style through tokens only. The tokens in the table are the styling API and change only with an entry in the changelog; the `data-*` attributes and class names in the components' markup are internal and may change in any version (ADR-0045). Where no token reaches what you want to change, ask for one: a selector on the markup breaks without warning.",
         ],
+        accessibility: [
+          "A theme changes colours and sizes, never the roles: an [Alert](#/alert) of tone warning or danger still announces itself, and every pair of text and ground the tokens set holds the contrast of WCAG 2.1 AA in light and in dark.",
+        ],
         keysOf: ["button", "checkbox", "switch", "typography"],
         limits: [
           "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",

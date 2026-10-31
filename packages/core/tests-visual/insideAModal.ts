@@ -17,7 +17,7 @@ export async function openTheModal(page: Page) {
 /** The modal standing and "Save" pressed: the toast of the failure is shown. */
 export async function failToSave(page: Page) {
   const dialog = await openTheModal(page);
-  const save = dialog.getByRole("button", { name: "Save" });
+  const save = dialog.getByRole("button", { name: "Save", exact: true });
   await save.click();
   const region = page.getByRole("region", { name: "Messages (Alt+T)" });
   await expect(region.getByText("Profile not saved")).toBeVisible();

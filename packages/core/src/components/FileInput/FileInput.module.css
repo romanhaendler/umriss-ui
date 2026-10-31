@@ -194,6 +194,11 @@
 
   /* Under a finger the cross is hit in a 24 px square (WCAG 2.5.8); 20 px is too small a target. */
   @media (pointer: coarse) {
+    /* Two rows' squares must not reach into each other. */
+    .list {
+      gap: var(--u-space-2);
+    }
+
     .remove {
       position: relative;
     }

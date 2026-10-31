@@ -528,6 +528,9 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "Thousands of rows that are all in the browser", use: "virtualisation" },
         ],
+        accessibility: [
+          "The table announces nothing about a request itself; a line of your own, in a polite live region (`<output aria-live=\"polite\">`), is what says that an answer arrived, as the example's toolbar does for the folds it released.",
+        ],
         keysOf: ["first-table", core("Input"), "columnmenu", core("Select"), core("Button"), core("Checkbox")],
         limits: [
           "The table sorts, filters, groups and pages nothing itself. Groups come from the server as `groups`, one line per group the page shows, and a page counts lines; selecting, folding and exporting every group are the application's for now.",

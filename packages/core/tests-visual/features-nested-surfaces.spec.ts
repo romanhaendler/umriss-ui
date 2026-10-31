@@ -13,7 +13,7 @@ test("A Select inside a Popover inside a Modal: a pick reaches, Escape closes on
   await expect(window).toBeVisible();
 
   await window.getByRole("button", { name: "Due", exact: true }).click();
-  const panel = page.getByRole("dialog", { name: "Delivery date" });
+  const panel = page.getByRole("dialog", { name: "Due", exact: true });
   await expect(panel).toBeVisible();
 
   const month = panel.getByRole("combobox", { name: "Month" });

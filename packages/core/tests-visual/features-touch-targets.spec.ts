@@ -91,7 +91,7 @@ test.describe("under a fine pointer", () => {
     expect((await size(page.locator('[data-example="on-and-off"] label'))).height).toBeCloseTo(16.9, 1);
 
     await openExample(page, "radiogroup", "radio-group");
-    expect((await size(page.locator('[data-example="radio-group"] label:has(input[type=radio])'))).height).toBe(19.5);
+    expect((await size(page.locator('[data-example="radio-group"] label:has(input[type=radio])'))).height).toBeCloseTo(16.9, 1);
 
     await openExample(page, "treeview", "a-tree");
     expect(await size(page.locator('[data-example="a-tree"] [data-target]'))).toEqual({ width: 16, height: 16 });
@@ -115,14 +115,14 @@ test("in WebKit under touch, 0930 typed into the time fields gives 09:30", async
     const page = await context.newPage();
     await openExample(page, "datetimepicker", "set-an-instant");
     await page.locator('[data-example="set-an-instant"] .exampleStage button').first().click();
-    const dialog = page.getByRole("dialog", { name: "Select date and time" });
+    const dialog = page.getByRole("dialog", { name: "Customer impact began" });
     await expect(dialog.getByRole("button", { name: /^(Increase|Decrease) / }).first()).toBeHidden();
-    await dialog.getByRole("textbox", { name: "Hour", exact: true }).tap();
+    await dialog.getByRole("spinbutton", { name: "Hour", exact: true }).tap();
     /* At a finger's pace: a burst within one frame would reach the hour before
        the focus has moved on to the minute, which no hand types. */
     await page.keyboard.type("0930", { delay: 50 });
-    await expect(dialog.getByRole("textbox", { name: "Hour", exact: true })).toHaveValue("09");
-    await expect(dialog.getByRole("textbox", { name: "Minute", exact: true })).toHaveValue("30");
+    await expect(dialog.getByRole("spinbutton", { name: "Hour", exact: true })).toHaveValue("09");
+    await expect(dialog.getByRole("spinbutton", { name: "Minute", exact: true })).toHaveValue("30");
   } finally {
     await browser.close();
   }

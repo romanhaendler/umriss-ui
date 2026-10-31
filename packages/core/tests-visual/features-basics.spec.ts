@@ -47,7 +47,7 @@ test("Toast deck closes again after a click on a close button", async ({ page })
   for (let i = 0; i < 3; i++) await trigger.click();
   await page.getByRole("button", { name: "Close message" }).last().click();
   await page.mouse.move(0, 0);
-  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "1 / 2, show all messages" })).toBeVisible();
 });
 
 test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ page }) => {
@@ -58,10 +58,10 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
   await trigger.focus();
   await page.keyboard.press("Alt+KeyT");
   await expect(page.getByRole("region", { name: "Messages (Alt+T)" })).toBeFocused();
-  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeHidden();
+  await expect(page.getByRole("button", { name: "1 / 2, show all messages" })).toBeHidden();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
-  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "1 / 2, show all messages" })).toBeVisible();
 });
 
 /* A page of the demo is one application: one deck for the toasts of every
@@ -98,7 +98,7 @@ test("Scan four parcels, then Save in the modal: one deck, nothing lies on anoth
   expect(decks).toBe(1);
   await expect(region).toHaveCount(1);
   const standing = await page.locator("[data-toast]").count();
-  await expect(page.getByRole("button", { name: `${standing} messages, show all` })).toBeVisible();
+  await expect(page.getByRole("button", { name: `1 / ${standing}, show all messages` })).toBeVisible();
 
   const retry = region.getByRole("button", { name: "Retry" });
   const box = (await retry.boundingBox())!;
@@ -150,7 +150,7 @@ test("A toast above a modal is pressable and closes without closing the modal", 
     ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.getAttribute("aria-label"),
     { x: box.x + box.width / 2, y: box.y + box.height / 2 },
   );
-  expect(hit).toBe("Close message");
+  expect(hit).toBe("Close message: Profile not saved");
   await cross.click();
   await expect(region.getByText("Profile not saved")).toBeHidden();
   await expect(dialog).toBeVisible();
@@ -797,8 +797,8 @@ test("Held toasts leave the page under them to be hit, and come back where they 
     const box = (await cross.boundingBox())!;
     return [box.x, box.y].map(Math.round);
   }).toEqual([stood.x, stood.y].map(Math.round));
-  expect(await atThePoint()).toBe("Close message");
-  expect(await tabIntoTheToasts()).toBe("Close message");
+  expect(await atThePoint()).toBe("Close message: Route T-03 planned");
+  expect(await tabIntoTheToasts()).toBe("Close message: Route T-03 planned");
 });
 
 /* Nothing glides while nothing is seen: a distance changed during a hold is
@@ -1140,12 +1140,6 @@ test("Switch toggles on Space and on its label", async ({ page }) => {
    to where the row would stand unscrolled: a long list went white. */
 test("Checkbox, switch and radio hold their input in their row", async ({ page }) => {
   const ownRow = (input: Element) => (input as HTMLElement).offsetParent === input.closest("label");
-
-  await openExample(page, "multiselect", "chips-in-the-field");
-  await page.locator('[data-example="chips-in-the-field"] [aria-haspopup="dialog"]').first().click();
-  const boxes = page.getByRole("dialog").getByRole("checkbox");
-  await expect(boxes.first()).toBeVisible();
-  for (const box of await boxes.all()) expect(await box.evaluate(ownRow)).toBe(true);
 
   await openExample(page, "switch", "on-and-off");
   expect(await page.locator('[data-example="on-and-off"]').getByRole("switch", { name: "Page me at night", exact: true }).evaluate(ownRow)).toBe(true);

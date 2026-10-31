@@ -1,3 +1,4 @@
+import { Button } from "@umriss-ui/core";
 import { Legend, useChart } from "../../../src";
 
 export const title = "Print the chart";
@@ -9,9 +10,9 @@ export default function PrintTheChart() {
   const { Chart, XAxis, YAxis, Line } = useChart(DAYS);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <button type="button" onClick={() => window.print()} style={{ alignSelf: "flex-start" }}>
+      <Button variant="secondary" size="sm" onClick={() => window.print()} style={{ alignSelf: "flex-start" }}>
         Print this page
-      </button>
+      </Button>
       <Chart height={260} aria-label="North depot: pallets in and out over fourteen days">
         <XAxis value="day" label="Day of March" tickCount={7} />
         <YAxis label="Pallets" />

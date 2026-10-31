@@ -167,6 +167,9 @@ export function clippedAway(anchor: Element): boolean {
     if (overflowX === "visible" && overflowY === "visible") continue;
     const clip = el.getBoundingClientRect();
     if (rect.bottom < clip.top || rect.top > clip.bottom || rect.right < clip.left || rect.left > clip.right) return true;
+    /* A modal dialog stands in the top layer: what clips the place it was
+       written in clips nothing inside it. */
+    if (el.localName === "dialog" && win.getComputedStyle(el).position === "fixed") break;
   }
   return false;
 }
