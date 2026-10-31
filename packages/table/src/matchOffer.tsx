@@ -11,7 +11,9 @@ import styles from "./Table.module.css";
 export function MatchOffer({ hook }: { hook: HookSnapshot }) {
   const wording = useWording();
   const formats = useFormats();
-  const { selection, rowCount, rows } = hook.publicSnapshot;
+  const { selection, rows } = hook.publicSnapshot;
+  /* The rows that match: a grouped page's `rowCount` counts lines. */
+  const rowCount = hook.matches ?? 0;
   const matching = selection.allMatching;
   const pageTicked = rows.length > 0 && rows.every((row) => selection.isSelected(hook.rowKey(row)));
   if (!matching && !(pageTicked && rowCount > rows.length)) return null;

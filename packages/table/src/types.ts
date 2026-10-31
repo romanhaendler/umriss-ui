@@ -492,12 +492,16 @@ export type ActionProps<Z, S extends boolean = false, Key extends RowKey = strin
     });
 
 /** What a server-mode bulk action receives, in the toolbar, while all that
-    match are selected: the request they match and the keys unticked since.
+    match are selected, or a group of them: the request they match and the keys unticked since.
     `Array.isArray` tells it from rows - the rows are typed as a mutable array
     so that it narrows both ways. */
 export interface AllMatching<Key extends RowKey = string> {
   request: TableRequest;
   except: readonly Key[];
+  /** Set when a group's box was ticked instead: the group's path (`groupPath`)
+      under the request's grouping. The rows of that group that match are
+      selected, `except` is empty. */
+  group?: string;
 }
 
 /** What a row carries in classes and data attributes. */
@@ -708,6 +712,7 @@ interface AutomaticMode<Z, Key extends RowKey = string> {
   error?: never;
   totals?: never;
   groups?: never;
+  matchCount?: never;
 }
 
 /** One group line of a server's answer (`groups`): a group the page shows
@@ -784,6 +789,11 @@ interface ServerMode<Z> {
       Missing or malformed, the rows are shown ungrouped and development
       says why. Hand it back with the `answers` it belongs to. */
   groups?: readonly ServerGroup[];
+  /** While grouped, how many rows the server's filtered set has: `rowCount`
+      then counts lines. "Select all that match", the count of what is selected
+      and the toolbar's entries read it. Without it, a grouped table offers
+      no "all that match" and names no count of entries. */
+  matchCount?: number;
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];

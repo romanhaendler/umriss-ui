@@ -74,13 +74,15 @@ export function TableToolbar({
        not treated along with it: a button that does more than it announces is
        the worst kind of button. An empty selection holds no row and says so
        without a pass over the filtered set. */
-    const selected = own || snapshot.selection.count === 0
+    const group = snapshot.server && !own ? hook.chosenGroup : null;
+    const selected = own || group || snapshot.selection.count === 0
       ? []
       : (hook.selectedRows ?? snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row))));
     /* In server mode "all that match" is a state, not rows: the count is the
        server's less the exceptions, and an action gets the request instead. */
     const all = snapshot.server && snapshot.selection.allMatching && !own;
-    const selectedTotal = all ? snapshot.rowCount - snapshot.selection.except.size : selected.length;
+    const selectedTotal = group ? group.count : all ? (hook.matches ?? 0) - snapshot.selection.except.size : selected.length;
+    const chosen = all || group !== null;
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
 
     conditions = (
@@ -100,7 +102,7 @@ export function TableToolbar({
             ? ""
             : snapshot.server
               ? /* The server counts the matches only; a total beside them would be a second request. */
-                wording.entries(snapshot.rowCount, formats.count(snapshot.rowCount))
+                hook.matches === null ? "" : wording.entries(hook.matches, formats.count(hook.matches))
               : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.tableState.total ?? hook.admitted.length), hook.tableState.total ?? hook.admitted.length)}
         </span>
         {restricted && (
@@ -114,8 +116,8 @@ export function TableToolbar({
             {bulkActions.map(({ key, spec }) => {
               /* Acts on the selected rows where it is shown and enabled. In server
                  mode "all that match" has no rows to ask, so only the booleans count. */
-              const applies = all ? undefined : selected.filter((row) => !holds(spec.hidden, row) && !holds(spec.disabled, row));
-              if (all ? holds(spec.hidden) : selected.every((row) => holds(spec.hidden, row))) return null;
+              const applies = chosen ? undefined : selected.filter((row) => !holds(spec.hidden, row) && !holds(spec.disabled, row));
+              if (chosen ? holds(spec.hidden) : selected.every((row) => holds(spec.hidden, row))) return null;
               const count = applies?.length;
               const label = count !== undefined && count < selected.length
                 ? `${spec.label} (${wording.ofSelected(formats.count(count), formats.count(selected.length))})`
@@ -125,10 +127,14 @@ export function TableToolbar({
                   key={key}
                   size={size}
                   variant={spec.tone === "danger" ? "danger" : "secondary"}
-                  disabled={all ? holds(spec.disabled) : count === 0}
+                  disabled={chosen ? holds(spec.disabled) : count === 0}
                   onClick={() =>
                     (spec.onSelect as (rows: readonly unknown[] | AllMatching<RowKey>) => void)(
-                      all ? { request: snapshot.request!, except: [...snapshot.selection.except] } : applies!,
+                      group
+                        ? { request: snapshot.request!, except: [], group: group.path }
+                        : all
+                          ? { request: snapshot.request!, except: [...snapshot.selection.except] }
+                          : applies!,
                     )}
                 >
                   {label}
