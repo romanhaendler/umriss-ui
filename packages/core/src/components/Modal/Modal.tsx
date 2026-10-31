@@ -22,8 +22,9 @@ interface ModalContextValue {
 const ModalContext = /* @__PURE__ */ createContext<ModalContextValue | null>(null);
 
 /* ------------------------------------------------------------------ */
-/* Modal – on the basis of the native <dialog>: focus trap, Escape and */
-/* scroll lock come from the browser, we supply only the looks.        */
+/* Modal – on the basis of the native <dialog>: focus trap and Escape   */
+/* come from the browser; the scroll lock and the return of the focus   */
+/* are the choreography's. We supply the looks.                         */
 /* ------------------------------------------------------------------ */
 
 /** The width of a `Modal`. */
@@ -48,7 +49,8 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
    holds the choreography, the backdrop and the name, and each of the two says
    only where its sheet stands. */
 /** A dialog window in the middle of the screen, on the native `<dialog>`:
-    focus trap, Escape and scroll lock come from the browser. Controlled through
+    focus trap and Escape come from the browser, the page's scroll lock and the
+    focus's return from the library. Controlled through
     `open` and `onClose`; inside it stand `ModalHeader`, `ModalBody` and
     `ModalFooter`. */
 export function Modal({ ref, size = "md", closeOnBackdrop = true, ...rest }: ModalProps) {
@@ -75,7 +77,7 @@ export interface DrawerProps extends Omit<ModalProps, "size"> {
 
 /* A drawer is a Modal that stands at an edge instead of in the middle: the
    same <dialog>, so the focus trap, Escape, the scroll lock and the return of
-   the focus are the browser's, and the same head, body and foot inside it.
+   the focus are the same, and the same head, body and foot inside it.
    It is modal on purpose - a panel beside the page that leaves the page
    operable is layout, not an overlay. Its width is the token
    `--u-drawer-width`, which an application or one drawer's `style`
@@ -114,6 +116,7 @@ function DialogFrame({
   children,
   onCancel,
   onMouseDown,
+  onKeyDown,
   ...rest
 }: DialogFrameProps) {
   const topRef = useRef<HTMLDivElement>(null);
@@ -126,7 +129,7 @@ function DialogFrame({
   /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
      The name belongs to the Modal; the palette uses the same routine without
      an exit. */
-  const { dialogRef, mounted, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
+  const { dialogRef, mounted, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel, onDialogKeyDown } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
@@ -149,6 +152,8 @@ function DialogFrame({
       /* The heading of the header names the window: a <dialog> takes no name
          from its content. */
       aria-labelledby={titleId}
+      /* Focusable itself: a dialog with no field takes the focus. */
+      tabIndex={-1}
       {...rest}
       /* After `rest` and composed with the caller's, so that a caller's
          `onCancel` or `onMouseDown` cannot take Escape's exit or the
@@ -156,6 +161,10 @@ function DialogFrame({
       data-side={side}
       data-closing={closing || undefined}
       onClose={handleDialogClose}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        onDialogKeyDown(event);
+      }}
       onCancel={(event) => {
         onCancel?.(event);
         if (!event.defaultPrevented) handleDialogCancel(event);
@@ -183,11 +192,11 @@ function DialogFrame({
 /* ------------------------------------------------------------------ */
 
 /** The props of `ModalHeader`: a div's attributes, with `title` taking a node
-    instead of the HTML attribute. */
+    instead of the HTML attribute; without it, the children are the heading. */
 export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, RefProp<HTMLDivElement> {
   /** The heading of the window. It names it for the screen reader at the same
       time – a dialog without a name says only "dialog". */
-  title: ReactNode;
+  title?: ReactNode;
   /** One sentence below the heading: what is to be decided here. */
   description?: ReactNode;
   /** Hides the close button. */
@@ -196,7 +205,7 @@ export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "
 
 /** The head of a `Modal` or `Drawer`: its title, which names the dialog for a
     screen reader, an optional sentence below it, and the close cross. */
-export function ModalHeader({ ref, title, description, hideClose = false, className, ...rest }: ModalHeaderProps) {
+export function ModalHeader({ ref, title, description, hideClose = false, className, children, ...rest }: ModalHeaderProps) {
   const modal = useContext(ModalContext);
   const wording = useWording();
 
@@ -204,12 +213,12 @@ export function ModalHeader({ ref, title, description, hideClose = false, classN
     <div ref={ref} className={cx(styles.header, className)} {...rest}>
       <div className={styles.headerText}>
         <h2 id={modal?.titleId} className={styles.title}>
-          {title}
+          {title ?? children}
         </h2>
         {description && <p className={styles.description}>{description}</p>}
       </div>
       {!hideClose && (
-        <IconButton size="sm" aria-label={wording.close} className={styles.close} onClick={() => modal?.onClose()}>
+        <IconButton size="sm" aria-label={wording.close} className={styles.close} data-dialog-close onClick={() => modal?.onClose()}>
           <CrossGlyph />
         </IconButton>
       )}
