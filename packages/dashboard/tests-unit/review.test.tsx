@@ -39,7 +39,7 @@ function Harness({ defaultView = DEFAULT, onViewChange, wide = false }: { defaul
 const order = () => Array.from(document.querySelectorAll("[data-widget]")).map((el) => el.getAttribute("data-widget"));
 const press = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
 const menuOf = (title: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${title}` }));
-const item = (name: string | RegExp) => fireEvent.click(screen.getByRole("menuitem", { name }));
+const item = (name: string | RegExp) => fireEvent.click(screen.queryByRole("menuitemradio", { name }) ?? screen.getByRole("menuitem", { name }));
 const said = (text: string) => waitFor(() => expect(document.querySelector("[data-umriss-announcer]")?.textContent).toBe(text));
 
 describe("the heading in the editing mode", () => {

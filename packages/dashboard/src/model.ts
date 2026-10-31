@@ -32,7 +32,7 @@ export interface DashboardView {
   widgets: ReadonlyArray<DashboardWidget>;
 }
 
-type Types = ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize; defaultOptions: unknown }>;
+type Types = ReadonlyMap<string, { sizes: Partial<Record<WidgetSize, SizeSpan>>; start: WidgetSize; defaultOptions?: unknown }>;
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 

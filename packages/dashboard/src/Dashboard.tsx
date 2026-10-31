@@ -1,4 +1,4 @@
-import { Children, isValidElement, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Children, isValidElement, Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { announce, Button, Card, Drawer, GripGlyph, Heading, Menu, MenuItem, MenuSeparator, ModalBody, ModalHeader, Popover, Skeleton, Text, useWording } from "@umriss-ui/core";
 import { add, move, newId, remove, resize, setOptions } from "./edit";
@@ -8,7 +8,7 @@ import styles from "./Dashboard.module.css";
 import { Failed } from "./Failed";
 import { readView } from "./model";
 import type { DashboardView, DashboardWidget, WidgetSize } from "./model";
-import { pack } from "./pack";
+import { pack, rowStep } from "./pack";
 import type { Place } from "./pack";
 import { shareOf } from "./share";
 import { useDrag } from "./useDrag";
@@ -76,7 +76,7 @@ function Body({ title, editing, children }: { title: string; editing: boolean; c
   }, []);
   const tabStop = scrolls && !editing;
   return (
-    <div ref={body} className={styles.body} inert={editing} {...(tabStop ? { role: "group", tabIndex: 0, "aria-label": title } : {})}>
+    <div ref={body} className={styles.body} data-widget-body="" inert={editing} {...(tabStop ? { role: "group", tabIndex: 0, "aria-label": title } : {})}>
       {children}
     </div>
   );
@@ -115,9 +115,14 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   const [heads] = useState(() => new Map<string, HTMLElement>());
   const [triggers] = useState(() => new Map<string, HTMLElement>());
   const addButton = useRef<HTMLButtonElement>(null);
+  const editButton = useRef<HTMLButtonElement>(null);
 
   const { editing } = editor;
   const total = view.widgets.length;
+  /* Widgets of one title are told apart by their place: a name is what a menu, a figure landmark and a tab stop are found by. */
+  const titles = shown.map(({ widget, type }) => titleOf(type, widget.options));
+  const hint = useId();
+  const nameOf = (title: string, at: number) => (titles.filter((one) => one === title).length > 1 ? wording.dashboardHead(title, at + 1, total) : title);
   const moveTo = (id: string, title: string, to: number) => {
     const from = view.widgets.findIndex((widget) => widget.id === id);
     const target = Math.max(0, Math.min(total - 1, to));
@@ -159,6 +164,15 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
     focusAfter.current = false;
   });
 
+  /* A bar button that is pressed is replaced or disabled by what it does; the focus goes on to the one that stands in its place
+     (the bar's "Add widget" in the mode, "Edit" outside it). */
+  const successor = useRef<"add" | "edit" | null>(null);
+  useEffect(() => {
+    const next = successor.current;
+    successor.current = null;
+    (next === "add" ? addButton.current : next === "edit" ? editButton.current : null)?.focus();
+  });
+
   const listed = [...types.values()].filter((type) => !catalogue || catalogue.includes(type.name));
   const addType = (type: AnyType) => {
     const widget = { id: newId(view, type.name), type: type.name, size: type.start, options: type.defaultOptions };
@@ -179,9 +193,13 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
           role: "group",
           tabIndex: 0,
           "aria-label": (locked ? wording.dashboardHeadLocked : wording.dashboardHead)(title, at + 1, total),
+          "aria-describedby": hint,
           onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
             if (event.target !== event.currentTarget) return;
-            const to = { ArrowLeft: at - 1, ArrowUp: at - 1, ArrowRight: at + 1, ArrowDown: at + 1, Home: 0, End: total - 1 }[event.key];
+            const rows = { ArrowUp: -1, ArrowDown: 1 }[event.key] as -1 | 1 | undefined;
+            const to = rows
+              ? view.widgets.findIndex((one) => one.id === shown[rowStep(shown.map((s) => s.span), COLUMNS, i, rows)]?.widget.id)
+              : { ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: total - 1 }[event.key];
             if (to === undefined) return;
             event.preventDefault();
             moveTo(widget.id, title, to);
@@ -196,7 +214,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
       <Menu
         align="end"
         trigger={
-          <Button ref={track(triggers, widget.id)} size="sm" variant="ghost" aria-label={wording.dashboardMenu(title)}>
+          <Button ref={track(triggers, widget.id)} size="sm" variant="ghost" aria-label={wording.dashboardMenu(nameOf(title, at))}>
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
               <path d="M1.5 5h.01M5 5h.01M8.5 5h.01" />
             </svg>
@@ -220,13 +238,15 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             {sizes.map(([name, span]) => (
               <MenuItem
                 key={name}
-                aria-current={name === widget.size || undefined}
+                role="menuitemradio"
+                aria-checked={name === widget.size}
                 onSelect={() => {
                   editor.step(resize(widget.id, name as WidgetSize));
                   announce(wording.dashboardResized(title, wording.dashboardSizes[name as WidgetSize]));
                 }}
               >
-                {wording.dashboardSizeEntry(wording.dashboardSizes[name as WidgetSize], shareOf(span), name === widget.size)}
+                <span aria-hidden="true" style={{ display: "inline-block", width: "1.25em" }}>{name === widget.size ? "✓" : ""}</span>
+                {wording.dashboardSizeEntry(wording.dashboardSizes[name as WidgetSize], shareOf(span))}
               </MenuItem>
             ))}
           </>
@@ -260,7 +280,19 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
   };
 
   return (
-    <div role="group" className={cx(styles.root, className)} data-editing={editing || undefined} {...rest}>
+    <div
+      role="group"
+      className={cx(styles.root, className)}
+      data-editing={editing || undefined}
+      {...rest}
+      onKeyDown={(event) => {
+        rest.onKeyDown?.(event);
+        /* Escape leaves the mode as Cancel does - unless it was meant for a drag, the catalogue, a form or a menu, which are closed by it first. */
+        if (event.key !== "Escape" || event.defaultPrevented || !editing || drag || editor.catalogue || optionsFor || (event.target as Element).closest('[role="menu"], [role="dialog"]')) return;
+        successor.current = "edit";
+        editor.cancel();
+      }}
+    >
       {editor.allowed && (
         <div className={styles.bar}>
           {editing ? (
@@ -268,16 +300,17 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
               <span className={styles.mode}>{wording.dashboardEditing}</span>
               <Button size="sm" disabled={!editor.canUndo} onClick={editor.undo}>{wording.dashboardUndo}</Button>
               <Button size="sm" disabled={!editor.canRedo} onClick={editor.redo}>{wording.dashboardRedo}</Button>
-              <Button size="sm" disabled={!editor.canReset} onClick={editor.reset}>{wording.dashboardReset}</Button>
+              <Button size="sm" disabled={!editor.canReset} onClick={() => { successor.current = "add"; editor.reset(); }}>{wording.dashboardReset}</Button>
               <Button ref={addButton} size="sm" onClick={() => editor.setCatalogue(true)}>{wording.dashboardAddWidget}</Button>
-              <Button size="sm" onClick={editor.cancel}>{wording.dashboardCancel}</Button>
-              <Button size="sm" variant="primary" onClick={editor.done}>{wording.dashboardDone}</Button>
+              <Button size="sm" onClick={() => { successor.current = "edit"; editor.cancel(); }}>{wording.dashboardCancel}</Button>
+              <Button size="sm" variant="primary" onClick={() => { successor.current = "edit"; editor.done(); }}>{wording.dashboardDone}</Button>
             </>
           ) : (
-            <Button size="sm" onClick={editor.edit}>{wording.dashboardEdit}</Button>
+            <Button ref={editButton} size="sm" onClick={() => { successor.current = "add"; editor.edit(); }}>{wording.dashboardEdit}</Button>
           )}
         </div>
       )}
+      {editing && <span id={hint} hidden>{wording.dashboardHeadHint}</span>}
       {editing && total === 0 && <Text>{wording.dashboardEmptyEditing}</Text>}
       {!editing && total === 0 && <Text>{wording.dashboardEmpty}</Text>}
       <div className={styles.grid} ref={grid}>
@@ -301,7 +334,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
             );
           }
           return (
-            <Card key={widget.id} ref={track(cards, widget.id)} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={title}>
+            <Card key={widget.id} ref={track(cards, widget.id)} className={styles.item} style={style} data-widget={widget.id} data-editing={editing || undefined} data-dragging={drag?.id === widget.id || undefined} aria-label={nameOf(title, at)}>
               <div {...head}>
                 {editing && <GripGlyph className={styles.grip} />}
                 <Title className={styles.title}>{title}</Title>
@@ -309,7 +342,7 @@ export function DashboardOf({ view: given, editor, className, children, catalogu
                 {editing && locked && <span className={styles.size}>{wording.dashboardLocked}</span>}
                 {menu}
               </div>
-              <Body title={title} editing={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></Body>
+              <Body title={nameOf(title, at)} editing={editing}><Failed size={widget.size} options={widget.options} fallback={<Text tone="secondary">{wording.dashboardFailed}</Text>}><Suspense fallback={<Skeleton width="100%" height="100%" />}><Content render={type.children} size={widget.size} options={widget.options} /></Suspense></Failed></Body>
             </Card>
           );
         })}

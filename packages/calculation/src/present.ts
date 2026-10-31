@@ -111,7 +111,9 @@ export function operatorText(position: Position, spoken: boolean, wording: Wordi
 
 export function reasonText(absence: Absence, wording: Wording): string {
   return absence.kind === "missing"
-    ? wording.calculationMissing(absence.label)
+    ? absence.labels.length > 1
+      ? wording.calculationMissingAll(absence.labels)
+      : wording.calculationMissing(absence.label)
     : wording.calculationDivisionByZero(absence.label);
 }
 
