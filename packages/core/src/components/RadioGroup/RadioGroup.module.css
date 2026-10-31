@@ -9,7 +9,7 @@
     composes: text from "#own-styles";
     display: flex;
     flex-direction: column;
-    gap: var(--u-space-3);
+    gap: var(--u-space-2);
   }
 
   /* A horizontal group stands in a row, among fields: it is as tall as a
@@ -20,11 +20,11 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: var(--u-space-5);
-    padding-block: calc((var(--u-control-height) - var(--u-text-sm) * var(--u-leading-normal)) / 2);
+    padding-block: calc((var(--u-control-height) - var(--u-text-sm) * var(--u-leading-tight)) / 2);
   }
 
   .horizontal.sm {
-    padding-block: calc((var(--u-control-height-sm) - var(--u-text-xs) * var(--u-leading-normal)) / 2);
+    padding-block: calc((var(--u-control-height-sm) - var(--u-text-xs) * var(--u-leading-tight)) / 2);
   }
 
   .option {
@@ -65,8 +65,9 @@
     flex: none;
     width: 16px;
     height: 16px;
-    margin-top: 1px;
+    margin-top: calc((var(--u-text-sm) * var(--u-leading-tight) - 16px) / 2);
     border-radius: var(--u-radius-full);
+    corner-shape: round;
     background: var(--u-color-surface);
     outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
@@ -85,6 +86,7 @@
     width: 6px;
     height: 6px;
     border-radius: var(--u-radius-full);
+    corner-shape: round;
     background: var(--u-color-primary-fg);
     transform: scale(0);
     transition: transform var(--u-transition-path);
@@ -139,7 +141,7 @@
 
   .label {
     font-size: var(--u-text-sm);
-    line-height: var(--u-leading-normal);
+    line-height: var(--u-leading-tight);
     color: var(--u-color-text);
   }
 
@@ -164,6 +166,7 @@
   .sm .dot {
     width: 14px;
     height: 14px;
+    margin-top: calc((var(--u-text-xs) * var(--u-leading-tight) - 14px) / 2);
   }
 
   .sm .dot::after {
