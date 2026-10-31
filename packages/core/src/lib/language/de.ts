@@ -291,7 +291,8 @@ export const GERMAN_WORDING: Wording = {
 
   close: "Schließen",
   closeToast: "Meldung schließen",
-  toastDeckCount: (count) => `${count} Meldungen, alle zeigen`,
+  toastDeckCount: (count) => `1 / ${count}, alle Meldungen zeigen`,
+  toastShortcutHint: "Alt+T: zu den Meldungen springen",
   toastRegion: "Meldungen (Alt+T)",
   confirm: "Bestätigen",
   cancel: "Abbrechen",

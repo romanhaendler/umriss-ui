@@ -108,7 +108,7 @@
   }
 
   .region[data-edge="bottom"] {
-    bottom: calc(var(--_toast-bottom) + env(safe-area-inset-bottom));
+    bottom: calc(var(--_toast-bottom) + env(safe-area-inset-bottom) + var(--_lift, 0px));
   }
 
   .region[data-edge="top"] {
@@ -144,6 +144,35 @@
      the region. */
   .live {
     display: contents;
+  }
+
+  /* The shortcut, shown while the deck is open (pointer or focus), on the
+     side away from the edge, where no card lies. */
+  .hint {
+    display: none;
+    position: absolute;
+    inset-inline-end: 0;
+    margin: 0;
+    padding: 2px var(--u-space-2);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    box-shadow: var(--u-shadow-overlay);
+    outline: 1px solid transparent;
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .region[data-open] .hint {
+    display: block;
+  }
+
+  .region[data-edge="bottom"] .hint {
+    bottom: calc(100% + var(--u-space-1));
+  }
+
+  .region[data-edge="top"] .hint {
+    top: calc(100% + var(--u-space-1));
   }
 
   /* A card lies at the region's edge and is moved to its place in the deck

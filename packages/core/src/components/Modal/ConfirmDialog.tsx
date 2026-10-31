@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import type { DialogHTMLAttributes, ReactNode } from "react";
+import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import { Button } from "../Button";
 import { Modal, ModalFooter, ModalHeader } from "./Modal";
@@ -12,8 +14,10 @@ export interface ConfirmDialogProps
   open: boolean;
   /** Cancelling: Escape, cross, backdrop or the second button. */
   onClose: () => void;
-  /** Agreeing. The dialog does not close itself from that – whoever wants to
-      show a confirmation in progress still needs it. */
+  /** Agreeing. Called once per opening - a second press, however quick, does
+      nothing, until `loading` ends with the dialog still open. The dialog does
+      not close itself from that – whoever wants to show a confirmation in
+      progress still needs it. */
   onConfirm: () => void;
   /** The question, as a statement: "Delete invoice 2041?". */
   title: ReactNode;
@@ -29,7 +33,8 @@ export interface ConfirmDialogProps
   cancelLabel?: string;
   /** "danger" for destructive actions. */
   tone?: "primary" | "danger";
-  /** Locks the actions while the confirmation is running. */
+  /** Locks the actions, Escape and the backdrop while the confirmation is
+      running. */
   loading?: boolean;
 }
 
@@ -48,14 +53,41 @@ export function ConfirmDialog({
   ...rest
 }: ConfirmDialogProps) {
   const wording = useWording();
+  const own = useRef<HTMLDialogElement>(null);
+  /* One agreement per opening; it can be given again after a `loading` that
+     ended with the dialog still open. */
+  const agreed = useRef(false);
+  useEffect(() => {
+    if (open && !loading) agreed.current = false;
+  }, [open, loading]);
+  /* The busy Confirm is disabled and lets the focus fall to the page; it
+     stays in the dialog. */
+  useEffect(() => {
+    const dialog = own.current;
+    if (!loading || !dialog) return;
+    const active = document.activeElement;
+    if (!dialog.contains(active) || (active as HTMLElement).matches(":disabled")) dialog.focus();
+  }, [loading]);
+  const confirm = () => {
+    if (!open || agreed.current) return;
+    agreed.current = true;
+    onConfirm();
+  };
   return (
-    <Modal ref={ref} {...rest} open={open} onClose={onClose} size="sm" closeOnBackdrop={!loading}>
+    <Modal
+      ref={mergeRefs(own, ref)}
+      {...rest}
+      open={open}
+      onClose={loading ? () => {} : onClose}
+      size="sm"
+      closeOnBackdrop={!loading}
+    >
       <ModalHeader title={title} description={description} hideClose />
       <ModalFooter>
-        <Button onClick={onClose} disabled={loading}>
+        <Button onClick={() => open && onClose()} disabled={loading}>
           {cancelLabel ?? wording.cancel}
         </Button>
-        <Button variant={tone} loading={loading} onClick={onConfirm}>
+        <Button variant={tone} loading={loading} onClick={confirm}>
           {confirmLabel ?? wording.confirm}
         </Button>
       </ModalFooter>
