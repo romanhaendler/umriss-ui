@@ -74,6 +74,8 @@ export interface ActionSpec {
   /** A bulk action always gets a list. */
   bulk: boolean;
   tone: "default" | "danger";
+  disabled?: boolean | ((row: never) => boolean);
+  hidden?: boolean | ((row: never) => boolean);
   onSelect: (target: never) => void;
 }
 

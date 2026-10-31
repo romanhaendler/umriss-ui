@@ -458,22 +458,26 @@ export interface RowActionsProps {
   pin?: boolean;
 }
 
-interface ActionBase {
+interface ActionBase<Z> {
   /** The label – text, because it is read out together with the row's name. */
   children: string;
   /** `"danger"` for an action that destroys something – that is how it appears in the menu and in the table toolbar. */
   tone?: "default" | "danger";
+  /** Whether the action is unavailable for a row. It stays in the row's menu, announced as unavailable. A function is asked each row. @default false */
+  disabled?: boolean | ((row: Z) => boolean);
+  /** Whether the action is absent for a row. A function is asked each row; with `bulk` a row it hides is left out of the list. @default false */
+  hidden?: boolean | ((row: Z) => boolean);
 }
 
 /** The props of `Action`: one action on a row, or with `bulk` on a list of
     rows - then it also stands in the table toolbar for the selection. */
 export type ActionProps<Z, S extends boolean = false, Key extends RowKey = string> =
-  | (ActionBase & {
+  | (ActionBase<Z> & {
       bulk?: false;
       /** Gets the row the action was triggered on. */
       onSelect: (row: Z) => void;
     })
-  | (ActionBase & {
+  | (ActionBase<Z> & {
       /** Acts on a list: at the row on a list made from it, in the table
           toolbar on the selection within the filtered set. */
       bulk: true;

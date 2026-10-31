@@ -873,7 +873,7 @@ export class Registry {
     } else {
       const old = existing.spec;
       if (old.label !== spec.label || old.bulk !== spec.bulk || old.tone !== spec.tone) this.structure++;
-      else if (old.onSelect !== spec.onSelect) this.presentation++;
+      else if (old.onSelect !== spec.onSelect || old.disabled !== spec.disabled || old.hidden !== spec.hidden) this.presentation++;
       existing.spec = spec;
     }
     this.actions.note(key);

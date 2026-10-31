@@ -15,6 +15,14 @@ import styles from "./Table.module.css";
    action would wander between row and menu when a third one is added. */
 export const AT_MOST_IN_THE_ROW = 2;
 
+/* An action's `disabled` or `hidden` for a row. A function is asked the row;
+   with no row at hand - a server table's "all that match" - a function does not
+   hold, and only the boolean does. */
+export function holds(flag: boolean | ((row: never) => boolean) | undefined, row?: unknown): boolean {
+  if (typeof flag === "function") return row !== undefined && (flag as (r: unknown) => boolean)(row);
+  return flag === true;
+}
+
 export function RowActionsCell({
   actions,
   row,
@@ -49,10 +57,15 @@ export function RowActionsCell({
   /* A bulk action always gets a list - at the row one made from it. That way
      "delete three" is one confirmation and not three. */
   const trigger = (spec: (typeof actions)[number]["spec"]) => {
-    if (held) return;
+    if (held || holds(spec.disabled, row)) return;
     const onSelect = spec.onSelect as (target: unknown) => void;
     onSelect(spec.bulk ? [row] : row);
   };
+
+  /* A hidden action is absent from this row; with none left, no menu and no
+     buttons stand here - only Delete, if the table has one. The count that
+     picks buttons or menu is the row's own. */
+  const shown = actions.filter(({ spec }) => !holds(spec.hidden, row));
 
   /* Delete asks inside its row before it is reported: a row lost to one
      stray click is data lost. */
@@ -72,14 +85,15 @@ export function RowActionsCell({
     </Button>
   ));
 
-  if (actions.length <= AT_MOST_IN_THE_ROW) {
+  if (shown.length <= AT_MOST_IN_THE_ROW) {
     return (
       <div className={cx(styles.actions, asking && styles.decision)}>
-        {!asking && actions.map(({ key, spec }) => (
+        {!asking && shown.map(({ key, spec }) => (
           <Button
             key={key}
             size="sm"
             variant="ghost"
+            disabled={holds(spec.disabled, row)}
             aria-label={wording.rowAction(spec.label, name)}
             onClick={() => trigger(spec)}
           >
@@ -92,7 +106,7 @@ export function RowActionsCell({
   }
   return (
     <div className={cx(styles.actions, asking && styles.decision)}>
-      {!asking && (
+      {!asking && shown.length > 0 && (
         <Menu
           align="end"
           trigger={
@@ -101,8 +115,8 @@ export function RowActionsCell({
             </IconButton>
           }
         >
-          {actions.map(({ key, spec }) => (
-            <MenuItem key={key} tone={spec.tone} onSelect={() => trigger(spec)}>
+          {shown.map(({ key, spec }) => (
+            <MenuItem key={key} tone={spec.tone} disabled={holds(spec.disabled, row)} onSelect={() => trigger(spec)}>
               {spec.label}
             </MenuItem>
           ))}
