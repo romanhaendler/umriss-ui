@@ -29,6 +29,7 @@ import type { Wording } from "@umriss-ui/core";
 import type { ColumnEntry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
+import { warnOnce } from "./dev";
 import { placeOf } from "./model/gridWalk";
 import type { GridLine, GridPosition } from "./model/gridWalk";
 import { NEW_LINE, useGridState } from "./gridState";
@@ -268,7 +269,11 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
        Row draft it is one of the row's, saved with it. */
     field = <DatePicker size="sm" value={draft instanceof Date ? draft : null} onValueChange={(date) => (editing.row ? setDraft(date) : grid.commit(id, date))} />;
   } else if (spec.edit === "select") {
-    const options = spec.editOptions ?? occurringValues(grid.hook.admitted, entry.read, formats).values;
+    let options: readonly unknown[] = spec.editOptions ?? occurringValues(grid.hook.admitted, entry.read, formats).values;
+    if (!Array.isArray(options)) {
+      warnOnce(`edit-options:${id}`, `\`editOptions\` of the column "${id}" is not an array; the cell offers no choice and edits nothing.`);
+      options = [];
+    }
     const index = options.findIndex((o) => same(o, draft));
     field = (
       <Select size="sm" value={index < 0 ? "" : String(index)} onChange={(event) => setDraft(options[Number(event.target.value)])}>

@@ -111,7 +111,9 @@ Each line gets a group header with its count and its sum under the Quantity
 column; the customers stand beside their orders as a span (ADR-0029). Without
 `defaultGrouping` the user groups from the column menu. `aggregate` takes `sum`,
 `avg`, `min`, `max`, `range`, `count`, `distinct` or a function of one's own, and
-is the footer over the filtered set as well.
+is the footer over the filtered set as well. The table does not coerce: a string in a
+numeric column or aggregate is left out of the figures and warns once in development -
+put `Number` in the rows, or give the column `sortValue={Number}`.
 
 ## Undo and redo, in the application
 

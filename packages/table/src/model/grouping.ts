@@ -234,9 +234,9 @@ export function isoWeek(date: Date, timeZone?: string): { week: number; year: nu
   // The calendar day alone matters from here on, so UTC does the counting.
   const thursday = new Date(Date.UTC(year, month, day + 3 - ((weekday + 6) % 7)));
   const thursdayYear = thursday.getUTCFullYear();
-  const firstThursday = new Date(Date.UTC(thursdayYear, 0, 4));
-  const week =
-    1 + Math.round((thursday.getTime() - firstThursday.getTime()) / 86_400_000 / 7 - ((((firstThursday.getUTCDay() + 6) % 7) - 3) / 7));
+  // A week belongs to the year of its Thursday; that year's first Thursday opens week 1.
+  const ordinal = (thursday.getTime() - Date.UTC(thursdayYear, 0, 1)) / 86_400_000;
+  const week = Math.floor(ordinal / 7) + 1;
   return { week, year: thursdayYear };
 }
 

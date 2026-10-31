@@ -58,7 +58,8 @@ export interface AggregateOptions<W, Z> {
       `"max"` for numbers and points in time; `"range"` for points in time;
       `"count"`, `"distinct"` for every value with a text form - or a function
       of one's own. Always from the values, never from other aggregates; absent
-      values count towards nothing. */
+      values count towards nothing; a string is not coerced - it is left out and
+      warns once in development. */
   aggregate?: AggregateFor<W, Z>;
   /** The word for an `aggregate` function of one's own: it stands before the
       value in the footer and is what a screen reader reads. A group header
