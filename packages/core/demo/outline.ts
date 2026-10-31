@@ -595,10 +595,10 @@ export const OUTLINE: readonly Rubric[] = [
         keys: [
           { key: "Arrow Down / Arrow Up", action: "Opens the list, then moves through the rows." },
           { key: "Home / End", action: "In a list of more than 500 options, moves to the first or last row; in a shorter one they move the caret." },
-          { key: "Enter", action: "Chooses the active row." },
+          { key: "Enter", action: "Chooses the active row; with `creatable`, on text that fits no option, takes the text." },
           { key: "Escape", action: "Closes the list." },
         ],
-        limits: ["No free text as a value: only an option can be chosen.", "No request of its own: `onSearch` reports the typed text and you fetch, debounce and cancel; `filter={false}` shows what you return."],
+        limits: ["Only an option can be chosen, unless `creatable` takes typed text as the value (string values only).", "No request of its own: `onSearch` reports the typed text and you fetch, debounce and cancel; `filter={false}` shows what you return."],
         types: ["ComboboxProps", "ComboboxOption"],
         exports: ["Combobox"],
       },
