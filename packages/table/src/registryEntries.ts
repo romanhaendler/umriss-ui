@@ -102,6 +102,10 @@ export interface HookSnapshot {
   grouping: TableInput<unknown>["grouping"];
   /** Tree rows, as the model takes them - absent when the rows are flat. */
   tree: TableInput<unknown>["tree"];
+  /** Tree rows: the branches being loaded (`null`) or that failed (the
+      message), and the call that asks for a failed one again. */
+  branchStatus: ReadonlyMap<RowKey, string | null>;
+  retryBranch: (key: RowKey) => void;
   /** The folded paths - for a grouping the body resolves itself. */
   folded: ReadonlySet<string>;
   publicSnapshot: TableSnapshot<unknown, RowKey>;

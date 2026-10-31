@@ -3,7 +3,7 @@
 
 import { useContext } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { AngleGlyph, Checkbox } from "@umriss-ui/core";
+import { AngleGlyph, Button, Checkbox, Spinner } from "@umriss-ui/core";
 import type { FlatteningEntry, Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
@@ -122,6 +122,8 @@ export function Row({
   const pinAt = (at: number) => pinnedCell(blocks, at);
   const edges = groupEdges(columns);
   const opens = entry !== undefined && entry.branch && !entry.empty;
+  /* A branch being loaded (null) or whose loading failed (the message). */
+  const branchState = opens && entry.expanded && entry.unloaded ? hook.branchStatus.get(key) : undefined;
 
   return (
     <>
@@ -149,6 +151,7 @@ export function Row({
         aria-posinset={group ? group.rows.indexOf(row) + 1 : entry?.position}
         aria-setsize={group ? group.rows.length : entry?.siblings}
         aria-expanded={opens ? entry.expanded : undefined}
+        aria-busy={branchState === null ? true : undefined}
         data-branch={opens ? (entry.expanded ? "open" : "closed") : undefined}
         tabIndex={virtual && !grid ? (absolute === tabStop ? 0 : -1) : undefined}
         data-grid-line={grid ? gridLine : undefined}
@@ -239,6 +242,32 @@ export function Row({
           />
         )}
       </tr>
+      {branchState !== undefined && (
+        <DetailRow
+          id={`${baseId}-branch-${index}`}
+          group={group?.path}
+          gridLine={undefined}
+          beforeRoot={undefined}
+          colSpan={columnCount}
+          entry={entry}
+        >
+          <div className={styles.branchLine}>
+            {branchState === null ? (
+              <span role="status" className={styles.branchLoading}>
+                <Spinner size={14} aria-hidden="true" />
+                {wording.branchLoading(name)}
+              </span>
+            ) : (
+              <>
+                <span role="alert">{branchState}</span>
+                <Button size="sm" variant="ghost" onClick={() => hook.retryBranch(key)}>
+                  {wording.tryAgain}
+                </Button>
+              </>
+            )}
+          </div>
+        </DetailRow>
+      )}
       {open && (
         <DetailRow
           id={detailId}

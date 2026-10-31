@@ -276,6 +276,7 @@ export const OUTLINE: readonly Rubric[] = [
           "The figures of a row are the application's: the table sums nothing for a branch. The footer sums the top level only, since a parent already holds its children.",
           "Every level sorts on its own, and a child never leaves its parent. A search or a filter shows a match with the rows above it, muted, and leaves the open branches as they were.",
           "The export writes every row of the filtered tree, open or not, with its level first.",
+          "A branch whose children are not loaded yet is a `null` from `childRows`: it gets a fold like any branch, and opening it calls `onBranchOpen(key, row)`. Load the children and pass new rows in; a promise returned puts a loading line under the branch while it is pending, and a rejection shows its message there with Try again. The table fetches nothing itself. A branch open in a view or in `defaultBranches` calls it on the first render. Search, sort, selection and export see an unloaded branch without rows, and open all leaves it shut.",
         ],
         alternatives: [
           { when: "Rows that share a value - a customer, a month", use: "grouping" },
@@ -288,7 +289,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "Not with grouping or pagination: both would build or cut levels a second way. A large tree uses virtualisation.",
-          "Not in [server mode](#/server-mode), and no branches loaded on demand yet.",
+          "Not in [server mode](#/server-mode).",
           "One column set for every level; a level without a value shows it as absent.",
         ],
         types: [],
