@@ -5,7 +5,7 @@ import { createContext, useContext, useSyncExternalStore } from "react";
 import { registryOf } from "./registry";
 import { warnOnce } from "./dev";
 import type { Registry } from "./registry";
-import type { TableRef, TableSnapshot } from "./types";
+import type { RowKey, TableRef, TableSnapshot } from "./types";
 
 export interface TableContextValue {
   registry: Registry;
@@ -20,7 +20,7 @@ const nothing = () => 0;
 
 export interface Connection {
   registry: Registry;
-  snapshot: TableSnapshot<unknown>;
+  snapshot: TableSnapshot<unknown, RowKey>;
   /** Does the part stand inside the table or beside it? */
   inside: boolean;
   footerTarget: HTMLElement | null;

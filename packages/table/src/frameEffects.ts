@@ -3,6 +3,7 @@
    widths held while loading, the development warnings and the virtual pitch.
    Each runs after every render, in the order the frame calls them. */
 
+import type { RowKey } from "./types";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { VirtualRows } from "@umriss-ui/core";
@@ -161,8 +162,8 @@ export function useRevealedRow(registry: Registry) {
    scroll area shows it at the nearest edge. A row already in view stays where
    it is, so a click in the table does not scroll it; a key outside the
    filtered set does nothing; the focus never moves. */
-export function useCurrentRowInView(registry: Registry, currentRow: string | null | undefined) {
-  const last = useRef<string | null | undefined>(undefined);
+export function useCurrentRowInView(registry: Registry, currentRow: RowKey | null | undefined) {
+  const last = useRef<RowKey | null | undefined>(undefined);
   useLayoutEffect(() => {
     if (last.current === currentRow) return;
     last.current = currentRow;

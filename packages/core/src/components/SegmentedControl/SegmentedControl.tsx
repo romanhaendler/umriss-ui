@@ -23,7 +23,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./SegmentedControl.module.css";
 
 /** One possibility of a `SegmentedControl`: its value and its short label. */
-export interface SegmentedOption<T extends string> {
+export interface SegmentedOption<T extends string | number> {
   /** What comes back when this possibility is chosen. */
   value: T;
   /** The segment's word - a short one; a long label ends in an ellipsis. */
@@ -38,7 +38,7 @@ export interface SegmentedOption<T extends string> {
 }
 
 /** The props of `SegmentedControl`. */
-export interface SegmentedControlProps<T extends string>
+export interface SegmentedControlProps<T extends string | number>
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, two to four, in the order in which they stand. */
   options: readonly SegmentedOption<T>[];
@@ -75,7 +75,7 @@ export interface SegmentedControlProps<T extends string>
     segment for each - a radio group in what it says and how the keys move.
     Controlled through `value` and `onValueChange`, or uncontrolled from
     `defaultValue`. */
-export function SegmentedControl<T extends string>(props: SegmentedControlProps<T>) {
+export function SegmentedControl<T extends string | number>(props: SegmentedControlProps<T>) {
   const {
     ref,
     options,

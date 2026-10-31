@@ -20,12 +20,12 @@ import { useFieldValue } from "../../lib/useFieldValue";
 import type { FieldValueProps } from "../../lib/useFieldValue";
 
 /** What the mechanics need of a possibility. */
-export interface RadioChoice<T extends string> {
+export interface RadioChoice<T extends string | number> {
   value: T;
   disabled?: boolean;
 }
 
-export interface UseRadioGroupOptions<T extends string> {
+export interface UseRadioGroupOptions<T extends string | number> {
   options: readonly RadioChoice<T>[];
   /** The component's props: `value`, `defaultValue`, `onValueChange` and the former `onChange`. */
   props: FieldValueProps<T | null>;
@@ -41,7 +41,7 @@ export interface UseRadioGroupOptions<T extends string> {
   label?: string;
 }
 
-export function useRadioGroup<T extends string>({
+export function useRadioGroup<T extends string | number>({
   options,
   props,
   component,
@@ -95,10 +95,9 @@ export function useRadioGroup<T extends string>({
     if (selectable.length === 0) return;
     event.preventDefault();
 
-    const currentValue =
-      (controlled ? value : groupRef.current?.querySelector<HTMLInputElement>("input:checked")?.value) ??
-      null;
-    const index = selectable.findIndex((option) => option.value === currentValue);
+    /* The DOM holds text; a number value is found by its text. */
+    const checkedText = groupRef.current?.querySelector<HTMLInputElement>("input:checked")?.value;
+    const index = selectable.findIndex((option) => (controlled ? option.value === value : String(option.value) === checkedText));
     const nextIndex =
       index === -1
         ? 0
@@ -111,7 +110,7 @@ export function useRadioGroup<T extends string>({
     const inputs = Array.from(
       groupRef.current?.querySelectorAll<HTMLInputElement>('input[type="radio"]') ?? [],
     );
-    inputs.find((input) => input.value === next.value)?.focus();
+    inputs.find((input) => input.value === String(next.value))?.focus();
     select(next);
   };
 

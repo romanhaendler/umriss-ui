@@ -17,7 +17,7 @@ import { withoutFieldProps } from "../../lib/useFieldValue";
 
 /** One possibility of a `RadioGroup`: its value, its label and an optional
     line of explanation. */
-export interface RadioOption<T extends string> {
+export interface RadioOption<T extends string | number> {
   /** What comes back when this possibility is chosen. */
   value: T;
   /** What stands beside it. */
@@ -31,7 +31,7 @@ export interface RadioOption<T extends string> {
 }
 
 /** The props of `RadioGroup`. */
-export interface RadioGroupProps<T extends string>
+export interface RadioGroupProps<T extends string | number>
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, in the order in which they are meant to stand. */
   options: readonly RadioOption<T>[];
@@ -60,7 +60,7 @@ export interface RadioGroupProps<T extends string>
 /** One choice out of a few possibilities, all of them visible. Controlled
     through `value` and `onValueChange`, or uncontrolled from `defaultValue`; the
     arrow keys move between the possibilities. */
-export function RadioGroup<T extends string>(props: RadioGroupProps<T>) {
+export function RadioGroup<T extends string | number>(props: RadioGroupProps<T>) {
   const {
     ref,
     options,

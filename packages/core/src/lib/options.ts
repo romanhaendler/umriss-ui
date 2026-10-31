@@ -4,7 +4,7 @@
 
 import { fold } from "./search";
 
-export interface SelectOption<T extends string = string> {
+export interface SelectOption<T extends string | number = string> {
   value: T;
   label: string;
   disabled?: boolean;
@@ -15,7 +15,7 @@ export interface SelectOption<T extends string = string> {
  * count. An empty query returns the list unchanged. Disabled options stay
  * visible - they are merely not selectable.
  */
-export function filterOptions<T extends string>(
+export function filterOptions<T extends string | number>(
   options: readonly SelectOption<T>[],
   search: string,
 ): readonly SelectOption<T>[] {
@@ -25,7 +25,7 @@ export function filterOptions<T extends string>(
 }
 
 /** The values that may be selected at all. */
-export function selectableValues<T extends string>(options: readonly SelectOption<T>[]): T[] {
+export function selectableValues<T extends string | number>(options: readonly SelectOption<T>[]): T[] {
   return options.filter((option) => !option.disabled).map((option) => option.value);
 }
 
@@ -34,20 +34,20 @@ export function selectableValues<T extends string>(options: readonly SelectOptio
    then chooses "all" loses nothing he had before. */
 
 /** Adds the whole subset to the selection. */
-export function selectAllOf<T extends string>(selection: readonly T[], subset: readonly T[]): T[] {
+export function selectAllOf<T extends string | number>(selection: readonly T[], subset: readonly T[]): T[] {
   const next = new Set(selection);
   subset.forEach((value) => next.add(value));
   return [...next];
 }
 
 /** Removes the whole subset from the selection. */
-export function selectNoneOf<T extends string>(selection: readonly T[], subset: readonly T[]): T[] {
+export function selectNoneOf<T extends string | number>(selection: readonly T[], subset: readonly T[]): T[] {
   const remove = new Set(subset);
   return selection.filter((value) => !remove.has(value));
 }
 
 /** Inverts the selection within the subset. */
-export function invertSelection<T extends string>(selection: readonly T[], subset: readonly T[]): T[] {
+export function invertSelection<T extends string | number>(selection: readonly T[], subset: readonly T[]): T[] {
   const current = new Set(selection);
   subset.forEach((value) => {
     if (current.has(value)) current.delete(value);
@@ -66,7 +66,7 @@ export function nextIndex(current: number, count: number, direction: 1 | -1): nu
  * The index the navigation stands on when opening. Where the selection is not
  * in the list - because it is filtered, say - it begins at the top.
  */
-export function startIndex<T extends string>(
+export function startIndex<T extends string | number>(
   options: readonly SelectOption<T>[],
   selection: T | null,
 ): number {

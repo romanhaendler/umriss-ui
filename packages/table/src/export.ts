@@ -9,7 +9,7 @@ import { allDays, dayText } from "./model/day";
 import { asCsv, asTabbed, plain } from "./model/csv";
 import type { CsvColumn, CsvConventions } from "./model/csv";
 import type { Registry, ColumnEntry } from "./registry";
-import type { ExportFormat, ExportSheet, TableSnapshot } from "./types";
+import type { ExportFormat, ExportSheet, RowKey, TableSnapshot } from "./types";
 import { exportCell, exportValue } from "./values";
 import type { ExportCell } from "./values";
 
@@ -34,7 +34,7 @@ export function visibleColumns(registry: Registry): ColumnEntry[] {
 /** Clears the search and lifts every condition - and nothing else: the
     pre-filter stays. The button in the toolbar and the one in the empty body do
     the same thing. */
-export function resetSearchAndFilters(snapshot: TableSnapshot<unknown>) {
+export function resetSearchAndFilters(snapshot: TableSnapshot<unknown, RowKey>) {
   snapshot.setSearch("");
   for (const id of Object.keys(snapshot.filter)) snapshot.setFilter(id, null);
 }

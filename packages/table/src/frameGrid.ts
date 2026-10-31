@@ -3,7 +3,7 @@
    handlers over them. Not a hook - it runs after the frame's early return. */
 
 import type { HookSnapshot, Registry } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import { gridLines } from "./model/gridWalk";
 import { NEW_LINE, gridHandlers } from "./grid";
 import type { GridHandle } from "./grid";
@@ -19,7 +19,7 @@ export function frameGrid({
 }: {
   registry: Registry;
   hook: HookSnapshot;
-  props: TableProps<unknown>;
+  props: TableProps<unknown, RowKey>;
   layout: FrameLayout;
   grid: GridHandle;
 }) {

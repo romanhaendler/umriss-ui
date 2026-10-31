@@ -5,7 +5,7 @@
 import type { FlatteningEntry } from "@umriss-ui/core";
 import { visibleColumns } from "./export";
 import type { HookSnapshot, Registry } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import type { PinBlocks } from "./model/pinning";
 import { lineCount } from "./model/tableModel";
 import { buildTree } from "./tree";
@@ -25,7 +25,7 @@ export function frameLayout({
 }: {
   registry: Registry;
   hook: HookSnapshot;
-  props: TableProps<unknown>;
+  props: TableProps<unknown, RowKey>;
   /** A Row draft is open. */
   drafting: boolean;
   /** Which pinned blocks stick in the width the scroll area has. */
@@ -59,7 +59,7 @@ export function frameLayout({
      wherever the row header stands - the structure reads down the left edge,
      as a grouping's span stands first. The flattening is the whole list, also
      under a virtual window: a row's parent and siblings may stand outside it. */
-  const entries: readonly FlatteningEntry<unknown>[] | undefined = projection.entries;
+  const entries: readonly FlatteningEntry<unknown, RowKey>[] | undefined = projection.entries;
   const tree: TreeSetup | undefined = entries ? buildTree(entries, hook, snapshot, dataColumns[0]) : undefined;
 
   /* A tree opens a row's detail with the row's own fold:

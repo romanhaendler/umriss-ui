@@ -7,7 +7,7 @@ import type { Formats } from "@umriss-ui/core";
 import type { RowFilter } from "./rowFilter";
 import type { ModelColumn, TableInput } from "./model/tableModel";
 import type { TableState } from "./model/tableState";
-import type { TableSnapshot } from "./types";
+import type { RowKey, TableSnapshot } from "./types";
 import type { Format } from "./values";
 import type { AggregateKind, DatePeriod } from "./model/grouping";
 import type { Pin, Pins } from "./model/pinning";
@@ -102,8 +102,8 @@ export interface HookSnapshot {
   tree: TableInput<unknown>["tree"];
   /** The folded paths - for a grouping the body resolves itself. */
   folded: ReadonlySet<string>;
-  publicSnapshot: TableSnapshot<unknown>;
-  rowKey: (row: unknown) => string;
+  publicSnapshot: TableSnapshot<unknown, RowKey>;
+  rowKey: (row: unknown) => RowKey;
   /** The provider's formats - the text comparison of the sort comes from there. */
   formats: Formats;
   /** The pins the user chose - absent while the declared ones hold. */
@@ -117,7 +117,7 @@ export interface HookSnapshot {
   selectedRows?: readonly unknown[];
   /** A row's box or key: toggles the row, or with `range` ticks or clears the
       rows from the one toggled last to this one. */
-  pick: (key: string, range: boolean) => void;
+  pick: (key: RowKey, range: boolean) => void;
   /** The header box: selects every key of the page, or clears them. */
   pickAll: () => void;
   /** Server mode: the rows answer an older request than the current one. */

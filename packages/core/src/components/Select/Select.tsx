@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
-import type { KeyboardEvent, SelectHTMLAttributes } from "react";
+import { Children, Fragment, isValidElement, useEffect, useId, useRef, useState } from "react";
+import type { KeyboardEvent, ReactNode, SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
@@ -19,16 +19,17 @@ import type { ListboxItem } from "../../lib/listbox";
    it (ADR-0041). */
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
-export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size" | "value" | "defaultValue">, RefProp<HTMLSelectElement> {
+export interface SelectProps<T extends string | number = string> extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size" | "value" | "defaultValue">, RefProp<HTMLSelectElement> {
   /** The chosen option's value; `null` and `undefined` mean the empty option.
       With it the field is controlled; `defaultValue` starts an uncontrolled one. */
-  value?: string | number | readonly string[] | null;
+  value?: T | readonly string[] | null;
   /** Uncontrolled: the value to start at. */
-  defaultValue?: string | number | readonly string[] | null;
+  defaultValue?: T | readonly string[] | null;
   /** Runs with the chosen option's value on every choice, `null` for the
-      empty option. Not for a `multiple` select, which reports through
-      `onChange` as the platform does. */
-  onValueChange?: (value: string | null) => void;
+      empty option. A number comes back as a number when the option is a
+      `<option value={1}>` among the select's own children. Not for a
+      `multiple` select, which reports through `onChange` as the platform does. */
+  onValueChange?: (value: T | null) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -57,7 +58,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * Combobox's - and under a finger the system's picker (ADR-0043). The arrow is
  * drawn in CSS and therefore follows the theme tokens.
  */
-export function Select(props: SelectProps) {
+export function Select<T extends string | number = string>(props: SelectProps<T>) {
   const {
     ref,
     size: ownSize,
@@ -235,7 +236,7 @@ export function Select(props: SelectProps) {
           onChange || onValueChange
             ? (event) => {
                 onChange?.(event);
-                if (!rest.multiple) onValueChange?.(event.target.value === "" ? null : event.target.value);
+                if (!rest.multiple) onValueChange?.(event.target.value === "" ? null : ((numberOptions(children).get(event.target.value) ?? event.target.value) as T));
               }
             : undefined
         }
@@ -304,6 +305,18 @@ const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", " ", "F4"]);
 const STEPS: Record<string, number> = { ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10 };
 
 /** The list's options, read from the select - an <optgroup> as their group. */
+/* The options written with a number: the DOM hands the choice back as text, and
+   this gives a number its type again. */
+function numberOptions(children: ReactNode, out = new Map<string, number>()): Map<string, number> {
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    const { value, children: inner } = child.props as { value?: unknown; children?: ReactNode };
+    if (child.type === "option" && typeof value === "number") out.set(String(value), value);
+    else if (child.type === "optgroup" || child.type === Fragment) numberOptions(inner, out);
+  });
+  return out;
+}
+
 function readItems(element: HTMLSelectElement): ListboxItem[] {
   return Array.from(element.options, (option) => {
     const group = option.parentElement instanceof HTMLOptGroupElement ? option.parentElement : null;

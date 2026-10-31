@@ -22,6 +22,9 @@ export type NumberFormat = "percent" | "count" | NumberOptions;
 
 /* --- Values --------------------------------------------------------------- */
 
+/** What `rowKey` returns: `1` and `"1"` are different keys. */
+export type RowKey = string | number;
+
 /** A value that is not there: `null` or `undefined`. */
 export type Absent = null | undefined;
 /** The value without the absence - that is what `children` gets. */
@@ -159,8 +162,8 @@ export interface EditOptions<W, Z> {
 }
 
 /** An edit the user committed - reported, not applied. */
-export interface CellEdit<Z> {
-  rowKey: string;
+export interface CellEdit<Z, Key extends RowKey = string> {
+  rowKey: Key;
   columnId: string;
   /** The editor's value: text for `"text"`, a number or null for
       `"number"`, a day or null for `"date"`, an option for `"select"`. */
@@ -169,8 +172,8 @@ export interface CellEdit<Z> {
 }
 
 /** A Row draft the user saved (ADR-0036) - reported, not applied. */
-export interface RowSave<Z> {
-  rowKey: string;
+export interface RowSave<Z, Key extends RowKey = string> {
+  rowKey: Key;
   /** The columns the draft changed, by column id, with their editors' values. */
   changes: Readonly<Record<string, unknown>>;
   row: Z;
@@ -182,8 +185,8 @@ export interface RowAdd {
 }
 
 /** A row the user asked to delete, and confirmed. */
-export interface RowDelete<Z> {
-  rowKey: string;
+export interface RowDelete<Z, Key extends RowKey = string> {
+  rowKey: Key;
   row: Z;
 }
 
@@ -464,7 +467,7 @@ interface ActionBase {
 
 /** The props of `Action`: one action on a row, or with `bulk` on a list of
     rows - then it also stands in the table toolbar for the selection. */
-export type ActionProps<Z, S extends boolean = false> =
+export type ActionProps<Z, S extends boolean = false, Key extends RowKey = string> =
   | (ActionBase & {
       bulk?: false;
       /** Gets the row the action was triggered on. */
@@ -477,16 +480,16 @@ export type ActionProps<Z, S extends boolean = false> =
       /** With `bulk` a list: at the row one made from it, in the table toolbar the selection. */
       /* A method, not a property: a server table stays assignable where an
          automatic one is asked for (`of`). */
-      onSelect(selected: S extends true ? Z[] | AllMatching : Z[]): void;
+      onSelect(selected: S extends true ? Z[] | AllMatching<Key> : Z[]): void;
     });
 
 /** What a server-mode bulk action receives, in the toolbar, while all that
     match are selected: the request they match and the keys unticked since.
     `Array.isArray` tells it from rows - the rows are typed as a mutable array
     so that it narrows both ways. */
-export interface AllMatching {
+export interface AllMatching<Key extends RowKey = string> {
   request: TableRequest;
-  except: readonly string[];
+  except: readonly Key[];
 }
 
 /** What a row carries in classes and data attributes. */
@@ -496,7 +499,7 @@ export type RowAttributes = { className?: string } & {
 
 /** The props of `Table`: how the table looks and behaves. Its state comes from
     `useTable`, its columns from the JSX inside it. */
-export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
+export interface TableProps<Z, Key extends RowKey = string> extends Omit<HTMLAttributes<HTMLDivElement>, "children">, RefProp<HTMLDivElement> {
   /* `ref`, `className`, `style` and the rest reach the outer frame. The names
      (`aria-label`, `aria-labelledby`, `aria-describedby`) reach the <table>. */
   /** Adds the selection column. "All" means: the filtered set. */
@@ -523,7 +526,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
   /** The key of the row the rest of the screen follows - the table marks it
       with `aria-current` and an accent bar, apart from the selection. The table
       keeps no copy: pass the key you hold, `null` for none. */
-  currentRow?: string | null;
+  currentRow?: Key | null;
   /** A primary click on a row, outside its controls - the checkbox, the
       expander, the actions and any button of yours in a cell - with the row's
       key and the row. Also called for the row already current, so that you
@@ -532,7 +535,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       Space), so a control of your own in that cell would stand inside it; in
       grid mode Enter on a cell with nothing to edit or enter. Without a
       `rowHeader` column the keyboard cannot choose a row. */
-  onCurrentRowChange?: (key: string, row: Z) => void;
+  onCurrentRowChange?: (key: Key, row: Z) => void;
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
   groupable?: boolean;
@@ -544,7 +547,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
   grid?: boolean;
   /** Grid mode: an edit the user committed. The table applies nothing; the
       cell shows the new value when the rows passed in carry it. */
-  onCellEdit?: (edit: CellEdit<Z>) => void;
+  onCellEdit?: (edit: CellEdit<Z, Key>) => void;
   /** Grid mode (ADR-0036): `"cell"` reports every cell as it is left
       (`onCellEdit`); `"row"` opens every cell of a row that edits at once, as
       one **Row draft**, and reports it only when the row is saved on purpose
@@ -552,7 +555,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
       A row with a draft is left only by saving or discarding it. */
   editMode?: "cell" | "row";
   /** `editMode="row"`: a saved Row draft, with the columns it changed. */
-  onRowSave?: (save: RowSave<Z>) => void;
+  onRowSave?: (save: RowSave<Z, Key>) => void;
   /** Grid mode: puts up a "New row" button - in the table toolbar, or beneath
       the table without one. It opens an empty Row draft above the rows; saved,
       it is reported whole. The row appears when the rows passed in carry it. */
@@ -562,7 +565,7 @@ export interface TableProps<Z> extends Omit<HTMLAttributes<HTMLDivElement>, "chi
   newRow?: () => Partial<Z>;
   /** Grid mode: a Delete button on every row, which asks inside its row before
       the delete is reported. The table removes nothing. */
-  onRowDelete?: (remove: RowDelete<Z>) => void;
+  onRowDelete?: (remove: RowDelete<Z, Key>) => void;
   /** Columns, `RowDetail`, `RowActions` and the unbound parts. */
   children?: ReactNode;
 }
@@ -617,9 +620,9 @@ export interface SetFilter<Z> {
 
 /* --- The hook ------------------------------------------------------------- */
 
-interface TableOptionsCommon<Z> {
+interface TableOptionsCommon<Z, Key extends RowKey = string> {
   /** A stable key per row – the basis of selection and expansion. */
-  rowKey: (row: Z) => string;
+  rowKey: (row: Z) => Key;
   /** How many rows a page holds in flow, or with `maxHeight`, and the start
       value in a frame of definite height before it is measured: there a page
       holds the whole lines the frame leaves between the head and the pager.
@@ -658,18 +661,18 @@ interface TableOptionsCommon<Z> {
       row is one row pitch tall, which the table measures itself (ADR-0042). */
   virtual?: boolean | { overscan?: number };
   /** A selection from outside instead of its own – when the application holds it. */
-  selection?: TableSelection<string>;
+  selection?: TableSelection<Key>;
   /** Called with the selected keys after each change – the user's or the API's,
       its own selection or the one handed in – from an effect, never at mount.
       Under "all that match" (server mode) the keys are the ones ticked
       before it; `selection.allMatching` and `selection.except` tell the rest.
       `keys` are the selected rows a reader sees - the toolbar's count - and
       `all` every key held, those a search or a condition hides included. */
-  onSelectionChange?: (keys: string[], all: string[]) => void;
+  onSelectionChange?: (keys: Key[], all: Key[]) => void;
 }
 
 /** The table holds every row and does the work itself. */
-interface AutomaticMode<Z> {
+interface AutomaticMode<Z, Key extends RowKey = string> {
   /** Without it the table holds every row and does the work itself. */
   server?: false;
   /** Tree rows: the children of a row - `undefined` for a leaf, an array for a
@@ -680,7 +683,7 @@ interface AutomaticMode<Z> {
   childRows?: (row: Z) => readonly Z[] | undefined;
   /** Tree rows: the branches open on the first render - their keys, or how
       many levels stand open (`1` = the roots open). It is the default `view` leaves out. */
-  defaultBranches?: readonly string[] | number;
+  defaultBranches?: readonly Key[] | number;
   rowCount?: never;
   onRequest?: never;
   exportRows?: never;
@@ -745,7 +748,7 @@ interface ServerMode<Z> {
 }
 
 /** The options of `useTable`: automatic, or in server mode over a server's rows. */
-export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode<Z>);
+export type TableOptions<Z, Key extends RowKey = string> = TableOptionsCommon<Z, Key> & (AutomaticMode<Z, Key> | ServerMode<Z>);
 
 /** What a format writes: the header labels, the widths the table holds, whether
     a column's own `exportValue` made its values (`own`: written as they come),
@@ -774,7 +777,7 @@ export interface ExportFormat<R = string> {
 }
 
 /** The state of a table, as everything outside the columns reads it. */
-export interface TableSnapshot<Z> {
+export interface TableSnapshot<Z, Key extends RowKey = string> {
   /** All the rows passed in, including those the pre-filter does not admit. */
   rows: readonly Z[];
   /** The filtered set: what the pre-filter admits and search and filters leave, across all pages. */
@@ -824,9 +827,9 @@ export interface TableSnapshot<Z> {
       grip's double click, for all columns at once. */
   autoSizeColumns: () => void;
   /** The keys of the expanded rows. */
-  expanded: readonly string[];
+  expanded: readonly Key[];
   /** Expands a row or collapses it. */
-  toggleRow: (key: string) => void;
+  toggleRow: (key: Key) => void;
   /** The conditions of the column filters and row filters by id, in the order
       in which they were set. Whatever fits no column and no row filter is absent. */
   filter: Readonly<Record<string, unknown>>;
@@ -838,7 +841,7 @@ export interface TableSnapshot<Z> {
   /** The condition of a row filter, as its type - `null` while it is lifted. */
   conditionOf: <B>(filter: RowFilter<Z, B>) => B | null;
   /** The selection – its own or the one handed in through `selection`. */
-  selection: TableSelection<string>;
+  selection: TableSelection<Key>;
   /** The ids the table is grouped by, the outermost first – only those a
       groupable column or a group key carries, at most three. */
   grouping: readonly string[];
@@ -859,9 +862,9 @@ export interface TableSnapshot<Z> {
   /** Unfolds every group. */
   unfoldAll: () => void;
   /** Tree rows: the keys of the open branches. */
-  branches: readonly string[];
+  branches: readonly Key[];
   /** Tree rows: opens a branch or closes it. */
-  toggleBranch: (key: string) => void;
+  toggleBranch: (key: Key) => void;
   /** Tree rows: opens every branch that has children. */
   unfoldAllBranches: () => void;
   /** Tree rows: closes every branch. */
@@ -895,7 +898,8 @@ export interface TableSnapshot<Z> {
 }
 
 /** What a part without a row type needs from a table – for `of`. */
-export type TableRef = Omit<TableSnapshot<unknown>, "setFilter" | "conditionOf"> & {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- a part outside the table takes a table of any key kind
+export type TableRef = Omit<TableSnapshot<unknown, any>, "setFilter" | "conditionOf"> & {
   readonly Table: unknown;
   /** Without a row kind: any id, any condition. */
   setFilter(column: string, condition: unknown): void;
@@ -903,18 +907,18 @@ export type TableRef = Omit<TableSnapshot<unknown>, "setFilter" | "conditionOf">
 
 /** What `useTable` returns: the table's state, and its parts typed at the
     row. Pass it as `of` to a part that stands outside the table. */
-export interface Table<Z, S extends boolean = false> extends TableSnapshot<Z> {
-  Table: (props: TableProps<Z>) => ReactNode;
+export interface Table<Z, S extends boolean = false, Key extends RowKey = string> extends TableSnapshot<Z, Key> {
+  Table: (props: TableProps<Z, Key>) => ReactNode;
   Column: ColumnComponent<Z>;
   VerdictColumn: VerdictColumnComponent<Z>;
   RowDetail: (props: RowDetailProps<Z>) => ReactNode;
   RowActions: (props: RowActionsProps) => ReactNode;
-  Action: (props: ActionProps<Z, S>) => ReactNode;
+  Action: (props: ActionProps<Z, S, Key>) => ReactNode;
   GroupBy: GroupByComponent<Z>;
   /** Brings the row with this key into view and returns `true`: in a paged table its page, in a scroll area, virtual or not, the scroll to it. `false`, with nothing changed, for a key the table does not have, a row a search, a condition or the `preFilter` hides, a row inside a folded group or branch, or a table not mounted; nothing is unfolded and no filter cleared. In server mode it reaches the rows of the page it holds. */
-  scrollToRow: (key: string) => boolean;
+  scrollToRow: (key: Key) => boolean;
   /** In grid mode, brings the row into view as `scrollToRow` does, makes the cell of that row and column the Active cell and moves the focus to it. Outside grid mode, for a column the table does not show, and wherever `scrollToRow` returns `false`, it returns `false` and changes nothing. */
-  focusCell: (key: string, column: string) => boolean;
+  focusCell: (key: Key, column: string) => boolean;
 }
 
 /** A column or group key the table can be grouped by. The columns stand in the

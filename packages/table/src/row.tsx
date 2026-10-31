@@ -7,7 +7,7 @@ import { AngleGlyph, Checkbox } from "@umriss-ui/core";
 import type { FlatteningEntry, Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import { asText, isAbsent, isRightAligned } from "./values";
 import type { Line } from "./model/grouping";
 import { SpanCell } from "./groupLines";
@@ -34,10 +34,10 @@ export function rowName(
   formats: Formats,
   wording: Wording,
 ): string {
-  if (!header) return hook.rowKey(row);
+  if (!header) return String(hook.rowKey(row));
   const value = header.read(row);
   if (isAbsent(value)) return wording.cellAbsentValue;
-  return asText(value, header.spec.format, formats, wording) ?? hook.rowKey(row);
+  return asText(value, header.spec.format, formats, wording) ?? String(hook.rowKey(row));
 }
 
 /* ====================================================================== */
@@ -92,7 +92,7 @@ export function Row({
   actions: ReturnType<Registry["actions"]["ordered"]>;
   blocks: PinBlocks;
   columnCount: number;
-  rowProps: TableProps<unknown>["rowProps"];
+  rowProps: TableProps<unknown, RowKey>["rowProps"];
   baseId: string;
   formats: Formats;
   wording: Wording;
@@ -307,7 +307,7 @@ function DetailRow({
   gridLine: string | undefined;
   beforeRoot: string | undefined;
   colSpan: number;
-  entry: FlatteningEntry<unknown> | undefined;
+  entry: FlatteningEntry<unknown, RowKey> | undefined;
   children: ReactNode;
 }) {
   return (
@@ -340,7 +340,7 @@ function Cell({
   /** The row is the application's current row. */
   isCurrent: boolean;
   /** Tree rows: this cell carries the indent and the fold. */
-  tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown>; detail?: TreeDetail };
+  tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown, RowKey>; detail?: TreeDetail };
   entry: ColumnEntry;
   row: unknown;
   kind: ReturnType<Registry["kindOf"]>;

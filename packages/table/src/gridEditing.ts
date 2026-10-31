@@ -7,7 +7,7 @@ import type { ColumnEntry } from "./registry";
 import { isAbsent } from "./values";
 import { rowLine } from "./model/gridWalk";
 import type { GridLine, GridPosition } from "./model/gridWalk";
-import type { CellEdit, RowAdd, RowDelete, RowSave } from "./types";
+import type { CellEdit, RowAdd, RowDelete, RowKey, RowSave } from "./types";
 import { NEW_LINE } from "./gridState";
 import type { GridHandle } from "./gridState";
 
@@ -19,15 +19,15 @@ export interface GridInput {
   ids: readonly string[];
   /** The data columns by id - the ones an edit can be declared on. */
   columnById: (id: string) => ColumnEntry | undefined;
-  rowKey: (row: unknown) => string;
+  rowKey: (row: unknown) => RowKey;
   virtual: VirtualRows | undefined;
-  onCellEdit: ((edit: CellEdit<unknown>) => void) | undefined;
+  onCellEdit: ((edit: CellEdit<unknown, RowKey>) => void) | undefined;
   /** `editMode="row"` (ADR-0036): a row opens whole, as a Row draft. */
   rowMode: boolean;
-  onRowSave: ((save: RowSave<unknown>) => void) | undefined;
+  onRowSave: ((save: RowSave<unknown, RowKey>) => void) | undefined;
   onRowAdd: ((add: RowAdd) => void) | undefined;
   newRow: (() => unknown) | undefined;
-  onRowDelete: ((remove: RowDelete<unknown>) => void) | undefined;
+  onRowDelete: ((remove: RowDelete<unknown, RowKey>) => void) | undefined;
   /** Selects or deselects a row - in a table with selection; Space asks for
       it from any cell of the row; with Shift (`range`) it takes the rows from the
       one toggled last. */

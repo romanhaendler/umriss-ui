@@ -43,6 +43,7 @@ import type { AggregateColumn, GroupLevel } from "./model/grouping";
 import { MOST_LEVELS, periodStart } from "./model/grouping";
 import { filterOf } from "./columnFilter";
 import { declaredPins, inPinOrder } from "./model/pinning";
+import type { RowKey } from "./types";
 import type { Pins } from "./model/pinning";
 import { List } from "./registryEntries";
 import type { ActionEntry, ActionSpec, ColumnEntry, ColumnSpec, HookSnapshot, PartKind } from "./registryEntries";
@@ -747,7 +748,7 @@ export class Registry {
 
   /** The row `scrollToRow` wants shown once it is rendered, and the column of
       the cell to make the Active cell in grid mode. */
-  reveal: { key: string; column?: string } | null = null;
+  reveal: { key: RowKey; column?: string } | null = null;
 
   setReveal(next: Registry["reveal"]) {
     this.reveal = next;
@@ -792,7 +793,7 @@ export class Registry {
   /** Grid mode: the ids of the columns a cell can be focused in, and what
       makes a cell the Active cell and focuses it - this render's, as `addRow`
       is. */
-  cellFocus: { columns: readonly string[]; put: (key: string, column: string) => void } | null = null;
+  cellFocus: { columns: readonly string[]; put: (key: RowKey, column: string) => void } | null = null;
 
   setCellFocus(focus: Registry["cellFocus"]) {
     this.cellFocus = focus;

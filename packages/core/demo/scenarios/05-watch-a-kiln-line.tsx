@@ -703,7 +703,7 @@ function ControlRoomBody() {
               size="sm"
               disabled={t.selection.selected.size === 0}
               onClick={() => {
-                setAcknowledged((before) => new Map([...before, ...[...t.selection.selected].map((id) => [String(id), now] as const)]));
+                setAcknowledged((before) => new Map([...before, ...[...t.selection.selected].map((id) => [id, now] as const)]));
                 t.selection.clear();
               }}
             >

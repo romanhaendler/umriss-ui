@@ -17,6 +17,7 @@ import { linesOf, pageLines, rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
+import type { RowKey } from "../types";
 import { useVirtual } from "@umriss-ui/core";
 import type { VirtualRows } from "@umriss-ui/core";
 
@@ -41,7 +42,7 @@ export type Sort<K extends string> = SortLevel<K>;
 
 export interface TableStateOptions<Z, K extends string> {
   /** A stable key per row – the basis of the selection. */
-  rowKey: (row: Z) => string;
+  rowKey: (row: Z) => RowKey;
   pageSize?: number;
   /** One level or several; a single one is the list holding only it. */
   defaultSort?: Sort<K> | readonly Sort<K>[] | null;
@@ -105,7 +106,7 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   defaultPageSize: number;
   /** Who the anchor is, asked when the page size changes: the key of the row
       with focus and the current row's key. The frame sets it. */
-  setAnchor: (read: () => { focus: string | null; current: string | null | undefined }) => void;
+  setAnchor: (read: () => { focus: string | null; current: RowKey | null | undefined }) => void;
   /** The size the frame holds, apart from the chosen one: `null` for none. It
       keeps the page and the view as they are. */
   setFittedPageSize: (size: number | null) => void;
@@ -126,13 +127,13 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   order: readonly K[];
   setOrder: (order: readonly K[]) => void;
   /** Keys of the expanded rows. */
-  expanded: readonly string[];
+  expanded: readonly RowKey[];
   /** Expands a row or collapses it; several may be open. */
-  toggleRow: (key: string) => void;
+  toggleRow: (key: RowKey) => void;
   /** The part of the state an application can keep. The library puts it
       nowhere: whether and where belongs to the application. */
   view: TableView<K>;
-  selection: TableSelection<string>;
+  selection: TableSelection<RowKey>;
   /**
    * The visible window when it virtualises - otherwise undefined.
    *
@@ -150,6 +151,10 @@ export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
       goes back to its default. */
   restart: (view: TableView<K>) => void;
 }
+
+/* Where a key stands among the row keys. The focus is read from the DOM, as text, so a number key is also found by its text. */
+const indexOfKey = (keys: readonly RowKey[], key: RowKey | null | undefined): number =>
+  key == null ? -1 : keys.findIndex((k) => k === key || String(k) === key);
 
 export function useTableState<Z, K extends string = string>(
   rows: readonly Z[],
@@ -179,7 +184,7 @@ export function useTableState<Z, K extends string = string>(
   const defaultPageSize = options.pageSize ?? 10;
   const pageSize = chosen ?? defaultPageSize;
   const [fitted, setFittedRaw] = useState<number | null>(null);
-  const [expanded, setExpanded] = useState<readonly string[]>([]);
+  const [expanded, setExpanded] = useState<readonly RowKey[]>([]);
   const [hidden, setHidden] = useState<readonly K[]>(initialView?.hidden ?? []);
   const [order, setOrder] = useState<readonly K[]>(initialView?.order ?? []);
   const [widths, setWidths] = useState<Readonly<Record<string, number>>>(() => widthsOf(initialView));
@@ -287,7 +292,7 @@ export function useTableState<Z, K extends string = string>(
   useLayoutEffect(() => {
     latest.current = { projection, chosen: pageSize, size: fitted ?? pageSize };
   });
-  const anchorKey = useRef<() => { focus: string | null; current: string | null | undefined }>(() => ({ focus: null, current: null }));
+  const anchorKey = useRef<() => { focus: string | null; current: RowKey | null | undefined }>(() => ({ focus: null, current: null }));
   const pageKeeping = useCallback((size: number) => {
     const shown = latest.current.projection;
     if (server) {
@@ -295,7 +300,7 @@ export function useTableState<Z, K extends string = string>(
          the page, the page's first row at the page's own offset. */
       const { focus, current } = anchorKey.current();
       const keys = shown.visible.map(rowKey);
-      const offset = [focus, current].map((key) => (key == null ? -1 : keys.indexOf(key))).find((index) => index >= 0) ?? 0;
+      const offset = [focus, current].map((key) => indexOfKey(keys, key)).find((index) => index >= 0) ?? 0;
       return Math.floor(((shown.page - 1) * latest.current.size + offset) / size) + 1;
     }
     const all: readonly Z[] = shown.lines ? rowsOf(shown.lines) : shown.filtered;
@@ -303,7 +308,7 @@ export function useTableState<Z, K extends string = string>(
     const onPage = new Set(shown.visible.map(rowKey));
     const { focus, current } = anchorKey.current();
     const at = [focus, current && onPage.has(current) ? current : null, shown.visible[0] ? rowKey(shown.visible[0]) : null]
-      .map((key) => (key == null ? -1 : keys.indexOf(key)))
+      .map((key) => indexOfKey(keys, key))
       .find((index) => index >= 0);
     if (at === undefined) return 1;
     if (!shown.lines) return Math.floor(at / size) + 1;
@@ -362,7 +367,7 @@ export function useTableState<Z, K extends string = string>(
      something up and widens the filter again would otherwise find his row
      collapsed and wonder why. A key that occurs nowhere any more costs
      nothing. */
-  const toggleRow = useCallback((key: string) => {
+  const toggleRow = useCallback((key: RowKey) => {
     setExpanded((current) =>
       current.includes(key)
         ? current.filter((s) => s !== key)

@@ -19,7 +19,7 @@ import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
 import type { Registry, ColumnSpec } from "./registry";
 import { link } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import { Frame } from "./frame";
 import { useFramed } from "./framed";
 import styles from "./Table.module.css";
@@ -29,12 +29,12 @@ import styles from "./Table.module.css";
 const OWN = [
   "selectable", "stickyHeader", "stickyRowHeader", "striped", "density", "maxHeight", "empty", "loading",
   "rowProps", "groupable", "grid", "onCellEdit", "editMode", "onRowSave", "onRowAdd", "newRow", "onRowDelete", "currentRow", "onCurrentRowChange",
-] as const satisfies readonly (keyof TableProps<unknown>)[];
+] as const satisfies readonly (keyof TableProps<unknown, RowKey>)[];
 
 /* A prop that is neither listed above nor a div attribute, the ref, the
    children or a name taken out in `Table` would reach the frame's <div>; the
    compiler refuses it here. */
-type Unlisted = Exclude<keyof TableProps<unknown>, keyof HTMLAttributes<HTMLDivElement> | "ref" | "children" | (typeof OWN)[number]>;
+type Unlisted = Exclude<keyof TableProps<unknown, RowKey>, keyof HTMLAttributes<HTMLDivElement> | "ref" | "children" | (typeof OWN)[number]>;
 true satisfies [Unlisted] extends [never] ? true : Unlisted;
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -84,7 +84,7 @@ interface RuntimeActionProps {
 }
 
 export interface Parts {
-  Table: (props: TableProps<unknown>) => ReactNode;
+  Table: (props: TableProps<unknown, RowKey>) => ReactNode;
   Column: (props: RuntimeColumnProps) => ReactNode;
   RowDetail: (props: { children: (row: never) => ReactNode }) => ReactNode;
   RowActions: (props: { children: ReactNode; pin?: boolean }) => ReactNode;
@@ -242,7 +242,7 @@ export function buildParts(registry: Registry): Parts {
 
   /* ----------------------------------------------------------------- Table */
 
-  function Table(props: TableProps<unknown>): ReactNode {
+  function Table(props: TableProps<unknown, RowKey>): ReactNode {
     // All idempotent (registry.ts, guarantee 1).
     registry.beginPass();
     registry.setStickyRowHeader(props.stickyRowHeader === true);

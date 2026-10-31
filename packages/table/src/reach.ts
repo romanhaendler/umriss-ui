@@ -2,6 +2,7 @@
    the focus on a cell. Both read the hook's latest snapshot when called, and
    change nothing for a row the table does not show. */
 
+import type { RowKey } from "./types";
 import type { Registry } from "./registry";
 import { pageLines } from "./model/grouping";
 
@@ -14,7 +15,7 @@ export function showPending(registry: Registry): boolean {
   const pending = registry.reveal;
   if (!pending) return true;
   const row = Array.from(registry.frameTable?.querySelectorAll<HTMLElement>("tr[data-motion]") ?? []).find(
-    (tr) => tr.dataset.motion === pending.key,
+    (tr) => tr.dataset.motion === String(pending.key),
   );
   if (!row) return false;
   registry.setReveal(null);
@@ -26,7 +27,7 @@ export function showPending(registry: Registry): boolean {
 /** The row with this key brought into view: its page, the window or the
     scroll, once it is rendered (`showPending`). `false` and nothing changed
     for a key the table does not show. */
-export function scrollToRow(registry: Registry, key: string, column?: string): boolean {
+export function scrollToRow(registry: Registry, key: RowKey, column?: string): boolean {
   const hook = registry.hook;
   if (!hook || !registry.frameTable) return false;
   const state = hook.tableState;
@@ -61,7 +62,7 @@ export function scrollToRow(registry: Registry, key: string, column?: string): b
 
 /** The cell of this row and column made the Active cell and focused - grid
     mode only. */
-export function focusCell(registry: Registry, key: string, column: string): boolean {
+export function focusCell(registry: Registry, key: RowKey, column: string): boolean {
   const focus = registry.cellFocus;
   return !!focus && focus.columns.includes(column) && scrollToRow(registry, key, column);
 }

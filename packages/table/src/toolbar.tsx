@@ -17,7 +17,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { Button, ControlSizeProvider, useFormats, useWording } from "@umriss-ui/core";
 import type { RefProp } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
-import type { AllMatching } from "./types";
+import type { AllMatching, RowKey } from "./types";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
 import { GroupingTag } from "./groupingChoice";
@@ -116,7 +116,7 @@ export function TableToolbar({
                 size={size}
                 variant={spec.tone === "danger" ? "danger" : "secondary"}
                 onClick={() =>
-                  (spec.onSelect as (rows: readonly unknown[] | AllMatching) => void)(
+                  (spec.onSelect as (rows: readonly unknown[] | AllMatching<RowKey>) => void)(
                     all ? { request: snapshot.request!, except: [...snapshot.selection.except] } : selected,
                   )}
               >
