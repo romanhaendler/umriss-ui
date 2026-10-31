@@ -13,7 +13,7 @@ test("A Select inside a Popover inside a Modal: a pick reaches, Escape closes on
   await expect(window).toBeVisible();
 
   await window.getByRole("button", { name: "Due", exact: true }).click();
-  const panel = page.getByRole("dialog", { name: "Select date" });
+  const panel = page.getByRole("dialog", { name: "Delivery date" });
   await expect(panel).toBeVisible();
 
   const month = panel.getByRole("combobox", { name: "Month" });
@@ -43,10 +43,10 @@ test("The typed field, Today and Clear stand in one row at 375 px, with no overf
   const example = page.locator('[data-example="pick-a-day"]');
   // A day must be picked first, or the panel has no Clear.
   await example.getByRole("button", { name: "Delivery date" }).click();
-  await page.getByRole("dialog", { name: "Select date" }).getByRole("button", { name: /, 15 / }).first().click();
+  await page.getByRole("dialog", { name: "Delivery date" }).getByRole("button", { name: /, 15 / }).first().click();
   await example.getByRole("button", { name: "Delivery date" }).click();
 
-  const panel = page.getByRole("dialog", { name: "Select date" });
+  const panel = page.getByRole("dialog", { name: "Delivery date" });
   const field = panel.getByRole("textbox", { name: "Type a date" });
   const today = panel.getByRole("button", { name: "Today" });
   const clear = panel.getByRole("button", { name: "Clear", exact: true });
@@ -57,7 +57,7 @@ test("The typed field, Today and Clear stand in one row at 375 px, with no overf
   expect(f!.width).toBeGreaterThanOrEqual(80);
 
   const overflow = await page.evaluate(() => {
-    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-label="Select date"]')!;
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-labelledby]')!;
     return {
       panel: dialog.scrollWidth - dialog.clientWidth,
       page: document.documentElement.scrollWidth - document.documentElement.clientWidth,

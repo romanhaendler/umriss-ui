@@ -37,12 +37,12 @@ test("Clicking the label toggles a Checkbox once", { tag: "@quick" }, async ({ p
   expect(await box.isChecked()).toBe(!before);
 });
 
-test("A MultiSelect option is checked without force", { tag: "@quick" }, async ({ page }) => {
+test("A MultiSelect option is selected by a click without force", { tag: "@quick" }, async ({ page }) => {
   await openExample(page, "multiselect", "chips-in-the-field");
   await page.locator('[data-example="chips-in-the-field"] [aria-haspopup="dialog"]').first().click();
-  const option = page.getByRole("dialog").getByRole("checkbox").first();
+  const option = page.getByRole("dialog").getByRole("option").first();
   await expect(option).toBeVisible();
-  const before = await option.isChecked();
-  await (before ? option.uncheck() : option.check());
-  expect(await option.isChecked()).toBe(!before);
+  const before = (await option.getAttribute("aria-selected")) === "true";
+  await option.click();
+  await expect(option).toHaveAttribute("aria-selected", String(!before));
 });

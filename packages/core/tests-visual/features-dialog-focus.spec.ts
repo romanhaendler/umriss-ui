@@ -24,9 +24,9 @@ for (const [page_, example, opener, name, field] of [
   });
 }
 
-test("a modal without autoFocus focuses its first tab stop @quick", async ({ page }) => {
+test("a modal without autoFocus focuses its first field, not the header's Close @quick", async ({ page }) => {
   await openExample(page, "modal", "a-window");
   await page.getByRole("button", { name: "Open the modal" }).click();
   const dialog = page.getByRole("dialog", { name: "Create a project" });
-  await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
+  await expect(dialog.getByRole("textbox", { name: "Project name" })).toBeFocused();
 });
