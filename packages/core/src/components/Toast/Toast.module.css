@@ -489,4 +489,11 @@
       transition: none;
     }
   }
+
+  /* Paper has no screen to float over: what opens above the page does not print. */
+  @media print {
+    .region {
+      display: none;
+    }
+  }
 }
