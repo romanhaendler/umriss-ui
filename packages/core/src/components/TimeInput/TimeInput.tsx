@@ -66,7 +66,7 @@ export function TimeInput(props: TimeInputProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [given, report, , formRef] = useFieldValue<string | null>("TimeInput", props, null, false);
+  const [given, report, , formRef] = useFieldValue<string | null>("TimeInput", props, null);
   const shown = partsOf(given);
   useShapeWarning("TimeInput", "value", given != null && shown[0] === "", "a text such as 14:30 or 14:30:00, or null");
   const value = shown[0] === "" ? null : shown.slice(0, withSeconds ? 3 : 2).join(":");

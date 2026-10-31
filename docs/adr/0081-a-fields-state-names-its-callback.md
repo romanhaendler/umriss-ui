@@ -53,6 +53,8 @@ in the minor after the release. `onChange` on Slider is the exception that shows
 a number today, and from the minor that removes the deprecated name it is the native input's
 event handler.
 
+The contract step was taken in the minor after 0.52.0: the deprecated `onChange(value)` and its warning are gone.
+
 The range pickers keep `DateRange`'s `{ from, to }`, which the table's `columnFilter` reads too:
 renaming the pair's keys would break every range a host stores, for no gain in the contract. A
 `Select`'s `onChange` is the native select's event and stays; `onValueChange` reports its option's

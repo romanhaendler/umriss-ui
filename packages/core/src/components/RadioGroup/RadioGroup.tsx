@@ -13,7 +13,7 @@ import type { RefProp } from "../../lib/refProp";
 import styles from "./RadioGroup.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useRadioGroup } from "./useRadioGroup";
-import { withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { withoutFieldProps } from "../../lib/useFieldValue";
 
 /** One possibility of a `RadioGroup`: its value, its label and an optional
     line of explanation. */
@@ -32,7 +32,7 @@ export interface RadioOption<T extends string | number> {
 
 /** The props of `RadioGroup`. */
 export interface RadioGroupProps<T extends string | number>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement>, DeprecatedOnChange<(value: T) => void> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue">, RefProp<HTMLDivElement> {
   /** The possibilities, in the order in which they are meant to stand. */
   options: readonly RadioOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with

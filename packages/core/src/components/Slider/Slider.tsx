@@ -3,7 +3,7 @@ import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode } fro
 import { cx } from "../../lib/cx";
 import { useFormats } from "../../lib/language";
 import { useFormField } from "../FormField";
-import { useFieldValue, useFormReset, withoutFieldProps, type DeprecatedOnChange } from "../../lib/useFieldValue";
+import { useFieldValue, useFormReset, withoutFieldProps } from "../../lib/useFieldValue";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Slider.module.css";
@@ -13,13 +13,13 @@ export type SliderMark = number | { value: number; label?: ReactNode };
 
 /** The props of `Slider`. */
 export interface SliderProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step">, RefProp<HTMLInputElement>, DeprecatedOnChange<(value: number) => void> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "min" | "max" | "step">, RefProp<HTMLInputElement> {
   /** Controlled: the value; `undefined` reads as `min`. */
   value?: number;
   /** Uncontrolled: the value to start at.
       @default min */
   defaultValue?: number;
-  /** Reports every change, by pointer or key, as a number on the step. */
+  /** Reports every change, by pointer or key, as a number on the step; `onChange` is the input's native event. */
   onValueChange?: (value: number) => void;
   /** The smallest value. */
   min?: number;
@@ -106,6 +106,7 @@ export function Slider(props: SliderProps) {
     id,
     disabled,
     onKeyDown,
+    onChange,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -160,7 +161,10 @@ export function Slider(props: SliderProps) {
           max={max}
           step={step}
           value={value}
-          onChange={(event) => commit(snap(Number(event.target.value), min, max, step))}
+          onChange={(event) => {
+            commit(snap(Number(event.target.value), min, max, step));
+            onChange?.(event);
+          }}
           onKeyDown={handleKeyDown}
         />
         {marks && marks.length > 0 && (

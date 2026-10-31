@@ -1,25 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { warnDeprecated, warnOnce } from "./dev";
+import { warnOnce } from "./dev";
 
 /** What a field's contract reads of its props (ADR-0081): the state prop and its callback. */
 export interface FieldValueProps<V> {
   value?: V | null;
   defaultValue?: V | null;
   onValueChange?: (value: never) => void;
-  /** The callback the field had before `onValueChange`; read only where `legacy` is set. */
-  onChange?: unknown;
 }
 
 /** Whether a field's props give it a `value`; `value={undefined}` beside a `defaultValue` gives none, so the default shows. */
 export function isControlled(props: { value?: unknown; defaultValue?: unknown }): boolean {
   return "value" in props && !(props.value === undefined && props.defaultValue != null);
-}
-
-/** The deprecated `onChange` alias of `onValueChange`, for a field prop type to extend. */
-export interface DeprecatedOnChange<T> {
-  /** The former name of `onValueChange`. @deprecated since 0.52 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: T;
 }
 
 /**
@@ -29,7 +21,6 @@ export interface DeprecatedOnChange<T> {
  * or `null` reads as empty, so a field whose application has no value yet stays controlled (unless
  * it has a `defaultValue`, which then shows). It is
  * fixed by the first render; a later switch is warned of in development and then followed.
- * `legacy` marks a field whose `onChange` handed a value: it still works, and speaks once.
  *
  * The fourth item is a ref callback for any element of the field: when the form around it resets,
  * the field goes back to its `defaultValue` (or empty) and reports that - a controlled field only
@@ -39,7 +30,6 @@ export function useFieldValue<V, E = V>(
   component: string,
   props: FieldValueProps<V | E>,
   empty: E,
-  legacy = true,
 ): [V | E, (next: V) => void, boolean, (element: HTMLElement | null) => void] {
   const present = isControlled(props);
   const [first] = useState(present);
@@ -52,8 +42,7 @@ export function useFieldValue<V, E = V>(
   }
   const controlled = first || present;
   const [own, setOwn] = useState<V | E>(() => props.defaultValue ?? empty);
-  const callback = (props.onValueChange ?? (legacy ? props.onChange : undefined)) as ((value: V) => void) | undefined;
-  if (legacy && props.onChange && !props.onValueChange) warnDeprecated(`${component} onChange(value)`, "onValueChange");
+  const callback = props.onValueChange as ((value: V) => void) | undefined;
   const value = controlled ? (props.value ?? empty) : own;
   const report = (next: V) => {
     if (!controlled) setOwn(next);
@@ -98,7 +87,7 @@ export function useFormReset(input: RefObject<{ form: HTMLFormElement | null } |
 const FIELD_KEYS = ["value", "defaultValue", "onValueChange", "onChange"] as const;
 const FIELD_KEY_SET: ReadonlySet<string> = new Set(FIELD_KEYS);
 
-/** The props without the four `useFieldValue` reads, for the rest that goes on to an element. */
+/** The props without the `useFieldValue` reads and `onChange` (no field that uses this takes it), for the rest that goes on to an element. */
 export function withoutFieldProps<P extends object>(props: P): Omit<P, (typeof FIELD_KEYS)[number]> {
   return Object.fromEntries(Object.entries(props).filter(([key]) => !FIELD_KEY_SET.has(key))) as never;
 }

@@ -331,7 +331,7 @@ function Stage({ shown }: { shown: Case }) {
                   aria-label="Figure"
                   options={(Object.keys(FIGURES) as Figure[]).map((name) => ({ value: name, label: name }))}
                   value={options.name}
-                  onChange={(name) => change({ name })}
+                  onValueChange={(name) => change({ name })}
                 />
               )}
             >
@@ -374,7 +374,7 @@ export default function ArrangeTheStartScreen() {
   return (
     <Stack gap={4}>
       <div data-callout="1">
-        <SegmentedControl aria-label="Case" options={CASES.map((one) => ({ value: one.value, label: one.label }))} value={current} onChange={setCurrent} />
+        <SegmentedControl aria-label="Case" options={CASES.map((one) => ({ value: one.value, label: one.label }))} value={current} onValueChange={setCurrent} />
       </div>
       <Stage key={current} shown={current} />
     </Stack>

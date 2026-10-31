@@ -27,7 +27,7 @@ export interface RadioChoice<T extends string | number> {
 
 export interface UseRadioGroupOptions<T extends string | number> {
   options: readonly RadioChoice<T>[];
-  /** The component's props: `value`, `defaultValue`, `onValueChange` and the former `onChange`. */
+  /** The component's props: `value`, `defaultValue`, `onValueChange`. */
   props: FieldValueProps<T | null>;
   component: string;
   disabled: boolean;
