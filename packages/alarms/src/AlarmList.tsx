@@ -543,6 +543,15 @@ function Body({
            nothing at all – and that is something else. */
         empty={<span className={styles.empty}>{disconnected ? wording.alarmNoneDisconnected : wording.alarmNone}</span>}
       >
+        {/* First, so that the priority stays in view on a phone, where the table scrolls sideways. */}
+        <Column value="priority" label={wording.alarmColumnPriority} sortable={false}>
+          {(p, row) => (
+            <span className={styles.priority}>
+              <PriorityMark priority={p} lifecycle={row.lifecycle} availability={row.availability} />
+              <span aria-hidden="true">{priorityWord(p, wording)}</span>
+            </span>
+          )}
+        </Column>
         <Column id="type" label={wording.alarmColumnAlarm} value={(row) => row.type.label} rowHeader sortable={false}>
           {(label, row) => (
             <span className={styles.alarm}>
@@ -586,14 +595,6 @@ function Body({
               </span>
             );
           }}
-        </Column>
-        <Column value="priority" label={wording.alarmColumnPriority} sortable={false}>
-          {(p, row) => (
-            <span className={styles.priority}>
-              <PriorityMark priority={p} lifecycle={row.lifecycle} availability={row.availability} />
-              <span aria-hidden="true">{priorityWord(p, wording)}</span>
-            </span>
-          )}
         </Column>
         <Column
           id="raised"
