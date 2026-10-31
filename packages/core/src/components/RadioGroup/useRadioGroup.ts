@@ -16,6 +16,8 @@ import { useId, useRef } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { idPart } from "../../lib/idPart";
 import { useFormField } from "../FormField";
+import { useFieldValue } from "../../lib/useFieldValue";
+import type { FieldValueProps } from "../../lib/useFieldValue";
 
 /** What the mechanics need of a possibility. */
 export interface RadioChoice<T extends string> {
@@ -25,9 +27,9 @@ export interface RadioChoice<T extends string> {
 
 export interface UseRadioGroupOptions<T extends string> {
   options: readonly RadioChoice<T>[];
-  value?: T | null;
-  defaultValue?: T | null;
-  onChange?: (value: T) => void;
+  /** The component's props: `value`, `defaultValue`, `onValueChange` and the former `onChange`. */
+  props: FieldValueProps<T | null>;
+  component: string;
   disabled: boolean;
   name?: string;
   /** The caller's own key handler; it runs first and can prevent ours. */
@@ -41,9 +43,8 @@ export interface UseRadioGroupOptions<T extends string> {
 
 export function useRadioGroup<T extends string>({
   options,
-  value,
-  defaultValue,
-  onChange,
+  props,
+  component,
   disabled,
   name,
   onKeyDown,
@@ -55,13 +56,15 @@ export function useRadioGroup<T extends string>({
   const groupName = name ?? field?.id ?? generatedName;
   const groupRef = useRef<HTMLDivElement>(null);
 
-  // Uncontrolled, the DOM state of the inputs leads: the browser holds the choice anyway.
-  const controlled = value !== undefined;
+  /* Uncontrolled, the DOM state of the inputs leads: the browser holds the choice anyway. A `value`
+     of `undefined` is controlled and empty. */
+  const [value, report, controlled] = useFieldValue<T, null>(component, props, null);
+  const defaultValue = props.defaultValue;
 
   const selectable = options.filter((option) => !option.disabled && !disabled);
 
   const select = (next: RadioChoice<T>) => {
-    onChange?.(next.value);
+    report(next.value);
   };
 
   // The arrow keys move and choose at once, as the radio pattern has it.

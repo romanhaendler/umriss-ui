@@ -7,6 +7,7 @@ import { Button } from "../Button";
 import { Checkbox } from "../Checkbox";
 import { Input } from "../Input";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import { WINDOW_ABOVE } from "../../lib/listbox";
@@ -36,11 +37,17 @@ export interface MultiSelectProps<T extends string = string>
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
-  /** The chosen values. Always controlled. */
-  value: readonly T[];
+  /** The chosen values; `undefined` means none. With it the field is
+      controlled; without it the field keeps the values itself, from `defaultValue`. */
+  value?: readonly T[];
+  /** Uncontrolled: the values to start with.
+      @default [] */
+  defaultValue?: readonly T[];
   /** Runs on every change of the selection, with the complete new list –
       not with the one value that moved. */
-  onChange: (value: T[]) => void;
+  onValueChange?: (value: T[]) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (value: T[]) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** What stands in the panel's search field. */
@@ -83,12 +90,10 @@ type Scope = "all" | "selected";
  * "selected" scope, rows that have been unticked stay visible until the scope
  * changes, so that nothing jumps away from under the mouse pointer.
  */
-export function MultiSelect<T extends string = string>(
-  {
+export function MultiSelect<T extends string = string>(props: MultiSelectProps<T>) {
+  const {
     ref,
     options: optionsGiven,
-    value: valueGiven,
-    onChange,
     placeholder,
     searchPlaceholder,
     emptyText,
@@ -101,9 +106,11 @@ export function MultiSelect<T extends string = string>(
     style,
     id,
     onClick,
-    ...rest
-  }: MultiSelectProps<T>,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [valueGiven, onChange] = useFieldValue<T[], readonly T[]>("MultiSelect", props, NONE as readonly T[]);
   const optionsOk = areOptions(optionsGiven);
   const options = optionsOk ? optionsGiven : (NONE as readonly MultiSelectOption<T>[]);
   useShapeWarning("MultiSelect", "options", !optionsOk, "an array of { value, label } objects, not strings");

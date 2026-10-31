@@ -15,6 +15,9 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
   /** Marks the switch as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
+  /** Runs with the new state on every click. `onChange` stays for the
+      event - what `register` and Formik read. */
+  onCheckedChange?: (checked: boolean) => void;
 }
 
 /* A switch is a checkbox that says "on" instead of "ticked": the same native
@@ -25,7 +28,7 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    is the pass-through: the class on the label, ref and rest on the input. */
 /** An on/off switch that takes effect at once - a native checkbox with
     `role="switch"`. Where the choice waits for a Save button, use `Checkbox`. */
-export function Switch({ ref, label, size: ownSize, invalid, className, style, id, ...rest }: SwitchProps) {
+export function Switch({ ref, label, size: ownSize, invalid, className, style, id, onChange, onCheckedChange, ...rest }: SwitchProps) {
   const size = useControlSize(ownSize);
   const field = useFormField();
   const inputId = id ?? field?.id;
@@ -42,6 +45,15 @@ export function Switch({ ref, label, size: ownSize, invalid, className, style, i
         aria-invalid={isInvalid || undefined}
         className={cx(styles.input, isInvalid && styles.invalid)}
         {...rest}
+        /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
+        onChange={
+          onChange || onCheckedChange
+            ? (event) => {
+                onChange?.(event);
+                onCheckedChange?.(event.target.checked);
+              }
+            : undefined
+        }
         /* After `rest`: the role is what the control is. */
         role="switch"
       />

@@ -1,6 +1,6 @@
 # Decisions
 
-Eighty decisions, each one written where it was made and kept afterwards. An
+Eighty-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -94,5 +94,6 @@ half a later reader needs most. The status column says which are superseded, wit
 | [0078](0078-alarm-management-is-a-package-that-owns-a-lifecycle-never-a-generation.md) | Alarm management is a package on core and table; it owns an alarm's lifecycle, never its generation | Alarms are a package of their own, after the alarm list was removed; supersedes ADR-0009 and ADR-0057 | accepted, supersedes ADR-0009 and ADR-0057, amends ADR-0035 | limits and alarms, architecture |
 | [0079](0079-the-size-is-the-applications-the-hit-area-the-librarys.md) | The size is the application's, the hit area the library's | A `md` control is 32 px under any pointer; `touch-scale.css` opts into 44 px under a finger; amends ADR-0070 | accepted, amends ADR-0070 | components, core |
 | [0080](0080-a-page-is-what-its-frame-holds.md) | A page is what its frame holds | A table fills a parent of definite height and contributes only its held page height; the page is the lines that fit; amends ADR-0042, ADR-0050 and ADR-0072 | accepted, amends ADR-0042, ADR-0050 and ADR-0072 | table |
+| [0081](0081-a-fields-state-names-its-callback.md) | A field's state names its callback | `value`/`defaultValue` with `onValueChange(value)`, `checked` with `onCheckedChange`; `onChange(event)` only on native-backed fields; `undefined` reads as empty; the old `onChange(value)` lives one minor | accepted | components, core |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

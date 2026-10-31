@@ -18,6 +18,7 @@ import { mergeRefs } from "../../lib/mergeRefs";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormField } from "../FormField";
 import { useRadioGroup } from "../RadioGroup/useRadioGroup";
+import { withoutFieldProps } from "../../lib/useFieldValue";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./SegmentedControl.module.css";
 
@@ -42,11 +43,13 @@ export interface SegmentedControlProps<T extends string>
   /** The possibilities, two to four, in the order in which they stand. */
   options: readonly SegmentedOption<T>[];
   /** The chosen possibility; `null` means: none yet. Together with
-      `onChange` the control is controlled. */
+      `onValueChange` the control is controlled. */
   value?: T | null;
   /** Initial value of an uncontrolled control. Not together with `value`. */
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
+  onValueChange?: (value: T) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (value: T) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
@@ -70,15 +73,12 @@ export interface SegmentedControlProps<T extends string>
 
 /** One choice out of a few short possibilities, drawn as one field with a
     segment for each - a radio group in what it says and how the keys move.
-    Controlled through `value` and `onChange`, or uncontrolled from
+    Controlled through `value` and `onValueChange`, or uncontrolled from
     `defaultValue`. */
-export function SegmentedControl<T extends string>(
-  {
+export function SegmentedControl<T extends string>(props: SegmentedControlProps<T>) {
+  const {
     ref,
     options,
-    value,
-    defaultValue,
-    onChange,
     size: ownSize,
     variant = "inset",
     fill = false,
@@ -86,16 +86,16 @@ export function SegmentedControl<T extends string>(
     name,
     className,
     onKeyDown,
-    ...rest
-  }: SegmentedControlProps<T>,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
   const size = useControlSize(ownSize);
   const field = useFormField();
   const radio = useRadioGroup({
     options,
-    value,
-    defaultValue,
-    onChange,
+    props,
+    component: "SegmentedControl",
     disabled,
     name,
     onKeyDown,

@@ -10,7 +10,13 @@ import { CrossGlyph } from "../../lib/glyphs";
 
 /** The props of `Input`: a native input's attributes, with `size` meaning the
     control's height. */
-export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">, RefProp<HTMLInputElement> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "value">, RefProp<HTMLInputElement> {
+  /** The text; `null` and `undefined` mean empty. With it the field is
+      controlled; `defaultValue` starts an uncontrolled one. */
+  value?: string | number | readonly string[] | null;
+  /** Runs with the new text on every edit. `onChange` stays for the event -
+      what `register` and Formik read. */
+  onValueChange?: (value: string) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
@@ -41,16 +47,20 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 /** A one-line text field. `chars` sets its width in characters, `numeric`
     sets figures right-aligned and tabular, `clearable` offers a cross. Inside
     a `FormField` it takes the field's id, description and invalid state. */
-export function Input({ ref, size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, ...rest }: InputProps) {
+export function Input(props: InputProps) {
+  const { ref, size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, onChange, onValueChange, value, ...rest } = props;
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;
-  const hasContent = String(rest.value ?? "").length > 0;
+  /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
+  const controlled = "value" in props;
+  const valueProps = controlled ? { value: value ?? "" } : {};
+  const hasContent = String(value ?? rest.defaultValue ?? "").length > 0;
 
   /* A hidden input is no field: it carries a value and nothing to see, and a
      wrapper around it would draw an empty frame. */
-  if (rest.type === "hidden") return <input ref={ref} id={id} className={className} style={style} {...rest} />;
+  if (rest.type === "hidden") return <input ref={ref} id={id} className={className} style={style} {...valueProps} {...rest} onChange={onChange} />;
 
   return (
     <span
@@ -72,7 +82,17 @@ export function Input({ ref, size: ownSize, chars, invalid, numeric = false, cle
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
         className={cx(styles.inner, numeric && styles.numeric)}
+        {...valueProps}
         {...rest}
+        /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
+        onChange={
+          onChange || onValueChange
+            ? (event) => {
+                onChange?.(event);
+                onValueChange?.(event.target.value);
+              }
+            : undefined
+        }
       />
       {clearable && hasContent && !disabled && (
         <button

@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Listbox, optionId, WINDOW_ABOVE } from "../../lib/listbox";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -32,12 +33,17 @@ export interface ComboboxProps<T extends string = string>
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
-  /** The chosen value; `null` means none. Always controlled - the field keeps
-      no second state beside the caller's. */
-  value: T | null;
+  /** The chosen value; `null` and `undefined` mean none. With it the field is
+      controlled; without it the field keeps the value itself, from `defaultValue`. */
+  value?: T | null;
+  /** Uncontrolled: the value to start at.
+      @default null */
+  defaultValue?: T | null;
   /** Runs on choosing and on clearing (`null`). Not while typing: what is
       typed is a search term and not yet a value. */
-  onChange: (value: T | null) => void;
+  onValueChange?: (value: T | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
@@ -78,12 +84,10 @@ export interface ComboboxProps<T extends string = string>
     The label of the chosen `value` is kept from the last `options` that held
     it, so a search that replaces the options does not empty the field - an
     initial `value` must stand among the first `options`. */
-export function Combobox<T extends string = string>(
-  {
+export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
+  const {
     ref,
     options: optionsGiven,
-    value,
-    onChange,
     placeholder,
     size: ownSize,
     chars,
@@ -100,9 +104,11 @@ export function Combobox<T extends string = string>(
     onKeyDown,
     onClick,
     onBlur,
-    ...rest
-  }: ComboboxProps<T>,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [value, onChange] = useFieldValue<T | null>("Combobox", props, null);
   const optionsOk = areOptions(optionsGiven);
   const options = optionsOk ? optionsGiven : NONE;
   useShapeWarning("Combobox", "options", !optionsOk, "an array of { value, label } objects, not strings");
@@ -129,7 +135,7 @@ export function Combobox<T extends string = string>(
   if (selected && (kept?.value !== selected.value || kept.label !== selected.label)) {
     setKept({ value: selected.value, label: selected.label });
   }
-  const chosenLabel = selected?.label ?? (value !== null && kept?.value === value ? kept.label : "");
+  const chosenLabel = selected?.label ?? (value != null && kept?.value === value ? kept.label : "");
 
   /* What VoiceOver does not read of an active descendant - how many options
      stand, and an option's state - the field says itself. The count on every
