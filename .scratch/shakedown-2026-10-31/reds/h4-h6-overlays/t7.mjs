@@ -1,0 +1,10 @@
+import {open,active} from "./lib.mjs";
+const w=(n=350)=>new Promise(r=>setTimeout(r,n));
+const {browser,page,errors}=await open("radix");
+await page.click("#r-trig"); await w();
+await page.click("#r-menu",{timeout:3000}).catch(e=>console.log("click menu trigger failed:",e.message.split("\n")[0]));
+await w(); console.log("menu item visible/hit?", await page.evaluate(()=>{const e=document.getElementById("r-mi"); if(!e) return "no item"; const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.x+5,r.y+5); return {top:h===e||e.contains(h),hit:h?.tagName+"#"+h?.id, bodyPE:getComputedStyle(document.body).pointerEvents, z:getComputedStyle(e.closest("[role=menu]")||e).zIndex}}));
+await page.screenshot({path:"shots/radix-menu.png"});
+await page.keyboard.press("Escape"); await w(); console.log("after Esc: radix content?",await page.evaluate(()=>!!document.querySelector("[role=dialog]")), "focus", await active(page));
+console.log(errors);
+await browser.close();

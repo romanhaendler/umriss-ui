@@ -1,0 +1,16 @@
+import {open,active,openDialogs} from "./lib.mjs";
+const w=(n=400)=>new Promise(r=>setTimeout(r,n));
+const {browser,page,errors}=await open("foc");
+const st=async(l)=>console.log(l.padEnd(38),"dlg",JSON.stringify(await openDialogs(page)),"focus",await active(page));
+await w(500); await st("initially open, StrictMode");
+await page.keyboard.type("hello"); console.log("typed:",await page.inputValue("#a-in"));
+await page.keyboard.press("Escape"); await w(500); await st("closed initial modal: return focus");
+await page.click("#ob"); await w(); await st("footer autoFocus");
+await page.keyboard.press("Enter"); await w(500); await st("Enter on OK");
+await page.click("#oc"); await w(); await st("confirm");
+await page.keyboard.press("Tab"); await st("tab"); await page.keyboard.press("Enter"); await w(200); await st("confirm pressed (loading)");
+await page.keyboard.press("Escape"); await w(300); await st("esc while loading");
+await w(1000); await st("after loading done");
+await page.click("#od"); await w(); await st("modal with nothing focusable");
+await page.keyboard.press("Tab"); await st("tab inside"); await page.keyboard.press("Escape"); await w(500); await st("esc");
+console.log(errors); await browser.close();

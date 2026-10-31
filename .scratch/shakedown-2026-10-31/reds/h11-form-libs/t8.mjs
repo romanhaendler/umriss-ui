@@ -1,0 +1,17 @@
+import {open,fillAll,F,logs} from "./drive.mjs";
+import {state,active,focusEach} from "./probe.mjs";
+const lib=process.argv[2]; const {b,p,errs}=await open(lib);
+await p.getByRole("button",{name:"Submit"}).click(); await p.waitForTimeout(500);
+const s=await state(p); console.log("pristine submit errors/aria:",JSON.stringify(Object.fromEntries(Object.entries(s).map(([k,v])=>[k,v.msg.startsWith("hint")?"ok":v.msg+"|"+v.inv]))));
+console.log("focus after invalid submit:",await active(p),JSON.stringify(await logs(p)));
+console.log("setFocus-like ref.focus:",JSON.stringify(await focusEach(p)));
+await fillAll(p);
+await p.getByRole("button",{name:"Submit"}).click(); await p.waitForTimeout(100);
+console.log("disabled during submit:",await p.locator("[data-field] :is(input,select,textarea,button)[disabled]").count(),"/",await p.locator("[data-field] :is(input,select,textarea,button)").count());
+await p.waitForTimeout(800);
+console.log("submitted:",await p.evaluate(()=>{const s=window.__submitted; if(!s)return "NONE"; const o={}; for(const k in s){const v=s[k]; o[k]=v instanceof Date?"Date":Array.isArray(v)?"Array "+JSON.stringify(v.map(x=>x instanceof File?"File":x)):v&&typeof v==="object"?"obj":typeof v+" "+JSON.stringify(v)} return JSON.stringify(o)}));
+await p.getByRole("button",{name:"Reset"}).click(); await p.waitForTimeout(300);
+console.log("after reset UI:",await p.evaluate(()=>({text:document.querySelector("[data-field=text] input").value,city:document.querySelector("[data-field=city] input").value,tags:document.querySelector("[data-field=tags] button").textContent,date:document.querySelector("[data-field=date] button").textContent,files:document.querySelector("[data-field=files]").textContent.slice(0,30),plan:[...document.querySelectorAll("[data-field=plan] input")].map(i=>i.checked).join()})));
+console.log("touched:",await p.locator("#touched").textContent());
+console.log(errs);
+await b.close();

@@ -1,0 +1,13 @@
+import { open, csv, sel } from "./lib.mjs";
+const h = await open({ extra: true, pageSize: 100 });
+const P = h.page; const ev = async (f) => { await P.evaluate(f); await P.waitForTimeout(250); };
+const pick = async (s) => (await s).split(/\r?\n/).filter((l) => l.startsWith("X3,"))[0]?.split(",").slice(0, 6).join(" | ");
+console.log("full   :", await pick(csv(P)));
+await ev(() => window.t.setSearch("<tag>"));
+console.log("search :", await pick(csv(P)));
+console.log("filter-only-midnight rows flips When column from ISO instant to a bare date");
+await ev(() => { window.t.setSearch(""); window.t.selection.set(["X3"], true); });
+console.log("copy   :", (await sel(P)).split("\n")[1].split("\t").slice(0, 6).join(" | "));
+await ev(() => window.t.selection.set(["X3", "R001"], true));
+console.log("copy 2 :", (await sel(P)).split("\n").map((l) => l.split("\t").slice(0, 6).join(" | ")).join("\n         "));
+await h.close();

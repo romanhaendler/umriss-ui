@@ -1,0 +1,14 @@
+import { open } from "./lib.mjs";
+const p = await open("s=rows", { width: 1100, height: 900 });
+await p.getByRole("button", { name: "New row" }).click(); await p.waitForTimeout(300);
+console.log("first row inputs", await p.locator("tbody tr").first().locator("input:not([type=checkbox]),select").count(), await p.evaluate(()=>document.activeElement.tagName+":"+(document.activeElement.getAttribute("aria-label")||"")));
+await p.keyboard.type("Fresh"); await p.keyboard.press("Enter"); await p.waitForTimeout(300);
+console.log("add", JSON.stringify(await p.evaluate(()=>window.__saves.at(-1))), (await p.names()).slice(0,2));
+await p.getByRole("button", { name: "Delete: Item 3" }).click(); await p.waitForTimeout(300);
+console.log("dialog", await p.locator("[role=alertdialog],[role=dialog]").count(), await p.locator("[role=alertdialog],[role=dialog]").first().innerText().catch(()=>""));
+await p.screenshot({ path: "shots/delete-confirm.png" });
+console.log(await p.locator("tbody tr").nth(4).locator("button").evaluateAll(b=>b.map(x=>x.outerHTML.slice(0,160)))); await p.locator("tbody tr").nth(4).locator("button").nth(2).click(); await p.waitForTimeout(300);
+console.log("deleted", await p.evaluate(()=>window.__saves.at(-1)), (await p.names()).slice(0,5));
+await p.getByRole("button", { name: "Expand Item 1" }).click(); await p.waitForTimeout(300);
+console.log("detail", await p.locator("#detail").textContent());
+console.log(p.errs); await p.b.close();

@@ -1,0 +1,11 @@
+import { open, csv, ROWS, diff } from "./lib.mjs";
+import { csvOf, select } from "./oracle.mjs";
+const h = await open();
+await h.page.evaluate((c) => window.t.setFilter("name", c), { terms: [{ operator: "contains", value: "a" }], join: undefined }); await h.page.waitForTimeout(200);
+const a = await csv(h.page);
+const st = { where: (r) => r.name.toLowerCase().includes("a") };
+const e = csvOf(select(ROWS, st), st);
+console.log(diff(a, e));
+const ids = (s) => s.split(/\r\n(?=R\d)/).map((l) => l.slice(0, 4));
+console.log(ids(a).join(" ")); console.log(ids(e).join(" "));
+console.log(h.logs); await h.close();

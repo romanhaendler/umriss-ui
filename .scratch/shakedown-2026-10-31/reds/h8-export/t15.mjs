@@ -1,0 +1,14 @@
+import { open, csv, sel, clickExport } from "./lib.mjs";
+const ids = (s) => s.split(/\r?\n(?=R\d)/).slice(1).length;
+const h = await open({ pageSize: 7 }); const P = h.page;
+const ev = async (f) => { await P.evaluate(f); await P.waitForTimeout(300); };
+const pag = async () => P.locator("nav, [class*=agination]").last().innerText().then((s) => s.replace(/\s+/g, " "));
+const state = async (n) => console.log(n, "| pageSize", await P.evaluate(() => window.t.pageSize), "page", await P.evaluate(() => window.t.page + "/" + window.t.pageCount), "visible", await P.evaluate(() => window.t.visible.length), "rows in DOM", await P.locator("tbody tr").count(), "| csv rows", ids(await csv(P)), "| pager:", await pag());
+await state("initial");
+await ev(() => window.t.setPage(6)); await state("page 6 (last, 5 rows)");
+await ev(() => window.t.setSearch("alpha")); await state("search alpha");
+await ev(() => { window.t.setSearch(""); window.t.setPageSize("fit"); }); await state("fit");
+await ev(() => window.t.setPageSize(25)); await ev(() => window.t.setPage(2)); await state("25, page 2");
+await ev(() => window.t.setFilter("qty", { from: 100 })); await state("filter leaves few rows, page 2");
+console.log(h.logs);
+await h.close();

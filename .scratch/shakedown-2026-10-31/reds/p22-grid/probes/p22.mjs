@@ -1,0 +1,10 @@
+import { open } from "./lib.mjs";
+const p = await open("s=rows", { width: 1100, height: 900 });
+const cell = (r, c) => p.locator("tbody tr").nth(r).locator("td,th").nth(c);
+const st = async (l) => console.log(l, await p.evaluate(() => JSON.stringify({ act: document.activeElement.tagName + ":" + (document.activeElement.value ?? document.activeElement.textContent.slice(0, 12)), inputs: document.querySelectorAll("tbody tr:nth-child(2) input:not([type=checkbox])").length, saves: window.__saves.length, invalid: [...document.querySelectorAll("[aria-invalid=true]")].length, msg: [...document.querySelectorAll("[id*=err],[class*=error],[class*=invalid]")].map(e=>e.textContent).slice(0,3) })));
+await cell(1, 2).click(); await st("opened");
+await p.keyboard.press("Meta+a"); await p.keyboard.press("Backspace"); await st("cleared");
+await p.screenshot({ path: "shots/rowedit-cleared.png" });
+await p.keyboard.press("Enter"); await p.waitForTimeout(300); await st("Enter");
+await p.screenshot({ path: "shots/rowedit-enter.png" });
+console.log(p.errs); await p.b.close();

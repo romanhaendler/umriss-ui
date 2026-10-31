@@ -1,0 +1,21 @@
+import {open,active,openDialogs} from "./lib.mjs";
+const w=(n=350)=>new Promise(r=>setTimeout(r,n));
+const {browser,page,errors}=await open("life");
+const lc=()=>page.evaluate(()=>({d:Object.fromEntries(Object.entries(window.__lc).filter(([k])=>/^(window|document|body):/.test(k)&&window.__lc[k]))}));
+console.log("base",JSON.stringify(await lc()));
+await page.click("#po"); await w(); console.log("popover open",JSON.stringify(await lc()));
+await page.evaluate(()=>document.getElementById("act").click()); await w(400);
+console.log("hidden activity: panel in DOM?",await page.evaluate(()=>{const e=document.getElementById("act-panel");return e?{vis:getComputedStyle(e.parentElement).display,hidden:!!e.closest("[hidden]")}:"gone"}), JSON.stringify(await lc()));
+await page.keyboard.press("Escape"); await w(200);
+await page.evaluate(()=>document.getElementById("act").click()); await w(400);
+console.log("visible again: panel?",await page.evaluate(()=>!!document.getElementById("act-panel")));
+// modal in activity
+await page.click("#mo"); await w(400); console.log("modal open dlg",JSON.stringify(await openDialogs(page)),"focus",await active(page));
+await page.evaluate(()=>document.getElementById("act").click()); await w(500);
+console.log("modal while activity hidden: dialogs",JSON.stringify(await openDialogs(page)),"modal sel",await page.evaluate(()=>document.querySelectorAll("dialog:modal").length),"focus",await active(page),"body pointer-events/inert",await page.evaluate(()=>document.body.inert));
+await page.screenshot({path:"shots/activity-hidden-modal.png"});
+console.log("can click header button #tog?",await page.click("#tog",{timeout:2000}).then(()=>"yes").catch(()=>"NO (blocked)"));
+await page.evaluate(()=>document.getElementById("act").click()); await w(500);
+console.log("restored: dialogs",JSON.stringify(await openDialogs(page)),"focus",await active(page));
+await page.keyboard.press("Escape"); await w(500); console.log("after Esc",JSON.stringify(await openDialogs(page)),await active(page));
+console.log(errors); await browser.close();

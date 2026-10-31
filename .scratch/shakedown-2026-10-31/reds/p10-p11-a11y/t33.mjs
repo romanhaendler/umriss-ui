@@ -1,0 +1,11 @@
+import { open } from "./lib.mjs";
+const s = await open("core", { browser: "webkit" }); const p = s.page;
+await p.getByRole("button", { name: "Date", exact: true }).focus(); await p.keyboard.press("Enter"); await p.waitForTimeout(400);
+await p.keyboard.press("PageUp"); await p.waitForTimeout(250);
+console.log("webkit active after PageUp:", await p.evaluate(() => document.activeElement === document.body ? "BODY" : document.activeElement.getAttribute("aria-label")));
+await s.close();
+const g = await open("virtual", { browser: "webkit" });
+await g.page.evaluate(() => document.querySelector("[role=grid] tbody tr:not([aria-hidden]) td").focus());
+await g.page.keyboard.press("Control+End"); await g.page.waitForTimeout(400); await g.page.keyboard.press("Control+Home"); await g.page.waitForTimeout(400);
+console.log("webkit ctrl+home:", await g.page.evaluate(() => { const a = document.activeElement; return a.tagName + " top=" + Math.round(a.getBoundingClientRect().top); }));
+await g.close();

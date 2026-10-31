@@ -1,0 +1,10 @@
+import { openRec } from "./lib.mjs";
+const lang = process.argv[2] || "de";
+const s = await openRec("read", { lang }); const p = s.page;
+const say = async (l) => console.log(l.padEnd(20), JSON.stringify(await s.live()), "| toolbar:", await p.evaluate(() => document.querySelector("table").closest("div")?.parentElement?.innerText.split("\n").slice(0, 4).join(" / ")));
+await p.getByRole("checkbox").nth(1).check(); await say("check row 1");
+await p.getByRole("checkbox").nth(2).check(); await say("check row 2");
+await p.getByRole("checkbox").first().check(); await say("select all");
+await p.getByRole("checkbox").first().uncheck(); await say("unselect all");
+await p.locator('button[aria-label*="aufklappen"],button[aria-label*="Expand"]').first().click(); await say("expand detail");
+await s.close();

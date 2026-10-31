@@ -1,0 +1,35 @@
+import { test, expect, go } from "./fx";
+const geom = (p: any) => p.evaluate(() => {
+  const rows = [...document.querySelectorAll("thead tr")];
+  const lab = rows[rows.length - 1], first = document.querySelector("tbody tr")!;
+  const cells = (tr: Element) => [...tr.children].map((c: any) => { const r = c.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.width)]; });
+  const top = rows.length > 1 ? [...rows[0].children].map((c: any) => { const r = c.getBoundingClientRect(); return `${c.innerText.trim()}@${Math.round(r.left)}+${Math.round(r.width)}x${c.colSpan}`; }) : [];
+  const a = cells(lab), b = cells(first);
+  const mism = a.map((x, i) => (x[0] !== b[i]?.[0] || x[1] !== b[i]?.[1] ? `${i}:${x}!=${b[i]}` : "")).filter(Boolean);
+  const sc = document.querySelector("table")!.parentElement!;
+  return { top, labels: [...lab.children].map((c: any) => c.innerText.trim()).join(","), mism, hscroll: sc.scrollWidth > sc.clientWidth ? `${sc.scrollWidth}>${sc.clientWidth}` : "none", n: [...lab.children].length };
+});
+test("groups: hide, pin, resize, container resize keep header and body aligned", async ({ page, logs }) => {
+  await page.setViewportSize({ width: 1100, height: 700 });
+  await go(page, "groups");
+  const step = async (l: string, fn?: () => Promise<any>) => { if (fn) await fn(); await page.waitForTimeout(150); const g = await geom(page); console.log(l.padEnd(28), JSON.stringify(g)); return g; };
+  const T = (js: string) => page.evaluate((j) => { const t = (window as any).__t; return eval(j); }, js);
+  await step("start");
+  await step("hide amount", () => T("t.toggleColumn('amount')"));
+  await step("hide qty (group empties)", () => T("t.toggleColumn('qty')"));
+  await step("show both", async () => { await T("t.toggleColumn('amount')"); await T("t.toggleColumn('qty')"); });
+  await step("pin qty start", () => T("t.setPin('qty','start')"));
+  await step("pin when end", () => T("t.setPin('when','end')"));
+  await step("order reverse", () => T("t.setOrder([...t.order].reverse())"));
+  await step("order reset", () => T("t.setOrder([])"));
+  await step("unpin all", async () => { await T("t.setPin('qty',null)"); await T("t.setPin('when',null)"); });
+  await step("container 500", () => page.evaluate(() => (window as any).__setW(500)));
+  await step("container 300", () => page.evaluate(() => (window as any).__setW(300)));
+  await page.screenshot({ path: "shots/groups-narrow.png" });
+  await step("container 1000", () => page.evaluate(() => (window as any).__setW(1000)));
+  await step("width amount 200", () => T("t.setWidth('amount', 200)"));
+  await step("autosize", () => T("t.autoSizeColumns()"));
+  await step("hide name (rowheader)", () => T("t.toggleColumn('name')"));
+  console.log("order", await T("t.order.join()"), "hidden", await T("t.hidden.join()"));
+  expect(logs).toEqual([]);
+});

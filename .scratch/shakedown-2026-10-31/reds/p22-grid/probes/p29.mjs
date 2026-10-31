@@ -1,0 +1,11 @@
+import { chromium } from "@playwright/test";
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1100, height: 800 } });
+await p.goto("http://localhost:4371/?s=virt"); await p.waitForSelector("table");
+const time = (label, fn) => p.evaluate(async ([label, fn]) => { const t0 = performance.now(); await new Promise(r => { eval(fn); requestAnimationFrame(() => requestAnimationFrame(r)); }); return label + " " + Math.round(performance.now() - t0) + "ms"; }, [label, fn]);
+console.log(await time("textfilter contains", `window.__t.setFilter("name", { terms: [{ operator: "contains", value: "99" }, { operator: "doesNotContain", value: "5" }], join: "and" })`));
+console.log(await time("clear", `window.__t.setFilter("name", null)`));
+console.log(await time("sort name", `window.__t.setView({sort:[{column:"name",direction:"asc"}]})`));
+console.log(await time("group dept", `window.__t.setGrouping(["dept"])`));
+console.log(await time("select all", `window.__t.selection.toggleAll()`));
+console.log(await time("search", `window.__t.setSearch("Item 5")`));
+await b.close();

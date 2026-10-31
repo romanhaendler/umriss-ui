@@ -1,0 +1,21 @@
+import { test, expect } from "@playwright/test";
+test("server mode: tick on two pages, bulk cancel acts on how many?", async ({ page }) => {
+  await page.goto("/?refresh=0&mode=server");
+  await page.waitForTimeout(1000);
+  await page.getByLabel("Select 1000").check();
+  await page.getByLabel("Select 1001").check();
+  await page.getByRole("button", { name: /next page/i }).first().click();
+  await page.waitForTimeout(600);
+  const first = await page.locator("tr[data-grid-line^='row:']").first().getAttribute("data-grid-line");
+  await page.getByLabel("Select " + first!.slice(4)).check();
+  const toolbarCount = await page.getByText(/^\d+ selected$/).first().innerText();
+  await page.getByRole("button", { name: "Cancel orders" }).first().click();
+  await page.waitForTimeout(300);
+  const dlg = await page.getByRole("dialog", { name: /Cancel \d+ orders/ }).innerText();
+  console.log({ toolbarCount, dlg: dlg.split("\n")[0] });
+  await page.getByRole("button", { name: "Cancel orders" }).last().click();
+  await page.waitForTimeout(800);
+  const cancelled = await page.evaluate(() => (window as any).__db().filter((r: any) => r.status === "CANCELLED").length);
+  console.log("cancelled on server", cancelled, "(ticked 3, 10 already CANCELLED) toast:", await page.getByText(/orders cancelled/).innerText());
+  expect.soft(dlg).toContain("Cancel 3 orders");
+});

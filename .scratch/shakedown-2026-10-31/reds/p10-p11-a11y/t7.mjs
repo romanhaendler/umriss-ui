@@ -1,0 +1,15 @@
+import { openRec, focused } from "./lib.mjs";
+const lang = process.argv[2] || "en";
+const s = await openRec("read", { lang }); const p = s.page;
+const say = async (l) => console.log(l.padEnd(30), "| focus:", await focused(p), "| live:", JSON.stringify(await s.live()));
+await say("load");
+await p.getByRole("button", { name: /^(Name)$/ }).click(); await say("sort name asc");
+await p.getByRole("button", { name: /^(Name)$/ }).click(); await say("sort name desc");
+await p.getByRole("searchbox").or(p.getByRole("textbox", { name: /Search|Such/ })).first().fill("Person 001"); await p.waitForTimeout(500); await say("search 'Person 001'");
+await p.getByRole("searchbox").or(p.getByRole("textbox", { name: /Search|Such/ })).first().fill(""); await p.waitForTimeout(500); await say("search cleared");
+const next = p.getByRole("button", { name: /Next|Weiter|next|nächste/i }).first();
+console.log("next count", await p.getByRole("button", { name: /Next|Weiter|nächste/i }).count());
+await next.click(); await say("next page");
+await next.click(); await say("next page 2");
+console.log(await p.locator("nav, [aria-label*=ag]").first().evaluate((e) => e.outerHTML.slice(0, 1500)).catch(()=>"no nav"));
+console.log(s.errors.join("\n")); await s.close();

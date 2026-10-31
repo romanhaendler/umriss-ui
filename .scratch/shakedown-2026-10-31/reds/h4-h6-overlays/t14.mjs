@@ -1,0 +1,10 @@
+import {open,active,openDialogs} from "./lib.mjs";
+const w=(n=400)=>new Promise(r=>setTimeout(r,n));
+const {browser,page,errors}=await open("radix");
+const st=async(l)=>console.log(l.padEnd(26),"umriss dlg",JSON.stringify(await openDialogs(page)),"radix open",await page.evaluate(()=>!!document.querySelector("[role=dialog][data-state=open]")),"focus",await active(page));
+await page.click("#r-trig"); await w(); await st("radix open");
+await page.evaluate(()=>document.getElementById("r-pal").click()); await w(500); await st("umriss modal in radix");
+await page.keyboard.press("Tab"); await w(100); await st("tab");
+await page.keyboard.press("Tab"); await w(100); await st("tab");
+await page.keyboard.press("Escape"); await w(500); await st("Escape");
+console.log(errors); await browser.close();

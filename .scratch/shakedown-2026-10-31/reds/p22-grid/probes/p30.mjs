@@ -1,0 +1,22 @@
+import { open } from "./lib.mjs";
+const p = await open("s=main", { width: 1100, height: 900 });
+const rc = async () => { await p.waitForTimeout(150); return p.evaluate(() => window.__t.rowCount); };
+const set = (c, v) => p.evaluate(([c, v]) => window.__t.setFilter(c, v), [c, v]);
+// note: k%3==0 -> null (67 of 200: k=0..199 -> 67). contains "n1": non-null k with "n1" in "n"+k
+await set("note", { terms: [{ operator: "contains", value: "n1" }] }); console.log("note contains n1", await rc());
+await set("note", { terms: [{ operator: "notContains", value: "n1" }] }); console.log("note notContains n1 (nulls?)", await rc());
+await set("note", { terms: [{ operator: "doesNotContain", value: "n1" }] }); console.log("note doesNotContain", await rc());
+console.log(p.errs.slice(-2));
+await set("note", { terms: [{ operator: "isEmpty" }] }); console.log("note isEmpty", await rc());
+await set("note", { terms: [{ operator: "equals", value: "N5" }] }); console.log("equals N5 ci", await rc());
+await set("note", { terms: [{ operator: "equals", value: "" }] }); console.log("equals ''", await rc());
+await set("note", { terms: [{ operator: "contains", value: "" }] }); console.log("contains ''", await rc());
+await set("note", { terms: [{ operator: "contains", value: "  n1 " }] }); console.log("contains ' n1 ' ws", await rc());
+await set("note", { join: "or", terms: [{ operator: "isEmpty" }, { operator: "startsWith", value: "n19" }] }); console.log("or isEmpty|startsWith n19", await rc());
+await set("note", { terms: [{ operator: "contains", value: "(" }] }); console.log("contains '(' regex-safe", await rc(), p.errs.slice(-1));
+await set("note", null);
+await set("name", { terms: [{ operator: "bogus", value: "x" }] }); console.log("bogus op", await rc(), p.errs.slice(-1));
+await set("name", { terms: [] }); console.log("empty terms", await rc(), p.errs.slice(-1));
+await set("name", "junk"); console.log("string cond", await rc(), p.errs.slice(-1));
+await set("name", null);
+await p.b.close();

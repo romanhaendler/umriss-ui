@@ -1,0 +1,26 @@
+import { test, expect, go } from "./fx";
+const S = (p: any) => p.evaluate(() => { const w = window as any; return `count=${w.__t.selection.count} log=${JSON.stringify(w.__sel.map((k: string[]) => k.length))} filtered=${w.__t.filtered.length} all=${w.__t.selection.allSelected} some=${w.__t.selection.someSelected}`; });
+const tb = (p: any) => p.locator("[class*=toolbar]").first().innerText().then((s: string) => s.replace(/\s+/g, " "));
+test("onSelectionChange during filter/page", async ({ page, logs }) => {
+  await go(page, "selch");
+  console.log("start", await S(page));
+  await page.locator("tbody tr").nth(0).getByRole("checkbox").check();
+  await page.locator("tbody tr").nth(1).getByRole("checkbox").check();
+  console.log("2 ticked", await S(page));
+  await page.getByRole("button", { name: /next page/i }).click();
+  console.log("page 2", await S(page), "| header all?", await page.locator("thead").getByRole("checkbox").evaluate((e: any) => e.checked + "/" + e.indeterminate));
+  await page.locator("thead").getByRole("checkbox").check();
+  console.log("page 2 all", await S(page));
+  await page.getByRole("searchbox").fill("Item 3");
+  await page.waitForTimeout(200);
+  console.log("search 'Item 3'", await S(page), "|", await tb(page), "| header:", await page.locator("thead").getByRole("checkbox").evaluate((e: any) => e.checked + "/" + e.indeterminate));
+  await page.locator("thead").getByRole("checkbox").uncheck();
+  console.log("untick header under search", await S(page));
+  await page.getByRole("searchbox").fill("");
+  await page.waitForTimeout(200);
+  console.log("search cleared", await S(page), "|", await tb(page));
+  const txt = await page.evaluate(() => (window as any).__t.selectionAsText().split("\n").length);
+  console.log("selectionAsText lines", txt);
+  await page.keyboard.press("Escape");
+  expect(logs).toEqual([]);
+});

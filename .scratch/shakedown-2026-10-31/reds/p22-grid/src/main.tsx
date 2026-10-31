@@ -1,0 +1,11 @@
+import { createRoot } from "react-dom/client";
+import { UmrissProvider } from "@umriss-ui/core";
+import "@umriss-ui/core/styles.css";
+import "@umriss-ui/table/styles.css";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+import { SCENES } from "./scenes";
+const q = new URLSearchParams(location.search);
+document.documentElement.style.colorScheme = q.get("dark") ? "dark" : "light";
+const LANG = q.get("lang") === "de" ? { formats: GERMAN_FORMATS, wording: GERMAN_WORDING } : undefined;
+const Scene = SCENES[q.get("s") ?? "main"]!;
+createRoot(document.getElementById("root")!).render(<UmrissProvider language={LANG}><Scene /></UmrissProvider>);

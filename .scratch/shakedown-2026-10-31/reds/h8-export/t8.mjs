@@ -1,0 +1,18 @@
+import { open, csv, sel, clickExport } from "./lib.mjs";
+const h = await open({ tree: true });
+const P = h.page;
+const ev = async (f) => { await P.evaluate(f); await P.waitForTimeout(200); };
+const show = async (n) => console.log(n, "\n  csv:", JSON.stringify(await csv(P)), "\n  sel:", JSON.stringify(await sel(P)), "\n  rows:", await P.evaluate(() => [...document.querySelectorAll("tbody tr")].length));
+await show("tree closed");
+await ev(() => window.t.unfoldAllBranches());
+await show("tree open");
+await ev(() => window.t.selection.set(["A1a", "B", "C"], true));
+await show("select A1a,B,C");
+await ev(() => { window.t.foldAllBranches(); });
+await show("folded w/ selection (A1a hidden by fold)");
+await ev(() => { window.t.setSearch("b one"); window.t.unfoldAllBranches(); });
+await show("search 'b one'");
+await ev(() => { window.t.setSearch(""); window.t.toggleSort("qty"); window.t.toggleSort("qty"); window.t.toggleColumn("name"); });
+await show("sorted qty desc, name hidden");
+console.log(h.logs);
+await h.close();

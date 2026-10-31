@@ -1,0 +1,16 @@
+import { open, csv, sel, clickExport } from "./lib.mjs";
+const h = await open({ groups: true, pageSize: 3 }); const P = h.page;
+const ev = async (f) => { await P.evaluate(f); await P.waitForTimeout(300); };
+const head = async () => (await csv(P)).split("\r\n")[0];
+const screenHead = async () => P.locator("thead tr").evaluateAll((trs) => trs.map((t) => [...t.children].map((c) => c.innerText.replace(/\s+/g, " ").trim() + (c.colSpan > 1 ? `(x${c.colSpan})` : "")).join(" | ")));
+console.log("default", await head(), await screenHead());
+await ev(() => window.t.toggleColumn("name"));
+console.log("hide name", await head(), await screenHead());
+await ev(() => window.t.setOrder(["sub", "price", "grp", "qty"]));
+console.log("reorder", await head(), await screenHead());
+await ev(() => window.t.setPin("qty", "end"));
+console.log("pin qty end", await head(), await screenHead());
+await ev(() => window.t.selection.set(["R001"], true));
+console.log("copy hdr", (await sel(P)).split("\n")[0]);
+console.log(h.logs);
+await h.close();

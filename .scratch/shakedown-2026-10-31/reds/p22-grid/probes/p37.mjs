@@ -1,0 +1,11 @@
+import { open } from "./lib.mjs";
+let p = await open("s=main", { width: 1100, height: 900 });
+await p.evaluate(() => sessionStorage.clear());
+await p.evaluate(() => { const t = window.__t; t.setFilter("note", { join: "or", terms: [{ operator: "isEmpty" }, { operator: "startsWith", value: "n19" }] }); t.setFilter("amount", { from: 100, to: 400 }); t.setFilter("dept", ["Ops", "HR"]); t.setGrouping(["dept"]); t.toggleSort("qty"); t.toggleColumn("when"); t.setPin("name", "start"); t.setWidth("note", 222); t.setPageSize(25); t.setPage(2); });
+await p.waitForTimeout(500);
+const v1 = await p.evaluate(() => JSON.stringify(window.__view)); console.log("view", v1);
+await p.reload(); await p.waitForSelector("table"); await p.waitForTimeout(600);
+console.log("after reload", await p.st(), "same view?", (await p.evaluate(() => JSON.stringify(window.__t.view))) === v1, JSON.stringify(await p.evaluate(()=>window.__t.view)).slice(0,400));
+console.log("chips", (await p.locator("[class*=toolbar]").first().innerText()).replace(/\n/g, " | "));
+console.log(p.errs);
+await p.b.close();

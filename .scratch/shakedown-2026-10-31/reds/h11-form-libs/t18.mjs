@@ -1,0 +1,10 @@
+import {open,F} from "./drive.mjs";
+const {b,p}=await open("tanstack?onSubmit",{h:1400});
+await p.getByRole("button",{name:"Submit"}).click(); await p.waitForTimeout(500);
+await F(p,"agree").scrollIntoViewIfNeeded();
+const box=await F(p,"agree").boundingBox(); const bx2=await F(p,"view").boundingBox();
+await p.screenshot({path:"shots/invalid-checkbox-radio-segmented.png",fullPage:true,clip:{x:0,y:box.y-130,width:600,height:bx2.y+bx2.height-box.y+170}});
+console.log(await p.evaluate(()=>{const g=n=>{const e=document.querySelector(`[data-field=${n}] `+(n==="agree"?"input":"")+(n==="text"?"input":"")); return null}; 
+ const c=el=>getComputedStyle(el); const box=document.querySelector("[data-field=agree] span[aria-hidden]"); const tb=document.querySelector("[data-field=text] input");
+ return {checkboxBorder:c(box).borderColor, inputBorder:c(tb).borderColor, textInvalidBorder: c(tb).borderTopColor}}));
+await b.close();

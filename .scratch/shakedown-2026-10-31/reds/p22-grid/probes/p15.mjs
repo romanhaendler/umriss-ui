@@ -1,0 +1,14 @@
+import { open } from "./lib.mjs";
+const p = await open("s=main&lang=de", { width: 1100, height: 900 });
+await p.locator("th", { hasText: /Name/i }).locator("button").nth(1).click();
+await p.waitForTimeout(300);
+console.log("popover", (await p.locator("[popover]:popover-open, [role=dialog]").last().innerText()).replace(/\n/g," | "), await p.locator("select option").allTextContents());
+await p.screenshot({ path: "shots/de-filter.png" });
+await p.keyboard.press("Escape");
+console.log("pager", await p.locator("nav").innerText().then(s=>s.replace(/\n/g," | ")));
+console.log("aria", await p.evaluate(()=>[...document.querySelectorAll("nav button")].map(b=>b.getAttribute("aria-label"))));
+await p.evaluate(()=>window.__t.setPage(2)); await p.waitForTimeout(200);
+console.log("live region", await p.locator("[role=status], [aria-live]").allTextContents());
+console.log("dates", (await p.locator("tbody tr").nth(1).innerText()).replace(/\n/g," | "));
+console.log("rowcount hdr", await p.locator("text=/von/").allTextContents());
+await p.b.close();

@@ -1,0 +1,51 @@
+import { chromium } from "playwright";
+const b = await chromium.launch(); const p = await b.newPage({viewport:{width:1280,height:800}}); const logs=[];
+p.on("console", (m) => { if (["error", "warning"].includes(m.type())) logs.push(m.text().slice(0,200).replace(/\n/g," ")); });
+p.on("pageerror", (e) => logs.push("PAGEERR " + e.message.slice(0, 200)));
+const say=console.log; const go = async (r) => { await p.goto(`http://localhost:4380/#/${r}`); await p.reload(); await p.waitForTimeout(400); };
+const act = () => p.evaluate(() => { const e=document.activeElement; return e?.tagName+":"+(e?.getAttribute("aria-label")||e?.textContent?.slice(0,20)||e?.id); });
+// profile
+await go("profile");
+await p.getByRole("button",{name:"Edit"}).click(); await p.waitForTimeout(300);
+say("modal focus:", await act(), "input value:", await p.getByRole("textbox",{name:"Name"}).inputValue());
+await p.getByRole("textbox",{name:"Name"}).fill("Grace Hopper"); await p.getByRole("button",{name:"Cancel"}).click(); await p.waitForTimeout(400);
+say("after cancel name:", await p.getByRole("heading",{level:2}).nth(1).textContent().catch(()=>"?"), "focus:", await act());
+await p.getByRole("button",{name:"Edit"}).click(); await p.waitForTimeout(300); say("reopen draft:", await p.getByRole("textbox",{name:"Name"}).inputValue());
+await p.getByRole("textbox",{name:"Name"}).fill("Grace Hopper"); await p.getByRole("button",{name:"Save"}).click(); await p.waitForTimeout(300);
+// tags: remove middle with keyboard
+const tag = p.getByRole("button",{name:/Remove|engines/i}).first();
+say("tag buttons:", await p.getByRole("group").first().locator("button").evaluateAll(e=>e.map(x=>x.getAttribute("aria-label"))));
+await p.locator("[aria-label=Skills] button").nth(1).focus(); await p.keyboard.press("Enter"); await p.waitForTimeout(200);
+say("focus after tag removed:", await act(), "tags:", await p.locator("[aria-label=Skills] button").count());
+await p.screenshot({path:"shots/profile.png"});
+// search
+await go("search");
+const s = p.getByRole("searchbox",{name:"Search"});
+await s.pressSequentially("result 1", {delay:30}); await p.waitForTimeout(700);
+say("hits:", await p.locator("ul[aria-label=Results] li").count(), "page text:", await p.getByText(/\d+ \/ \d+/).textContent());
+await s.fill("zzz"); await p.waitForTimeout(700); say("empty:", await p.getByText(/Nothing for/).textContent());
+await p.getByRole("button",{name:/clear/i}).click().catch(()=>say("no clear button by name; type=search native?")); await p.waitForTimeout(700);
+say("after clear value:", JSON.stringify(await s.inputValue()), "focus:", await act());
+await s.fill(""); await s.press("Escape"); await p.waitForTimeout(500);
+say("logs", logs.splice(0));
+// admin
+await go("admin");
+say("rows:", await p.locator("tbody tr").count(), "pager text:", await p.locator("text=/of 200/").allTextContents());
+await p.screenshot({path:"shots/admin.png"});
+await p.getByRole("button",{name:"Next page"}).click(); await p.waitForTimeout(200);
+say("page2 first row:", await p.locator("tbody tr").first().innerText());
+await p.getByRole("checkbox",{name:/select all/i}).check().catch(e=>say("selectall fail",e.message.slice(0,80)));
+await p.waitForTimeout(200); say("toolbar:", (await p.locator("text=/selected/").allTextContents()));
+await p.screenshot({path:"shots/admin-sel.png"});
+await p.getByRole("button",{name:"Next page"}).click(); await p.waitForTimeout(200);
+say("selection after paging:", await p.locator("text=/selected/").allTextContents());
+await p.getByRole("button",{name:"Delete"}).first().click(); await p.waitForTimeout(300);
+say("confirm title:", await p.getByRole("dialog").innerText().then(t=>t.slice(0,60).replace(/\n/g," ")));
+await p.getByRole("button",{name:"Delete",exact:true}).last().click(); await p.waitForTimeout(400);
+say("pager after delete:", await p.locator("text=/ of /").allTextContents(), "selected:", await p.locator("text=/selected/").allTextContents(), "focus:", await act());
+await p.screenshot({path:"shots/admin-after-del.png"});
+const sr = p.getByRole("searchbox");
+await p.getByRole("searchbox").first().fill("User 15").catch(e=>say("search fill fail", e.message.slice(0,80))); await p.waitForTimeout(500);
+say("rows after search:", await p.locator("tbody tr").count(), await p.locator("text=/ of /").allTextContents());
+say("logs", logs.splice(0));
+await b.close();

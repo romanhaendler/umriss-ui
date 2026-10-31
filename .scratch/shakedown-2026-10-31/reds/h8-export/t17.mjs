@@ -1,0 +1,13 @@
+import { open, csv, download, clickExport, ROWS } from "./lib.mjs";
+import ExcelJS from "exceljs";
+const h = await open({ lang: "de" }); const P = h.page;
+await P.evaluate(() => { const t = window.t; t.toggleColumn("price"); t.setOrder(["sub", "name", "qty"]); t.setPin("verdict", "start"); t.toggleSort("qty"); t.setSearch("e"); });
+await P.waitForTimeout(300);
+const c = (await csv(P)).replace(/^﻿/, "").split("\r\n").map((l) => l.split(";")[0]);
+const wb = new ExcelJS.Workbook(); await wb.xlsx.load(Buffer.from(await clickExport(P, "XLSX")));
+const ws = wb.worksheets[0];
+const first = []; ws.eachRow((r) => first.push(String(r.getCell(1).value)));
+console.log("csv col1:", c.join(",").slice(0, 100)); console.log("xlsx col1:", first.join(",").slice(0, 100));
+console.log("hdr csv:", (await csv(P)).split("\r\n")[0].slice(1)); console.log("hdr xlsx:", JSON.stringify(ws.getRow(1).values.slice(1)));
+console.log("equal order:", c.join() === first.map((x) => x).join() || "col1 differ (verdict first col numeric?)");
+await h.close();

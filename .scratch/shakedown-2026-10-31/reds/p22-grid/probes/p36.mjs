@@ -1,0 +1,10 @@
+import { open } from "./lib.mjs";
+let p = await open("s=wide", { width: 1100, height: 700 });
+console.log("wide: th", await p.locator("thead th").count(), "td/row", await p.locator("tbody tr").first().locator("td,th").count(), "rows", await p.locator("tbody tr").count());
+const t0 = Date.now(); 
+console.log("scrollLeft", await p.evaluate(() => { const s = document.querySelector("table").parentElement; s.scrollLeft = 5000; return [s.scrollLeft, s.scrollWidth]; }));
+await p.screenshot({ path: "shots/wide.png" });
+console.log(p.errs.slice(0, 3)); await p.b.close();
+p = await open("s=srvvirt", { width: 1100, height: 700 });
+console.log("server+virtual: rows", await p.locator("tbody tr").count(), "errs", p.errs.slice(0, 3));
+await p.b.close();

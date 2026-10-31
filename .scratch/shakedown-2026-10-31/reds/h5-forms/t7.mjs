@@ -1,0 +1,12 @@
+import {chromium} from "playwright";
+const b=await chromium.launch();
+const tz=process.argv[2]||"Europe/Berlin";
+const pg=await (await b.newContext({locale:"en",timezoneId:tz,viewport:{width:900,height:1400}})).newPage();
+const errs=[]; pg.on("console",m=>{if(["error","warning"].includes(m.type()))errs.push(m.text())}); pg.on("pageerror",e=>errs.push("PE "+e.message));
+await pg.goto("http://localhost:4330/?lang=en");
+const dt=pg.locator("button[name=dt]");
+await dt.click(); await pg.waitForTimeout(300);
+await pg.screenshot({path:"shots/dt-open.png"});
+console.log(await pg.evaluate(()=>[...document.querySelectorAll("[role=dialog] *")].filter(e=>e.children.length==0).slice(0,60).map(e=>e.tagName+"|"+(e.getAttribute("aria-label")||"")+"|"+(e.textContent||e.value||"").slice(0,15)).join("\n")));
+console.log(errs);
+await b.close();

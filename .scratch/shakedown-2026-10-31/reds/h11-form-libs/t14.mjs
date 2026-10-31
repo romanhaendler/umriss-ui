@@ -1,0 +1,12 @@
+import {open,F} from "./drive.mjs";
+const {b,p}=await open("conform?native");
+const snap=()=>p.evaluate(()=>({text:document.querySelector("[data-field=text] input").value,agree:document.querySelector("[data-field=agree] input").checked,notify:document.querySelector("[data-field=notify] input").checked,vol:document.querySelector("[data-field=volume] input").value,plan:[...document.querySelectorAll("[data-field=plan] input")].map(i=>i.checked?i.value:"").join(""),view:[...document.querySelectorAll("[data-field=view] input")].map(i=>i.checked?i.value:"").join(""),color:document.querySelector("[data-field=color] select").value}));
+console.log("initial",JSON.stringify(await snap()));
+await F(p,"text").locator("input").fill("zzz"); await F(p,"agree").locator("input").uncheck(); await F(p,"notify").locator("input").uncheck();
+await F(p,"volume").locator("input").fill("10"); await F(p,"plan").getByText("Alpha").click(); await F(p,"view").locator("input[value=a]").click(); await F(p,"color").locator("select").selectOption("a");
+console.log("changed",JSON.stringify(await snap()));
+await p.getByRole("button",{name:"ResetNative"}).click(); await p.waitForTimeout(200);
+console.log("after native reset",JSON.stringify(await snap()));
+await p.getByRole("button",{name:"Submit"}).click(); await p.waitForTimeout(200);
+console.log("FD",JSON.stringify(await p.evaluate(()=>window.__fd)));
+await b.close();

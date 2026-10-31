@@ -1,0 +1,16 @@
+import { open, sel } from "./lib.mjs";
+const h = await open({ pageSize: 5 }); const P = h.page;
+await P.evaluate(() => { window.cp = []; const o = navigator.clipboard.writeText.bind(navigator.clipboard); navigator.clipboard.writeText = (t) => { window.cp.push(t); return o(t); }; });
+const boxes = P.locator("tbody tr input[type=checkbox]");
+await boxes.nth(0).click(); await boxes.nth(2).click();
+const tryCopy = async (label) => { await P.evaluate(() => (window.cp = [])); await P.keyboard.press("Control+c"); await P.waitForTimeout(250); console.log(label, "-> focus", await P.evaluate(() => document.activeElement.tagName), "copied:", (await P.evaluate(() => window.cp.length)) > 0, "docsel:", JSON.stringify(await P.evaluate(() => getSelection().toString().slice(0, 20)))); };
+await P.locator("tbody tr").nth(1).locator("td").nth(3).click();
+await tryCopy("after click on a cell");
+await boxes.nth(0).focus(); await tryCopy("checkbox focus");
+await P.locator("tbody tr").nth(1).locator("td").nth(3).dblclick();
+await tryCopy("after dblclick (word marked)");
+await P.locator("thead th").nth(3).click();
+await tryCopy("after click on sort header");
+await P.getByRole("button", { name: "Export", exact: true }).first().focus();
+await tryCopy("focus on toolbar Export button");
+await h.close();

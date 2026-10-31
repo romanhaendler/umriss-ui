@@ -1,0 +1,10 @@
+import {open,F,logs,pickers} from "./drive.mjs";
+import {state,active} from "./probe.mjs";
+const {b,p}=await open("tanstack?onBlur");
+await pickers(p,"date");
+console.log("date after valid pick, focus:",await active(p),(await state(p)).date);
+await F(p,"tags").locator("button").first().click(); await p.getByRole("dialog").getByText("Alpha").first().click(); await p.keyboard.press("Escape");
+console.log("tags after valid pick, focus:",await active(p),(await state(p)).tags);
+await p.mouse.click(5,5); await p.waitForTimeout(100);
+console.log("after clicking away:",(await state(p)).tags.msg,(await state(p)).date.msg);
+await b.close();

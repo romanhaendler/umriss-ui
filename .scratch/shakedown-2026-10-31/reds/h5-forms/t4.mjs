@@ -1,0 +1,17 @@
+import {chromium} from "playwright";
+const b=await chromium.launch();
+const pg=await (await b.newContext({locale:"en"})).newPage();
+const errs=[]; pg.on("console",m=>{if(["error","warning"].includes(m.type()))errs.push(m.text())}); pg.on("pageerror",e=>errs.push("PE "+e.message));
+await pg.goto("http://localhost:4330/?lang=en");
+const cb=pg.locator("input[name=cb]"); const lg=()=>pg.evaluate(()=>JSON.stringify(window.log.slice(-6)));
+const st=()=>pg.locator("#state").innerText();
+const step=async(n,f)=>{await pg.evaluate(()=>window.log.length=0);await f();console.log(n,"| field:",await cb.inputValue(),"| log",await lg(),"| cb state",(await st()).match(/"cb":[^,]*/)[0])};
+await step("click+type 'Gam' (value=b)",async()=>{await cb.click();await pg.keyboard.type("Gam")});
+await step("blur w/o choosing",async()=>{await pg.keyboard.press("Tab")});
+await step("focus, select-all, type 'zzz', blur",async()=>{await cb.click();await pg.keyboard.press("Meta+A");await pg.keyboard.type("zzz");await pg.keyboard.press("Tab")});
+await step("select-all type 'gam' Enter",async()=>{await cb.click();await pg.keyboard.press("Meta+A");await pg.keyboard.type("gam");await pg.keyboard.press("Enter")});
+await step("select-all type 'alp' fast then click outside",async()=>{await cb.click();await pg.keyboard.press("Meta+A");await pg.keyboard.type("alp",{delay:0});await pg.mouse.click(5,5)});
+await step("backspace all, blur (not clearable path)",async()=>{await cb.click();await pg.keyboard.press("Meta+A");await pg.keyboard.press("Backspace");await pg.keyboard.press("Tab")});
+await step("parent set while typing",async()=>{await cb.click();await pg.keyboard.type("Be");await pg.evaluate(()=>document.getElementById("parent").click());});
+await pg.keyboard.press("Tab");console.log("after blur field",await cb.inputValue(),await st());
+console.log("errs",errs); await b.close();

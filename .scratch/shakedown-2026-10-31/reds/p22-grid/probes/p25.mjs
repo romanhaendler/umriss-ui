@@ -1,0 +1,18 @@
+import { open } from "./lib.mjs";
+let p = await open("s=rows", { width: 1100, height: 900 });
+await p.getByRole("button", { name: "Delete: Item 3" }).first().click().catch(()=>{});
+await p.locator("tbody tr").nth(3).locator("button").nth(1).click(); await p.locator("tbody tr").nth(3).locator("button").nth(1).click().catch(()=>{}); await p.waitForTimeout(300);
+console.log("delete", JSON.stringify(await p.evaluate(()=>window.__saves.at(-1))), (await p.names()).slice(2,5));
+await p.b.close();
+p = await open("s=tree", { width: 1100, height: 600 });
+console.log("tree rows", await p.locator("tbody tr").allInnerTexts().then(a=>a.map(s=>s.replace(/\s+/g," "))));
+await p.evaluate(()=>window.__t.unfoldAllBranches()); await p.waitForTimeout(200);
+console.log("unfold", await p.locator("tbody tr").allInnerTexts().then(a=>a.map(s=>s.replace(/\s+/g," "))));
+await p.evaluate(()=>window.__t.setSearch("A21")); await p.waitForTimeout(500);
+console.log("search A21", await p.locator("tbody tr").allInnerTexts().then(a=>a.map(s=>s.replace(/\s+/g," "))));
+await p.evaluate(()=>{window.__t.setSearch(""); window.__t.foldAllBranches();}); await p.waitForTimeout(200);
+await p.locator("th button", { hasText: "V" }).first().click(); await p.locator("th button", { hasText: "V" }).first().click(); await p.waitForTimeout(200);
+console.log("sort desc", await p.locator("tbody tr").allInnerTexts().then(a=>a.map(s=>s.replace(/\s+/g," "))));
+await p.locator("tbody tr").first().locator("input[type=checkbox]").click(); await p.waitForTimeout(100);
+console.log("select parent", await p.evaluate(()=>[...window.__t.selection.selected]));
+console.log(p.errs); await p.b.close();
