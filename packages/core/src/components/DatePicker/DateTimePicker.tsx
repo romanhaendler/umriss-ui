@@ -215,6 +215,7 @@ export function DateTimePicker(props: DateTimePickerProps) {
         aria-label={wording.dateTimePanel}
         id={panelId}
         className={styles.panel}
+        closeOnTabOut
       >
           <div>
             <Calendar
@@ -249,7 +250,7 @@ export function DateTimePicker(props: DateTimePickerProps) {
             >
               <span className={styles.timeLabel}>{wording.timeOfDay}</span>
               <div className={styles.timeGroup}>
-                <TimeField own={hourRef} value={hour} onValue={setHour} max={23} label={wording.hour} next={minuteRef} />
+                <TimeField own={hourRef} value={hour} onValue={setHour} max={23} label={wording.hour} next={minuteRef} pasteTakes="first" />
                 <span className={styles.timeSeparator}>:</span>
                 <TimeField own={minuteRef} value={minute} onValue={setMinute} max={59} label={wording.minute} next={withSeconds ? secondRef : undefined} />
                 {withSeconds && (

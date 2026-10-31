@@ -17,9 +17,14 @@ const sampleIn = (formats: Formats) => dayShown(SAMPLE, formats.timeZone);
 /** The sample date written in the formats in use: the field's placeholder. */
 export const sampleDate = (formats: Formats) => formats.date(sampleIn(formats));
 
+/* The digits of Arabic-Indic (ar-EG) and Persian (fa) writing as ASCII digits, so that a
+   date is read from what the formats write and from what a keyboard of those languages types. */
+const asciiDigits = (text: string) =>
+  text.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (c) => String(c.charCodeAt(0) - (c.charCodeAt(0) >= 0x06f0 ? 0x06f0 : 0x0660)));
+
 /* The order the formats write day, month and year in. */
 function orderOf(formats: Formats): Part[] {
-  const numbers = formats.date(sampleIn(formats)).match(/\d+/g) ?? [];
+  const numbers = asciiDigits(formats.date(sampleIn(formats))).match(/\d+/g) ?? [];
   const names: Record<string, Part> = { "25": "d", "12": "m", "2031": "y" };
   const order = numbers.map((n) => names[n]).filter((p): p is Part => !!p);
   return order.length === 3 ? order : ["d", "m", "y"];
@@ -36,7 +41,7 @@ function nearestYear(yy: number, todayYear: number): number {
 /** The calendar day a text names (local midnight, as the grid has them), or
     `null` where it is no date. `today` is a calendar day as well. */
 export function readTypedDate(text: string, formats: Formats, today: Date = new Date()): Date | null {
-  const trimmed = text.trim();
+  const trimmed = asciiDigits(text).trim();
   let order = orderOf(formats);
   let parts = trimmed.split(/\D+/).filter(Boolean);
   if (/^\d+$/.test(trimmed)) {
