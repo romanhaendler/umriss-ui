@@ -59,3 +59,16 @@ test("Fit all columns sets every column to its content", async ({ page }) => {
   expect(fitted).toBeLessThan(before);
   expect((await widthOf(page, "Note")) + 2).toBeGreaterThan(await widthOf(page, "Customer"));
 });
+
+test("fitting an already fitted column leaves its width as it is", { tag: "@quick" }, async ({ page }) => {
+  const table = example(page, "columns-that-share-the-width");
+  const fit = async () => {
+    await table.getByRole("button", { name: "Columns", exact: true }).click();
+    await page.getByRole("button", { name: "Fit all columns" }).click();
+    await page.keyboard.press("Escape");
+  };
+  await fit();
+  const once = await widthOf(page, "Customer");
+  await fit();
+  expect(await widthOf(page, "Customer")).toBe(once);
+});
