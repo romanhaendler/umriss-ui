@@ -143,25 +143,19 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
 
-  /* Exception, deliberately recorded rather than quietly left out: the muted
-     text reaches 4.5:1 in neither theme and on neither of the two grounds -
-     measured light 3.41:1 on the surface and 3.10:1 on the sunken surface, dark
-     4.07:1 and 3.74:1. It carries labels, units and helper texts, never body
-     text, and is therefore held here against the weaker bound of 3:1. Before
-     the bound sinks for all pairs, it had better sink visibly here for these
-     four. Whoever promotes the token to body text must first darken it (light)
-     or lighten it (dark) and strike this exception. */
+  /* The muted text carries labels, units and helper texts, so it holds the
+     full bound like every text pair. */
   {
     name: "Muted text on the surface",
     fg: "--u-color-text-muted",
     bg: "--u-color-surface",
-    minimum: { light: LARGE_TEXT, dark: LARGE_TEXT },
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
   {
     name: "Muted text on the sunken surface",
     fg: "--u-color-text-muted",
     bg: "--u-color-surface-sunken",
-    minimum: { light: LARGE_TEXT, dark: LARGE_TEXT },
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
 
   /* The tones as type (tone-contrast): each on its own pale surface and on both

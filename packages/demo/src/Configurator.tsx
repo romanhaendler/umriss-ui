@@ -83,7 +83,7 @@ export function Configurator({ configurator, packageName }: { configurator: Conf
       <Stage className="exampleStage configuratorStage">
         <Component {...props} />
       </Stage>
-      <div className="configuratorPanel">
+      <div className="configuratorPanel" data-umriss-gap="">
         {controls.map((control) => (
           <Field
             key={control.prop}

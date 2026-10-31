@@ -11,6 +11,18 @@
     max-inline-size: 100%;
   }
 
+  /* Fields stacked one under another: an error or hint of the one never
+     touches the label of the next. */
+  .field + .field {
+    margin-block-start: var(--u-space-4);
+  }
+
+  /* Where the container spaces its children by a gap of its own - core's
+     Stack and Grid mark themselves - a margin would double it. */
+  :where([data-umriss-gap]) > .field + .field {
+    margin-block-start: 0;
+  }
+
   /* The label stands beside the field: a row that wraps. The field part - the
      control and under it the hint or error - takes the rest and needs 12rem;
      where that does not fit, it wraps under the label. Baseline alignment puts

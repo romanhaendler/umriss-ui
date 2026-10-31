@@ -91,6 +91,7 @@
      rest, fully present on hover or focus of the field – at rest the field
      stays a clean input, its operation shows itself as one approaches. */
   .stepper {
+    composes: control from "#own-styles";
     flex: none;
     display: flex;
     align-items: center;

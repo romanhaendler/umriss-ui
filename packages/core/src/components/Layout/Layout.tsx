@@ -34,6 +34,7 @@ export function Stack({ ref, direction = "column", gap = 3, align, justify, wrap
   return (
     <div
       ref={ref}
+      data-umriss-gap=""
       className={cx(styles.stack, className)}
       style={{
         flexDirection: direction,
@@ -83,6 +84,7 @@ export function Grid({ ref, columns = 2, minItemWidth, gap = 4, className, style
   return (
     <div
       ref={ref}
+      data-umriss-gap=""
       className={cx(styles.grid, className)}
       style={{
         gridTemplateColumns: minItemWidth
