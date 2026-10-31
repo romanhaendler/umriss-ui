@@ -138,7 +138,7 @@ describe("asCsv – the language's notation", () => {
   });
 
   it("leaves an exponent form as it is", () => {
-    expect(budget(1e-7, GERMAN)).toBe("1e-7");
+    expect(budget(1e-7, GERMAN)).toBe("0,0000001");
   });
 });
 

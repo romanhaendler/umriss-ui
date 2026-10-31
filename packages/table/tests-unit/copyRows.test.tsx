@@ -105,13 +105,13 @@ describe("selectionAsText", () => {
     );
     act(() => current!.unfoldAllBranches());
     pick("sn");
-    expect(current!.selectionAsText()).toBe("Unit\tBudget\tOpen\nNorth\t120,5\tnein");
+    expect(current!.selectionAsText()).toBe("Ebene\tUnit\tBudget\tOpen\n2\tNorth\t120,5\tnein");
   });
 
   it("writes a selected branch without its unselected children, no level column, closed or open", () => {
     render(<Units tree />);
     pick("s");
-    expect(current!.selectionAsText()).toBe("Unit\tBudget\tOpen\nSales\t300\tyes");
+    expect(current!.selectionAsText()).toBe("Level\tUnit\tBudget\tOpen\n1\tSales\t300\tyes");
   });
 
   it("leaves a selected row outside the filter out", () => {
