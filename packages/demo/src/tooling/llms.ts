@@ -359,6 +359,11 @@ function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): str
       ...rubric.pages.map((page) => `- [${page.name}](${twinUrl(manifest.place, `/${page.id}`)}): ${page.sentence}`),
       "",
     ]),
+    /* llmstxt.org: what a reader short of room may skip. */
+    "## Optional",
+    "",
+    `- [Every page in full](${fullUrl}): the whole documentation in one file, examples' source and props tables included.`,
+    "",
   ].join("\n");
 }
 

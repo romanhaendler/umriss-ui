@@ -29,6 +29,7 @@
   "type": "module",
   "files": [
     "dist",
+    "API.md",
     "docs/llms-full.md",
     "CHANGELOG.md"
   ],
@@ -58,7 +59,8 @@
   },
   "scripts": {
     "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
-    "prepack": "pnpm run props",
+    "prepack": "pnpm run props && node ../../scripts/packManifest.mjs strip",
+    "postpack": "node ../../scripts/packManifest.mjs restore",
     "predev": "pnpm run props",
     "dev": "vite --config vite.demo.config.ts",
     "build": "vite build",
