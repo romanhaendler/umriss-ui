@@ -57,7 +57,33 @@ export function handleMenuKeyDown(
       close();
       break;
     default:
+      if (event.key.length === 1 && event.key !== " " && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        typeahead(items, index, event.key);
+      }
       break;
+  }
+}
+
+/* The letters typed within half a second form one prefix (APG menu button). A
+   single letter, typed again, moves on to the next entry that begins with it;
+   more letters narrow the prefix from the focused entry. */
+const TYPEAHEAD_PAUSE = 500;
+let typed = { text: "", at: 0 };
+
+function typeahead(items: readonly HTMLElement[], index: number, key: string) {
+  const now = Date.now();
+  const text = (now - typed.at > TYPEAHEAD_PAUSE ? "" : typed.text) + key.toLowerCase();
+  typed = { text, at: now };
+  const repeated = text.length > 1 && [...text].every((c) => c === text[0]);
+  const prefix = repeated ? (text[0] as string) : text;
+  const from = prefix.length === 1 ? index + 1 : Math.max(index, 0);
+  for (let n = 0; n < items.length; n++) {
+    const item = items[(from + n) % items.length] as HTMLElement;
+    if (item.textContent?.trim().toLowerCase().startsWith(prefix)) {
+      item.focus();
+      return;
+    }
   }
 }
 
@@ -84,19 +110,22 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
   const triggerRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const panelId = useId();
+  // ArrowUp on the trigger opens the menu at its last entry, ArrowDown and a click at its first.
+  const [enterAtLast, setEnterAtLast] = useState(false);
 
   const closeMenu = () => {
     setOpen(false);
     triggerRef.current?.focus();
   };
 
-  /* On opening, focus goes to the first selectable entry as soon as the panel
+  /* On opening, focus goes to the first selectable entry (the last, after ArrowUp) as soon as the panel
      stands, as in `ContextMenu`. An effect on `open` runs before the popover
      has found its portal target. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     panelRef.current = node;
-    node?.querySelector<HTMLButtonElement>('[role="menuitem"]:not([disabled])')?.focus();
-  }, []);
+    const items = node?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not([disabled])') ?? [];
+    (enterAtLast ? items[items.length - 1] : items[0])?.focus();
+  }, [enterAtLast]);
 
   const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) =>
     handleMenuKeyDown(event, panelRef.current, closeMenu);
@@ -115,7 +144,15 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
         "aria-controls": open ? panelId : undefined,
         onClick: (event: ReactMouseEvent<HTMLElement>) => {
           (triggerProps.onClick as ((e: ReactMouseEvent<HTMLElement>) => void) | undefined)?.(event);
+          setEnterAtLast(false);
           setOpen(!open);
+        },
+        onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => {
+          (triggerProps.onKeyDown as ((e: ReactKeyboardEvent<HTMLElement>) => void) | undefined)?.(event);
+          if (event.defaultPrevented || (event.key !== "ArrowDown" && event.key !== "ArrowUp")) return;
+          event.preventDefault();
+          setEnterAtLast(event.key === "ArrowUp");
+          setOpen(true);
         },
       })}
       <Popover

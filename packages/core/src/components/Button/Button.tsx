@@ -38,6 +38,7 @@ export function Button({
   className,
   children,
   type,
+  onClick,
   ...rest
 }: ButtonProps) {
   const size = useControlSize(ownSize);
@@ -46,9 +47,12 @@ export function Button({
       ref={ref}
       type={type ?? "button"}
       className={cx(styles.button, styles[variant], styles[size], className)}
-      disabled={disabled || loading}
+      disabled={disabled}
       aria-busy={loading || undefined}
+      // Loading is not `disabled`: a disabled button drops the focus a pressed submit holds.
+      aria-disabled={loading && !disabled ? true : undefined}
       {...rest}
+      onClick={loading ? (event) => event.preventDefault() : onClick}
     >
       {loading && <Spinner className={styles.spinner} />}
       <span className={styles.label}>{children}</span>
