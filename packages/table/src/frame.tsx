@@ -269,6 +269,7 @@ export function Frame({
           ref={tableRef}
           role={lines || entries ? "treegrid" : gridMode ? "grid" : undefined}
           aria-multiselectable={gridMode && selectable ? true : undefined}
+          aria-colcount={gridMode ? columnCount : undefined}
           aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
           onKeyDown={gridEvents?.onKeyDown}
           onFocus={gridEvents?.onFocus}
@@ -321,6 +322,7 @@ export function Frame({
             ids={gridIds}
             editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
             outside={gridEvents?.outside}
+            settle={gridEvents?.settle}
           />
         )}
       </div>

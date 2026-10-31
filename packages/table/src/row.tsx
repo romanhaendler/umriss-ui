@@ -409,6 +409,8 @@ function Cell({
   return (
     <Tag
       scope={spec.rowHeader ? "row" : undefined}
+      /* The fold's own label is not part of the row's name. */
+      aria-label={spec.rowHeader && tree ? rowName : undefined}
       className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
       style={pin.style}
       data-edit={editKind}

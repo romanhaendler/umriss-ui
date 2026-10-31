@@ -9,6 +9,10 @@ import { NEW_LINE } from "./gridState";
 import type { Active } from "./gridState";
 import type { EditingActions, GridInput } from "./gridEditing";
 
+/** The key of the column groups' row: reached by ArrowUp from the head, but
+    not one of the lines the walk counts. */
+export const GROUP_LINE = "head-group";
+
 export const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
 
 /** The cells of a line, with the column each begins at. */
@@ -34,6 +38,25 @@ function placeOfCell(table: HTMLTableElement, target: EventTarget | null): Place
   if (!cell || !row || line === undefined || row.closest("table") !== table) return null;
   const { start, end } = cellsOf(row).find((c) => c.cell === cell)!;
   return { cell, line, column: start, end };
+}
+
+/** The cell of the column groups' row over a column: the one covering it, or
+    - over a blank - the nearest group's. */
+function groupCell(row: HTMLTableRowElement, column: number): HTMLTableCellElement | undefined {
+  const cells = cellsOf(row).filter((c) => !c.cell.hasAttribute("data-blank"));
+  const distance = (c: { start: number; end: number }) => (column < c.start ? c.start - column : column >= c.end ? column - c.end + 1 : 0);
+  return cells.reduce<(typeof cells)[number] | undefined>((best, c) => (!best || distance(c) < distance(best) ? c : best), undefined)?.cell;
+}
+
+/** A key in the column groups' row: arrows along its groups, down to the head. */
+function onGroupKey(input: GridInput, table: HTMLTableElement, place: Place, event: ReactKeyboardEvent<HTMLTableElement>) {
+  const groups = cellsOf(place.cell.parentElement as HTMLTableRowElement).filter((c) => !c.cell.hasAttribute("data-blank"));
+  const i = groups.findIndex((c) => c.cell === place.cell);
+  const to = { ArrowLeft: groups[i - 1], ArrowRight: groups[i + 1], Home: groups[0], End: groups.at(-1) }[event.key];
+  if (event.key === "ArrowDown") moveTo(input, table, { line: 0, column: place.column });
+  else if (!to && !(event.key in MOVES) && event.key !== " ") return;
+  else to?.cell.focus({ preventScroll: true });
+  event.preventDefault();
 }
 
 const MOVES: Readonly<Record<string, GridMove>> = {
@@ -76,7 +99,12 @@ function moveTo({ grid, lines, ids, virtual }: GridInput, table: HTMLTableElemen
   const row = Array.from(table.querySelectorAll<HTMLTableRowElement>("tr[data-grid-line]")).find((r) => r.dataset.gridLine === line.key);
   const cell = row ? cellsOf(row).find((c) => p.column >= c.start && p.column < c.end)?.cell : undefined;
   /* The head sticks, always in view: scrolled into view it sat in the
-     scroll padding kept for it, and the body jumped up beneath it. */
+     scroll padding kept for it, and the body jumped up beneath it. A head that
+     does not stick is scrolled to by taking the area to its top. */
+  if (line.key === "head") {
+    if (virtual) virtual.showRow(0);
+    else if (table.parentElement) table.parentElement.scrollTop = 0;
+  }
   if (cell) cell.focus({ preventScroll: line.key === "head" });
   else {
     grid.focus.want("cell");
@@ -94,6 +122,10 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
   if (event.defaultPrevented) return;
   const place = placeOfCell(table, event.target);
   if (!place) return;
+  if (place.line === GROUP_LINE) {
+    if (event.target === place.cell && !event.ctrlKey && !event.metaKey && !event.altKey) onGroupKey(input, table, place, event);
+    return;
+  }
   const here: GridPosition = { line: keys.indexOf(place.line), column: goalIn(place, grid.state.active) };
   if (here.line < 0) return;
 
@@ -150,19 +182,27 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
     }
     return;
   }
-  if (event.altKey || event.metaKey) return;
-  const move = event.ctrlKey ? { Home: "first", End: "last" }[event.key] : MOVES[event.key];
+  if (event.altKey) return;
+  /* Ctrl with Home and End, and on a Mac Cmd with those and the arrows, go to
+     the grid's edges. */
+  const edge: Record<string, GridMove> = { Home: "first", End: "last", ...(event.metaKey && { ArrowUp: "first", ArrowDown: "last", ArrowLeft: "lineStart", ArrowRight: "lineEnd" }) };
+  const move = event.ctrlKey || event.metaKey ? edge[event.key] : MOVES[event.key];
   if (move) {
     event.preventDefault();
-    moveTo(input, table, stepGrid(lines, here, move as GridMove, pageOf(place.cell, table)));
+    const up = (move === "up" || move === "pageUp") && here.line === 0;
+    const group = up ? table.querySelector<HTMLTableRowElement>(`tr[data-grid-line="${GROUP_LINE}"]`) : null;
+    if (group) groupCell(group, here.column)?.focus({ preventScroll: true });
+    else moveTo(input, table, stepGrid(lines, here, move, pageOf(place.cell, table)));
     return;
   }
-  if (event.ctrlKey) return;
+  if (event.ctrlKey || event.metaKey) return;
   /* Space selects the row, as in AG Grid and MUI - the key its checkbox
      answers to, from any of its cells. Without a selection it does
      nothing, and never starts an edit: it would open editors on the way
      down the page. */
   if (event.key === " ") {
+    /* On a head cell the browser would scroll the area, and nothing is asked. */
+    if (place.line === "head") event.preventDefault();
     const at = rowAt(here);
     if (select && at && place.line !== NEW_LINE) {
       event.preventDefault();
@@ -233,6 +273,7 @@ export function onFocus({ grid, lines, ids }: GridInput, { save, refuse }: Editi
     return;
   }
   grid.focus.want(null);
+  grid.focus.hold(place.cell);
   /* From the state as the key just left it: a key moves the Active cell
      and focuses it in one event, and the focus must not undo the goal. */
   grid.setState((s) => {
