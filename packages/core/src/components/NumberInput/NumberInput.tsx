@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import {
   clampNumber,
   decimalsAllowed,
@@ -24,16 +25,23 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement> {
-  /** The number, or `null` for "not stated". An empty field is not zero:
-      a quantity that was not measured is not a quantity of zero. */
-  value: number | null;
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement> {
+  /** The number, or `null` (or `undefined`) for "not stated". An empty
+      field is not zero: a quantity that was not measured is not a quantity
+      of zero. With it the field is controlled; without it the field keeps
+      the number itself, from `defaultValue`. */
+  value?: number | null;
+  /** Uncontrolled: the number to start at.
+      @default null */
+  defaultValue?: number | null;
   /** Runs on every valid input, with `null` for the emptied field – and
       always clamped: what goes out lies between `min` and `max`, by every
       route, while typing included. Only the text in the field may still
       stand outside while typing; on leaving it is set to the clamped
       value. */
-  onChange: (value: number | null) => void;
+  onValueChange?: (value: number | null) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  onChange?: (value: number | null) => void;
   /** Lower bound. Every reported value is clamped; the text in the field
       follows on leaving. */
   min?: number;
@@ -82,11 +90,9 @@ const adornmentChars = (adornment: ReactNode) =>
  * present on hover or focus. Holding one down repeats the step (a short
  * run-up, then briskly); min/max disable the respective button.
  */
-export function NumberInput(
-  {
+export function NumberInput(props: NumberInputProps) {
+  const {
     ref,
-    value: valueGiven,
-    onChange,
     min,
     max,
     step = 1,
@@ -104,9 +110,11 @@ export function NumberInput(
     onFocus,
     onBlur,
     onKeyDown,
-    ...rest
-  }: NumberInputProps,
-) {
+    ...fieldRest
+  } = props;
+  // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
+  const rest = withoutFieldProps(fieldRest);
+  const [valueGiven, onChange] = useFieldValue<number | null>("NumberInput", props, null);
   const value = typeof valueGiven === "number" ? valueGiven : null;
   useShapeWarning("NumberInput", "value", valueGiven != null && typeof valueGiven !== "number", "a number or null");
   const size = useControlSize(ownSize);

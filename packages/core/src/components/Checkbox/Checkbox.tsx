@@ -12,11 +12,14 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
   label?: ReactNode;
   /** Partially checked (e.g. "select all" with a mixed selection). */
   indeterminate?: boolean;
+  /** Runs with the new state on every click. `onChange` stays for the
+      event - what `register` and Formik read. */
+  onCheckedChange?: (checked: boolean) => void;
 }
 
 /** A native checkbox with its label beside it; `indeterminate` shows the mixed
     state. Inside a `FormField` it takes the field's id and description. */
-export function Checkbox({ ref, label, indeterminate = false, className, style, id, ...rest }: CheckboxProps) {
+export function Checkbox({ ref, label, indeterminate = false, className, style, id, onChange, onCheckedChange, ...rest }: CheckboxProps) {
   const innerRef = useRef<HTMLInputElement>(null);
   useImperativeHandle(ref, () => innerRef.current as HTMLInputElement);
 
@@ -42,6 +45,15 @@ export function Checkbox({ ref, label, indeterminate = false, className, style, 
         aria-required={field?.required || undefined}
         className={styles.input}
         {...rest}
+        /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
+        onChange={
+          onChange || onCheckedChange
+            ? (event) => {
+                onChange?.(event);
+                onCheckedChange?.(event.target.checked);
+              }
+            : undefined
+        }
       />
       <span className={styles.box} aria-hidden="true">
         <svg viewBox="0 0 10 8" className={styles.check}>
