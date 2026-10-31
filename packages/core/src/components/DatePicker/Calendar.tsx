@@ -105,19 +105,27 @@ export function Calendar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The focus follows the active day - but only if it already lies in the grid.
-  // Otherwise the calendar would, for example, take the focus away from the time
-  // field again.
+  /* A key that moves the active day set this: when it carries the day into
+     another month, the focused button is gone by the time the effect runs, and
+     the focus has fallen to the body. */
+  const keyMoved = useRef(false);
+
+  // The focus follows the active day - but only if it already lies in the grid
+  // (or a key in the grid has just left it with the month). Otherwise the
+  // calendar would, for example, take the focus away from the time field again.
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
-    if (!grid.contains(document.activeElement)) return;
+    const carried = keyMoved.current;
+    keyMoved.current = false;
+    if (!carried && !grid.contains(document.activeElement)) return;
     grid.querySelector<HTMLButtonElement>('[data-active="true"]')?.focus();
-  }, [active]);
+  }, [active, view]);
 
   const handleGridKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     const step = dayStep(event.key);
     if (step !== undefined) {
+      keyMoved.current = true;
       event.preventDefault();
       const next = clampDay(addDays(active, step), bounds);
       onActive(next);
@@ -127,6 +135,7 @@ export function Calendar({
     const jumped = jumpKey(event.key, event.shiftKey, active, formats.weekStart);
     if (jumped) {
       const moved = clampDay(jumped, bounds);
+      keyMoved.current = true;
       event.preventDefault();
       onActive(moved);
       if (viewFollows(moved, view)) onView(startOfMonth(moved));

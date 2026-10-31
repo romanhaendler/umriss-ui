@@ -17,9 +17,11 @@ export interface TimeFieldProps {
   next?: React.RefObject<HTMLInputElement | null>;
   own?: React.RefObject<HTMLInputElement | null>;
   disabled?: boolean;
+  /** Which number of a pasted "14:30" the field takes: the hour's is the first, the minute's and second's the last. */
+  pasteTakes?: "first" | "last";
 }
 
-export function TimeField({ value, onValue, max, label, next, own, disabled = false }: TimeFieldProps) {
+export function TimeField({ value, onValue, max, label, next, own, disabled = false, pasteTakes = "last" }: TimeFieldProps) {
   const wording = useWording();
   // The ref mirrors the current value, so that the hold repetition never
   // calculates on stale closures.
@@ -71,7 +73,11 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
         ref={own}
         type="text"
         inputMode="numeric"
+        role="spinbutton"
         aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={max}
+        aria-valuenow={Number.parseInt(value, 10) || 0}
         disabled={disabled}
         className={styles.timeField}
         value={value}
@@ -96,6 +102,14 @@ export function TimeField({ value, onValue, max, label, next, own, disabled = fa
           }
         }}
         onKeyDown={handleKeyDown}
+        onPaste={(event) => {
+          /* "30", "14" or "14:30": the field takes its own number of what was pasted, clamped. */
+          const numbers = event.clipboardData.getData("text").match(/\d+/g);
+          if (!numbers) return;
+          event.preventDefault();
+          fresh.current = true;
+          onValue(pad2(Math.min(max, Number.parseInt((pasteTakes === "first" ? numbers[0] : numbers.at(-1))!, 10))));
+        }}
         onFocus={(event) => {
           fresh.current = true;
           event.target.select();
