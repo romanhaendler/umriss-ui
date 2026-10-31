@@ -32,7 +32,7 @@ import {
 import { errorBody, newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
-import { awaitsFit, useFit } from "./fit";
+import { awaitsFit, fits, useFit } from "./fit";
 import { linePitch } from "./pinned";
 import { FootRow, HeadRow } from "./headFoot";
 import { MatchOffer } from "./matchOffer";
@@ -149,6 +149,11 @@ export function Frame({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of the selection is said
   }, [chosen?.selected, chosen?.except]);
 
+  /* Placeholders stand where loading has no row to keep: the counts and the
+     pager then say nothing. */
+  const skeleton = loading && error === undefined && (registry.hook?.publicSnapshot.visible.length ?? 0) === 0;
+  useLayoutEffect(() => registry.setSkeleton(skeleton), [registry, skeleton]);
+
   const hook = registry.hook;
   if (!hook) return null;
 
@@ -234,7 +239,7 @@ export function Frame({
 
   return (
     <>
-      {snapshot.server && selectable && <MatchOffer hook={hook} />}
+      {snapshot.server && selectable && <MatchOffer hook={hook} reserve={fits(registry)} />}
       <div
         ref={virtual?.scrollRef}
         onScroll={(event) => {

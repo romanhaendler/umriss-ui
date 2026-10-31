@@ -736,6 +736,13 @@
     font-size: var(--u-text-sm);
   }
 
+  /* The place of the offer while it has nothing to say: the height it will
+     have, its hairline unseen. */
+  .matchReserved {
+    min-height: calc(var(--u-control-height-sm) + 2 * var(--u-space-1) + 1px);
+    border-bottom-color: transparent;
+  }
+
   .toolbarInfo {
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
@@ -796,11 +803,11 @@
     }
   }
 
+  /* The type of the range beside it: figures that hold their width, not a
+     face of their own. */
   .paginationStatus {
     white-space: nowrap;
-    font-family: var(--u-font-mono);
-    font-size: var(--u-text-xs);
-    letter-spacing: var(--u-tracking-figures);
+    font-variant-numeric: tabular-nums;
   }
 
   /* ---- Column filters --------------------------------------------------- */

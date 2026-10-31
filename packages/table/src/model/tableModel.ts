@@ -82,8 +82,10 @@ export interface TableInput<Z = unknown, K extends string = string> {
   };
   /** Server mode: the rows are the page a server answered, and `rowCount` is
       its filtered set. The model then searches, filters, sorts, groups and
-      pages nothing - it would do it over one page and call that the whole. */
-  server?: { rowCount: number };
+      pages nothing - it would do it over one page and call that the whole.
+      A total of 0 is "not answered yet" - a page of a view handed in stays -
+      unless `answered` says the server did answer: then it is page 1 of 1. */
+  server?: { rowCount: number; answered?: boolean };
   /** Tree rows: the rows are the roots, and these read their children. The
       model then sorts every level on its own, filters by core's path rule and
       pages nothing. */
@@ -344,13 +346,14 @@ export function tableModel<Z, K extends string = string>(
   /* Server mode: the rows stand as the server sent them. Only the page count
      is the table's, from the server's total; the page is clamped only against
      a total that is known - with none yet (the first request is still out),
-     the page of a view handed in would otherwise fall back to one. */
+     the page of a view handed in would otherwise fall back to one. A total of
+     0 that is known is page 1 of 1. */
   if (input.server) {
     const visibleColumns = visibleOf(columns, hidden, order);
-    const { rowCount } = input.server;
+    const { rowCount, answered } = input.server;
     const size = pageSize && pageSize > 0 ? pageSize : Math.max(rowCount, 1);
     const pageCount = Math.max(1, Math.ceil(rowCount / size));
-    const currentPage = rowCount > 0 ? Math.min(Math.max(1, page), pageCount) : Math.max(1, page);
+    const currentPage = rowCount === 0 && !answered ? Math.max(1, page) : Math.min(Math.max(1, page), pageCount);
     return {
       columns: visibleColumns,
       filtered: [...rows],

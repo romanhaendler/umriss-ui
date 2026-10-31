@@ -229,6 +229,13 @@ export function useTableState<Z, K extends string = string>(
     [sortedSet, groups, lines, columns, page, modelPageSize, hidden, order, rows, search, filter, sort, grouping, server, tree],
   );
 
+  /* A page the rows no longer reach is written back as the clamped one, so
+     that rows returning do not carry the reader away from the page they saw.
+     Only where some row stands: an empty set (rows still on their way) holds
+     a page of a view handed in. */
+  const clamped = staged && !virtual && projection.filtered.length > 0 ? projection.page : page;
+  if (clamped !== page) setPageRaw(clamped);
+
   /* The hook always runs - the number of hooks must not hang on whether it
      virtualises. Without virtualisation it calculates over zero rows and the
      result is not handed out. */

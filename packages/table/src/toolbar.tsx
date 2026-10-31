@@ -95,7 +95,7 @@ export function TableToolbar({
     right = (
       <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>
         <span role="status" className={styles.filteredCount}>
-          {!restricted
+          {!restricted || registry.skeleton
             ? ""
             : snapshot.server
               ? /* The server counts the matches only; a total beside them would be a second request. */
