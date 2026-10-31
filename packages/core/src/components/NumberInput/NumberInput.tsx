@@ -4,6 +4,7 @@ import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNod
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import {
   clampNumber,
   decimalsAllowed,
@@ -25,7 +26,7 @@ import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 /** The props of `NumberInput`: a native input's attributes, with the value a
     number or `null`. */
 export interface NumberInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "size" | "prefix" | "type">, RefProp<HTMLInputElement>, FormPostProps<number> {
   /** The number, or `null` (or `undefined`) for "not stated". An empty
       field is not zero: a quantity that was not measured is not a quantity
       of zero. With it the field is controlled; without it the field keeps
@@ -110,6 +111,8 @@ export function NumberInput(props: NumberInputProps) {
     onFocus,
     onBlur,
     onKeyDown,
+    name,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -248,6 +251,8 @@ export function NumberInput(props: NumberInputProps) {
       style={{ ...extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) }), ...style }}
     >
       {prefix && <span className={styles.adornment}>{prefix}</span>}
+      {/* The plain number is posted, not the text the field shows in the reader's notation. */}
+      <FormPost entries={[[name, posted(value, String, formValue)]]} disabled={disabled} />
       <input
         ref={ref}
         type="text"

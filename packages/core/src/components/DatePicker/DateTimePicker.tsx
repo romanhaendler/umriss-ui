@@ -6,6 +6,7 @@ import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, isoWithOffset, posted, type FormPostProps } from "../../lib/FormPost";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
@@ -34,7 +35,7 @@ import { ClockGlyph } from "../../lib/glyphs";
  * with "Apply", "Now" or "Clear", not already on the click on a day.
  */
 export interface DateTimePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<Date> {
   /** The instant; `null` means none. The panel reads and sets its day and
       wall clock in the formats' zone (the reader's, unless the application names one). */
   value?: Date | null;
@@ -92,6 +93,8 @@ export function DateTimePicker(props: DateTimePickerProps) {
     min,
     max,
     className,
+    name,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -175,6 +178,8 @@ export function DateTimePicker(props: DateTimePickerProps) {
 
   return (
     <>
+      {/* ISO 8601 with the offset the formats' zone has at that instant. */}
+      <FormPost entries={[[name, posted(value, (date) => isoWithOffset(date, timeZone), formValue)]]} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
         root={rest}

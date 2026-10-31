@@ -7,6 +7,7 @@ import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, isoDay, rangeEntries, type FormPostRangeProps } from "../../lib/FormPost";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
 import { MonthPair, PresetColumn } from "./RangePanel";
@@ -33,7 +34,7 @@ export type { DateRange, RangePreset } from "./range";
  * Both ends count inclusively. There is no error state.
  */
 export interface DateRangePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps {
   /** The time span, both ends on midnight in the formats' zone (the reader's, unless the application names one) and both inclusive; `null`
       means none. */
   value?: DateRange | null;
@@ -107,6 +108,10 @@ export function DateRangePicker(props: DateRangePickerProps) {
     min,
     max,
     className,
+    name,
+    startName,
+    endName,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -205,6 +210,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
 
   return (
     <>
+      <FormPost entries={rangeEntries({ name, startName, endName, formValue }, value, (date) => isoDay(date, timeZone))} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
         root={rest}

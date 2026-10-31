@@ -4,6 +4,7 @@ import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react"
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Listbox, optionId, WINDOW_ABOVE } from "../../lib/listbox";
 import { mergeRefs } from "../../lib/mergeRefs";
@@ -29,7 +30,7 @@ export interface ComboboxOption<T extends string = string> {
 
 /** The props of `Combobox`. */
 export interface ComboboxProps<T extends string = string>
-  extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement> {
+  extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement>, FormPostProps<T> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
@@ -104,6 +105,8 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     onKeyDown,
     onClick,
     onBlur,
+    name,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -278,6 +281,8 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
             closePanel();
           }}
         />
+        {/* The value is posted, not the label the input shows. */}
+        <FormPost entries={[[name, posted(value, String, formValue)]]} disabled={disabled} />
         {clearable && !disabled && (value !== null || (query ?? "") !== "") && (
           <button
             type="button"

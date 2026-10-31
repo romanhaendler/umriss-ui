@@ -7,6 +7,7 @@ import { Popover } from "../Popover";
 import { Checkbox } from "../Checkbox";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
+import { FormPost, isoWithOffset, rangeEntries, type FormPostRangeProps } from "../../lib/FormPost";
 import { startOfMonth, sameDay, dayOnly } from "./Calendar";
 import { rangeDays, defaultPresets } from "./range";
 import { MonthPair, PresetColumn } from "./RangePanel";
@@ -75,7 +76,7 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  * DateTimePicker, separately per end of the range.
  */
 export interface DateTimeRangePickerProps
-  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement> {
+  extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostRangeProps {
   /** The time span with times at both ends; `null` means none. The panel reads
       and sets days and wall clocks in the formats' zone (the reader's, unless
       the application names one). */
@@ -154,6 +155,10 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
     min,
     max,
     className,
+    name,
+    startName,
+    endName,
+    formValue,
     ...fieldRest
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -405,6 +410,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
 
   return (
     <>
+      <FormPost entries={rangeEntries({ name, startName, endName, formValue }, value, (date) => isoWithOffset(date, timeZone))} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
         root={rest}
