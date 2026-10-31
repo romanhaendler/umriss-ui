@@ -82,7 +82,7 @@ export default function SortArrangeAndExport() {
               <Button size="sm" variant="ghost" aria-label={`Move ${label} to the left`} disabled={i === 0} onClick={() => moveLeft(id)}>
                 ←
               </Button>
-              <Checkbox label={label} checked={!t.hidden.includes(id)} onChange={() => t.toggleColumn(id)} />
+              <Checkbox label={label} checked={!t.hidden.includes(id)} onCheckedChange={() => t.toggleColumn(id)} />
             </Stack>
           );
         })}

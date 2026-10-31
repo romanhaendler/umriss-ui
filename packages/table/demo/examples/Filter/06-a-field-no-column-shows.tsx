@@ -181,7 +181,7 @@ export default function FieldNoColumnShows() {
           /* Typed as the filter's condition - no cast. */
           value={t.conditionOf(tours) ?? []}
           /* The whole new choice, every time; an empty one lifts the condition. */
-          onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
+          onValueChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
         />
       </Toolbar>
       <Column value="id" label="Shipment" rowHeader />

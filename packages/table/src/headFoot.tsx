@@ -70,7 +70,7 @@ export function HeadRow({
               aria-label={snapshot.server ? wording.selectAllOnPage : wording.selectAllRows}
               checked={snapshot.selection.allSelected}
               indeterminate={snapshot.selection.someSelected}
-              onChange={hook.pickAll}
+              onCheckedChange={hook.pickAll}
             />
           </th>
         )}

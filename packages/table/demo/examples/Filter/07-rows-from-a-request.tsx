@@ -210,7 +210,7 @@ export default function RowsFromARequest() {
           placeholder="Every status"
           options={STATUSES}
           value={t.conditionOf(statuses) ?? []}
-          onChange={(next) => t.setFilter(statuses, next.length > 0 ? next : null)}
+          onValueChange={(next) => t.setFilter(statuses, next.length > 0 ? next : null)}
         />
         <Button variant="ghost" onClick={refetch}>
           Reload

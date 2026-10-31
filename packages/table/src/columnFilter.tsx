@@ -270,7 +270,7 @@ function ListInput({
           key={option.key}
           label={option.text}
           checked={keys.has(option.key)}
-          onChange={() => toggle(option)}
+          onCheckedChange={() => toggle(option)}
         />
       ))}
     </div>
@@ -382,10 +382,10 @@ function NumberRangeInput({ condition, setCondition, format }: FilterInputProps<
   return (
     <div className={styles.rangeFields}>
       <FormField label={wording.filterFrom}>
-        <NumberInput size="sm" grouping={grouping} value={from} invalid={invalid} onChange={(value) => change("from", value)} />
+        <NumberInput size="sm" grouping={grouping} value={from} invalid={invalid} onValueChange={(value) => change("from", value)} />
       </FormField>
       <FormField label={wording.filterTo} error={invalid ? wording.rangeInvalid : undefined}>
-        <NumberInput size="sm" grouping={grouping} value={to} onChange={(value) => change("to", value)} />
+        <NumberInput size="sm" grouping={grouping} value={to} onValueChange={(value) => change("to", value)} />
       </FormField>
     </div>
   );
@@ -401,7 +401,7 @@ function PeriodInput({ condition, setCondition }: FilterInputProps<unknown, Rang
         size="sm"
         clearable
         value={period}
-        onChange={(next) => setCondition(next ? { from: next.from, to: next.to } : null)}
+        onValueChange={(next) => setCondition(next ? { from: next.from, to: next.to } : null)}
       />
     </div>
   );
@@ -577,7 +577,7 @@ function TextInput({ condition, setCondition }: FilterInputProps<unknown, TextCo
           { value: "and", label: wording.textAnd },
           { value: "or", label: wording.textOr },
         ]}
-        onChange={join}
+        onValueChange={join}
       />
       {row(1)}
     </div>

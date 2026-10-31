@@ -54,7 +54,7 @@ export default function Provider() {
       <Stack gap={4}>
         <Invoices />
         <FormField label="Received from">
-          <DatePicker value={from} onChange={setFrom} />
+          <DatePicker value={from} onValueChange={setFrom} />
         </FormField>
       </Stack>
     </UmrissProvider>

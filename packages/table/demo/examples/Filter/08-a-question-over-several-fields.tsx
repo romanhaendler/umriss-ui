@@ -192,12 +192,12 @@ export default function QuestionOverSeveralFields() {
   return (
     <Stack gap={3}>
       <Stack direction="row" gap={4} wrap>
-        <Switch label="Overdue only" checked={condition !== null} onChange={(e) => set(e.target.checked, condition?.failed ?? false)} />
+        <Switch label="Overdue only" checked={condition !== null} onCheckedChange={(checked) => set(checked, condition?.failed ?? false)} />
         <Checkbox
           label="Count failed attempts"
           disabled={condition === null}
           checked={condition?.failed ?? false}
-          onChange={(e) => set(true, e.target.checked)}
+          onCheckedChange={(checked) => set(true, checked)}
         />
       </Stack>
 
