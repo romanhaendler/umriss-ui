@@ -43,17 +43,24 @@ export interface SliderProps
   showValue?: boolean;
 }
 
-/** Decimals of a step, so that 0.1 + 0.2 stays 0.3 on the track. */
-const decimalsOf = (step: number) => (String(step).split(".")[1] ?? "").length;
+/** Decimals of a number, exponent notation included (1e-7 has seven). */
+const decimalsIn = (x: number) => {
+  const [mantissa = "", exponent = "0"] = String(x).split("e");
+  return Math.max(0, (mantissa.split(".")[1] ?? "").length - Number(exponent));
+};
+
+/** Decimals of the grid - those of `min` and of `step` - so that 0.1 + 0.2
+    stays 0.3 on the track and 0.5 + 1 stays 1.5. */
+const decimalsOf = (step: number, min = 0) => Math.min(100, Math.max(decimalsIn(step), decimalsIn(min)));
 
 /** The last value on the step grid - `max` itself only where it lies on the
     grid; the browser would otherwise show the thumb a step below the value. */
 const topOf = (min: number, max: number, step: number) =>
-  Number((min + Math.floor((max - min) / step + 1e-9) * step).toFixed(decimalsOf(step)));
+  Number((min + Math.floor((max - min) / step + 1e-9) * step).toFixed(decimalsOf(step, min)));
 
 /** A value moved onto the step grid from `min`, and inside the bounds. */
 function snap(value: number, min: number, max: number, step: number): number {
-  const onGrid = Number((min + Math.round((value - min) / step) * step).toFixed(decimalsOf(step)));
+  const onGrid = Number((min + Math.round((value - min) / step) * step).toFixed(decimalsOf(step, min)));
   return Math.min(topOf(min, max, step), Math.max(min, onGrid));
 }
 
@@ -113,7 +120,7 @@ export function Slider(props: SliderProps) {
   const [given, report, controlled] = useFieldValue<number>("Slider", props, min);
   // Uncontrolled, the start is put on the step grid; a controlled value is the caller's.
   const value = controlled ? given : snap(given, min, max, step);
-  const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step)));
+  const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step, min)));
   const text = show(value);
   // The readout's room is its longest value's: the track keeps its length as the figure changes.
   const room = Math.max(show(min).length, show(max).length);

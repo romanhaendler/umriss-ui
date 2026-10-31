@@ -212,6 +212,7 @@ export function Row({
             entry={e}
             row={row}
             kind={registry.kindOf(e, hook.rows)}
+            format={registry.shownFormat(e, hook.rows, formats.timeZone)}
             pin={withEdge(pinAt(leading + i), edges.has(e))}
             formats={formats}
             wording={wording}
@@ -326,6 +327,7 @@ function Cell({
   entry,
   row,
   kind,
+  format,
   pin,
   formats,
   wording,
@@ -342,6 +344,8 @@ function Cell({
   entry: ColumnEntry;
   row: unknown;
   kind: ReturnType<Registry["kindOf"]>;
+  /** The format the cell is written in: the column's own, or the day alone for a column of midnights. */
+  format: ReturnType<Registry["shownFormat"]>;
   pin: PinnedCell;
   formats: Formats;
   wording: Wording;
@@ -370,7 +374,7 @@ function Cell({
   } else if (spec.presentation) {
     content = (spec.presentation as (w: unknown, z: unknown) => ReactNode)(value, row);
   } else {
-    content = asText(value, spec.format, formats, wording);
+    content = asText(value, format, formats, wording);
   }
   /* One line, whatever the value is (ADR-0042): the box neither wraps nor
      grows the row, and what does not fit ends in an ellipsis that the tip

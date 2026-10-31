@@ -163,7 +163,7 @@ export function useTableState<Z, K extends string = string>(
   const sortOf = (view: TableView<K> | undefined): readonly Sort<K>[] => {
     /* The view handed in beats the application's default: whoever opens a kept
        view wants to see its sort, not the house's. */
-    if (view?.sort?.length) return [...view.sort];
+    if (view?.sort) return [...view.sort];
     if (!defaultSort) return [];
     return Array.isArray(defaultSort) ? [...defaultSort] : [defaultSort as Sort<K>];
   };
@@ -410,7 +410,8 @@ export function useTableState<Z, K extends string = string>(
   }, [widths, defaultWidths]);
 
   /* The application's setting is the default for the sort as well. A view
-     without a sort restores it anyway, so only a deviation carries it - and an
+     without a sort key restores it anyway, so only a deviation carries it (an
+     empty sort included: it is the user's choice against the default) - and an
      untouched table yields an empty view. The comparison is against
      `defaultSort`, not against the sort of the view handed in: otherwise a kept
      view would lose exactly the sort it was kept for. */
@@ -429,7 +430,7 @@ export function useTableState<Z, K extends string = string>(
   const view = useMemo<TableView<K>>(
     () => ({
       ...(search ? { search } : {}),
-      ...(sort.length && !isDefaultSort ? { sort } : {}),
+      ...(!isDefaultSort ? { sort } : {}),
       /* Without paging there is no page a view could carry - a page three in
          the view of a virtualised table would be a promise nobody redeems on
          opening. */

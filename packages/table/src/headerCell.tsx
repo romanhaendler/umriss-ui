@@ -49,21 +49,35 @@ export function HeaderCell({
     const startX = event.clientX;
     const startWidth = cell.getBoundingClientRect().width;
     const pointer = event.pointerId;
+    const before = snapshot.widths[id];
+    /* A flex column's minimum ends with its flex, once a width is set: the drag keeps it. */
+    const least = Math.max(MIN, spec.flex !== undefined ? (spec.minWidth ?? 0) : 0);
     grip.setPointerCapture(pointer);
     const onMove = (e: PointerEvent) => {
       if (e.pointerId !== pointer) return;
-      snapshot.setWidth(id, Math.max(MIN, startWidth + (e.clientX - startX)));
+      snapshot.setWidth(id, Math.max(least, startWidth + (e.clientX - startX)));
     };
-    const onEnd = (e: PointerEvent) => {
-      if (e.pointerId !== pointer) return;
+    const stop = () => {
       grip.removeEventListener("pointermove", onMove);
       grip.removeEventListener("pointerup", onEnd);
       grip.removeEventListener("pointercancel", onEnd);
+      document.removeEventListener("keydown", onKey, true);
       if (grip.hasPointerCapture(pointer)) grip.releasePointerCapture(pointer);
+    };
+    const onEnd = (e: PointerEvent) => {
+      if (e.pointerId === pointer) stop();
+    };
+    /* Escape takes the drag back: the width the column had before it. */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      snapshot.setWidth(id, before);
+      stop();
     };
     grip.addEventListener("pointermove", onMove);
     grip.addEventListener("pointerup", onEnd);
     grip.addEventListener("pointercancel", onEnd);
+    document.addEventListener("keydown", onKey, true);
   };
 
   const measureAndSet = (cell: HTMLTableCellElement | null) => {

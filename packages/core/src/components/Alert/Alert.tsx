@@ -7,7 +7,7 @@ import { cx } from "../../lib/cx";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Alert.module.css";
 import { useWording } from "../../lib/language";
-import { CrossGlyph } from "../../lib/glyphs";
+import { CrossGlyph, ToneGlyph } from "../../lib/glyphs";
 import { roleFromTone } from "../../lib/roleFromTone";
 
 /** How urgent an alert is; it also decides whether a screen reader is
@@ -48,6 +48,7 @@ export function Alert({ ref, tone = "neutral", title, actions, onDismiss, dismis
       className={cx(styles.alert, styles[tone], className)}
       {...rest}
     >
+      <ToneGlyph tone={tone} className={styles.glyph} />
       <div className={styles.content}>
         {title && <p className={styles.title}>{title}</p>}
         {children && <div className={styles.text}>{children}</div>}
