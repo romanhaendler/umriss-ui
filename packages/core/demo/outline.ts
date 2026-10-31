@@ -455,16 +455,41 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "`onValueChange` reports a number already on the step and inside the bounds, by pointer and by key alike. Pair it with a [NumberInput](#/numberinput) on the same state when the exact figure matters too.",
         ],
-        alternatives: [{ when: "An exact figure, or a range without sensible bounds", use: "numberinput" }],
+        alternatives: [
+          { when: "An exact figure, or a range without sensible bounds", use: "numberinput" },
+          { when: "A lower and an upper end", use: "rangeslider" },
+        ],
         keys: [
           { key: "Arrow Right / Arrow Up", action: "Increases the value by one step." },
           { key: "Arrow Left / Arrow Down", action: "Decreases the value by one step." },
           { key: "Page Up / Page Down", action: "Moves by a tenth of the range." },
           { key: "Home / End", action: "Moves to the lower or upper bound." },
         ],
-        limits: ["One thumb: no range with two ends.", "Marks show values; they do not catch the thumb."],
+        limits: ["One thumb: a range with two ends is the RangeSlider.", "Marks show values; they do not catch the thumb."],
         types: ["SliderProps"],
         exports: ["Slider"],
+      },
+      {
+        id: "rangeslider",
+        name: "RangeSlider",
+        sentence: "A lower and an upper end set roughly on one track (range slider): an acceptable band, a price window, shift hours. The stretch between the two ends is filled.",
+        about: [
+          "`onValueChange` reports the pair `[from, to]`, already on the step grid from `min` and inside the bounds; the ends never cross, whether moved by pointer or key. A press on the bare track moves the nearer thumb.",
+          "Each thumb is a slider of its own, named `Lower value` and `Upper value`. With a `name` the form gets `<name>Start` and `<name>End`, as the range pickers post, and a form's reset puts both back.",
+        ],
+        alternatives: [
+          { when: "One value", use: "slider" },
+          { when: "Exact figures at both ends", use: "numberinput" },
+        ],
+        keys: [
+          { key: "Arrow Right / Arrow Up", action: "Increases the focused end by one step, up to the other end." },
+          { key: "Arrow Left / Arrow Down", action: "Decreases the focused end by one step." },
+          { key: "Page Up / Page Down", action: "Moves the focused end by a tenth of the range." },
+          { key: "Home / End", action: "Moves the focused end to the lower or upper bound, or to the other end." },
+        ],
+        limits: ["No marks on the track; use the Slider's where marks are needed.", "The ends may meet; no minimum gap between them is kept."],
+        types: ["RangeSliderProps"],
+        exports: ["RangeSlider"],
       },
       {
         id: "checkbox",
@@ -665,6 +690,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         alternatives: [
           { when: "A day without a time", use: "datepicker" },
+          { when: "A time of day without a day", use: "timeinput" },
           { when: "A span with times at both ends", use: "datetimerangepicker" },
         ],
         keys: [
@@ -677,6 +703,26 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["umriss shows the reader's time (ADR-0060)."],
         types: ["DateTimePickerProps"],
         exports: ["DateTimePicker"],
+      },
+      {
+        id: "timeinput",
+        name: "TimeInput",
+        sentence: "A time of day without a day (time field): when a shift starts, when a job runs, a daily cut-off. The hour, minute and second fields of the date-time picker, standing alone.",
+        about: [
+          "The value is the text `HH:mm`, or `HH:mm:ss` with `withSeconds`, as a native time input has it - on a 24-hour clock, and the same text a form posts. `null` is empty; the first field set on an empty time brings the others to zero.",
+          "The fields type themselves onwards, and a pasted `14:30` is split between them. `onBlur` runs when focus leaves all of them, not between two.",
+        ],
+        alternatives: [
+          { when: "A day and a time of day", use: "datetimepicker" },
+          { when: "A length of time rather than a time of day", use: "numberinput" },
+        ],
+        keys: [
+          { key: "0 - 9", action: "Types the two digits of a field and moves on to the next." },
+          { key: "Arrow Up / Arrow Down", action: "Steps the field by one, round the clock." },
+        ],
+        limits: ["No 12-hour clock and no time zone: a time of day is the text it is written as."],
+        types: ["TimeInputProps"],
+        exports: ["TimeInput"],
       },
       {
         id: "daterangepicker",

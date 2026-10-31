@@ -50,7 +50,7 @@ const decimalsIn = (x: number) => {
 
 /** Decimals of the grid - those of `min` and of `step` - so that 0.1 + 0.2
     stays 0.3 on the track and 0.5 + 1 stays 1.5. */
-const decimalsOf = (step: number, min = 0) => Math.min(100, Math.max(decimalsIn(step), decimalsIn(min)));
+export const decimalsOf = (step: number, min = 0) => Math.min(100, Math.max(decimalsIn(step), decimalsIn(min)));
 
 /** The last value on the step grid - `max` itself only where it lies on the
     grid; the browser would otherwise show the thumb a step below the value. */
@@ -58,7 +58,7 @@ const topOf = (min: number, max: number, step: number) =>
   Number((min + Math.floor((max - min) / step + 1e-9) * step).toFixed(decimalsOf(step, min)));
 
 /** A value moved onto the step grid from `min`, and inside the bounds. */
-function snap(value: number, min: number, max: number, step: number): number {
+export function snap(value: number, min: number, max: number, step: number): number {
   const onGrid = Number((min + Math.round((value - min) / step) * step).toFixed(decimalsOf(step, min)));
   return Math.min(topOf(min, max, step), Math.max(min, onGrid));
 }
@@ -66,7 +66,7 @@ function snap(value: number, min: number, max: number, step: number): number {
 /** Where a key takes the value, per the APG slider pattern; `undefined` for
     a key that is not the slider's. PageUp moves by a tenth of the range on
     the step, and never by less than one step. */
-function keyed(key: string, value: number, min: number, max: number, step: number): number | undefined {
+export function keyed(key: string, value: number, min: number, max: number, step: number): number | undefined {
   const page = Math.max(step, Math.round((max - min) / 10 / step) * step);
   switch (key) {
     case "ArrowRight":

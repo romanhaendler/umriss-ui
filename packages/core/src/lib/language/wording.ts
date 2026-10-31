@@ -157,6 +157,9 @@ export interface Wording {
   /** Header of the two time columns in the range with time of day. */
   sideFrom: string;
   sideTo: string;
+  /** Accessible names of the two thumbs of a RangeSlider. */
+  rangeSliderFrom: string;
+  rangeSliderTo: string;
   /** Accessible name of the time fields, per side. */
   startHour: string;
   startMinute: string;
@@ -865,6 +868,8 @@ export const DEFAULT_WORDING: Wording = {
   second: "Second",
   sideFrom: "From",
   sideTo: "To",
+  rangeSliderFrom: "Lower value",
+  rangeSliderTo: "Upper value",
   startHour: "Start hour",
   startMinute: "Start minute",
   startSecond: "Start second",
