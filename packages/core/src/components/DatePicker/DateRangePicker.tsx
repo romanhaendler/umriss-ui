@@ -116,7 +116,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [valueGiven, onChange] = useFieldValue<DateRange | null>("DateRangePicker", props, null);
+  const [valueGiven, onChange, , formRef] = useFieldValue<DateRange | null>("DateRangePicker", props, null);
   const rangeOk = valueGiven != null && isDate(valueGiven.from) && isDate(valueGiven.to);
   const value = rangeOk ? valueGiven : null;
   useShapeWarning("DateRangePicker", "value", valueGiven != null && !rangeOk, "{ from: Date, to: Date } or null");
@@ -213,6 +213,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
       <FormPost entries={rangeEntries({ name, startName, endName, formValue }, value, (date) => isoDay(date, timeZone))} disabled={disabled} />
       <RangeTrigger
         rootRef={ref}
+        formRef={formRef}
         root={rest}
         className={className}
         wrapRef={wrapRef}

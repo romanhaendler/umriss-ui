@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
 import {
@@ -118,7 +119,7 @@ export function NumberInput(props: NumberInputProps) {
   } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
-  const [valueGiven, onChange] = useFieldValue<number | null>("NumberInput", props, null);
+  const [valueGiven, onChange, , formRef] = useFieldValue<number | null>("NumberInput", props, null);
   // NaN and ±Infinity are no number a field can show: it stays empty.
   const value = typeof valueGiven === "number" && Number.isFinite(valueGiven) ? valueGiven : null;
   useShapeWarning("NumberInput", "value", valueGiven != null && value === null, "a number or null, and a finite one");
@@ -272,7 +273,7 @@ export function NumberInput(props: NumberInputProps) {
       {/* The plain number is posted, not the text the field shows in the reader's notation. */}
       <FormPost entries={[[name, posted(value, String, formValue)]]} disabled={disabled} />
       <input
-        ref={ref}
+        ref={mergeRefs(ref, formRef)}
         type="text"
         /* A minus key only the text keyboard has, where a negative value is
            allowed; `min={0}` brings back the number pad. */
