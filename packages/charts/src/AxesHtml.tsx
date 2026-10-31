@@ -180,7 +180,10 @@ export function AxesHtml({
           axis,
           snapshot.limits.filter((g) => g.axisKey === axis.key),
           plot,
-          silhouette === null || silhouette.leaving,
+          // Neither while waiting nor under "No data": a [0, 1] marked there means nothing - unlike the
+          // categories an axis lists itself.
+          (silhouette === null || silhouette.leaving) &&
+            !(snapshot.empty && !snapshot.loading && scene.categoriesAt(axis.orientation, axis.id) === undefined),
         ),
       )}
     </div>

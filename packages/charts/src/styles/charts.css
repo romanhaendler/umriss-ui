@@ -45,11 +45,11 @@
     --uc-series-5: var(--u-chart-5, #7c3aed);
     --uc-series-6: var(--u-chart-6, #0891b2);
 
-    --uc-size-tick: 11.5px;
-    --uc-size-title: 12px;
-    --uc-size-legend: 12.5px;
+    --uc-size-tick: 0.71875rem;
+    --uc-size-title: 0.75rem;
+    --uc-size-legend: 0.78125rem;
     /* The tooltip's text; its head is an x value and takes the tick's size. */
-    --uc-size-tooltip: 12px;
+    --uc-size-tooltip: 0.75rem;
     /* A label on an axis stands tight to its tick; running text - the legend,
        the tooltip - gets a little more air. */
     --uc-leading-label: 1.25;
@@ -84,6 +84,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    /* The legend stands after the plot in the DOM and above it by `order`: Tab follows what the eye sees. */
+    reading-flow: flex-visual;
     font-family: var(--uc-font);
     color: var(--uc-color-text);
     /* Numbers run in tabular figures everywhere - axes as well as tooltip. */
@@ -560,12 +562,13 @@
 
   /* Over the plot area's corner, its position measured inline (top right; at
      the bottom where a legend stands above). Quiet - the tooltip's surface,
-     the legend entry's states -, under the tooltip and the data table. */
+     the legend entry's states -, above the tooltip, under the data table. */
   .uc-show-all {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    /* As high as the tooltip, and later in the DOM: the tooltip never covers it. */
+    z-index: 2;
     translate: calc(-100% - 6px) 6px;
     padding: 2px 8px;
     border: 1px solid var(--uc-color-axis);
@@ -696,6 +699,12 @@
     font-size: var(--uc-size-tooltip);
     line-height: var(--uc-leading-text);
     color: var(--uc-color-text);
+  }
+
+  /* Left with no hit it is an empty box: gone at once, not fading out as a stub. */
+  .uc-tooltip:empty {
+    visibility: hidden;
+    transition: none;
   }
 
   .uc-tooltip-head {
