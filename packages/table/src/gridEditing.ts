@@ -32,6 +32,8 @@ export interface GridInput {
       it from any cell of the row; with Shift (`range`) it takes the rows from the
       one toggled last. */
   select: ((row: unknown, range: boolean) => void) | undefined;
+  /** Ctrl or Cmd with A: every row, as the head checkbox gives it when not all are ticked yet. */
+  selectAll: (() => void) | undefined;
   /** Reports the row as the current one - in a table with `onCurrentRowChange`;
       Enter asks for it on a cell with nothing to edit or enter. */
   report: ((row: unknown) => void) | undefined;

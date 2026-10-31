@@ -243,6 +243,9 @@ export function Frame({
           if (blocks.start || blocks.end) markUnder(event.currentTarget);
           markBeyond(event.currentTarget, blocks);
         }}
+        /* A click on text leaves the focus on <body>, outside the table, where
+           Ctrl+C would never reach onCopyKey: the frame takes it. */
+        tabIndex={-1}
         onKeyDown={onCopyKey}
         onAnimationEnd={(event) => (event.target as Element).removeAttribute("data-copied")}
         className={styles.scroll}

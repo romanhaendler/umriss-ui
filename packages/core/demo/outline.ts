@@ -399,6 +399,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",
+          "Give a field a `name` and a `<form>` (or a React 19 `<form action>`) receives its value in `FormData`: the Combobox the value, not the label; the MultiSelect one entry per value; DatePicker `YYYY-MM-DD`; DateTimePicker ISO with the offset; a range picker `<name>Start` and `<name>End` (`startName`, `endName` rename them); NumberInput the plain number; empty `\"\"`. `formValue` writes a value another way.",
         ],
         keysOf: ["input", "numberinput", "checkbox", "select", "datepicker", "button"],
         limits: [
