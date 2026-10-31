@@ -6,6 +6,7 @@ import type {
   MouseEvent as ReactMouseEvent,
   ReactElement,
   ReactNode,
+  Ref,
 } from "react";
 import { cx } from "../../lib/cx";
 import { elementRef } from "../../lib/elementRef";
@@ -69,7 +70,7 @@ export function handleMenuKeyDown(
 export interface MenuProps {
   /** Trigger, e.g. a <Button>; must accept refs. Its own ref keeps its
       element: the menu holds the same one beside it. */
-  trigger: ReactElement<Record<string, unknown>>;
+  trigger: ReactElement<{ ref?: Ref<HTMLElement>; "aria-expanded"?: boolean; "aria-describedby"?: string; "aria-label"?: string } & Record<string, unknown>>;
   /** The entries – typically `MenuItem` and `MenuSeparator`. */
   children: ReactNode;
   /** Alignment of the panel relative to the trigger. */

@@ -109,6 +109,7 @@ function FreshnessLine({
 export function Stat({ ref, label, value: valueGiven, unit, decimals, limits, history, asOf, ages, quality, className, ...rest }: StatProps) {
   const value = typeof valueGiven === "string" ? undefined : valueGiven;
   useShapeWarning("Stat", "value", typeof valueGiven === "string", "a number, null or undefined");
+  useShapeWarning("Stat", "asOf", typeof asOf === "string", "a Date, a number of milliseconds or null");
   const formats = useFormats();
   const wording = useWording();
 

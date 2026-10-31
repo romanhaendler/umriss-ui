@@ -118,7 +118,10 @@ stylesheets by hand.
 
 **Colours** come from `--uc-*` variables that fall back to the tokens of
 `@umriss-ui/core` where they exist and to literals where they do not. The palette is `--u-chart-1` to
-`--u-chart-6`; core's README holds a brand file that sets them, light and dark. **Light and
+`--u-chart-6`; core's README holds a brand file that sets them, light and dark. Where colour alone
+does not tell the series apart (printouts, colour-blind readers), `encoding="marks"` on `Chart` gives
+each series a dash and a marker shape, and a hatch on bars, states, cells and limit bands, by the same
+palette place; the default stays `encoding="color"`. **Light and
 dark** follow the application's `color-scheme`: the canvas colours are resolved
 anew when the root element's attributes or the system preference change;
 `invalidateTheme()` covers a switch made on another ancestor. **Fonts** are not
