@@ -93,18 +93,15 @@ describe("a page-size change keeps the anchor", () => {
     expect(first()).toBe("r0");
   });
 
-  it("does not re-cut a resize while focus is in the rows, and cuts when it leaves", () => {
+  it("re-cuts a resize at once while focus is in the rows, and the focused row keeps its page and focus", () => {
     render(<Case />);
     const row = document.querySelector<HTMLElement>('tr[data-motion="r10"]')!;
     row.tabIndex = 0;
     row.focus();
     resize(20 + 8 * 20);
-    expect(count()).toBe(5);
-    act(() => {
-      screen.getByText("outside").focus();
-      vi.advanceTimersByTime(1);
-    });
     expect(count()).toBe(8);
+    expect(rowsOnPage()).toContain("r10");
+    expect(document.activeElement).toBe(row);
   });
 
   it("says nothing when the frame resizes", () => {
