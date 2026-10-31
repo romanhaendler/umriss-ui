@@ -6,7 +6,7 @@ import { VisuallyHidden } from "@umriss-ui/core";
 import type { FlatteningEntry, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
-import type { TableSnapshot } from "./types";
+import type { RowKey, TableSnapshot } from "./types";
 import { FoldMark } from "./groupLines";
 import styles from "./Table.module.css";
 
@@ -18,10 +18,10 @@ import styles from "./Table.module.css";
     an element the caller returns, not yet rendered. */
 export function detailOf(
   registry: Registry,
-  snapshot: TableSnapshot<unknown>,
+  snapshot: TableSnapshot<unknown, RowKey>,
   row: unknown,
-  key: string,
-  entry: FlatteningEntry<unknown> | undefined,
+  key: RowKey,
+  entry: FlatteningEntry<unknown, RowKey> | undefined,
 ): { content: ReactNode; open: boolean } | null {
   const content = registry.detail?.presentation(row as never);
   if (content === null || content === undefined || content === false) return null;
@@ -33,13 +33,13 @@ export function detailOf(
     lines the body draws. */
 export function openDetails(
   registry: Registry,
-  snapshot: TableSnapshot<unknown>,
+  snapshot: TableSnapshot<unknown, RowKey>,
   rows: readonly unknown[],
-  rowKey: (row: unknown) => string,
+  rowKey: (row: unknown) => RowKey,
   tree: TreeSetup | undefined,
-): Set<string> {
+): Set<RowKey> {
   const wanted = new Set([...snapshot.expanded, ...snapshot.branches]);
-  const out = new Set<string>();
+  const out = new Set<RowKey>();
   for (const row of rows) {
     const key = rowKey(row);
     if (wanted.has(key) && detailOf(registry, snapshot, row, key, tree?.entry(row))?.open) out.add(key);
@@ -52,12 +52,12 @@ export interface TreeSetup {
   /** The column that carries the tree. */
   column: ColumnEntry | undefined;
   /** Whether a root follows the row - its last line draws the root's line. */
-  beforeRoot: (key: string) => boolean;
-  entry: (row: unknown) => FlatteningEntry<unknown> | undefined;
-  parent: (key: string) => string | undefined;
+  beforeRoot: (key: RowKey) => boolean;
+  entry: (row: unknown) => FlatteningEntry<unknown, RowKey> | undefined;
+  parent: (key: RowKey) => RowKey | undefined;
   /** Opens or closes a branch - the open branches, never the search's path. */
-  set: (key: string, open: boolean) => void;
-  siblings: (key: string, open: boolean) => void;
+  set: (key: RowKey, open: boolean) => void;
+  siblings: (key: RowKey, open: boolean) => void;
 }
 
 /* The indent per level, then the fold - a leaf keeps its slot so that the
@@ -79,7 +79,7 @@ export function TreeCellContent({
   children,
 }: {
   setup: TreeSetup;
-  entry: FlatteningEntry<unknown>;
+  entry: FlatteningEntry<unknown, RowKey>;
   detail?: TreeDetail;
   name: string;
   wording: Wording;
@@ -103,7 +103,7 @@ export function TreeCellContent({
     else {
       const parent = setup.parent(entry.key);
       const table = event.currentTarget.closest("table");
-      const target = Array.from(table?.querySelectorAll<HTMLButtonElement>("[data-branch-key]") ?? []).find((b) => b.dataset.branchKey === parent);
+      const target = Array.from(table?.querySelectorAll<HTMLButtonElement>("[data-branch-key]") ?? []).find((b) => b.dataset.branchKey === String(parent));
       target?.focus();
     }
   };
@@ -134,15 +134,15 @@ export function TreeCellContent({
 
 /** The tree of a flattening: the lookups its rows and folds ask. */
 export function buildTree(
-  entries: readonly FlatteningEntry<unknown>[],
+  entries: readonly FlatteningEntry<unknown, RowKey>[],
   hook: HookSnapshot,
-  snapshot: TableSnapshot<unknown>,
+  snapshot: TableSnapshot<unknown, RowKey>,
   column: ColumnEntry | undefined,
 ): TreeSetup {
-  const byKey = new Map<string, FlatteningEntry<unknown>>();
-  const parentOf = new Map<string, string | undefined>();
-  const beforeRoot = new Set<string>();
-  const path: string[] = [];
+  const byKey = new Map<RowKey, FlatteningEntry<unknown, RowKey>>();
+  const parentOf = new Map<RowKey, RowKey | undefined>();
+  const beforeRoot = new Set<RowKey>();
+  const path: RowKey[] = [];
   entries.forEach((entry, i) => {
     byKey.set(entry.key, entry);
     path.length = entry.level;

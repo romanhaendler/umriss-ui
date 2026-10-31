@@ -69,6 +69,7 @@ export type {
   GroupFor,
   Present,
   Presentation,
+  RowKey,
 } from "./types";
 export type { Pin } from "./model/pinning";
 export type { ToolbarSize } from "./toolbarSize";

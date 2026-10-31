@@ -80,7 +80,7 @@ export function copyKeyHandler({
     } else if (chosen.length > 0) {
       text = selectionText(registry, formats, wording);
       words = wording.copiedRows(chosen.length, formats.count(chosen.length));
-      const keys = new Set(chosen.map((row) => hook.rowKey(row)));
+      const keys = new Set(chosen.map((row) => String(hook.rowKey(row))));
       marked = Array.from(currentTarget.querySelectorAll<HTMLElement>("tr[data-motion]"))
         .filter((tr) => keys.has(tr.dataset.motion!))
         .flatMap((tr) => Array.from(tr.children));

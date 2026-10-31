@@ -4,11 +4,12 @@
 import { createContext } from "react";
 import type { MouseEvent } from "react";
 import { FOCUSABLE } from "./gridKeys";
+import type { RowKey } from "./types";
 
 /** What a row reads: the key to mark, and how a choice of a row is reported -
     absent when the table does not report. */
 export const CurrentRowContext = /* @__PURE__ */ createContext<{
-  key: string | null | undefined;
+  key: RowKey | null | undefined;
   report: ((row: unknown) => void) | undefined;
 }>({ key: undefined, report: undefined });
 
@@ -19,8 +20,8 @@ export const rowOfElement = /* @__PURE__ */ new WeakMap<Element, unknown>();
 /** A primary click on a body row, outside the controls of the row. */
 export function chooseRow(
   event: MouseEvent<HTMLTableElement>,
-  rowKey: (row: unknown) => string,
-  report: (key: string, row: unknown) => void,
+  rowKey: (row: unknown) => RowKey,
+  report: (key: RowKey, row: unknown) => void,
 ) {
   const target = event.target;
   if (event.button !== 0 || !(target instanceof Element)) return;

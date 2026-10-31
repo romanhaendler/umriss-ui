@@ -38,7 +38,7 @@ import { DEV, asRows, probeStale, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition, reviveCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { ExportFormat, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
+import type { ExportFormat, RowKey, SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
 /** The conditions per column or row filter, in the order in which they were
     set. The third element marks one that came in with a view (`initialView`,
@@ -173,8 +173,8 @@ function foldablePaths(groups: readonly RowGroup<unknown>[] | undefined): string
 }
 
 /** The keys of the branches on the first `levels` levels - `1` the roots. */
-function branchesTo(rows: readonly unknown[], reader: NodeReader<unknown>, levels: number): string[] {
-  const out: string[] = [];
+function branchesTo(rows: readonly unknown[], reader: NodeReader<unknown, RowKey>, levels: number): RowKey[] {
+  const out: RowKey[] = [];
   const walk = (list: readonly unknown[], level: number) => {
     if (level >= levels) return;
     for (const row of list) {
@@ -189,7 +189,7 @@ function branchesTo(rows: readonly unknown[], reader: NodeReader<unknown>, level
   return out;
 }
 
-const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>): boolean =>
+const sameSet = <T,>(a: ReadonlySet<T>, b: ReadonlySet<T>): boolean =>
   a.size === b.size && [...a].every((id) => b.has(id));
 
 /** The widths that hold: those of the columns, and over them the dragged ones. */
@@ -212,9 +212,9 @@ function effectiveWidths(
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z>(rows: readonly Z[], options: Extract<TableOptions<Z>, { server: true }>): Table<Z, true>;
-export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z>;
-export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Table<Z, boolean> {
+export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: Extract<TableOptions<Z, Key>, { server: true }>): Table<Z, true, Key>;
+export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: TableOptions<Z, Key>): Table<Z, false, Key>;
+export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey>): Table<Z, boolean, RowKey> {
   /* A rowKey that is not a function would crash in the first row read: the table shows no rows instead. */
   const keyed = typeof options.rowKey === "function";
   const rowKeyType = typeof options.rowKey;
@@ -304,7 +304,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
-  const rowKey = useAccessor(keyed ? options.rowKey : (): string => "", rowsUnknown) as (row: unknown) => string;
+  const rowKey = useAccessor(keyed ? options.rowKey : (): RowKey => "", rowsUnknown) as (row: unknown) => RowKey;
   /* Tree rows: the rows are the roots, and their levels
      come from their children. A grouping would build levels a second way, and
      pages would tear rows from their parents - both are passed over. The
@@ -318,18 +318,18 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   useLayoutEffect(() => {
     latest.current = { children: childRows, key: rowKey };
   });
-  const [reader] = useState<NodeReader<unknown>>(() => ({
+  const [reader] = useState<NodeReader<unknown, RowKey>>(() => ({
     key: (row) => latest.current.key(row),
     children: (row) => latest.current.children?.(row),
     label: () => "",
   }));
-  const [defaultBranches] = useState<readonly string[]>(() => {
+  const [defaultBranches] = useState<readonly RowKey[]>(() => {
     const given = options.server ? undefined : options.defaultBranches;
     if (!isTree || given === undefined) return [];
     return typeof given === "number" ? branchesTo(rowsUnknown, reader, given) : [...given];
   });
-  const [branchesState, setBranchesState] = useState<readonly string[]>(() => start?.branches ?? defaultBranches);
-  const liveBranches = useMemo(() => (isTree ? new Set(allBranches(rowsUnknown, reader)) : new Set<string>()), [isTree, rowsUnknown, reader]);
+  const [branchesState, setBranchesState] = useState<readonly RowKey[]>(() => start?.branches ?? defaultBranches);
+  const liveBranches = useMemo(() => (isTree ? new Set(allBranches(rowsUnknown, reader)) : new Set<RowKey>()), [isTree, rowsUnknown, reader]);
   const branches = isTree ? branchesState.filter((key) => liveBranches.has(key)) : [];
   useMemo(() => {
     if (!isTree) return;
@@ -684,10 +684,10 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      on a page the table no longer holds. It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never
      more than the selection and the page. */
-  const [seenRows] = useState(() => new Map<string, unknown>());
+  const [seenRows] = useState(() => new Map<RowKey, unknown>());
   let selectedRows: readonly unknown[] | undefined;
   if (server) {
-    const onPage = new Set<string>();
+    const onPage = new Set<RowKey>();
     for (const row of rowsUnknown) {
       const key = rowKey(row);
       onPage.add(key);
@@ -704,7 +704,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
      reader reaches by paging, in reading order: the lines of a grouping
      without a folded group's rows, a tree's flattening, otherwise the
      filtered set - in server mode the page held. */
-  const anchor = useRef<string | null>(null);
+  const anchor = useRef<RowKey | null>(null);
   const emptied = !selection.allMatching && selection.selected.size === 0;
   useEffect(() => {
     if (emptied) anchor.current = null;
@@ -713,7 +713,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     registry.markPicked();
     selection.toggleAll();
   };
-  const pick = (key: string, range: boolean) => {
+  const pick = (key: RowKey, range: boolean) => {
     registry.markPicked();
     const reach = (b.lines ? rowsOf(b.lines) : (b.shown ?? b.filtered)).map(rowKey);
     const from = anchor.current === null ? -1 : reach.indexOf(anchor.current);
@@ -731,7 +731,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       ...(formats.timeZone && { wallClock: (d: Date) => zoneFields(d, formats.timeZone) }),
     });
 
-  const snapshot: TableSnapshot<Z> = {
+  const snapshot: TableSnapshot<Z, RowKey> = {
     rows,
     filtered: b.filtered as Z[],
     visible: (paginates || isTree ? b.visible : b.filtered) as Z[],
@@ -774,7 +774,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
       setFoldedState([]);
     },
     branches,
-    toggleBranch: (key: string) => {
+    toggleBranch: (key: RowKey) => {
       if (!liveBranches.has(key)) return;
       setBranchesState((old) => (old.includes(key) ? old.filter((k) => k !== key) : [...old, key]));
     },
@@ -800,7 +800,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
     grouping,
     tree,
     folded: foldedSet,
-    publicSnapshot: snapshot as unknown as TableSnapshot<unknown>,
+    publicSnapshot: snapshot as unknown as TableSnapshot<unknown, RowKey>,
     rowKey,
     formats,
     pins: pinsChosen,
@@ -820,8 +820,8 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z>): Tabl
   });
 
   const reach = {
-    scrollToRow: (key: string) => scrollToRow(registry, key),
-    focusCell: (key: string, column: string) => focusCell(registry, key, column),
+    scrollToRow: (key: RowKey) => scrollToRow(registry, key),
+    focusCell: (key: RowKey, column: string) => focusCell(registry, key, column),
   };
-  return { ...snapshot, ...parts, ...reach } as unknown as Table<Z>;
+  return { ...snapshot, ...parts, ...reach } as unknown as Table<Z, false, RowKey>;
 }

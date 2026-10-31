@@ -18,7 +18,7 @@ import { announce, silence } from "../../lib/announce";
 
 /** One possibility of a `Combobox`: the value it stands for and the label it
     is found by. */
-export interface ComboboxOption<T extends string = string> {
+export interface ComboboxOption<T extends string | number = string> {
   /** What comes back when this row is chosen. */
   value: T;
   /** What stands there - and what is filtered on. Text and not a node: what
@@ -29,7 +29,7 @@ export interface ComboboxOption<T extends string = string> {
 }
 
 /** The props of `Combobox`. */
-export interface ComboboxProps<T extends string = string>
+export interface ComboboxProps<T extends string | number = string>
   extends Omit<HTMLAttributes<HTMLInputElement>, "onChange" | "defaultValue">, RefProp<HTMLInputElement>, FormPostProps<T> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
@@ -85,7 +85,7 @@ export interface ComboboxProps<T extends string = string>
     The label of the chosen `value` is kept from the last `options` that held
     it, so a search that replaces the options does not empty the field - an
     initial `value` must stand among the first `options`. */
-export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
+export function Combobox<T extends string | number = string>(props: ComboboxProps<T>) {
   const {
     ref,
     options: optionsGiven,

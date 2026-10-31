@@ -5,7 +5,7 @@ import { Button, Checkbox, VisuallyHidden } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import { NOT_PINNED, pinnedCell, withEdge } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
@@ -26,7 +26,7 @@ export function HeadRow({
   registry: Registry;
   hook: HookSnapshot;
   layout: FrameLayout;
-  props: TableProps<unknown>;
+  props: TableProps<unknown, RowKey>;
   wording: Wording;
 }) {
   const { selectable = false, grid: gridMode = false } = props;

@@ -12,6 +12,7 @@
 
 import { DEFAULT_FORMATS, treeModel } from "@umriss-ui/core";
 import type { FlatteningEntry, NodeReader } from "@umriss-ui/core";
+import type { RowKey } from "../types";
 import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
 import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 /** The direction of one sort level: `asc` puts the smallest value on top,
@@ -95,11 +96,11 @@ export interface TableInput<Z = unknown, K extends string = string> {
 /** Tree rows for the model: how a row is keyed, how its children are read,
     and which branches are open. */
 export interface TreeInput<Z> {
-  key: (row: Z) => string;
+  key: (row: Z) => RowKey;
   /** `undefined` a leaf, an array a branch - the rule of core's reader. */
   children: (row: Z) => readonly Z[] | undefined;
   /** The keys of the open branches. */
-  open: ReadonlySet<string>;
+  open: ReadonlySet<RowKey>;
   /** The pre-filter: a row it does not admit is gone with its subtree. */
   admit?: (row: Z) => boolean;
 }
@@ -125,7 +126,7 @@ export interface TableProjection<Z, K extends string = string> {
   visibleLines?: Line<Z>[];
   /** Tree rows: the flattening - the rows shown, in reading order, with
       their level and state. `visible` holds their rows. */
-  entries?: readonly FlatteningEntry<Z>[];
+  entries?: readonly FlatteningEntry<Z, RowKey>[];
   /** Tree rows: every row the flattening shows, before a virtual window. */
   shown?: Z[];
   /** Tree rows: the roots that match or lead to a match - what a footer
@@ -133,7 +134,7 @@ export interface TableProjection<Z, K extends string = string> {
   roots?: Z[];
   /** Tree rows: every row of the filtered tree in reading order, open or
       not, path rows included - what the export writes. */
-  exported?: readonly FlatteningEntry<Z>[];
+  exported?: readonly FlatteningEntry<Z, RowKey>[];
   /** Tree rows: how many rows the tree has on every level - what "of 1,204"
       counts, as the rows the pre-filter admits do for a flat table. */
   total?: number;
@@ -389,7 +390,7 @@ function treeProjection<Z, K extends string>(
   const { admit } = tree;
   const level = (list: readonly Z[]) => sorted(admit ? list.filter(admit) : list);
   const childrenOf = new Map<Z, readonly Z[] | undefined>();
-  const reader: NodeReader<Z> = {
+  const reader: NodeReader<Z, RowKey> = {
     key: tree.key,
     children: (row) => {
       if (!childrenOf.has(row)) {
@@ -402,11 +403,11 @@ function treeProjection<Z, K extends string>(
     matches,
   };
   const roots = level(rows);
-  const state = { expanded: tree.open, checked: new Set<string>(), active: null, anchor: null, search: "" };
+  const state = { expanded: tree.open, checked: new Set<RowKey>(), active: null, anchor: null, search: "" };
   const entries = treeModel(roots, reader, state);
 
   /* Every branch open: the whole filtered tree, for the export and the sets. */
-  const everyKey = new Set<string>();
+  const everyKey = new Set<RowKey>();
   let total = 0;
   const walk = (list: readonly Z[]) => {
     for (const row of list) {

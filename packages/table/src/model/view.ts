@@ -30,7 +30,7 @@ export interface TableView<K extends string = string> {
   /** The paths of the folded groups. A path that no longer occurs falls out. */
   folded?: readonly string[];
   /** Tree rows: the keys of the open branches. A key that no longer occurs falls out. */
-  branches?: readonly string[];
+  branches?: readonly (string | number)[];
   /** The pinned columns, whole, once the user's choice deviates from what the
       columns declare - `{}` when every declared pin was undone. A column that
       does not exist falls out. */
@@ -64,7 +64,7 @@ export const viewKey = (view: TableView): string =>
         : value,
   );
 
-const sorted = (set: readonly string[] | undefined) => (set === undefined ? undefined : [...set].sort());
+const sorted = (set: readonly (string | number)[] | undefined) => (set === undefined ? undefined : [...set].sort());
 
 /** The view without names that no registered column carries. As long as none
     has registered it stays as it is - otherwise the first render would erase

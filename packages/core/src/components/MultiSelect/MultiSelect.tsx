@@ -23,7 +23,7 @@ import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce } from "../../lib/announce";
 
 /** One possibility of a `MultiSelect`: the value it stands for and its label. */
-export interface MultiSelectOption<T extends string = string> {
+export interface MultiSelectOption<T extends string | number = string> {
   /** What stands in `value` when this row is ticked. */
   value: T;
   /** What is shown – in the panel and as a chip in the field. */
@@ -34,7 +34,7 @@ export interface MultiSelectOption<T extends string = string> {
 }
 
 /** The props of `MultiSelect`. */
-export interface MultiSelectProps<T extends string = string>
+export interface MultiSelectProps<T extends string | number = string>
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
@@ -92,7 +92,7 @@ type Scope = "all" | "selected";
  * "selected" scope, rows that have been unticked stay visible until the scope
  * changes, so that nothing jumps away from under the mouse pointer.
  */
-export function MultiSelect<T extends string = string>(props: MultiSelectProps<T>) {
+export function MultiSelect<T extends string | number = string>(props: MultiSelectProps<T>) {
   const {
     ref,
     options: optionsGiven,
@@ -152,7 +152,7 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
      otherwise gives no word of it - and what a gesture away from the
      checkboxes added or removed. A ticked checkbox with the focus says
      "checked" itself and is left to do so. */
-  const labelOf = (optionValue: T) => options.find((option) => option.value === optionValue)?.label ?? optionValue;
+  const labelOf = (optionValue: T) => options.find((option) => option.value === optionValue)?.label ?? String(optionValue);
 
   /** `inScope` is the list before the search: the snapshot of the chosen
       while the scope holds, the chosen now when it is entered. */
@@ -320,7 +320,8 @@ export function MultiSelect<T extends string = string>(props: MultiSelectProps<T
       navs[index - 1]?.focus();
     } else if ((event.key === "Delete" || event.key === "Backspace") && target.dataset.value) {
       event.preventDefault();
-      remove(target.dataset.value as T);
+      const chosen = options.find((option) => String(option.value) === target.dataset.value);
+      if (chosen) remove(chosen.value);
       requestAnimationFrame(() => {
         const next = navElements();
         (next[Math.min(index, next.length - 1)] ?? mainRef.current)?.focus();

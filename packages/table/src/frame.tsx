@@ -9,7 +9,7 @@ import { cx } from "./cx";
 import { NewRowButton } from "./toolbar";
 import { useFlexWidths } from "./flexWidths";
 import type { Registry } from "./registry";
-import type { TableProps } from "./types";
+import type { RowKey, TableProps } from "./types";
 import { useLineMotion } from "./motion";
 import { GridContext, GridFocus, useGridState } from "./grid";
 import { rowLine } from "./model/gridWalk";
@@ -46,7 +46,7 @@ export function Frame({
   name,
 }: {
   registry: Registry;
-  props: TableProps<unknown>;
+  props: TableProps<unknown, RowKey>;
   /** The three names of the table, for the <table> (ADR-0068). */
   name: { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string };
 }) {
