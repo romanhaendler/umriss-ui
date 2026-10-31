@@ -72,7 +72,7 @@ describe("A caller's handler runs beside the component's own", () => {
     function Case() {
       const [value, setValue] = useState("a");
       return (
-        <Tabs value={value} onChange={setValue}>
+        <Tabs value={value} onValueChange={setValue}>
           <TabList aria-label="Views" onKeyDown={vi.fn()}>
             <Tab value="a">First</Tab>
             <Tab value="b" onClick={clicked}>
@@ -284,7 +284,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
   it("Tab and MenuItem: an onClick that prevents keeps their own work from running", () => {
     const changed = vi.fn();
     render(
-      <Tabs value="a" onChange={changed}>
+      <Tabs value="a" onValueChange={changed}>
         <TabList aria-label="Views">
           <Tab value="a">First</Tab>
           <Tab value="b" onClick={(event) => event.preventDefault()}>

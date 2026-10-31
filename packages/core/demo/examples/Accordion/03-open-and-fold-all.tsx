@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Accordion, AccordionItem, Button, Stack, Text } from "../../../src";
 
 export const title = "Open and fold all";
-export const lead = "Control `value` with `onChange` when a toolbar opens every section at once, or an address keeps which stand open.";
+export const lead = "Control `value` with `onValueChange` when a toolbar opens every section at once, or an address keeps which stand open.";
 
 const SECTIONS = [
   { value: "vehicle", title: "Vehicle", text: "FP 377 K, an e-van with 900 kg payload, charged to 92 %." },
@@ -26,7 +26,7 @@ export default function OpenAndFoldAll() {
           {open.length} of {SECTIONS.length} open
         </Text>
       </Stack>
-      <Accordion type="multiple" value={open} onChange={setOpen}>
+      <Accordion type="multiple" value={open} onValueChange={setOpen}>
         {SECTIONS.map((s) => (
           <AccordionItem key={s.value} value={s.value} title={s.title}>
             {s.text}

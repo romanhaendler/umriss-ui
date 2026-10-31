@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
+import { warnDeprecated } from "../../lib/dev";
 import { idPart } from "../../lib/idPart";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
@@ -23,8 +24,8 @@ function useTabs(component: string): TabsContextValue {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tabs – controlled through value + onChange, or on their own from   */
-/* defaultValue.                                                      */
+/* Tabs – controlled through value + onValueChange, or on their own   */
+/* from defaultValue.                                                 */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Tabs`. */
@@ -39,18 +40,24 @@ export interface TabsProps
   defaultValue?: string;
   /** Receives the value of the chosen tab. Controlled, the tab switches only
       once `value` follows; uncontrolled it is merely a message. */
+  onValueChange?: (value: string) => void;
+  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
   onChange?: (value: string) => void;
 }
 
 /** Tabs: a `TabList` of `Tab`s and one `TabPanel` per value. Controlled
-    through `value` and `onChange`, or uncontrolled from `defaultValue`. */
-export function Tabs({ ref, value, defaultValue, onChange, className, children, ...rest }: TabsProps) {
+    through `value` and `onValueChange`, or uncontrolled from `defaultValue`. */
+export function Tabs({ ref, value, defaultValue, onValueChange, onChange, className, children, ...rest }: TabsProps) {
   const idBase = useId();
   const [ownValue, setOwnValue] = useState(defaultValue ?? "");
   const controlled = value !== undefined;
   const change = (next: string) => {
     if (!controlled) setOwnValue(next);
-    onChange?.(next);
+    onValueChange?.(next);
+    if (onChange) {
+      warnDeprecated("Tabs onChange", "onValueChange");
+      onChange(next);
+    }
   };
 
   return (

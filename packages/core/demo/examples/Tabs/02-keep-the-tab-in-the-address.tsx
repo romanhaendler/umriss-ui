@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Stack, Tab, TabList, TabPanel, Tabs, Text } from "../../../src";
 
 export const title = "Keep the tab in the address";
-export const lead = "Control `value` with `onChange` when the visible tab belongs in the address, so a link or a reload opens the same view.";
+export const lead = "Control `value` with `onValueChange` when the visible tab belongs in the address, so a link or a reload opens the same view.";
 
 export default function KeepTheTabInTheAddress() {
   const [tab, setTab] = useState("stops");
 
   return (
     <Stack gap={3}>
-      <Tabs value={tab} onChange={setTab}>
+      <Tabs value={tab} onValueChange={setTab}>
         <TabList aria-label="Tour T-01">
           <Tab value="stops">Stops</Tab>
           <Tab value="vehicle">Vehicle</Tab>

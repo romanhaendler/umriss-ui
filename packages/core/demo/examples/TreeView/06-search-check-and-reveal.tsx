@@ -122,7 +122,7 @@ export default function SearchCheckAndReveal() {
   const withChecks = useTree(filing, {
     reader: READER,
     checked,
-    onChecked: setChecked,
+    onCheckedChange: setChecked,
     onLoadChildren: load,
     defaultExpanded: ["contracts", "framework", "documents"],
     defaultActive: "fc-nimbrel",
@@ -140,7 +140,7 @@ export default function SearchCheckAndReveal() {
   const searched = useTree(filing, {
     reader: READER,
     search: term,
-    onSearch: setTerm,
+    onSearchChange: setTerm,
   });
 
   const chosen = useMemo(() => [...checked].sort().join(", "), [checked]);

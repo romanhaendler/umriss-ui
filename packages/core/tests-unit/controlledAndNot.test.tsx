@@ -1,6 +1,6 @@
 /* Rule 2 of the README for the two that did not meet it (core-passthrough 05):
    `Tabs` were controlled only, `Card` uncontrolled only. Both now take the
-   pattern of the other fields - `value`/`defaultValue` with `onChange`,
+   pattern of the other fields - `value`/`defaultValue` with `onValueChange`,
    `collapsed`/`defaultCollapsed` with `onCollapsedChange` - and are tested at
    the seam a caller has: what it sees and what it is told. */
 
@@ -9,7 +9,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { Tab, TabList, TabPanel, Tabs } from "../src/components/Tabs";
 import { Card, CardBody, CardHeader } from "../src/components/Card";
 
-function TabsCase(props: { value?: string; defaultValue?: string; onChange?: (value: string) => void }) {
+function TabsCase(props: { value?: string; defaultValue?: string; onValueChange?: (value: string) => void }) {
   return (
     <Tabs {...props}>
       <TabList aria-label="Views">
@@ -41,7 +41,7 @@ describe("Tabs – uncontrolled", () => {
 
   it("report the switch as a message", () => {
     const changed = vi.fn();
-    render(<TabsCase defaultValue="a" onChange={changed} />);
+    render(<TabsCase defaultValue="a" onValueChange={changed} />);
     fireEvent.keyDown(screen.getByRole("tab", { name: "First" }), { key: "End" });
     expect(changed).toHaveBeenCalledWith("b");
     expect(screen.getByRole("tabpanel").textContent).toBe("Two");
@@ -51,11 +51,11 @@ describe("Tabs – uncontrolled", () => {
 describe("Tabs – controlled", () => {
   it("report and wait: the tab switches only once value follows", () => {
     const changed = vi.fn();
-    const { rerender } = render(<TabsCase value="a" onChange={changed} />);
+    const { rerender } = render(<TabsCase value="a" onValueChange={changed} />);
     fireEvent.click(screen.getByRole("tab", { name: "Second" }));
     expect(changed).toHaveBeenCalledWith("b");
     expect(screen.getByRole("tabpanel").textContent).toBe("One");
-    rerender(<TabsCase value="b" onChange={changed} />);
+    rerender(<TabsCase value="b" onValueChange={changed} />);
     expect(screen.getByRole("tabpanel").textContent).toBe("Two");
   });
 });

@@ -8,7 +8,7 @@
    be restored from a link or from a stored view. */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { isDev } from "../../lib/dev";
+import { isDev, warnDeprecated } from "../../lib/dev";
 import { useVirtual } from "../../lib/useVirtual";
 import type { VirtualRows, VirtualOptions } from "../../lib/useVirtual";
 import {
@@ -42,6 +42,7 @@ export interface TreeOptions<K, S extends Key = string> {
   defaultExpanded?: Iterable<S>;
   defaultChecked?: Iterable<S>;
   defaultActive?: S | null;
+  defaultSearch?: string;
   /** Controlled from outside; where set, it wins over the tree's own state. */
   expanded?: ReadonlySet<S>;
   checked?: ReadonlySet<S>;
@@ -50,10 +51,20 @@ export interface TreeOptions<K, S extends Key = string> {
       four values, so that a range is repeatable. */
   anchor?: S | null;
   search?: string;
+  onExpandedChange?: (next: ReadonlySet<S>) => void;
+  onCheckedChange?: (next: ReadonlySet<S>) => void;
+  onActiveChange?: (next: S | null) => void;
+  onAnchorChange?: (next: S | null) => void;
+  onSearchChange?: (text: string) => void;
+  /** The former name of `onExpandedChange`; it goes in the next minor release. @deprecated */
   onExpanded?: (next: ReadonlySet<S>) => void;
+  /** The former name of `onCheckedChange`; it goes in the next minor release. @deprecated */
   onChecked?: (next: ReadonlySet<S>) => void;
+  /** The former name of `onActiveChange`; it goes in the next minor release. @deprecated */
   onActive?: (next: S | null) => void;
+  /** The former name of `onAnchorChange`; it goes in the next minor release. @deprecated */
   onAnchor?: (next: S | null) => void;
+  /** The former name of `onSearchChange`; it goes in the next minor release. @deprecated */
   onSearch?: (text: string) => void;
   /** Enter on a node, or a click on its label. */
   onActivate?: (node: K) => void;
@@ -143,6 +154,12 @@ export function useTree<K, S extends Key = string>(
     active: activeProp,
     anchor: anchorProp,
     search: searchProp,
+    defaultSearch = "",
+    onExpandedChange,
+    onCheckedChange,
+    onActiveChange,
+    onAnchorChange,
+    onSearchChange,
     onExpanded,
     onChecked,
     onActive,
@@ -161,7 +178,7 @@ export function useTree<K, S extends Key = string>(
   );
   const [ownActive, setOwnActive] = useState<S | null>(defaultActive);
   const [ownAnchor, setOwnAnchor] = useState<S | null>(null);
-  const [ownSearch, setOwnSearch] = useState("");
+  const [ownSearch, setOwnSearch] = useState(defaultSearch);
   const [revealCount, setRevealCount] = useState(0);
 
   const snapshot = useMemo<TreeSnapshot<S>>(
@@ -231,19 +248,35 @@ export function useTree<K, S extends Key = string>(
     (next: TreeSnapshot<S>) => {
       if (next.expanded !== snapshot.expanded) {
         if (expandedProp === undefined) setOwnExpanded(next.expanded);
-        onExpanded?.(next.expanded);
+        onExpandedChange?.(next.expanded);
+        if (onExpanded) {
+          warnDeprecated("useTree onExpanded", "onExpandedChange");
+          onExpanded(next.expanded);
+        }
       }
       if (next.checked !== snapshot.checked) {
         if (checkedProp === undefined) setOwnChecked(next.checked);
-        onChecked?.(next.checked);
+        onCheckedChange?.(next.checked);
+        if (onChecked) {
+          warnDeprecated("useTree onChecked", "onCheckedChange");
+          onChecked(next.checked);
+        }
       }
       if (next.anchor !== snapshot.anchor) {
         if (anchorProp === undefined) setOwnAnchor(next.anchor);
-        onAnchor?.(next.anchor);
+        onAnchorChange?.(next.anchor);
+        if (onAnchor) {
+          warnDeprecated("useTree onAnchor", "onAnchorChange");
+          onAnchor(next.anchor);
+        }
       }
       if (next.active !== snapshot.active) {
         if (activeProp === undefined) setOwnActive(next.active);
-        onActive?.(next.active);
+        onActiveChange?.(next.active);
+        if (onActive) {
+          warnDeprecated("useTree onActive", "onActiveChange");
+          onActive(next.active);
+        }
       }
     },
     [
@@ -252,6 +285,10 @@ export function useTree<K, S extends Key = string>(
       checkedProp,
       activeProp,
       anchorProp,
+      onExpandedChange,
+      onCheckedChange,
+      onActiveChange,
+      onAnchorChange,
       onExpanded,
       onChecked,
       onActive,
@@ -370,9 +407,13 @@ export function useTree<K, S extends Key = string>(
   const setSearch = useCallback(
     (text: string) => {
       if (searchProp === undefined) setOwnSearch(text);
-      onSearch?.(text);
+      onSearchChange?.(text);
+      if (onSearch) {
+        warnDeprecated("useTree onSearch", "onSearchChange");
+        onSearch(text);
+      }
     },
-    [searchProp, onSearch],
+    [searchProp, onSearchChange, onSearch],
   );
 
   const rowWindow = useVirtual(virtual ? flattening.length : 0, {

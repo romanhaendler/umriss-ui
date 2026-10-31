@@ -35,7 +35,7 @@ const READER: NodeReader<Member> = { key: (m) => m.id, children: (m) => m.childr
 
 export default function TickASelection() {
   const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set(["arjun", "chloe"]));
-  const tree = useTree(TEAMS, { reader: READER, checked, onChecked: setChecked, defaultExpanded: ["web"] });
+  const tree = useTree(TEAMS, { reader: READER, checked, onCheckedChange: setChecked, defaultExpanded: ["web"] });
 
   return (
     <Stack gap={2}>
