@@ -13,6 +13,10 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.53.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
+
 ## 0.52.0 – A dashboard that prints, widgets told apart by place, the focus kept in the edit bar (Oct. 2026)
 
 ### Added

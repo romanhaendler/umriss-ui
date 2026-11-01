@@ -30,6 +30,10 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.53.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
+
 ## 0.52.0 – Printed, announced and in rem: a chart prints cleanly and its text grows with the root size (Oct. 2026)
 
 ### Added

@@ -18,6 +18,10 @@ moves from here under the rule above.
 
 ---
 
+## 0.53.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
+
 ## 0.52.0 – Lane headers that leave room, a lane intent from the keyboard, a schedule that prints (Oct. 2026)
 
 ### Added

@@ -32,7 +32,7 @@ export interface AccordionProps
   /** Reports the open sections after a header's click. Controlled, the
       accordion follows once `value` does; uncontrolled it is a message. */
   onValueChange?: (value: string[]) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.53 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: string[]) => void;
   /** The level of the heading each header stands in - the one that fits the
       page's outline. */

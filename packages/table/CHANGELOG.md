@@ -26,6 +26,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.53.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
+
 ## 0.52.0 – Server mode with groups, a printed table, announcements for a screen reader, keys that can be numbers (Oct. 2026)
 
 ### Added

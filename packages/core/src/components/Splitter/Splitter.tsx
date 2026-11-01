@@ -21,7 +21,7 @@ export interface SplitterProps
   defaultValue?: number;
   /** Reports every move, by pointer or key, as the first pane's share. */
   onValueChange?: (value: number) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.53 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: number) => void;
   /** The smallest share of the first pane, and where Enter collapses it to. */
   min?: number;

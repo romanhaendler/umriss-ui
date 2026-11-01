@@ -56,15 +56,15 @@ export interface TreeOptions<K, S extends Key = string> {
   onActiveChange?: (next: S | null) => void;
   onAnchorChange?: (next: S | null) => void;
   onSearchChange?: (text: string) => void;
-  /** The former name of `onExpandedChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onExpandedChange`. @deprecated since 0.53 - use `onExpandedChange`; it goes in the next minor release. */
   onExpanded?: (next: ReadonlySet<S>) => void;
-  /** The former name of `onCheckedChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onCheckedChange`. @deprecated since 0.53 - use `onCheckedChange`; it goes in the next minor release. */
   onChecked?: (next: ReadonlySet<S>) => void;
-  /** The former name of `onActiveChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onActiveChange`. @deprecated since 0.53 - use `onActiveChange`; it goes in the next minor release. */
   onActive?: (next: S | null) => void;
-  /** The former name of `onAnchorChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onAnchorChange`. @deprecated since 0.53 - use `onAnchorChange`; it goes in the next minor release. */
   onAnchor?: (next: S | null) => void;
-  /** The former name of `onSearchChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onSearchChange`. @deprecated since 0.53 - use `onSearchChange`; it goes in the next minor release. */
   onSearch?: (text: string) => void;
   /** Enter on a node, or a click on its label. */
   onActivate?: (node: K) => void;

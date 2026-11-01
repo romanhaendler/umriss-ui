@@ -41,7 +41,7 @@ export interface TabsProps
   /** Receives the value of the chosen tab. Controlled, the tab switches only
       once `value` follows; uncontrolled it is merely a message. */
   onValueChange?: (value: string) => void;
-  /** The former name of `onValueChange`; it goes in the next minor release. @deprecated */
+  /** The former name of `onValueChange`. @deprecated since 0.53 - use `onValueChange`; it goes in the next minor release. */
   onChange?: (value: string) => void;
 }
 

@@ -27,6 +27,19 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.53.0 – The old names go: a field reports only through `onValueChange`; Tabs, Accordion, Splitter and the tree name their callback too (Nov. 2026)
+
+### Added
+
+- **`onValueChange`** on Tabs, Accordion and Splitter; **`onExpandedChange`, `onCheckedChange`, `onActiveChange`, `onAnchorChange` and `onSearchChange`** on `useTree`, with `defaultSearch` for an uncontrolled search (ADR-0081).
+
+### Changed
+
+- **The deprecated `onChange(value)` is removed** from NumberInput, Combobox, MultiSelect, SegmentedControl, RadioGroup, Slider, the four date pickers and FileInput, with its development warning; on Slider `onChange` is now the native input event.
+  - Migration: replace `onChange={(value) => ...}` with `onValueChange={(value) => ...}` (`onCheckedChange` on Checkbox and Switch); a Slider handler that took a number takes the event now, or moves to `onValueChange`.
+- **`onChange` on Tabs, Accordion and Splitter, and `onExpanded`, `onChecked`, `onActive`, `onAnchor` and `onSearch` on `useTree` are deprecated** and warn once in development.
+  - Migration: Tabs, Accordion, Splitter: `onChange` -> `onValueChange`; useTree: `onExpanded` -> `onExpandedChange`, `onChecked` -> `onCheckedChange`, `onActive` -> `onActiveChange`, `onAnchor` -> `onAnchorChange`, `onSearch` -> `onSearchChange`. The old names work in 0.53.0 and are removed in 0.54.0.
+
 ## 0.52.0 – A form field says what it did: `onValueChange` everywhere, printing, a server table with groups (Oct. 2026)
 
 ### Added

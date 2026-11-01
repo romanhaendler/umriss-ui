@@ -12,6 +12,10 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.53.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
+
 ## 0.52.0 – The priority first, the list printed (Oct. 2026)
 
 ### Added
