@@ -14,6 +14,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      check:
+        description: "Publish nothing: offer npm the versions it has, to see that it still trusts this repository"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,7 +39,10 @@ jobs:
           persist-credentials: false
       - id: find
         # In dependency order: core and charts before what depends on them.
-        # A new package is added here.
+        # A new package is added here. A check takes the versions npm has
+        # instead: npm must refuse each, and it can only refuse with a token.
+        env:
+          CHECK: ${{ inputs.check }}
         run: |
           dirs=""
           for dir in core charts table alarms schedule calculation dashboard; do
@@ -42,9 +50,10 @@ jobs:
             version="$(node -p "require('./packages/$dir/package.json').version")"
             if npm view "$name@$version" version > /dev/null 2>&1; then
               echo "$name@$version is on npm"
+              [ "$CHECK" = true ] && dirs="$dirs $dir"
             else
               echo "$name@$version is not - publishing"
-              dirs="$dirs $dir"
+              [ "$CHECK" = true ] || dirs="$dirs $dir"
             fi
           done
           echo "dirs=${dirs# }" >> "$GITHUB_OUTPUT"
@@ -120,7 +129,10 @@ jobs:
       - name: Publish and tag
         env:
           DIRS: ${{ needs.find.outputs.dirs }}
+          CHECK: ${{ inputs.check }}
         run: |
+          # A check leaves no provenance statement for a version it does not publish.
+          [ "$CHECK" = true ] && export NPM_CONFIG_PROVENANCE=false
           for dir in $DIRS; do
             name="$(node -p "require('./packages/$dir/package.json').name")"
             version="$(node -p "require('./packages/$dir/package.json').version")"

@@ -53,7 +53,11 @@ marks the commit; it triggers nothing, and none is set by hand.
 No token is involved: each package on npm trusts that workflow through Trusted
 Publishing (package settings → *Trusted Publisher*: owner `romanhaendler`,
 repository `umriss-ui`, workflow `publish.yml`, environment `npm`, *Allow npm
-publish* ticked), and npm attaches the provenance itself. Under *Publishing
+publish* ticked), and npm attaches the provenance itself. Whether npm still
+trusts it - after the repository or a package's settings changed - is checked
+without publishing: *Actions → Publish → Run workflow* with `check` offers npm
+the versions it already has. npm refuses each, and it reaches the refusal only
+with a token, so a missing trust fails the run. Under *Publishing
 access* every package requires two-factor authentication and refuses tokens
 that bypass it. The `build` job packs with pnpm — only pnpm rewrites the
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
