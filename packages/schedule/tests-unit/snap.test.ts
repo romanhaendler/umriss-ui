@@ -48,3 +48,21 @@ describe("snapTime with an offset", () => {
     expect(snapTime(at, { step: 2 * HOUR, offset: 0 })).toBe(snapTime(at, 2 * HOUR));
   });
 });
+
+describe("snapTime across a clock change", () => {
+  const BERLIN = "Europe/Berlin";
+  it("snaps a handover raster onto 06:00 CET after the autumn change", () => {
+    expect(snapTime(t("2026-10-25T02:30:00+02:00"), { step: 8 * HOUR, offset: 6 * HOUR }, BERLIN)).toBe(t("2026-10-25T06:00:00+01:00"));
+  });
+
+  it("snaps a day raster onto local midnight on both change days", () => {
+    expect(snapTime(t("2026-03-29T08:00:00+02:00"), 24 * HOUR, BERLIN)).toBe(t("2026-03-29T00:00:00+01:00"));
+    expect(snapTime(t("2026-10-25T08:00:00+01:00"), 24 * HOUR, BERLIN)).toBe(t("2026-10-25T00:00:00+02:00"));
+  });
+
+  it("in New York keeps a line in the skipped hour uncorrected, and corrects the others", () => {
+    const NY = "America/New_York";
+    expect(snapTime(t("2026-03-08T03:10:00-04:00"), { step: 24 * HOUR, offset: 2.5 * HOUR }, NY)).toBe(t("2026-03-08T01:30:00-05:00"));
+    expect(snapTime(t("2026-03-08T08:00:00-04:00"), 24 * HOUR, NY)).toBe(t("2026-03-08T00:00:00-05:00"));
+  });
+});

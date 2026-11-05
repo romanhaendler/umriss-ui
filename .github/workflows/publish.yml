@@ -51,9 +51,13 @@ jobs:
             if npm view "$name@$version" version > /dev/null 2>&1; then
               echo "$name@$version is on npm"
               [ "$CHECK" = true ] && dirs="$dirs $dir"
+            elif [ "$CHECK" = true ]; then
+              # Nothing to offer npm: a green run would have checked nothing for it.
+              echo "::error::$name@$version is not on npm - the check has nothing to offer for it"
+              exit 1
             else
               echo "$name@$version is not - publishing"
-              [ "$CHECK" = true ] || dirs="$dirs $dir"
+              dirs="$dirs $dir"
             fi
           done
           echo "dirs=${dirs# }" >> "$GITHUB_OUTPUT"
@@ -74,8 +78,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm typecheck
+      # check:site compares the checked-in API.md; typecheck rewrites it.
       - run: pnpm check:site
+      - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm build
 
@@ -143,7 +148,9 @@ jobs:
             else
               cat publish.log >&2
               grep -q "cannot publish over the previously published versions" publish.log || exit 1
-              echo "$dir@$version is on npm already - only tagged"
+              echo "$dir@$version is on npm already"
+              # A check publishes nothing and so tags nothing.
+              [ "$CHECK" = true ] && continue
             fi
             tag="$dir-v$version"
             git tag "$tag"
