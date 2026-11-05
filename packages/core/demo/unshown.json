@@ -15,8 +15,5 @@
   "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
   "FileInputProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
   "DateTimePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "DateTimeRangePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "SplitterProps.onChange": "(g) deprecated alias: the former name of `onValueChange`, which the examples show",
-  "TabsProps.onChange": "(g) deprecated alias: the former name of `onValueChange`, which the examples show",
-  "AccordionProps.onChange": "(g) deprecated alias: the former name of `onValueChange`, which the examples show"
+  "DateTimeRangePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration"
 }
