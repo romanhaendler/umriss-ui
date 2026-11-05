@@ -23,7 +23,7 @@ look wrong, set traps or fall short. The maintainer then decides whether the lib
 - Browser checks: Playwright with **Chromium or WebKit**; Firefox cannot launch here. Browsers are cached in
   `~/Library/Caches/ms-playwright`; if the cached WebKit does not match your Playwright, run
   `npx playwright install webkit chromium` inside your host.
-- Dev servers: only the ports given in your task, never 4173-4177. Kill every server you start.
+- Dev servers: only the ports given in your task, never 4173-4179. Kill every server you start.
 - Keep the host on disk when you are done. Install tools into your host, never globally (`npm i -g`,
   `brew`); name in your report every download that went to a global cache (a Playwright browser build, the
   Cypress binary, Electron), so the coordinator can remove it after the run.

@@ -16,7 +16,7 @@ few minors. The first run was 2026-10-24; its findings stand in `.scratch/shaked
 2. **Pick.** Take the hosts and personas from `personas.md` that the change touches; all of them for a full
    run. Each becomes one subagent with: the path to `brief.md`, its entry from `personas.md`, its own host
    directory under the scratch directory, and its own port range (`4300` upwards, ten per agent; never
-   4173-4177, the demo servers').
+   4173-4179, the demo servers').
 3. **Dispatch in waves of at most eight.** The machine slows past that, and a timeout in a busy wave is
    rerun alone. Implementation-grade work, so the faster model is fine (see the user's memory). Keep the Mac
    awake (`caffeinate -i`) for the length of the run.

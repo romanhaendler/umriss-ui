@@ -5,9 +5,10 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { pnpm } from "./pnpm.mjs";
+import { PACKAGES } from "./ports.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const all = ["core", "charts", "table", "schedule", "calculation", "dashboard", "alarms", "demo"];
+const all = [...PACKAGES, "demo"];
 const args = process.argv.slice(2);
 const allowed = args.flatMap((value, i) => (args[i - 1] === "--allow" ? ["--allow", value] : []));
 const arg = args.find((value, i) => value !== "--allow" && args[i - 1] !== "--allow");
