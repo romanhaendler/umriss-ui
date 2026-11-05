@@ -32,6 +32,25 @@ export interface MultiSelectOption<T extends string | number = string> {
   disabled?: boolean;
 }
 
+/* The measuring row renders this many chips at most: a chip is wider than a
+   few pixels, so no trigger fits more than this many whatever is chosen. */
+const MEASURED_CHIPS = 100;
+
+/* How many chips fit before the "+N" counter: all of them when the whole row
+   fits without the counter, else the most that fit with it (at least one).
+   `widths` may hold fewer than `total` chips; then the counter is always due. */
+export function fitChips(widths: number[], total: number, counter: number, gap: number, available: number): number {
+  let sum = 0;
+  let fitting = 1;
+  for (let k = 1; k <= widths.length; k += 1) {
+    sum += widths[k - 1] ?? 0;
+    const row = sum + (k - 1) * gap;
+    if (k === total && row <= available) return k;
+    if (k < total && row + gap + counter <= available) fitting = k;
+  }
+  return fitting;
+}
+
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string | number = string>
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T> {
@@ -171,8 +190,11 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
     );
   };
 
+  /* Membership by a set: thousands chosen must not cost a scan per option. */
+  const chosen = useMemo(() => new Set<T>(value), [value]);
+
   const chosenNow = (targetScope: Scope) =>
-    targetScope === "selected" ? options.filter((option) => value.includes(option.value)) : options;
+    targetScope === "selected" ? options.filter((option) => chosen.has(option.value)) : options;
 
   const sayRemoved = (optionValue: T) => announce(wording.optionRemoved(labelOf(optionValue)), fieldRef.current);
 
@@ -226,7 +248,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
 
   const toggle = (optionValue: T) => {
     onChange(
-      value.includes(optionValue) ? value.filter((v) => v !== optionValue) : [...value, optionValue],
+      chosen.has(optionValue) ? value.filter((v) => v !== optionValue) : [...value, optionValue],
     );
   };
 
@@ -266,7 +288,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
       toggle(first.value);
       // `value` is still the one before the toggle: it comes back as a prop.
       announce(
-        (value.includes(first.value) ? wording.optionRemoved : wording.optionAdded)(first.label),
+        (chosen.has(first.value) ? wording.optionRemoved : wording.optionAdded)(first.label),
         fieldRef.current,
       );
     }
@@ -303,19 +325,19 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
 
   const optionRow = (index: number) => {
     const option = filtered[index]!;
-    const chosen = value.includes(option.value);
+    const isChosen = chosen.has(option.value);
     return (
       <div
         key={option.value}
         role="option"
-        aria-selected={chosen}
+        aria-selected={isChosen}
         aria-disabled={option.disabled || undefined}
         data-index={index}
         data-row={windowed ? "" : undefined}
         aria-setsize={windowed ? filtered.length : undefined}
         aria-posinset={windowed ? index + 1 : undefined}
         tabIndex={index === tabStop ? 0 : -1}
-        className={cx(styles.option, windowed && styles.row, chosen && styles.optionChosen, option.disabled && styles.optionDisabled)}
+        className={cx(styles.option, windowed && styles.row, isChosen && styles.optionChosen, option.disabled && styles.optionDisabled)}
         onFocus={() => setRover(index)}
         onClick={() => !option.disabled && toggle(option.value)}
       >
@@ -375,8 +397,8 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
 
   /* ---- Intelligent chip display: as many chips as really fit ---- */
   const selectedOptions = useMemo(
-    () => options.filter((option) => value.includes(option.value)),
-    [options, value],
+    () => options.filter((option) => chosen.has(option.value)),
+    [options, chosen],
   );
   const [visibleChips, setVisibleChips] = useState(1);
   const summaryRef = useRef<HTMLSpanElement>(null);
@@ -393,21 +415,13 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
     }
     const counterWidth = children[children.length - 1]?.offsetWidth ?? 0;
     const chipWidths = children.slice(0, -1).map((child) => child.offsetWidth);
+    const total = selectedOptions.length;
     const available = container.clientWidth;
     /* The gap from the stylesheet, not a number kept in step with it. */
     const GAP = Number.parseFloat(getComputedStyle(measureRow).columnGap) || 0;
-    let fitting = 1;
-    for (let k = chipWidths.length; k >= 1; k -= 1) {
-      let width = (k - 1) * GAP;
-      for (let i = 0; i < k; i += 1) width += chipWidths[i] ?? 0;
-      if (k < chipWidths.length) width += GAP + counterWidth;
-      if (width <= available) {
-        fitting = k;
-        break;
-      }
-    }
+    const fitting = fitChips(chipWidths, total, counterWidth, GAP, available);
     setVisibleChips(fitting);
-  }, []);
+  }, [selectedOptions.length]);
 
   // Measure after EVERY commit – covers deleting, adding and label changes
   // without a gap. Cheap (a few offsetWidth reads); sets the count only when
@@ -501,7 +515,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
               )}
             </span>
             <span ref={measureRef} className={cx(styles.summary, styles.measure)} aria-hidden="true">
-              {selectedOptions.map((option) => (
+              {selectedOptions.slice(0, MEASURED_CHIPS).map((option) => (
                 <span key={option.value} className={styles.chip}>
                   <span className={styles.chipLabel}>{option.label}</span>
                   <span className={styles.chipX}>{chipRemoveX}</span>
