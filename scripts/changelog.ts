@@ -2,8 +2,9 @@
 // commits since the last "Release:" commit, per package. Prints only.
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
+import { PACKAGES as PACKAGE_NAMES } from './ports.ts'
 
-const PACKAGES = ['core', 'charts', 'table', 'schedule', 'calculation', 'dashboard', 'alarms']
+const PACKAGES: readonly string[] = PACKAGE_NAMES
 
 // One subject to { text, names }, or null for "Release:" and "Merge" subjects.
 // The prefix is everything before the first colon; names are lower-cased and

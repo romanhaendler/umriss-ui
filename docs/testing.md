@@ -250,7 +250,7 @@ re-sorts them should expect baselines to wander.
   `git archive` into a temporary directory, installs offline, runs
   `playwright test -g '<pattern>'` there and removes the directory: the answer
   to "did this fail before me?". It refuses to start while one of ports
-  4173-4177 is in use.
+  4173-4179 is in use.
 
 `.github/workflows/visual.yml` runs the full suite on macOS when started by
 hand (Actions → Visual → Run workflow). It has not run yet, and the runner's

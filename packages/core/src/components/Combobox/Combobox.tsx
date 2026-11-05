@@ -15,7 +15,7 @@ import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce, silence } from "../../lib/announce";
-import { fold } from "../../lib/search";
+import { foldedText } from "../../lib/search";
 
 /** One possibility of a `Combobox`: the value it stands for and the label it
     is found by. */
@@ -157,7 +157,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
      option's label as it stands. */
   const typed = (query ?? "").trim();
   const adding =
-    creatable && typed !== "" && !options.some((option) => fold(option.label).text === fold(typed).text) ? typed : null;
+    creatable && typed !== "" && !options.some((option) => foldedText(option.label) === foldedText(typed)) ? typed : null;
   const rowCount = filtered.length + (adding === null ? 0 : 1);
   const addLabel = adding === null ? "" : wording.createOption(adding);
 
@@ -172,7 +172,7 @@ export function Combobox<T extends string | number = string>(props: ComboboxProp
     const found = filter ? filterOptions(options, text).length : options.length;
     const clean = text.trim();
     const add =
-      creatable && clean !== "" && !options.some((option) => fold(option.label).text === fold(clean).text);
+      creatable && clean !== "" && !options.some((option) => foldedText(option.label) === foldedText(clean));
     return found + (add ? 1 : 0);
   };
 
