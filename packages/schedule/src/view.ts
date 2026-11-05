@@ -58,13 +58,15 @@ export function defaultSpan(
   toAxis: (wallClock: number) => number = (v) => v,
   wide: "start" | "middle" = "middle",
 ): [number, number] | null {
-  if (subtasks.length === 0) return null;
   let from = Infinity;
   let to = -Infinity;
   for (const s of subtasks) {
+    /* An unreadable time (NaN, a string) would carry NaN into the span; such a subtask is warned of, not fitted to. */
+    if (!Number.isFinite(s.from) || !Number.isFinite(s.to)) continue;
     from = Math.min(from, s.from - (s.leadIn ?? 0));
     to = Math.max(to, s.to + (s.leadOut ?? 0));
   }
+  if (from === Infinity) return null;
   from = toAxis(from);
   to = toAxis(to);
   const span = Math.min(limits.max, Math.max(limits.min, to - from));
