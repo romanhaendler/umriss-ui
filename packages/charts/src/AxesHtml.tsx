@@ -5,7 +5,8 @@
    Tick labels of the right and top positions mirror their alignment,
    y titles stand rotated outside their axis. */
 
-import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
+import { useLayoutPart } from "./useLayoutPart";
 import type { ChartScene, LimitLabel } from "./scene";
 import { Silhouette, type SilhouetteState } from "./Silhouette";
 import { TICK_GAP, TICK_LEN, type AxisLayout } from "./layout";
@@ -156,11 +157,7 @@ export function AxesHtml({
   empty: ReactNode;
   silhouette: SilhouetteState | null;
 }): ReactNode {
-  const snapshot = useSyncExternalStore(
-    scene.subscribeLayout,
-    scene.getLayoutSnapshot,
-    scene.getLayoutServerSnapshot,
-  );
+  const snapshot = useLayoutPart(scene, (s) => ({ layout: s.layout, limits: s.limits, empty: s.empty, loading: s.loading }));
   const { layout } = snapshot;
   if (layout.plot.width <= 0 || layout.plot.height <= 0) return null;
   const { plot } = layout;
