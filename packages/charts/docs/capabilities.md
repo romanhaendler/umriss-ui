@@ -174,7 +174,7 @@ axis with the map kept by the library: every promise above holds on it.
 | `step`: the tooltip reports the sample the hold began with | Q22 | Unit (jsdom scene) |
 | Downsampling above two points per pixel column: first, min, max and last per column, a gap kept; only the window of the x domain and one point beyond each edge | Q20 | Unit (downsample), Screenshot (`gestures-and-keys`, unchanged by it) |
 | The tooltip searches the raw data, not what the drawing kept | Q20 | Unit (jsdom scene) |
-| `maxGap`: a step between readings longer than it breaks the stroke, one of exactly `maxGap` does not; a `step` hold ends `maxGap` after its reading; a reading between two gaps keeps its marker; a pointer farther than `maxGap` from the nearest reading finds no hit; the gap survives downsampling; off by default | — | Unit (maxGapDraw, maxGapHit), Screenshot (`an-outage`) |
+| `maxGap`: a step between readings longer than it breaks the stroke, one of exactly `maxGap` does not; a `step` hold ends `maxGap` after its reading; a reading between two gaps keeps its marker; a pointer farther than `maxGap` from the nearest reading finds no hit; the gap survives downsampling; off by default | — | Unit (maxGapDraw, maxGapHit, thinningGaps: a day of seconds thinned to 1000 px draws a 60 s hole as one break and nothing else), Screenshot (`an-outage`) |
 
 ## `Area`
 
@@ -191,7 +191,7 @@ axis with the map kept by the library: every promise above holds on it.
 | `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
-| `maxGap`: a step longer than it closes the area's section on both sides, as a missing value does; not read in a `stack` | — | Unit (maxGapDraw), Screenshot (`an-outage`) |
+| `maxGap`: a step longer than it closes the area's section on both sides, as a missing value does; not read in a `stack` | — | Unit (maxGapDraw, thinningGaps), Screenshot (`an-outage`) |
 | `stack`: areas of one id stand on the ones registered before, the stack below as their baseline channel; a gap stacks as zero; downsampled after stacking, each member keeping its own extremes per pixel column | charts-stacking K1-K3 | Unit (stack, jsdom stacking), Screenshot (`stacked`) |
 | Below a stacked area's outline a 1px line in the ground's colour parts its fill from the member above, in both encodings | charts-stacking 04 | Unit (draw), Screenshot (`stacked`) |
 
