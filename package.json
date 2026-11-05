@@ -10,7 +10,7 @@
     "prepare": "node scripts/prepare.mjs",
     "check": "node scripts/check.mjs",
     "screenshot": "node scripts/screenshot.mjs",
-    "changelog": "node scripts/changelog.mjs",
+    "changelog": "node scripts/changelog.ts",
     "check:site": "pnpm -r --if-present check:site",
     "semgrep": "scripts/semgrep.sh",
     "typecheck": "pnpm -r typecheck && pnpm -r --if-present typecheck:demo",
