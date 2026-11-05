@@ -235,7 +235,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
   const formats = useFormats();
   const wording = useWording();
   const rowsUnknown = rows as readonly unknown[];
-  const modelColumns = registry.modelColumns(rowsUnknown, formats);
+  const modelColumns = registry.modelColumns(rowsUnknown, formats, wording);
 
   const [start] = useState<TableView | undefined>(() => options.initialView);
 
@@ -933,6 +933,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown, RowKey>,
     rowKey,
     formats,
+    wording,
     pins: pinsChosen,
     filterOptions: server ? options.filterOptions : undefined,
     exportRows: options.server ? (options.exportRows as ((r: TableRequest) => Promise<readonly unknown[]>) | undefined) : undefined,

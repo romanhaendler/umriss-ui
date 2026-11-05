@@ -30,12 +30,13 @@
    nothing. */
 
 import type { ReactNode } from "react";
-import type { Formats } from "@umriss-ui/core";
+import { DEFAULT_WORDING } from "@umriss-ui/core";
+import type { Formats, Wording } from "@umriss-ui/core";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
 import { windowed } from "./model/tableState";
 import { DEV, probeStale, warnOnce } from "./dev";
-import { columnKind, isDateFormat, sortValue } from "./values";
+import { asText, columnKind, isAbsent, isDateFormat, sortValue } from "./values";
 import type { Format } from "./values";
 import { allDays } from "./model/day";
 import type { ValueKind } from "./values";
@@ -553,19 +554,21 @@ export class Registry {
     key: string;
     rows: readonly unknown[];
     formats: Formats;
+    wording: Wording;
     columns: readonly ModelColumn<unknown>[];
   } | null = null;
 
   /** The columns for tableModel. The same identity as long as nothing changed
       that the model reads - that is how the body recognises whether it may take
       over the hook's calculation. */
-  modelColumns(rows: readonly unknown[], formats: Formats): readonly ModelColumn<unknown>[] {
+  modelColumns(rows: readonly unknown[], formats: Formats, wording: Wording = DEFAULT_WORDING): readonly ModelColumn<unknown>[] {
     const ordered = this.orderedColumns();
     const key = [this.structure, this.values, ordered.map((e) => e.key).join("|")].join(":");
     if (
       this.modelCache?.key === key &&
       this.modelCache.rows === rows &&
-      this.modelCache.formats === formats
+      this.modelCache.formats === formats &&
+      this.modelCache.wording === wording
     ) {
       return this.modelCache.columns;
     }
@@ -575,9 +578,19 @@ export class Registry {
       const sortable = this.isSortable(entry, rows);
       const searchable = spec.searchable ?? kind === "text";
       const read = (row: unknown) => sortValue(entry.read(row), spec.ownSortValue);
+      /* A date, number or boolean is found by the text its cell shows, not by its sort key (epoch milliseconds, 1/0). */
+      const format = this.shownFormat(entry, rows, formats.timeZone);
+      const searchValue =
+        searchable && kind !== "text" && kind !== "other" && kind !== "empty"
+          ? (row: unknown) => {
+              const value = entry.read(row);
+              return isAbsent(value) ? undefined : (asText(value, format, formats, wording) ?? undefined);
+            }
+          : undefined;
       return {
         id: spec.id,
         label: spec.label,
+        searchValue,
         value: sortable || searchable ? read : undefined,
         /* Text sorts with the provider's comparison, not with the built-in
            German one (spec, the table of defaults). */
@@ -591,7 +604,7 @@ export class Registry {
         width: spec.width,
       };
     });
-    this.modelCache = { key, rows, formats, columns };
+    this.modelCache = { key, rows, formats, wording, columns };
     return columns;
   }
 
@@ -618,7 +631,7 @@ export class Registry {
       a new one, with the columns of this pass. */
   private computedProjection(): TableProjection<unknown> {
     const hook = this.hook!;
-    const columns = this.modelColumns(hook.rows, hook.formats);
+    const columns = this.modelColumns(hook.rows, hook.formats, hook.wording);
     const b = hook.tableState;
     if (columns === hook.modelColumns) {
       return b;
