@@ -31,6 +31,9 @@ export interface ModelColumn<Z, K extends string = string> {
   value?: (row: Z) => string | number | null | undefined;
   /** A comparison of one's own; otherwise by the kind of the value. */
   compare?: (a: Z, b: Z) => number;
+  /** The text the free-text search reads instead of `value`, where the shown
+      text differs from the sort key (dates, numbers, booleans). */
+  searchValue?: (row: Z) => string | undefined;
   /** Takes part in the free-text search.
       @default false */
   searchable?: boolean;
@@ -186,11 +189,11 @@ function matcherOf<Z, K extends string>(
   filter: ((row: Z) => boolean) | undefined,
 ) {
   const term = (search ?? "").trim().toLowerCase();
-  const searchColumns = columns.filter((s) => s.searchable && s.value);
+  const searchColumns = columns.filter((s) => s.searchable && (s.searchValue || s.value));
   const matchesSearch = (row: Z) =>
     !term ||
     searchColumns.some((s) => {
-      const value = s.value!(row);
+      const value = s.searchValue ? s.searchValue(row) : s.value!(row);
       return !absent(value) && String(value).toLowerCase().includes(term);
     });
   return { term, matches: (row: Z) => matchesSearch(row) && (filter ? filter(row) : true) };
