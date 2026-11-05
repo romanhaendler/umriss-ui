@@ -1,7 +1,7 @@
 /* A searchable date, number or boolean column is searched by the text its cell
    shows, not by its sort key. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_FORMATS, DEFAULT_WORDING } from "@umriss-ui/core";
 import { Registry } from "../src/registry";
 import type { ColumnSpec } from "../src/registry";
@@ -32,5 +32,18 @@ describe("search by the shown text", () => {
   it("does not find the sort keys", () => {
     expect(found("17")).toEqual([]);
     expect(found("no")).toEqual(["b"]);
+  });
+
+  it("formats a row's cell once for as long as the columns are kept", () => {
+    const date = vi.fn(DEFAULT_FORMATS.date);
+    const formats = { ...DEFAULT_FORMATS, date };
+    const registry = new Registry();
+    registry.registerColumn("at", { ...column("at"), format: "date" });
+    const columns = registry.modelColumns(rows, formats, DEFAULT_WORDING);
+    tableModel(rows, columns, { search: "2026" });
+    const once = date.mock.calls.length;
+    expect(once).toBeGreaterThan(0);
+    tableModel(rows, columns, { search: "24/10" });
+    expect(date.mock.calls.length).toBe(once);
   });
 });
