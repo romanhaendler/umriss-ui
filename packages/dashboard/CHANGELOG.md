@@ -13,6 +13,12 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.54.0 – A saved size is read only if its type offers it (Nov. 2026)
+
+### Fixed
+
+- **A saved dashboard** no longer reads a widget size such as `constructor` or `toString` as a size; the widget takes its type's start size.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).

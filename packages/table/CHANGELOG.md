@@ -26,6 +26,21 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.54.0 – Search finds what a cell shows, editing holds up in big and tree tables (Nov. 2026)
+
+### Added
+
+- **`ModelColumn.searchValue`**, the text a search matches beside the sort value; a searchable date, number or boolean column fills it with the cell's text in the formats' notation.
+
+### Fixed
+
+- **Searching a date, number or boolean column** finds what the cells show ("2026", "1,234", "yes") and no longer matches epoch milliseconds or 1/0; a search keystroke does not format every cell again.
+- **Big tables stay responsive:** a closed filter funnel no longer recomputes its values on every update, a page-size change in a grouped table is instant, Tab in grid editing no longer lags, and typing into a cell editor of a large grid no longer slows down with the number of rows.
+- **A child row of a tree table** can be edited again without the editor closing at once.
+- **A cell being edited** is no longer reported or dropped when the table starts loading, a row draft is no longer saved when a live update moves its row to another page, and the pager no longer leaves an open Row draft.
+- **Ctrl+C on a day cell** copies the day in the plant's time zone, as the row copy and the exports do, not the previous day's UTC timestamp.
+- **The list filter's popover** no longer flashes empty while it closes.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).

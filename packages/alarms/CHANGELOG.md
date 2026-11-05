@@ -12,6 +12,19 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.54.0 – A snooze that cannot end, durations rounded to the minute (Nov. 2026)
+
+### Changed
+
+- **`countAcknowledgeable` requires the as-of time,** so it always agrees with `acknowledge`.
+  - Migration: pass the as-of time as the third argument of `countAcknowledgeable(alarms, ids, asOf)`; the old default of `-Infinity` is gone.
+- **A duration in the alarm list rounds to the whole minute** like the schedule and the range picker.
+  - Migration: a test that read "1 hr 29 min" for 1 h 29 min 40 s reads "1 hr 30 min".
+
+### Fixed
+
+- **A snoozed alarm whose end is missing or not a number** comes back into service and is counted by the banner instead of staying hidden or blanking the list.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).

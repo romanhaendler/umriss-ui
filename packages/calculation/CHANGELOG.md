@@ -14,6 +14,10 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.54.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `formatDuration`.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).

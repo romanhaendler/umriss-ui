@@ -18,6 +18,19 @@ moves from here under the rule above.
 
 ---
 
+## 0.54.0 – A schedule that survives an unreadable time and a clock change (Nov. 2026)
+
+### Changed
+
+- **The tooltip's duration comes from core's `formatDuration`.**
+  - Migration: nothing to change; the result is unchanged.
+
+### Fixed
+
+- **One subtask with an unreadable time** (NaN or a string) no longer leaves the schedule empty; the first window fits the valid subtasks.
+- **Arrow keys stay smooth** with thousands of subtasks in one row.
+- **A bar dragged or moved on a clock-change day** snaps onto the real local raster line (handover or midnight) instead of landing an hour off.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).

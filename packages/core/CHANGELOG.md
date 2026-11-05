@@ -27,6 +27,27 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.54.0 – The old callback names go; a duration formatter, a calmer MultiSelect and search, a TreeView that types like Select (Nov. 2026)
+
+### Added
+
+- **`formatDuration(ms, wording, { days? })`** renders a span as hours and minutes from the wording's short units, rounded to the whole minute; the alarm list, the schedule tooltip and the date-time range picker share it.
+
+### Changed
+
+- **The old callback names are removed**, as 0.53.0 announced: `onChange` of Tabs, Accordion and Splitter, and `onExpanded`, `onChecked`, `onActive`, `onAnchor` and `onSearch` of useTree, with their development warnings (ADR-0081).
+  - Migration: Tabs, Accordion, Splitter: `onChange` -> `onValueChange`; useTree: `onExpanded` -> `onExpandedChange`, `onChecked` -> `onCheckedChange`, `onActive` -> `onActiveChange`, `onAnchor` -> `onAnchorChange`, `onSearch` -> `onSearchChange`.
+- **TreeView typeahead follows Select and Menu:** typing the same letter again moves on to the next node that begins with it; different letters narrow the prefix from the active node.
+  - Migration: typing "p" twice used to search the prefix "pp" and stay put; it now moves to the next node beginning with "p". Nothing to change unless you relied on the old stay-put behaviour.
+
+### Fixed
+
+- **A MultiSelect with thousands of chosen values** no longer stalls when toggling, selecting all or searching, and one whose selection exactly fills the field shows every chip instead of one and a counter.
+- **Typing into a Combobox or MultiSelect with thousands of options** answers each key without lag; a TreeView search ignores accents and case, so "kuhlung" finds "Kühlung".
+- **Link and Breadcrumb rendered on a server** (Next.js, prerendering) keep their `href` and no longer warn about an unsafe scheme.
+- **A toast with `duration: Infinity`** stays until dismissed, as `0` does, instead of vanishing at once.
+- **Ctrl/Cmd+K opens the CommandPalette** on Russian, Greek and Hebrew layouts.
+
 ## 0.53.0 – The old names go: a field reports only through `onValueChange`; Tabs, Accordion, Splitter and the tree name their callback too (Nov. 2026)
 
 ### Added

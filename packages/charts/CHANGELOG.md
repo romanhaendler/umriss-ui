@@ -30,6 +30,23 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.54.0 – Live charts render less, gaps stay real, a calendar axis keeps a fixed window (Nov. 2026)
+
+### Changed
+
+- **Live charts re-render their legend, HTML axes and data table only when what those show changes.**
+  - Migration: nothing to change; look at tests that counted renders of these parts.
+- **Converting times in removed working time uses a binary search,** faster with many intervals.
+  - Migration: nothing to change; the result is the same.
+
+### Fixed
+
+- **A zoomed-out trend with `maxGap`** is one line where the readings are continuous and breaks only at real gaps, instead of a pen-up and a lone marker per pixel column; a thinned line no longer repeats the last reading before a gap that starts at a column edge, and a band's lower edge keeps its dips.
+- **A fixed x domain on an axis with a working calendar** shows that wall-clock window, with its readings and ticks, instead of drawing far outside the plot.
+- **`pareto()` leaves out items whose value is not finite** instead of returning NaN shares.
+- **A limit band open on one side** (`to={Infinity}`) is drawn up to the plot's edge.
+- **The text-measure cache** no longer grows without bound on a live time axis.
+
 ## 0.53.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which removes a field's deprecated `onChange(value)` (ADR-0081).
