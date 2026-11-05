@@ -31,7 +31,7 @@ import type { ColumnEntry, Registry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
 import { warnOnce } from "./dev";
-import { placeOf } from "./model/gridWalk";
+import { lineIndex, placeOf } from "./model/gridWalk";
 import type { GridLine, GridPosition } from "./model/gridWalk";
 import { NEW_LINE, useGridState } from "./gridState";
 import type { Active, Editing, GridHandle, GridState } from "./gridState";
@@ -190,7 +190,7 @@ export function GridFocus({
     const { active, widget, editing } = grid.state;
     const at = resolve(active, lines, ids);
     const key = lines[at.line]?.key;
-    const indexOf = new Map(lines.map((l, i) => [l.key, i]));
+    const indexOf = lineIndex(lines);
     let stop: HTMLTableCellElement | null = null;
     let fallback: HTMLTableCellElement | null = null;
     /* ponytail: every cell and every control in them, after every render -
@@ -259,11 +259,7 @@ export function GridFocus({
 function resolve(active: Active | null, lines: readonly GridLine[], ids: readonly string[]): GridPosition {
   if (!active) return { line: Math.min(1, lines.length - 1), column: 0 };
   return {
-    line: placeOf(
-      lines.map((l) => l.key),
-      active.line,
-      active.lineIndex,
-    ),
+    line: lineIndex(lines).get(active.line) ?? Math.max(0, Math.min(lines.length - 1, active.lineIndex)),
     column: placeOf(ids, active.column, active.columnIndex),
   };
 }
