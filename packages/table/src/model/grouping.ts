@@ -332,6 +332,19 @@ export function linesOf<Z>(groups: readonly RowGroup<Z>[], folded: ReadonlySet<s
   return lines;
 }
 
+/** The index of each page's first line; the cut `pageLines` makes. */
+export function pageStarts<Z>(lines: readonly Line<Z>[], size: number): number[] {
+  const starts = [0];
+  if (size > 0) {
+    for (let at = 0; ; ) {
+      at += Math.max(1, size - (lines[at]?.parents.length ?? 0));
+      if (at >= lines.length) break;
+      starts.push(at);
+    }
+  }
+  return starts;
+}
+
 /**
  * One page of lines. A page counts lines - headers and rows alike - and is
  * `size` lines long, the last one excepted: a page that begins inside a group
@@ -346,14 +359,7 @@ export function pageLines<Z>(
   page: number,
   size: number,
 ): { lines: Line<Z>[]; page: number; pageCount: number } {
-  const starts = [0];
-  if (size > 0) {
-    for (let at = 0; ; ) {
-      at += Math.max(1, size - (lines[at]?.parents.length ?? 0));
-      if (at >= lines.length) break;
-      starts.push(at);
-    }
-  }
+  const starts = pageStarts(lines, size);
   const pageCount = starts.length;
   const current = Math.min(Math.max(1, page), pageCount);
   const slice = size > 0 ? lines.slice(starts[current - 1], starts[current] ?? lines.length) : [...lines];

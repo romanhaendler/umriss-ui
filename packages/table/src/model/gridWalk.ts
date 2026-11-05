@@ -208,10 +208,17 @@ export function nextCell(
   backwards: boolean,
   accept: (position: GridPosition) => boolean,
 ): GridPosition | null {
-  const cells: GridPosition[] = lines.flatMap((line, i) => line.cells.map((_, c) => ({ line: i, column: startOf(line.cells, c) })));
-  const here = cells.findIndex((p) => p.line === at.line && p.column === cellAt(lines[at.line]!.cells, at.column).start);
-  const order = backwards ? cells.slice(0, Math.max(0, here)).reverse() : cells.slice(here + 1);
-  return order.find(accept) ?? null;
+  // Walks outward from `at` and stops at the first accepted cell: no position of the other lines is built.
+  const step = backwards ? -1 : 1;
+  for (let line = at.line, index = cellAt(lines[at.line]!.cells, at.column).index + step; ; index += step) {
+    while (index < 0 || index >= lines[line]!.cells.length) {
+      line += step;
+      if (line < 0 || line >= lines.length) return null;
+      index = backwards ? lines[line]!.cells.length - 1 : 0;
+    }
+    const position = { line, column: startOf(lines[line]!.cells, index) };
+    if (accept(position)) return position;
+  }
 }
 
 /** Where the Active cell's line or column stands now, found by its key. Where
