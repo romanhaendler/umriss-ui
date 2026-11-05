@@ -4,7 +4,7 @@
 
 import type { HookSnapshot, Registry } from "./registry";
 import type { RowKey, TableProps } from "./types";
-import { gridLines } from "./model/gridWalk";
+import { gridLines, rowLine } from "./model/gridWalk";
 import { NEW_LINE, gridHandlers } from "./grid";
 import type { GridHandle } from "./grid";
 import type { FrameLayout } from "./frameLayout";
@@ -53,6 +53,8 @@ export function frameGrid({
     ? gridHandlers({
         grid,
         lines: gridLinesNow,
+        hasRow: (line) => hook.rows.some((row) => rowLine(hook.rowKey(row)) === line),
+        loading,
         ids: gridIds,
         columnById: (id) => dataColumns.find((e) => e.spec.id === id),
         rowKey: hook.rowKey,
