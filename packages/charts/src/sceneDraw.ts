@@ -49,9 +49,9 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
     const config = entry.config;
     // A course draws its window, and above two points per pixel column only
     // what shows (downsample.ts); every other kind draws its points.
-    const course =
+    const course: Course =
       config.kind === "line" || config.kind === "area"
-        ? downsample(mat, xAxis.scale.domain[0], xAxis.scale.domain[1], xAxis.scale.m, xAxis.scale.b, s.layout.plot.width)
+        ? downsample(mat, xAxis.scale.domain[0], xAxis.scale.domain[1], xAxis.scale.m, xAxis.scale.b, s.layout.plot.width, config.maxGap)
         : mat;
     base.x = course.x;
     base.y = course.y;
@@ -66,7 +66,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
           dash: config.dash ?? marks?.dash,
           markers: config.markers,
           step: config.step,
-          maxGap: config.maxGap,
+          maxGap: course.thinned === true ? undefined : config.maxGap,
           marker: marks?.marker,
         });
         break;
@@ -83,7 +83,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
           edges: entry.stacked !== null,
           // A stack stands on sums at every x; a hole in one member would
           // leave the members above standing on nothing.
-          maxGap: entry.stacked === null ? config.maxGap : undefined,
+          maxGap: entry.stacked === null && course.thinned !== true ? config.maxGap : undefined,
         });
         break;
       case "bar": {
