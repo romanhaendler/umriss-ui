@@ -27,8 +27,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm typecheck
+      # check:site compares the checked-in API.md; typecheck rewrites it.
       - run: pnpm check:site
+      - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm build
       - run: pnpm -r check:dist
