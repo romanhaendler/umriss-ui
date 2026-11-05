@@ -19,11 +19,11 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
 } from "react";
 import { useChartScene, useDataTable } from "./context";
+import { useLayoutPart } from "./useLayoutPart";
 import type { ChartScene } from "./scene";
 
 /** The disclosure key: the legend shows it, or the table on its own line. */
@@ -46,7 +46,8 @@ export function DataKey({ scene, state }: { scene: ChartScene; state: { id: stri
 function DataTableInner({ scene }: { scene: ChartScene }): ReactNode {
   const id = useId();
   useDataTable("DataTable", id);
-  const snapshot = useSyncExternalStore(scene.subscribeLayout, scene.getLayoutSnapshot, scene.getLayoutServerSnapshot);
+  // Shown, the table is written anew from each layout; closed, only its key's state and the legend matter.
+  const snapshot = useLayoutPart(scene, (s) => (s.dataTable?.open === true ? s : { dataTable: s.dataTable, legend: s.legend }));
   const state = snapshot.dataTable;
   const open = state?.open === true;
   // Written anew on each render - a layout, new data - and only while open.

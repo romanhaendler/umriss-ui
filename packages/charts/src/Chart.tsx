@@ -31,6 +31,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { ChartContext } from "./context";
+import { useLayoutPart } from "./useLayoutPart";
 import { ChartsWordingContext } from "./WordingProvider";
 import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
@@ -417,11 +418,12 @@ function ShowAll({ scene, plotRef, label }: { scene: ChartScene; plotRef: RefObj
     () => scene.getView().domains !== undefined,
     () => false,
   );
-  const snapshot = useSyncExternalStore(scene.subscribeLayout, scene.getLayoutSnapshot, scene.getLayoutServerSnapshot);
-  const { plot } = snapshot.layout;
+  const { plot, top } = useLayoutPart(scene, (s) => ({
+    plot: s.layout.plot,
+    // A legend above the plot - or the data key's line where there is none.
+    top: s.legend === null ? s.dataTable !== null : s.legend.placement === "top",
+  }));
   if (!zoomed || plot.width <= 0) return null;
-  // A legend above the plot - or the data key's line where there is none.
-  const top = snapshot.legend === null ? snapshot.dataTable !== null : snapshot.legend.placement === "top";
   return (
     <ShowAllButton
       scene={scene}
