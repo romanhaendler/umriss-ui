@@ -3,8 +3,8 @@
    The raster lies on LOCAL time, counted from local midnight plus an offset: a
    raster of two hours means 06:00, 08:00, 10:00 on the wall clock, and a
    raster of eight hours offset by six means handovers at 06:00, 14:00
-   and 22:00 - never UTC's hours. The offset of the time zone is the one at the
-   instant itself, so a raster keeps its hours across a clock change. Snapping
+   and 22:00 - never UTC's hours. The line is found in local time and then
+   converted with the offset at the line's own instant, so a raster keeps its hours across a clock change. Snapping
    shapes the ghost and therefore the intent - never the stored data. */
 
 import { localOffset } from "@umriss-ui/charts";
@@ -24,6 +24,11 @@ export interface SnapRaster {
 export function snapTime(time: number, raster: number | SnapRaster, timeZone?: string): number {
   const { step, offset } = typeof raster === "number" ? { step: raster, offset: 0 } : raster;
   if (!(step > 0) || !Number.isFinite(time)) return time;
-  const origin = localOffset(time, timeZone) + offset;
-  return origin + Math.round((time - origin) / step) * step;
+  const local = time - localOffset(time, timeZone);
+  const line = offset + Math.round((local - offset) / step) * step;
+  // The line is on the local clock; the offset (localOffset is minus the UTC offset) at the line's own instant may differ across a
+  // clock change. A line inside a skipped hour has no instant of its own and stays uncorrected.
+  const guess = line + localOffset(time, timeZone);
+  const real = line + localOffset(guess, timeZone);
+  return real - localOffset(real, timeZone) === line ? real : guess;
 }
