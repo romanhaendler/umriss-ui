@@ -69,7 +69,8 @@ export function useCommandPaletteShortcut(onOpen: () => void, options: CommandPa
       /* The real target: inside a shadow root `event.target` is the host. */
       const target = event.composedPath()[0] ?? event.target;
       if (inModal(target)) return;
-      if ((event.key === "k" || event.key === "K") && (event.metaKey || event.ctrlKey)) {
+      /* The physical key too: on Russian, Greek or Hebrew layouts `key` is not a Latin k. */
+      if ((event.key === "k" || event.key === "K" || event.code === "KeyK") &&(event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         latest.current.onOpen();
         return;

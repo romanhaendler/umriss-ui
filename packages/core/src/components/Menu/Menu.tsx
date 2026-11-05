@@ -11,6 +11,7 @@ import type {
 import { cx } from "../../lib/cx";
 import { elementRef } from "../../lib/elementRef";
 import { mergeRefs } from "../../lib/mergeRefs";
+import { typeaheadIndex } from "../../lib/typeahead";
 import type { RefProp } from "../../lib/refProp";
 import { Popover } from "../Popover";
 import styles from "./Menu.module.css";
@@ -69,9 +70,7 @@ export function handleMenuKeyDown(
   }
 }
 
-/* The letters typed within half a second form one prefix (APG menu button). A
-   single letter, typed again, moves on to the next entry that begins with it;
-   more letters narrow the prefix from the focused entry. */
+/* The letters typed within half a second form one prefix (APG menu button). */
 const TYPEAHEAD_PAUSE = 500;
 let typed = { text: "", at: 0 };
 
@@ -79,16 +78,7 @@ function typeahead(items: readonly HTMLElement[], index: number, key: string) {
   const now = Date.now();
   const text = (now - typed.at > TYPEAHEAD_PAUSE ? "" : typed.text) + key.toLowerCase();
   typed = { text, at: now };
-  const repeated = text.length > 1 && [...text].every((c) => c === text[0]);
-  const prefix = repeated ? (text[0] as string) : text;
-  const from = prefix.length === 1 ? index + 1 : Math.max(index, 0);
-  for (let n = 0; n < items.length; n++) {
-    const item = items[(from + n) % items.length] as HTMLElement;
-    if (item.textContent?.trim().toLowerCase().startsWith(prefix)) {
-      item.focus();
-      return;
-    }
-  }
+  items[typeaheadIndex(items.map((item) => item.textContent?.trim() ?? ""), index, text)]?.focus();
 }
 
 /* ------------------------------------------------------------------ */
