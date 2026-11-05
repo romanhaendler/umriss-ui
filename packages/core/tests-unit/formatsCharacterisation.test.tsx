@@ -14,27 +14,13 @@
    round, a 24-hour clock in both - and not from the way the implementation
    computes them.
 
-   The import paths of the English half deliberately point at the old
-   scattered places (`DatePicker/format`, `NumberInput/number`, `Meter`). Those
-   modules pass through to the seam; whoever imports here checks both sides of
-   the same promise.
-
    Time zone: Europe/Berlin (vitest.config.ts). The 2026 changeover dates are
    29.03. (forward) and 25.10. (back). */
 
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Meter } from "../src/components/DataViz";
-import {
-  displayFormat,
-  dateTimeFormat,
-  shortFormat,
-  longFormat,
-  monthFormat,
-  timeFormat,
-} from "../src/components/DatePicker/format";
-import { offsetLabel } from "../src/components/DatePicker/time";
-import { formatNumber } from "../src/components/NumberInput/number";
+import { DEFAULT_FORMATS } from "../src/lib/language/formats";
 import { GERMAN_FORMATS } from "../src/lib/language/de";
 
 /* A date with a two-digit day and a one-digit month, so that the zero padding
@@ -43,23 +29,23 @@ const SAMPLE = new Date(2026, 2, 17, 9, 5, 3);
 
 describe("The default notation: dates", () => {
   it("writes the display date two-digit with slashes, the day first", () => {
-    expect(displayFormat.format(SAMPLE)).toBe("17/03/2026");
+    expect(DEFAULT_FORMATS.date(SAMPLE)).toBe("17/03/2026");
   });
 
   it("writes the short form without the year, both parts two-digit", () => {
-    expect(shortFormat.format(SAMPLE)).toBe("17/03");
+    expect(DEFAULT_FORMATS.dateShort(SAMPLE)).toBe("17/03");
   });
 
   it("writes the month out in full with the year", () => {
-    expect(monthFormat.format(SAMPLE)).toBe("March 2026");
+    expect(DEFAULT_FORMATS.month(SAMPLE)).toBe("March 2026");
   });
 
   it("writes the long form with the weekday and a one-digit day", () => {
-    expect(longFormat.format(SAMPLE)).toBe("Tuesday, 17 March 2026");
+    expect(DEFAULT_FORMATS.dateLong(SAMPLE)).toBe("Tuesday, 17 March 2026");
   });
 
   it("pads a one-digit day in the short form", () => {
-    expect(shortFormat.format(new Date(2026, 0, 5))).toBe("05/01");
+    expect(DEFAULT_FORMATS.dateShort(new Date(2026, 0, 5))).toBe("05/01");
   });
 });
 
@@ -68,37 +54,37 @@ describe("The default notation: times", () => {
      as in the German set. A screen that writes 3 pm where 15:00 was
      meant is read wrongly once and distrusted afterwards. */
   it("writes hour and minute two-digit on a 24-hour clock", () => {
-    expect(timeFormat(false).format(SAMPLE)).toBe("09:05");
-    expect(timeFormat(false).format(new Date(2026, 2, 17, 15, 0, 0))).toBe("15:00");
+    expect(DEFAULT_FORMATS.time(SAMPLE, false)).toBe("09:05");
+    expect(DEFAULT_FORMATS.time(new Date(2026, 2, 17, 15, 0, 0), false)).toBe("15:00");
   });
 
   it("appends the second two-digit", () => {
-    expect(timeFormat(true).format(SAMPLE)).toBe("09:05:03");
+    expect(DEFAULT_FORMATS.time(SAMPLE, true)).toBe("09:05:03");
   });
 
   it("writes midnight as 00:00", () => {
-    expect(timeFormat(false).format(new Date(2026, 2, 17, 0, 0, 0))).toBe("00:00");
+    expect(DEFAULT_FORMATS.time(new Date(2026, 2, 17, 0, 0, 0), false)).toBe("00:00");
   });
 });
 
 describe("The default notation: date and time together", () => {
   it("joins the two with a comma", () => {
-    expect(dateTimeFormat(false).format(SAMPLE)).toBe("17/03/2026, 09:05");
+    expect(DEFAULT_FORMATS.dateTime(SAMPLE, false)).toBe("17/03/2026, 09:05");
   });
 
   it("joins the two with seconds", () => {
-    expect(dateTimeFormat(true).format(SAMPLE)).toBe("17/03/2026, 09:05:03");
+    expect(DEFAULT_FORMATS.dateTime(SAMPLE, true)).toBe("17/03/2026, 09:05:03");
   });
 });
 
 describe("The offset label", () => {
   /* Unchanged by the notation: the zone name reads the same in both. */
   it("names winter time GMT+1", () => {
-    expect(offsetLabel(new Date(2026, 0, 15, 12, 0, 0))).toBe("GMT+1");
+    expect(DEFAULT_FORMATS.offset(new Date(2026, 0, 15, 12, 0, 0))).toBe("GMT+1");
   });
 
   it("names summer time GMT+2", () => {
-    expect(offsetLabel(new Date(2026, 6, 15, 12, 0, 0))).toBe("GMT+2");
+    expect(DEFAULT_FORMATS.offset(new Date(2026, 6, 15, 12, 0, 0))).toBe("GMT+2");
   });
 
   /* The doubled hour at the end of summer time: 25.10.2026, 02:30 exists
@@ -108,46 +94,46 @@ describe("The offset label", () => {
   it("distinguishes the two instances of the doubled hour", () => {
     const early = new Date(Date.UTC(2026, 9, 25, 0, 30));
     const late = new Date(Date.UTC(2026, 9, 25, 1, 30));
-    expect(offsetLabel(early)).toBe("GMT+2");
-    expect(offsetLabel(late)).toBe("GMT+1");
+    expect(DEFAULT_FORMATS.offset(early)).toBe("GMT+2");
+    expect(DEFAULT_FORMATS.offset(late)).toBe("GMT+1");
   });
 });
 
 describe("The default notation: numbers", () => {
   it("separates thousands with a comma", () => {
-    expect(formatNumber(1234)).toBe("1,234");
+    expect(DEFAULT_FORMATS.number(1234)).toBe("1,234");
   });
 
   it("separates decimals with a dot", () => {
-    expect(formatNumber(1234.5)).toBe("1,234.5");
+    expect(DEFAULT_FORMATS.number(1234.5)).toBe("1,234.5");
   });
 
   it("forces the requested number of places", () => {
-    expect(formatNumber(1234.5, 2)).toBe("1,234.50");
+    expect(DEFAULT_FORMATS.number(1234.5, 2)).toBe("1,234.50");
   });
 
   it("cuts off only at ten decimal places without a place count", () => {
-    expect(formatNumber(1.23456789)).toBe("1.23456789");
+    expect(DEFAULT_FORMATS.number(1.23456789)).toBe("1.23456789");
   });
 
   it("writes a tiny non-zero value in scientific notation, never as 0", () => {
-    expect(formatNumber(1.6e-19)).toBe("1.6E-19");
+    expect(DEFAULT_FORMATS.number(1.6e-19)).toBe("1.6E-19");
     expect(GERMAN_FORMATS.number(1.602e-19)).toBe("1,602E-19");
-    expect(formatNumber(1e-9)).toBe("0.000000001");
-    expect(formatNumber(0)).toBe("0");
-    expect(formatNumber(1.6e-19, 2)).toBe("0.00");
+    expect(DEFAULT_FORMATS.number(1e-9)).toBe("0.000000001");
+    expect(DEFAULT_FORMATS.number(0)).toBe("0");
+    expect(DEFAULT_FORMATS.number(1.6e-19, 2)).toBe("0.00");
   });
 
   it("writes zero decimal places as a whole number", () => {
-    expect(formatNumber(1234.56, 0)).toBe("1,235");
+    expect(DEFAULT_FORMATS.number(1234.56, 0)).toBe("1,235");
   });
 
   it("puts the minus in front", () => {
-    expect(formatNumber(-1234.5, 1)).toBe("-1,234.5");
+    expect(DEFAULT_FORMATS.number(-1234.5, 1)).toBe("-1,234.5");
   });
 
   it("separates millions twice", () => {
-    expect(formatNumber(1234567.89, 2)).toBe("1,234,567.89");
+    expect(DEFAULT_FORMATS.number(1234567.89, 2)).toBe("1,234,567.89");
   });
 });
 

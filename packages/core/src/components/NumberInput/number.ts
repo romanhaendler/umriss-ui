@@ -3,7 +3,7 @@
    (ADR-0024). Pure functions without React - the seam at which NumberInput is
    tested. */
 
-import { DEFAULT_FORMATS, DEFAULT_SEPARATORS, type Separators } from "../../lib/language/formats";
+import { DEFAULT_SEPARATORS, type Separators } from "../../lib/language/formats";
 
 /**
  * A typed "." is the decimal separator wherever "." is not the group
@@ -121,18 +121,6 @@ export function filterInput(
   allowed.delete("");
   return [...dotAsDecimal(raw, separators)].filter((char) => allowed.has(char) || /\s/.test(char)).join("");
 }
-
-/**
- * Writes a number in the default notation.
- *
- * The notation itself sits in the language seam, together with the date and
- * percentage formats; what stands here is only the name under which the pure
- * tests know it. This pass-through carries the default; the component reads
- * the notation through `useFormats()` and thereby follows an override made by
- * the application.
- */
-export const formatNumber = (value: number, decimals?: number): string =>
-  DEFAULT_FORMATS.number(value, decimals);
 
 /** The decimal places a number is written with: 0.25 has two, 1e-7 has seven. */
 const placesOf = (n: number): number => {

@@ -20,13 +20,7 @@ import { Select } from "../Select";
 import { dayShown, zoneToday } from "./zoned";
 import { NO_BOUNDS, clampDay, monthOutside, outside } from "./bounds";
 import type { DayBounds } from "./bounds";
-import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
-
-/* A pass-through of the wording's weekday heads; part of the calendar
-   module's public extent. */
-export const WEEKDAYS = DEFAULT_WORDING.weekdays;
-
-export { monthFormat, longFormat } from "./format";
+import { useFormats, useWording } from "../../lib/language";
 
 export { startOfMonth, addDays, addMonths, sameDay, dayOnly } from "./grid";
 

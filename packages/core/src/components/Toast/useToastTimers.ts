@@ -13,7 +13,9 @@ interface TimerInfo {
 
 /** Whether a toast goes away on its own: it has a time, and is not still at work. */
 export function leavesByItself(item: ToastItem, defaultDuration: number) {
-  return (item.duration ?? defaultDuration) > 0 && item.tone !== "loading";
+  const ms = item.duration ?? defaultDuration;
+  /* setTimeout with Infinity fires at once, so an endless duration stays like 0. */
+  return ms > 0 && Number.isFinite(ms) && item.tone !== "loading";
 }
 
 /** The running timers and the teardowns of leaving toasts, all cancelled with
