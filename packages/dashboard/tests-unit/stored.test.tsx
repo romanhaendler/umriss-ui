@@ -46,6 +46,15 @@ describe("a stored view that is not a view", () => {
   });
 });
 
+describe("a stored size the type does not offer", () => {
+  it.each(["constructor", "toString"])("reads %s as the type's start size", (size) => {
+    render(<Harness initialView={{ widgets: [{ ...figure("a"), size }, { ...figure("b"), size }] }} />);
+    const placed = (id: string) => (document.querySelector(`[data-widget="${id}"]`) as HTMLElement).style;
+    expect([placed("a").getPropertyValue("--_dashboard-columns"), placed("b").getPropertyValue("--_dashboard-columns")]).toEqual(["3", "3"]);
+    expect(placed("a").getPropertyValue("--_dashboard-column")).not.toBe(placed("b").getPropertyValue("--_dashboard-column"));
+  });
+});
+
 describe("widgets of a type not declared now", () => {
   const stored = { widgets: [ghost("g1"), figure("a"), figure("b"), ghost("g2")] };
 
