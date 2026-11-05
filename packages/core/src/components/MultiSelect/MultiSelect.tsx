@@ -36,6 +36,21 @@ export interface MultiSelectOption<T extends string | number = string> {
    few pixels, so no trigger fits more than this many whatever is chosen. */
 const MEASURED_CHIPS = 100;
 
+/* How many chips fit before the "+N" counter: all of them when the whole row
+   fits without the counter, else the most that fit with it (at least one).
+   `widths` may hold fewer than `total` chips; then the counter is always due. */
+export function fitChips(widths: number[], total: number, counter: number, gap: number, available: number): number {
+  let sum = 0;
+  let fitting = 1;
+  for (let k = 1; k <= widths.length; k += 1) {
+    sum += widths[k - 1] ?? 0;
+    const row = sum + (k - 1) * gap;
+    if (k === total && row <= available) return k;
+    if (k < total && row + gap + counter <= available) fitting = k;
+  }
+  return fitting;
+}
+
 /** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string | number = string>
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<T> {
@@ -404,15 +419,7 @@ export function MultiSelect<T extends string | number = string>(props: MultiSele
     const available = container.clientWidth;
     /* The gap from the stylesheet, not a number kept in step with it. */
     const GAP = Number.parseFloat(getComputedStyle(measureRow).columnGap) || 0;
-    // One forward running sum: chips 0..k-1 with the counter after them.
-    let fitting = 1;
-    let sum = 0;
-    for (let k = 1; k <= chipWidths.length; k += 1) {
-      sum += chipWidths[k - 1] ?? 0;
-      const row = sum + (k - 1) * GAP;
-      if (k < total ? row + GAP + counterWidth <= available : row <= available) fitting = k;
-      else if (k < total) break;
-    }
+    const fitting = fitChips(chipWidths, total, counterWidth, GAP, available);
     setVisibleChips(fitting);
   }, [selectedOptions.length]);
 
