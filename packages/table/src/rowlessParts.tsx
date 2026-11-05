@@ -226,7 +226,7 @@ export function ColumnMenu({ size: own, of, ref, ...rest }: ColumnMenuProps) {
   if (!connection) return null;
   const { registry, snapshot } = connection;
   const hook = registry.hook!;
-  const ordered = registry.inPinOrder(orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order));
+  const ordered = registry.inPinOrder(orderColumns(registry.modelColumns(hook.rows, hook.formats, hook.wording), snapshot.order));
   const pins = registry.pins();
   const headingOf = (id: string) => registry.columnById(id)?.spec.heading;
   /* A column moves inside its block: past the edge of a block it would only
