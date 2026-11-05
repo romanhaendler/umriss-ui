@@ -35,7 +35,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentPropsWithRef, KeyboardEvent } from "react";
-import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, formatDuration, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { Pagination, useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
@@ -157,7 +157,7 @@ function SnoozePanel({
           ref={group}
           value={ms}
           onValueChange={setMs}
-          options={durations.map((d) => ({ value: String(d), label: durationWord(d, wording) }))}
+          options={durations.map((d) => ({ value: String(d), label: formatDuration(d, wording) }))}
         />
       </FormField>
       {reasons.length > 0 && (
@@ -226,18 +226,6 @@ function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): {
     default:
       return null;
   }
-}
-
-/** The duration as a word; the sentence structure comes from the wording, not
-    from this file. */
-function durationWord(ms: number, wording: Wording): string {
-  const minutes = Math.max(0, Math.floor(ms / 60000));
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  const parts: string[] = [];
-  if (hours > 0) parts.push(wording.hoursShort(hours));
-  if (hours === 0 || rest > 0) parts.push(wording.minutesShort(rest));
-  return parts.join(" ");
 }
 
 /** Alarm list: the lifecycle of an alarm, operable.
@@ -472,7 +460,7 @@ function Body({
               >
                 {snoozeDurations.map((ms) => (
                   <MenuItem key={ms} onSelect={() => onSnooze(snoozable.map((row) => row.id), viewAsOf + ms)}>
-                    {durationWord(ms, wording)}
+                    {formatDuration(ms, wording)}
                   </MenuItem>
                 ))}
               </Menu>
@@ -605,7 +593,7 @@ function Body({
           sortable={false}
         />
         <Column value="duration" label={wording.alarmColumnDuration} sortable={false}>
-          {(ms) => <span className={styles.duration}>{durationWord(ms, wording)}</span>}
+          {(ms) => <span className={styles.duration}>{formatDuration(ms, wording)}</span>}
         </Column>
         <Column value="frequency" label={wording.alarmColumnFrequency} format="count" sortable={false} />
         {/* In a pane of definite height the list pages with a fitted page; new
