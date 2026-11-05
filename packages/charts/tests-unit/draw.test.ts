@@ -399,3 +399,22 @@ describe("Markers on the plot's edge", () => {
     expect(arcs(filled)).toBe(3);
   });
 });
+
+describe("a limit band open on one side", () => {
+  it("is drawn up to the edge of the plot", () => {
+    const { ctx, filled } = recordingContext();
+    drawSeriesLayer(ctx, {
+      width: 1000,
+      height: 100,
+      plot: { x: 0, y: 0, width: 1000, height: 100 },
+      axes: [],
+      theme: FALLBACK_THEME,
+      series: [],
+      limitBands: [
+        { orientation: "y", fromPx: 20, toPx: Number.NEGATIVE_INFINITY, color: "red", band: true, dash: [], hatch: true },
+      ],
+      limitLines: [],
+    });
+    expect(filled[0]?.ops).toContainEqual(["rect", 0, 0, 1000, 20]);
+  });
+});
