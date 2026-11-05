@@ -53,7 +53,12 @@ export function frameGrid({
     ? gridHandlers({
         grid,
         lines: gridLinesNow,
-        hasRow: (line) => hook.rows.some((row) => rowLine(hook.rowKey(row)) === line),
+        hasRow: (line) => {
+          /* A tree's child rows lie in their branches, not in `rows`. */
+          const children = hook.tree?.children;
+          const seek = (rows: readonly unknown[]): boolean => rows.some((row) => rowLine(hook.rowKey(row)) === line || (children ? seek(children(row) ?? []) : false));
+          return seek(hook.rows);
+        },
         loading,
         ids: gridIds,
         columnById: (id) => dataColumns.find((e) => e.spec.id === id),
