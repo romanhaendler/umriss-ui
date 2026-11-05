@@ -25,3 +25,12 @@ describe("p29 tree", () => {
     expect(typeaheadTarget(flat, "ä", null)).toBe("Äpfel");
   });
 });
+
+describe("tree search folds accents", () => {
+  const names: N[] = [{ id: "Kühlung" }, { id: "Café" }, { id: "Zebra" }];
+  const shown = (search: string) => treeModel(names, reader, snap({ search })).map((x) => x.key);
+  it("finds Kühlung by kuhlung and Café by cafe", () => {
+    expect(shown("kuhlung")).toEqual(["Kühlung"]);
+    expect(shown("cafe")).toEqual(["Café"]);
+  });
+});

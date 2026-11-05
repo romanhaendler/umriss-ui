@@ -15,6 +15,8 @@
    The state transitions live here and not in the hook, so that everything
    that is hard about a tree can be checked without a browser. */
 
+import { foldedText } from "../../lib/search";
+
 /** A node's key, as `reader.key` returns it. */
 export type Key = string | number;
 
@@ -121,7 +123,7 @@ function prepare<K, S extends Key>(
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
 ): Preparation<S> {
-  const text = snapshot.search.trim().toLowerCase();
+  const text = foldedText(snapshot.search.trim());
   const pre: Preparation<S> = {
     indeterminate: new Set<S>(),
     survives: new Set<S>(),
@@ -136,7 +138,7 @@ function prepare<K, S extends Key>(
     const selfChecked = snapshot.checked.has(id);
     const selfMatches = reader.matches
       ? reader.matches(node)
-      : text === "" || reader.label(node).toLowerCase().includes(text);
+      : text === "" || foldedText(reader.label(node)).includes(text);
     if (selfMatches) pre.matches.add(id);
 
     let anyChecked = selfChecked;
