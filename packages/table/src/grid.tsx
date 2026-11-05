@@ -27,7 +27,7 @@ import type { ReactNode, RefObject } from "react";
 import { Checkbox, DatePicker, DateTimePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, announce, useFormats } from "@umriss-ui/core";
 import type { Wording } from "@umriss-ui/core";
 import { allDays } from "./model/day";
-import type { ColumnEntry } from "./registry";
+import type { ColumnEntry, Registry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
 import { warnOnce } from "./dev";
@@ -76,6 +76,8 @@ export function gridHandlers(input: GridInput) {
     outside,
     /* The edited row left the lines: its draft is reported or ended now. */
     settle: gone() ? () => void save() : undefined,
+    /* A Row draft is left only by saving or discarding it, by paging too. */
+    hold: editing?.row ? actions.refuse : undefined,
   };
 }
 
@@ -136,7 +138,12 @@ export function GridFocus({
   editable,
   outside,
   settle,
+  hold,
+  registry,
 }: {
+  registry: Registry;
+  /** While a Row draft is open: what a step of the pager does instead of paging. */
+  hold?: () => void;
   table: RefObject<HTMLTableElement | null>;
   grid: GridHandle;
   lines: readonly GridLine[];
@@ -168,6 +175,13 @@ export function GridFocus({
     document.addEventListener("mousedown", onMouseDown);
     return () => document.removeEventListener("mousedown", onMouseDown);
   }, [listening, tableRef]);
+
+  useLayoutEffect(() => {
+    registry.setPageHold(hold ?? null);
+    return () => {
+      registry.setPageHold(null);
+    };
+  }, [registry, hold]);
 
   useLayoutEffect(() => {
     const table = tableRef.current;
