@@ -14,6 +14,10 @@ import type { GridHandle } from "./gridState";
 export interface GridInput {
   grid: GridHandle;
   lines: readonly GridLine[];
+  /** Whether a row is among the hook's rows - all pages, filtered or not. */
+  hasRow: (line: string) => boolean;
+  /** The table is `loading`: its rows are not settled, so nothing is gone. */
+  loading: boolean;
   /** The head row's columns: data columns by id, the others by a name of
       their own (`#select`, `#detail`, `#span`, `#actions`). */
   ids: readonly string[];
@@ -58,8 +62,8 @@ export function editingActions(input: GridInput) {
   const editing = grid.state.editing;
 
   const lineRow = (key: string) => (key === NEW_LINE ? editing?.fresh : (lines.find((l) => l.key === key)?.row ?? editing?.source));
-  /** The edited row is no longer among the lines: a live update removed it. */
-  const gone = () => editing !== null && editing.line !== NEW_LINE && !keys.includes(editing.line);
+  /** A live update removed the edited row from the hook's rows. A row on another page, in a hidden group or while the table loads is not gone. */
+  const gone = () => editing !== null && editing.line !== NEW_LINE && !input.loading && !input.hasRow(editing.line);
   /** The row of a row line - not of its detail, nor of a group line. */
   const rowAt = (p: GridPosition) => {
     const line = lines[p.line];
