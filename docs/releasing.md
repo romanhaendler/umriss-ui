@@ -37,8 +37,8 @@ A version is released by raising it. On every push to `main`,
 `.github/workflows/publish.yml` asks npm for each package whether the version
 in its `package.json` stands there already; whatever is missing is published,
 in dependency order (`core` and `charts` before what depends on them). The
-`build` job, without the token, installs, runs lint, types (`typecheck` and
-`typecheck:demo`), `check:site`, unit tests, build and `check:dist`, and packs
+`build` job, without the token, installs, runs lint, `check:site`, types (`typecheck` and
+`typecheck:demo`, which rewrite `API.md`, so after the comparison), unit tests, build and `check:dist`, and packs
 each package; the `publish` job, the only one with the token, installs nothing,
 runs no package script and hands the tarballs to npm. A version with a hyphen
 (`0.3.0-rc.1`) goes to `next`, every other to `latest`. A push that raises no
@@ -57,7 +57,8 @@ publish* ticked), and npm attaches the provenance itself. Whether npm still
 trusts it - after the repository or a package's settings changed - is checked
 without publishing: *Actions → Publish → Run workflow* with `check` offers npm
 the versions it already has. npm refuses each, and it reaches the refusal only
-with a token, so a missing trust fails the run. Under *Publishing
+with a token, so a missing trust fails the run; a package whose version is not
+on npm fails it too, and a check sets no tag. Under *Publishing
 access* every package requires two-factor authentication and refuses tokens
 that bypass it. The `build` job packs with pnpm — only pnpm rewrites the
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
