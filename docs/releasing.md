@@ -95,7 +95,7 @@ publishes the tarball, and the job that holds the token has no pnpm at all
    over prose would check the wording, not the truth.
 3. The full check, with the machine kept awake (`caffeinate`): lint, types
    (`pnpm typecheck`), unit, build and `check:dist`, then `pnpm test:visual`.
-   Wait for parallel suites to end, and free ports 4173-4177 first. A test that
+   Wait for parallel suites to end, and free ports 4173-4179 first. A test that
    times out on a busy machine is rerun alone.
    When the table's XLSX writer changed since the last release, the maintainer
    also opens one file from the table demo's "An Excel file" example in Excel

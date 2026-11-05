@@ -221,6 +221,15 @@ export function fold(text: string): { text: string; origin: number[]; width: num
   return { text: folded, origin, width };
 }
 
+/**
+ * The text `fold` returns, without the offsets: plain ASCII only needs
+ * lower-casing, which is what makes comparing thousands of labels per
+ * keystroke cheap.
+ */
+export function foldedText(text: string): string {
+  return /^[\x00-\x7f]*$/.test(text) ? text.toLowerCase() : fold(text).text;
+}
+
 /** Consecutive places become one span - otherwise the rendering marks every
     character on its own and flickers at the edges. */
 function mergeAdjacent(positions: readonly MatchSpan[]): readonly MatchSpan[] {

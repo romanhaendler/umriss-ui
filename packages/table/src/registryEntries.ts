@@ -3,7 +3,7 @@
    entries are kept in. */
 
 import type { ReactNode } from "react";
-import type { Formats } from "@umriss-ui/core";
+import type { Formats, Wording } from "@umriss-ui/core";
 import type { RowFilter } from "./rowFilter";
 import type { ModelColumn, TableInput } from "./model/tableModel";
 import type { TableState } from "./model/tableState";
@@ -112,6 +112,8 @@ export interface HookSnapshot {
   rowKey: (row: unknown) => RowKey;
   /** The provider's formats - the text comparison of the sort comes from there. */
   formats: Formats;
+  /** The provider's wording - the search reads a boolean as the text it shows. */
+  wording: Wording;
   /** The pins the user chose - absent while the declared ones hold. */
   pins: Pins | null;
   /** Server mode: the values a list filter offers, from the application. */
