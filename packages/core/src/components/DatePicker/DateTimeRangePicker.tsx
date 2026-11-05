@@ -21,6 +21,7 @@ import { dayShown, gridDay, zoneToday } from "./zoned";
 import { clampDay, presetDays, useDayBounds } from "./bounds";
 import { ZoneNote } from "./ZoneNote";
 import { zoneFields } from "../../lib/zone";
+import { formatDuration } from "../../lib/duration";
 import { rangeFromDays, order, orderByDay } from "./contract";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./DatePicker.module.css";
@@ -299,15 +300,7 @@ export function DateTimeRangePicker(props: DateTimeRangePickerProps) {
       return wording.daysAllDay(days);
     }
     const ms = Math.abs(resultTo.getTime() - resultFrom.getTime());
-    const minutes = Math.round(ms / 60_000);
-    const days = Math.floor(minutes / 1440);
-    const hours = Math.floor((minutes % 1440) / 60);
-    const min = minutes % 60;
-    const parts: string[] = [];
-    if (days > 0) parts.push(wording.days(days));
-    if (hours > 0) parts.push(wording.hoursShort(hours));
-    if (min > 0 || parts.length === 0) parts.push(wording.minutesShort(min));
-    return wording.duration(parts);
+    return wording.duration([formatDuration(ms, wording, { days: true })]);
   };
 
   const footText = (() => {

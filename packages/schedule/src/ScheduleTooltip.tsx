@@ -5,7 +5,7 @@
 
 import type { ReactNode } from "react";
 import { MINUTE } from "@umriss-ui/charts";
-import { useFormats, useWording } from "@umriss-ui/core";
+import { formatDuration, useFormats, useWording } from "@umriss-ui/core";
 import { timeText } from "./timeAxis";
 import type { ScheduleTooltipTarget } from "./scene";
 import styles from "./Schedule.module.css";
@@ -13,12 +13,7 @@ import styles from "./Schedule.module.css";
 /** A duration in hours and minutes, from the wording. */
 export function useDuration(): (ms: number) => string {
   const wording = useWording();
-  return (ms) => {
-    const minutes = Math.round(ms / MINUTE);
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    return [hours > 0 ? wording.hoursShort(hours) : "", rest > 0 || hours === 0 ? wording.minutesShort(rest) : ""].filter(Boolean).join(" ");
-  };
+  return (ms) => formatDuration(ms, wording);
 }
 
 /** A span as one reading, the year included: the times on one day under that
