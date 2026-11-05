@@ -427,7 +427,7 @@ describe("alarmModel – age and duration", () => {
 
 describe("alarmModel – acknowledging", () => {
   it("counts what an acknowledgement would change before it happens", () => {
-    expect(countAcknowledgeable(FOUR, ["m-au", "m-gu", "m-aq"])).toBe(2);
+    expect(countAcknowledgeable(FOUR, ["m-au", "m-gu", "m-aq"], T0)).toBe(2);
   });
 
   it("counts what it changed – and nothing the second time", () => {
