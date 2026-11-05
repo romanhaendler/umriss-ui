@@ -2,7 +2,7 @@
    Shared by Combobox and MultiSelect - hence here and not in one of the two
    component folders. Pure functions, no React. */
 
-import { fold } from "./search";
+import { foldedText } from "./search";
 
 export interface SelectOption<T extends string | number = string> {
   value: T;
@@ -19,9 +19,9 @@ export function filterOptions<T extends string | number>(
   options: readonly SelectOption<T>[],
   search: string,
 ): readonly SelectOption<T>[] {
-  const term = fold(search.trim()).text;
+  const term = foldedText(search.trim());
   if (!term) return options;
-  return options.filter((option) => fold(option.label).text.includes(term));
+  return options.filter((option) => foldedText(option.label).includes(term));
 }
 
 /** The values that may be selected at all. */
