@@ -51,11 +51,19 @@ export function FilterPanel({
      otherwise the filter would betray what the pre-filter hides. */
   const { filterOptions } = hook;
   const offered = filterOptions?.(id);
-  // Only an open panel shows them; a closed funnel would recompute them on every live update.
-  const { values, absent } = useMemo(
-    () => (!open ? { values: [], absent: false } : offered ? occurringValues(offered, (value) => value, formats) : occurringValues(hook.admitted, entry.read, formats)),
-    [open, offered, hook.admitted, entry, formats],
+  /* Only an open panel computes them (a closed funnel would on every live update); the pass that closes it
+     keeps its list, so that a closing popover does not flash empty. */
+  const [wasOpen, setWasOpen] = useState(open);
+  const [closedWith, setClosedWith] = useState<ReturnType<typeof occurringValues>>({ values: [], absent: false });
+  const computed = useMemo(
+    () => (!open && !wasOpen ? null : offered ? occurringValues(offered, (value) => value, formats) : occurringValues(hook.admitted, entry.read, formats)),
+    [open, wasOpen, offered, hook.admitted, entry, formats],
   );
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (!open && computed !== null) setClosedWith(computed);
+  }
+  const { values, absent } = computed ?? closedWith;
   const filter = filterOf(entry.spec.filter);
   /* In server mode the table holds one page: the values it could offer are
      the page's, and a value that occurs only on page nine  would not be offered. */

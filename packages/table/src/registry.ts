@@ -580,11 +580,17 @@ export class Registry {
       const read = (row: unknown) => sortValue(entry.read(row), spec.ownSortValue);
       /* A date, number or boolean is found by the text its cell shows, not by its sort key (epoch milliseconds, 1/0). */
       const format = this.shownFormat(entry, rows, formats.timeZone);
+      /* The text a row's cell shows, kept per row for as long as these columns are: a search keystroke does not format every cell again. */
+      const shownText = new WeakMap<object, string | undefined>();
       const searchValue =
         searchable && kind !== "text" && kind !== "other" && kind !== "empty"
           ? (row: unknown) => {
+              const cacheable = typeof row === "object" && row !== null;
+              if (cacheable && shownText.has(row)) return shownText.get(row);
               const value = entry.read(row);
-              return isAbsent(value) ? undefined : (asText(value, format, formats, wording) ?? undefined);
+              const text = isAbsent(value) ? undefined : (asText(value, format, formats, wording) ?? undefined);
+              if (cacheable) shownText.set(row, text);
+              return text;
             }
           : undefined;
       return {

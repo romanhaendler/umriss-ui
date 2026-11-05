@@ -10,6 +10,8 @@ import type { LayoutSnapshot } from "./sceneModel";
     the labels they wrote stand in the layout beside them. */
 function same(a: unknown, b: unknown): boolean {
   if (a === b || (typeof a === "function" && typeof b === "function")) return true;
+  // A typed array is compared by identity only: its elements are not a part to walk.
+  if (ArrayBuffer.isView(a) || ArrayBuffer.isView(b)) return false;
   if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) return false;
   const keys = Object.keys(a);
   if (Array.isArray(a) !== Array.isArray(b) || keys.length !== Object.keys(b).length) return false;
@@ -22,7 +24,8 @@ export function useLayoutPart<T>(scene: ChartScene, select: (snapshot: LayoutSna
     const prev = last.current;
     if (prev !== null && prev.snapshot === snapshot) return prev.part;
     const part = select(snapshot);
-    const kept = prev !== null && same(prev.part, part) ? prev.part : part;
+    // A part that is the snapshot itself (an open table) changes with it: nothing to save by comparing.
+    const kept = prev !== null && (part as unknown) !== snapshot && same(prev.part, part) ? prev.part : part;
     last.current = { snapshot, part: kept };
     return kept;
   };

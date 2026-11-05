@@ -50,6 +50,7 @@ export function downsample(
   let i = lo;
   while (i <= hi) {
     const c = Math.floor((x[i] as number) * m + b);
+    const start = i;
     // first, min, max, last, min and max of y0, the first gap and the first
     // point after the last one, and the ends of every long step.
     const cand: number[] = [];
@@ -74,8 +75,13 @@ export function downsample(
       if (maxGap !== undefined && i > lo && (x[i] as number) - (x[i - 1] as number) > maxGap) {
         const before = y[i - 1] as number;
         if (!Number.isNaN(before) && (y0 === null || !Number.isNaN(y0[i - 1] as number))) {
-          breaks.add(i - 1);
-          cand.push(i - 1, i);
+          if (i - 1 >= start) {
+            breaks.add(i - 1);
+            cand.push(i - 1, i);
+          } else {
+            // The previous column kept i - 1 as its last: the break follows it.
+            kept.push(Number.NaN);
+          }
         }
       }
       if (first < 0) first = i;

@@ -102,24 +102,25 @@ export function calendarFrom(input: CalendarInput): WorkingCalendar {
   return fresh;
 }
 
-/** Index of the interval that contains the wall clock time (edges included);
-    -1 when it lies in removed time. Binary search over the beginnings. */
-function findInterval(calendar: WorkingCalendar, wallClock: number): number {
-  const intervals = calendar.intervals;
+/** Index of the first interval that begins after the wall clock time
+    (intervals.length when none does). Binary search over the beginnings. */
+function firstAfter(intervals: readonly WorkingInterval[], wallClock: number): number {
   let lo = 0;
-  let hi = intervals.length - 1;
-  let hit = -1;
-  while (lo <= hi) {
+  let hi = intervals.length;
+  while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if ((intervals[mid] as WorkingInterval).from <= wallClock) {
-      hit = mid;
-      lo = mid + 1;
-    } else {
-      hi = mid - 1;
-    }
+    if (wallClock < (intervals[mid] as WorkingInterval).from) hi = mid;
+    else lo = mid + 1;
   }
+  return lo;
+}
+
+/** Index of the interval that contains the wall clock time (edges included);
+    -1 when it lies in removed time. */
+function findInterval(calendar: WorkingCalendar, wallClock: number): number {
+  const hit = firstAfter(calendar.intervals, wallClock) - 1;
   if (hit < 0) return -1;
-  return wallClock <= (intervals[hit] as WorkingInterval).to ? hit : -1;
+  return wallClock <= (calendar.intervals[hit] as WorkingInterval).to ? hit : -1;
 }
 
 /** Wall clock time → working time.
@@ -193,15 +194,8 @@ export function toWorkingTimeClamped(wallClock: number, input: CalendarInput): n
   if (!Number.isNaN(inside)) return inside;
   if (!Number.isFinite(wallClock)) return Number.NaN;
   // The seam of the first span that begins after the value.
-  const intervals = calendar.intervals;
-  let lo = 0;
-  let hi = intervals.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (wallClock < (intervals[mid] as WorkingInterval).from) hi = mid;
-    else lo = mid + 1;
-  }
-  if (lo < intervals.length) return calendar.offsets[lo] as number;
+  const lo = firstAfter(calendar.intervals, wallClock);
+  if (lo < calendar.intervals.length) return calendar.offsets[lo] as number;
   return calendar.total;
 }
 

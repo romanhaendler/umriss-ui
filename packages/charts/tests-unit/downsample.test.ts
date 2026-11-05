@@ -87,4 +87,16 @@ describe("downsample", () => {
     expect(out.x[out.length - 1]).toBe(41_000);
     expect(out.length).toBeLessThanOrEqual(4 * 202);
   });
+
+  it("keeps the left end of a long step once when the step crosses a column", () => {
+    const xs = Float64Array.from({ length: 1000 }, (_, i) => (i < 500 ? i : i + 200));
+    const ys = Float64Array.from(xs, (v) => v % 7);
+    const series = { x: xs, y: ys, y0: null, w: null, box: null, length: 1000 };
+    const p = plot(0, 1200, 50);
+    const out = downsample(series, p.from, p.to, p.m, p.b, p.width, 5);
+    const at = [...out.y].findIndex(Number.isNaN);
+    expect(out.x[at - 1]).toBe(499);
+    expect(out.x[at - 2]).not.toBe(499);
+    expect(out.x[at + 1]).toBe(700);
+  });
 });
