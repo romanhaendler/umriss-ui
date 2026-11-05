@@ -29,9 +29,24 @@ const port = await new Promise((resolve) => {
   });
 });
 const dev = spawn(...pnpm(["--filter", `@umriss-ui/${pkg}`, "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"]), { stdio: "ignore", detached: !WINDOWS });
+/* The dev server is pnpm's grandchild: the whole tree goes. Windows has no
+   process groups, so there taskkill walks the tree. A server that already died
+   has no tree left, and that is no reason to hide the error that stopped us. */
+const stopDev = () => {
+  try {
+    if (WINDOWS) execFileSync("taskkill", ["/pid", String(dev.pid), "/T", "/F"], { stdio: "ignore" });
+    else process.kill(-dev.pid);
+  } catch {}
+};
+/* Ctrl+C reaches only this process: the server is detached into its own group. */
+process.once("SIGINT", () => {
+  stopDev();
+  process.exit(130);
+});
 let browser;
 try {
   for (let tries = 0; ; tries += 1) {
+    if (dev.exitCode !== null || dev.signalCode !== null) throw new Error("the dev server did not come up");
     if (await fetch(`http://127.0.0.1:${port}/`).then((r) => r.ok, () => false)) break;
     if (tries > 120) throw new Error("the dev server did not come up");
     await new Promise((r) => setTimeout(r, 500));
@@ -53,8 +68,5 @@ try {
   console.log(`${out}\nerrors: ${errors.length ? "\n" + errors.join("\n") : "none"}`);
 } finally {
   await browser?.close();
-  /* The dev server is pnpm's grandchild: the whole tree goes. Windows has no
-     process groups, so there taskkill walks the tree. */
-  if (WINDOWS) execFileSync("taskkill", ["/pid", String(dev.pid), "/T", "/F"], { stdio: "ignore" });
-  else process.kill(-dev.pid);
+  stopDev();
 }
