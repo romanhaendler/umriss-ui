@@ -75,7 +75,7 @@ export function copyKeyHandler({
     const chosen = selectedInOrder(registry);
     const edited = editedId === undefined ? undefined : dataColumns.find((e) => e.spec.id === editedId);
     if (edited) {
-      text = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field.value : valueText(edited, grid.state.editing?.drafts[edited.spec.id], formats, wording);
+      text = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field.value : valueText(registry, edited, grid.state.editing?.drafts[edited.spec.id], formats, wording);
       words = wording.copiedCell;
     } else if (chosen.length > 0) {
       text = selectionText(registry, formats, wording);
@@ -92,7 +92,7 @@ export function copyKeyHandler({
       /* The focus may stand on a control in another cell of the row. */
       const home = Array.from(currentTarget.querySelectorAll<HTMLElement>("tr[data-grid-line]")).find((tr) => tr.dataset.gridLine === key)?.children[grid.state.active.columnIndex];
       if (home) marked = [home];
-      text = cellText(entry, line.row, formats, wording);
+      text = cellText(registry, entry, line.row, formats, wording);
       words = wording.copiedCell;
     } else return;
     event.preventDefault();
