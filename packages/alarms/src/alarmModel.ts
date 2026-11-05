@@ -131,6 +131,15 @@ export interface Snooze {
 export const isHidden = (availability: Availability): boolean =>
   availability !== "in-service";
 
+/* Not "asOf >= until": a missing record or an end that is not a number (an
+   ISO string from JSON) makes that false for ever and hides the alarm for
+   good. Asking whether the as-of time is still before the end fails safe: what
+   cannot be read has ended. */
+function snoozeEnded(alarm: Alarm, asOf: number): boolean {
+  const until: unknown = (alarm.snooze as Snooze | undefined)?.until;
+  return !(typeof until === "number" && asOf < until);
+}
+
 /**
  * The availability at the as-of time. A snooze that has reached its end is in
  * service again - by the model's clock, not by a timer: nothing here reads a
@@ -138,7 +147,7 @@ export const isHidden = (availability: Availability): boolean =>
  * back only while a browser tab happens to be open.
  */
 export function availabilityAt(alarm: Alarm, asOf: number): Availability {
-  if (alarm.availability === "snoozed") return asOf >= alarm.snooze.until ? "in-service" : "snoozed";
+  if (alarm.availability === "snoozed") return snoozeEnded(alarm, asOf) ? "in-service" : "snoozed";
   return alarm.availability ?? "in-service";
 }
 
@@ -156,7 +165,7 @@ export function availabilityAt(alarm: Alarm, asOf: number): Availability {
     lifecycle underneath. A resolved alarm keeps its lifecycle too: there is
     nothing to see again. */
 export function lifecycleAt(alarm: Alarm, asOf: number): LifecycleState {
-  return alarm.availability === "snoozed" && asOf >= alarm.snooze.until && isActive(alarm.lifecycle)
+  return alarm.availability === "snoozed" && snoozeEnded(alarm, asOf) && isActive(alarm.lifecycle)
     ? "active-unacknowledged"
     : alarm.lifecycle;
 }
@@ -418,7 +427,7 @@ export function detectFlood(
 export function countAcknowledgeable(
   alarms: readonly Alarm[],
   ids: Iterable<string>,
-  asOf: number = Number.NEGATIVE_INFINITY,
+  asOf: number,
 ): number {
   const set = new Set(ids);
   return alarms.reduce(
@@ -451,7 +460,7 @@ export function acknowledge(
     const state = lifecycleAt(m, time);
     if (!set.has(m.id) || isAcknowledged(state)) return m;
     count += 1;
-    const ended = m.availability === "snoozed" && time >= m.snooze.until;
+    const ended = m.availability === "snoozed" && snoozeEnded(m, time);
     const base = ended ? { ...m, availability: "in-service" as const, snooze: undefined } : m;
     return { ...base, lifecycle: nextLifecycleState(state, "acknowledged"), acknowledgedAt: time };
   });

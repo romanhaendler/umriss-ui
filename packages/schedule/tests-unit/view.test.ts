@@ -46,6 +46,12 @@ describe("defaultSpan", () => {
   const LIMITS = { min: HOUR, max: 10 * HOUR };
   const work = (from: number, to: number, more: Partial<Subtask> = {}): Subtask => ({ id: `${from}`, task: "t", lane: "l", from, to, ...more });
 
+  it("fits to the readable subtasks and leaves out one whose time is NaN or a string", () => {
+    const bad = [work(0, NaN), { ...work(0, 0), from: "2026-01-01", to: "2026-01-02" } as unknown as Subtask];
+    expect(defaultSpan([...bad, work(2 * HOUR, 5 * HOUR)], LIMITS)).toEqual([2 * HOUR, 5 * HOUR]);
+    expect(defaultSpan(bad, LIMITS)).toBeNull();
+  });
+
   it("is the extent of the subtasks, their lead-in and lead-out included", () => {
     expect(defaultSpan([work(2 * HOUR, 3 * HOUR, { leadIn: HOUR }), work(4 * HOUR, 5 * HOUR, { leadOut: HOUR / 2 })], LIMITS)).toEqual([HOUR, 5.5 * HOUR]);
   });
