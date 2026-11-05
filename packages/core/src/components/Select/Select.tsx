@@ -1,6 +1,7 @@
 import { Children, Fragment, isValidElement, useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode, SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
+import { typeaheadIndex } from "../../lib/typeahead";
 import { isControlled } from "../../lib/useFieldValue";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
@@ -159,16 +160,8 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
     const letter = key.toLowerCase();
     const text = timeStamp - typed.current.at < 500 ? typed.current.text + letter : letter;
     typed.current = { text, at: timeStamp };
-    const repeat = [...text].every((each) => each === letter);
-    const term = repeat ? letter : text;
-    const from = repeat ? activeIndex + 1 : activeIndex;
-    for (let offset = 0; offset < items.length; offset += 1) {
-      const index = (from + offset) % items.length;
-      if (items[index]!.label.toLowerCase().startsWith(term)) {
-        moveTo(index);
-        return;
-      }
-    }
+    const index = typeaheadIndex(items.map((item) => item.label), activeIndex, text);
+    if (index >= 0) moveTo(index);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSelectElement>) => {
