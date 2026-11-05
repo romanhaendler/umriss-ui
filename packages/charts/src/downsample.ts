@@ -16,7 +16,10 @@
 import { lowerBound } from "./hit";
 import type { MaterializedSeries } from "./types";
 
-export type Course = Pick<MaterializedSeries, "x" | "y" | "y0" | "length">;
+export type Course = Pick<MaterializedSeries, "x" | "y" | "y0" | "length"> & {
+  /** Set when points were dropped: the gaps of maxGap are then already in the course as NaN points. */
+  thinned?: boolean;
+};
 
 /** What of a course is drawn in a plot `width` pixels wide over [from, to],
     with px = x·m + b. Below the threshold, views onto the window - no copy. */
@@ -27,6 +30,7 @@ export function downsample(
   m: number,
   b: number,
   width: number,
+  maxGap?: number,
 ): Course {
   const { x, y, y0, length: n } = series;
   const lo = Math.max(0, lowerBound(x, n, from) - 1);
@@ -42,14 +46,19 @@ export function downsample(
   }
 
   const kept: number[] = [];
-  const column = new Array<number>(6);
+  const breaks = new Set<number>();
   let i = lo;
   while (i <= hi) {
     const c = Math.floor((x[i] as number) * m + b);
+    // first, min, max, last, min and max of y0, the first gap and the first
+    // point after the last one, and the ends of every long step.
+    const cand: number[] = [];
     let first = -1;
     let last = -1;
     let min = -1;
     let max = -1;
+    let min0 = -1;
+    let max0 = -1;
     let gap = -1;
     let tail = -1;
     for (; i <= hi && Math.floor((x[i] as number) * m + b) === c; i++) {
@@ -62,23 +71,31 @@ export function downsample(
         continue;
       }
       tail = -1;
+      if (maxGap !== undefined && i > lo && (x[i] as number) - (x[i - 1] as number) > maxGap) {
+        const before = y[i - 1] as number;
+        if (!Number.isNaN(before) && (y0 === null || !Number.isNaN(y0[i - 1] as number))) {
+          breaks.add(i - 1);
+          cand.push(i - 1, i);
+        }
+      }
       if (first < 0) first = i;
       last = i;
       if (min < 0 || v < (y[min] as number)) min = i;
       if (max < 0 || v > (y[max] as number)) max = i;
+      if (y0 !== null) {
+        const w = y0[i] as number;
+        if (min0 < 0 || w < (y0[min0] as number)) min0 = i;
+        if (max0 < 0 || w > (y0[max0] as number)) max0 = i;
+      }
     }
     // In the order of x: the path runs left to right through the column.
-    column[0] = first;
-    column[1] = min;
-    column[2] = max;
-    column[3] = last;
-    column[4] = gap;
-    column[5] = tail;
-    column.sort((p, q) => p - q);
+    cand.push(first, min, max, last, min0, max0, gap, tail);
+    cand.sort((p, q) => p - q);
     let previous = -1;
-    for (const k of column) {
+    for (const k of cand) {
       if (k < 0 || k === previous) continue;
       kept.push(k);
+      if (breaks.has(k)) kept.push(Number.NaN);
       previous = k;
     }
   }
@@ -88,8 +105,16 @@ export function downsample(
     y: new Float64Array(kept.length),
     y0: y0 === null ? null : new Float64Array(kept.length),
     length: kept.length,
+    thinned: true,
   };
   kept.forEach((k, j) => {
+    if (Number.isNaN(k)) {
+      // The break sits at its left neighbour's x.
+      out.x[j] = out.x[j - 1] as number;
+      out.y[j] = Number.NaN;
+      if (out.y0 !== null) out.y0[j] = Number.NaN;
+      return;
+    }
     out.x[j] = x[k] as number;
     out.y[j] = y[k] as number;
     if (out.y0 !== null) out.y0[j] = (y0 as Float64Array)[k] as number;
