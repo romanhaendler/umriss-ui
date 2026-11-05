@@ -5,7 +5,6 @@
    This lies here and not in the DateTimePicker, because the DateTimeRangePicker
    needs the same parts - a picker is no home for shared logic. */
 
-import { DEFAULT_FORMATS } from "../../lib/language/formats";
 import { zoneFields, zoneInstant } from "../../lib/zone";
 
 export type DstStatus =
@@ -93,13 +92,6 @@ export function truncateInstant(instant: Date, withSeconds: boolean): Date {
   const step = withSeconds ? 1_000 : 60_000;
   return new Date(Math.floor(instant.getTime() / step) * step);
 }
-
-/**
- * The short form of the UTC offset, e.g. "GMT+2".
- *
- * The formatter behind it lies in the language seam and is built once.
- */
-export const offsetLabel = (d: Date): string => DEFAULT_FORMATS.offset(d);
 
 export const pad2 = (n: number) => String(n).padStart(2, "0");
 

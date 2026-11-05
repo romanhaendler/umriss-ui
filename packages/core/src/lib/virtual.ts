@@ -91,7 +91,7 @@ export interface RowPlacement {
   rowHeight: number;
   scrollTop: number;
   viewportHeight: number;
-  /** Height of the sticky header; it covers the upper edge. */
+  /** Height of the sticky header; it stands above row 0 and covers the upper edge. */
   headerHeight?: number;
 }
 
@@ -101,8 +101,8 @@ export interface RowPlacement {
  * This is the arithmetic the keyboard handling hangs on: without it the focus
  * moves into a row that is not rendered.
  *
- * The sticky header counts against the upper edge: a row standing exactly at
- * `scrollTop` lies behind it.
+ * The sticky header stands above row 0, so it pushes every row down by its
+ * height, and once scrolled it covers the upper edge of the viewport.
  */
 export function scrollForRow(
   index: number,
@@ -110,7 +110,7 @@ export function scrollForRow(
 ): number | null {
   if (rowHeight <= 0) return null;
 
-  const top = index * rowHeight;
+  const top = headerHeight + index * rowHeight;
   const bottom = top + rowHeight;
 
   if (top < scrollTop + headerHeight) return Math.max(0, top - headerHeight);

@@ -104,7 +104,7 @@ describe("scrollForRow – bringing a row into view", () => {
     /* Without this arithmetic the row lands behind the header: it is scrolled,
        but covered - the defect one notices only once the focus ring becomes
        invisible. */
-    expect(scrollForRow(5, { ...PLACEMENT, scrollTop: 800, headerHeight: 36 })).toBe(164);
+    expect(scrollForRow(5, { ...PLACEMENT, scrollTop: 800, headerHeight: 36 })).toBe(200);
   });
 
   it("does not run negative", () => {
