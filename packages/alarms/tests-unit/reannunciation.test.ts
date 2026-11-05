@@ -49,3 +49,25 @@ describe("a shelve that ends", () => {
     expect(rowAt(unseen, UNTIL + MIN).lifecycle).toBe("resolved-unacknowledged");
   });
 });
+
+describe("a shelve whose end cannot be read", () => {
+  const broken = (record: unknown): Alarm => ({ ...acked, availability: "snoozed", snooze: record }) as Alarm;
+
+  it("an ISO-string end is in service, unacknowledged again and counted", () => {
+    const view = alarmModel({ alarms: [broken({ until: "2026-08-26T06:10:00Z", by: "x" })], types: TYPES, asOf: T0 });
+    expect(view.visible[0]!.availability).toBe("in-service");
+    expect(view.visible[0]!.lifecycle).toBe("active-unacknowledged");
+    expect(view.activeUnacknowledged).toBe(1);
+  });
+
+  it("a shelve without a record does not throw and is in service", () => {
+    const view = alarmModel({ alarms: [broken(undefined)], types: TYPES, asOf: T0 });
+    expect(view.visible[0]!.availability).toBe("in-service");
+  });
+
+  it("the count and the acknowledgement agree after an end at 100", () => {
+    const one = snooze(acked, 100, "x");
+    expect(countAcknowledgeable([one], ["a"], 200)).toBe(1);
+    expect(acknowledge([one], ["a"], 200).count).toBe(1);
+  });
+});
