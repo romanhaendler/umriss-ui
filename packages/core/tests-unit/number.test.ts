@@ -7,8 +7,8 @@
    the parser takes the notation it is given. */
 
 import { describe, expect, it } from "vitest";
-import { clampNumber, filterInput, formatNumber, parseNumber, stepNumber } from "../src/components/NumberInput/number";
-import { separatorsOf } from "../src/lib/language/formats";
+import { clampNumber, filterInput, parseNumber, stepNumber } from "../src/components/NumberInput/number";
+import { DEFAULT_FORMATS, separatorsOf } from "../src/lib/language/formats";
 import { GERMAN_FORMATS } from "../src/lib/language/de";
 
 /* The German notation, as an application takes it (ADR-0024). */
@@ -34,7 +34,7 @@ describe("parseNumber – the default notation", () => {
   }
 
   it("reads back what the default notation writes", () => {
-    expect(parseNumber(formatNumber(1234567.89, 2))).toBe(1234567.89);
+    expect(parseNumber(DEFAULT_FORMATS.number(1234567.89, 2))).toBe(1234567.89);
   });
 });
 
@@ -123,19 +123,19 @@ describe("filterInput – permitted characters per configuration", () => {
 
 describe("formatNumber – output in the default notation", () => {
   it("sets the group comma and the decimal dot", () => {
-    expect(formatNumber(1234.5, 2)).toBe("1,234.50");
-    expect(formatNumber(1234567.89, 2)).toBe("1,234,567.89");
+    expect(DEFAULT_FORMATS.number(1234.5, 2)).toBe("1,234.50");
+    expect(DEFAULT_FORMATS.number(1234567.89, 2)).toBe("1,234,567.89");
   });
 
   it("rounds to the required places", () => {
-    expect(formatNumber(0.5, 0)).toBe("1");
+    expect(DEFAULT_FORMATS.number(0.5, 0)).toBe("1");
   });
 
   /* The round trip is the actual assurance: what has been formatted must
      read back unchanged. */
   it("is reversible with parseNumber", () => {
     for (const value of [0, 1234.5, -2.75, 1234567.89]) {
-      expect(parseNumber(formatNumber(value, 2))).toBe(value);
+      expect(parseNumber(DEFAULT_FORMATS.number(value, 2))).toBe(value);
     }
   });
 });

@@ -16,6 +16,7 @@
    that is hard about a tree can be checked without a browser. */
 
 import { foldedText } from "../../lib/search";
+import { typeaheadIndex } from "../../lib/typeahead";
 
 /** A node's key, as `reader.key` returns it. */
 export type Key = string | number;
@@ -547,13 +548,8 @@ export function toggleCheck<K, S extends Key = string>(
 /**
  * The next visible node whose label starts like this - or null.
  *
- * A single letter searches **behind** the active node, so that the same
- * letter pressed twice jumps onwards instead of finding the same node again.
- * Several letters search **from** the active node, so that refining does not
- * jump onwards. Both are intended and are the reason why the length of the
- * prefix matters here.
- *
- * At the end it wraps around. Disabled and unloaded nodes are valid targets:
+ * The rule is `typeaheadIndex`'s, shared with Select and Menu. At the end it
+ * wraps around. Disabled and unloaded nodes are valid targets:
  * typeahead moves only the focus, and both are navigable.
  */
 export function typeaheadTarget<K, S extends Key = string>(
@@ -561,15 +557,12 @@ export function typeaheadTarget<K, S extends Key = string>(
   prefix: string,
   active: S | null,
 ): S | null {
-  const wanted = prefix.toLowerCase();
-  if (wanted === "" || flattening.length === 0) return null;
-  const here = flattening.findIndex((e) => e.key === active);
-  const from = here < 0 ? 0 : wanted.length === 1 ? here + 1 : here;
-  for (let n = 0; n < flattening.length; n++) {
-    const entry = flattening[(from + n) % flattening.length] as FlatteningEntry<K, S>;
-    if (entry.label.toLowerCase().startsWith(wanted)) return entry.key;
-  }
-  return null;
+  const at = typeaheadIndex(
+    flattening.map((e) => e.label),
+    flattening.findIndex((e) => e.key === active),
+    prefix,
+  );
+  return at < 0 ? null : (flattening[at] as FlatteningEntry<K, S>).key;
 }
 
 /* ================= Reaching a node ================= */
