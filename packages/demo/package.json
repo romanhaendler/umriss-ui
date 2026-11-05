@@ -8,14 +8,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./outline": "./src/outline.ts",
-    "./packages": "./src/packages.ts",
     "./tooling/props": "./src/tooling/props.ts",
     "./tooling/llms": "./src/tooling/llms.ts",
     "./tooling/tokens": "./src/tooling/tokens.ts",
     "./tooling/tokenTable": "./src/tooling/tokenTable.ts",
     "./tooling/propsReader": "./src/tooling/propsReader.ts",
-    "./tooling/fileName": "./src/tooling/fileName.ts",
-    "./tooling/source": "./src/tooling/source.ts",
     "./tooling/wordingTable": "./src/tooling/wordingTable.ts",
     "./tooling/referenceTable": "./src/tooling/referenceTable.ts",
     "./shell.css": "./src/shell.css",
@@ -33,11 +30,7 @@
     "./checks/floor": "./checks/floor.ts",
     "./checks/touchScale": "./checks/touchScale.ts",
     "./checks/silentPages": "./checks/silentPages.ts",
-    "./checks/trustedTypes": "./checks/trustedTypes.ts",
-    "./tests-support/setup": "./tests-support/setup.ts",
-    "./tests-support/styleGuard": "./tests-support/styleGuard.ts",
-    "./tests-support/wordingGuard": "./tests-support/wordingGuard.ts",
-    "./tests-support/glyphGuard": "./tests-support/glyphGuard.ts"
+    "./checks/trustedTypes": "./checks/trustedTypes.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

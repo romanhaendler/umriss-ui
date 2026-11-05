@@ -13,6 +13,7 @@ import {
   calendarFrom,
   toWorkingTime,
   toWallClock,
+  toWorkingTimeClamped,
   HOUR,
   DAY,
   timeStep,
@@ -304,5 +305,15 @@ describe("localOffset - the grid's shift onto local time", () => {
     const noon = Date.UTC(2026, 0, 15, 12);
     const ticks = workingTimeTicks([], noon, noon + DAY, DAY, localOffset(noon));
     expect(ticks.map((t) => new Date(t.wallClock).getHours())).toEqual([0]);
+  });
+});
+
+describe("toWorkingTimeClamped", () => {
+  it("lands removed time on the next seam and the ends on 0 and the total", () => {
+    expect(toWorkingTimeClamped(10 * HOUR, shifts)).toBe(4 * HOUR);
+    expect(toWorkingTimeClamped(20 * HOUR, shifts)).toBe(8 * HOUR);
+    expect(toWorkingTimeClamped(0, shifts)).toBe(0);
+    expect(toWorkingTimeClamped(50 * HOUR, shifts)).toBe(16 * HOUR);
+    expect(toWorkingTimeClamped(Number.NaN, shifts)).toBeNaN();
   });
 });

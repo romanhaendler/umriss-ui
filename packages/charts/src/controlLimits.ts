@@ -61,12 +61,6 @@ function limitsFrom(center: number, sigma: number): ControlLimits {
   };
 }
 
-/** Sigma calculated back from a limit that stands on paper. For callers whose
-    baseline has been handed down as a centre line and a control limit. */
-export function sigmaFromLimit(center: number, upper: number): number {
-  return (upper - center) / 3;
-}
-
 /** Centre line and control limits. Either given or calculated from exactly the
     named reference window - never from the whole series and never from the
     visible excerpt. Gaps (NaN) count neither in the centre line nor in the
