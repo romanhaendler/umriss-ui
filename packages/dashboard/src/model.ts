@@ -75,7 +75,7 @@ export function readView(view: DashboardView, types: Types): DashboardView {
       const type = types.get(widget.type);
       if (!type || seen.has(widget.id)) return [];
       seen.add(widget.id);
-      return [{ ...widget, size: type.sizes[widget.size] ? widget.size : type.start, options: readOptions(widget.options, type.defaultOptions) }];
+      return [{ ...widget, size: Object.hasOwn(type.sizes, widget.size) ? widget.size : type.start, options: readOptions(widget.options, type.defaultOptions) }];
     }),
   };
 }
