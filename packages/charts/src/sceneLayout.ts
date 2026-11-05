@@ -10,7 +10,7 @@ import { labelled, baselineOf, normalizes } from "./sceneConfig";
 import { inTime, materialize } from "./sceneMaterial";
 import { type SeriesEntry } from "./sceneModel";
 import { yTickFormat } from "./sceneSpeech";
-import { publishView, isHidden, zooms, domainOf, hasZoom } from "./sceneView";
+import { publishView, isHidden, zooms, domainOf, ownDomainOf, hasZoom } from "./sceneView";
 import type { AxisConfig, LimitConfig, AxisOrientation } from "./types";
 import { sameSpan } from "./view";
 import { differsFromReader, zoneName } from "./zone";
@@ -192,7 +192,7 @@ export function updateLayout(s: ChartScene): void {
       grid: grid.get(id) ?? false,
       extent: extentFor(s, c),
       domainMode: domainOf(s, c),
-      ...(zooms(s, c) && { ownDomainMode: c.domain }),
+      ...(zooms(s, c) && { ownDomainMode: ownDomainOf(s, c) }),
       tickCount: categories === undefined ? c.tickCount : undefined,
       tickFormat:
         categories === undefined

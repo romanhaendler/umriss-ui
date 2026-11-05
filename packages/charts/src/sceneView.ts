@@ -7,7 +7,7 @@ import { type AxisLayout } from "./layout";
 import type { ChartScene } from "./scene";
 import { stackOf } from "./sceneConfig";
 import { say } from "./sceneSpeech";
-import { calendarFrom, toWallClock } from "./workingTime";
+import { calendarFrom, toWallClock, toWorkingTimeClamped } from "./workingTime";
 import type { AxisConfig, ChartRange, MaterializedSeries, SeriesConfig } from "./types";
 import {
   defaultLimits,
@@ -119,7 +119,18 @@ export function zoomAxisIds(s: ChartScene): string[] {
 /** What an axis shows: on a zoomable x axis the span the view names, and
     its own `domain` where the view names none. */
 export function domainOf(s: ChartScene, config: AxisConfig): AxisConfig["domain"] {
-  return (zooms(s, config) ? s.heldSpans[config.id] : undefined) ?? config.domain;
+  return (zooms(s, config) ? s.heldSpans[config.id] : undefined) ?? ownDomainOf(s, config);
+}
+
+/** An axis' own `domain` in the units of its scale: a fixed pair is named on
+    the wall clock, so on a working-time axis it is mapped like the data; a held
+    span is already in working time and never passes here. */
+export function ownDomainOf(s: ChartScene, config: AxisConfig): AxisConfig["domain"] {
+  const { domain, calendar } = config;
+  if (!Array.isArray(domain) || calendar === undefined || calendar.length === 0) return domain;
+  if (s.categoriesAt(config.orientation, config.id) !== undefined) return domain;
+  const [from, to] = domain as readonly [number, number];
+  return [toWorkingTimeClamped(from, calendar), toWorkingTimeClamped(to, calendar)];
 }
 
 /** The narrowest and widest span zoom reaches on an axis: its own, or at

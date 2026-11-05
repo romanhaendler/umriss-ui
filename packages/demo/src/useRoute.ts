@@ -88,8 +88,11 @@ export function useRoute({ addressOf, fromPlace }: Demo["addresses"]) {
     const target = place.example;
     /* An example, a scenario - or another anchor of the page, such as a
        section's heading or a props table's `#type-<Name>`. */
+    /* The name is a string inside a quoted attribute selector: a backslash or a
+       quote in the address has to be escaped, or the selector does not parse. */
+    const quoted = target?.replace(/["\\]/g, "\\$&");
     const example =
-      target === undefined ? null : document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`);
+      quoted === undefined ? null : document.querySelector(`[data-example="${quoted}"], [data-scenario="${quoted}"]`);
     const el = example ?? (target === undefined ? null : document.getElementById(target));
     if (el === null) {
       /* A page change with no named target starts at the top. Otherwise one
