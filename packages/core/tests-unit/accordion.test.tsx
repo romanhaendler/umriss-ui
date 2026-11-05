@@ -71,18 +71,18 @@ describe("Accordion", () => {
 
   it("uncontrolled: reports every change as a message", () => {
     const changed = vi.fn();
-    render(<Settings type="multiple" defaultValue={["general"]} onChange={changed} />);
+    render(<Settings type="multiple" defaultValue={["general"]} onValueChange={changed} />);
     fireEvent.click(header("Users"));
     expect(changed).toHaveBeenCalledWith(["general", "users"]);
   });
 
   it("controlled: reports and waits until value follows", () => {
     const changed = vi.fn();
-    const { rerender } = render(<Settings value={[]} onChange={changed} />);
+    const { rerender } = render(<Settings value={[]} onValueChange={changed} />);
     fireEvent.click(header("Alarms"));
     expect(changed).toHaveBeenCalledWith(["alarms"]);
     expect(expanded("Alarms")).toBe(false);
-    rerender(<Settings value={["alarms"]} onChange={changed} />);
+    rerender(<Settings value={["alarms"]} onValueChange={changed} />);
     expect(expanded("Alarms")).toBe(true);
   });
 

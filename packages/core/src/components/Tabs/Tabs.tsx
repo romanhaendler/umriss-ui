@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
-import { warnDeprecated } from "../../lib/dev";
 import { idPart } from "../../lib/idPart";
 import { mergeRefs } from "../../lib/mergeRefs";
 import type { RefProp } from "../../lib/refProp";
@@ -41,23 +40,17 @@ export interface TabsProps
   /** Receives the value of the chosen tab. Controlled, the tab switches only
       once `value` follows; uncontrolled it is merely a message. */
   onValueChange?: (value: string) => void;
-  /** The former name of `onValueChange`. @deprecated since 0.53 - use `onValueChange`; it goes in the next minor release. */
-  onChange?: (value: string) => void;
 }
 
 /** Tabs: a `TabList` of `Tab`s and one `TabPanel` per value. Controlled
     through `value` and `onValueChange`, or uncontrolled from `defaultValue`. */
-export function Tabs({ ref, value, defaultValue, onValueChange, onChange, className, children, ...rest }: TabsProps) {
+export function Tabs({ ref, value, defaultValue, onValueChange, className, children, ...rest }: TabsProps) {
   const idBase = useId();
   const [ownValue, setOwnValue] = useState(defaultValue ?? "");
   const controlled = value !== undefined;
   const change = (next: string) => {
     if (!controlled) setOwnValue(next);
     onValueChange?.(next);
-    if (onChange) {
-      warnDeprecated("Tabs onChange", "onValueChange");
-      onChange(next);
-    }
   };
 
   return (

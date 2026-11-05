@@ -85,7 +85,7 @@ describe("Splitter", () => {
 
   it("collapses the first pane on Enter and restores it on the next", () => {
     const changed = vi.fn();
-    render(<Panes defaultValue={35} min={10} onChange={changed} />);
+    render(<Panes defaultValue={35} min={10} onValueChange={changed} />);
     press("Enter");
     expect(now()).toBe("10");
     press("Enter");
@@ -115,7 +115,7 @@ describe("Splitter", () => {
   });
 
   it("stays where the caller holds it when the caller does not follow", () => {
-    render(<Panes value={30} onChange={() => undefined} />);
+    render(<Panes value={30} onValueChange={() => undefined} />);
     press("ArrowRight");
     expect(now()).toBe("30");
   });

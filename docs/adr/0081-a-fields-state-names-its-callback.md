@@ -53,7 +53,7 @@ in the minor after the release. `onChange` on Slider is the exception that shows
 a number today, and from the minor that removes the deprecated name it is the native input's
 event handler.
 
-The contract step was taken in the minor after 0.52.0: the deprecated `onChange(value)` and its warning are gone.
+The contract step was taken in the minor after 0.52.0: the deprecated `onChange(value)` and its warning are gone. The same step followed for `Tabs`, `Accordion`, `Splitter` and `useTree` in the minor after 0.53.0.
 
 The rule is not only for fields. The next minor extends it to the other components that hold a state
 of their own: `Tabs`, `Accordion` and `Splitter` hand their finished value to `onValueChange` (their
