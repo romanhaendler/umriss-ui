@@ -23,7 +23,6 @@ import {
   useRevealedRow,
   useCutValueWarnings,
   useUnboundedVirtualWarning,
-  useDraftOfVanishedRow,
   useFocusAfterFold,
   useHeldColumnWidths,
   useHeldWidthsWhenEmpty,
@@ -120,7 +119,6 @@ export function Frame({
     };
   }, [registry]);
 
-  useDraftOfVanishedRow(registry, grid);
   useStickyHeaderHeights(tableRef, stickyHeader);
   useFocusAfterFold(registry, tableRef);
   useHeldColumnWidths(registry, tableRef, loading);
@@ -343,6 +341,8 @@ export function Frame({
             editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
             outside={gridEvents?.outside}
             settle={gridEvents?.settle}
+            hold={gridEvents?.hold}
+            registry={registry}
           />
         )}
       </div>

@@ -629,6 +629,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);
   const goTo = (page: number, button: number, from: HTMLElement) => {
+    if (connection.registry.pageHold) return connection.registry.pageHold();
     pressed.current = document.activeElement === from ? button : null;
     stepped.current = true;
     setSpoken((words) => words ?? "");
@@ -649,7 +650,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of, ...rest }:
             /* As wide as the longest size offered */
             chars={Math.max(...sizes.map((size) => String(size).length), ...(fitOffered ? [wording.fit.length] : []))}
             value={fitting ? "fit" : snapshot.pageSize}
-            onChange={(event) => snapshot.setPageSize(event.target.value === "fit" ? "fit" : Number(event.target.value))}
+            onChange={(event) => connection.registry.pageHold ? connection.registry.pageHold() : snapshot.setPageSize(event.target.value === "fit" ? "fit" : Number(event.target.value))}
             aria-label={wording.rowsPerPage}
           >
             {fitOffered && <option value="fit">{wording.fit}</option>}

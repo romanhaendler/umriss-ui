@@ -784,6 +784,13 @@ export class Registry {
       set: the application says its rows are not settled. Read in an effect, so it needs no re-render. */
   busy = false;
 
+  /** Set while a Row draft is open: the pager calls it and does not page. */
+  pageHold: (() => void) | null = null;
+
+  setPageHold(hold: (() => void) | null) {
+    this.pageHold = hold;
+  }
+
   setBusy(busy: boolean) {
     this.busy = busy;
   }

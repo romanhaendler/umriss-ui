@@ -11,7 +11,7 @@
    It walks the whole row, not only the part in view: the scene brings the
    subtask into view, as a drag near the edge pans along (ADR-0033). */
 
-import { rowAt, type Rows } from "./rows";
+import { rowAt, type Row, type Rows } from "./rows";
 import type { Subtask, Dependency } from "./model";
 
 /** What the walk can stand on: a subtask, or a milestone made into the shape
@@ -24,13 +24,17 @@ export type WalkMove = "next" | "previous" | "up" | "down" | "first" | "last" | 
     order - by the start of the main time, then its end. Empty rows are left
     out. */
 export function walkRows<T extends Walked>(rows: Rows, subtasks: readonly T[]): T[][] {
+  const index = new Map<Row, number>();
+  rows.rows.forEach((row, i) => index.set(row, i));
   const byRow = new Map<number, T[]>();
   for (const subtask of subtasks) {
     const slot = rows.slots.get(subtask.lane);
     const row = slot === undefined ? null : rowAt(rows, slot.top);
     if (row === null) continue;
-    const index = rows.rows.indexOf(row);
-    byRow.set(index, [...(byRow.get(index) ?? []), subtask]);
+    const i = index.get(row) as number;
+    const work = byRow.get(i);
+    if (work === undefined) byRow.set(i, [subtask]);
+    else work.push(subtask);
   }
   return [...byRow.entries()]
     .sort(([a], [b]) => a - b)

@@ -12,7 +12,7 @@ import { DEV, warnOnce } from "./dev";
 import type { Registry, ColumnEntry } from "./registry";
 import type { RowGroup } from "./model/grouping";
 import type { ExportFormat, ExportSheet, RowKey, TableSnapshot } from "./types";
-import { exportCell, exportValue } from "./values";
+import { exportCell } from "./values";
 import type { ExportCell } from "./values";
 
 /** A column's name in a file: under its group, "<group> · <column>". */
@@ -176,14 +176,15 @@ export function selectionText(registry: Registry, formats: Formats, wording: Wor
   return asTabbed(rows, columns, conventionsOf(formats, wording));
 }
 
-/** One cell as the copy writes it: the export's value in the language's notation. */
-export function cellText(entry: ColumnEntry, row: unknown, formats: Formats, wording: Wording): string {
-  return valueText(entry, entry.read(row), formats, wording);
+/** One cell as the copy writes it: the row copy's value in the language's notation. */
+export function cellText(registry: Registry, entry: ColumnEntry, row: unknown, formats: Formats, wording: Wording): string {
+  return valueText(registry, entry, entry.read(row), formats, wording);
 }
 
 /** The same for a value that is not (yet) the row's - what an open editor holds. */
-export function valueText(entry: ColumnEntry, raw: unknown, formats: Formats, wording: Wording): string {
-  const value = exportValue(raw, entry.spec.ownExportValue);
+export function valueText(registry: Registry, entry: ColumnEntry, raw: unknown, formats: Formats, wording: Wording): string {
+  const write = dateWriter([], writesDays(registry, entry), !!entry.spec.ownExportValue, formats.timeZone);
+  const value = write(exportCell(raw, entry.spec.ownExportValue));
   return value === undefined ? "" : plain(value, conventionsOf(formats, wording));
 }
 
