@@ -8,6 +8,8 @@ export interface TextSize {
   readonly height: number;
 }
 
+const CACHE_CAP = 5_000;
+
 const EMPTY: TextSize = { width: 0, height: 0 };
 
 export class TextMeasurer {
@@ -41,6 +43,8 @@ export class TextMeasurer {
     span.textContent = text;
     const rect = span.getBoundingClientRect();
     const size: TextSize = { width: rect.width, height: rect.height };
+    // A live time axis adds a label every tick step; the cache must not grow with it.
+    if (this.cache.size >= CACHE_CAP) this.cache.clear();
     this.cache.set(key, size);
     return size;
   }

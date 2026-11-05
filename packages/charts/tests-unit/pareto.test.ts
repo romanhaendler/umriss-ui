@@ -191,4 +191,11 @@ describe("pareto - the collected remainder", () => {
     expect(entries.length).toBe(1);
     expect(entries[0]).toMatchObject({ name: "Other", value: 34, remainder: true });
   });
+
+  it("leaves out an item whose value is not finite", () => {
+    const r = pareto([{ name: "a", value: 3 }, { name: "b", value: Number.NaN }, { name: "c", value: 5 }]);
+    expect(r.entries.map((e) => e.name)).toEqual(["c", "a"]);
+    expect(r.entries.every((e) => Number.isFinite(e.share))).toBe(true);
+    expect(r.cutoffIndex).toBeGreaterThanOrEqual(0);
+  });
 });

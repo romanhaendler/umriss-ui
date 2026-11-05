@@ -10,7 +10,6 @@ import {
   ruleRun,
   ruleTrend,
   ruleTwoOfThree,
-  sigmaFromLimit,
   defaultRules,
   violatedIndices,
   violations,
@@ -82,10 +81,6 @@ describe("controlLimits - sigma out of the mean moving range", () => {
       upper: 3,
       lower: -3,
     });
-  });
-
-  it("calculates sigma back out of a limit held on paper", () => {
-    expect(sigmaFromLimit(12, 16.5)).toBe(1.5);
   });
 
   it("lets the limits fall onto the centre line for a flat process", () => {

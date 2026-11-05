@@ -794,8 +794,11 @@ function drawLimits(
 ): void {
   for (const g of limits) {
     if (g.band) {
-      const a = Math.min(g.fromPx, g.toPx);
-      const b = Math.max(g.fromPx, g.toPx);
+      // A side open to infinity lands at +-Infinity pixels; the plot's edge is where it is drawn to.
+      const lo = g.orientation === "y" ? plot.y : plot.x;
+      const hi = lo + (g.orientation === "y" ? plot.height : plot.width);
+      const a = Math.max(lo, Math.min(g.fromPx, g.toPx));
+      const b = Math.min(hi, Math.max(g.fromPx, g.toPx));
       ctx.fillStyle = g.color;
       ctx.save();
       // A band is ground, not a mark: it carries only enough opacity to make the
