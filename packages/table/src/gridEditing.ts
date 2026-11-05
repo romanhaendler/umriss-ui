@@ -5,7 +5,7 @@
 import type { VirtualRows } from "@umriss-ui/core";
 import type { ColumnEntry } from "./registry";
 import { isAbsent } from "./values";
-import { rowLine } from "./model/gridWalk";
+import { lineIndex, rowLine } from "./model/gridWalk";
 import type { GridLine, GridPosition } from "./model/gridWalk";
 import type { CellEdit, RowAdd, RowDelete, RowKey, RowSave } from "./types";
 import { NEW_LINE } from "./gridState";
@@ -58,7 +58,6 @@ export type EditingActions = ReturnType<typeof editingActions>;
 export function editingActions(input: GridInput) {
   const { grid, lines, ids, columnById, rowKey, onCellEdit, rowMode, onRowSave, onRowAdd, newRow } = input;
   const { setState } = grid;
-  const keys = lines.map((l) => l.key);
   const editing = grid.state.editing;
 
   const lineRow = (key: string) => (key === NEW_LINE ? editing?.fresh : (lines.find((l) => l.key === key)?.row ?? editing?.source));
@@ -120,7 +119,7 @@ export function editingActions(input: GridInput) {
       if (focus) grid.focus.want("editor");
       setState((s) => ({
         ...s,
-        active: { line: editing.line, column, lineIndex: Math.max(0, keys.indexOf(editing.line)), columnIndex: ids.indexOf(column) },
+        active: { line: editing.line, column, lineIndex: Math.max(0, lineIndex(lines).get(editing.line) ?? -1), columnIndex: ids.indexOf(column) },
         editing: s.editing && { ...s.editing, column, drafts, errors, refused: false },
       }));
       return false;

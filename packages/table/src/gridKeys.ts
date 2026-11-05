@@ -3,7 +3,7 @@
    They walk the Active cell and call the edit paths of `gridEditing.ts`. */
 
 import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
-import { nextCell, stepGrid } from "./model/gridWalk";
+import { lineIndex, nextCell, stepGrid } from "./model/gridWalk";
 import type { GridMove, GridPosition } from "./model/gridWalk";
 import { NEW_LINE } from "./gridState";
 import type { Active } from "./gridState";
@@ -116,7 +116,6 @@ function moveTo({ grid, lines, ids, virtual }: GridInput, table: HTMLTableElemen
 export function onKeyDown(input: GridInput, actions: EditingActions, event: ReactKeyboardEvent<HTMLTableElement>) {
   const { grid, lines, ids, columnById, select, report } = input;
   const { rowAt, editable, startEdit, save, discard } = actions;
-  const keys = lines.map((l) => l.key);
   const editing = grid.state.editing;
   const table = event.currentTarget;
   if (event.defaultPrevented) return;
@@ -126,7 +125,7 @@ export function onKeyDown(input: GridInput, actions: EditingActions, event: Reac
     if (event.target === place.cell && !event.ctrlKey && !event.metaKey && !event.altKey) onGroupKey(input, table, place, event);
     return;
   }
-  const here: GridPosition = { line: keys.indexOf(place.line), column: goalIn(place, grid.state.active) };
+  const here: GridPosition = { line: (lineIndex(lines).get(place.line) ?? -1), column: goalIn(place, grid.state.active) };
   if (here.line < 0) return;
 
   /* In a Row draft: Enter saves it, Escape discards it, and Tab walks its

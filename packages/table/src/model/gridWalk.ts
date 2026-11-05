@@ -88,6 +88,19 @@ export function lineCells(shape: LineShape, layout: GridLayout): number[] {
 
 /* --- The lines ------------------------------------------------------------------ */
 
+/** Where each line's key stands among the lines - kept with the array, so that
+    the lookups of a render cost nothing over all lines when it is the same one. */
+const indexes = new WeakMap<readonly GridLine[], Map<string, number>>();
+export function lineIndex(lines: readonly GridLine[]): Map<string, number> {
+  let index = indexes.get(lines);
+  if (!index) {
+    index = new Map();
+    lines.forEach((l, i) => index!.has(l.key) || index!.set(l.key, i));
+    indexes.set(lines, index);
+  }
+  return index;
+}
+
 /** The key of a row's line - the one the table, the walk and the editor
     name it by. */
 /* A number key is marked, so that the lines of `1` and `"1"` differ. */
