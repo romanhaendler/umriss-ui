@@ -97,6 +97,7 @@ export function pareto(
   );
 
   const sorted = items
+    .filter((item) => Number.isFinite(item.value))
     .map((item, inputIndex) => ({ item, inputIndex }))
     .sort((a, b) => b.item.value - a.item.value || a.inputIndex - b.inputIndex)
     .map(({ item }) => item);

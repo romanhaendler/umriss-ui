@@ -13,7 +13,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { filterSort, groupStage, pageStage, tableModel } from "./tableModel";
-import { linesOf, pageLines, rowsOf } from "./grouping";
+import { linesOf, pageStarts, rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
@@ -315,11 +315,8 @@ export function useTableState<Z, K extends string = string>(
     if (!shown.lines) return Math.floor(at / size) + 1;
     /* Grouped pages are cut by lines, headers counted: ask the cut itself. */
     const row = all[at];
-    const count = pageLines(shown.lines, 1, size).pageCount;
-    for (let page = 1; page <= count; page++) {
-      if (rowsOf(pageLines(shown.lines, page, size).lines).includes(row as Z)) return page;
-    }
-    return 1;
+    const line = shown.lines.findIndex((l) => l.kind === "row" && l.row === row);
+    return line < 0 ? 1 : pageStarts(shown.lines, size).filter((start) => start <= line).length;
   }, [rowKey, server]);
 
   const setPageSize = useCallback((size: number | "fit") => {

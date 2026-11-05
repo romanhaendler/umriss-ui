@@ -193,10 +193,15 @@ export function toWorkingTimeClamped(wallClock: number, input: CalendarInput): n
   if (!Number.isNaN(inside)) return inside;
   if (!Number.isFinite(wallClock)) return Number.NaN;
   // The seam of the first span that begins after the value.
-  for (let i = 0; i < calendar.intervals.length; i++) {
-    const interval = calendar.intervals[i] as WorkingInterval;
-    if (wallClock < interval.from) return calendar.offsets[i] as number;
+  const intervals = calendar.intervals;
+  let lo = 0;
+  let hi = intervals.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (wallClock < (intervals[mid] as WorkingInterval).from) hi = mid;
+    else lo = mid + 1;
   }
+  if (lo < intervals.length) return calendar.offsets[lo] as number;
   return calendar.total;
 }
 
