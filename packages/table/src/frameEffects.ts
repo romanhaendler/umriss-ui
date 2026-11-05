@@ -1,5 +1,4 @@
-/* The effects of the frame that measure or mend the rendered table: the draft
-   of a vanished row, the sticky header's height, the focus after a fold, the
+/* The effects of the frame that measure or mend the rendered table: the sticky header's height, the focus after a fold, the
    widths held while loading, the development warnings and the virtual pitch.
    Each runs after every render, in the order the frame calls them. */
 
@@ -9,26 +8,12 @@ import type { RefObject } from "react";
 import type { VirtualRows } from "@umriss-ui/core";
 import { DEV, warnOnce } from "./dev";
 import type { Registry } from "./registry";
-import { rowLine } from "./model/gridWalk";
-import { NEW_LINE } from "./grid";
-import type { GridHandle } from "./grid";
 import { markStuck } from "./scrollMarks";
 import { columnRow } from "./pinned";
 import { scrollToRow, showPending } from "./reach";
 import styles from "./Table.module.css";
 
 type TableRef = RefObject<HTMLTableElement | null>;
-
-/* A row gone from the rows takes its draft with it (ADR-0036) - nothing is
-   left to report it against. */
-export function useDraftOfVanishedRow(registry: Registry, grid: GridHandle) {
-  const draftLine = grid.state.editing?.line;
-  useLayoutEffect(() => {
-    const hook = registry.hook;
-    if (!hook || draftLine === undefined || draftLine === NEW_LINE) return;
-    if (!hook.rows.some((row) => rowLine(hook.rowKey(row)) === draftLine)) grid.setState((s) => ({ ...s, editing: null }));
-  });
-}
 
 /* Sticky group headers stand below the head and below one another; how high those
    are only the layout knows. Measured after every render - a density or a
