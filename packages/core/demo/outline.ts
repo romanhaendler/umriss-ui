@@ -655,6 +655,26 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["MultiSelectProps", "MultiSelectOption"],
         exports: ["MultiSelect"],
       },
+      {
+        id: "colorpicker",
+        name: "ColorPicker",
+        sentence: "One colour, typed as hex and compared with the colour the panel opened with (colour field): the line of a series, a tag, a state.",
+        about: [
+          "The value is a lowercase `#rrggbb` string or `null`; a given value in any hex spelling (`#ABC`, `2563EB`) is read, and anything else warns in development and reads as `null`. It reports on every settled step, so what the colour is for can follow at once.",
+          "Escape and Cancel put the opening colour back, with one more `onValueChange`; Done, a click outside, a Tab out and a scroll keep the colour. The focus returns to the field in every case.",
+        ],
+        alternatives: [
+          { when: "One of a few named options", use: "radiogroup" },
+          { when: "A day or a moment", use: "datepicker" },
+        ],
+        keys: [
+          { key: "Enter, Space or Arrow Down", action: "On the field, opens the panel." },
+          { key: "Escape", action: "Puts back the colour the panel opened with and closes it." },
+        ],
+        limits: ["Hex only: no alpha, no `rgb()`, `hsl()` or `oklch()`."],
+        types: ["ColorPickerProps"],
+        exports: ["ColorPicker"],
+      },
     ],
   },
   {

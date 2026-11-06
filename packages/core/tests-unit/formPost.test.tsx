@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { act, fireEvent, render } from "@testing-library/react";
 import {
   Combobox,
+  ColorPicker,
   DatePicker,
   DateRangePicker,
   DateTimePicker,
@@ -48,6 +49,12 @@ describe("a field with a name posts its value", () => {
     expect(post(berlin(<DatePicker name="d" defaultValue={new Date(2026, 9, 31)} />))).toEqual([["d", "2026-10-31"]]);
     expect(post(berlin(<DateTimePicker name="t" defaultValue={instant} />))).toEqual([["t", "2026-10-31T14:30:00+01:00"]]);
     expect(post(<DatePicker name="d" />)).toEqual([["d", ""]]);
+  });
+
+  it("ColorPicker posts lowercase #rrggbb", () => {
+    expect(post(<ColorPicker name="c" defaultValue="#2563EB" />)).toEqual([["c", "#2563eb"]]);
+    expect(post(<ColorPicker name="c" defaultValue="26e" formValue={(v) => v.slice(1)} />)).toEqual([["c", "2266ee"]]);
+    expect(post(<ColorPicker name="c" />)).toEqual([["c", ""]]);
   });
 
   it("the range pickers post <name>Start and <name>End, both overridable", () => {

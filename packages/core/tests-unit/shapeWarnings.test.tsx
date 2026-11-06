@@ -3,7 +3,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
-import { Combobox, DatePicker, DateRangePicker, DateTimePicker, MultiSelect, NumberInput, Stat } from "../src";
+import { ColorPicker, Combobox, DatePicker, DateRangePicker, DateTimePicker, MultiSelect, NumberInput, Stat } from "../src";
 
 const noop = () => {};
 const bad = (v: unknown) => v as never;
@@ -19,7 +19,8 @@ function warnings(ui: React.ReactElement, rerenderTo?: React.ReactElement): stri
 
 const cases: [string, React.ReactElement, RegExp][] = [
   ["DatePicker", <DatePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DatePicker value must be a Date or null/],
-  ["DateTimePicker", <DateTimePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DateTimePicker value must be a Date or null/],
+  ["ColorPicker", <ColorPicker value={bad("blue")} onValueChange={noop} aria-label="c" />, /ColorPicker value must be a hex colour/],
+  ["DateTimePicker",<DateTimePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DateTimePicker value must be a Date or null/],
   ["DateRangePicker", <DateRangePicker value={bad("2024-03-04")} onValueChange={noop} aria-label="d" />, /DateRangePicker value must be \{ from: Date, to: Date \} or null/],
   ["MultiSelect value", <MultiSelect options={[{ value: "a", label: "A" }]} value={bad("a")} onValueChange={noop} aria-label="m" />, /MultiSelect value must be an array/],
   ["MultiSelect options", <MultiSelect options={bad(["a", "b"])} value={[]} onValueChange={noop} aria-label="m" />, /MultiSelect options must be an array of \{ value, label \}/],

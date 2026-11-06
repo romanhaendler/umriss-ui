@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
+  ColorPicker,
   Combobox,
   DatePicker,
   DateRangePicker,
@@ -88,6 +89,16 @@ const cases: Case[] = [
     change: clear,
     state: () => [document.body.textContent, posted()],
     expected: day,
+  },
+  {
+    name: "ColorPicker",
+    make: (p) => <ColorPicker aria-label="f" name="f" defaultValue="#2563eb" {...p} />,
+    change: () => {
+      fireEvent.click(screen.getByRole("button"));
+      fireEvent.change(screen.getByRole("textbox", { name: "Hex" }), { target: { value: "#ff0000" } });
+    },
+    state: () => [document.querySelector("button")!.textContent, posted()],
+    expected: "#2563eb",
   },
   {
     name: "DateTimePicker",

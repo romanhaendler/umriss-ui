@@ -13,6 +13,7 @@ export * from "./components/Checkbox";
    has the same specificity as one of another component. */
 export * from "./components/CommandPalette";
 export * from "./components/Combobox";
+export * from "./components/ColorPicker";
 export * from "./components/DataViz";
 export * from "./components/DatePicker";
 export * from "./components/Divider";

@@ -17,6 +17,7 @@ import {
   ButtonGroup,
   Combobox,
   ControlSizeProvider,
+  ColorPicker,
   DatePicker,
   DateRangePicker,
   DateTimePicker,
@@ -55,6 +56,7 @@ const CONTROLS: Record<string, (size?: ControlSize) => ReactElement> = {
   Combobox: (size) => <Combobox aria-label="Field" size={size} value={null} onValueChange={() => {}} options={[]} />,
   MultiSelect: (size) => <MultiSelect aria-label="Field" size={size} value={[]} onValueChange={() => {}} options={[]} />,
   DatePicker: (size) => <DatePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
+  ColorPicker: (size) => <ColorPicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
   DateTimePicker: (size) => <DateTimePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
   DateRangePicker: (size) => <DateRangePicker aria-label="Field" size={size} value={null} onValueChange={() => {}} />,
   DateTimeRangePicker: (size) => (

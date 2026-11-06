@@ -25,7 +25,8 @@ describe("A field without FormField", () => {
     ["Combobox", <core.Combobox key="c" options={[]} value={null} onValueChange={noop} {...own} />, "combobox"],
     ["MultiSelect", <core.MultiSelect key="c" options={[]} value={[]} onValueChange={noop} {...own} />, "button"],
     ["DatePicker", <core.DatePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
-    ["DateTimePicker", <core.DateTimePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
+    ["ColorPicker", <core.ColorPicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
+    ["DateTimePicker",<core.DateTimePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
     ["DateRangePicker", <core.DateRangePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
     ["DateTimeRangePicker", <core.DateTimeRangePicker key="c" value={null} onValueChange={noop} {...own} />, "button"],
   ])("%s takes its name and the caller's message on the field", (_name, field, role) => {

@@ -137,6 +137,20 @@ export interface Wording {
   /** The clearing x of the range with time - kept apart from the range without,
       so that an application can call the two differently. */
   dateTimeRangeClear: string;
+
+  /* -------- Colour ------------------------------------------------ */
+  colorPlaceholder: string;
+  /** Accessible name of the ColorPicker panel, where its field names it no other way. */
+  colorPanel: string;
+  /** The name and the visible label of the hex field. */
+  colorHex: string;
+  colorBefore: string;
+  colorAfter: string;
+  /** Stands for no colour in the strip that compares the colour the panel opened with and the colour now. */
+  colorNone: string;
+  /** The strip as one sentence, for a screen reader. */
+  colorBeforeAfter: (before: string, after: string) => string;
+  colorDone: string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -854,6 +868,15 @@ export const DEFAULT_WORDING: Wording = {
   dateRangeClear: "Clear range",
   dateTimeRangePanel: "Select range with time",
   dateTimeRangeClear: "Clear range with time",
+
+  colorPlaceholder: "Select colour",
+  colorPanel: "Choose colour",
+  colorHex: "Hex",
+  colorBefore: "Before",
+  colorAfter: "After",
+  colorNone: "None",
+  colorBeforeAfter: (before, after) => `Before ${before}, after ${after}`,
+  colorDone: "Done",
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",
