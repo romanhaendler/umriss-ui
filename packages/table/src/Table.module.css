@@ -481,14 +481,16 @@
   /* Top-aligned in its cell: an inline-flex box sits on the baseline of its
      first item, so a head whose arrow comes first would sit lower
      than its neighbours' labels. */
+  /* Its margin and padding are the cell's padding (`.th`), so the button, its
+     focus ring with it, ends at the cell's edges and never reaches a neighbour. */
   .sortButton {
     composes: ring from "#own-styles";
     display: inline-flex;
     vertical-align: top;
     align-items: center;
     gap: var(--u-space-1);
-    margin: calc(-1 * var(--_table-padY)) calc(-1 * var(--u-space-3));
-    padding: var(--_table-padY) var(--u-space-3);
+    margin: calc(-1 * var(--_table-padY)) calc(-1 * var(--u-space-2));
+    padding: var(--_table-padY) var(--u-space-2);
     border: none;
     background: none;
     font: inherit;
