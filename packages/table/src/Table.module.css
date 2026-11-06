@@ -177,6 +177,12 @@
     text-align: center;
   }
 
+  /* The outer cells' wider padding would push the centre off the cell's. */
+  .th.headGroup:first-child,
+  .th.headGroup:last-child {
+    padding-inline: var(--u-space-2);
+  }
+
   /* The rule at a group boundary, through head, body and foot. A box-shadow
      is not painted on a cell of a collapsed table and a border scrolls away
      from a sticky cell, so a cell's own gradient draws it. The pin edge's

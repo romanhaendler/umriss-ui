@@ -16,7 +16,7 @@ type Box = { left: number; right: number; top: number; bottom: number };
 type Head = {
   name: string;
   cell: Box;
-  parts: { label: Box | null; rank: Box | null; arrow: Box | null; sortButton: Box | null };
+  parts: { label: Box | null; rank: Box | null; arrow: Box | null; sortButton: Box | null; groupInk: Box | null };
 };
 /** A rule returns one line per miss: part and distance in px. */
 type Rule = (head: Head) => string[];
@@ -32,6 +32,12 @@ const RULES: Rule[] = [
     if (b.right - cell.right > TOLERANCE) out.push(`sort button reaches ${(b.right - cell.right).toFixed(1)}px past the cell's right edge`);
     return out;
   },
+  /* A group's label ink stands in the centre of its cell. */
+  ({ cell, parts: { groupInk: ink } }) => {
+    if (!ink) return [];
+    const off = (ink.left + ink.right) / 2 - (cell.left + cell.right) / 2;
+    return Math.abs(off) > TOLERANCE ? [`group label ink is ${off.toFixed(1)}px off the cell's centre`] : [];
+  },
 ];
 
 /** Every head of the example with the boxes of its parts. */
@@ -40,6 +46,13 @@ const measure = (root: Locator): Promise<Head[]> =>
     const box = (e: Element | null) => {
       const r = e?.getBoundingClientRect();
       return r && r.width > 0 ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    };
+    /* The ink of an element's text: a Range over its text nodes, not its box. */
+    const ink = (e: Element | null) => {
+      if (!e) return null;
+      const range = document.createRange();
+      range.selectNodeContents(e);
+      return box({ getBoundingClientRect: () => range.getBoundingClientRect() } as Element);
     };
     return Array.from(el.querySelectorAll<HTMLTableCellElement>("thead th")).flatMap((th) => {
       const cell = box(th);
@@ -54,6 +67,7 @@ const measure = (root: Locator): Promise<Head[]> =>
             rank: box(th.querySelector('[class*="sortRank"]')),
             arrow: box(th.querySelector('[class*="sortIndicator"] svg')),
             sortButton: box(th.querySelector('[class*="sortButton"]')),
+            groupInk: th.closest("tr")?.hasAttribute("data-head-group") ? ink(th) : null,
           },
         },
       ];
@@ -93,6 +107,14 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
       await page.mouse.up();
     }
     if (g) await check("all columns at their least width");
+
+    /* Pinning a column splits its group into two cells. */
+    if (exampleId === "a-header-over-columns") {
+      await ex.getByRole("button", { name: "Columns" }).click();
+      await page.getByRole("button", { name: "Pin Feb to start" }).click();
+      await page.keyboard.press("Escape");
+      await check("a group split by pinning");
+    }
 
     if (faults.size) throw new Error(`${name}:\n${[...faults].join("\n")}`);
   });
