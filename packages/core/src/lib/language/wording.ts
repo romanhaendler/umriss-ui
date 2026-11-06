@@ -151,6 +151,12 @@ export interface Wording {
   /** The strip as one sentence, for a screen reader. */
   colorBeforeAfter: (before: string, after: string) => string;
   colorDone: string;
+  /** Names of the square and the hue strip, the square's role description, and what they say as value. */
+  colorSquare: string;
+  colorSquareRole: string;
+  colorSquareValue: (saturation: number, brightness: number) => string;
+  colorHue: string;
+  colorHueValue: (degrees: number) => string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -877,6 +883,11 @@ export const DEFAULT_WORDING: Wording = {
   colorNone: "None",
   colorBeforeAfter: (before, after) => `Before ${before}, after ${after}`,
   colorDone: "Done",
+  colorSquare: "Saturation and brightness",
+  colorSquareRole: "two-axis colour area",
+  colorSquareValue: (saturation, brightness) => `Saturation ${saturation} %, brightness ${brightness} %`,
+  colorHue: "Hue",
+  colorHueValue: (degrees) => `${degrees} degrees`,
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",
