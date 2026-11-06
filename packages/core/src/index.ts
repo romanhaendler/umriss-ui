@@ -97,13 +97,15 @@ export { hasWarned, warnOnce } from "./lib/dev";
    same rule, not at "RadioGroup" beside its mechanics. */
 export * from "./components/SegmentedControl";
 
+/* The colour picker stands at the end for the same rule, not at "ColorPicker";
+   its styles land after the date picker's trigger it composes. */
+export * from "./components/ColorPicker";
+
 /* The types a props table names, so that every name a reader sees can be
    imported. They bring no stylesheet. */
 export type { TextTracking, TextLeading } from "./components/Typography/Typography";
 export type { Align } from "./components/Popover/position";
 
 /* Pure arithmetic and types, no stylesheet: they stand at the end. */
-/* ColorPicker stands here for the same rule: its styles land after the pickers' it composes. */
-export * from "./components/ColorPicker";
 export * from "./lib/zone";
 export * from "./lib/quality";
