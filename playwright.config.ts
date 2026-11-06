@@ -48,11 +48,31 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI && reusable(portOf(pkg), root),
     timeout: 180_000,
   })),
-  projects: wanted.flatMap((pkg) =>
-    (["light", "dark"] as const).map((colorScheme) => ({
-      name: `${pkg === "core" ? "ui" : pkg}-${colorScheme === "dark" ? "dark" : "light"}`,
-      testDir: `packages/${pkg}/tests-visual`,
-      use: { baseURL: `http://localhost:${portOf(pkg)}`, colorScheme },
-    })),
-  ),
+  projects: [
+    ...wanted.flatMap((pkg) =>
+      (["light", "dark"] as const).map((colorScheme) => ({
+        name: `${pkg === "core" ? "ui" : pkg}-${colorScheme === "dark" ? "dark" : "light"}`,
+        testDir: `packages/${pkg}/tests-visual`,
+        use: { baseURL: `http://localhost:${portOf(pkg)}`, colorScheme },
+      })),
+    ),
+    /* The table's geometry checks measure layout, which differs by engine:
+       they run in WebKit too, light only. */
+    ...(wanted.includes("table")
+      ? [
+          {
+            name: "table-webkit",
+            testDir: "packages/table/tests-visual",
+            testMatch: /(head-geometry|group-rule)\.spec\.ts$/,
+            use: {
+              ...devices["Desktop Safari"],
+              viewport: { width: 1280, height: 900 },
+              deviceScaleFactor: 1,
+              baseURL: `http://localhost:${portOf("table")}`,
+              colorScheme: "light" as const,
+            },
+          },
+        ]
+      : []),
+  ],
 });
