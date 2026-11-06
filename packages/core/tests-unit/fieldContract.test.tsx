@@ -7,6 +7,7 @@ import type { ReactElement } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import {
   Checkbox,
+  ColorPicker,
   Combobox,
   DatePicker,
   DateRangePicker,
@@ -121,6 +122,15 @@ const cases: Case[] = [
       fireEvent.click(screen.getByRole("button", { name: "Today" }));
     },
     expected: expect.any(Date),
+  },
+  {
+    name: "ColorPicker",
+    make: (p) => <ColorPicker aria-label="f" {...(p as object)} />,
+    act: () => {
+      fireEvent.click(screen.getByRole("button"));
+      fireEvent.change(screen.getByRole("textbox", { name: "Hex" }), { target: { value: "#FF0000" } });
+    },
+    expected: "#ff0000",
   },
   {
     name: "DateTimePicker",

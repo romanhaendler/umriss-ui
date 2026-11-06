@@ -46,6 +46,16 @@
      the ink behind them mixes in; each stays above 4.5:1 in both themes. The
      class goes on the content, not on the inked surface: that surface still
      reads the ink from the token. */
+  /* An overlay - a popover, a dialog, a toast - stands one step above the
+     surface it opens over. Inside it the surface and its hover and pressed
+     steps are the raised ones, so that its fields and keys stand on it and not
+     a step below. In the light theme they are the surface's own values. */
+  .raised {
+    --u-color-surface: var(--u-color-surface-raised);
+    --u-color-surface-sunken: var(--u-color-surface-raised-sunken);
+    --u-color-surface-pressed: var(--u-color-surface-raised-pressed);
+  }
+
   .ink {
     --u-color-text: var(--u-color-bg);
     --u-color-text-secondary: color-mix(in srgb, var(--u-color-bg) 75%, transparent);

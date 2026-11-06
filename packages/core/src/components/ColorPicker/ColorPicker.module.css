@@ -1,0 +1,209 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  .swatch {
+    display: inline-block;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin-inline-end: var(--u-space-2);
+    vertical-align: -0.2rem;
+    border-radius: var(--u-radius-xs);
+    background: var(--_color);
+    /* Inside the swatch: the value's ellipsis box clips at the swatch's own edge. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    box-shadow: inset 0 0 0 1px var(--u-edge-color-strong);
+    /* Forced colours keep the swatch's own colour. */
+    forced-color-adjust: none;
+  }
+
+  .chevron {
+    transform: rotate(90deg);
+  }
+
+  /* 300px wide: the prototype's panel. The rows are grid rows, so that a row
+     added or left out leaves the others where they stand. */
+  .panel {
+    composes: text from "#own-styles";
+    box-sizing: border-box;
+    inline-size: 300px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: var(--u-space-3);
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-overlay);
+  }
+
+  .row {
+    display: flex;
+    align-items: end;
+    gap: var(--u-space-2);
+  }
+
+  .labelled {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .label {
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-muted);
+  }
+
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--u-space-2);
+    align-items: end;
+  }
+
+  .hex {
+    font-family: var(--u-font-mono);
+  }
+
+  /* Two surfaces share a row; a third wraps to the next. */
+  .contrasts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--u-space-1);
+  }
+
+  .contrast {
+    display: flex;
+    flex: 1 1 8rem;
+    align-items: center;
+    gap: var(--u-space-1);
+    min-width: 0;
+    padding: 3px 6px;
+    white-space: nowrap;
+    border-radius: var(--u-radius-xs);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge);
+    font-size: var(--u-text-xs);
+  }
+
+  /* The colour on the surface it is measured against. */
+  .chip {
+    position: relative;
+    flex: none;
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: var(--u-radius-xs);
+    background: var(--_surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge-strong);
+    forced-color-adjust: none;
+  }
+
+  .chip::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: var(--_color);
+  }
+
+  .surface {
+    color: var(--u-color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ratio {
+    margin-inline-start: auto;
+    font-family: var(--u-font-mono);
+  }
+
+  .pass,
+  .fail {
+    font-weight: 500;
+  }
+
+  .pass {
+    color: var(--u-color-success);
+  }
+
+  .fail {
+    color: var(--u-color-danger-text);
+  }
+
+  .swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .choice {
+    position: relative;
+    inline-size: 18px;
+    block-size: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--u-radius-xs);
+    background: var(--_color);
+    cursor: pointer;
+    outline: 1px solid transparent;
+    box-shadow: inset 0 0 0 1px var(--u-edge-color-strong);
+    /* Forced colours keep the swatch's own colour. */
+    forced-color-adjust: none;
+  }
+
+  .choice[aria-pressed="true"] {
+    box-shadow: 0 0 0 2px var(--u-color-surface), 0 0 0 3.5px var(--u-color-text);
+    /* Forced colours drop the shadow; the outline marks the pressed one. */
+    outline-color: CanvasText;
+    outline-offset: 2px;
+  }
+
+  .choice:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* Under a finger the hit area grows to 24 x 24 px around the 18 px swatch (ADR-0079). */
+  @media (pointer: coarse) {
+    .choice::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+    }
+  }
+
+  .compare {
+    display: flex;
+    align-items: stretch;
+    block-size: 28px;
+    overflow: hidden;
+    border-radius: var(--u-radius-sm);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge);
+    font-size: var(--u-text-xs);
+  }
+
+  .compare > span {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    padding: 0 var(--u-space-2);
+    background: var(--_color);
+    color: var(--_ink);
+    font-family: var(--u-font-mono);
+    forced-color-adjust: none;
+  }
+
+  .foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--u-space-2);
+    padding-top: var(--u-space-2);
+    box-shadow: 0 -1px 0 var(--u-hairline);
+  }
+
+  .footClear {
+    margin-right: auto;
+  }
+}

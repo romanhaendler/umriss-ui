@@ -11,7 +11,7 @@
 
 import { test, expect } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
-import { openExample } from "./navigation";
+import { openExample, standstill } from "./navigation";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
@@ -50,6 +50,9 @@ test("A multiselect holds still while values are chosen and removed", async ({ p
   const rangeBefore = await box(range);
 
   await field.locator("[aria-haspopup]").click();
+  /* The panel stands with the page: a click while it still scales in makes
+     Playwright scroll the option into view, and the page with it. */
+  await standstill(page);
   const panel = page.getByRole("dialog");
   for (const carrier of ["DPD", "Hermes", "FedEx", "TNT", "Dachser"]) {
     await panel.getByText(carrier, { exact: true }).click();
@@ -167,6 +170,9 @@ test("A multiselect holds still in a column too", async ({ page }) => {
   const field = example(page, "narrow-places").locator(".exampleStage [aria-haspopup]").last().locator("..");
   const before = await box(field);
   await field.locator("[aria-haspopup]").click();
+  /* The panel stands with the page: a click while it still scales in makes
+     Playwright scroll the option into view, and the page with it. */
+  await standstill(page);
   const panel = page.getByRole("dialog");
   for (const person of ["Ada Okafor", "Jun Park"]) await panel.getByText(person, { exact: true }).click();
   await page.keyboard.press("Escape");

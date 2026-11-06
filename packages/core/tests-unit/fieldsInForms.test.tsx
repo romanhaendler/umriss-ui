@@ -6,6 +6,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   Checkbox,
   Combobox,
+  ColorPicker,
   DatePicker,
   DateRangePicker,
   DateTimePicker,
@@ -97,6 +98,7 @@ describe("onBlur fires when the focus leaves the whole field", () => {
   });
 
   it.each([
+    ["ColorPicker", ColorPicker],
     ["DatePicker", DatePicker],
     ["DateRangePicker", DateRangePicker],
     ["DateTimePicker", DateTimePicker],

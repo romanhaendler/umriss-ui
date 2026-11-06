@@ -6,7 +6,7 @@
 
 @layer umriss.components {
   .panel {
-    composes: text from "#own-styles";
+    composes: text raised from "#own-styles";
     position: fixed;
     z-index: var(--u-z-popover);
     /* Never larger than the window (8px air, as the position keeps): on a

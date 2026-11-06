@@ -137,6 +137,43 @@ export interface Wording {
   /** The clearing x of the range with time - kept apart from the range without,
       so that an application can call the two differently. */
   dateTimeRangeClear: string;
+
+  /* -------- Colour ------------------------------------------------ */
+  colorPlaceholder: string;
+  /** The name of the ColorPicker trigger where nothing else names it: the colour as hex, or `null` for none. */
+  colorTrigger: (hex: string | null) => string;
+  /** Accessible name of the ColorPicker panel, where its field names it no other way. */
+  colorPanel: string;
+  /** The name and the visible label of the hex field. */
+  colorHex: string;
+  colorBefore: string;
+  colorAfter: string;
+  /** Stands for no colour in the strip that compares the colour the panel opened with and the colour now. */
+  colorNone: string;
+  /** The strip as one sentence, for a screen reader. */
+  colorBeforeAfter: (before: string, after: string) => string;
+  colorDone: string;
+  /** Name of the row of the application's own colours. */
+  colorSwatches: string;
+  /** The name of core's light surface in the contrast readout. */
+  colorSurfaceLight: string;
+  /** The name of core's dark surface in the contrast readout. */
+  colorSurfaceDark: string;
+  /** The verdict of the contrast readout at 3:1 and above, and below it; words, so that the colour is not the only sign. */
+  colorPass: string;
+  colorFail: string;
+  /** Names of the red, green and blue fields of the ColorPicker panel. */
+  colorRed: string;
+  colorGreen: string;
+  colorBlue: string;
+  /** The button that picks a colour from the screen. */
+  colorEyedropper: string;
+  /** Names of the square and the hue strip, the square's role description, and what they say as value. */
+  colorSquare: string;
+  colorSquareRole: string;
+  colorSquareValue: (saturation: number, brightness: number) => string;
+  colorHue: string;
+  colorHueValue: (degrees: number) => string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -854,6 +891,30 @@ export const DEFAULT_WORDING: Wording = {
   dateRangeClear: "Clear range",
   dateTimeRangePanel: "Select range with time",
   dateTimeRangeClear: "Clear range with time",
+
+  colorPlaceholder: "Select colour",
+  colorTrigger: (hex) => (hex ? `Colour ${hex}` : "Colour: none"),
+  colorPanel: "Choose colour",
+  colorHex: "Hex",
+  colorBefore: "Before",
+  colorAfter: "After",
+  colorNone: "None",
+  colorBeforeAfter: (before, after) => `Before ${before}, after ${after}`,
+  colorDone: "Done",
+  colorSwatches: "Swatches",
+  colorSurfaceLight: "Light",
+  colorSurfaceDark: "Dark",
+  colorPass: "Pass",
+  colorFail: "Fail",
+  colorRed: "Red",
+  colorGreen: "Green",
+  colorBlue: "Blue",
+  colorEyedropper: "Pick a colour from the screen",
+  colorSquare: "Saturation and brightness",
+  colorSquareRole: "two-axis colour area",
+  colorSquareValue: (saturation, brightness) => `Saturation ${saturation} %, brightness ${brightness} %`,
+  colorHue: "Hue",
+  colorHueValue: (degrees) => `${degrees} degrees`,
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",

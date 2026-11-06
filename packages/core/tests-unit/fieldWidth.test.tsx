@@ -11,6 +11,7 @@ import { renderToString } from "react-dom/server";
 import {
   Combobox,
   ControlSizeProvider,
+  ColorPicker,
   DatePicker,
   DateRangePicker,
   DateTimePicker,
@@ -39,6 +40,7 @@ const FIELDS: Record<string, (props: { chars?: number; style?: object }) => Reac
   Combobox: (p) => <Combobox aria-label="Field" value={null} onValueChange={() => {}} options={[]} {...p} />,
   MultiSelect: (p) => <MultiSelect aria-label="Field" value={[]} onValueChange={() => {}} options={[]} {...p} />,
   DatePicker: (p) => <DatePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
+  ColorPicker: (p) => <ColorPicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
   DateTimePicker: (p) => <DateTimePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
   DateRangePicker: (p) => <DateRangePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,
   DateTimeRangePicker: (p) => <DateTimeRangePicker aria-label="Field" value={null} onValueChange={() => {}} {...p} />,

@@ -5,10 +5,10 @@ import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
 import { clippedAway, computePosition, motionOrigin, visibleViewport } from "./position";
-import type { Align, PopoverPosition } from "./position";
+import type { Align, PopoverPosition, Side } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
-import { FOREIGN_MODAL, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
+import { FOREIGN_MODAL, absoluteOrigin, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
 import type { PortalTarget } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
 import { firstTabStop, lastTabStop } from "../../lib/firstTabStop";
@@ -25,13 +25,19 @@ const ParentPanel = createContext<((contains: (node: Node) => boolean) => () => 
 const STACK_KEY = Symbol.for("umriss.openPopovers");
 const openStack: object[] = ((globalThis as { [STACK_KEY]?: object[] })[STACK_KEY] ??= []);
 
+/** Why a popover asks to close: Escape, a click outside, a scroll
+    (`hideOnScroll`), the anchor clipped away by a scrolling container, a Tab
+    out of the panel (`closeOnTabOut`). */
+export type PopoverCloseReason = "escape" | "outside" | "scroll" | "clipped" | "tab";
+
 /** The props of `Popover`. */
 export interface PopoverProps {
   /** Whether the surface stands. Controlled: the popover never opens itself. */
   open: boolean;
   /** Reports every wish to change the state – outside click, Escape,
-      scrolling. Whether it closes as a result is the caller's decision. */
-  onOpenChange: (open: boolean) => void;
+      scrolling. Whether it closes as a result is the caller's decision. A
+      wish to close carries its `PopoverCloseReason`. */
+  onOpenChange: (open: boolean, reason?: PopoverCloseReason) => void;
   /** Trigger the panel hangs from (the reference for the position). */
   anchorRef: RefObject<HTMLElement | null>;
   /**
@@ -134,13 +140,19 @@ export function Popover({
   /* Portal target, set in an effect: no ref may be read during the render. */
   const [target, setTarget] = useState<PortalTarget | null>(null);
   const portalTarget = usePortalTarget();
+  /* In the body the panel is absolute: the browser scrolls it with the page
+     and it never trails. Every other target keeps the fixed box. */
+  const glued = !!target && !isShadowRoot(target) && target === target.ownerDocument.body;
+  /* The side the panel stands on is its preferred side for the next measure:
+     it switches only when that side runs out, not when the first has room again. */
+  const sideRef = useRef<Side>("bottom");
   /* Closed, it stays for its exit - inert, and no longer listening. */
   const present = usePresence(open, panelRef, "--u-duration-exit-fast");
   const closing = present && !open;
 
   const close = useCallback(
-    (returnFocus: boolean) => {
-      onOpenChange(false);
+    (returnFocus: boolean, reason: PopoverCloseReason) => {
+      onOpenChange(false, reason);
       if (returnFocus && restoreFocus) (focusRef ?? anchorRef).current?.focus();
     },
     [onOpenChange, restoreFocus, anchorRef, focusRef],
@@ -189,19 +201,31 @@ export function Popover({
       anchorRect,
       { width: size.width / scale, height: size.height / scale },
       viewport,
-      { align, offset },
+      { align, offset, side: sideRef.current },
     );
     if (next.maxHeight !== undefined) panel.style.maxHeight = `${next.maxHeight}px`;
+    sideRef.current = next.side;
     /* A fixed box counts from an ancestor that transforms (a foreign dialog
-       centred by a translate), not from the window. */
-    const origin = fixedOrigin(target);
-    setPosition({ ...next, top: next.top - origin.y, left: next.left - origin.x });
-  }, [anchorRef, align, offset, width, minWidth, target]);
+       centred by a translate), not from the window; an absolute one from the
+       body's containing block, scroll included. */
+    // shortcut: an anchor in a nested scrolling container still trails that container's scroll, fix by following it per frame.
+    const origin = glued ? absoluteOrigin(target as HTMLElement) : fixedOrigin(target);
+    /* Whole pixels: text in a panel at a fractional place blurs and wavers. */
+    const top = Math.round(next.top - origin.y);
+    const left = Math.round(next.left - origin.x);
+    /* The same place keeps the same state: nothing re-renders, nothing moves. */
+    setPosition((prev) =>
+      prev && prev.top === top && prev.left === left && prev.side === next.side && prev.align === next.align && prev.maxHeight === next.maxHeight
+        ? prev
+        : { ...next, top, left },
+    );
+  }, [anchorRef, align, offset, width, minWidth, target, glued]);
 
   useLayoutEffect(() => {
     if (!open) return;
     /* Dialog, then the setting, then the body (`portalTargetFor`). It reads
        the DOM, so it runs in the effect. */
+    sideRef.current = "bottom";
     setTarget(portalTargetFor(anchorRef.current, portalTarget));
   }, [open, anchorRef, portalTarget]);
 
@@ -226,14 +250,14 @@ export function Popover({
     const handlePointerDown = (event: MouseEvent) => {
       /* The first node of the composed path: inside a shadow root `target` is
          retargeted to the host, which no ref contains. */
-      if (!isInside(event.composedPath()[0] as Node)) closeRef.current(false);
+      if (!isInside(event.composedPath()[0] as Node)) closeRef.current(false, "outside");
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || openStack.at(-1) !== self) return;
       /* Escape closes the panel and nothing more: the same key is a dialog's
          close request. */
       event.preventDefault();
-      closeRef.current(true);
+      closeRef.current(true, "escape");
     };
     /* A foreign dialog listens for Escape in the capture phase of the
        document and would close with the panel. The window's capture comes
@@ -252,7 +276,7 @@ export function Popover({
         requested = 0;
         /* An anchor scrolled out of a clipping container leaves the panel
            floating over the page: it closes. */
-        if (anchorRef.current && clippedAway(anchorRef.current)) closeRef.current(false);
+        if (anchorRef.current && clippedAway(anchorRef.current)) closeRef.current(false, "clipped");
         else measure();
       });
     };
@@ -260,7 +284,7 @@ export function Popover({
       /* A scroll inside the panel moves nothing the position depends on; a
          re-measure would drop its cut and jump it back to its top. */
       if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
-      if (hideOnScroll) closeRef.current(false);
+      if (hideOnScroll) closeRef.current(false, "scroll");
       else reposition();
     };
     /* The on-screen keyboard and a zoom change the visible part of the window
@@ -358,7 +382,7 @@ export function Popover({
               if (at !== edge && !(event.shiftKey && at === panel)) return;
               /* Forward: the browser's own Tab then goes on from the anchor. Back: the anchor itself. */
               if (event.shiftKey) event.preventDefault();
-              onOpenChange(false);
+              onOpenChange(false, "tab");
               (focusRef ?? anchorRef).current?.focus();
             }
           : undefined
@@ -370,6 +394,9 @@ export function Popover({
       inert={closing}
       aria-hidden={closing || undefined}
       style={{
+        /* Fixed until the first measurement: unplaced at 0,0 of the page, a field
+           focused inside it would scroll the page to its top. */
+        position: glued && position ? "absolute" : undefined,
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         /* The motion origin, computed here and drawn by the stylesheet. */

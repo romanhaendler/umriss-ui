@@ -5,7 +5,7 @@
 
 @layer umriss.components {
   .dialog {
-    composes: text from "#own-styles";
+    composes: text raised from "#own-styles";
     border: none;
     margin: 0;
     /* The sides and the foot keep clear of the hardware's insets under

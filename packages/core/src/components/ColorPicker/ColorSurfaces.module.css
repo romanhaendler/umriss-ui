@@ -1,0 +1,91 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The square and the strip draw their colours with gradients only, so that a
+   hue costs one custom property and nothing is redrawn. Both keep their own
+   colours under forced colours, and their handles take a system outline. */
+
+@layer umriss.components {
+  .square,
+  .hue {
+    position: relative;
+    box-sizing: border-box;
+    inline-size: 100%;
+    touch-action: none;
+    forced-color-adjust: none;
+  }
+
+  .square {
+    block-size: 150px;
+    border-radius: var(--u-radius-sm);
+    background:
+      linear-gradient(to top, black, transparent),
+      linear-gradient(to right, white, var(--_pure));
+    box-shadow: var(--u-edge);
+    outline: 1px solid transparent;
+    cursor: crosshair;
+  }
+
+  /* The strip is 24px high for the finger (ADR-0079) and draws a 14px track,
+     pulled back into the panel's rhythm by the margin. */
+  .hue {
+    block-size: 24px;
+    margin-block: -5px;
+    cursor: ew-resize;
+  }
+
+  .track {
+    position: absolute;
+    inset-block: 5px;
+    inset-inline: 0;
+    border-radius: var(--u-radius-full);
+    /* The named colours are the HSB hues by definition. */
+    background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+    box-shadow: var(--u-edge);
+    outline: 1px solid transparent;
+  }
+
+  /* A round handle with a white ring and a dark edge reads on every colour;
+     it never takes pointer events, the surface does. */
+  .handle {
+    position: absolute;
+    inset-inline-start: var(--_x);
+    inset-block-start: var(--_y, 50%);
+    box-sizing: border-box;
+    inline-size: 20px;
+    block-size: 20px;
+    margin: -10px 0 0 -10px;
+    /* White on every theme: the ring has to read on any colour, not on the surface. */
+    border: 2px solid white;
+    border-radius: var(--u-radius-full);
+    corner-shape: round;
+    background: var(--_color);
+    box-shadow:
+      var(--u-edge-strong),
+      var(--u-shadow-float);
+    outline: 1px solid transparent;
+    pointer-events: none;
+  }
+
+  .square:focus-visible,
+  .hue:focus-visible .track {
+    box-shadow: var(--u-focus-ring);
+    outline: 2px solid transparent;
+  }
+
+  @media (forced-colors: active) {
+    .square,
+    .track {
+      outline-color: CanvasText;
+    }
+
+    .handle {
+      outline-color: Highlight;
+      outline-width: 2px;
+    }
+
+    .square:focus-visible,
+    .hue:focus-visible .track {
+      outline-color: Highlight;
+    }
+  }
+}

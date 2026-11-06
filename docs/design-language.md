@@ -227,6 +227,7 @@ and its root with it. The defaults:
 | Input, Select, Combobox, MultiSelect | 20 | One count for every field that shows text. A `ch` is wider than the average letter a browser counts for `size`; a chip costs more than its letters, and twenty hold two short chips and the counter |
 | NumberInput | 10 | A figure; a prefix and suffix given as text are counted on top |
 | Textarea | 40 | A line of prose |
+| ColorPicker | 9, or its placeholder | A hex value `#rrggbb` and the swatch before it; the placeholder if that is longer |
 | The date pickers | their longest value | The length of the formats in use, so a date never truncates, in English or German |
 | Slider, FileInput | 20, 32 | They show no text to count, and take no `chars`; the slider follows the text fields |
 

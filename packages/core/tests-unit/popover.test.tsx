@@ -5,6 +5,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, useRef, useState } from "react";
+import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Popover } from "../src/components/Popover/Popover";
 import { FormField, useFormField } from "../src/components/FormField";
@@ -240,5 +241,48 @@ describe("Popover – motion", () => {
     expect(screen.getByRole("dialog").style.opacity).toBe("");
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+});
+
+describe("Popover – the reason it reports for closing", () => {
+  function Reasons(props: Partial<ComponentProps<typeof Popover>> & Pick<ComponentProps<typeof Popover>, "onOpenChange">) {
+    const anchorRef = useRef<HTMLButtonElement>(null);
+    return (
+      <div>
+        <button ref={anchorRef}>Trigger</button>
+        <button>Elsewhere</button>
+        <Popover open anchorRef={anchorRef} role="dialog" aria-label="Surface" {...props}>
+          <button>Inside</button>
+        </Popover>
+      </div>
+    );
+  }
+
+  it("names Escape", () => {
+    const onOpenChange = vi.fn();
+    render(<Reasons onOpenChange={onOpenChange} />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onOpenChange).toHaveBeenCalledWith(false, "escape");
+  });
+
+  it("names a click outside", () => {
+    const onOpenChange = vi.fn();
+    render(<Reasons onOpenChange={onOpenChange} />);
+    fireEvent.mouseDown(screen.getByText("Elsewhere"));
+    expect(onOpenChange).toHaveBeenCalledWith(false, "outside");
+  });
+
+  it("names a scroll under hideOnScroll", () => {
+    const onOpenChange = vi.fn();
+    render(<Reasons onOpenChange={onOpenChange} hideOnScroll />);
+    fireEvent.scroll(window);
+    expect(onOpenChange).toHaveBeenCalledWith(false, "scroll");
+  });
+
+  it("names a Tab out of the panel", () => {
+    const onOpenChange = vi.fn();
+    render(<Reasons onOpenChange={onOpenChange} closeOnTabOut />);
+    fireEvent.keyDown(screen.getByText("Inside"), { key: "Tab" });
+    expect(onOpenChange).toHaveBeenCalledWith(false, "tab");
   });
 });

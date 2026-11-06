@@ -57,6 +57,8 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The danger button's label names the destructive action. A deliberate departure from ISA-101: colour here marks a consequence, not an abnormal state.",
   "core/Checkbox/Checkbox.module.css":
     "The invalid box's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
+  "core/ColorPicker/ColorPicker.module.css":
+    "The contrast readout colours its verdict; the words Pass and Fail stand in the same line beside the ratio.",
   "core/RadioGroup/RadioGroup.module.css":
     "The invalid group's empty dots' edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Combobox/Combobox.module.css":

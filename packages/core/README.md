@@ -484,6 +484,7 @@ The table is not part of this package. It lives in
 | `Skeleton` | a loading placeholder (bar or circle) with a discreet pulse |
 | `EmptyState` | an empty state with title, description, action and an optional symbol |
 | `Stack` / `Grid` | layout primitives with token spacing (a 4 px step), `Grid` with a fixed count, a width per column (`columns={[140, "fill"]}`) or responsive via `minItemWidth` |
+| `ColorPicker` | colour field: a swatch and the hex value, a panel with a hex field, the colour beside the one it opened with, Cancel and Done |
 | `DatePicker` | calendar selection: weeks from Monday, arrow keys across the month, today/clear, the date in Geist Mono |
 | `DateTimePicker` | date plus time: two-digit fields that advance automatically, visible up/down steppers and arrow-key counting; after the day is chosen the focus jumps into the time, `withSeconds`, "now"; the clock change is handled honestly – a missing hour (the start of summer time) is detected and corrected forwards with a note, a duplicated hour (the start of winter time) offers the choice between both occurrences including the UTC offset |
 | `TimeInput` | a time of day without a day: the date-time picker's hour, minute and (`withSeconds`) second fields standing alone - they type themselves onwards, arrows count round the clock, a pasted `14:30` is split; the value is the text `HH:mm` (`HH:mm:ss`), `null` while empty, and the same text is posted |
@@ -503,7 +504,7 @@ The table is not part of this package. It lives in
 | `TreeView` / `TreeSearch` / `useTree` | a tree with exactly one active node and optional ticking (cascade, indeterminate, locked, unloaded); arrow keys, type to jump, range selection, virtualisation. The search keeps its term in the tree |
 | `Stat` | a metric: one value, read against its limits – the verdict as a word and a colour, the deviation from the target value, history, freshness and the source's quality |
 | `CommandPalette` / `useCommandPaletteShortcut` | a command palette: subsequence search with rank and highlighted finds, groups, keywords a candidate is found by, at most `maxFinds` finds with a line for the rest, a populated resting state; opens on Ctrl/⌘+K and `/` (`slash: false` switches the single key off, WCAG 2.1.4; neither opens inside a modal dialog) |
-| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `EndGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph`  / `MoreGlyph` / `ToneGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
+| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `EndGlyph` / `CalendarGlyph` / `ClockGlyph` / `DropperGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph`  / `MoreGlyph` / `ToneGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |
 | `Switch` | on or off, taking effect at once: a native checkbox under `role="switch"`, the label beside it, two sizes, invalid through `FormField`; the thumb travels on the path transition |
