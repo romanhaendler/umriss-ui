@@ -210,8 +210,9 @@ export function Popover({
        body's containing block, scroll included. */
     // shortcut: an anchor in a nested scrolling container still trails that container's scroll, fix by following it per frame.
     const origin = glued ? absoluteOrigin(target as HTMLElement) : fixedOrigin(target);
-    const top = next.top - origin.y;
-    const left = next.left - origin.x;
+    /* Whole pixels: text in a panel at a fractional place blurs and wavers. */
+    const top = Math.round(next.top - origin.y);
+    const left = Math.round(next.left - origin.x);
     /* The same place keeps the same state: nothing re-renders, nothing moves. */
     setPosition((prev) =>
       prev && prev.top === top && prev.left === left && prev.side === next.side && prev.align === next.align && prev.maxHeight === next.maxHeight
@@ -393,7 +394,9 @@ export function Popover({
       inert={closing}
       aria-hidden={closing || undefined}
       style={{
-        position: glued ? "absolute" : undefined,
+        /* Fixed until the first measurement: unplaced at 0,0 of the page, a field
+           focused inside it would scroll the page to its top. */
+        position: glued && position ? "absolute" : undefined,
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         /* The motion origin, computed here and drawn by the stylesheet. */
