@@ -94,12 +94,12 @@ for (const dpr of [0.9, 1, 1.1, 1.25, 1.5, 2])
           );
           await ctx.close();
           const label = (e: (typeof found)[number]) => `${id} at ${dpr}: ${e.row} at x=${e.x.toFixed(2)} [${e.profile}]`;
-          const seen = new Map<string, (typeof found)[number]>();
+          const firstAt = new Map<string, (typeof found)[number]>();
           for (const e of found) {
             expect(e.peak, `${label(e)}: the rule is drawn`).toBeGreaterThan(6);
             /* one boundary, one place in every row: head, body and foot draw it at the same device column */
-            const first = seen.get(e.x.toFixed(1)) ?? e;
+            const first = firstAt.get(e.x.toFixed(1)) ?? e;
             expect(Math.abs(e.centre - first.centre), `${label(e)} stands off the ${first.row} row's rule (${first.profile})`).toBeLessThan(0.3);
-            seen.set(e.x.toFixed(1), first);
+            firstAt.set(e.x.toFixed(1), first);
           }
         });

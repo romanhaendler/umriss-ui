@@ -36,6 +36,8 @@ const RULES: Rule[] = [
     const out: string[] = [];
     if (cell.left - b.left > TOLERANCE) out.push(`sort button reaches ${(cell.left - b.left).toFixed(1)}px past the cell's left edge`);
     if (b.right - cell.right > TOLERANCE) out.push(`sort button reaches ${(b.right - cell.right).toFixed(1)}px past the cell's right edge`);
+    if (cell.top - b.top > TOLERANCE) out.push(`sort button reaches ${(cell.top - b.top).toFixed(1)}px past the cell's top edge`);
+    if (b.bottom - cell.bottom > TOLERANCE) out.push(`sort button reaches ${(b.bottom - cell.bottom).toFixed(1)}px past the cell's bottom edge`);
     return out;
   },
 

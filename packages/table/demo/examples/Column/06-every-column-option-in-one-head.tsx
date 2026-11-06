@@ -3,7 +3,7 @@ import type { LanguageOptions } from "@umriss-ui/core";
 import { ColumnGroup, ColumnMenu, Toolbar, useTable } from "../../../src";
 
 export const title = "Every column option in one head";
-export const lead = "Left and right alignment (`numeric`), a list or a range `filter`, an automatic, `flex` or sized `width`, a `pin` to the start or the end, first, middle and last place, a `ColumnGroup` and a time column that carries its zone's name - the zone is the application's, not the reader's - in the regular and the compact density. Sort two columns to see the ranks beside the arrows.";
+export const lead = "Left and right alignment (`numeric`), a list or a range `filter`, an automatic, `flex` or sized `width`, a `pin` to the start or the end, first, middle and last place, a `ColumnGroup` and a time column that carries its zone's name - the zone is the application's, not the reader's - over a footer of sums, in the regular and the compact density. Sort two columns to see the ranks beside the arrows.";
 
 /* Outside the component: a provider that gets a new object on every render
    recomputes on every render. */
@@ -43,14 +43,14 @@ function Shipments({ caption, density }: { caption: string; density?: "regular" 
           <Column value="city" label="City" />
         </ColumnGroup>
         <ColumnGroup label="Load">
-          <Column value="weight" label="Weight (kg)" numeric filter="range" width={150} />
-          <Column value="parcels" label="Parcels" numeric />
+          <Column value="weight" label="Weight (kg)" numeric filter="range" width={150} aggregate="sum" />
+          <Column value="parcels" label="Parcels" numeric flex={1} aggregate="sum" />
         </ColumnGroup>
         <ColumnGroup label="Dispatch">
           <Column value="departs" label="Departs" format="dateTime" filter="range" width={280} />
         </ColumnGroup>
         <ColumnGroup label="Charge">
-          <Column value="fee" label="Fee (€)" numeric format={{ decimals: 2 }} pin="end" />
+          <Column value="fee" label="Fee (€)" numeric format={{ decimals: 2 }} pin="end" aggregate="sum" />
         </ColumnGroup>
       </Table>
     </Stack>
