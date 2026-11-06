@@ -34,7 +34,7 @@ for (const dpr of [0.9, 1, 1.1, 1.25, 1.5, 2])
           const ex = page.locator(`[data-example="${id}"]`);
           if (pinned) {
             /* the column menu pins a column of the group */
-            const columns = ex.getByRole("button", { name: "Columns" });
+            const columns = ex.getByRole("button", { name: "Columns" }).first();
             test.skip((await columns.count()) === 0, "no column menu");
             await columns.click();
             await page.getByRole("button", { name: /^Pin .* to start$/ }).first().click();
@@ -53,7 +53,8 @@ for (const dpr of [0.9, 1, 1.1, 1.25, 1.5, 2])
                   : c.closest("tfoot") ? "foot" : "body";
                 /* a cell scrolled out of its frame is not on screen */
                 const seen = c.contains(document.elementFromPoint(r.left + 2, r.top + r.height / 2));
-                return { x: r.left, y: r.top + r.height / 2, row, seen };
+                /* read the rule in the cell's top padding, where no text stands beside it */
+                return { x: r.left, y: r.top + 2, row, seen };
               })
               .filter((e) => e.seen && e.y > 0 && e.y < innerHeight && e.x > 8 && e.x < innerWidth - 8),
           );

@@ -26,7 +26,7 @@ const SHIPMENTS: Shipment[] = [
   { id: "FP-1004241", customer: "Nimbrel Software", city: "Cardiff", weight: 7.2, parcels: 1, departs: new Date(Date.UTC(2026, 2, 18, 14, 45)), fee: 12.5 },
 ];
 
-function Shipments({ caption, density, menu }: { caption: string; density?: "regular" | "compact"; menu?: boolean }) {
+function Shipments({ caption, density }: { caption: string; density?: "regular" | "compact" }) {
   const { Table, Column } = useTable(SHIPMENTS, { rowKey: (s) => s.id });
   return (
     <Stack gap={2}>
@@ -34,11 +34,9 @@ function Shipments({ caption, density, menu }: { caption: string; density?: "reg
         {caption}
       </Text>
       <Table density={density} aria-label={`Shipments, ${caption}`}>
-        {menu && (
-          <Toolbar>
-            <ColumnMenu />
-          </Toolbar>
-        )}
+        <Toolbar>
+          <ColumnMenu />
+        </Toolbar>
         <Column value="id" label="Shipment" rowHeader pin="start" width={130} />
         <ColumnGroup label="Consignee">
           <Column value="customer" label="Customer" filter="list" flex={1} minWidth={160} />
@@ -63,7 +61,7 @@ export default function EveryColumnOption() {
   return (
     <UmrissProvider language={LANGUAGE}>
       <Stack gap={5}>
-        <Shipments caption="Regular" menu />
+        <Shipments caption="Regular" />
         <Shipments caption='density="compact"' density="compact" />
       </Stack>
     </UmrissProvider>
