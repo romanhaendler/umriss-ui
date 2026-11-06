@@ -65,6 +65,7 @@ describe("ColorPicker value", () => {
     render(<Held start="#000000" onValueChange={changed} />);
     open();
     type(text);
+    fireEvent.blur(hex());
     expect(changed).toHaveBeenLastCalledWith(text === "#26e" ? "#2266ee" : "#2563eb");
   });
 

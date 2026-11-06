@@ -162,11 +162,13 @@
     box-shadow: var(--u-focus-ring);
   }
 
-  /* The hit area grows to 24 x 24 px around the 18 px swatch (ADR-0079). */
-  .choice::before {
-    content: "";
-    position: absolute;
-    inset: -3px;
+  /* Under a finger the hit area grows to 24 x 24 px around the 18 px swatch (ADR-0079). */
+  @media (pointer: coarse) {
+    .choice::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+    }
   }
 
   .compare {

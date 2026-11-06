@@ -96,6 +96,7 @@ export const GERMAN_WORDING: Wording = {
   dateTimeRangeClear: "Zeitraum mit Uhrzeit leeren",
 
   colorPlaceholder: "Farbe wählen",
+  colorTrigger: (hex) => (hex ? `Farbe ${hex}` : "Farbe: keine"),
   colorPanel: "Farbe wählen",
   colorHex: "Hex",
   colorBefore: "Vorher",

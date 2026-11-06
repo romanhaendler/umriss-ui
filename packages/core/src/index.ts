@@ -13,7 +13,6 @@ export * from "./components/Checkbox";
    has the same specificity as one of another component. */
 export * from "./components/CommandPalette";
 export * from "./components/Combobox";
-export * from "./components/ColorPicker";
 export * from "./components/DataViz";
 export * from "./components/DatePicker";
 export * from "./components/Divider";
@@ -104,5 +103,7 @@ export type { TextTracking, TextLeading } from "./components/Typography/Typograp
 export type { Align } from "./components/Popover/position";
 
 /* Pure arithmetic and types, no stylesheet: they stand at the end. */
+/* ColorPicker stands here for the same rule: its styles land after the pickers' it composes. */
+export * from "./components/ColorPicker";
 export * from "./lib/zone";
 export * from "./lib/quality";

@@ -14,6 +14,20 @@ import styles from "./ColorPicker.module.css";
 /** Black or white, whichever reads on the colour (0.179 is the luminance where the two contrast ratios meet). */
 const inkOn = (hex: string) => (luminance(hex) > 0.179 ? "#000000" : "#ffffff");
 
+/** `--u-color-surface` as it resolves in each scheme, read once when the panel opens so that a theme overriding the token is measured. Where the token does not resolve (no stylesheet loaded) the values it ships with stand in. */
+function readSurfaces(): [string, string] {
+  const read = (scheme: "light" | "dark", fallback: string) => {
+    if (typeof document === "undefined") return fallback;
+    const probe = document.createElement("div");
+    probe.style.cssText = `position:fixed;visibility:hidden;color-scheme:${scheme};background:var(--u-color-surface)`;
+    document.body.append(probe);
+    const parts = /^rgb\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)\s*\)/.exec(getComputedStyle(probe).backgroundColor);
+    probe.remove();
+    return parts ? rgbToHex([Number(parts[1]), Number(parts[2]), Number(parts[3])]) : fallback;
+  };
+  return [read("light", "#ffffff"), read("dark", "#161618")];
+}
+
 export interface ColorPanelProps {
   /** The colour the panel opened with; `null` for none. */
   start: string | null;
@@ -37,21 +51,26 @@ export interface ColorPanelProps {
 export function ColorPanel({ start, current, swatches, contrastAgainst, onColor, onDone, onCancel, onClear }: ColorPanelProps) {
   const wording = useWording();
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
+  /* A colour set from outside moves the square and the strip too; a grey keeps the hue it had. */
+  if (current && current !== hsvToHex(hsv)) setHsv(hexToHsv(current, hsv));
   /* What the reader is typing into the hex field; null while they are not, and
      the field shows the current colour, whichever control set it. */
   const [hexDraft, setHexDraft] = useState<string | null>(null);
 
   /* Every control that hands over a whole colour comes through here; the
      square and the strip set `hsv` themselves and hand over its hex. */
-  const apply = (hex: string) => {
-    setHsv((prev) => hexToHsv(hex, prev));
+  const give = (hex: string) => {
     if (hex !== current) onColor(hex);
   };
+  const apply = (hex: string) => {
+    setHsv((prev) => hexToHsv(hex, prev));
+    give(hex);
+  };
 
-  /* The two values of `--u-color-surface`. */
+  const [light, dark] = useState(readSurfaces)[0];
   const surfaces = contrastAgainst ?? [
-    { name: wording.colorSurfaceLight, value: "#ffffff" },
-    { name: wording.colorSurfaceDark, value: "#161618" },
+    { name: wording.colorSurfaceLight, value: light },
+    { name: wording.colorSurfaceDark, value: dark },
   ];
   const own = (swatches ?? []).flatMap(({ name, value }) => {
     const hex = normalizeHex(value);
@@ -71,14 +90,19 @@ export function ColorPanel({ start, current, swatches, contrastAgainst, onColor,
   /* The square and the strip hand over the new HSB state; its hex goes out where it differs. */
   const move = (next: Hsv) => {
     setHsv(next);
-    const hex = hsvToHex(next);
-    if (hex !== current) onColor(hex);
+    give(hsvToHex(next));
   };
 
+  /* While typing only a whole six-digit value applies: `#256` on the way to
+     `#2563eb` is also a colour. A shorthand applies when the field commits. */
   const type = (text: string) => {
     setHexDraft(text);
-    const typed = normalizeHex(text);
+    if (/^#?[0-9a-f]{6}$/i.test(text.trim())) apply(normalizeHex(text)!);
+  };
+  const commit = () => {
+    const typed = hexDraft && normalizeHex(hexDraft);
     if (typed) apply(typed);
+    setHexDraft(null);
   };
 
   return (
@@ -98,7 +122,8 @@ export function ColorPanel({ start, current, swatches, contrastAgainst, onColor,
             spellCheck={false}
             value={hexDraft ?? current ?? ""}
             onChange={(event) => type(event.target.value)}
-            onBlur={() => setHexDraft(null)}
+            onBlur={commit}
+            onKeyDown={(event) => event.key === "Enter" && commit()}
           />
         </div>
         {dropper && (

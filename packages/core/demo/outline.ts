@@ -404,7 +404,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",
           "A FormField keeps no space around itself: the fields of a form stand in a [Stack](#/stack-and-grid) or another container with a gap, which spaces them, so an error never touches the next label.",
-          "Give a field a `name` and a `<form>` (or a React 19 `<form action>`) receives its value in `FormData`: the Combobox the value, not the label; the MultiSelect one entry per value; DatePicker `YYYY-MM-DD`; DateTimePicker ISO with the offset; a range picker `<name>Start` and `<name>End` (`startName`, `endName` rename them); NumberInput the plain number; empty `\"\"`. `formValue` writes a value another way.",
+          "Give a field a `name` and a `<form>` (or a React 19 `<form action>`) receives its value in `FormData`: the Combobox the value, not the label; the MultiSelect one entry per value; ColorPicker the lowercase `#rrggbb`; DatePicker `YYYY-MM-DD`; DateTimePicker ISO with the offset; a range picker `<name>Start` and `<name>End` (`startName`, `endName` rename them); NumberInput the plain number; empty `\"\"`. `formValue` writes a value another way.",
         ],
         keysOf: ["input", "numberinput", "checkbox", "select", "datepicker", "button"],
         limits: [
@@ -658,7 +658,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "colorpicker",
         name: "ColorPicker",
-        sentence: "One colour, typed as hex and compared with the colour the panel opened with (colour field): the line of a series, a tag, a state.",
+        sentence: "One colour, chosen on a square and a hue strip, typed as hex or as red, green and blue, or picked from the screen, from the application's own swatches (colour field): the line of a series, a tag, a state. The panel reads the colour against light and dark surfaces and compares it with the colour it opened with.",
         about: [
           "The value is a lowercase `#rrggbb` string or `null`; a given value in any hex spelling (`#ABC`, `2563EB`) is read, and anything else warns in development and reads as `null`. It reports on every settled step, so what the colour is for can follow at once.",
           "Escape and Cancel put the opening colour back, with one more `onValueChange`; Done, a click outside, a Tab out and a scroll keep the colour. The focus returns to the field in every case.",
@@ -672,7 +672,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Puts back the colour the panel opened with and closes it." },
         ],
         limits: ["Hex only: no alpha, no `rgb()`, `hsl()` or `oklch()`."],
-        types: ["ColorPickerProps"],
+        types: ["ColorPickerProps", "ColorSwatch"],
         exports: ["ColorPicker"],
       },
     ],

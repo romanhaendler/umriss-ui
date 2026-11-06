@@ -4,6 +4,8 @@ import { hsvToHex } from "./color";
 import type { Hsv } from "./color";
 import styles from "./ColorSurfaces.module.css";
 
+/** The hue at full saturation and brightness. */
+const pureOf = ({ h }: Hsv) => hsvToHex({ h, s: 1, v: 1 });
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
 
 /** Pointer down captures the pointer, every move while captured reports the point as fractions of the box. */
@@ -53,7 +55,7 @@ export function ColorSquare({ hsv, onChange }: ColorSurfaceProps) {
       aria-valuemax={100}
       aria-valuenow={brightness}
       aria-valuetext={wording.colorSquareValue(saturation, brightness)}
-      style={{ "--_pure": hsvToHex({ h: hsv.h, s: 1, v: 1 }), "--_color": hsvToHex(hsv), "--_x": `${hsv.s * 100}%`, "--_y": `${(1 - hsv.v) * 100}%` } as CSSProperties}
+      style={{ "--_pure": pureOf(hsv), "--_color": hsvToHex(hsv), "--_x": `${hsv.s * 100}%`, "--_y": `${(1 - hsv.v) * 100}%` } as CSSProperties}
       onKeyDown={key}
       {...dragOn((x, y) => onChange({ ...hsv, s: x, v: 1 - y }))}
     >
@@ -83,7 +85,7 @@ export function HueStrip({ hsv, onChange }: ColorSurfaceProps) {
       aria-valuemax={360}
       aria-valuenow={degrees}
       aria-valuetext={wording.colorHueValue(degrees)}
-      style={{ "--_color": hsvToHex({ h: hsv.h, s: 1, v: 1 }), "--_x": `${(hsv.h / 360) * 100}%` } as CSSProperties}
+      style={{ "--_color": pureOf(hsv), "--_x": `${(hsv.h / 360) * 100}%` } as CSSProperties}
       onKeyDown={key}
       {...dragOn((x) => onChange({ ...hsv, h: x * 360 }))}
     >

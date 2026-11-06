@@ -6,7 +6,7 @@ import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { useFieldValue, withoutFieldProps } from "../../lib/useFieldValue";
 import { FormPost, posted, type FormPostProps } from "../../lib/FormPost";
-import { RangeTrigger } from "../DatePicker/RangeTrigger";
+import { RangeTrigger, naturalChars } from "../DatePicker/RangeTrigger";
 import type { RefProp } from "../../lib/refProp";
 import { useControlSize } from "../../lib/controlSize";
 import { useWording } from "../../lib/language";
@@ -18,6 +18,7 @@ import triggerStyles from "../DatePicker/DatePicker.module.css";
 
 /** A named colour: an entry of `swatches`, or a surface in `contrastAgainst`. */
 export interface ColorSwatch {
+  /** What the colour is called: said by a screen reader and shown on hover (swatch), or the surface's name in the readout. */
   name: string;
   /** A hex colour, `#2563eb` or `2563EB`. */
   value: string;
@@ -60,7 +61,7 @@ export interface ColorPickerProps
   contrastAgainst?: readonly ColorSwatch[];
 }
 
-/** A colour field: a trigger with the colour's swatch and hex value, and a panel that holds the hex field, the colour as it was when the panel opened beside the colour now, Cancel and Done. */
+/** A colour field: a trigger with the colour's swatch and hex value, and a panel with the saturation and brightness square, the hue strip, the hex field, the red, green and blue fields, the eyedropper where the browser has one, the application's own swatches, the contrast against light and dark surfaces, the colour as it was when the panel opened beside the colour now, Cancel and Done. */
 export function ColorPicker(props: ColorPickerProps) {
   const { ref, placeholder, clearable = false, disabled = false, invalid, size: ownSize, chars, className, name, formValue, swatches, contrastAgainst, ...fieldRest } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
@@ -82,6 +83,7 @@ export function ColorPicker(props: ColorPickerProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
   const panelId = useId();
+  const placeholderText = placeholder ?? wording.colorPlaceholder;
 
   const openPanel = () => {
     cancelled.current = false;
@@ -91,6 +93,12 @@ export function ColorPicker(props: ColorPickerProps) {
   const close = () => {
     setOpen(false);
     triggerRef.current?.focus();
+  };
+  /* The cross and the panel's Clear: a field committing on its way out must not paint over the `null`. */
+  const clear = () => {
+    cancelled.current = true;
+    onChange(null);
+    if (open) close();
   };
   const cancel = () => {
     cancelled.current = true;
@@ -106,6 +114,7 @@ export function ColorPicker(props: ColorPickerProps) {
         formRef={formRef}
         root={{
           ...rest,
+          "aria-label": rest["aria-label"] ?? (rest["aria-labelledby"] || field ? undefined : wording.colorTrigger(value?.toUpperCase() ?? null)),
           onKeyDown: (event) => {
             rest.onKeyDown?.(event);
             if (event.defaultPrevented || event.key !== "ArrowDown") return;
@@ -129,14 +138,11 @@ export function ColorPicker(props: ColorPickerProps) {
           )
         }
         icon={<AngleGlyph className={`${triggerStyles.icon} ${styles.chevron}`} />}
-        placeholder={placeholder ?? wording.colorPlaceholder}
-        onClear={() => {
-          onChange(null);
-          if (open) setOpen(false);
-        }}
+        placeholder={placeholderText}
+        onClear={clear}
         ariaLabel={wording.clear}
         chars={chars}
-        natural={9}
+        natural={naturalChars(() => 9, placeholderText)}
       />
       <Popover
         onBlur={(event) => fieldBlur(event, rest.onBlur, wrapRef)}
@@ -164,14 +170,7 @@ export function ColorPicker(props: ColorPickerProps) {
           }}
           onDone={close}
           onCancel={cancel}
-          onClear={
-            clearable
-              ? () => {
-                  onChange(null);
-                  close();
-                }
-              : undefined
-          }
+          onClear={clearable ? clear : undefined}
         />
       </Popover>
     </>

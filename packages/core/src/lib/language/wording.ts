@@ -140,6 +140,8 @@ export interface Wording {
 
   /* -------- Colour ------------------------------------------------ */
   colorPlaceholder: string;
+  /** The name of the ColorPicker trigger where nothing else names it: the colour as hex, or `null` for none. */
+  colorTrigger: (hex: string | null) => string;
   /** Accessible name of the ColorPicker panel, where its field names it no other way. */
   colorPanel: string;
   /** The name and the visible label of the hex field. */
@@ -891,6 +893,7 @@ export const DEFAULT_WORDING: Wording = {
   dateTimeRangeClear: "Clear range with time",
 
   colorPlaceholder: "Select colour",
+  colorTrigger: (hex) => (hex ? `Colour ${hex}` : "Colour: none"),
   colorPanel: "Choose colour",
   colorHex: "Hex",
   colorBefore: "Before",
