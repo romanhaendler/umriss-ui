@@ -27,29 +27,39 @@
     --lightningcss-dark: ;
 
     /* ---- Neutral: Ink & Paper ---- */
-    --u-color-bg: light-dark(#fafafa, #0f0f10);
-    --u-color-surface: light-dark(#ffffff, #161618);
-    --u-color-surface-sunken: light-dark(#f4f4f5, #1e1e21);
+    /* The dark grounds step by lightness, because a shadow on a near-black
+       ground shows nothing: page to surface and surface to raised are each
+       about 3.6 L* apart, hover and pressed about 2.6, measured with the 1 %
+       viewing flare of IEC 61966-2-1 that compresses the dark end. */
+    --u-color-bg: light-dark(#fafafa, #121213);
+    --u-color-surface: light-dark(#ffffff, #1e1e20);
+    --u-color-surface-sunken: light-dark(#f4f4f5, #252528);
     /* The pressed step of a quiet key: what sinks to the sunken surface under
        the pointer sinks once more while it is pressed (the interaction-state
        canon). The three `-pressed` surfaces exist because a hover for each
        ground needs something stronger. */
-    --u-color-surface-pressed: light-dark(#e9e9eb, #28282c);
+    --u-color-surface-pressed: light-dark(#e9e9eb, #2c2c30);
+    /* An overlay's ground and its hover and pressed steps, one step above the
+       surface it opens over; the overlays take them through `raised` in
+       `#own-styles`. Light: the surface's own values, the shadow lifts it. */
+    --u-color-surface-raised: light-dark(#ffffff, #28282c);
+    --u-color-surface-raised-sunken: light-dark(#f4f4f5, #2f2f33);
+    --u-color-surface-raised-pressed: light-dark(#e9e9eb, #36363a);
     --u-color-text: light-dark(#171717, #ededed);
-    --u-color-text-secondary: light-dark(#565656, #a5a5ab);
+    --u-color-text-secondary: light-dark(#565656, #b0b0b6);
     /* 4.5:1 on every ground it stands on in both themes, the pressed surface
        included (contrast.test.ts). */
-    --u-color-text-muted: light-dark(#666666, #909096);
+    --u-color-text-muted: light-dark(#666666, #9e9ea4);
 
     /* ---- Edges as shadows (instead of borders) ---- */
-    --u-edge-color: light-dark(rgba(23, 23, 23, 0.08), rgba(255, 255, 255, 0.10));
-    --u-edge-color-strong: light-dark(rgba(23, 23, 23, 0.17), rgba(255, 255, 255, 0.20));
+    --u-edge-color: light-dark(rgba(23, 23, 23, 0.08), rgba(255, 255, 255, 0.14));
+    --u-edge-color-strong: light-dark(rgba(23, 23, 23, 0.17), rgba(255, 255, 255, 0.24));
     --u-edge: 0 0 0 1px var(--u-edge-color);
     --u-edge-strong: 0 0 0 1px var(--u-edge-color-strong);
-    --u-hairline: light-dark(rgba(23, 23, 23, 0.06), rgba(255, 255, 255, 0.07));        /* inner dividing lines */
+    --u-hairline: light-dark(rgba(23, 23, 23, 0.06), rgba(255, 255, 255, 0.10));        /* inner dividing lines */
     /* The edge of a field under the pointer. */
     --u-color-edge-hover: color-mix(in srgb, var(--u-color-text) 30%, transparent);
-    --u-hairline-strong: light-dark(rgba(23, 23, 23, 0.12), rgba(255, 255, 255, 0.14)); /* e.g. under table heads */
+    --u-hairline-strong: light-dark(rgba(23, 23, 23, 0.12), rgba(255, 255, 255, 0.18)); /* e.g. under table heads */
 
     /* ---- Ink as interaction (the primary button) ---- */
     --u-color-primary-bg: light-dark(#171717, #ededed);

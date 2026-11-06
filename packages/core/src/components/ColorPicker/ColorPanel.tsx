@@ -25,7 +25,7 @@ function readSurfaces(): [string, string] {
     probe.remove();
     return parts ? rgbToHex([Number(parts[1]), Number(parts[2]), Number(parts[3])]) : fallback;
   };
-  return [read("light", "#ffffff"), read("dark", "#161618")];
+  return [read("light", "#ffffff"), read("dark", "#1e1e20")];
 }
 
 export interface ColorPanelProps {

@@ -34,7 +34,7 @@
      deck over it and nowhere else. The ring shows where Alt+T has put the
      focus. */
   .region {
-    composes: text from "#own-styles";
+    composes: text raised from "#own-styles";
     composes: ring from "#own-styles";
     position: fixed;
     z-index: var(--u-z-toast);

@@ -44,12 +44,12 @@ describe("ColorPicker contrast readout", () => {
     open();
     expect(readout("Light").textContent).toContain("5.2:1");
     expect(readout("Light").textContent).toContain("Pass");
-    expect(readout("Dark").textContent).toContain("3.5:1");
+    expect(readout("Dark").textContent).toContain("3.2:1");
     expect(readout("Dark").textContent).toContain("Pass");
   });
 
   it("says Fail below 3:1", () => {
-    render(<ColorPicker aria-label="Colour" defaultValue="#161618" />);
+    render(<ColorPicker aria-label="Colour" defaultValue="#1e1e20" />);
     open();
     expect(readout("Dark").textContent).toContain("1.0:1");
     expect(readout("Dark").textContent).toContain("Fail");

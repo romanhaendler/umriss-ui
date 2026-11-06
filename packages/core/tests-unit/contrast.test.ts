@@ -219,6 +219,17 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   })),
 
+  /* The raised grounds of an overlay and its hover and pressed steps carry the
+     same text as the surface: every text tone at the full bound. */
+  ...(["--u-color-text", "--u-color-text-secondary", "--u-color-text-muted"] as const).flatMap((fg) =>
+    (["--u-color-surface-raised", "--u-color-surface-raised-sunken", "--u-color-surface-raised-pressed"] as const).map((bg) => ({
+      name: `${fg} as text on ${bg}`,
+      fg,
+      bg,
+      minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+    })),
+  ),
+
   /* Exception, light: 4.45:1 measured - five hundredths under the bound. The
      case is defused, because on the subtle accent surface the components set
      not --u-color-accent but the --u-color-accent-text provided for it (badge,
@@ -507,6 +518,8 @@ const QUIET_GROUNDS = [
   "--u-color-surface",
   "--u-color-surface-sunken",
   "--u-color-surface-pressed",
+  "--u-color-surface-raised",
+  "--u-color-surface-raised-pressed",
   "--u-color-material-fallback",
   "--u-color-accent-subtle",
   "--u-color-accent-subtle-pressed",
@@ -516,7 +529,7 @@ const QUIET_GROUNDS = [
   "--u-color-danger-subtle-pressed",
 ] as const;
 const EDGES = ["--u-edge-color", "--u-edge-color-strong", "--u-hairline", "--u-hairline-strong", "--u-color-edge-hover"] as const;
-const EDGE_GROUNDS = ["--u-color-bg", "--u-color-surface", "--u-color-surface-sunken"] as const;
+const EDGE_GROUNDS = ["--u-color-bg", "--u-color-surface", "--u-color-surface-sunken", "--u-color-surface-raised"] as const;
 const MORE_TEXT = 7; // WCAG AAA, normal text (1.4.6)
 
 for (const [themeName, theme] of MORE) {

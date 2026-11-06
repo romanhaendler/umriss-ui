@@ -10,7 +10,7 @@
      clear of a notch or a home indicator. Without the viewport setting the
      insets are zero and nothing moves. */
   .dialog {
-    composes: text from "#own-styles";
+    composes: text raised from "#own-styles";
     border: none;
     margin: 0;
     padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
