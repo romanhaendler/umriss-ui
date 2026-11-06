@@ -23,10 +23,12 @@ export interface ColorPanelProps {
   onDone: () => void;
   /** Cancel: puts `start` back and closes. */
   onCancel: () => void;
+  /** Given, a Clear button stands in the foot while a colour is set; it empties the field. */
+  onClear?: () => void;
 }
 
 /** The panel's content. It keeps its own HSB state while it stands and hands out hex: a grey or black colour has no hue of its own, and deriving the state back from the hex would throw the hue the reader left. */
-export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorPanelProps) {
+export function ColorPanel({ start, current, onColor, onDone, onCancel, onClear }: ColorPanelProps) {
   const wording = useWording();
   const [, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
   /* What the reader is typing into the hex field; null while they are not, and
@@ -110,6 +112,11 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
         ))}
       </div>
       <div className={styles.foot}>
+        {onClear && current && (
+          <Button size="sm" variant="ghost" className={styles.footClear} onClick={onClear}>
+            {wording.clear}
+          </Button>
+        )}
         <Button size="sm" variant="ghost" onClick={onCancel}>
           {wording.cancel}
         </Button>
