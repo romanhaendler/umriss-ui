@@ -71,7 +71,7 @@ describe("a foreign modal dialog", () => {
     );
     fireEvent.keyDown(screen.getByText("panel text"), { key: "Escape" });
     document.removeEventListener("keydown", dialogEscape, true);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(onOpenChange).toHaveBeenCalledWith(false, "escape");
     expect(dialogEscape).not.toHaveBeenCalled();
   });
 });
@@ -130,7 +130,7 @@ describe("an iframe", () => {
     expect(doc.body.textContent).toContain("panel text");
     expect(document.body.textContent).not.toContain("panel text");
     doc.dispatchEvent(new (doc.defaultView as unknown as typeof globalThis).KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(onOpenChange).toHaveBeenCalledWith(false, "escape");
   });
 
   it("binds the palette shortcut to a given window", () => {

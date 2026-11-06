@@ -25,13 +25,19 @@ const ParentPanel = createContext<((contains: (node: Node) => boolean) => () => 
 const STACK_KEY = Symbol.for("umriss.openPopovers");
 const openStack: object[] = ((globalThis as { [STACK_KEY]?: object[] })[STACK_KEY] ??= []);
 
+/** Why a popover asks to close: Escape, a click outside, a scroll
+    (`hideOnScroll`), the anchor clipped away by a scrolling container, a Tab
+    out of the panel (`closeOnTabOut`). */
+export type PopoverCloseReason = "escape" | "outside" | "scroll" | "clipped" | "tab";
+
 /** The props of `Popover`. */
 export interface PopoverProps {
   /** Whether the surface stands. Controlled: the popover never opens itself. */
   open: boolean;
   /** Reports every wish to change the state – outside click, Escape,
-      scrolling. Whether it closes as a result is the caller's decision. */
-  onOpenChange: (open: boolean) => void;
+      scrolling. Whether it closes as a result is the caller's decision. A
+      wish to close carries its `PopoverCloseReason`. */
+  onOpenChange: (open: boolean, reason?: PopoverCloseReason) => void;
   /** Trigger the panel hangs from (the reference for the position). */
   anchorRef: RefObject<HTMLElement | null>;
   /**
@@ -139,8 +145,8 @@ export function Popover({
   const closing = present && !open;
 
   const close = useCallback(
-    (returnFocus: boolean) => {
-      onOpenChange(false);
+    (returnFocus: boolean, reason: PopoverCloseReason) => {
+      onOpenChange(false, reason);
       if (returnFocus && restoreFocus) (focusRef ?? anchorRef).current?.focus();
     },
     [onOpenChange, restoreFocus, anchorRef, focusRef],
@@ -226,14 +232,14 @@ export function Popover({
     const handlePointerDown = (event: MouseEvent) => {
       /* The first node of the composed path: inside a shadow root `target` is
          retargeted to the host, which no ref contains. */
-      if (!isInside(event.composedPath()[0] as Node)) closeRef.current(false);
+      if (!isInside(event.composedPath()[0] as Node)) closeRef.current(false, "outside");
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || openStack.at(-1) !== self) return;
       /* Escape closes the panel and nothing more: the same key is a dialog's
          close request. */
       event.preventDefault();
-      closeRef.current(true);
+      closeRef.current(true, "escape");
     };
     /* A foreign dialog listens for Escape in the capture phase of the
        document and would close with the panel. The window's capture comes
@@ -252,7 +258,7 @@ export function Popover({
         requested = 0;
         /* An anchor scrolled out of a clipping container leaves the panel
            floating over the page: it closes. */
-        if (anchorRef.current && clippedAway(anchorRef.current)) closeRef.current(false);
+        if (anchorRef.current && clippedAway(anchorRef.current)) closeRef.current(false, "clipped");
         else measure();
       });
     };
@@ -260,7 +266,7 @@ export function Popover({
       /* A scroll inside the panel moves nothing the position depends on; a
          re-measure would drop its cut and jump it back to its top. */
       if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
-      if (hideOnScroll) closeRef.current(false);
+      if (hideOnScroll) closeRef.current(false, "scroll");
       else reposition();
     };
     /* The on-screen keyboard and a zoom change the visible part of the window
@@ -358,7 +364,7 @@ export function Popover({
               if (at !== edge && !(event.shiftKey && at === panel)) return;
               /* Forward: the browser's own Tab then goes on from the anchor. Back: the anchor itself. */
               if (event.shiftKey) event.preventDefault();
-              onOpenChange(false);
+              onOpenChange(false, "tab");
               (focusRef ?? anchorRef).current?.focus();
             }
           : undefined
