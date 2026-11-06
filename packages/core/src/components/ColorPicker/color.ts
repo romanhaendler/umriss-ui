@@ -58,3 +58,9 @@ export function luminance(hex: string): number {
   }) as [number, number, number];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
+
+/** WCAG's contrast ratio of two colours, 1 to 21. */
+export function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+  return (hi + 0.05) / (lo + 0.05);
+}
