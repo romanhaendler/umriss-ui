@@ -13,6 +13,10 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.55.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
+
 ## 0.54.0 – A saved size is read only if its type offers it (Nov. 2026)
 
 ### Fixed

@@ -12,6 +12,10 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.55.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
+
 ## 0.54.0 – A snooze that cannot end, durations rounded to the minute (Nov. 2026)
 
 ### Changed

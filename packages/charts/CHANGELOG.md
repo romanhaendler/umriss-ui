@@ -30,6 +30,10 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.55.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
+
 ## 0.54.0 – Live charts render less, gaps stay real, a calendar axis keeps a fixed window (Nov. 2026)
 
 ### Changed

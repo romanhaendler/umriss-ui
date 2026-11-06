@@ -26,6 +26,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.55.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
+
 ## 0.54.0 – Search finds what a cell shows, editing holds up in big and tree tables (Nov. 2026)
 
 ### Added

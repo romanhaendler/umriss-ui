@@ -18,6 +18,10 @@ moves from here under the rule above.
 
 ---
 
+## 0.55.0 – Released in step with core (Nov. 2026)
+
+No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
+
 ## 0.54.0 – A schedule that survives an unreadable time and a clock change (Nov. 2026)
 
 ### Changed

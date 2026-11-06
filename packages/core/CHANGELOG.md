@@ -27,6 +27,21 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.55.0 – A colour field, popovers that stay on their field, a clearer dark theme (Nov. 2026)
+
+### Added
+
+- **`ColorPicker`**, a colour field in the family of DatePicker: the trigger shows a swatch and the hex value; the panel has a saturation and brightness square, a hue strip (dragged, or moved with the arrow keys; the hue survives black and grey), a hex field, R, G and B number fields, an eyedropper where the browser has `EyeDropper`, and the new colour beside the one the panel opened with. The value is a lowercase `#rrggbb` or `null`. Done or a click outside keeps the colour; Cancel or Escape puts the old one back. `clearable` adds a cross on the trigger and Clear in the panel, both setting `null`. `swatches` lists the application's own colours as one-click choices; `contrastAgainst` names the surfaces the colour is measured against (ratio, Pass or Fail at 3:1; core's light and dark surface by default). Types `ColorSwatch`; glyph `DropperGlyph`; wording `colorTrigger` and the panel's labels, in English and German.
+- **Popover's `onOpenChange(false, reason)`** says why it closes: `"escape"`, `"outside"`, `"scroll"`, `"clipped"` or `"tab"`, typed `PopoverCloseReason`. A caller that reads one argument sees no change.
+- **Tokens `--u-color-surface-raised`, `--u-color-surface-raised-sunken` and `--u-color-surface-raised-pressed`**: the grounds of an overlay. Popovers, dialogs, the command palette and toasts use them.
+
+### Changed
+
+- **An open popover stays glued to its trigger while the page scrolls** instead of trailing it, and it stays on the side it opened on until that side runs out of room. It no longer flips back merely because its first side has room again. Its position is rounded to whole pixels.
+  - Migration: nothing to change. Look at tests that measured a panel's position after scrolling, or expected it to flip back.
+- **The dark theme is lighter and has more contrast between its grounds.** The page (`#121213`), surface (`#1e1e20`), sunken and pressed grounds are a step lighter. Overlays stand one lightness step above the surface they open over (`#28282c`). Edges and dividers are stronger. The secondary and muted text is a little lighter, to keep 4.5:1 on every ground. The light theme is unchanged.
+  - Migration: nothing to change. A dark screenshot of your application will differ; a colour you hard-coded to match core's old dark grounds should take the token instead.
+
 ## 0.54.0 – The old callback names go; a duration formatter, a calmer MultiSelect and search, a TreeView that types like Select (Nov. 2026)
 
 ### Added
