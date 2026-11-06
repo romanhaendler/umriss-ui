@@ -26,6 +26,19 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.55.1 – Every head stands whole, and lines up with its column (Nov. 2026)
+
+### Changed
+
+- **A right-aligned head keeps its sort arrow in its own slot.** In a `numeric` column, or any column of figures such as a time, the arrow no longer hangs past the label into the cell's padding: shown or hidden, it takes its place as in a left-aligned head, so it is whole beside the next head and at the table's edge, never under the filter funnel, and sorting, a second sort level or a hover moves nothing in the head. The whole head - label, rank, arrow, funnel - ends where the figures end; an unsorted head's label therefore stands in from its figures by the arrow's slot.
+  - Migration: nothing to change. A column of figures needs room for the arrow's slot beside its label; a sized column narrower than that is raised to it, and its label gives way with an ellipsis. Look at layouts that sized a numeric column exactly to its label.
+
+### Fixed
+
+- **A head's sort button stays inside its cell**, the first and the last head included: its focus ring no longer reaches 4 px into the neighbouring heads, and a click near a boundary sorts the column it lands on.
+- **A `ColumnGroup`'s label stands in the centre of its cell**, also in the first and the last group, which stood 2 px off.
+- **A `ColumnGroup`'s rule is one even line** from the group head through the head and the body to the footer at any browser zoom or display scale - before, one row drew it one device pixel wide and another two lighter ones - and beside a pinned column too; a printed table keeps it.
+
 ## 0.55.0 – Released in step with core (Nov. 2026)
 
 No change of its own; the number moves with core, which adds `ColorPicker` and makes its dark theme lighter.
