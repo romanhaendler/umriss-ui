@@ -5,10 +5,10 @@ import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
 import { clippedAway, computePosition, motionOrigin, visibleViewport } from "./position";
-import type { Align, PopoverPosition } from "./position";
+import type { Align, PopoverPosition, Side } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
-import { FOREIGN_MODAL, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
+import { FOREIGN_MODAL, absoluteOrigin, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
 import type { PortalTarget } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
 import { firstTabStop, lastTabStop } from "../../lib/firstTabStop";
@@ -140,6 +140,12 @@ export function Popover({
   /* Portal target, set in an effect: no ref may be read during the render. */
   const [target, setTarget] = useState<PortalTarget | null>(null);
   const portalTarget = usePortalTarget();
+  /* In the body the panel is absolute: the browser scrolls it with the page
+     and it never trails. Every other target keeps the fixed box. */
+  const glued = !!target && !isShadowRoot(target) && target === target.ownerDocument.body;
+  /* The side the panel stands on is its preferred side for the next measure:
+     it switches only when that side runs out, not when the first has room again. */
+  const sideRef = useRef<Side>("bottom");
   /* Closed, it stays for its exit - inert, and no longer listening. */
   const present = usePresence(open, panelRef, "--u-duration-exit-fast");
   const closing = present && !open;
@@ -195,19 +201,30 @@ export function Popover({
       anchorRect,
       { width: size.width / scale, height: size.height / scale },
       viewport,
-      { align, offset },
+      { align, offset, side: sideRef.current },
     );
     if (next.maxHeight !== undefined) panel.style.maxHeight = `${next.maxHeight}px`;
+    sideRef.current = next.side;
     /* A fixed box counts from an ancestor that transforms (a foreign dialog
-       centred by a translate), not from the window. */
-    const origin = fixedOrigin(target);
-    setPosition({ ...next, top: next.top - origin.y, left: next.left - origin.x });
-  }, [anchorRef, align, offset, width, minWidth, target]);
+       centred by a translate), not from the window; an absolute one from the
+       body's containing block, scroll included. */
+    // shortcut: an anchor in a nested scrolling container still trails that container's scroll, fix by following it per frame.
+    const origin = glued ? absoluteOrigin(target as HTMLElement) : fixedOrigin(target);
+    const top = next.top - origin.y;
+    const left = next.left - origin.x;
+    /* The same place keeps the same state: nothing re-renders, nothing moves. */
+    setPosition((prev) =>
+      prev && prev.top === top && prev.left === left && prev.side === next.side && prev.align === next.align && prev.maxHeight === next.maxHeight
+        ? prev
+        : { ...next, top, left },
+    );
+  }, [anchorRef, align, offset, width, minWidth, target, glued]);
 
   useLayoutEffect(() => {
     if (!open) return;
     /* Dialog, then the setting, then the body (`portalTargetFor`). It reads
        the DOM, so it runs in the effect. */
+    sideRef.current = "bottom";
     setTarget(portalTargetFor(anchorRef.current, portalTarget));
   }, [open, anchorRef, portalTarget]);
 
@@ -376,6 +393,7 @@ export function Popover({
       inert={closing}
       aria-hidden={closing || undefined}
       style={{
+        position: glued ? "absolute" : undefined,
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         /* The motion origin, computed here and drawn by the stylesheet. */
