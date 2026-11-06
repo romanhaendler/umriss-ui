@@ -9,8 +9,10 @@
     vertical-align: -0.2rem;
     border-radius: var(--u-radius-xs);
     background: var(--_color);
+    /* Inside the swatch: the value's ellipsis box clips at the swatch's own edge. */
     outline: 1px solid transparent;
-    box-shadow: var(--u-edge-strong);
+    outline-offset: -1px;
+    box-shadow: inset 0 0 0 1px var(--u-edge-color-strong);
     /* Forced colours keep the swatch's own colour. */
     forced-color-adjust: none;
   }
