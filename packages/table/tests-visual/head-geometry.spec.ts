@@ -20,7 +20,7 @@ type Head = {
   content: Box;
   /** The inner edges of every clipping ancestor in which the cell itself stands whole. */
   clips: { name: string; left: number; right: number }[];
-  parts: { label: Box | null; rank: Box | null; arrow: Box | null; funnel: Box | null; sortButton: Box | null };
+  parts: { label: Box | null; rank: Box | null; arrow: Box | null; funnel: Box | null; sortButton: Box | null; groupInk: Box | null };
   /** Of a column head over a plain row: the ink of its label and of the column's values, left and right edge. */
   align: { right: boolean; labelInk: { left: number; right: number } | null; valueInk: { left: number; right: number } | null } | null;
 };
@@ -79,6 +79,13 @@ const RULES: Rule[] = [
     const d = end - align.valueInk.right;
     return Math.abs(d) > TOLERANCE ? [`last part ends ${d.toFixed(1)}px off the values' right edge`] : [];
   },
+
+  /* A group's label ink stands in the centre of its cell. */
+  ({ cell, parts: { groupInk: ink } }) => {
+    if (!ink) return [];
+    const off = (ink.left + ink.right) / 2 - (cell.left + cell.right) / 2;
+    return Math.abs(off) > TOLERANCE ? [`group label ink is ${off.toFixed(1)}px off the cell's centre`] : [];
+  },
 ];
 
 /** Every head of the example with the boxes of its parts. */
@@ -87,6 +94,13 @@ const measure = (root: Locator): Promise<Head[]> =>
     const box = (e: Element | null) => {
       const r = e?.getBoundingClientRect();
       return r && r.width > 0 ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom } : null;
+    };
+    /* The ink of an element's text: a Range over its text nodes, not its box. */
+    const ink = (e: Element | null) => {
+      if (!e) return null;
+      const range = document.createRange();
+      range.selectNodeContents(e);
+      return box({ getBoundingClientRect: () => range.getBoundingClientRect() } as Element);
     };
     return Array.from(el.querySelectorAll<HTMLTableCellElement>("thead th")).flatMap((th) => {
       const cell = box(th);
@@ -111,7 +125,7 @@ const measure = (root: Locator): Promise<Head[]> =>
       }
       /* The edges of what is drawn by an element's text, in this table only,
          skipping what is hidden for assistive technology or clipped to nothing. */
-      const ink = (e: Element) => {
+      const textInk = (e: Element) => {
         const rs: { left: number; right: number }[] = [];
         const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
         for (let n = w.nextNode(); n; n = w.nextNode()) {
@@ -137,12 +151,12 @@ const measure = (root: Locator): Promise<Head[]> =>
           const c = tr.cells[th.cellIndex];
           /* A grouped or tree table indents its first column; a badge's pill, a meter, an icon and a filled chip are the cell's own too. */
           const own = c?.querySelector('[class*="badge"], [role="meter"], svg') || (c && Array.from(c.querySelectorAll("*")).some((n) => getComputedStyle(n).backgroundColor !== "rgba(0, 0, 0, 0)")) || tableHasLevels;
-          const i = c?.textContent?.trim() && !own ? ink(c) : null;
+          const i = c?.textContent?.trim() && !own ? textInk(c) : null;
           return i ? [i] : [];
         });
         align = {
           right: cs.textAlign === "right" || th.className.includes("numeric"),
-          labelInk: ink(label),
+          labelInk: textInk(label),
           valueInk: inks.length ? { left: Math.min(...inks.map((i) => i.left)), right: Math.max(...inks.map((i) => i.right)) } : null,
         };
       }
@@ -159,6 +173,7 @@ const measure = (root: Locator): Promise<Head[]> =>
             arrow: box(th.querySelector('[class*="sortIndicator"] svg')),
             funnel: box(th.querySelector('[class*="filterButton"]')),
             sortButton: box(th.querySelector('[class*="sortButton"]')),
+            groupInk: th.closest("tr")?.hasAttribute("data-head-group") ? ink(th) : null,
           },
         },
       ];
@@ -214,6 +229,14 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
       await page.mouse.up();
     }
     if (g) await check("all columns at their least width");
+
+    /* Pinning a column splits its group into two cells. */
+    if (exampleId === "a-header-over-columns") {
+      await ex.getByRole("button", { name: "Columns" }).click();
+      await page.getByRole("button", { name: "Pin Feb to start" }).click();
+      await page.keyboard.press("Escape");
+      await check("a group split by pinning");
+    }
 
     if (faults.size) throw new Error(`${name}:\n${[...faults].join("\n")}`);
   });
