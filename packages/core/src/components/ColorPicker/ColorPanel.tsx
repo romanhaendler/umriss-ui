@@ -3,8 +3,9 @@ import type { CSSProperties } from "react";
 import { Button } from "../Button";
 import { Input } from "../Input";
 import { useWording } from "../../lib/language";
-import { hexToHsv, luminance, normalizeHex } from "./color";
+import { contrast, hexToHsv, luminance, normalizeHex } from "./color";
 import type { Hsv } from "./color";
+import type { ColorSwatch } from "./ColorPicker";
 import styles from "./ColorPicker.module.css";
 
 /** Black or white, whichever reads on the colour (0.179 is the luminance where the two contrast ratios meet). */
@@ -15,6 +16,10 @@ export interface ColorPanelProps {
   start: string | null;
   /** The colour now; `null` while none is set. */
   current: string | null;
+  /** The application's own colours; none shows no row. */
+  swatches?: readonly ColorSwatch[];
+  /** The surfaces the contrast is read against; `undefined` for core's two, an empty list for none. */
+  contrastAgainst?: readonly ColorSwatch[];
   /** Every settled step. */
   onColor: (hex: string) => void;
   /** Done: keeps the colour and closes. */
@@ -24,7 +29,7 @@ export interface ColorPanelProps {
 }
 
 /** The panel's content. It keeps its own HSB state while it stands and hands out hex: a grey or black colour has no hue of its own, and deriving the state back from the hex would throw the hue the reader left. */
-export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorPanelProps) {
+export function ColorPanel({ start, current, swatches, contrastAgainst, onColor, onDone, onCancel }: ColorPanelProps) {
   const wording = useWording();
   const [, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
   /* What the reader is typing into the hex field; null while they are not, and
@@ -37,6 +42,16 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
     setHsv((prev) => hexToHsv(hex, prev));
     if (hex !== current) onColor(hex);
   };
+
+  /* The two values of `--u-color-surface`. */
+  const surfaces = contrastAgainst ?? [
+    { name: wording.colorSurfaceLight, value: "#ffffff" },
+    { name: wording.colorSurfaceDark, value: "#161618" },
+  ];
+  const own = (swatches ?? []).flatMap(({ name, value }) => {
+    const hex = normalizeHex(value);
+    return hex ? [{ name, hex }] : [];
+  });
 
   const type = (text: string) => {
     setHexDraft(text);
@@ -63,6 +78,29 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
           />
         </div>
       </div>
+      {current && surfaces.length > 0 && (
+        <div className={styles.contrasts}>
+          {surfaces.map(({ name, value }) => {
+            const ratio = contrast(current, value);
+            const pass = ratio >= 3;
+            return (
+              <span key={name} className={styles.contrast}>
+                <span className={styles.chip} style={{ "--_surface": value, "--_color": current } as CSSProperties} aria-hidden />
+                <span className={styles.surface}>{name}</span>
+                <span className={styles.ratio}>{ratio.toFixed(1)}:1</span>
+                <span className={pass ? styles.pass : styles.fail}>{pass ? wording.colorPass : wording.colorFail}</span>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {own.length > 0 && (
+        <div role="group" aria-label={wording.colorSwatches} className={styles.swatches}>
+          {own.map(({ name, hex }) => (
+            <button key={name + hex} type="button" title={name} aria-label={name} aria-pressed={hex === current} className={styles.choice} style={{ "--_color": hex } as CSSProperties} onClick={() => apply(hex)} />
+          ))}
+        </div>
+      )}
       <div className={styles.compare} role="img" aria-label={wording.colorBeforeAfter(start ?? wording.colorNone, current ?? wording.colorNone)}>
         {([[wording.colorBefore, start], [wording.colorAfter, current]] as const).map(([word, color]) => (
           <span key={word} style={{ "--_color": color ?? "transparent", "--_ink": color ? inkOn(color) : undefined } as CSSProperties}>

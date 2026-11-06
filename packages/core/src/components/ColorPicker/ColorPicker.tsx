@@ -16,6 +16,13 @@ import { normalizeHex } from "./color";
 import styles from "./ColorPicker.module.css";
 import triggerStyles from "../DatePicker/DatePicker.module.css";
 
+/** A named colour: an entry of `swatches`, or a surface in `contrastAgainst`. */
+export interface ColorSwatch {
+  name: string;
+  /** A hex colour, `#2563eb` or `2563EB`. */
+  value: string;
+}
+
 /** The props of `ColorPicker`: the field's value contract (ADR-0081) with a hex colour for the value. */
 export interface ColorPickerProps
   extends Omit<HTMLAttributes<HTMLButtonElement>, "onChange" | "defaultValue">, RefProp<HTMLButtonElement>, FormPostProps<string> {
@@ -42,11 +49,17 @@ export interface ColorPickerProps
       place, and where the place asks - in a toolbar or a row - it is as wide
       as a hex value. */
   chars?: number;
+  /** The application's own colours as one-click choices in the panel, named for a screen reader and on hover; the one matching the colour is pressed.
+      @default no default */
+  swatches?: readonly ColorSwatch[];
+  /** The surfaces the panel measures the colour against, each with its contrast ratio and Pass or Fail at 3:1 (WCAG 1.4.11 - for marks and lines, not text). An empty list hides the readout.
+      @default core's light and dark surface */
+  contrastAgainst?: readonly ColorSwatch[];
 }
 
 /** A colour field: a trigger with the colour's swatch and hex value, and a panel that holds the hex field, the colour as it was when the panel opened beside the colour now, Cancel and Done. */
 export function ColorPicker(props: ColorPickerProps) {
-  const { ref, placeholder, disabled = false, invalid, size: ownSize, chars, className, name, formValue, ...fieldRest } = props;
+  const { ref, placeholder, disabled = false, invalid, size: ownSize, chars, className, name, formValue, swatches, contrastAgainst, ...fieldRest } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
   const [valueGiven, onChange, , formRef] = useFieldValue<string | null>("ColorPicker", props, null);
@@ -138,6 +151,8 @@ export function ColorPicker(props: ColorPickerProps) {
         <ColorPanel
           start={start}
           current={value}
+          swatches={swatches}
+          contrastAgainst={contrastAgainst}
           onColor={(hex) => {
             if (!cancelled.current) onChange(hex);
           }}

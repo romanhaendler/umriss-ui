@@ -151,6 +151,15 @@ export interface Wording {
   /** The strip as one sentence, for a screen reader. */
   colorBeforeAfter: (before: string, after: string) => string;
   colorDone: string;
+  /** Name of the row of the application's own colours. */
+  colorSwatches: string;
+  /** The name of core's light surface in the contrast readout. */
+  colorSurfaceLight: string;
+  /** The name of core's dark surface in the contrast readout. */
+  colorSurfaceDark: string;
+  /** The verdict of the contrast readout at 3:1 and above, and below it; words, so that the colour is not the only sign. */
+  colorPass: string;
+  colorFail: string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -877,6 +886,11 @@ export const DEFAULT_WORDING: Wording = {
   colorNone: "None",
   colorBeforeAfter: (before, after) => `Before ${before}, after ${after}`,
   colorDone: "Done",
+  colorSwatches: "Swatches",
+  colorSurfaceLight: "Light",
+  colorSurfaceDark: "Dark",
+  colorPass: "Pass",
+  colorFail: "Fail",
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",
