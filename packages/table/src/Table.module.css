@@ -179,10 +179,27 @@
 
   /* The rule at a group boundary, through head, body and foot. A box-shadow
      is not painted on a cell of a collapsed table and a border scrolls away
-     from a sticky cell, so a cell's own gradient draws it. The pin edge's
-     shadow and the sticky head's line sit on pseudo-elements; this one is
-     the cell's background layer, under its surface. */
-  .groupEdge {
+     from a sticky cell, so the rule is the border of a pseudo-element on the
+     cell's left edge: the engine snaps a border to whole device pixels, which
+     a one-pixel background at a fractional position is not. */
+  /* A head cell is positioned already and a pinned one sticks. */
+  .td.groupEdge:not(.pinned) {
+    position: relative;
+  }
+
+  .groupEdge:not(.pinStartEdge, .pinEndEdge)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-left: 1px solid var(--u-hairline-strong);
+    pointer-events: none;
+  }
+
+  /* The edge cell of a pinned block has its shadow on `::before`, so it keeps
+     the rule as its background layer, under its surface. */
+  .groupEdge:is(.pinStartEdge, .pinEndEdge) {
     background-image: linear-gradient(var(--u-hairline-strong), var(--u-hairline-strong));
     background-repeat: no-repeat;
     background-size: 1px 100%;
@@ -2100,8 +2117,13 @@
       background: CanvasText;
     }
 
-    /* The group rule is a gradient as well: a border in the text colour. */
-    .groupEdge {
+    /* The group rule is a border in the text colour; on a pinned block's edge
+       cell it is a gradient, which forced colours drop. */
+    .groupEdge:not(.pinStartEdge, .pinEndEdge)::before {
+      border-left-color: CanvasText;
+    }
+
+    .groupEdge:is(.pinStartEdge, .pinEndEdge) {
       background-image: none;
       border-left: 1px solid CanvasText;
     }
