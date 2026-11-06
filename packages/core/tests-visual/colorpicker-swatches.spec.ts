@@ -6,8 +6,8 @@ import { openExample } from "./navigation";
 
 test("the swatches keep their colours under forced colours", { tag: "@quick" }, async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
-  await openExample(page, "colorpicker", "choose-from-a-palette");
-  await page.locator('[data-example="choose-from-a-palette"]').getByRole("button", { name: /Task category/ }).click();
+  await openExample(page, "colorpicker", "from-a-palette");
+  await page.locator('[data-example="from-a-palette"]').getByRole("button", { name: /Task category/ }).click();
   const group = page.getByRole("group", { name: "Swatches" });
   await expect(group).toBeVisible();
   const ocean = group.getByRole("button", { name: "Ocean" });

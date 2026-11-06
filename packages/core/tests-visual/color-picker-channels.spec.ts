@@ -9,7 +9,7 @@ test("A channel set in the panel changes the colour, and Cancel puts it back ove
   await openExample(page, "colorpicker", "a-colour");
   const trigger = page.getByRole("button", { name: "Line colour" });
   await trigger.click();
-  const panel = page.getByRole("dialog", { name: "Line colour" });
+  const panel = page.getByRole("dialog", { name: "Choose colour" });
   await panel.getByRole("textbox", { name: "Red" }).fill("255");
   await panel.getByRole("textbox", { name: "Red" }).press("Enter");
   await expect(page.getByText("value: #ff63eb")).toBeVisible();
@@ -29,6 +29,6 @@ test("The eyedropper button picks a colour where the browser has EyeDropper", { 
   });
   await openExample(page, "colorpicker", "a-colour");
   await page.getByRole("button", { name: "Line colour" }).click();
-  await page.getByRole("dialog", { name: "Line colour" }).getByRole("button", { name: "Pick a colour from the screen" }).click();
+  await page.getByRole("dialog", { name: "Choose colour" }).getByRole("button", { name: "Pick a colour from the screen" }).click();
   await expect(page.getByText("value: #ff0000")).toBeVisible();
 });

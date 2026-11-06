@@ -12,6 +12,8 @@ const openPanel = async (page: Page) => {
   await openExample(page, "colorpicker", "series-of-a-trend");
   await page.getByRole("button", { name: "Zone 1" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
+  // The panel scales in; measure its surfaces only once it stands still.
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
   return {
     square: page.getByRole("slider", { name: "Saturation and brightness" }),
     hue: page.getByRole("slider", { name: "Hue" }),
