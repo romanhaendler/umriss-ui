@@ -160,6 +160,12 @@ export interface Wording {
   /** The verdict of the contrast readout at 3:1 and above, and below it; words, so that the colour is not the only sign. */
   colorPass: string;
   colorFail: string;
+  /** Names of the red, green and blue fields of the ColorPicker panel. */
+  colorRed: string;
+  colorGreen: string;
+  colorBlue: string;
+  /** The button that picks a colour from the screen. */
+  colorEyedropper: string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -891,6 +897,10 @@ export const DEFAULT_WORDING: Wording = {
   colorSurfaceDark: "Dark",
   colorPass: "Pass",
   colorFail: "Fail",
+  colorRed: "Red",
+  colorGreen: "Green",
+  colorBlue: "Blue",
+  colorEyedropper: "Pick a colour from the screen",
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",

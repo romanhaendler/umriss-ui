@@ -174,6 +174,7 @@ const CASES: Record<string, Case> = {
   MeasureGlyph: (probe) => <core.MeasureGlyph {...p(probe)} />,
   CalendarGlyph: (probe) => <core.CalendarGlyph {...p(probe)} />,
   ClockGlyph: (probe) => <core.ClockGlyph {...p(probe)} />,
+  DropperGlyph: (probe) => <core.DropperGlyph {...p(probe)} />,
   ToneGlyph: (probe) => <core.ToneGlyph tone="success" {...p(probe)} />,
   MoreGlyph: (probe) => <core.MoreGlyph {...p(probe)} />,
   Stat: (probe) => <core.Stat label="Temperature" value={21} {...p(probe)} />,

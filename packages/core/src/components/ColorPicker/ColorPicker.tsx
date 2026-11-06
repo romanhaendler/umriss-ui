@@ -35,6 +35,9 @@ export interface ColorPickerProps
   onValueChange?: (value: string | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
+  /** A cross on the trigger and Clear in the panel set `null`.
+      @default false */
+  clearable?: boolean;
   /** Locks the field and the panel. */
   disabled?: boolean;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
@@ -59,7 +62,7 @@ export interface ColorPickerProps
 
 /** A colour field: a trigger with the colour's swatch and hex value, and a panel that holds the hex field, the colour as it was when the panel opened beside the colour now, Cancel and Done. */
 export function ColorPicker(props: ColorPickerProps) {
-  const { ref, placeholder, disabled = false, invalid, size: ownSize, chars, className, name, formValue, swatches, contrastAgainst, ...fieldRest } = props;
+  const { ref, placeholder, clearable = false, disabled = false, invalid, size: ownSize, chars, className, name, formValue, swatches, contrastAgainst, ...fieldRest } = props;
   // The field's own props are read from `props` by `useFieldValue`; none of them reaches the element.
   const rest = withoutFieldProps(fieldRest);
   const [valueGiven, onChange, , formRef] = useFieldValue<string | null>("ColorPicker", props, null);
@@ -115,7 +118,7 @@ export function ColorPicker(props: ColorPickerProps) {
         triggerRef={triggerRef}
         panel={{ id: panelId, open, onToggle: () => (open ? close() : openPanel()) }}
         field={field}
-        state={{ disabled, invalid: isInvalid, clearable: false, size }}
+        state={{ disabled, invalid: isInvalid, clearable, size }}
         hasValue={!!value}
         display={
           value && (
@@ -127,7 +130,10 @@ export function ColorPicker(props: ColorPickerProps) {
         }
         icon={<AngleGlyph className={`${triggerStyles.icon} ${styles.chevron}`} />}
         placeholder={placeholder ?? wording.colorPlaceholder}
-        onClear={() => {}}
+        onClear={() => {
+          onChange(null);
+          if (open) setOpen(false);
+        }}
         ariaLabel={wording.clear}
         chars={chars}
         natural={9}
@@ -158,6 +164,14 @@ export function ColorPicker(props: ColorPickerProps) {
           }}
           onDone={close}
           onCancel={cancel}
+          onClear={
+            clearable
+              ? () => {
+                  onChange(null);
+                  close();
+                }
+              : undefined
+          }
         />
       </Popover>
     </>

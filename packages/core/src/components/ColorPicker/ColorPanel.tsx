@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import { Button } from "../Button";
+import { Button, IconButton } from "../Button";
 import { Input } from "../Input";
+import { NumberInput } from "../NumberInput";
+import { DropperGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
-import { contrast, hexToHsv, luminance, normalizeHex } from "./color";
+import { contrast, hexToHsv, hexToRgb, luminance, normalizeHex, rgbToHex } from "./color";
 import type { Hsv } from "./color";
 import type { ColorSwatch } from "./ColorPicker";
 import styles from "./ColorPicker.module.css";
@@ -26,10 +28,12 @@ export interface ColorPanelProps {
   onDone: () => void;
   /** Cancel: puts `start` back and closes. */
   onCancel: () => void;
+  /** Given, a Clear button stands in the foot while a colour is set; it empties the field. */
+  onClear?: () => void;
 }
 
 /** The panel's content. It keeps its own HSB state while it stands and hands out hex: a grey or black colour has no hue of its own, and deriving the state back from the hex would throw the hue the reader left. */
-export function ColorPanel({ start, current, swatches, contrastAgainst, onColor, onDone, onCancel }: ColorPanelProps) {
+export function ColorPanel({ start, current, swatches, contrastAgainst, onColor, onDone, onCancel, onClear }: ColorPanelProps) {
   const wording = useWording();
   const [, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
   /* What the reader is typing into the hex field; null while they are not, and
@@ -52,6 +56,16 @@ export function ColorPanel({ start, current, swatches, contrastAgainst, onColor,
     const hex = normalizeHex(value);
     return hex ? [{ name, hex }] : [];
   });
+
+  /* The browser's EyeDropper is not in the TS DOM lib and only some browsers have it; a refused or aborted pick rejects and changes nothing. */
+  const dropper = typeof window !== "undefined" ? (window as unknown as { EyeDropper?: new () => { open(): Promise<{ sRGBHex: string }> } }).EyeDropper : undefined;
+  const rgb = hexToRgb(current ?? "#000000");
+  const channel = (index: number, value: number | null) => {
+    if (value === null) return;
+    const next = [...rgb] as [number, number, number];
+    next[index] = value;
+    apply(rgbToHex(next));
+  };
 
   const type = (text: string) => {
     setHexDraft(text);
@@ -77,6 +91,33 @@ export function ColorPanel({ start, current, swatches, contrastAgainst, onColor,
             onBlur={() => setHexDraft(null)}
           />
         </div>
+        {dropper && (
+          <IconButton
+            size="sm"
+            aria-label={wording.colorEyedropper}
+            onClick={() =>
+              void new dropper()
+                .open()
+                .then(({ sRGBHex }) => {
+                  const picked = normalizeHex(sRGBHex);
+                  if (picked) apply(picked);
+                })
+                .catch(() => {})
+            }
+          >
+            <DropperGlyph size={14} />
+          </IconButton>
+        )}
+      </div>
+      <div className={styles.channels}>
+        {([["R", wording.colorRed], ["G", wording.colorGreen], ["B", wording.colorBlue]] as const).map(([letter, name], index) => (
+          <div key={letter} className={styles.labelled}>
+            <span className={styles.label} aria-hidden>
+              {letter}
+            </span>
+            <NumberInput size="sm" aria-label={name} min={0} max={255} decimals={0} value={rgb[index]!} onValueChange={(value) => channel(index, value)} />
+          </div>
+        ))}
       </div>
       {current && surfaces.length > 0 && (
         <div className={styles.contrasts}>
@@ -109,6 +150,11 @@ export function ColorPanel({ start, current, swatches, contrastAgainst, onColor,
         ))}
       </div>
       <div className={styles.foot}>
+        {onClear && current && (
+          <Button size="sm" variant="ghost" className={styles.footClear} onClick={onClear}>
+            {wording.clear}
+          </Button>
+        )}
         <Button size="sm" variant="ghost" onClick={onCancel}>
           {wording.cancel}
         </Button>
