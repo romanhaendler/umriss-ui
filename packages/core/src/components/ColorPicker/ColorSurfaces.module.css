@@ -55,6 +55,7 @@
     margin: -10px 0 0 -10px;
     border: 2px solid white;
     border-radius: var(--u-radius-full);
+    corner-shape: round;
     background: var(--_color);
     box-shadow:
       var(--u-edge-strong),
