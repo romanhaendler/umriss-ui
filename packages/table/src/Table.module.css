@@ -203,15 +203,6 @@
     pointer-events: none;
   }
 
-  /* The edge cell of a pinned block has its shadow on `::before`, so it keeps
-     the rule as its background layer, under its surface. */
-  .groupEdge:is(.pinStartEdge, .pinEndEdge) {
-    background-image: linear-gradient(var(--u-hairline-strong), var(--u-hairline-strong));
-    background-repeat: no-repeat;
-    background-size: 1px 100%;
-    background-position: left top;
-  }
-
   .sticky thead tr + tr .th {
     top: var(--u-table-head-group-row, 0px);
   }
@@ -480,6 +471,41 @@
   .scroll[data-under-start] .pinStartEdge::before,
   .scroll[data-under-end] .pinEndEdge::before {
     visibility: visible;
+  }
+
+  /* A pinned block's edge cell that is also a group boundary: its `::before`
+     carries both - the group rule as a border at the cell's left edge, always
+     shown, and the shadow as a background beside the cell, shown only while
+     content lies under the block. */
+  .groupEdge.pinStartEdge::before,
+  .groupEdge.pinEndEdge::before {
+    visibility: visible;
+    background-image: none;
+    background-repeat: no-repeat;
+    background-size: 6px 100%;
+  }
+
+  .groupEdge.pinStartEdge::before {
+    box-sizing: border-box;
+    left: 0;
+    width: calc(100% + 6px);
+    border-left: 1px solid var(--u-hairline-strong);
+    background-position: right top;
+  }
+
+  .groupEdge.pinEndEdge::before {
+    right: auto;
+    left: -6px;
+    border-right: 1px solid var(--u-hairline-strong);
+    background-position: left top;
+  }
+
+  .scroll[data-under-start] .groupEdge.pinStartEdge::before {
+    background-image: linear-gradient(to right, var(--u-shadow-sticky), transparent);
+  }
+
+  .scroll[data-under-end] .groupEdge.pinEndEdge::before {
+    background-image: linear-gradient(to left, var(--u-shadow-sticky), transparent);
   }
 
   /* ---- Sorting --------------------------------------------------------- */
@@ -2109,15 +2135,15 @@
       background: CanvasText;
     }
 
-    /* The group rule is a border in the text colour; on a pinned block's edge
-       cell it is a gradient, which forced colours drop. */
-    .groupEdge:not(.pinStartEdge, .pinEndEdge)::before {
-      border-left-color: CanvasText;
+    /* The group rule is a border in the text colour. On an end block's edge
+       it is that edge's line too. */
+    .groupEdge::before {
+      border-color: CanvasText;
     }
 
-    .groupEdge:is(.pinStartEdge, .pinEndEdge) {
-      background-image: none;
-      border-left: 1px solid CanvasText;
+    .groupEdge.pinEndEdge::before {
+      width: 6px;
+      border-left: none;
     }
 
     /* A pinned block's inner edge is a gradient, which forced colours drop:
@@ -2189,6 +2215,23 @@
        the label stands in the cell as plain text. */
     .sortButton {
       display: contents;
+    }
+
+    /* The group rule stands on its cell's pseudo-element, which needs the
+       cell positioned, without the offsets that made it stick. A pinned cell
+       keeps its offset in an inline style, so it draws the rule as its own
+       border: on paper nothing sticks. */
+    .table :is(.th, .td).groupEdge:not(.pinned) {
+      position: relative;
+      inset: auto;
+    }
+
+    .groupEdge.pinned::before {
+      display: none;
+    }
+
+    .groupEdge.pinned {
+      border-left: 1px solid var(--u-hairline-strong);
     }
 
     .table tfoot {
