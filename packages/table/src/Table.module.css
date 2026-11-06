@@ -548,20 +548,6 @@
     color: var(--u-color-accent);
   }
 
-  /* The arrow of a numeric head hangs in the cell's padding, past the label,
-     whether hidden or not: it holds no slot, so the label ends where the
-     figures end. The cell's padding is wider than the arrow. */
-  .numeric .sortButton {
-    position: relative;
-  }
-
-  .numeric .sortIndicator {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    translate: 0 -50%;
-  }
-
   .thFlex {
     display: flex;
     align-items: center;
