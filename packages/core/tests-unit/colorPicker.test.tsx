@@ -51,7 +51,7 @@ describe("ColorPicker trigger", () => {
     expect(trigger().getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("opens on Enter and Space like a button", () => {
+  it("opens on Arrow Down (Enter and Space are the button's own click)", () => {
     render(<ColorPicker aria-label="Colour" />);
     trigger().focus();
     fireEvent.keyDown(trigger(), { key: "ArrowDown" });
@@ -79,6 +79,13 @@ describe("ColorPicker value", () => {
     rerender(<ColorPicker aria-label="Colour" value="blue" onValueChange={() => {}} />);
     expect(trigger().textContent).toBe("Select colour");
     expect(warn.mock.calls.filter((c) => /ColorPicker value must be/.test(String(c[0])))).toHaveLength(1);
+  });
+
+  it("shows in the hex field a colour set from outside while the panel stands", () => {
+    const { rerender } = render(<ColorPicker aria-label="Colour" value="#2563eb" />);
+    open();
+    rerender(<ColorPicker aria-label="Colour" value="#dc2626" />);
+    expect(hex().value).toBe("#dc2626");
   });
 
   it("ignores a partial hex value and snaps back to the current colour on blur", () => {

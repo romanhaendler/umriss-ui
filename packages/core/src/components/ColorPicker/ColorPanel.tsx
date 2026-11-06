@@ -3,18 +3,12 @@ import type { CSSProperties } from "react";
 import { Button } from "../Button";
 import { Input } from "../Input";
 import { useWording } from "../../lib/language";
-import { hexToHsv, hexToRgb, normalizeHex } from "./color";
+import { hexToHsv, luminance, normalizeHex } from "./color";
 import type { Hsv } from "./color";
 import styles from "./ColorPicker.module.css";
 
-/** Black or white, whichever reads on the colour (WCAG relative luminance; 0.179 is where the two ratios meet). */
-function inkOn(hex: string): string {
-  const [r, g, b] = hexToRgb(hex).map((x) => {
-    const s = x / 255;
-    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  }) as [number, number, number];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.179 ? "#000000" : "#ffffff";
-}
+/** Black or white, whichever reads on the colour (0.179 is the luminance where the two contrast ratios meet). */
+const inkOn = (hex: string) => (luminance(hex) > 0.179 ? "#000000" : "#ffffff");
 
 export interface ColorPanelProps {
   /** The colour the panel opened with; `null` for none. */
@@ -32,15 +26,22 @@ export interface ColorPanelProps {
 /** The panel's content. It keeps its own HSB state while it stands and hands out hex: a grey or black colour has no hue of its own, and deriving the state back from the hex would throw the hue the reader left. */
 export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorPanelProps) {
   const wording = useWording();
-  const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
-  const [hexText, setHexText] = useState(start ?? "");
+  const [, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
+  /* What the reader is typing into the hex field; null while they are not, and
+     the field shows the current colour, whichever control set it. */
+  const [hexDraft, setHexDraft] = useState<string | null>(null);
+
+  /* Every control that hands over a whole colour comes through here; the
+     square and the strip set `hsv` themselves and hand over its hex. */
+  const apply = (hex: string) => {
+    setHsv((prev) => hexToHsv(hex, prev));
+    if (hex !== current) onColor(hex);
+  };
 
   const type = (text: string) => {
-    setHexText(text);
+    setHexDraft(text);
     const typed = normalizeHex(text);
-    if (!typed) return;
-    setHsv(hexToHsv(typed, hsv));
-    if (typed !== current) onColor(typed);
+    if (typed) apply(typed);
   };
 
   return (
@@ -56,9 +57,9 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
             aria-label={wording.colorHex}
             autoComplete="off"
             spellCheck={false}
-            value={hexText}
+            value={hexDraft ?? current ?? ""}
             onChange={(event) => type(event.target.value)}
-            onBlur={() => setHexText(current ?? "")}
+            onBlur={() => setHexDraft(null)}
           />
         </div>
       </div>

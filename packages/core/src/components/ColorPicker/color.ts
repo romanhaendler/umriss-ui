@@ -49,3 +49,12 @@ export function hexToHsv(hex: string, prev?: Hsv): Hsv {
   const s = max === 0 ? (prev?.s ?? 0) : d / max;
   return { h, s, v: max };
 }
+
+/** WCAG's relative luminance, 0 (black) to 1 (white). */
+export function luminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex).map((x) => {
+    const s = x / 255;
+    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
