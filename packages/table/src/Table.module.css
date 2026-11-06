@@ -463,9 +463,9 @@
 
   /* Top-aligned in its cell: an inline-flex box sits on the baseline of its
      first item, so a head whose arrow comes first would sit lower
-     than its neighbours' labels. */
-  /* Its margin and padding are the cell's padding (`.th`), so the button, its
-     focus ring with it, ends at the cell's edges and never reaches a neighbour. */
+     than its neighbours' labels. Its margin and padding are the cell's
+     padding on each side, so the button - its hit area and its inset focus
+     ring - reaches the cell's edges and never a neighbour's. */
   .sortButton {
     composes: ring from "#own-styles";
     display: inline-flex;
@@ -482,6 +482,16 @@
     color: inherit;
     cursor: pointer;
     transition: color var(--u-transition);
+  }
+
+  .th:first-child .sortButton {
+    margin-left: calc(-1 * var(--u-space-3));
+    padding-left: var(--u-space-3);
+  }
+
+  .th:last-child .sortButton {
+    margin-right: calc(-1 * var(--u-space-3));
+    padding-right: var(--u-space-3);
   }
 
   /* Drawn inside the button: the scroll area cuts what lies outside the table's
