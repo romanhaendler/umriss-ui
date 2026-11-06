@@ -5,7 +5,8 @@ import { Input } from "../Input";
 import { NumberInput } from "../NumberInput";
 import { DropperGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
-import { hexToHsv, hexToRgb, luminance, normalizeHex, rgbToHex } from "./color";
+import { hexToHsv, hexToRgb, hsvToHex, luminance, normalizeHex, rgbToHex } from "./color";
+import { ColorSquare, HueStrip } from "./ColorSurfaces";
 import type { Hsv } from "./color";
 import styles from "./ColorPicker.module.css";
 
@@ -30,7 +31,7 @@ export interface ColorPanelProps {
 /** The panel's content. It keeps its own HSB state while it stands and hands out hex: a grey or black colour has no hue of its own, and deriving the state back from the hex would throw the hue the reader left. */
 export function ColorPanel({ start, current, onColor, onDone, onCancel, onClear }: ColorPanelProps) {
   const wording = useWording();
-  const [, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
+  const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(start ?? "#000000"));
   /* What the reader is typing into the hex field; null while they are not, and
      the field shows the current colour, whichever control set it. */
   const [hexDraft, setHexDraft] = useState<string | null>(null);
@@ -52,6 +53,13 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel, onClear 
     apply(rgbToHex(next));
   };
 
+  /* The square and the strip hand over the new HSB state; its hex goes out where it differs. */
+  const move = (next: Hsv) => {
+    setHsv(next);
+    const hex = hsvToHex(next);
+    if (hex !== current) onColor(hex);
+  };
+
   const type = (text: string) => {
     setHexDraft(text);
     const typed = normalizeHex(text);
@@ -60,6 +68,8 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel, onClear 
 
   return (
     <>
+      <ColorSquare hsv={hsv} onChange={move} />
+      <HueStrip hsv={hsv} onChange={move} />
       <div className={styles.row}>
         <div className={styles.labelled}>
           <span className={styles.label} aria-hidden>
