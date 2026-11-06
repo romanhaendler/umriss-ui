@@ -43,6 +43,13 @@ for (const dpr of [0.9, 1, 1.1, 1.25, 1.5, 2])
           const table = ex.locator("table").first();
           await table.scrollIntoViewIfNeeded();
           await page.mouse.move(0, 0);
+          /* pinning slides the column: measure once it stands (an endless or held animation is not waited for) */
+          await page.evaluate(() =>
+            Promise.race([
+              Promise.all(document.getAnimations().map((a) => (a.effect?.getComputedTiming().iterations === Infinity ? 0 : a.finished.catch(() => {})))),
+              new Promise((done) => setTimeout(done, 1000)),
+            ]),
+          );
           const edges = await table.evaluate((t) =>
             Array.from(t.querySelectorAll<HTMLElement>('[class*="groupEdge"]'))
               .map((c) => {
