@@ -68,6 +68,21 @@ export function fixedOrigin(target: PortalTarget | null): { x: number; y: number
 }
 
 /**
+ * Where the containing block of an absolute box in `body` starts, in viewport
+ * pixels: a probe at 0,0 reads it, so a positioned or transformed body or
+ * html and the scroll offset come out at once. Read on every measure - the
+ * scroll moves it.
+ */
+export function absoluteOrigin(body: HTMLElement): { x: number; y: number } {
+  const probe = body.ownerDocument.createElement("span");
+  probe.style.cssText = "position:absolute;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none";
+  body.append(probe);
+  const rect = probe.getBoundingClientRect();
+  probe.remove();
+  return { x: rect.left, y: rect.top };
+}
+
+/**
  * The portal target for the toast region, in this order:
  *
  * 1. the topmost modal dialog (`useTopmostModalDialog`) - a toast outside it

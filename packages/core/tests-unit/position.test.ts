@@ -164,6 +164,21 @@ describe("computePosition – preferred side", () => {
   });
 });
 
+describe("computePosition – staying on the side it stands on", () => {
+  const panel = { width: 100, height: 300 };
+  it("stays above while there is room above, though below has room too", () => {
+    const pos = computePosition(anchor(200, 500), panel, VIEWPORT, { side: "top" });
+    expect(pos.side).toBe("top");
+    expect(pos.flipped).toBe(false);
+  });
+
+  it("flips below only when above has no room and below has", () => {
+    const pos = computePosition(anchor(200, 200), panel, VIEWPORT, { side: "top" });
+    expect(pos.side).toBe("bottom");
+    expect(pos.top).toBe(200 + 32 + 6);
+  });
+});
+
 /* On a phone the visible part of the page is not the window: a pinch or the
    zoom into a small field moves it, and the on-screen keyboard shortens it
    (the visual viewport). Anchor and panel still count from the window's corner
