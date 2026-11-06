@@ -53,6 +53,13 @@
     color: var(--u-color-text-muted);
   }
 
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--u-space-2);
+    align-items: end;
+  }
+
   .hex {
     font-family: var(--u-font-mono);
   }

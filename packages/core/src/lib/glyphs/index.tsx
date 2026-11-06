@@ -172,6 +172,22 @@ export function MeasureGlyph({ ref, size = 10, ...rest }: GlyphProps) {
   );
 }
 
+/** An eyedropper: a pipette with its bulb at the top and its tip at the bottom left. */
+export function DropperGlyph({ ref, size = 10, ...rest }: GlyphProps) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      <path
+        d="M6.5 1.5l2 2M7.2 2.2L2.8 6.6 2 8.6l2-.8 4.4-4.4M5.5 3.2l1.3 1.3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /* The date pickers' two characters, set at 12 pixels. */
 
 /** A calendar leaf: a sheet with its header and two rings. With `range`, a

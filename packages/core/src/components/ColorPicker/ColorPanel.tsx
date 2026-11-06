@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import { Button } from "../Button";
+import { Button, IconButton } from "../Button";
 import { Input } from "../Input";
+import { NumberInput } from "../NumberInput";
+import { DropperGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
-import { hexToHsv, luminance, normalizeHex } from "./color";
+import { hexToHsv, hexToRgb, luminance, normalizeHex, rgbToHex } from "./color";
 import type { Hsv } from "./color";
 import styles from "./ColorPicker.module.css";
 
@@ -38,6 +40,16 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
     if (hex !== current) onColor(hex);
   };
 
+  /* The browser's EyeDropper is not in the TS DOM lib and only some browsers have it; a refused or aborted pick rejects and changes nothing. */
+  const dropper = typeof window !== "undefined" ? (window as unknown as { EyeDropper?: new () => { open(): Promise<{ sRGBHex: string }> } }).EyeDropper : undefined;
+  const rgb = hexToRgb(current ?? "#000000");
+  const channel = (index: number, value: number | null) => {
+    if (value === null) return;
+    const next = [...rgb] as [number, number, number];
+    next[index] = value;
+    apply(rgbToHex(next));
+  };
+
   const type = (text: string) => {
     setHexDraft(text);
     const typed = normalizeHex(text);
@@ -62,6 +74,33 @@ export function ColorPanel({ start, current, onColor, onDone, onCancel }: ColorP
             onBlur={() => setHexDraft(null)}
           />
         </div>
+        {dropper && (
+          <IconButton
+            size="sm"
+            aria-label={wording.colorEyedropper}
+            onClick={() =>
+              void new dropper()
+                .open()
+                .then(({ sRGBHex }) => {
+                  const picked = normalizeHex(sRGBHex);
+                  if (picked) apply(picked);
+                })
+                .catch(() => {})
+            }
+          >
+            <DropperGlyph size={14} />
+          </IconButton>
+        )}
+      </div>
+      <div className={styles.channels}>
+        {([["R", wording.colorRed], ["G", wording.colorGreen], ["B", wording.colorBlue]] as const).map(([letter, name], index) => (
+          <div key={letter} className={styles.labelled}>
+            <span className={styles.label} aria-hidden>
+              {letter}
+            </span>
+            <NumberInput size="sm" aria-label={name} min={0} max={255} decimals={0} value={rgb[index]!} onValueChange={(value) => channel(index, value)} />
+          </div>
+        ))}
       </div>
       <div className={styles.compare} role="img" aria-label={wording.colorBeforeAfter(start ?? wording.colorNone, current ?? wording.colorNone)}>
         {([[wording.colorBefore, start], [wording.colorAfter, current]] as const).map(([word, color]) => (

@@ -151,6 +151,12 @@ export interface Wording {
   /** The strip as one sentence, for a screen reader. */
   colorBeforeAfter: (before: string, after: string) => string;
   colorDone: string;
+  /** Names of the red, green and blue fields of the ColorPicker panel. */
+  colorRed: string;
+  colorGreen: string;
+  colorBlue: string;
+  /** The button that picks a colour from the screen. */
+  colorEyedropper: string;
   previousMonth: string;
   nextMonth: string;
   /** Name of the calendar head's month list. */
@@ -877,6 +883,10 @@ export const DEFAULT_WORDING: Wording = {
   colorNone: "None",
   colorBeforeAfter: (before, after) => `Before ${before}, after ${after}`,
   colorDone: "Done",
+  colorRed: "Red",
+  colorGreen: "Green",
+  colorBlue: "Blue",
+  colorEyedropper: "Pick a colour from the screen",
   previousMonth: "Previous month",
   nextMonth: "Next month",
   monthSelect: "Month",
