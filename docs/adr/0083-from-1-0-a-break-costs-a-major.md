@@ -4,10 +4,11 @@ Status: accepted, supersedes ADR-0066 from `1.0.0` on
 Date:   2026-11
 
 ADR-0066 gave `0.x` an upgrade promise and ended with "1.0 stays no goal": the
-surface still moved. Since then the surface has settled - no deprecated alias is
-alive in core or the table, the field contract of ADR-0081 holds - and `0.x`
-tells a caller the opposite of what is meant. Under `0.x` every minor may break,
-and a rename lives one minor only because minors come weekly.
+surface still moved. Since then the root contract and the field contract of
+ADR-0081 have landed, no deprecated alias is alive in core or the table, and what
+is still named inconsistently is set right before `1.0.0`. After that `0.x` would
+tell a caller the opposite of what is meant: under it every minor may break, and
+a rename lives one minor only because minors come weekly.
 
 `1.0.0` is therefore a promise and not a number. Until it appears, ADR-0066
 holds unchanged.
