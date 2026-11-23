@@ -4,6 +4,7 @@ import type { RefProp } from "../../lib/refProp";
 import { clampFraction, percentDisplay } from "./scale";
 import styles from "./DataViz.module.css";
 import { useFormats, useWording } from "../../lib/language";
+import { warnDeprecated } from "../../lib/dev";
 
 /** The colour of a meter's bar - an assessment, never the only statement. */
 export type MeterTone = "neutral" | "accent" | "success" | "warning" | "danger";
@@ -17,7 +18,7 @@ export interface MeterProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTM
       is never the only statement. */
   tone?: MeterTone;
   /** The percentage to the right of the bar (Geist Mono). */
-  showLabel?: boolean;
+  showValue?: boolean;
   /**
    * What is being measured, e.g. "Utilisation".
    *
@@ -29,10 +30,15 @@ export interface MeterProps extends HTMLAttributes<HTMLSpanElement>, RefProp<HTM
    * @default the wording's "Fill level"
    */
   label?: string;
+  /** The old name of `showValue`.
+      @deprecated since 0.58 - use showValue. */
+  showLabel?: boolean;
 }
 
 /** A narrow fill-level bar, e.g. for utilisation in table cells. */
-export function Meter({ ref, value, tone = "accent", showLabel = true, label, className, ...rest }: MeterProps) {
+export function Meter({ ref, value, tone = "accent", showValue, showLabel, label, className, ...rest }: MeterProps) {
+  if (showLabel !== undefined) warnDeprecated("Meter showLabel", "showValue");
+  const shown = showValue ?? showLabel ?? true;
   const formats = useFormats();
   const wording = useWording();
   const fraction = clampFraction(value);
@@ -53,7 +59,7 @@ export function Meter({ ref, value, tone = "accent", showLabel = true, label, cl
       <span className={styles.track}>
         <span className={cx(styles.fill, styles[tone])} style={{ width: `${fraction * 100}%` }} />
       </span>
-      {showLabel && <span className={styles.meterLabel}>{formats.percent(fraction)}</span>}
+      {shown && <span className={styles.meterLabel}>{formats.percent(fraction)}</span>}
     </span>
   );
 }

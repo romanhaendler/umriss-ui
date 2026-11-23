@@ -7,5 +7,5 @@
 import { ProgressBar } from "../../src";
 
 export const component = ProgressBar;
-export const controls = ["value", "showLabel"];
+export const controls = ["value", "showValue"];
 export const bounds = { value: [0, 1] };

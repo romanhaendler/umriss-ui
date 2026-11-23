@@ -104,7 +104,7 @@ export * from "./components/ColorPicker";
 /* The types a props table names, so that every name a reader sees can be
    imported. They bring no stylesheet. */
 export type { TextTracking, TextLeading } from "./components/Typography/Typography";
-export type { Align } from "./components/Popover/position";
+export type { PopoverAlign, Align } from "./components/Popover/position";
 
 /* Pure arithmetic and types, no stylesheet: they stand at the end. */
 export * from "./lib/zone";

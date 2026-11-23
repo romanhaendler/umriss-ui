@@ -14,7 +14,7 @@ export function usePaletteKeys({
   setHeld,
   keyboardTakesOver,
   fieldRef,
-  onChoose,
+  onSelect,
   onClose,
 }: {
   order: readonly Find<PaletteCandidate>[];
@@ -22,7 +22,7 @@ export function usePaletteKeys({
   setHeld: (id: string) => void;
   keyboardTakesOver: () => void;
   fieldRef: RefObject<HTMLInputElement | null>;
-  onChoose: (id: string) => void;
+  onSelect: (id: string) => void;
   onClose: () => void;
 }) {
   const wording = useWording();
@@ -54,7 +54,7 @@ export function usePaletteKeys({
     }
     if (event.key === "Enter") {
       event.preventDefault();
-      if (activeId !== null) onChoose(activeId);
+      if (activeId !== null) onSelect(activeId);
       return;
     }
     if (event.key === "Escape") {

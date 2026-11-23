@@ -133,7 +133,7 @@ describe("Command palette – a group and a candidate with spaces", () => {
       <CommandPalette
         open
         onClose={() => undefined}
-        onChoose={() => undefined}
+        onSelect={() => undefined}
         items={[{ id: "row one", label: "Table", group: "Two words" }]}
       />,
     );

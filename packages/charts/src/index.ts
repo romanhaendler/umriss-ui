@@ -22,7 +22,7 @@ export { LinearScale } from "./scale";
    caller who wants to draw something other than what the composition offers
    should be able to reach the arithmetic without rebuilding it. */
 export { assess, verdictWeight } from "./limit";
-export type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
+export type { Assessment, Limit, LimitSet, LimitSide, Side, Severity, Verdict } from "./limit";
 export {
   controlLimits,
   zones,

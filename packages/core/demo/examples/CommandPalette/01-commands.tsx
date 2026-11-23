@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, CommandPalette, Stack, Text } from "../../../src";
 
 export const title = "Run a command";
-export const lead = "Typing finds candidates by subsequence – “ack” finds “Acknowledge the alert”; `onChoose` reports the id and you decide what happens.";
+export const lead = "Typing finds candidates by subsequence – “ack” finds “Acknowledge the alert”; `onSelect` reports the id and you decide what happens.";
 
 const COMMANDS = [
   { id: "ack", label: "Acknowledge the alert", group: "Incident INC-1048" },
@@ -29,7 +29,7 @@ export default function Commands() {
         onClose={() => setOpen(false)}
         items={COMMANDS}
         restingItems={COMMANDS}
-        onChoose={(id) => {
+        onSelect={(id) => {
           setOpen(false);
           setLast(COMMANDS.find((c) => c.id === id)?.label ?? id);
         }}

@@ -151,7 +151,7 @@ _Avoid_: scale, variant, `selectSize` (retired)
 **Density**:
 How close a data surface sets its lines: regular or compact. Said with
 `density` on the surface, or once on the **Provider** for every surface under
-it, where regular is called `comfortable`; a surface's own wins. A table and a
+it; a surface's own wins, and where nobody says, a surface keeps its own default. A table and a
 **Calculation** follow it, and compact is one set of measures
 for both, so that they stand side by side: the smallest type step, and
 27 px under a fine pointer, 35 under a finger - a table's **Row pitch**, and

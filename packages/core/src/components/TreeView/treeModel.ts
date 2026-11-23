@@ -19,11 +19,14 @@ import { foldedText } from "../../lib/search";
 import { typeaheadIndex } from "../../lib/typeahead";
 
 /** A node's key, as `reader.key` returns it. */
-export type Key = string | number;
+export type TreeKey = string | number;
+
+/** @deprecated since 0.58 - use TreeKey. */
+export type Key = TreeKey;
 
 /** How a node is read - handed over once, not per node. The node's own type
     thereby stays entirely the caller's. */
-export interface NodeReader<K, S extends Key = string> {
+export interface NodeReader<K, S extends TreeKey = string> {
   key: (node: K) => S;
   /** `undefined` means leaf, an empty list means empty branch - the
       difference is visible and intended. */
@@ -46,7 +49,7 @@ export interface NodeReader<K, S extends Key = string> {
 /** The whole state of a tree, as plain values: the open branches, the checked
     nodes, the active node, the anchor and the search text. The transitions take
     one and return the next. */
-export interface TreeSnapshot<S extends Key = string> {
+export interface TreeSnapshot<S extends TreeKey = string> {
   expanded: ReadonlySet<S>;
   checked: ReadonlySet<S>;
   active: S | null;
@@ -60,7 +63,7 @@ export interface TreeSnapshot<S extends Key = string> {
 /** One visible node of a tree, with everything a row needs to be drawn and
     read out: level, branch or leaf, check state, search state and position
     among its siblings. */
-export interface FlatteningEntry<K, S extends Key = string> {
+export interface FlatteningEntry<K, S extends TreeKey = string> {
   node: K;
   key: S;
   /** Roots stand at 0. Drives the indentation and what is read out. */
@@ -96,17 +99,20 @@ export interface FlatteningEntry<K, S extends Key = string> {
 
 /** Where the active node moves: up and down the visible rows, in and out of a
     branch, to the first or the last row. */
-export type Direction = "up" | "down" | "in" | "out" | "start" | "end";
+export type TreeDirection = "up" | "down" | "in" | "out" | "start" | "end";
+
+/** @deprecated since 0.58 - use TreeDirection. */
+export type Direction = TreeDirection;
 
 /** A node the cascade may not touch: disabled, or with descendants nobody has
     seen. One rule, two reasons (ADR-0005). */
-function mayBeChecked<K, S extends Key>(reader: NodeReader<K, S>, node: K): boolean {
+function mayBeChecked<K, S extends TreeKey>(reader: NodeReader<K, S>, node: K): boolean {
   return reader.disabled?.(node) !== true && reader.unloaded?.(node) !== true;
 }
 
 /* ================= Flattening ================= */
 
-interface Preparation<S extends Key> {
+interface Preparation<S extends TreeKey> {
   /** Key -> indeterminate (derived). */
   indeterminate: Set<S>;
   /** Key -> survives the search text. */
@@ -119,7 +125,7 @@ interface Preparation<S extends Key> {
 
 /** One pass from the bottom up for both derived quantities. Separate passes
     would be two places for one rule each. */
-function prepare<K, S extends Key>(
+function prepare<K, S extends TreeKey>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -177,7 +183,7 @@ function prepare<K, S extends Key>(
  * matches itself brings its whole subtree along, but only visibly so if it is
  * actually expanded.
  */
-export function treeModel<K, S extends Key = string>(
+export function treeModel<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -243,7 +249,7 @@ export function treeModel<K, S extends Key = string>(
 /* ================= Transitions ================= */
 
 /** Opens a branch. Returns the same snapshot where it is open already. */
-export function expand<S extends Key>(
+export function expand<S extends TreeKey>(
   snapshot: TreeSnapshot<S>,
   key: S,
 ): TreeSnapshot<S> {
@@ -254,7 +260,7 @@ export function expand<S extends Key>(
 }
 
 /** Closes a branch. Returns the same snapshot where it is closed already. */
-export function collapse<S extends Key>(
+export function collapse<S extends TreeKey>(
   snapshot: TreeSnapshot<S>,
   key: S,
 ): TreeSnapshot<S> {
@@ -266,7 +272,7 @@ export function collapse<S extends Key>(
 
 /** Sets the active node; `null` for none. Returns the same snapshot where
     nothing changes. */
-export function setActive<S extends Key>(
+export function setActive<S extends TreeKey>(
   snapshot: TreeSnapshot<S>,
   key: S | null,
 ): TreeSnapshot<S> {
@@ -282,10 +288,10 @@ export function setActive<S extends Key>(
  * both at once - opening *and* stepping inside - makes the tree impossible to
  * inspect without expanding it.
  */
-export function move<K, S extends Key = string>(
+export function move<K, S extends TreeKey = string>(
   flattening: readonly FlatteningEntry<K, S>[],
   snapshot: TreeSnapshot<S>,
-  direction: Direction,
+  direction: TreeDirection,
 ): TreeSnapshot<S> {
   if (flattening.length === 0) return snapshot;
   const first = flattening[0] as FlatteningEntry<K, S>;
@@ -328,7 +334,7 @@ export function move<K, S extends Key = string>(
 
 /** Sets the node a range selection spans from; `null` for none. Returns the
     same snapshot where nothing changes. */
-export function setAnchor<S extends Key>(
+export function setAnchor<S extends TreeKey>(
   snapshot: TreeSnapshot<S>,
   key: S | null,
 ): TreeSnapshot<S> {
@@ -339,7 +345,7 @@ export function setAnchor<S extends Key>(
 /** The checkable keys between two visible nodes, both ends included and
     independent of their order. Whatever may not be checked drops out: the
     gesture does what it can instead of nothing. */
-export function keysBetween<K, S extends Key = string>(
+export function keysBetween<K, S extends TreeKey = string>(
   flattening: readonly FlatteningEntry<K, S>[],
   from: S,
   to: S,
@@ -358,13 +364,13 @@ export function keysBetween<K, S extends Key = string>(
 
 /** Node, parent and depth per key - one pass, so that cascade and
     reconciliation manage without repeated searching. */
-interface NodeIndex<K, S extends Key> {
+interface NodeIndex<K, S extends TreeKey> {
   nodes: Map<S, K>;
   parents: Map<S, S | null>;
   depth: Map<S, number>;
 }
 
-function indexNodes<K, S extends Key>(
+function indexNodes<K, S extends TreeKey>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
 ): NodeIndex<K, S> {
@@ -382,7 +388,7 @@ function indexNodes<K, S extends Key>(
 
 /** The keys the filter shows - a match, the path to one, and everything under
     a match - or `null` where no filter runs and everything is shown. */
-function shownByFilter<K, S extends Key>(
+function shownByFilter<K, S extends TreeKey>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -409,7 +415,7 @@ function shownByFilter<K, S extends Key>(
  * set together with its descendants; afterwards all ancestors of the targets
  * are reconciled, from the bottom up - and only those.
  */
-export function setChecked<K, S extends Key = string>(
+export function setChecked<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -497,7 +503,7 @@ export function setChecked<K, S extends Key = string>(
  * "Full" therefore means the same thing everywhere: checking would change
  * nothing any more. For a leaf that coincides with "is checked".
  */
-function toggleKeys<K, S extends Key = string>(
+function toggleKeys<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -511,7 +517,7 @@ function toggleKeys<K, S extends Key = string>(
 }
 
 /** Everything checkable on - or empty, if everything is on already. */
-export function toggleAll<K, S extends Key = string>(
+export function toggleAll<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -534,7 +540,7 @@ export function toggleAll<K, S extends Key = string>(
  * "full" as in toggleAll. If the node is not checkable or does not exist, the
  * snapshot stays unchanged.
  */
-export function toggleCheck<K, S extends Key = string>(
+export function toggleCheck<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -552,7 +558,7 @@ export function toggleCheck<K, S extends Key = string>(
  * wraps around. Disabled and unloaded nodes are valid targets:
  * typeahead moves only the focus, and both are navigable.
  */
-export function typeaheadTarget<K, S extends Key = string>(
+export function typeaheadTarget<K, S extends TreeKey = string>(
   flattening: readonly FlatteningEntry<K, S>[],
   prefix: string,
   active: S | null,
@@ -569,7 +575,7 @@ export function typeaheadTarget<K, S extends Key = string>(
 
 /** The keys from the root down to the target, the target included; null if
     the key does not exist in the data. */
-export function pathTo<K, S extends Key = string>(
+export function pathTo<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   key: S,
@@ -604,7 +610,7 @@ export function pathTo<K, S extends Key = string>(
  *
  * The target itself is not expanded: it is meant to be shown, not opened.
  */
-export function revealPath<K, S extends Key = string>(
+export function revealPath<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
@@ -634,7 +640,7 @@ export function revealPath<K, S extends Key = string>(
 /** Every loaded branch with content. Empty ones stay out because expanding
     them showed nothing; unloaded ones stay out because one click would
     otherwise trigger a thousand requests (ADR-0005). */
-export function allBranches<K, S extends Key = string>(
+export function allBranches<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
 ): S[] {
@@ -655,7 +661,7 @@ export function allBranches<K, S extends Key = string>(
 /** The first key that occurs twice, otherwise null. Two nodes with the same
     key break the cascade and the active node silently - `useTree` reports
     that during development. */
-export function duplicateKey<K, S extends Key = string>(
+export function duplicateKey<K, S extends TreeKey = string>(
   roots: readonly K[],
   reader: NodeReader<K, S>,
 ): S | null {

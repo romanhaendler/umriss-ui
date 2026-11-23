@@ -154,7 +154,7 @@ export default function BesideAServiceList() {
                   <Meter
                     value={used}
                     tone={used >= 1 ? "danger" : used >= 0.75 ? "warning" : "neutral"}
-                    showLabel
+                    showValue
                     label={`Downtime budget of ${service.name}`}
                   />
                   <Text size="xs" tone="muted">

@@ -26,7 +26,7 @@ export default function Synonyms() {
         open={open}
         onClose={() => setOpen(false)}
         items={COMMANDS}
-        onChoose={(id) => {
+        onSelect={(id) => {
           setOpen(false);
           setLast(COMMANDS.find((c) => c.id === id)?.label ?? id);
         }}

@@ -36,6 +36,7 @@ import { IconButton } from "../Button";
 import { Row, rowId } from "./PaletteRow";
 import { usePaletteFinds } from "./usePaletteFinds";
 import { usePaletteGrowth } from "./usePaletteGrowth";
+import { warnDeprecated } from "../../lib/dev";
 import { usePaletteKeys } from "./usePaletteKeys";
 import { usePaletteMark } from "./usePaletteMark";
 import styles from "./CommandPalette.module.css";
@@ -76,7 +77,7 @@ export interface CommandPaletteItem {
 
 /** The props of `CommandPalette`. */
 export interface CommandPaletteProps
-  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "children">,
+  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "onSelect" | "children">,
     RefProp<HTMLDialogElement> {
   /** Controlled like the modal: opening is the caller's decision. */
   open: boolean;
@@ -88,7 +89,10 @@ export interface CommandPaletteProps
   /** Reports the `id` of the chosen candidate. What happens next is the
       caller's decision - that is exactly what keeps places and commands
       together. */
-  onChoose: (id: string) => void;
+  onSelect?: (id: string) => void;
+  /** The old name of `onSelect`.
+      @deprecated since 0.58 - use onSelect. */
+  onChoose?: (id: string) => void;
   /**
    * What stands there as long as nothing is typed. Without a value: nothing,
    * and the window is only the field.
@@ -118,12 +122,13 @@ export interface CommandPaletteProps
 
 /** A window above the application in which one types and finds: it searches
     `items` by subsequence, ranks and marks the matches, and reports the chosen
-    candidate's `id` to `onChoose`. Controlled through `open` and `onClose`. */
+    candidate's `id` to `onSelect`. Controlled through `open` and `onClose`. */
 export function CommandPalette({
   ref,
   open,
   onClose,
   items,
+  onSelect,
   onChoose,
   restingItems,
   maxFinds,
@@ -134,6 +139,8 @@ export function CommandPalette({
   onKeyDownCapture,
   ...rest
 }: CommandPaletteProps) {
+  if (onChoose) warnDeprecated("CommandPalette onChoose", "onSelect");
+  const choose = onSelect ?? onChoose ?? (() => {});
   const wording = useWording();
   const baseId = useId();
   const listId = `${baseId}-list`;
@@ -200,7 +207,7 @@ export function CommandPalette({
 
   const { bodyRef, bodyHeight } = usePaletteGrowth(mounted);
 
-  const onKeyDown = usePaletteKeys({ order, activeId, setHeld, keyboardTakesOver, fieldRef, onChoose, onClose });
+  const onKeyDown = usePaletteKeys({ order, activeId, setHeld, keyboardTakesOver, fieldRef, onSelect: choose, onClose });
 
   /* ---------------------------------------------------------------- */
   /* Presentation                                                      */
@@ -295,7 +302,7 @@ export function CommandPalette({
                       withIcon={withIcons}
                       onSweep={pointerSweeps}
                       onMove={pointerMoves}
-                      onChoose={onChoose}
+                      onSelect={choose}
                     />
                   ));
                   if (group.name === undefined) return rows;

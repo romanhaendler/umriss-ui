@@ -338,9 +338,9 @@ describe("Density of the alarm list", () => {
     expect(tableClass()).toMatch(/compact/);
   });
 
-  it("becomes regular under comfortable", () => {
+  it("becomes regular under regular", () => {
     render(
-      <UmrissProvider density="comfortable">
+      <UmrissProvider density="regular">
         <AlarmList view={projectionOf()} />
       </UmrissProvider>,
     );
@@ -349,7 +349,7 @@ describe("Density of the alarm list", () => {
 
   it("lets a density on the list beat the setting", () => {
     render(
-      <UmrissProvider density="comfortable">
+      <UmrissProvider density="regular">
         <AlarmList view={projectionOf()} density="compact" />
       </UmrissProvider>,
     );

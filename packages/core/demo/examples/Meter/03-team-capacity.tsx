@@ -46,7 +46,7 @@ export default function TeamCapacity() {
               <Text as="span" size="sm">{name}</Text>
             </td>
             <td style={CELL}>
-              <Meter value={share} tone={toneOf(share)} showLabel label={`Capacity booked, ${name}`} />
+              <Meter value={share} tone={toneOf(share)} showValue label={`Capacity booked, ${name}`} />
             </td>
             <td style={{ ...CELL, textAlign: "right", whiteSpace: "nowrap" }}>
               <Text as="span" size="sm" mono>

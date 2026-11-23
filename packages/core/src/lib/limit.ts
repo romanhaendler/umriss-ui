@@ -13,7 +13,10 @@
    `wording`. */
 
 /** Whether a limit is an upper or a lower bound. */
-export type Side = "upper" | "lower";
+export type LimitSide = "upper" | "lower";
+
+/** @deprecated since 0.58 - use LimitSide. */
+export type Side = LimitSide;
 
 /** How seriously a violation weighs: one severity that advises and one that
     calls for action. Exactly two; for a third distinction one sets a
@@ -34,7 +37,7 @@ export type Verdict = "ok" | "unknown" | "warning" | "alarm";
     force a `null` on one edge in the one-sided case. */
 export interface Limit {
   value: number;
-  side: Side;
+  side: LimitSide;
   severity: Severity;
 }
 

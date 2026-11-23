@@ -207,7 +207,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
   it("CommandPalette: onMouseDown on the backdrop, and the palette still closes", () => {
     const pressed = vi.fn();
     const closed = vi.fn();
-    render(<CommandPalette open onClose={closed} items={[]} onChoose={vi.fn()} onMouseDown={pressed} />);
+    render(<CommandPalette open onClose={closed} items={[]} onSelect={vi.fn()} onMouseDown={pressed} />);
     fireEvent.mouseDown(dialog());
     expect(pressed).toHaveBeenCalledTimes(1);
     expect(closed).toHaveBeenCalledTimes(1);
@@ -220,7 +220,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
         open
         onClose={closed}
         items={[]}
-        onChoose={vi.fn()}
+        onSelect={vi.fn()}
         onMouseDown={(event) => event.preventDefault()}
       />,
     );
@@ -273,7 +273,7 @@ describe("A caller's handler runs first and can prevent the component's own", ()
         onClose={vi.fn()}
         items={[{ id: "a", label: "Alpha" }]}
         restingItems={[{ id: "a", label: "Alpha" }]}
-        onChoose={chosen}
+        onSelect={chosen}
         onKeyDown={(event) => event.preventDefault()}
       />,
     );

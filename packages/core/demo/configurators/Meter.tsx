@@ -6,6 +6,6 @@
 import { Meter } from "../../src";
 
 export const component = Meter;
-export const controls = ["value", "tone", "showLabel"];
+export const controls = ["value", "tone", "showValue"];
 export const required = { value: 0.8 };
 export const bounds = { value: [0, 1] };

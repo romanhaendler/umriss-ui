@@ -203,7 +203,7 @@ describe("a Modal", () => {
 
 describe("a closed CommandPalette", () => {
   it("mounts nothing", () => {
-    render(<CommandPalette open={false} onClose={() => {}} items={[]} onChoose={() => {}} />);
+    render(<CommandPalette open={false} onClose={() => {}} items={[]} onSelect={() => {}} />);
     expect(document.querySelector("dialog")!.children).toHaveLength(0);
     expect(document.querySelector("input")).toBeNull();
   });

@@ -11,6 +11,7 @@ import type {
 import { cx } from "../../lib/cx";
 import { elementRef } from "../../lib/elementRef";
 import { mergeRefs } from "../../lib/mergeRefs";
+import { warnDeprecated } from "../../lib/dev";
 import { typeaheadIndex } from "../../lib/typeahead";
 import type { RefProp } from "../../lib/refProp";
 import { Popover } from "../Popover";
@@ -177,7 +178,7 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
       stays open after something has happened hides the result. */
   onSelect?: () => void;
   /** "danger" for destructive actions. */
-  tone?: "default" | "danger";
+  tone?: "neutral" | "danger" | /** @deprecated since 0.58 - use "neutral". */ "default";
   /** What kind of entry it is: a plain one, one of a group of which one is chosen,
       or one that is on or off. The last two are told by `aria-checked`.
       @default "menuitem" */
@@ -186,7 +187,8 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
 
 /** An entry of a `Menu` or a `ContextMenu`. It runs `onSelect` and closes the
     menu. */
-export function MenuItem({ ref, onSelect, tone = "default", role = "menuitem", className, children, onClick, ...rest }: MenuItemProps) {
+export function MenuItem({ ref, onSelect, tone = "neutral", role = "menuitem", className, children, onClick, ...rest }: MenuItemProps) {
+  if (tone === "default") warnDeprecated('MenuItem tone="default"', 'tone="neutral"');
   const menu = useContext(MenuContext);
 
   return (

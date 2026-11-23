@@ -89,7 +89,7 @@ const CASES: Record<string, Case> = {
   CardBody: (probe) => <core.CardBody {...p(probe)} />,
   Checkbox: (probe) => <core.Checkbox label="Agree" {...p(probe)} />,
   CommandPalette: (probe) => (
-    <core.CommandPalette open={false} onClose={noop} items={[]} onChoose={noop} {...p(probe)} />
+    <core.CommandPalette open={false} onClose={noop} items={[]} onSelect={noop} {...p(probe)} />
   ),
   Combobox: (probe) => <core.Combobox options={[]} value={null} onValueChange={noop} {...p(probe)} />,
   Meter: (probe) => <core.Meter value={0.5} {...p(probe)} />,

@@ -30,13 +30,13 @@ import {
   type TreeSnapshot,
   type FlatteningEntry,
   type NodeReader,
-  type Direction,
-  type Key,
+  type TreeDirection,
+  type TreeKey,
 } from "./treeModel";
 
 /** The options of `useTree`: how a node is read, and each of its values
     either uncontrolled (`default…`) or controlled with its `on…` handler. */
-export interface TreeOptions<K, S extends Key = string> {
+export interface TreeOptions<K, S extends TreeKey = string> {
   reader: NodeReader<K, S>;
   /** Initial values, where the tree holds its own state. */
   defaultExpanded?: Iterable<S>;
@@ -74,7 +74,7 @@ export interface TreeOptions<K, S extends Key = string> {
 
 /** What `useTree` returns: the visible nodes and the gestures on them. Hand it
     to `TreeView` and `TreeSearch`. */
-export interface Tree<K, S extends Key = string> {
+export interface Tree<K, S extends TreeKey = string> {
   /** The visible nodes – complete, even where only a window of them is
       rendered. Positions and sibling counts come from here and never from
       what stands in the document (ADR-0004). */
@@ -84,7 +84,7 @@ export interface Tree<K, S extends Key = string> {
   toggleExpanded: (key: S) => void;
   toggleCheck: (key: S) => void;
   activate: (key: S) => void;
-  move: (direction: Direction) => void;
+  move: (direction: TreeDirection) => void;
   setSearch: (text: string) => void;
   /** Expands the ancestors, brings the row into view and sets the active
       node. Returns the key, or null if it does not exist in the data. */
@@ -106,7 +106,7 @@ export interface Tree<K, S extends Key = string> {
   /** Moves the active node **and** toggles the new one – one gesture, one
       report. Separate from move(), so that plain movement checks nothing; to
       be called instead of move(), not in addition to it. */
-  moveAndCheck: (direction: Direction) => void;
+  moveAndCheck: (direction: TreeDirection) => void;
   /** Checks everything checkable – or empties, if everything is on already. */
   toggleAll: () => void;
   /**
@@ -130,7 +130,7 @@ export interface Tree<K, S extends Key = string> {
     @param options How a node is read, and the initial or controlled state with
     its change handlers.
     @returns The tree to hand to `TreeView` and `TreeSearch`. */
-export function useTree<K, S extends Key = string>(
+export function useTree<K, S extends TreeKey = string>(
   roots: readonly K[],
   options: TreeOptions<K, S>,
 ): Tree<K, S> {
@@ -302,7 +302,7 @@ export function useTree<K, S extends Key = string>(
      basis of the check, otherwise the gesture would toggle the node one is
      just leaving. */
   const moveAndCheck = useCallback(
-    (direction: Direction) => {
+    (direction: TreeDirection) => {
       const afterMove = moveModel(flattening, snapshot, direction);
       if (afterMove.active === null || afterMove.active === snapshot.active) return;
       apply(
@@ -330,7 +330,7 @@ export function useTree<K, S extends Key = string>(
   );
 
   const move = useCallback(
-    (direction: Direction) => apply(moveModel(flattening, snapshot, direction)),
+    (direction: TreeDirection) => apply(moveModel(flattening, snapshot, direction)),
     [flattening, snapshot, apply],
   );
 

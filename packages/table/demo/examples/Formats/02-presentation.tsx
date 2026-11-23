@@ -29,7 +29,7 @@ export default function Presentation() {
       </Column>
       <Column value="budgetUsed" label="Error budget used">
         {(share, service) => (
-          <Meter value={share} tone={share > 0.8 ? "warning" : "accent"} label={`Error budget used, ${service.name}`} showLabel />
+          <Meter value={share} tone={share > 0.8 ? "warning" : "accent"} label={`Error budget used, ${service.name}`} showValue />
         )}
       </Column>
     </Table>

@@ -116,7 +116,7 @@ export function RowActionsCell({
           }
         >
           {shown.map(({ key, spec }) => (
-            <MenuItem key={key} tone={spec.tone} disabled={holds(spec.disabled, row)} onSelect={() => trigger(spec)}>
+            <MenuItem key={key} tone={spec.tone === "danger" ? "danger" : "neutral"} disabled={holds(spec.disabled, row)} onSelect={() => trigger(spec)}>
               {spec.label}
             </MenuItem>
           ))}

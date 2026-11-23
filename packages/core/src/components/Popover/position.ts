@@ -29,7 +29,10 @@ export interface Viewport extends Size {
 }
 
 /** Where the panel lines up with its anchor along the side it stands on. */
-export type Align = "start" | "end" | "center";
+export type PopoverAlign = "start" | "end" | "center";
+
+/** @deprecated since 0.58 - use PopoverAlign. */
+export type Align = PopoverAlign;
 
 /** Preferred side; the other one is taken when there is no room there. */
 export type Side = "top" | "bottom";
@@ -43,14 +46,14 @@ export interface PopoverPosition {
   side: Side;
   /** The edge of the anchor the panel lines up with, after flipping: `start`
       asked for and no room to the right becomes `end`. */
-  align: Align;
+  align: PopoverAlign;
   /** Set where the panel fits on neither side and is cut to the room on the
       larger one, to scroll in itself: the height it may take. */
   maxHeight?: number;
 }
 
 export interface PositionOptions {
-  align?: Align;
+  align?: PopoverAlign;
   side?: Side;
   /** Air between anchor and panel. */
   offset?: number;
@@ -107,7 +110,7 @@ export function computePosition(
   }
   const above = (side === "top") !== flipped;
 
-  const leftFor = (edge: Align) =>
+  const leftFor = (edge: PopoverAlign) =>
     edge === "end"
       ? anchor.right - panel.width
       : edge === "center"
@@ -117,7 +120,7 @@ export function computePosition(
   /* Across as along: where the edge asked for pushes the panel out of the
      window and the other one does not, it lines up with the other one. Where
      neither fits (a phone), centred is tried; only then is it shoved. */
-  const other: Align = align === "start" ? "end" : align === "end" ? "start" : "center";
+  const other: PopoverAlign = align === "start" ? "end" : align === "end" ? "start" : "center";
   const used = ([align, other, "center"] as const).find((edge) => fitsAcross(leftFor(edge))) ?? align;
   // Clamp at the right edge first, then at the left: if the panel is wider than
   // the viewport, the left edge wins.
@@ -137,7 +140,7 @@ export function computePosition(
 // ponytail: a panel clamped at the window's edge (a phone, where neither edge
 // fits) still grows from its aligned corner, not from under the anchor; an x in
 // pixels from the anchor if it shows.
-export function motionOrigin(side: Side, align: Align): string {
+export function motionOrigin(side: Side, align: PopoverAlign): string {
   const x = align === "start" ? "left" : align === "end" ? "right" : "center";
   return `${x} ${side === "bottom" ? "top" : "bottom"}`;
 }

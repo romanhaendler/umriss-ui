@@ -16,6 +16,7 @@ import { useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import { LanguageProvider, useLanguage } from "../language";
 import type { LanguageOptions } from "../language";
+import { warnDeprecated } from "../dev";
 import { UmrissContext } from "./context";
 import type { UmrissContextValue } from "./context";
 
@@ -23,7 +24,7 @@ import type { UmrissContextValue } from "./context";
     takes it through `useDensityFor` as the default for its `density` - in
     @umriss-ui/table the table, in @umriss-ui/calculation
     the calculation; a compact set of tokens does not exist. */
-export type Density = "comfortable" | "compact";
+export type Density = "regular" | "compact";
 
 /**
  * Where overlays portal to.
@@ -55,30 +56,31 @@ export interface ToastConfig {
   limit?: number;
 }
 
-/** The settings of `UmrissProvider` as the components read them. `density`
-    and `portalTarget` are always set; `toast` holds only what the provider was
-    given - the toasts apply their own defaults to the rest. */
+/** The settings of `UmrissProvider` as the components read them. `portalTarget`
+    is always set and `density` is `undefined` where nobody set one; `toast`
+    holds only what the provider was given - the toasts apply their own defaults
+    to the rest. */
 export interface UmrissConfig {
-  density: Density;
+  density: Density | undefined;
   portalTarget: PortalTarget;
   toast: ToastConfig;
 }
 
 const DEFAULTS: UmrissConfig = {
-  density: "comfortable",
+  density: undefined,
   portalTarget: null,
   toast: {},
 };
 
-/* `useDensityFor` distinguishes "the provider says comfortable" from "nobody
-   said anything". @umriss-ui/table reads it from here. */
+/* `useDensityFor` gives a component its own default where nobody said
+   anything. @umriss-ui/table reads it from here. */
 export { useDensityFor } from "./context";
 
 /** The whole configuration; without a provider, the defaults. */
 export const useUmriss = (): UmrissConfig => useContext(UmrissContext) ?? DEFAULTS;
 
-/** The configured density; without a provider, "comfortable". */
-export const useDensity = (): Density => useUmriss().density;
+/** The configured density; `undefined` where no provider set one. */
+export const useDensity = (): Density | undefined => useUmriss().density;
 
 /** The setting for toasts; without a provider, empty. */
 export const useToastConfig = (): ToastConfig => useUmriss().toast;
@@ -105,11 +107,11 @@ export interface UmrissProviderProps {
   /**
    * The default for the `density` of every component that reads it with
    * `useDensityFor` - in `@umriss-ui/table` `Table`, in
-   * `@umriss-ui/calculation` `Calculation` ("comfortable" means "regular").
+   * `@umriss-ui/calculation` `Calculation`.
    *
    * @default none - a component keeps its own density
    */
-  density?: Density;
+  density?: Density | /** @deprecated since 0.58 - use "regular". */ "comfortable";
   /**
    * Where overlays portal to, unless an open dialog takes them. A function is
    * evaluated on every opening - a target that only enters the tree later
@@ -152,10 +154,10 @@ export function UmrissProvider({
      subtree to English; the element stays the same, so the subtree is not
      remounted when `language` comes or goes. */
   const outer = useLanguage();
+  if (density === "comfortable") warnDeprecated('density="comfortable"', 'density="regular"');
   const value = useMemo<UmrissContextValue>(
     () => ({
-      density: density ?? "comfortable",
-      densityGiven: density !== undefined,
+      density: density === "comfortable" ? "regular" : density,
       portalTarget,
       toast: toast ?? {},
     }),

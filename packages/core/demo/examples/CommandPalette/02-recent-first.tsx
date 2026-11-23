@@ -33,7 +33,7 @@ export default function RecentFirst() {
         onClose={() => setOpen(false)}
         items={items}
         restingItems={resting}
-        onChoose={(id) => {
+        onSelect={(id) => {
           setOpen(false);
           setRecent((list) => [id, ...list.filter((one) => one !== id)].slice(0, 3));
         }}

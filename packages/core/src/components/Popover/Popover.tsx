@@ -5,7 +5,7 @@ import { cx } from "../../lib/cx";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
 import { clippedAway, computePosition, motionOrigin, visibleViewport } from "./position";
-import type { Align, PopoverPosition, Side } from "./position";
+import type { PopoverAlign, PopoverPosition, Side } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
 import { FOREIGN_MODAL, absoluteOrigin, fixedOrigin, isShadowRoot, portalTargetFor } from "../../lib/portalTarget";
@@ -51,7 +51,7 @@ export interface PopoverProps {
   insideRefs?: ReadonlyArray<RefObject<HTMLElement | null>>;
   /** Where the surface points as long as there is room. Where there is none,
       it flips to the other side and clamps to the edge of the window. */
-  align?: Align;
+  align?: PopoverAlign;
   /** Distance between trigger and surface, in pixels. */
   offset?: number;
   /** "anchor" takes over the width of the trigger, a number fixes it. */

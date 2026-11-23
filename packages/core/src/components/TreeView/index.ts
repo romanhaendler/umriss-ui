@@ -10,6 +10,8 @@ export type {
   TreeSnapshot,
   FlatteningEntry,
   NodeReader,
+  TreeDirection,
+  TreeKey,
   Direction,
   Key,
 } from "./treeModel";

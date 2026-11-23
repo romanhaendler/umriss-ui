@@ -37,7 +37,7 @@ export default function SearchHundredsOfPages() {
         onClose={() => setOpen(false)}
         items={ITEMS}
         maxFinds={50}
-        onChoose={(id) => {
+        onSelect={(id) => {
           setOpen(false);
           setLast(id);
         }}

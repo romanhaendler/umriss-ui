@@ -2,6 +2,7 @@ import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import type { RefProp } from "../../lib/refProp";
 import { useFormats, useWording } from "../../lib/language";
+import { warnDeprecated } from "../../lib/dev";
 import { clampFraction, percentDisplay } from "../DataViz/scale";
 import styles from "./ProgressBar.module.css";
 
@@ -22,6 +23,9 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement>, RefPro
   valueText?: string;
   /** The percentage beside the bar (Geist Mono). Never for an indeterminate
       bar - it has no figure to show. */
+  showValue?: boolean;
+  /** The old name of `showValue`.
+      @deprecated since 0.58 - use showValue. */
   showLabel?: boolean;
 }
 
@@ -31,7 +35,9 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement>, RefPro
    An upload that is 90 per cent done is not a warning. (CONTEXT.md, Progress.) */
 /** How far a task has come, from 0 to 1 - or, without a value, that it runs.
     It has no tone: a measured value judged against limits is a `Meter`. */
-export function ProgressBar({ ref, value, label, valueText, showLabel = false, className, ...rest }: ProgressBarProps) {
+export function ProgressBar({ ref, value, label, valueText, showValue, showLabel, className, ...rest }: ProgressBarProps) {
+  if (showLabel !== undefined) warnDeprecated("ProgressBar showLabel", "showValue");
+  const shown = showValue ?? showLabel ?? false;
   const formats = useFormats();
   const wording = useWording();
   const determinate = value !== undefined;
@@ -57,7 +63,7 @@ export function ProgressBar({ ref, value, label, valueText, showLabel = false, c
           style={determinate ? { width: `${fraction * 100}%` } : undefined}
         />
       </span>
-      {showLabel && determinate && <span className={styles.label}>{formats.percent(fraction)}</span>}
+      {shown && determinate && <span className={styles.label}>{formats.percent(fraction)}</span>}
     </div>
   );
 }

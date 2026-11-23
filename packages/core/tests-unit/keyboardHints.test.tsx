@@ -20,13 +20,13 @@ function Search(props: { enterKeyHint?: "go"; autoComplete?: string }) {
 describe("keyboard hints", () => {
   it("the palette closes through its cross", () => {
     const onClose = vi.fn();
-    render(<CommandPalette open onClose={onClose} items={[]} onChoose={vi.fn()} />);
+    render(<CommandPalette open onClose={onClose} items={[]} onSelect={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalled();
   });
 
   it("the palette's field says go", () => {
-    render(<CommandPalette open onClose={vi.fn()} items={[]} onChoose={vi.fn()} />);
+    render(<CommandPalette open onClose={vi.fn()} items={[]} onSelect={vi.fn()} />);
     expect(screen.getByRole("combobox").getAttribute("enterkeyhint")).toBe("go");
   });
 

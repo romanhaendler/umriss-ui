@@ -23,7 +23,10 @@
    case table and that test, or not at all. */
 
 /** Whether a limit is an upper or a lower bound. */
-export type Side = "upper" | "lower";
+export type LimitSide = "upper" | "lower";
+
+/** @deprecated since 0.58 - use LimitSide. */
+export type Side = LimitSide;
 
 /** How seriously a violation weighs. Exactly two: one severity that advises and
     one that calls for action. Five severities would be five colours, and five
@@ -45,7 +48,7 @@ export type Verdict = "ok" | "unknown" | "warning" | "alarm";
     free of a `null` on the other edge. */
 export interface Limit {
   value: number;
-  side: Side;
+  side: LimitSide;
   severity: Severity;
 }
 

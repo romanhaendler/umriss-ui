@@ -36,9 +36,9 @@ describe("ProgressBar", () => {
   });
 
   it("shows the share beside the bar on request, and never for the indeterminate one", () => {
-    const { rerender } = render(<ProgressBar value={0.5} label="Upload" showLabel />);
+    const { rerender } = render(<ProgressBar value={0.5} label="Upload" showValue />);
     expect(screen.getByText("50%")).toBeTruthy();
-    rerender(<ProgressBar label="Upload" showLabel />);
+    rerender(<ProgressBar label="Upload" showValue />);
     expect(screen.queryByText(/%/)).toBeNull();
   });
 

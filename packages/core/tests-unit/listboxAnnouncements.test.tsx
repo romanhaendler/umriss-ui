@@ -152,7 +152,7 @@ describe("CommandPalette - what it says", () => {
     { id: "tree", label: "TreeView", group: "Structure" },
   ];
   const setup = (restingItems?: typeof ITEMS) => {
-    render(<CommandPalette open onClose={vi.fn()} items={ITEMS} restingItems={restingItems} onChoose={vi.fn()} />);
+    render(<CommandPalette open onClose={vi.fn()} items={ITEMS} restingItems={restingItems} onSelect={vi.fn()} />);
     return { field: screen.getByRole("combobox"), dialog: screen.getByRole("dialog") };
   };
 

@@ -27,13 +27,13 @@ const ITEMS: CommandPaletteItem[] = [
 
 function Harness({
   items = ITEMS,
-  onChoose = vi.fn(),
+  onSelect = vi.fn(),
   initiallyOpen = true,
   restingItems,
   maxFinds,
 }: {
   items?: CommandPaletteItem[];
-  onChoose?: (id: string) => void;
+  onSelect?: (id: string) => void;
   initiallyOpen?: boolean;
   restingItems?: CommandPaletteItem[];
   maxFinds?: number;
@@ -46,7 +46,7 @@ function Harness({
         open={open}
         onClose={() => setOpen(false)}
         items={items}
-        onChoose={onChoose}
+        onSelect={onSelect}
         restingItems={restingItems}
         maxFinds={maxFinds}
       />
@@ -134,11 +134,11 @@ describe("Command palette - a filled resting state", () => {
   });
 
   it("lets the rows be chosen and operated with the arrows", () => {
-    const onChoose = vi.fn();
-    render(<Harness restingItems={RESTING} onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness restingItems={RESTING} onSelect={onSelect} />);
     fireEvent.keyDown(field(), { key: "ArrowDown" });
     fireEvent.keyDown(field(), { key: "Enter" });
-    expect(onChoose).toHaveBeenCalledWith("schicht");
+    expect(onSelect).toHaveBeenCalledWith("schicht");
   });
 
   it("then also shows the foot - there is already something to move", () => {
@@ -193,19 +193,19 @@ describe("Command palette - the keyboard", () => {
   });
 
   it("reports the id of the marked entry with Enter", () => {
-    const onChoose = vi.fn();
-    render(<Harness onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness onSelect={onSelect} />);
     type("tree");
     fireEvent.keyDown(field(), { key: "Enter" });
-    expect(onChoose).toHaveBeenCalledWith("treeview");
+    expect(onSelect).toHaveBeenCalledWith("treeview");
   });
 
   it("reports nothing when nothing is found", () => {
-    const onChoose = vi.fn();
-    render(<Harness onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness onSelect={onSelect} />);
     type("zzzzz");
     fireEvent.keyDown(field(), { key: "Enter" });
-    expect(onChoose).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
   });
 
   it("closes with Escape and gives the focus back", () => {
@@ -227,13 +227,13 @@ describe("Command palette - the keyboard", () => {
    button - whoever wanted the context menu had already chosen. */
 describe("Command palette - only the main button chooses", () => {
   it("does not choose on a right click, but does on a left click", () => {
-    const onChoose = vi.fn();
-    render(<Harness onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness onSelect={onSelect} />);
     type("tab");
     fireEvent.mouseDown(rows()[0]!, { button: 2 });
-    expect(onChoose).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
     fireEvent.mouseDown(rows()[0]!, { button: 0 });
-    expect(onChoose).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -250,7 +250,7 @@ describe("Command palette - onClose exactly once", () => {
           setOpen(false);
         }}
         items={ITEMS}
-        onChoose={() => undefined}
+        onSelect={() => undefined}
       />
     );
   }
@@ -365,11 +365,11 @@ describe("Command palette - the pointer against the keyboard", () => {
   });
 
   it("chooses a row on a click, no matter who has the mark", () => {
-    const onChoose = vi.fn();
-    render(<Harness onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness onSelect={onSelect} />);
     type("table");
     fireEvent.mouseDown(rows()[1]!);
-    expect(onChoose).toHaveBeenCalledWith("tablefilter");
+    expect(onSelect).toHaveBeenCalledWith("tablefilter");
   });
 });
 
@@ -661,12 +661,12 @@ describe("useCommandPaletteShortcut – the slash switch and its guard", () => {
    choice, before the word typed had even arrived. */
 describe("CommandPalette – an input method's Enter", () => {
   it("chooses nothing while a composition runs", () => {
-    const onChoose = vi.fn();
-    render(<Harness onChoose={onChoose} />);
+    const onSelect = vi.fn();
+    render(<Harness onSelect={onSelect} />);
     type("tab");
     fireEvent.keyDown(field(), { key: "Enter", isComposing: true });
-    expect(onChoose).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
     fireEvent.keyDown(field(), { key: "Enter" });
-    expect(onChoose).toHaveBeenCalledWith("table");
+    expect(onSelect).toHaveBeenCalledWith("table");
   });
 });

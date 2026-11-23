@@ -7,12 +7,12 @@ import type { ChangeEvent } from "react";
 import { Input } from "../Input";
 import type { InputProps } from "../Input";
 import { useWording } from "../../lib/language";
-import type { Key } from "./treeModel";
+import type { TreeKey } from "./treeModel";
 import type { Tree } from "./useTree";
 
 /** The props of `TreeSearch`: an `Input`'s, with the tree in place of `value`
     and `onChange`. */
-export interface TreeSearchProps<K, S extends Key = string>
+export interface TreeSearchProps<K, S extends TreeKey = string>
   extends Omit<InputProps, "value" | "onChange" | "type"> {
   /** The same tree as the view's. The field does not hold the text itself –
       it belongs to the tree, because the flattening depends on it. */
@@ -21,7 +21,7 @@ export interface TreeSearchProps<K, S extends Key = string>
 
 /** The search field of a tree: an `Input` that writes into the tree's search
     text, so that the `TreeView` filters on it. */
-export function TreeSearch<K, S extends Key = string>({ ref, tree, placeholder, ...rest }: TreeSearchProps<K, S>) {
+export function TreeSearch<K, S extends TreeKey = string>({ ref, tree, placeholder, ...rest }: TreeSearchProps<K, S>) {
   const wording = useWording();
   return (
     <Input

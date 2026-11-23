@@ -358,7 +358,7 @@ function Content() {
               <Meter
                 value={load}
                 tone={load > 1 ? "danger" : load > 0.9 ? "warning" : undefined}
-                showLabel
+                showValue
                 label="Payload against the vehicle's capacity"
               />
             </Stack>

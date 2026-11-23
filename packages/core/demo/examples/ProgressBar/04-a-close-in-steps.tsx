@@ -44,7 +44,7 @@ export default function ACloseInSteps() {
       />
       <CardBody>
         <Stack gap={4}>
-          <ProgressBar value={overall} label="The whole close" showLabel />
+          <ProgressBar value={overall} label="The whole close" showValue />
           <Divider />
           {STEPS.map((step, i) => {
             const share = shares[i]!;
@@ -58,7 +58,7 @@ export default function ACloseInSteps() {
                   <ProgressBar
                     value={share}
                     label={step.name}
-                    showLabel
+                    showValue
                     valueText={step.items > 0 ? `${Math.round(share * step.items)} of ${step.items} ${step.unit}` : undefined}
                   />
                 )}

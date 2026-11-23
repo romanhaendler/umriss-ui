@@ -663,12 +663,12 @@ function ControlRoomBody() {
             <ProgressBar
               label={inTheKiln}
               value={current === undefined ? 0 : (minute - current.kiln[0]) / (current.kiln[1] - current.kiln[0])}
-              showLabel
+              showValue
             />
             <Text size="sm" tone="muted">
               The early shift, 06:00 to 14:00
             </Text>
-            <ProgressBar label="The early shift" value={(minute + 1) / SHIFT_MINUTES} showLabel />
+            <ProgressBar label="The early shift" value={(minute + 1) / SHIFT_MINUTES} showValue />
           </Stack>
         </Grid>
       </Region>
@@ -807,7 +807,7 @@ function BatchDetails({ batch, minute, onClose }: { batch: Batch; minute: number
       />
       <ModalBody>
         <Stack gap={3}>
-          <ProgressBar label="Tiles fired" value={total / batch.tiles} showLabel />
+          <ProgressBar label="Tiles fired" value={total / batch.tiles} showValue />
           <Text>
             {total} fired, {good} inside the tolerance, {total - good} scrap.
           </Text>

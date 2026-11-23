@@ -36,7 +36,7 @@ export default function Shortcut() {
         open={open}
         onClose={() => setOpen(false)}
         items={PROJECTS}
-        onChoose={(id) => {
+        onSelect={(id) => {
           setOpen(false);
           setProject(PROJECTS.find((p) => p.id === id)?.label ?? id);
         }}

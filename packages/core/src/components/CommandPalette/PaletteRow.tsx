@@ -19,7 +19,7 @@ export function Row({
   withIcon,
   onSweep,
   onMove,
-  onChoose,
+  onSelect,
 }: {
   find: Find<PaletteCandidate>;
   baseId: string;
@@ -27,7 +27,7 @@ export function Row({
   withIcon: boolean;
   onSweep: (id: string) => void;
   onMove: (id: string) => void;
-  onChoose: (id: string) => void;
+  onSelect: (id: string) => void;
 }) {
   const { candidate } = item;
   return (
@@ -43,7 +43,7 @@ export function Row({
         event.preventDefault();
         // Only the main button chooses - whoever wants the context menu has not chosen.
         if (event.button !== 0) return;
-        onChoose(candidate.id);
+        onSelect(candidate.id);
       }}
     >
       {withIcon && (

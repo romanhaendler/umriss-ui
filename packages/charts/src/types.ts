@@ -1,7 +1,7 @@
 /* Types of the registration model and of materialisation. */
 
 import type { ReactNode } from "react";
-import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
+import type { Assessment, Limit, LimitSet, LimitSide, Side, Severity, Verdict } from "./limit";
 import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 import type { ValueFormat } from "./format";
@@ -232,7 +232,7 @@ export type SeriesConfig<T = unknown> =
     `state` and `matrix`. The set is closed. */
 export type SeriesKind = SeriesConfig["kind"];
 
-export type { Assessment, Limit, LimitSet, Side, Severity, Verdict };
+export type { Assessment, Limit, LimitSet, LimitSide, Side, Severity, Verdict };
 export type { WorkingInterval, WorkingCalendar } from "./workingTime";
 
 /** Whether an axis or a limit runs along x or along y. */

@@ -12,5 +12,8 @@
   "DateTimePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
   "DateTimePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
   "DateTimeRangePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
-  "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows"
+  "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
+  "MeterProps.showLabel": "(g) deprecated alias: the old name of showValue",
+  "ProgressBarProps.showLabel": "(g) deprecated alias: the old name of showValue",
+  "CommandPaletteProps.onChoose": "(g) deprecated alias: the old name of onSelect"
 }

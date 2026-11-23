@@ -27,14 +27,14 @@ import { Checkbox } from "../Checkbox";
 import { Spinner } from "../Spinner";
 import { useWording } from "../../lib/language";
 import { idPart } from "../../lib/idPart";
-import type { FlatteningEntry, Key } from "./treeModel";
+import type { FlatteningEntry, TreeKey } from "./treeModel";
 import type { Tree } from "./useTree";
 import styles from "./TreeView.module.css";
 
 /** After this pause typeahead starts over. */
 const TYPEAHEAD_PAUSE = 600;
 
-interface TreeViewBase<K, S extends Key = string>
+interface TreeViewBase<K, S extends TreeKey = string>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children">,
     RefProp<HTMLDivElement> {
   /** The tree from `useTree`. It is the whole state: flattening, active node,
@@ -49,7 +49,7 @@ interface TreeViewBase<K, S extends Key = string>
 
 /** The props of `TreeView`. The tree is a structure of its own and needs a
     name: `aria-label` is required. */
-export type TreeViewProps<K, S extends Key = string> = TreeViewBase<K, S> & {
+export type TreeViewProps<K, S extends TreeKey = string> = TreeViewBase<K, S> & {
   /** Accessible name of the tree. */
   "aria-label": string;
 };
@@ -57,7 +57,7 @@ export type TreeViewProps<K, S extends Key = string> = TreeViewBase<K, S> & {
 /** The tree as a control: draws the nodes of a `Tree` from `useTree` as a
     `tree` with keyboard navigation, typeahead and, with `checkable`, ticks.
     What a node says is yours - `children` renders it. */
-export function TreeView<K, S extends Key = string>({
+export function TreeView<K, S extends TreeKey = string>({
   ref,
   tree,
   "aria-label": name,
@@ -103,7 +103,7 @@ export function TreeView<K, S extends Key = string>({
      again), once. A render that merely finds it outside the window - because
      the person scrolled away - must leave the scroll position alone, and so
      must not search the flattening for it. */
-  const shown = useRef<{ active: Key | null; count: number } | null>(null);
+  const shown = useRef<{ active: TreeKey | null; count: number } | null>(null);
   const windowFrom = rowWindow?.from;
   const windowTo = rowWindow?.to;
   const showRow = rowWindow?.showRow;

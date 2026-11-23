@@ -11,7 +11,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import { useRef } from "react";
-import { UmrissProvider, useDensityFor } from "../src/lib/provider";
+import { UmrissProvider, useDensity, useDensityFor } from "../src/lib/provider";
 import { Popover } from "../src/components/Popover";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import { Input } from "../src/components/Input";
@@ -310,12 +310,35 @@ describe("Density", () => {
     expect(read()).toBe("compact");
   });
 
-  it("makes a compact component regular under comfortable", () => {
+  it("makes a compact component regular under regular, without a warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <UmrissProvider density="regular">
+        <DensitySample fallback="compact" />
+      </UmrissProvider>,
+    );
+    expect(read()).toBe("regular");
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("still takes the old word comfortable as regular, and warns", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     render(
       <UmrissProvider density="comfortable">
         <DensitySample fallback="compact" />
       </UmrissProvider>,
     );
     expect(read()).toBe("regular");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('density="regular"'));
+    warn.mockRestore();
+  });
+
+  it("tells nobody's density apart: useDensity is undefined outside a provider and under a silent one", () => {
+    const seen: unknown[] = [];
+    const Probe = () => (seen.push(useDensity()), null);
+    render(<Probe />);
+    render(<UmrissProvider><Probe /></UmrissProvider>);
+    expect(seen).toEqual([undefined, undefined]);
   });
 });
