@@ -24,4 +24,5 @@ stands, and under which name or shape?
 
 Every one breaks a caller, so every one is the maintainer's. The answer is one line per group, shaped for
 `/to-spec`. What is not a break (the component props missing from `API.md`, stale doc sentences, the second
-`ZoomLimits`, `aria-label` beside `aria-labelledby`) the agent decides.
+`ZoomLimits`) the agent decides. Decided already in "What of the charts' surface changes before 1.0":
+`Schedule` takes `aria-label` or `aria-labelledby`, one of the two.

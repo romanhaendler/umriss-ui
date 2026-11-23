@@ -61,6 +61,10 @@ beyond the map.
 - [What of the young packages' surface changes before 1.0](issues/17-what-of-the-young-packages-surface-changes-before-1-0.md):
   all three go to 1.0; the alarms' model part is `@experimental`; `freshness` becomes `ages`, `catalogue()`
   becomes `openCatalogue()`; `DashboardView` is the promised storage format; the rest is frozen as it stands.
+- [What of the charts' surface changes before 1.0](issues/18-what-of-the-charts-surface-changes-before-1-0.md):
+  the registry's types leave the index; `tone` becomes `verdict`; `row` and `state` on `Matrix` and
+  `StateBand`; a chart's name is required by type; a series stays identified by its name; the rest is frozen
+  as it stands.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
