@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createRef } from "react";
 import { render, renderHook } from "@testing-library/react";
 import * as charts from "../src";
-import { useChart } from "../src";
+import { useChart, type ChartName } from "../src";
 import { passThroughGuard } from "../../demo/tests-support/passThroughGuard.tsx";
 import type { PassThroughCase } from "../../demo/tests-support/passThroughGuard.tsx";
 
@@ -19,7 +19,7 @@ const ROWS = [{ t: 0, a: 1 }];
 function Harness({ through }: { through?: object }) {
   const c = useChart(ROWS);
   return (
-    <c.Chart {...through}>
+    <c.Chart {...(through as ChartName)}>
       <c.XAxis value="t" />
       <c.YAxis />
       <c.Line value="a" name="A" />
@@ -81,7 +81,7 @@ describe("the name and the root of the chart", () => {
     function Fresh({ through }: { through?: object }) {
       const c = fresh.useChart(ROWS);
       return (
-        <c.Chart {...through}>
+        <c.Chart {...(through as ChartName)}>
           <c.XAxis value="t" />
           <c.YAxis />
           <c.Line value="a" name="A" />

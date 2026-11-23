@@ -8,6 +8,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { verdictOf } from "./dev";
 import type { ValueFunction, Value, AreaSeriesConfig } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -38,7 +39,7 @@ export interface AreaProps<T> {
   color?: string;
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** The stack this series stands in: every Bar and Area with the same id on
       the same x and y axis stands on the ones registered before it. A gap
       stacks as zero; negative values stack downward from zero. The tooltip
@@ -67,6 +68,9 @@ export interface AreaProps<T> {
       nearest reading finds no hit. In a `stack` this is not read.
       @default no limit, a stretch without rows is bridged */
   maxGap?: number;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** A series drawn as a filled area between its values and a baseline, 0
@@ -81,7 +85,6 @@ export function Area<T>(props: AreaProps<T>): null {
     name,
     format,
     color,
-    tone,
     stack,
     normalize,
     fillOpacity = 0.18,
@@ -89,6 +92,7 @@ export function Area<T>(props: AreaProps<T>): null {
     dash,
     maxGap,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "Area");
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<AreaSeriesConfig>(
@@ -103,7 +107,7 @@ export function Area<T>(props: AreaProps<T>): null {
         name,
         format,
         color,
-        tone,
+        tone: verdict,
         stack,
         normalize,
         fillOpacity,
@@ -111,7 +115,7 @@ export function Area<T>(props: AreaProps<T>): null {
         dash,
         maxGap,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash, maxGap],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, verdict, stack, normalize, fillOpacity, strokeWidth, dash, maxGap],
   );
 
   useSeries("Area", config);

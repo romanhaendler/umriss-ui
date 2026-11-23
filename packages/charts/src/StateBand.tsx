@@ -1,9 +1,9 @@
 /* <StateBand> - the fifth series kind (ADR-0007).
 
-   The `value` yields a NUMBER: the index of the state in the state list. That
+   The `state` yields a NUMBER: the index of the state in the state list. That
    keeps the materialised series at the same three channels as every other kind,
    the drawing loop monomorphic and the affine scale contract untouched. A caller
-   whose data carries strings maps them in a `value` function - one line, once per point
+   whose data carries strings maps them in a `state` function - one line, once per point
    during materialisation.
 
    The lane stands in domain units of the y axis, not in pixels and not in
@@ -15,6 +15,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { warnDeprecated } from "./dev";
 import type { ValueFunction, Value, StateEntry, StateSeriesConfig } from "./types";
 
 /** The props of `StateBand`. Its lane is named, or given by its two edges -
@@ -24,7 +25,7 @@ export interface StateBandProps<T> {
       function of it; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would
       be a claim about the interval. */
-  value: Value<T>;
+  state?: Value<T>;
   /** The closed set of states, in the order of their codes. */
   states: readonly StateEntry[];
   /** Binding to an x axis. */
@@ -48,6 +49,9 @@ export interface StateBandProps<T> {
   /** Upper edge of the lane in domain units of a numeric y axis.
       @default the end of the axis' domain */
   laneTo?: number;
+  /** The old name of `state`.
+      @deprecated since 0.58 - use `state`. */
+  value?: Value<T>;
 }
 
 /** A lane is named or given by its edges: the compiler refuses both at once.
@@ -72,7 +76,8 @@ export function StateBand<T>(props: StateBandProps<T> & OneLane): null {
     laneFrom,
     laneTo,
   } = props;
-  const accessor = readerOf<ValueFunction<T>>(props.value);
+  if (props.value !== undefined) warnDeprecated("value on StateBand", "state");
+  const accessor = readerOf<ValueFunction<T>>(props.state ?? props.value);
 
   const config = useMemo<StateSeriesConfig>(
     () =>

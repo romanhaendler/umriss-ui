@@ -1,6 +1,6 @@
 /* <Matrix> - the sixth series kind (ADR-0011).
 
-   `value` yields the row position, as it yields the y position on every
+   `row` yields the row position, as it yields the y position on every
    kind, and `level` the third channel that decides the colour. The level
    channel is NAMED and does not overload the baseline channel: a property that only individual kinds carry does not belong
    in the shared type with a comment.
@@ -15,6 +15,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { warnDeprecated } from "./dev";
 import type { AxisField, ValueFunction, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -38,7 +39,7 @@ export interface MatrixProps<T> {
       the y axis then has a named row per distinct one, the first at the top,
       in the order the data bring them or the y axis' `categories`
       (ADR-0052). Never an instant: a `Date` is refused. */
-  value: AxisField<T, number | string | null | undefined> | ((d: T, index: number) => number | string | null | undefined);
+  row?: AxisField<T, number | string | null | undefined> | ((d: T, index: number) => number | string | null | undefined);
   /** The level that decides the colour - a number field of the row or a
       function of it. A missing level is a hole, not a zero. */
   level: Value<T>;
@@ -68,15 +69,17 @@ export interface MatrixProps<T> {
       heat map would be all clipped text.
       @default false */
   labels?: boolean;
+  /** The old name of `row`.
+      @deprecated since 0.58 - use `row`. */
+  value?: AxisField<T, number | string | null | undefined> | ((d: T, index: number) => number | string | null | undefined);
 }
 
-/** A series drawn as a grid of coloured cells: `value` gives the row,
+/** A series drawn as a grid of coloured cells: `row` gives the row,
     `level` the colour - by the limits of an assessment or across a gradient.
     A missing level is a hole, not a zero. Renders nothing itself: it registers
     with the surrounding `Chart`. */
 export function Matrix<T>(props: MatrixProps<T>): null {
   const {
-    value,
     level,
     coloring,
     xAxisId = "x",
@@ -86,6 +89,8 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     format,
     labels = false,
   } = props;
+  if (props.value !== undefined) warnDeprecated("value on Matrix", "row");
+  const row = props.row ?? props.value;
 
   const effectiveColoring = useMemo<MatrixColoring>(
     () => coloring ?? { kind: "gradient", stops: DEFAULT_GRADIENT },
@@ -97,7 +102,7 @@ export function Matrix<T>(props: MatrixProps<T>): null {
       ({
         kind: "matrix",
         // A row named by a string is given its place in materialisation.
-        accessor: readerOf<(d: T, index: number) => number | string | null | undefined>(value) as ValueFunction<T>,
+        accessor: readerOf<(d: T, index: number) => number | string | null | undefined>(row) as ValueFunction<T>,
         level: readerOf<ValueFunction<T>>(level),
         coloring: effectiveColoring,
         xAxisId,
@@ -107,7 +112,7 @@ export function Matrix<T>(props: MatrixProps<T>): null {
         format,
         labels,
       }) as MatrixSeriesConfig,
-    [value, level, effectiveColoring, xAxisId, yAxisId, data, name, format, labels],
+    [row, level, effectiveColoring, xAxisId, yAxisId, data, name, format, labels],
   );
 
   useSeries("Matrix", config);

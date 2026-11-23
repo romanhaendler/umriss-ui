@@ -5,6 +5,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { verdictOf } from "./dev";
 import type { ValueFunction, Value, LineSeriesConfig } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -30,7 +31,7 @@ export interface LineProps<T> {
       @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** Line width in CSS pixels.
       @default 1.5 */
   strokeWidth?: number;
@@ -53,6 +54,9 @@ export interface LineProps<T> {
       this from the nearest reading finds no hit on the series.
       @default no limit, a stretch without rows is bridged */
   maxGap?: number;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** A series drawn as a line through its values; a gap breaks it. Renders
@@ -65,13 +69,13 @@ export function Line<T>(props: LineProps<T>): null {
     name,
     format,
     color,
-    tone,
     strokeWidth = 1.5,
     dash,
     markers = "auto",
     step,
     maxGap,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "Line");
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<LineSeriesConfig>(
@@ -85,14 +89,14 @@ export function Line<T>(props: LineProps<T>): null {
         name,
         format,
         color,
-        tone,
+        tone: verdict,
         strokeWidth,
         dash,
         markers,
         step,
         maxGap,
       }) as LineSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers, step, maxGap],
+    [accessor, xAxisId, yAxisId, data, name, format, color, verdict, strokeWidth, dash, markers, step, maxGap],
   );
 
   useSeries("Line", config);

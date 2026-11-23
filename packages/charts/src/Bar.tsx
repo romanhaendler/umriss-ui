@@ -11,6 +11,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { verdictOf } from "./dev";
 import type { ValueFunction, Value, BarSeriesConfig } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -43,7 +44,7 @@ export interface BarProps<T> {
   color?: string;
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** The stack this series stands in: every Bar and Area with the same id on
       the same x and y axis stands on the ones registered before it. A gap
       stacks as zero; negative values stack downward from zero. The tooltip
@@ -58,6 +59,9 @@ export interface BarProps<T> {
       Several bar series share this fraction.
       @default 0.8 */
   barWidth?: number;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** A series drawn as bars from 0, or from its `baseline`, to its values, one at each x: a category
@@ -78,11 +82,11 @@ export function Bar<T>(props: BarProps<T>): null {
     name,
     format,
     color,
-    tone,
     stack,
     normalize,
     barWidth = 0.8,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "Bar");
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<BarSeriesConfig>(
@@ -97,12 +101,12 @@ export function Bar<T>(props: BarProps<T>): null {
         name,
         format,
         color,
-        tone,
+        tone: verdict,
         stack,
         normalize,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, barWidth],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, verdict, stack, normalize, barWidth],
   );
 
   useSeries("Bar", config);

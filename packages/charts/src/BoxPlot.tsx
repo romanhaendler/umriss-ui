@@ -11,6 +11,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { verdictOf } from "./dev";
 import type { ValueFunction, BoxSeriesConfig, ListFunction, ListValue, Value } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -62,11 +63,14 @@ export interface BoxPlotProps<T> {
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. Set by the caller: a box out of its specification is the caller's
       judgement, not the library's. */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** Width as a fraction of the step, as a bar's: boxes and bars on one x axis
       share this fraction and stand side by side.
       @default 0.8 */
   boxWidth?: number;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** A series drawn as a box per x: median, quartiles and whiskers, optionally
@@ -91,9 +95,9 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     name,
     format,
     color,
-    tone,
     boxWidth = 0.8,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "BoxPlot");
 
   const config = useMemo<BoxSeriesConfig>(
     () =>
@@ -115,10 +119,10 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         name,
         format,
         color,
-        tone,
+        tone: verdict,
         boxWidth,
       }) as BoxSeriesConfig,
-    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, notchLower, notchUpper, count, xAxisId, yAxisId, data, name, format, color, tone, boxWidth],
+    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, notchLower, notchUpper, count, xAxisId, yAxisId, data, name, format, color, verdict, boxWidth],
   );
 
   useSeries("BoxPlot", config);

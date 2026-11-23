@@ -1,7 +1,7 @@
 import { Legend, LimitLine, Tooltip, useChart } from "../../../src";
 
 export const title = "Against the objective";
-export const lead = "A `LimitLine` shows what was promised. Whether a box breaks it is your judgement, not the library's: this week's whiskers reach past the objective in every region, so its series carries `tone=\"alarm\"`.";
+export const lead = "A `LimitLine` shows what was promised. Whether a box breaks it is your judgement, not the library's: this week's whiskers reach past the objective in every region, so its series carries `verdict=\"alarm\"`.";
 
 interface Spread {
   region: string;
@@ -41,7 +41,7 @@ export default function AgainstTheObjective() {
       <BoxPlot
         name="This week"
         data={THIS_WEEK}
-        tone="alarm"
+        verdict="alarm"
         median="median"
         lowerQuartile="q1"
         upperQuartile="q3"

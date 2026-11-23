@@ -60,7 +60,7 @@ const TRACES: readonly Trace[] = (() => {
 })();
 
 export const title = "Mark samples that miss a target";
-export const lead = "Put the misses in a series of their own with `tone=\"alarm\"`: a scatter has one colour, and the tone is the theme's alarm red.";
+export const lead = "Put the misses in a series of their own with `verdict=\"alarm\"`: a scatter has one colour, and the tone is the theme's alarm red.";
 
 const OBJECTIVE = SERVICES.find((one) => one.id === "checkout")!.latencySlo;
 
@@ -73,7 +73,7 @@ export default function AgainstATarget() {
       <LimitLine value={OBJECTIVE} severity="warning" label="Objective" />
       {/* The two channels never both carry a value, so no trace is drawn twice. */}
       <Scatter value={(d) => (d.ms <= OBJECTIVE ? d.ms : null)} name="Request" radius={2.5} />
-      <Scatter value={(d) => (d.ms > OBJECTIVE ? d.ms : null)} name="Too slow" tone="alarm" radius={4} />
+      <Scatter value={(d) => (d.ms > OBJECTIVE ? d.ms : null)} name="Too slow" verdict="alarm" radius={4} />
       <Legend placement="top" />
       <Tooltip mode="nearest" />
     </Chart>

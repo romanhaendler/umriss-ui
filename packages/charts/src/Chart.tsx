@@ -47,7 +47,7 @@ import "./styles/charts.css";
 
 /** The props of `Chart`. Its rows are not among them: `useChart(rows)` binds
     them (ADR-0048). */
-export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onSelect" | "title" | "color"> {
   /** The root element, the `<div>` that `className`, `style`, `id` and the
       `data-*` attributes reach. */
   ref?: Ref<HTMLDivElement>;
@@ -64,7 +64,7 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
   height?: number;
   /** Outer spacing of the plot area in CSS pixels.
       @default 8 */
-  padding?: number | Partial<Padding>;
+  padding?: number | { top?: number; right?: number; bottom?: number; left?: number };
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
   /** Goes to the root element, after the chart's own styles: a `height` or
@@ -113,13 +113,18 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
       sending each other their view (`useChart`'s `onViewChange` and
       `setView`). */
   syncId?: string;
-  /** Instrumentation for the benchmark page; not needed otherwise. */
+  /** Instrumentation for the benchmark page; not needed otherwise.
+      @experimental a minor release may change what it reports. */
   onPerf?: (perf: ChartPerf) => void;
   /** The axes, series and companions of this chart. They draw nothing
       themselves: each registers its configuration and the scene draws it,
       and the order in the JSX is the drawing order. */
   children?: ReactNode;
 }
+
+/** A chart is named: `aria-label`, or `aria-labelledby` for a heading on the page. Beside `ChartProps` and
+    not in it, so that `ChartProps` stays an interface another can extend. */
+export type ChartName = { "aria-label": string } | { "aria-labelledby": string };
 
 /** The container of a chart: it holds the data, measures the plot area and
     draws on canvas whatever its children register - axes, series, limits,

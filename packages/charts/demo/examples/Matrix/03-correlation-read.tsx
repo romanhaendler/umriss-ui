@@ -73,7 +73,7 @@ export default function CorrelationRead() {
         <first.XAxis value="column" ticks={VARIABLES.map((_, k) => k)} tickFormat={(v) => VARIABLES[v] ?? ""} />
         <first.YAxis />
         <first.Matrix
-          value="variable"
+          row="variable"
           level="r"
           coloring={{ kind: "gradient", stops: DIVERGING, range: [-1, 1] }}
           name="Correlation"
@@ -85,7 +85,7 @@ export default function CorrelationRead() {
       <second.Chart height={300} aria-label="Load per service and hour, labels where the cells have room">
         <second.XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
         <second.YAxis />
-        <second.Matrix value="service" level="load" name="Load" labels />
+        <second.Matrix row="service" level="load" name="Load" labels />
         <Tooltip mode="nearest" />
       </second.Chart>
     </>

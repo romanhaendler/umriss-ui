@@ -230,7 +230,7 @@ describe("A state band's entries", () => {
       <Chart aria-label="Bands" height={200}>
         <XAxis value="t" />
         <YAxis />
-        <StateBand value={(row) => row.t} states={states} name="Van" />
+        <StateBand state={(row) => row.t} states={states} name="Van" />
         <Line value="a" name="A" />
         <Legend />
       </Chart>

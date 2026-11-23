@@ -3,7 +3,7 @@ import "./styles/charts.css";
 /* `Chart`, the axes and the series kinds are not exported on their own:
    `useChart(rows)` hands them out, bound to the rows (ADR-0048). Their props
    stay public types. */
-export type { ChartProps } from "./Chart";
+export type { ChartProps, ChartName } from "./Chart";
 export type { AreaProps } from "./Area";
 export type { BarProps } from "./Bar";
 export type { LineProps } from "./Line";
@@ -15,7 +15,7 @@ export { ControlChart, type ControlChartProps } from "./ControlChart";
 export type { XAxisProps, YAxisProps } from "./Axis";
 export { Legend, type LegendProps } from "./Legend";
 export { Tooltip, type TooltipProps } from "./Tooltip";
-export { invalidateTheme, type ResolvedTheme } from "./theme";
+export { invalidateTheme } from "./theme";
 export { LinearScale } from "./scale";
 
 /* The pure modules: they are the actual worth of the four instruments, and a
@@ -44,7 +44,6 @@ export type { ParetoSettings } from "./pareto";
 export type {
   ParetoEntry,
   ParetoItem,
-  ParetoOptions,
   ParetoResult,
 } from "./pareto";
 export {
@@ -69,31 +68,13 @@ export type {
 } from "./workingTime";
 export type {
   ValueFunction,
-  AreaSeriesConfig,
-  LimitBandConfig,
-  LimitConfig,
-  LimitLineConfig,
   LimitRole,
   MatrixColoring,
-  MatrixSeriesConfig,
-  StateSeriesConfig,
   StateEntry,
-  AxisConfig,
   AxisOrientation,
   AxisPosition,
-  BarSeriesConfig,
   ChartPerf,
-  LegendConfig,
-  LineSeriesConfig,
-  MaterializedSeries,
-  Padding,
-  Rect,
   Scale,
-  ScatterSeriesConfig,
-  SeriesBase,
-  SeriesConfig,
-  SeriesKind,
-  TooltipConfig,
   TooltipHit,
   TooltipPoint,
 } from "./types";
@@ -117,12 +98,10 @@ export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 /* The data table. At the end, by the workspace's rule
    for new exports. */
 export { DataTable } from "./DataTable";
-export type { DataTableGroup } from "./scene";
 
 /* The box plot. At the end, by the workspace's rule for new
    exports. */
 export type { BoxPlotProps } from "./BoxPlot";
-export type { BoxSeriesConfig, BoxChannels } from "./types";
 /* What a custom tooltip `render` reads of a box. */
 export type { BoxNumbers, BoxExtras, ListFunction } from "./types";
 

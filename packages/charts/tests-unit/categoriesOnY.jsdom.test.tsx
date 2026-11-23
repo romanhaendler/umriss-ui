@@ -77,7 +77,7 @@ function Cells({ categories, label }: { categories?: readonly string[]; label?: 
     <Chart aria-label="Successful requests per service and hour">
       <XAxis value="hour" ticks={[0, 1]} tickFormat={(v) => `${v}:00`} />
       <YAxis categories={categories} categoryLabel={label} />
-      <Matrix value="service" level="success" name="Success" />
+      <Matrix row="service" level="success" name="Success" />
       <Tooltip mode="nearest" />
       <DataTable />
     </Chart>
@@ -143,8 +143,8 @@ function Fleet({ categories, withCharge }: { categories?: readonly string[]; wit
       <XAxis value="t" ticks={[0, 5, 10, 15, 20]} domain={[0, 20]} tickFormat={(v) => `t${v}`} />
       <YAxis categories={categories} />
       {withCharge === true && <YAxis id="charge" position="right" domain={[0, 100]} />}
-      <StateBand data={VAN_A} value="state" states={STATES} lane="Van A" name="Van A" />
-      <StateBand data={VAN_B} value="state" states={STATES} lane="Van B" name="Van B" />
+      <StateBand data={VAN_A} state="state" states={STATES} lane="Van A" name="Van A" />
+      <StateBand data={VAN_B} state="state" states={STATES} lane="Van B" name="Van B" />
       {withCharge === true && <Line value="percent" yAxisId="charge" name="Charge" />}
       <Tooltip mode="nearest" />
     </Chart>
@@ -216,7 +216,7 @@ describe("A matrix with categories along both axes", () => {
         <Chart aria-label="Pieces per day and shift">
           <XAxis value="day" />
           <YAxis />
-          <Matrix value="shift" level="pieces" name="Pieces per cell" />
+          <Matrix row="shift" level="pieces" name="Pieces per cell" />
           <Tooltip mode="nearest" />
         </Chart>
       );
@@ -246,7 +246,7 @@ describe("A series moved to another axis", () => {
         <YAxis id="left" />
         <YAxis id="right" position="right" />
         <YAxis id="eur" position="right" />
-        <StateBand data={VAN_A} value="state" states={STATES} xAxisId="byNumber" yAxisId={yAxisId} lane="Van A" name="Van A" />
+        <StateBand data={VAN_A} state="state" states={STATES} xAxisId="byNumber" yAxisId={yAxisId} lane="Van A" name="Van A" />
         <Bar value="eur" xAxisId={xAxisId} yAxisId="eur" name="Moved bar" />
         <Tooltip mode="nearest" />
       </Chart>

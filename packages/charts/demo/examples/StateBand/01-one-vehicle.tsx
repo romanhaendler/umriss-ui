@@ -166,7 +166,7 @@ export default function OneVehicle() {
       <XAxis value="t" time label="Time" />
       {/* Without a lane the band fills its y axis; one tick names it. */}
       <YAxis domain={[0, 1]} ticks={[0.5]} tickFormat={() => "FP 214 K"} grid={false} />
-      <StateBand value="state" states={VEHICLE_STATES} name="FP 214 K" />
+      <StateBand state="state" states={VEHICLE_STATES} name="FP 214 K" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

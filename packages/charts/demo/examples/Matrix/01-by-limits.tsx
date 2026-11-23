@@ -70,7 +70,7 @@ export default function ByLimits() {
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
       <Matrix
-        value="service"
+        row="service"
         level="success"
         coloring={{
           kind: "assessment",

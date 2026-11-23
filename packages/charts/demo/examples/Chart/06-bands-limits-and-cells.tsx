@@ -242,7 +242,7 @@ function BatteryAndStates() {
       <YAxis id="lane" position="right" domain={[-0.5, 4.5]} />
       <LimitBand from={10} to={20} severity="warning" label="Reserve" />
       <LimitLine value={10} severity="alarm" label="Empty soon" />
-      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" lane="FP 377 K" name="FP 377 K" />
+      <StateBand data={STATES} state="state" states={VEHICLE_STATES} yAxisId="lane" lane="FP 377 K" name="FP 377 K" />
       <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />
       <Tooltip mode="x" />
@@ -257,7 +257,7 @@ function SuccessCells() {
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
       <Matrix
-        value="service"
+        row="service"
         level="success"
         coloring={{
           kind: "assessment",

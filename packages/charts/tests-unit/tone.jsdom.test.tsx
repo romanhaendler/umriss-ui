@@ -66,8 +66,8 @@ describe("tone", () => {
     expect(
       await chips(({ Area, Bar }) => (
         <>
-          <Area value="a" name="Scrap" tone="alarm" />
-          <Bar value="a" name="Rework" tone="warning" />
+          <Area value="a" name="Scrap" verdict="alarm" />
+          <Bar value="a" name="Rework" verdict="warning" />
         </>
       )),
     ).toEqual([colour(FALLBACK_THEME.colorAlarm), colour(FALLBACK_THEME.colorWarning)]);
@@ -81,7 +81,7 @@ describe("tone", () => {
         origin={{ kind: "given", center: 11, sigma: 1 }}
         name="Feature"
         violationName="Violations"
-        tone="ok"
+        verdict="ok"
       />
     ));
     expect(line).toBe(colour(FALLBACK_THEME.colorOk));

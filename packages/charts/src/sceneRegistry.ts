@@ -51,7 +51,7 @@ export function slotTaken(s: ChartScene, slot: number, except?: SeriesEntry): bo
 }
 
 /** DEV: a series past the palette's last place takes the colour of an earlier place, and under encoding by marks
-    its dash and marker too. A series with its own `color` or `tone` is not a repeat. Warns once per series. */
+    its dash and marker too. A series with its own `color` or `verdict` is not a repeat. Warns once per series. */
 function warnIfRepeatsPlace(s: ChartScene, entry: SeriesEntry): void {
   const places = (s.theme?.series ?? FALLBACK_THEME.series).length;
   if (!DEV || entry.slot < places || entry.config.color !== undefined || entry.config.tone !== undefined) return;
@@ -60,8 +60,8 @@ function warnIfRepeatsPlace(s: ChartScene, entry: SeriesEntry): void {
   warnOnce(
     `palette:${entry.config.name ?? entry.order}`,
     `The series ${who(entry)} repeats the colour of ${first ? `the series ${who(first)}` : "an earlier series"} - ` +
-      "it has no `color` and no `tone` beyond the palette's places, and under encoding by marks its dash and marker too. " +
-      "Give it a `color` or a `tone`, or split the chart.",
+      "it has no `color` and no `verdict` beyond the palette's places, and under encoding by marks its dash and marker too. " +
+      "Give it a `color` or a `verdict`, or split the chart.",
   );
 }
 
@@ -82,6 +82,12 @@ export function registerSeries(s: ChartScene, config: SeriesConfig): number {
     own: null,
     stacked: null,
   };
+  if (config.name !== undefined && [...s.series.values()].some((e) => e.config.name === config.name)) {
+    warnOnce(
+      `same-name:${config.name}`,
+      `Two series are named "${config.name}". A series is told apart by its name - in the legend, in the view's hidden list and by the palette - so give each its own.`,
+    );
+  }
   s.series.set(id, entry);
   warnIfRepeatsPlace(s, entry);
   s.materialsDirty = true;

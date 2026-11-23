@@ -22,7 +22,8 @@ import { useLimit } from "./context";
 import type { LimitBandConfig, LimitLineConfig, LimitRole, Severity } from "./types";
 
 interface LimitCommonProps {
-  /** Axis on which the value lies.
+  /** Axis on which the value lies. One name, not an `xAxisId` and a `yAxisId`: a
+      limit stands on the one axis of its `orientation`, where a series is bound to two.
       @default the first axis of the orientation */
   axisId?: string;
   /** Whether the value lies on the x or on the y axis - a limit is nearly
@@ -102,6 +103,16 @@ export function LimitLine(props: LimitLineProps): null {
     [value, axisId, orientation, severity, role, label, color, inExtent],
   );
 
+  useLimit("LimitLine", config);
+  return null;
+}
+
+/** A control chart's zone line, at one or two sigma: the one limit whose role `LimitLine` does not offer. */
+export function ZoneLine({ value, axisId }: { value: number; axisId?: string }): null {
+  const config = useMemo<LimitLineConfig>(
+    () => ({ kind: "line", value, axisId, orientation: "y", severity: "alarm", role: "zone", inExtent: false }),
+    [value, axisId],
+  );
   useLimit("LimitLine", config);
   return null;
 }

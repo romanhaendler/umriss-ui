@@ -16,6 +16,7 @@ import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import { BAR_WIDTH } from "./colourBar";
 import type { ChartScene, LegendBar, LegendMark } from "./scene";
 import type { Rect } from "./types";
+import { warnOnce } from "./dev";
 
 /** The props of `Legend`. */
 export interface LegendProps {
@@ -92,6 +93,9 @@ function LegendInner({ scene, placement: asked }: { scene: ChartScene; placement
             )}
           </>
         );
+        if (item.names.length === 0) {
+          warnOnce("unnamed-hidden", "A legend entry of a series without a name cannot hide it: a series is hidden by its name. Give the series a `name`.");
+        }
         return item.names.length === 0 ? (
           <span key={item.id} {...shared}>
             {content}

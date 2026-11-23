@@ -9,7 +9,7 @@
    view does. */
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Chart as FreeChart, type ChartProps } from "./Chart";
+import { Chart as FreeChart, type ChartName, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
 import { warnOnce } from "./dev";
 import { toPicture } from "./picture";
@@ -60,7 +60,7 @@ export interface ChartOptions<Z = unknown, V extends number | string = number> {
 export interface ChartParts<Z> {
   /** The chart over the hook's rows. One per `useChart`: it holds the view,
       and a second chart is a second call. */
-  Chart: (props: ChartProps) => ReactNode;
+  Chart: (props: ChartProps & ChartName) => ReactNode;
   /** An x axis reads the rows of every series bound to it: the hook's, or
       with `<XAxis<Row>>` those the series bring as their own `data`. */
   XAxis: <T = Z>(props: XAxisProps<T>) => null;

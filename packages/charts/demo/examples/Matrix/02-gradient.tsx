@@ -69,7 +69,7 @@ export default function Gradient() {
     <Chart height={280} aria-label="Successful requests per service and hour yesterday, as a gradient">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
       <YAxis />
-      <Matrix value="service" level="success" name="Success rate" format={{ decimals: 1 }} />
+      <Matrix row="service" level="success" name="Success rate" format={{ decimals: 1 }} />
       <Legend />
       <Tooltip mode="nearest" />
     </Chart>

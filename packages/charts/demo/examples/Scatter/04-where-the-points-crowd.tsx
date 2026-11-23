@@ -48,7 +48,7 @@ export default function WherePointsCrowd() {
     <Chart height={320} aria-label="Two hundred thousand points counted into cells, the counts as a gradient">
       <XAxis value="x" label="x" />
       <YAxis />
-      <Matrix value="y" level="count" name="Points per cell" format={{ decimals: 0 }} />
+      <Matrix row="y" level="count" name="Points per cell" format={{ decimals: 0 }} />
       <Legend />
       <Tooltip mode="nearest" />
     </Chart>

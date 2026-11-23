@@ -129,8 +129,8 @@ describe("The legend under encoding by marks", () => {
       "marks",
       ({ StateBand }) => (
         <>
-          <StateBand value="s" states={[{ label: "Running", color: "green" }, { label: "Fault", color: "red" }]} name="One" />
-          <StateBand value="s" states={[{ label: "Setup", color: "blue" }, { label: "Fault", color: "red" }]} name="Two" />
+          <StateBand state="s" states={[{ label: "Running", color: "green" }, { label: "Fault", color: "red" }]} name="One" />
+          <StateBand state="s" states={[{ label: "Setup", color: "blue" }, { label: "Fault", color: "red" }]} name="Two" />
         </>
       ),
     );
@@ -150,7 +150,7 @@ describe("The legend under encoding by marks", () => {
       { label: "Running", color: "green" },
       { label: "Fault", color: "red" },
     ];
-    const items = await legendOf("marks", ({ StateBand }) => <StateBand value="s" states={states} name="Furnace" />);
+    const items = await legendOf("marks", ({ StateBand }) => <StateBand state="s" states={states} name="Furnace" />);
     const hatches = items.map((i) => i.querySelector("rect + path")?.getAttribute("d") ?? "");
     expect(hatches[0]).toBe("");
     expect(hatches[1]).not.toBe("");
@@ -201,7 +201,7 @@ describe("The legend under encoding by marks", () => {
     const [matrix] = await legendOf(
       "marks",
       ({ Matrix }) => (
-        <Matrix value="a" level="b" coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }} name="Load" />
+        <Matrix row="a" level="b" coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }} name="Load" />
       ),
     );
     expect(matrix?.querySelectorAll("rect")).toHaveLength(3);

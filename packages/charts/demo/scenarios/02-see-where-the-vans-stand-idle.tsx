@@ -212,7 +212,7 @@ function FleetLanes() {
         <StateBand
           key={one.vehicle.id}
           data={one.points}
-          value="state"
+          state="state"
           states={VEHICLE_STATES}
           lane={one.vehicle.plate}
           name={`${one.vehicle.plate} (${one.vehicle.type}, ${depotOf(one.vehicle.depot)})`}

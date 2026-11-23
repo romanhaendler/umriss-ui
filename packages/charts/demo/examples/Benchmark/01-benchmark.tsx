@@ -229,8 +229,8 @@ export default function Benchmark() {
           <XAxis value={matrix ? "c" : "t"} label="Index" domain="data" zoomable />
           <YAxis domain={mode === "state" ? [0, 1] : undefined} />
           {mode === "scatter" ? <Scatter value="s1" name="S1" /> : null}
-          {mode === "state" ? <StateBand value="st" states={STATES} name="State" /> : null}
-          {matrix ? <Matrix value="r" level="lvl" name="Level" /> : null}
+          {mode === "state" ? <StateBand state="st" states={STATES} name="State" /> : null}
+          {matrix ? <Matrix row="r" level="lvl" name="Level" /> : null}
           {mode === "bars" ? <Bar value="s1" name="S1" /> : null}
           {course ? mode === "lines" ? <Line value="s1" name="S1" /> : <Bar value="s1" name="S1" /> : null}
           {course ? mode === "lines" ? <Line value="s2" name="S2" /> : <Area value="s2" name="S2" /> : null}

@@ -196,7 +196,7 @@ export default function LimitsAndState() {
       <LimitLine value={20} severity="warning" label="Charge soon" />
       <LimitLine value={10} severity="alarm" label="Return now" />
       {LANES.map(({ vehicle, day }) => (
-        <StateBand key={vehicle.id} data={day} value="state" states={VEHICLE_STATES} yAxisId="lanes" lane={vehicle.plate} name={vehicle.plate} />
+        <StateBand key={vehicle.id} data={day} state="state" states={VEHICLE_STATES} yAxisId="lanes" lane={vehicle.plate} name={vehicle.plate} />
       ))}
       <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />

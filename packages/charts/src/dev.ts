@@ -115,3 +115,9 @@ export function warnDeprecatedTokens(tokens: Record<string, string>): void {
     if (new RegExp(`${old}(?![\\w-])`).test(css)) warnDeprecated(old, replacement);
   }
 }
+
+/** The verdict a series is given: `verdict`, or the old `tone` (which warns once per part); `verdict` wins. */
+export function verdictOf<V>(verdict: V | undefined, tone: V | undefined, part: string): V | undefined {
+  if (tone !== undefined) warnDeprecated(`tone on ${part}`, "verdict");
+  return verdict ?? tone;
+}

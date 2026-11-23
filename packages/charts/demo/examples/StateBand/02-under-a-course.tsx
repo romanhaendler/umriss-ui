@@ -187,7 +187,7 @@ export default function UnderACourse() {
       <YAxis domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}
       <YAxis id="lane" position="right" domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
-      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" />
+      <StateBand data={STATES} state="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" />
       <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />
       <Tooltip mode="x" />

@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Line } from "./Line";
 import { asRows } from "./dev";
 import { Scatter } from "./Scatter";
-import { LimitLine } from "./LimitLine";
+import { LimitLine, ZoneLine } from "./LimitLine";
 import {
   controlLimits,
   violatedIndices,
@@ -29,7 +29,7 @@ import {
   type Violation,
 } from "./controlLimits";
 import { fnEqual } from "./scene";
-import { probeStale } from "./dev";
+import { probeStale, verdictOf } from "./dev";
 import { readerOf } from "./value";
 import type { ValueFunction, Value } from "./types";
 import type { ValueFormat } from "./format";
@@ -62,7 +62,7 @@ export interface ControlChartProps<T> {
   color?: string;
   /** A role instead of a colour value for the line; the theme resolves it.
       The violations are always "alarm". */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** Switchable one by one; run lengths are parameters. */
   rules?: Partial<RuleOptions>;
   /** The faint zone lines at one and two sigma. Rule 4 is about the two-sigma
@@ -84,6 +84,9 @@ export interface ControlChartProps<T> {
   /** The violations as data - they can be listed beside the chart as well as
       marked on it. */
   onViolations?: (found: readonly Violation[]) => void;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** The value of the previous render while it equals the new one. A caller
@@ -129,7 +132,6 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     name,
     format,
     color,
-    tone,
     rules,
     zoneLines = true,
     labelUpper,
@@ -137,6 +139,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     violationName,
     onViolations,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "ControlChart");
   const data = asRows(props.data, "the data of the ControlChart");
   // Compared as the scene compares a series' value: a field by its name, a
   // function by its source text.
@@ -200,26 +203,14 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
 
   return (
     <>
-      <Line value={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} tone={tone} />
+      <Line value={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} verdict={verdict} />
       {usable && (
         <>
           {zoneList.map((z) => (
-            <LimitLine
-              key={`zone-${z.k}-upper`}
-              value={z.upper}
-              axisId={yAxisId}
-              role="zone"
-              inExtent={false}
-            />
+            <ZoneLine key={`zone-${z.k}-upper`} value={z.upper} axisId={yAxisId} />
           ))}
           {zoneList.map((z) => (
-            <LimitLine
-              key={`zone-${z.k}-lower`}
-              value={z.lower}
-              axisId={yAxisId}
-              role="zone"
-              inExtent={false}
-            />
+            <ZoneLine key={`zone-${z.k}-lower`} value={z.lower} axisId={yAxisId} />
           ))}
           <LimitLine value={limits.center} axisId={yAxisId} role="control" />
           <LimitLine value={limits.upper} axisId={yAxisId} role="control" label={labelUpper} />
@@ -233,7 +224,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
         yAxisId={yAxisId}
         name={violationName}
         format={format}
-        tone="alarm"
+        verdict="alarm"
         radius={4}
       />
     </>

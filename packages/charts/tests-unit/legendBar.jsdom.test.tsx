@@ -29,7 +29,7 @@ function Probe({ coloring, wording }: { coloring?: MatrixColoring; wording?: Cha
     <Chart aria-label="Correlations" height={200} wording={wording}>
       <XAxis value="hour" />
       <YAxis />
-      <Matrix value="who" level="r" name="Correlation" coloring={coloring} format={{ decimals: 1 }} />
+      <Matrix row="who" level="r" name="Correlation" coloring={coloring} format={{ decimals: 1 }} />
       <Legend />
     </Chart>
   );

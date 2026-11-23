@@ -9,6 +9,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
+import { verdictOf } from "./dev";
 import type { ValueFunction, Value, ScatterSeriesConfig } from "./types";
 import type { ValueFormat } from "./format";
 
@@ -34,10 +35,13 @@ export interface ScatterProps<T> {
       @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
-  tone?: "ok" | "warning" | "alarm";
+  verdict?: "ok" | "warning" | "alarm";
   /** Point radius in CSS pixels.
       @default 3 */
   radius?: number;
+  /** The old name of `verdict`.
+      @deprecated since 0.58 - use `verdict`. */
+  tone?: "ok" | "warning" | "alarm";
 }
 
 /** A series drawn as points only, one per value. Renders nothing itself: it
@@ -50,9 +54,9 @@ export function Scatter<T>(props: ScatterProps<T>): null {
     name,
     format,
     color,
-    tone,
     radius = 3,
   } = props;
+  const verdict = verdictOf(props.verdict, props.tone, "Scatter");
   const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<ScatterSeriesConfig>(
@@ -66,10 +70,10 @@ export function Scatter<T>(props: ScatterProps<T>): null {
         name,
         format,
         color,
-        tone,
+        tone: verdict,
         radius,
       }) as ScatterSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, radius],
+    [accessor, xAxisId, yAxisId, data, name, format, color, verdict, radius],
   );
 
   useSeries("Scatter", config);

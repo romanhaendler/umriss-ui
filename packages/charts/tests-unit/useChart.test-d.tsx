@@ -90,26 +90,26 @@ export function Fields() {
       <BoxPlot median="p95" lowerQuartile="p95" upperQuartile="p99" lowerWhisker={(d) => d.p95} upperWhisker="p99" outliers="samples" />
       {/* @ts-expect-error outliers are a list, not a number */}
       <BoxPlot median="p95" lowerQuartile="p95" upperQuartile="p99" lowerWhisker="p95" upperWhisker="p99" outliers="p95" />
-      <Matrix value="t" level="p95" />
-      <Matrix value={(d) => d.t + 0.5} level={(d) => d.p99} />
+      <Matrix row="t" level="p95" />
+      <Matrix row={(d) => d.t + 0.5} level={(d) => d.p99} />
       {/* @ts-expect-error the colour channel is checked as well */}
-      <Matrix value="t" level="host" />
+      <Matrix row="t" level="host" />
       <Scatter value="p95" />
-      <StateBand value="p95" states={[]} />
+      <StateBand state="p95" states={[]} />
       {/* A matrix' rows named by the data (ADR-0052). */}
-      <Matrix value="host" level="p95" />
-      <Matrix value={(d) => d.host} level="p95" />
+      <Matrix row="host" level="p95" />
+      <Matrix row={(d) => d.host} level="p95" />
       {/* @ts-expect-error a list is no row */}
-      <Matrix value="samples" level="p95" />
+      <Matrix row="samples" level="p95" />
       {/* @ts-expect-error a row is a position or a name, not an instant */}
-      <Matrix value={(d) => new Date(d.t)} level="p95" />
+      <Matrix row={(d) => new Date(d.t)} level="p95" />
       {/* A lane by its name, or by its edges - one way or the other. */}
-      <StateBand value="p95" states={[]} lane="Kiln 2" />
-      <StateBand value="p95" states={[]} laneFrom={0} laneTo={0.9} />
+      <StateBand state="p95" states={[]} lane="Kiln 2" />
+      <StateBand state="p95" states={[]} laneFrom={0} laneTo={0.9} />
       {/* @ts-expect-error a named lane has no edges */}
-      <StateBand value="p95" states={[]} lane="Kiln 2" laneFrom={0} />
+      <StateBand state="p95" states={[]} lane="Kiln 2" laneFrom={0} />
       {/* @ts-expect-error a lane's name is text */}
-      <StateBand value="p95" states={[]} lane={2} />
+      <StateBand state="p95" states={[]} lane={2} />
 
       {/* An axis read by series with their own data names their row. */}
       <XAxis<Deploy> id="deploys" value="t" />
@@ -162,4 +162,24 @@ export function RangeOnACategoryAxis() {
   useChart(latencies, { onRange: (r: ChartRange<string>) => r.from.toUpperCase() + r.to.toUpperCase() });
   // @ts-expect-error a numeric axis' bounds are not strings
   useChart(latencies, { onRange: (r) => r.from.toUpperCase() });
+}
+
+/* A chart is named by type, and a limit's role is only what a limit line draws. */
+export function Named() {
+  const { Chart } = useChart(latencies);
+  return (
+    <>
+      <Chart aria-label="Latency" />
+      <Chart aria-labelledby="heading" />
+      {/* @ts-expect-error a chart without a name does not compile */}
+      <Chart />
+      {/* @ts-expect-error the DOM's `onSelect`, `title` and `color` are not a chart's */}
+      <Chart aria-label="Latency" title="Latency" color="red" onSelect={() => {}} />
+      <LimitLine value={1} role="control" />
+      {/* @ts-expect-error a zone is the control chart's own */}
+      <LimitLine value={1} role="zone" />
+      {/* @ts-expect-error a zone is the control chart's own */}
+      <LimitBand from={1} to={2} role="zone" />
+    </>
+  );
 }

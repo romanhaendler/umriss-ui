@@ -160,7 +160,7 @@ describe("The walk over a matrix", () => {
       <Chart aria-label="OEE">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
         <YAxis />
-        <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
+        <Matrix row="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
         <Tooltip mode="nearest" />
       </Chart>
     );
@@ -203,7 +203,7 @@ describe("A matrix among other series", () => {
       <Chart aria-label="Mixed">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
         <YAxis />
-        <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
+        <Matrix row="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
         <Scatter value={(d) => d.machine + 0.5} name="Probe" />
         <Tooltip mode="nearest" />
       </Chart>

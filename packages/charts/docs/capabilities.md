@@ -189,7 +189,7 @@ axis with the map kept by the library: every promise above holds on it.
 | A point between two gaps is a stroke from its foot to its value, with or without an outline | Q23 | Unit (draw) |
 | `fillOpacity`, `strokeWidth` (0 leaves the outline out) | 4.3 | Screenshot (`filled`, `corridor`, light and dark) |
 | `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
-| `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
+| `verdict`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
 | `maxGap`: a step longer than it closes the area's section on both sides, as a missing value does; not read in a `stack` | — | Unit (maxGapDraw, thinningGaps), Screenshot (`an-outage`) |
 | `stack`: areas of one id stand on the ones registered before, the stack below as their baseline channel; a gap stacks as zero; downsampled after stacking, each member keeping its own extremes per pixel column | charts-stacking K1-K3 | Unit (stack, jsdom stacking), Screenshot (`stacked`) |
@@ -218,7 +218,7 @@ axis with the map kept by the library: every promise above holds on it.
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
-| `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
+| `verdict`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | The hover marker sits at the head, not at the foot | R-4.7 | Interaction (`mixed`) |
 | `stack`: bars of one id stand on each other in registration order, one place in the group; a gap stacks as zero and is no hit; negative values stack downward from zero apart from the positive | charts-stacking K1-K3 | Unit (stack, bars, draw, jsdom stacking), Screenshot (`stacked`) |
 | A stack's extent from its foot to its highest top; a hidden member gives up its place | charts-stacking K2 | Unit (jsdom stacking) |
@@ -242,7 +242,7 @@ axis with the map kept by the library: every promise above holds on it.
 | Several box series side by side in the step; boxes and bars on one x axis share one group | ADR-0002 | Unit (jsdom boxPlot), Screenshot (`grouped`, `objective`) |
 | The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
 | Hidden (by `name`, through the view): out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3, ADR-0047 | Unit (jsdom boxPlot) |
-| Mixed with `Line` and `LimitLine`; `tone` per series | Q11 | Screenshot (`objective`, `detailed`) |
+| Mixed with `Line` and `LimitLine`; `verdict` per series | Q11 | Screenshot (`objective`, `detailed`) |
 | `outliers`: a list per box in two named channels - values flat, offsets per box -, null without it and for every other kind | ADR-0040 | Unit (materialize) |
 | Outliers drawn in the box's colour on its centre line, filled; beyond three IQR of the box's own quartiles a ring; in the extent, hidden with their box, never a hit of their own | ADR-0040, B12 | Unit (materialize, jsdom boxPlot), Screenshot (`outliers`) |
 | Tooltip and table: a count and the values top to bottom, cut after five; a row and a column only where given | box-plot B9 | Unit (jsdom boxPlot) |
@@ -258,7 +258,7 @@ axis with the map kept by the library: every promise above holds on it.
 |---|---|---|
 | Points without a connecting path | 4.3 | Screenshot (`mixed`, `measurements`) |
 | `radius` | 4.3 | Screenshot (`measurements`, `over-a-course`) |
-| `tone`: a role the theme resolves, not a colour value | 4.3 | Screenshot (`over-a-course`, light and dark) |
+| `verdict`: a role the theme resolves, not a colour value | 4.3 | Screenshot (`over-a-course`, light and dark) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its point out | R-2.5 | Screenshot (`mixed`) |
 | Deliberately without the line's marker policy | — | type check |
@@ -319,7 +319,7 @@ axis with the map kept by the library: every promise above holds on it.
 | No text brought along: the labelling of the limits and the name of the violations come from the caller | — | Unit (jsdom, control chart) |
 | A constant reference window (sigma 0): no outlier and no two-of-three, and a DEV warning that the limits are degenerate | — | Unit (control limits) |
 | The violations as data through `onViolations`, once per change of their content; an inline `value` function and origin recompute nothing | — | Unit (jsdom, control chart violations) |
-| `tone` colours the line; the violations stay "alarm" | Q11 | Unit (jsdom tone) |
+| `verdict` colours the line; the violations stay "alarm" | Q11 | Unit (jsdom tone) |
 
 ## The working-time axis (`calendar`)
 

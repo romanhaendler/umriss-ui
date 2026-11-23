@@ -384,7 +384,7 @@ export interface Scale {
     specification and the other way round, and each of the four cases calls for
     something different - which is why the two lines have to look
     distinguishable (ADR-0008). */
-export type LimitRole = "specification" | "control" | "zone";
+export type LimitRole = "specification" | "control";
 
 export interface LimitBase {
   /** Axis on which the value lies; without one, the first axis of its
@@ -392,7 +392,8 @@ export interface LimitBase {
   axisId?: string;
   orientation: AxisOrientation;
   severity: Severity;
-  role: LimitRole;
+  /** `"zone"` is the control chart's own: a faint line at one or two sigma. */
+  role: LimitRole | "zone";
   label?: string;
   /** A colour of its own; without one, that of the role or of the severity out of
       the theme. */
@@ -500,7 +501,8 @@ export interface HoverState {
   mouseY: number;
 }
 
-/** Measurements of the instrumentation for the benchmark page. */
+/** Measurements of the instrumentation for the benchmark page.
+    @experimental a minor release may change them. */
 export interface ChartPerf {
   materializeMs: number;
   seriesDrawMs: number;

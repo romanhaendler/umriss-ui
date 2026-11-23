@@ -166,7 +166,7 @@ export default function OneLaneEach() {
       <XAxis value="t" time label="Time" />
       <YAxis grid={false} />
       {FLEET.map(({ vehicle, day }) => (
-        <StateBand key={vehicle.id} data={day} value="state" states={VEHICLE_STATES} lane={vehicle.plate} name={vehicle.plate} />
+        <StateBand key={vehicle.id} data={day} state="state" states={VEHICLE_STATES} lane={vehicle.plate} name={vehicle.plate} />
       ))}
       <Legend placement="top" />
       <Tooltip mode="x" />

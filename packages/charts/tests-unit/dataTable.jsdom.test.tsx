@@ -160,7 +160,7 @@ describe("The table", () => {
         <Chart aria-label="States">
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
           <YAxis domain={[0, 1]} />
-          <StateBand value="s" states={states} name="Furnace" />
+          <StateBand state="s" states={states} name="Furnace" />
           <DataTable />
         </Chart>
       );

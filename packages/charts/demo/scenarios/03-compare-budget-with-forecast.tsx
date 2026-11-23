@@ -79,7 +79,7 @@ function GapPerCentre() {
       <XAxis value="name" />
       <YAxis label="k€" tickFormat={euros} />
       {/* One series per sign, stacked on one another so that each bar stands centred on its cost centre. */}
-      <Bar value={(d) => (gap(d) > 0 ? thousands(gap(d)) : null)} name="Over budget" tone="alarm" stack="gap" format={euros} />
+      <Bar value={(d) => (gap(d) > 0 ? thousands(gap(d)) : null)} name="Over budget" verdict="alarm" stack="gap" format={euros} />
       <Bar
         value={(d) => (gap(d) <= 0 ? thousands(gap(d)) : null)}
         name="Under budget"
@@ -101,7 +101,7 @@ function MarketingByMonth() {
       <YAxis label="k€" tickFormat={euros} />
       <Bar value={(d) => thousands(d.budget)} name="Budget" color="var(--uc-color-text)" barWidth={0.7} format={euros} />
       <Bar value={(d) => (d.actual === null ? null : thousands(d.actual))} name="Actual" barWidth={0.7} format={euros} />
-      <Line value={(d) => thousands(d.forecast)} name="Forecast" tone="warning" markers="always" format={euros} />
+      <Line value={(d) => thousands(d.forecast)} name="Forecast" verdict="warning" markers="always" format={euros} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
