@@ -8,7 +8,7 @@
 
 import { createElement, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { announce, useWording } from "@umriss-ui/core";
+import { announce, useWording, warnOnce } from "@umriss-ui/core";
 import { DashboardOf } from "./Dashboard";
 import type { DashboardProps } from "./Dashboard";
 import type { Edit } from "./edit";
@@ -52,7 +52,7 @@ export interface DashboardParts {
   /** Leaves the mode, keeps the changes and reports them once if there are any. */
   done: () => void;
   /** Opens the catalogue. Does nothing outside the editing mode. */
-  catalogue: () => void;
+  openCatalogue: () => void;
   /** Leaves the mode and puts the arrangement back as it was before `edit`. */
   cancel: () => void;
   /** Goes one step back in the draft. Does nothing at the first. */
@@ -61,6 +61,9 @@ export interface DashboardParts {
   redo: () => void;
   /** Steps to the `defaultView`; `undo` brings the arrangement back. */
   reset: () => void;
+  /** The old name of `openCatalogue`.
+      @deprecated since 0.58 - use openCatalogue. */
+  catalogue: () => void;
 }
 
 /** The part of the hook `Dashboard` draws the mode from. */
@@ -207,7 +210,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
       undo,
       redo,
       reset,
-      catalogue: () => setCatalogue(true),
+      openCatalogue: () => setCatalogue(true),
       read,
       setView: (given: DashboardView) => {
         const view = isView(given) ? given : latest.current.defaultView;
@@ -241,9 +244,13 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     edit: parts.edit,
     done: parts.done,
     cancel: parts.cancel,
-    catalogue: parts.catalogue,
+    openCatalogue: parts.openCatalogue,
     undo: parts.undo,
     redo: parts.redo,
     reset: parts.reset,
+    catalogue: () => {
+      warnOnce("@umriss-ui/dashboard", "deprecated:useDashboard catalogue", "useDashboard's catalogue() is deprecated and goes in the next minor release; use openCatalogue().");
+      parts.openCatalogue();
+    },
   };
 }

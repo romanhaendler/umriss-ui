@@ -1,3 +1,4 @@
 {
+  "DashboardParts.catalogue": "(g) deprecated alias: the old name of openCatalogue",
   "DashboardProps.ref": "(a) pass-through: receives the root group"
 }

@@ -26,7 +26,9 @@ export interface DashboardWidget {
 }
 
 /** The arrangement of a dashboard: which widgets, in what order, at which
-    sizes, with which options. An object, so that more can join it later. */
+    sizes, with which options. An object, so that more can join it later.
+    It is the supported storage format: an addition is a minor release, and renaming
+    or removing `widgets`, `type` or `size` is a major one. */
 export interface DashboardView {
   /** The widgets, in the order they are drawn and read. */
   widgets: ReadonlyArray<DashboardWidget>;

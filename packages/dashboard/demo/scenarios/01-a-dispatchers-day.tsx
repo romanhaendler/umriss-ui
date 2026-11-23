@@ -257,7 +257,7 @@ function Stage({ shown }: { shown: Case }) {
     rearranging: [
       <Button key="edit" onClick={edit} disabled={parts.editing}>Edit</Button>,
       <Button key="undo" onClick={() => { parts.undo(); setSaid("One step back, not all of them."); }} disabled={!parts.editing}>Undo</Button>,
-      <Button key="catalogue" onClick={() => { parts.catalogue(); setSaid("Every widget type with its name, a sentence and the room it takes. A new widget shows something at once and stands at the end."); }} disabled={!parts.editing}>Add a widget</Button>,
+      <Button key="catalogue" onClick={() => { parts.openCatalogue(); setSaid("Every widget type with its name, a sentence and the room it takes. A new widget shows something at once and stands at the end."); }} disabled={!parts.editing}>Add a widget</Button>,
       <Button key="done" onClick={() => { parts.done(); setSaid("Only now, and once, the application is told the whole arrangement."); }} disabled={!parts.editing}>Done</Button>,
     ],
     wrong: [

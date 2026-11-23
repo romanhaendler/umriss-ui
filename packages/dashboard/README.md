@@ -108,6 +108,9 @@ const { Dashboard, WidgetType } = useDashboard({
   dashboard's boundary never sees the error, and it can reset the application's
   data layer. Without one, a widget gets another try by itself when its size or
   its options change.
+- **`DashboardView` is the storage format.** What an application stores of it keeps
+  reading after an upgrade: an addition to it is a minor release, and renaming or
+  removing `widgets`, `type` or `size` is a major one.
 - **The application's, not the library's:** where an arrangement is stored,
   which default a role gets, several dashboards, sharing, and what stands in a
   widget.
