@@ -13,8 +13,8 @@
     composes: text raised from "#own-styles";
     border: none;
     margin: 0;
-    padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
-      max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+    padding: max(var(--u-space-6), env(safe-area-inset-top)) max(var(--u-space-6), env(safe-area-inset-right))
+      max(var(--u-space-6), env(safe-area-inset-bottom)) max(var(--u-space-6), env(safe-area-inset-left));
     /* On a pinch-zoomed page the dialog is the visible part and not the
        layout viewport (`--_vv-*`, visualViewport.ts), so the sheet stays in
        sight; unzoomed the properties are absent and it is the window. */

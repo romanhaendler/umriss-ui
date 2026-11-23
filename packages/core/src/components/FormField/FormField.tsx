@@ -21,9 +21,17 @@ export interface FormFieldContextValue {
 
 const FormFieldContext = /* @__PURE__ */ createContext<FormFieldContextValue | null>(null);
 
-/** Used by Input, Select and Checkbox to wire up id and aria automatically. */
+/** Reads the wiring of the surrounding FormField (id, label, description,
+    invalid, required) so a field sets its id and aria attributes itself.
+    Returns `null` outside a FormField and inside a `FormFieldBoundary`. */
 export function useFormField(): FormFieldContextValue | null {
   return useContext(FormFieldContext);
+}
+
+/** The props of `FormFieldBoundary`. */
+export interface FormFieldBoundaryProps {
+  /** What stands outside the field's wiring. */
+  children: ReactNode;
 }
 
 /**
@@ -33,7 +41,7 @@ export function useFormField(): FormFieldContextValue | null {
  * then activates the field's trigger through htmlFor and closes the panel
  * again immediately.
  */
-export function FormFieldBoundary({ children }: { children: ReactNode }) {
+export function FormFieldBoundary({ children }: FormFieldBoundaryProps) {
   return <FormFieldContext value={null}>{children}</FormFieldContext>;
 }
 

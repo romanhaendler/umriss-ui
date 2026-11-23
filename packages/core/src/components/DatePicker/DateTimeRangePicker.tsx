@@ -118,7 +118,7 @@ export interface DateTimeRangePickerProps
    *
    * @default `DEFAULT_PRESETS`, in the wording's labels
    */
-  presets?: RangePreset[];
+  presets?: readonly RangePreset[];
   /** The earliest day the picker offers, inclusive. Only its calendar day counts - in the formats' zone, when one is named - not its time of day. A value given outside is shown as given. */
   min?: Date;
   /** The latest day the picker offers, inclusive; read as `min` is. */

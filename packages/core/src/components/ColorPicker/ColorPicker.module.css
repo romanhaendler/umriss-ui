@@ -134,7 +134,7 @@
   .swatches {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: var(--u-space-1);
   }
 
   .choice {

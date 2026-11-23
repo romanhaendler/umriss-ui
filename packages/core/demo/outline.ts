@@ -401,7 +401,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "FormField",
         sentence: "The frame around a field: its label, a hint below it and the error that replaces the hint (validation messages). Wrap every field in one, so the question, the help and the problem are read out together.",
         about: [
-          "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
+          "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`. A panel that opens from a field and holds fields of its own (a search box, option checkboxes) stands inside a `FormFieldBoundary`, so they do not take the outer field's id.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",
           "A FormField keeps no space around itself: the fields of a form stand in a [Stack](#/stack-and-grid) or another container with a gap, which spaces them, so an error never touches the next label.",
           "Give a field a `name` and a `<form>` (or a React 19 `<form action>`) receives its value in `FormData`: the Combobox the value, not the label; the MultiSelect one entry per value; ColorPicker the lowercase `#rrggbb`; DatePicker `YYYY-MM-DD`; DateTimePicker ISO with the offset; a range picker `<name>Start` and `<name>End` (`startName`, `endName` rename them); NumberInput the plain number; empty `\"\"`. `formValue` writes a value another way.",
@@ -411,8 +411,8 @@ export const OUTLINE: readonly Rubric[] = [
           "No validation: the caller's form library decides; pass `error` (ADR-0060). No form state and no submit handling either.",
           "One field per `FormField`; a group of fields that share one label is a fieldset of your own.",
         ],
-        types: ["FormFieldProps"],
-        exports: ["FormField", "useFormField"],
+        types: ["FormFieldProps", "FormFieldBoundaryProps"],
+        exports: ["FormField", "useFormField", "FormFieldBoundary"],
       },
       {
         id: "textarea",
@@ -687,7 +687,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "DatePicker",
         sentence: "One day, picked in a calendar (date field): a delivery date, a due date. Weeks begin on Monday.",
         about: [
-          "The value contract of the four pickers stands here. `DatePicker` hands out a `Date` at local midnight on every path and reports as soon as the day is chosen. [DateTimePicker](#/datetimepicker) hands out an instant and reports only on Apply, Now or Clear. [DateRangePicker](#/daterangepicker) gives both ends at local midnight, both inclusive. [DateTimeRangePicker](#/datetimerangepicker) sets an all-day end to the end of the day, not to its midnight.",
+          "The calendar leaf on the pickers' triggers is `CalendarGlyph`; with `range` it carries the bar of the range pickers. The value contract of the four pickers stands here. `DatePicker` hands out a `Date` at local midnight on every path and reports as soon as the day is chosen. [DateTimePicker](#/datetimepicker) hands out an instant and reports only on Apply, Now or Clear. [DateRangePicker](#/daterangepicker) gives both ends at local midnight, both inclusive. [DateTimeRangePicker](#/datetimerangepicker) sets an all-day end to the end of the day, not to its midnight.",
           "`null` means no date, never 1 January 1970. A range never comes out backwards: ends picked in reverse are swapped, so there is no error state to handle. A time that falls into a clock change is named in the panel, never guessed: a skipped hour moves forward, and a doubled hour asks which of the two.",
         ],
         alternatives: [
@@ -701,8 +701,8 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Closes the calendar and returns to the field." },
         ],
         limits: ["No typing of a date into the field.", "umriss shows the reader's time (ADR-0060)."],
-        types: ["DatePickerProps"],
-        exports: ["DatePicker"],
+        types: ["DatePickerProps", "CalendarGlyphProps"],
+        exports: ["DatePicker", "CalendarGlyph"],
       },
       {
         id: "datetimepicker",
@@ -869,6 +869,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "`warning` and `danger` interrupt a screen reader at once; `neutral`, `accent` and `success` are read out politely when the reader is free. Choose the tone by what the reader has to do, not by the colour you want.",
           "Dismissing is reported through `onDismiss` and nothing more: whether and when the message comes back is your state.",
+          "The icon beside the text is `ToneGlyph`, which a message of your own can use to say its tone by shape as well as by colour.",
         ],
         alternatives: [
           { when: "Confirming something that has already happened, which may pass unnoticed", use: "toast" },
@@ -888,8 +889,8 @@ export const OUTLINE: readonly Rubric[] = [
           "No timer: an alert stays until you remove it. A message that goes by itself is a toast.",
           "No stack or queue of messages; place each alert where its matter is.",
         ],
-        types: ["AlertProps"],
-        exports: ["Alert"],
+        types: ["AlertProps", "ToneGlyphProps"],
+        exports: ["Alert", "ToneGlyph"],
       },
       {
         id: "toast",

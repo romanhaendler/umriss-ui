@@ -55,8 +55,9 @@ export interface ToastConfig {
   limit?: number;
 }
 
-/** The settings of `UmrissProvider` as the components read them, every value
-    filled in. */
+/** The settings of `UmrissProvider` as the components read them. `density`
+    and `portalTarget` are always set; `toast` holds only what the provider was
+    given - the toasts apply their own defaults to the rest. */
 export interface UmrissConfig {
   density: Density;
   portalTarget: PortalTarget;

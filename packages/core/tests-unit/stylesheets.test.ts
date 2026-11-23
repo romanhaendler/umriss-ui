@@ -191,7 +191,7 @@ const EXCEPTIONS: Readonly<Record<string, string>> = {
     "No duration but a delay: the open deck's order jumps once its cards stand apart, after --u-duration-medium. A z-index that took time would pass the front card under an older one while they still overlap; the shorthand needs a duration before the delay.",
 };
 
-describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
+describe("The vocabulary of the stylesheets", () => {
   it("reads the stylesheets of every package that has them", () => {
     const packages = new Set(Object.keys(LIBRARY).map((path) => nameOf(path).split("/")[0]));
     expect([...packages].sort()).toEqual(["calculation", "charts", "core", "schedule", "table"]);
@@ -442,7 +442,7 @@ function canonFinds(check: CanonCheck): string[] {
   );
 }
 
-describe("The interaction-state canon (visuelle-wertigkeit 04)", () => {
+describe("The interaction-state canon", () => {
   const check = (kind: CanonCheck) => () => {
     expect([...new Set(canonFinds(kind))].filter((find) => !(find in CANON_EXCEPTIONS))).toEqual([]);
   };

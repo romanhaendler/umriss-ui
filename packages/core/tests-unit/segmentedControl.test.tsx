@@ -45,7 +45,7 @@ describe("SegmentedControl – what it says", () => {
   });
 });
 
-describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
+describe("SegmentedControl – icons", () => {
   it("names a possibility by its word alone, its icon hidden", () => {
     render(
       <SegmentedControl

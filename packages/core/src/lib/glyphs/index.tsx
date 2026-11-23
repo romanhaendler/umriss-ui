@@ -33,8 +33,6 @@ export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "c
   /**
    * Edge length in pixels. Each glyph has the size it is drawn at in the
    * components.
-   *
-   * @default the glyph's own size
    */
   size?: number;
 }
@@ -192,9 +190,16 @@ export function DropperGlyph({ ref, size = 10, ...rest }: GlyphProps) {
 
 /* The date pickers' two characters, set at 12 pixels. */
 
+/** The props of `CalendarGlyph`. */
+export interface CalendarGlyphProps extends GlyphProps {
+  /** Draws a bar across the sheet for the span a range picker chooses.
+      @default false */
+  range?: boolean;
+}
+
 /** A calendar leaf: a sheet with its header and two rings. With `range`, a
     bar across the sheet stands for the span a range picker chooses. */
-export function CalendarGlyph({ ref, size = 12, range = false, ...rest }: GlyphProps & { range?: boolean }) {
+export function CalendarGlyph({ ref, size = 12, range = false, ...rest }: CalendarGlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <rect x="1" y="1.6" width="8" height="7.7" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -209,16 +214,20 @@ export function CalendarGlyph({ ref, size = 12, range = false, ...rest }: GlyphP
   );
 }
 
+/** The five tones a component can take, as the tone components name them. */
+export type Tone = "neutral" | "accent" | "success" | "warning" | "danger";
+
+/** The props of `ToneGlyph`. */
+export interface ToneGlyphProps extends GlyphProps {
+  /** Which tone the glyph stands for. */
+  tone: Tone;
+}
+
 /** What a tone looks like beside its colour: a tick for success, an
     exclamation in a circle for danger, in a triangle for warning, and an "i" in
     a circle for the neutral and accent tones. The dots of ! and i are strokes of
     no length: a round cap alone is a dot as wide as the stem. */
-export function ToneGlyph({
-  ref,
-  tone,
-  size = 16,
-  ...rest
-}: GlyphProps & { tone: "neutral" | "accent" | "success" | "warning" | "danger" }) {
+export function ToneGlyph({ ref, tone, size = 16, ...rest }: ToneGlyphProps) {
   return (
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       {tone === "success" && (

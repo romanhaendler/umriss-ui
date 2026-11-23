@@ -53,12 +53,12 @@ export interface Wording {
   invertSelection: string;
   nothingSelected: string;
   /** The cross on a selected value in the trigger. */
-  removeSelectedValue: (beschriftung: string) => string;
+  removeSelectedValue: (label: string) => string;
   /** The "+N" counter in the trigger. */
   manageMoreSelected: (count: number) => string;
   /** The summary in the panel: "3 / 12". The sentence structure belongs to the
       language, even where it is only a slash here. */
-  multiSelectSummary: (gewaehlt: number, total: number) => string;
+  multiSelectSummary: (selected: number, total: number) => string;
   /* What the lists say through the live region (listbox-announcements):
      VoiceOver does not read an `aria-activedescendant` option's count or
      state, so the lists say them. The command palette's moving reads the
@@ -205,8 +205,8 @@ export interface Wording {
   endMinute: string;
   endSecond: string;
   /** Stepper buttons of a time field; the label comes from above. */
-  timeFieldIncrease: (feld: string) => string;
-  timeFieldDecrease: (feld: string) => string;
+  timeFieldIncrease: (field: string) => string;
+  timeFieldDecrease: (field: string) => string;
   /** Said when a picker takes a new value; the text is the value as the field shows it. */
   pickerPicked: (value: string) => string;
   /** Footer of the range panels. */
@@ -222,7 +222,7 @@ export interface Wording {
   /** "3 days (all day)" */
   daysAllDay: (count: number) => string;
   /** "Duration: 1 day 2 hrs 30 min" */
-  duration: (teile: readonly string[]) => string;
+  duration: (parts: readonly string[]) => string;
   hoursShort: (count: number) => string;
   minutesShort: (count: number) => string;
   /** Daylight-saving change: the hour that does not exist. */
@@ -232,8 +232,8 @@ export interface Wording {
   /** Daylight-saving change: the hour that occurs twice. */
   timeAmbiguousHint: string;
   timeAmbiguousHintSide: (side: string) => string;
-  timeEarlier: (versatz: string) => string;
-  timeLater: (versatz: string) => string;
+  timeEarlier: (offset: string) => string;
+  timeLater: (offset: string) => string;
   /** The calendar's weekday headers, starting at Monday. */
   weekdays: readonly string[];
   /** The quick-select ranges, in the order of PRESET_LABELS. */
@@ -341,7 +341,7 @@ export interface Wording {
   /** Header of the actions column - for the screen reader, not visible. */
   rowActions: string;
   /** One action on a row: "Open: A-2041". */
-  rowAction: (aktion: string, row: string) => string;
+  rowAction: (action: string, row: string) => string;
   /** The menu holding a row's actions. */
   rowActionsMenu: (row: string) => string;
   /** The editor of a cell in a table's grid mode, named after its column and
@@ -489,8 +489,8 @@ export interface Wording {
   target: string;
   /** "3,2 above target" or "1,5 below target" - the amount comes from the
       formats, which is where the comma is from. */
-  deviationAbove: (betrag: string) => string;
-  deviationBelow: (betrag: string) => string;
+  deviationAbove: (amount: string) => string;
+  deviationBelow: (amount: string) => string;
   deviationOnTarget: string;
   /** The three freshness states. They are a DIFFERENT axis from the verdict: a
       stale value keeps its verdict (ADR-0010). */
@@ -557,7 +557,7 @@ export interface Wording {
   /** The cross on a tag without text content. */
   remove: string;
   /** The cross on a tag with text content. */
-  removeTag: (beschriftung: string) => string;
+  removeTag: (label: string) => string;
 
   /* -------- @umriss-ui/schedule ------------------------------------ */
   /* The schedule's entries stand here for the table's reason: one provider
@@ -853,9 +853,9 @@ export const DEFAULT_WORDING: Wording = {
   selectNone: "None",
   invertSelection: "Invert",
   nothingSelected: "Nothing selected",
-  removeSelectedValue: (beschriftung) => `Remove ${beschriftung}`,
+  removeSelectedValue: (label) => `Remove ${label}`,
   manageMoreSelected: (count) => `Manage all ${count} selected`,
-  multiSelectSummary: (gewaehlt, total) => `${gewaehlt} / ${total}`,
+  multiSelectSummary: (selected, total) => `${selected} / ${total}`,
   optionCount: (count) => (count === 1 ? "1 option" : `${count} options`),
   optionActive: (label, { selected, disabled, group }) =>
     [label, group, selected && "selected", disabled && "unavailable"].filter(Boolean).join(", "),
@@ -939,8 +939,8 @@ export const DEFAULT_WORDING: Wording = {
   endHour: "End hour",
   endMinute: "End minute",
   endSecond: "End second",
-  timeFieldIncrease: (feld) => `Increase ${feld}`,
-  timeFieldDecrease: (feld) => `Decrease ${feld}`,
+  timeFieldIncrease: (field) => `Increase ${field}`,
+  timeFieldDecrease: (field) => `Decrease ${field}`,
   pickerPicked: (value) => `Selected ${value}`,
   chooseStartDate: "Select start date",
   chooseEndDate: "Select end date – backwards is allowed",
@@ -952,7 +952,7 @@ export const DEFAULT_WORDING: Wording = {
   rangePreview: (from, to, count) =>
     `${from} – ${to} · ${count} ${count === 1 ? "day" : "days"}`,
   daysAllDay: (count) => `${count} ${count === 1 ? "day" : "days"} (all day)`,
-  duration: (teile) => `Duration: ${teile.join(" ")}`,
+  duration: (parts) => `Duration: ${parts.join(" ")}`,
   hoursShort: (count) => `${count} ${count === 1 ? "hr" : "hrs"}`,
   minutesShort: (count) => `${count} min`,
   timeMissingHint: (timeOfDay) =>
@@ -962,8 +962,8 @@ export const DEFAULT_WORDING: Wording = {
   timeAmbiguousHint: "This time occurs twice on this day (end of daylight saving time):",
   timeAmbiguousHintSide: (side) =>
     `${side}: This time occurs twice on this day (end of daylight saving time):`,
-  timeEarlier: (versatz) => `Earlier (${versatz})`,
-  timeLater: (versatz) => `Later (${versatz})`,
+  timeEarlier: (offset) => `Earlier (${offset})`,
+  timeLater: (offset) => `Later (${offset})`,
   weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   presets: {
     today: "Today",
@@ -1026,7 +1026,7 @@ export const DEFAULT_WORDING: Wording = {
   expandRowNamed: (row) => `Expand ${row}`,
   collapseRowNamed: (row) => `Collapse ${row}`,
   rowActions: "Actions",
-  rowAction: (aktion, row) => `${aktion}: ${row}`,
+  rowAction: (action, row) => `${action}: ${row}`,
   rowActionsMenu: (row) => `Actions: ${row}`,
   editCell: (column, row) => `Edit ${column}: ${row}`,
   newRow: "New row",
@@ -1113,8 +1113,8 @@ export const DEFAULT_WORDING: Wording = {
   verdictUnknown: "No value",
   statAbsentValue: "—",
   target: "Target",
-  deviationAbove: (betrag) => `${betrag} above target`,
-  deviationBelow: (betrag) => `${betrag} below target`,
+  deviationAbove: (amount) => `${amount} above target`,
+  deviationBelow: (amount) => `${amount} below target`,
   deviationOnTarget: "on target",
   freshnessFresh: "Fresh",
   freshnessStale: "Stale",
@@ -1151,7 +1151,7 @@ export const DEFAULT_WORDING: Wording = {
   hide: "Hide",
   moreActions: "More actions",
   remove: "Remove",
-  removeTag: (beschriftung) => `Remove ${beschriftung}`,
+  removeTag: (label) => `Remove ${label}`,
   scheduleOverlap: "Overlap",
   scheduleViolatedDependency: "Violated dependency",
   scheduleGhostTimes: (from, to) => `${from}–${to}`,

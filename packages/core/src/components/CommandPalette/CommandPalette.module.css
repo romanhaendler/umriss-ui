@@ -274,7 +274,7 @@
     justify-content: center;
     min-width: 18px;
     height: 18px;
-    padding: 0 4px;
+    padding: 0 var(--u-space-1);
     border-radius: var(--u-radius-xs);
     background: var(--u-color-surface-sunken);
     font-family: var(--u-font-sans);

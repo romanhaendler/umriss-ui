@@ -12,8 +12,5 @@
   "DateTimePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
   "DateTimePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
   "DateTimeRangePickerProps.min": "(f) twin: reads as DatePickerProps.min, which its example shows",
-  "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
-  "FileInputProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "DateTimePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration",
-  "DateTimeRangePickerProps.defaultValue": "not shown yet: the examples move to the field contract's names with the callers' migration"
+  "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows"
 }

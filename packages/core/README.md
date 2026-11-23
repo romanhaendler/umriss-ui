@@ -558,7 +558,13 @@ The table is not part of this package. It lives in
    a layer (ADR-0021; the guards in `tests-unit/stylesheets.test.ts` hold it).
 6. Everything is English – identifiers, props and prose (ADR-0018, which
    reversed ADR-0015). The accessible name is spelled `aria-label` everywhere
-   (ADR-0068).
+   (ADR-0068). It is required where a component shows no text of its own
+   (`IconButton`, `TagGroup`, `TreeView`) and optional where it names a group
+   or a surface (`ButtonGroup`, `ContextMenu`, `Popover`); `Menu` and
+   `Breadcrumb` take it through the rest of their props.
+   `size` is `"sm" | "md"` on a control (`Avatar` has a scale of its own,
+   `Modal` is `"sm" | "md" | "lg"`), a `TextSize` on `Text`, `Heading` and
+   `Link`, and a number of pixels on a glyph and the `Spinner`.
 7. A field's root composes `extent` from `#own-styles`: it fills the place
    that gives it a width, is its natural width where the place asks, and is
    never wider than its place; what it shows never moves it (ADR-0041). A field
