@@ -1,6 +1,6 @@
 # Under a finger the controls grow, and touch is told by the pointer
 
-Status: amended by ADR-0079
+Status: amended by ADR-0079 (the 44 px decision and its first consequence)
 Date:   2026-10
 
 On a phone, a tablet and a touch-only kiosk every umriss control was 32 px tall,

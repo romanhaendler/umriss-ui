@@ -1,6 +1,6 @@
 # A stale value keeps its verdict
 
-Status: accepted
+Status: accepted, extended by ADR-0077 (a bad value keeps its verdict too)
 Date:   2026-08
 
 Freshness and judgement are two axes, and nothing in this library collapses one

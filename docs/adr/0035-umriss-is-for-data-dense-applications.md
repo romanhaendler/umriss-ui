@@ -1,6 +1,6 @@
 # umriss is for data-dense applications, not for plants alone
 
-Status: accepted. Superseded in part by ADR-0066 (the consequence "no deprecated aliases")
+Status: accepted, superseded in part by ADR-0066 ("no deprecated aliases"); amended by ADR-0078 (the alarms package's wording)
 Date:   2026-09
 
 umriss grew out of plant screens, and until now it said so: ADR-0032 opened

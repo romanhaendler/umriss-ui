@@ -1,6 +1,6 @@
 # The styles load themselves, and they touch nothing else
 
-Status: accepted
+Status: accepted, amended on 2026-10-24 (a build that lowers light-dark() gets light by default)
 Date:   2026-09
 
 Until now a caller wrote two imports, and the second was not optional:

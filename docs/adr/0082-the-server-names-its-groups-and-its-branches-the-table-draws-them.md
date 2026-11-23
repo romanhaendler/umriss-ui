@@ -1,6 +1,6 @@
 # The server names its groups and its branches; the table draws them
 
-Status: accepted
+Status: accepted, amends ADR-0072
 Date:   2026-10
 
 Amends ADR-0072.

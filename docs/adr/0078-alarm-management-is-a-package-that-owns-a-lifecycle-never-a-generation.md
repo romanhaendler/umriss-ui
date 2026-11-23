@@ -1,6 +1,6 @@
 # Alarm management is a package on core and table; it owns an alarm's lifecycle, never its generation
 
-Status: accepted, supersedes ADR-0009 and ADR-0057
+Status: accepted, supersedes ADR-0009 and ADR-0057, amends ADR-0035
 Date:   2026-10-27
 
 The alarm list left `@umriss-ui/table` in 0.34, for lack of contact with control rooms. A control-room

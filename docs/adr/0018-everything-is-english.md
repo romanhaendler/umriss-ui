@@ -1,6 +1,6 @@
 # Everything is English
 
-Status: accepted — supersedes ADR-0015
+Status: accepted — supersedes ADR-0015; its section "What stands from ADR-0015" superseded by ADR-0068
 Date:   2026-09
 
 ADR-0015 settled a real disagreement. `CONTEXT.md` had fixed two languages —

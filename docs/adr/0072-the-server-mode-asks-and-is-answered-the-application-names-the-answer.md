@@ -1,6 +1,6 @@
 # The server mode asks and is answered; the application names the answer
 
-Status: accepted
+Status: accepted, amended by ADR-0080 (the first request and the settled resize) and by ADR-0082 (the groups and the branches the server names)
 Date:   2026-10
 
 The server mode shows one page a server answered and trusts the application to

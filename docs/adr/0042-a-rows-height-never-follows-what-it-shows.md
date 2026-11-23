@@ -1,6 +1,6 @@
 # A row's height never follows what it shows
 
-Status: accepted
+Status: accepted, amended by ADR-0080 (in a filled frame the held height is the frame's)
 Date:   2026-10
 
 A table's height moved with whatever it held. A row was 13 px type × a line of

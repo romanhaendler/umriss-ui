@@ -1,6 +1,6 @@
 # A chart fills its frame, never below its floor
 
-Status: accepted
+Status: accepted, amended by ADR-0080 (a table fills its frame too)
 Date:   2026-10
 
 A dashboard sets a chart beside a calculation in a grid of two columns, each
