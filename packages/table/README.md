@@ -61,7 +61,7 @@ export function Orders() {
 ```
 
 What the columns do not say is decided by the value: text on the left, a number
-right-aligned in the provider's notation and sortable. `rowHeader` makes the
+right-aligned in the provider's notation and sortable; `align` sets a column's side by hand - start, centre or end. `rowHeader` makes the
 order number the name of the row — for a screen reader, and for the sticky
 column.
 

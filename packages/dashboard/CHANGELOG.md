@@ -13,6 +13,10 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.56.0 – Released in step with the table (Nov. 2026)
+
+No change of its own; the number moves with the table, whose columns now take `align` and stand at the start, centred or at the end.
+
 ## 0.55.1 – Released in step with the table (Nov. 2026)
 
 No change of its own; the number moves with the table, whose heads now stand whole and line up with their columns in every sort state.

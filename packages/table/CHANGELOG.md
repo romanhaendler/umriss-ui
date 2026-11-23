@@ -26,6 +26,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.56.0 – A column says where its values stand (Nov. 2026)
+
+### Added
+
+- **`align` on every column**, `VerdictColumn` and presets made with `column()` included: `"start"`, `"center"` or `"end"` sets the side of the whole column - the head label with its arrow, rank and funnel, the values, the footer, the aggregates in group lines and the loading rows - so a column of short codes, states or check marks stands centred under its label. It decides the side alone: `numeric`, given or decided by the first value, keeps deciding the figures, so `numeric align="center"` is tabular figures, centred, and `align="end"` on text is ordinary type, flush right. A centred head is centred as one group of label, arrow slot and funnel; a value or label wider than its column is cut at the end, as everywhere. Without `align` a table stands as before, and an export writes nothing of it.
+
 ## 0.55.1 – Every head stands whole, and lines up with its column (Nov. 2026)
 
 ### Changed

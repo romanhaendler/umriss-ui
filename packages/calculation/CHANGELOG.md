@@ -14,6 +14,10 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.56.0 – Released in step with the table (Nov. 2026)
+
+No change of its own; the number moves with the table, whose columns now take `align` and stand at the start, centred or at the end.
+
 ## 0.55.1 – Released in step with the table (Nov. 2026)
 
 No change of its own; the number moves with the table, whose heads now stand whole and line up with their columns in every sort state.
