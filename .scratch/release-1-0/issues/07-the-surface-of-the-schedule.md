@@ -1,7 +1,7 @@
 # The surface of the schedule
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

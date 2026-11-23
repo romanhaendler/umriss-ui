@@ -1,7 +1,7 @@
 # The documents agree with the source
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

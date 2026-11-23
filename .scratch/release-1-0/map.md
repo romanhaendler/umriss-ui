@@ -40,6 +40,9 @@ beyond the map.
 
 ## Decisions so far
 
+- [What 1.0 promises](issues/01-what-1-0-promises.md): ADR-0083 - semver from `1.0.0`, the surface is
+  `API.md`, the token names and the wording keys; a rename lives until the next major; `@experimental` is
+  exempt; raising React is a major, raising TypeScript, Node or a browser a minor.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
@@ -52,13 +55,21 @@ beyond the map.
 - [What `.scratch` still holds](issues/14-what-scratch-still-holds.md): two open tickets, both only a person
   can close; eleven folders are done and deletable once the pointers from `docs/` are set right; no
   `SECURITY.md`; two undecided design notes.
+- [What the demos leave unfinished](issues/11-what-the-demos-leave-unfinished.md): `unshown.json` already
+  lists the 48 component props without an example; no example filters a boolean column or sets a list filter
+  through `initialView`; the dashboard and the alarms are thin; no leftover text.
+- [The surface of core](issues/04-the-surface-of-core.md): no alias left and the field contract holds; eight
+  groups of candidates that break a caller, the largest being `Wording` as one interface of 443 keys and
+  density's two words.
+- [The surface of the three young packages](issues/08-the-surface-of-the-three-young-packages.md): the
+  calculation and the dashboard read as fit to freeze; the alarms are the least settled, and their surface is
+  partly the table's model.
 
 ## Not yet specified
 
 - **The polishing points themselves.** Each review returns candidates; which are taken before 1.0, and which
   break a caller and so go to the maintainer, can only be asked once they are on the table. Expect one
   decision ticket per review, perhaps per package.
-- **Whether a young package is fit to freeze** (`alarms`, `dashboard`, `calculation`): hangs on its review.
 - **How the demos look.** The review of the demos reads their text; judging the look needs the sites built
   and a person or screenshots in front of them.
 - **The order of the releases up to 1.0**, and how the taken points are cut into specs: hangs on the points

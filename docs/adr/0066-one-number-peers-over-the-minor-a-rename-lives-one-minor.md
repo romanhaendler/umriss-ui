@@ -1,6 +1,6 @@
 # The upgrade promise: one number, peers over the minor, a rename lives one minor
 
-Status: accepted, supersedes ADR-0035 in part (its consequence "no deprecated aliases")
+Status: accepted, supersedes ADR-0035 in part (its consequence "no deprecated aliases"); superseded by ADR-0083 from `1.0.0` on
 Date:   2026-10
 
 umriss is `0.x` and has been public for about two months: more than fifty

@@ -16,6 +16,8 @@ frozen as it stands, and under which name or shape?
 - `GroupBy` against the glossary, and `density`'s values against core's.
 - The hook's return: `Table<Z, S, Key>`, the 47 members, `asCsv`.
 - `unknown` in the grid's reports.
+- `SearchProps.onValueChange`, which `packages/table/demo/unshown.json` holds back "with the callers'
+  migration" to the field contract's names: which name is frozen.
 - The pure model: frozen, taken back, or marked by whatever "What 1.0 promises" allows for the unfinished.
 
 Every one breaks a caller, so every one is the maintainer's. The answer is one line per group, shaped for
