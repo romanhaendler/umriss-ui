@@ -30,7 +30,7 @@ describe("A Stat says its quality", () => {
     const before = nameOf();
     rerender(<Stat label="Furnace" value={805} unit="°C" limits={FURNACE} quality="good" />);
     expect(nameOf()).toBe(before);
-    expect(screen.queryByText(DEFAULT_WORDING.qualityGood)).toBeNull();
+    expect(screen.queryByText("Good quality")).toBeNull();
     expect(screen.queryByText(DEFAULT_WORDING.qualityBad)).toBeNull();
   });
 

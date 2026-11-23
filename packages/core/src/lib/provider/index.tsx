@@ -12,11 +12,11 @@
    renders and behaves without it, so the library can be introduced component
    by component. */
 
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { LanguageProvider, useLanguage } from "../language";
 import type { LanguageOptions } from "../language";
-import { warnDeprecated } from "../dev";
+import { warnDeprecated, warnDeprecatedTokens } from "../dev";
 import { UmrissContext } from "./context";
 import type { UmrissContextValue } from "./context";
 
@@ -135,6 +135,12 @@ export interface UmrissProviderProps {
   children: ReactNode;
 }
 
+/* Tokens renamed in 0.58; the old name is an alias that the library still reads. */
+const RENAMED_TOKENS = {
+  "--u-shadow-sticky": "--u-color-shadow-sticky",
+  "--u-color-edge-hover": "--u-edge-color-hover",
+};
+
 /**
  * The root provider. Optional: without it everything behaves as it does today.
  *
@@ -155,6 +161,7 @@ export function UmrissProvider({
      remounted when `language` comes or goes. */
   const outer = useLanguage();
   if (density === "comfortable") warnDeprecated('density="comfortable"', 'density="regular"');
+  useEffect(() => warnDeprecatedTokens(RENAMED_TOKENS), []);
   const value = useMemo<UmrissContextValue>(
     () => ({
       density: density === "comfortable" ? "regular" : density,

@@ -322,7 +322,6 @@ export const GERMAN_WORDING: Wording = {
   freshnessFresh: "Aktuell",
   freshnessStale: "Veraltet",
   freshnessDisconnected: "Keine Verbindung",
-  qualityGood: "Qualität gut",
   qualityUncertain: "Qualität unsicher",
   qualityBad: "Qualität schlecht",
   asOfAgo: (duration) => `Stand: ${duration}`,

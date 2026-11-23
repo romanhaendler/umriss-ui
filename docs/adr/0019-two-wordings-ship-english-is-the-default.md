@@ -70,3 +70,14 @@ a different object and deserves its own.
 A third language no longer hand-writes its formats: core exports `formatsFor(locale, timeZone?)`, and
 `formatsFor("fr-CH")` is the whole set. The `weekdays` wording stays Monday-first by definition; the
 calendars rotate the heads by the formats' `weekStart`, so a team's wording cannot mislabel a day.
+
+## Amendment 2026-11-23
+
+What a caller hands in is a part: `UmrissProvider`'s `language.wording` and `LanguageProvider`'s `wording` take one
+key, several or a whole `Wording`, and are merged over the default, so a key added in a minor breaks no translator.
+Whoever types a complete `Wording` of their own spreads `DEFAULT_WORDING` first; the interface stays one and
+`useWording()` returns it whole. umriss's own two files stay complete, held by their type.
+
+A known limit: seventeen texts are built by joining a wording with a separator or a bracket in the component
+(a toast's close label and its title, a table's filter count, an export's file name and extension, and the like),
+so the order and the separators are the library's and a language that orders them differently cannot say so.
