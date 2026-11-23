@@ -58,6 +58,9 @@ beyond the map.
   density is `"regular" | "compact"` everywhere; `Wording` is handed in as a part; `clearable` clears through
   `onValueChange`; `showValue`, `onSelect`, `neutral`, four type names; six exports and one token go; two
   things are `@experimental`.
+- [What of the young packages' surface changes before 1.0](issues/17-what-of-the-young-packages-surface-changes-before-1-0.md):
+  all three go to 1.0; the alarms' model part is `@experimental`; `freshness` becomes `ages`, `catalogue()`
+  becomes `openCatalogue()`; `DashboardView` is the promised storage format; the rest is frozen as it stands.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
