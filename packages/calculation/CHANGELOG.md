@@ -14,6 +14,12 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.58.1 – `API.md` gives functions their signatures (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
 ## 0.58.0 – The candidate for 1.0, released in step (Nov. 2026)
 
 No change of its own; the number moves with the other six, whose surface is frozen with this minor. The calculation's density was `"regular" | "compact"` already, the word core now uses too.

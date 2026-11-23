@@ -27,6 +27,16 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.58.1 – `API.md` gives functions their signatures; what the palette's `onClose` reports (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
+### Fixed
+
+- **The sentence on `CommandPalette`'s `onClose` said that a choice reports a wish to close.** It never did: `onClose` reports Escape, an outside click and the close button, and `onSelect` closes the palette itself where the choice ends the work.
+
 ## 0.58.0 – The candidate for 1.0: one word for density, the new names, rem for what sizes with the text (Nov. 2026)
 
 This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.

@@ -30,6 +30,16 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.58.1 – `API.md` gives functions their signatures; a reference window is named by indices (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
+### Fixed
+
+- **`ControlLimitOrigin`'s sentence says how a reference window is named:** by indices into the values, half-open, `from` up to but not `to` - never by x values. A window given as timestamps holds no value, and the chart then draws no limit.
+
 ## 0.58.0 – The candidate for 1.0: `verdict`, a name required by type, the registry's types leave the index (Nov. 2026)
 
 This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.

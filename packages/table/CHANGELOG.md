@@ -26,6 +26,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.58.1 – After a re-sort the focus in a grid follows its row (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
+### Fixed
+
+- **In a `grid` table that is `virtual`, the focus follows its row after the rows re-sort,** by the row's key into the same column, and the cell is scrolled into view. It landed on an unrelated row, in Chromium out of view. A row the reader scrolled away, and a row that is gone, keep what they did.
+
 ## 0.58.0 – The candidate for 1.0: `conditions`, `GroupKey`, one way to pin and one way to export (Nov. 2026)
 
 This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.

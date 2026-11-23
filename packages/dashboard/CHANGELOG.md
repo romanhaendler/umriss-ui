@@ -13,6 +13,16 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.58.1 – The editing outline keeps clear of the bar's last button (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
+### Fixed
+
+- **The outline of the editing mode no longer covers the edge of the bar's last button.** The bar's controls stand 2 px in from the frame, at rest too.
+
 ## 0.58.0 – The candidate for 1.0: `openCatalogue()`, the stored view is promised (Nov. 2026)
 
 This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.

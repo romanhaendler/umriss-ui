@@ -18,6 +18,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.58.1 – `API.md` gives functions their signatures (Nov. 2026)
+
+### Added
+
+- **`API.md` prints every function's signature and the members of every record type with their types** (a closing section "Types in full"), so that a caller reads what a function takes and what a record's fields are without opening the source.
+
 ## 0.58.0 – The candidate for 1.0: `predecessor` and `successor`, `barLabel`, a lead by keyboard (Nov. 2026)
 
 This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
@@ -30,8 +36,8 @@ This is the last minor before `1.0.0`, and the surface is frozen with it. Every 
 
 ### Changed
 
-- **A dependency names its `predecessor` and `successor` (were `from` and to).**
-  - Migration: Rename `from` to `predecessor` and to to `successor` on every dependency; the old names are read for this minor with a warning and removed in 1.0.0.
+- **A dependency names its `predecessor` and `successor` (were `from` and `to`).**
+  - Migration: Rename `from` to `predecessor` and `to` to `successor` on every dependency; the old names are read for this minor with a warning and removed in 1.0.0.
 - **`Schedule`'s `label` is `barLabel`, and `ends` on `Schedule` and on a dependency is `endMarks`.**
   - Migration: Rename them; the old names work for this minor with a warning and are removed in 1.0.0.
 - **The resolved appearance is `{ provisional, fixed, muted, open }`.**
