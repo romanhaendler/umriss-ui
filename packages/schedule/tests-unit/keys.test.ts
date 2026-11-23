@@ -1,4 +1,4 @@
-/* The keyboard through the scene (schedule-a11y 02, 03, 05): the active subtask
+/* The keyboard through the scene: the active subtask
    is the hover the pointer would make, pointer and keys hand it over, the view
    follows it, the brackets follow a dependency, and Alt proposes exactly the
    intents a drag of one step would. jsdom's plot lies at the origin, so a

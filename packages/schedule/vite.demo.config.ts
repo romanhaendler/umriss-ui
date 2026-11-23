@@ -8,7 +8,7 @@ import { ownStyles } from "../../scripts/styles/ownStyles.ts";
    the rule from ADR-0022 concerns imports, not where the resolver finds them. */
 export default defineConfig({
   root: "demo",
-  /* Every page's Markdown twin (.scratch/pages-as-markdown), written by
+  /* Every page's Markdown twin, written by
      `props` beside the tables: served at its address in `dev`, and copied
      into the build - the same files the site carries. */
   publicDir: ".generated/twins",

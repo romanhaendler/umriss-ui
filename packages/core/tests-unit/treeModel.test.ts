@@ -932,7 +932,7 @@ describe("setChecked – sets instead of toggling", () => {
   });
 
   it("sets instead of toggling – otherwise a child would undo its parent", () => {
-    /* Exactly the case the ticket demands a decision on: if the range
+    /* Exactly the case that needs a decision: if the range
        contains a branch *and* one of its children, a sequence of toggles
        would touch the child twice and uncheck it again. */
     const s = setChecked(TREE, READER, snapshot(), ["a2", "a2x"], true);

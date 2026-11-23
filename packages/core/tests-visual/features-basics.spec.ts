@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
-/* The five table tests of this file went with the table (umriss-table 14).
+/* This file has no table tests: the table's own suite holds them.
    Their counterparts stand in
    `packages/table/tests-visual/features-table.spec.ts` and run against the
    scenario of the demo of @umriss-ui/table. */
@@ -1077,7 +1077,7 @@ test("Menu opens and triggers an action", async ({ page }) => {
 });
 
 /* The context menu's one novelty is that it opens at a point, and jsdom has no
-   layout to check that in (schedule-refinement 08). */
+   layout to check that in. */
 test("ContextMenu opens at the point of the right-click", async ({ page }) => {
   await openExample(page, "contextmenu", "at-the-pointer");
   const surface = page.locator('[data-example="at-the-pointer"] div', { hasText: "anywhere in here" }).last();

@@ -1,4 +1,4 @@
-/* charts-essentials 01: the time axis. Ticks on local boundaries from the
+/* the time axis. Ticks on local boundaries from the
    minute to the month, labels by level in en-GB with a 24-hour clock, the date
    on the first tick after a day change. The tests run under Europe/Berlin
    (vitest.config.ts); 29 March 2026 is the spring clock change there. */
@@ -58,7 +58,7 @@ describe("timeTicks - candidates on local boundaries", () => {
   });
 });
 
-/* charts-review: day ticks across the autumn clock change - charts-fixes 09
+/* Day ticks across the autumn clock change - 
    left one offset per domain, an hour off after the change. */
 describe("ticks across the autumn clock change (25 Oct 2026)", () => {
   it("stands day ticks on local midnight on a time axis", () => {
@@ -119,14 +119,14 @@ describe("timeLabels - by level, en-GB, 24 hours", () => {
     expect(timeLabels([at(1, 1), at(4, 1)], months)).toEqual(["Jan 2026", "Apr 2026"]);
   });
 
-  /* charts-review: a zoomed axis whose first tick was a local midnight named
+  /* A zoomed axis whose first tick was a local midnight named
      no day at all - the first tick had no tick before it to differ from. */
   it("gives the first tick the date at its level, a midnight too", () => {
     const step = timeStepFor(4 * HOUR, 4);
     expect(timeLabels([at(3, 17), at(3, 17, 1), at(3, 17, 2)], step)).toEqual(["17 Mar 00:00", "01:00", "02:00"]);
   });
 
-  /* charts-review: readings a second apart shared one header. */
+  /* Readings a second apart shared one header. */
   it("writes the seconds only when asked", () => {
     const t = at(3, 17, 15, 23) + 5000;
     expect(timeText(t)).toBe("17 Mar 15:23");
@@ -194,7 +194,7 @@ describe("computeLayout - a time axis", () => {
     expect(x.format(at(3, 16, 7))).toBe("16. 7:00");
   });
 
-  /* charts-essentials 05: an axis without data stands on [0, 1] - one
+  /* an axis without data stands on [0, 1] - one
      millisecond of 1970, which has no readable tick. */
   it("draws no ticks over less than a minute, as on an empty chart", () => {
     const x = xOf({ time: true, extent: [0, 1] });

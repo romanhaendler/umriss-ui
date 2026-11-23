@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-a11y 02: a chart with a tooltip is one tab stop whose keys walk an
+/* a chart with a tooltip is one tab stop whose keys walk an
    Active point (ADR-0030). What a person observes: the role the plot reports,
    and what the tooltip shows after each key. */
 

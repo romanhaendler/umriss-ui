@@ -1,4 +1,4 @@
-/* Copying rows (table-copy-rows 01 and 02): `selectionAsText()` and the key
+/* Copying rows: `selectionAsText()` and the key
    that writes it. The text is the export's values, tab-separated, under a
    header line; the key is heard on the frame and leaves the browser's own copy
    alone wherever text is marked or typed. */
@@ -237,7 +237,7 @@ describe("Ctrl+C and Cmd+C", () => {
   });
 });
 
-/* The flash (table-copy-rows 03): `data-copied` on the copied cells, taken off
+/* The flash: `data-copied` on the copied cells, taken off
    when the animation ends. jsdom runs no animation; the end is fired by hand. */
 describe("The flash of a copy", () => {
   const flashed = () => Array.from(document.querySelectorAll("[data-copied]"));

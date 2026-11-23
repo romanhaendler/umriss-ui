@@ -1,4 +1,4 @@
-/* Downsampling (charts-long-series 03, Q20): what of a course is drawn. */
+/* Downsampling: what of a course is drawn. */
 
 import { describe, expect, it } from "vitest";
 import { downsample } from "../src/downsample";

@@ -1,4 +1,4 @@
-/* The grid's walk as a pure module (table-grid-mode 01): the lines of a table
+/* The grid's walk as a pure module: the lines of a table
    in grid mode with their cells, and where a key takes the Active cell over
    them. Literals throughout - a table small enough to read. */
 

@@ -1,4 +1,4 @@
-/* Which example shows which row (.scratch/props-to-examples), against a
+/* Which example shows which row, against a
    fixture package: one example for each kind of use, a page that shows
    another page's prop, and a scenario. What is checked is what a reader of a
    row sees - the examples it names and their order - never how the scan

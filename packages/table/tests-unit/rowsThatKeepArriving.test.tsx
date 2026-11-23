@@ -1,5 +1,4 @@
-/* A table under rows that change every second (table-rows-that-keep-arriving
-   01): `rows` is a new array each second - values move, a row appears, one
+/* A table under rows that change every second: `rows` is a new array each second - values move, a row appears, one
    goes, one moves under the sort. No API is involved; what is asserted is what
    the table keeps of its own state across those ticks: the sort, the
    selection by key, an open Row draft, the Active cell, the scroll position

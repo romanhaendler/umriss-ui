@@ -1,5 +1,5 @@
 /* Behaviour of the schedule in the browser: its chrome, pan and zoom, hover,
-   click, right-click and selection (schedule 05). Observed through what the DOM
+   click, right-click and selection. Observed through what the DOM
    says - band labels, lane headers, what an example writes down - never the
    pixel mechanics in between. Light only: behaviour, not appearance. */
 
@@ -46,7 +46,7 @@ async function wheel(page: Page, x: number, y: number, deltaY: number, times: nu
 
     It replaced a measurement of the page's scroll position, which asked the
     same question of the wrong thing: once the demo was cut into chapters
-    (schedule-lane-groups 05) its pages became short enough not to scroll at
+    its pages became short enough not to scroll at
     all, and a promise about a schedule would have failed for a reason that had
     nothing to do with schedules. */
 async function watchWheel(page: Page): Promise<() => Promise<boolean | undefined>> {
@@ -481,7 +481,7 @@ test("a bar that began before the view keeps its label at the edge", async ({ pa
 });
 
 /* ------------------------------------------------------------------ */
-/* One channel per statement (schedule-lane-groups 02)                  */
+/* One channel per statement                  */
 /* ------------------------------------------------------------------ */
 
 /* The appearances are the one thing about the schedule that IS the picture, so
@@ -688,7 +688,7 @@ test("three statements on one bar stay three statements", async ({ page }) => {
 });
 
 /* ------------------------------------------------------------------ */
-/* Hover is not selection (schedule-lane-groups 03)                     */
+/* Hover is not selection                     */
 /* ------------------------------------------------------------------ */
 
 test("hovering a selected bar still shows something, because the two are different kinds of mark", async ({ page }) => {
@@ -757,7 +757,7 @@ test("the subtask that was clicked is told from its task's other bars", async ({
 });
 
 /* ------------------------------------------------------------------ */
-/* Lane groups (schedule-lane-groups 08)                                */
+/* Lane groups                                */
 /* ------------------------------------------------------------------ */
 
 test("a group is structure over lanes: a head above them, and its lanes in the order they were declared", async ({ page }) => {
@@ -939,7 +939,7 @@ test("a subtask on a folded lane is drawn on no other row", async ({ page }) => 
 });
 
 /* ------------------------------------------------------------------ */
-/* The miniature (schedule-lane-groups 09)                              */
+/* The miniature                              */
 /* ------------------------------------------------------------------ */
 
 /** The miniature's row of the example, in plot coordinates. It has no

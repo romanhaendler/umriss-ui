@@ -1,4 +1,4 @@
-/* The Language page's wording tables (theming-and-wording-reference 04),
+/* The Language page's wording tables,
    against the running objects: the German column says what `GERMAN_WORDING`
    and the charts' German wording say, and the guard `demo/props.ts` runs
    names a key whose row is gone. */

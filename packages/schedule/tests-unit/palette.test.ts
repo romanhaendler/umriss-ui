@@ -1,4 +1,4 @@
-/* The canvas palette under forced colours (forced-colors 04): the selection
+/* The canvas palette under forced colours: the selection
    colour is the active subtask's alone, the findings take the text colour -
    their dash says what they are -, and the present steps back to GrayText. */
 

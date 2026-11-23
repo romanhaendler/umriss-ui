@@ -60,7 +60,7 @@ describe("Mount in jsdom", () => {
     // The legend renders the registered series.
     expect(host.querySelectorAll(".uc-legend-item")).toHaveLength(2);
 
-    /* library-audit 05: `role="img"` stood on the root, and the root contains the
+    /* `role="img"` stood on the root, and the root contains the
        legend. The descendants of an image are presentational to a screen reader -
        which made the only operable element of the chart unreachable. The image is
        now the plot area - and, with a tooltip, the tab stop that walks its hits

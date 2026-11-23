@@ -1,4 +1,4 @@
-/* Motion that explains the grouping (table-grouping 06): which lines travel,
+/* Motion that explains the grouping: which lines travel,
    and how far. */
 
 import { describe, expect, it } from "vitest";

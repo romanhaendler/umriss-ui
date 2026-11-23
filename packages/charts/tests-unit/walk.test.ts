@@ -1,4 +1,4 @@
-/* charts-a11y 02: the keyboard's walk over materialised series, as a pure
+/* the keyboard's walk over materialised series, as a pure
    function (ADR-0030). Positions are x values; a gap is none; the walk stays
    inside the visible domain. */
 

@@ -1,4 +1,4 @@
-/* What a bar says besides its colour (schedule-legibility 05).
+/* What a bar says besides its colour.
 
    A closed list, because a plan with twelve kinds of bar is a plan nobody can
    read. Two of them contradict - provisional work is not fixed work - and the

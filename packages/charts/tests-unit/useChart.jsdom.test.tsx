@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-bound-to-rows 02 (ADR-0048): the chart bound to its rows by the
+/*  (ADR-0048): the chart bound to its rows by the
    hook. What a person observes: the parts keep their identity over renders,
    the chart reads the rows of the latest render, and a `value` switched from
    one field to another redraws the series - every field reader reads the same

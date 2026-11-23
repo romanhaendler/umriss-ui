@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* box-plot 01: a box per x, read as it is drawn. What a person meets: the
+/* a box per x, read as it is drawn. What a person meets: the
    tooltip and the readout top to bottom (B9), the arrows walking box to box
    (B11), the data table's columns, the y axis reaching the whisker ends, and
    both wordings. */
@@ -166,7 +166,7 @@ describe("A box in the data table", () => {
   });
 });
 
-/* box-plot 02: several series - grouped beside each other, mixed with a line,
+/* several series - grouped beside each other, mixed with a line,
    toggled from the legend. */
 describe("Several box series", () => {
   type Extra = { hidden?: boolean; encoding?: "marks" };
@@ -298,7 +298,7 @@ describe("The hover marker of grouped boxes", () => {
   });
 });
 
-/* box-plot 03: outliers belong to their box (ADR-0040) - read in its tooltip
+/* outliers belong to their box (ADR-0040) - read in its tooltip
    and table row as a count and their values, cut after five. */
 describe("A box's outliers", () => {
   interface WithOutliers {
@@ -382,7 +382,7 @@ describe("A box's outliers", () => {
   });
 });
 
-/* box-plot 04: mean, notch and count read where given; a half-given notch
+/* mean, notch and count read where given; a half-given notch
    and numbers out of order warn once in DEV and draw what is given. */
 describe("A box's mean, notch and count", () => {
   interface Full {

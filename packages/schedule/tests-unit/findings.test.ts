@@ -1,4 +1,4 @@
-/* Findings: overlaps on a lane and violated dependencies (schedule 03).
+/* Findings: overlaps on a lane and violated dependencies.
 
    The expected values are worked out by hand from the fixtures, in minutes
    after a fixed morning - never by running the module's own arithmetic. */

@@ -211,7 +211,7 @@ describe("computePosition – visible part of the window", () => {
   });
 });
 
-/* The motion origin (visuelle-wertigkeit 02): the point a panel grows out of,
+/* The motion origin: the point a panel grows out of,
    as the stylesheet's `transform-origin`. Checked are properties of the
    mapping, not its formula. */
 describe("motionOrigin", () => {

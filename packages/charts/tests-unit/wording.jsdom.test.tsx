@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-a11y 01: the charts carry their own wording (ADR-0031) - English by
+/* the charts carry their own wording (ADR-0031) - English by
    default, German behind a subpath, entry by entry, and a string prop still
    wins over the register. */
 

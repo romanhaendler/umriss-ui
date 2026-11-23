@@ -1,4 +1,4 @@
-/* One size, one name, one scope (control-sizes 01, ADR-0041).
+/* One size, one name, one scope (ADR-0041).
 
    Every control with two heights takes `size`; a `ControlSizeProvider` around
    it sets the default; the control's own `size` wins. A surface of its own -

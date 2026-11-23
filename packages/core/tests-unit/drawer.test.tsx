@@ -1,4 +1,4 @@
-/* The drawer at the seam a caller has (core-foundations 03): a Modal that
+/* The drawer at the seam a caller has: a Modal that
    enters from an edge. The focus trap, Escape and the return of the focus are
    the native dialog's and are checked in the browser
    (features-basics.spec.ts); what is tested here is that the drawer IS that

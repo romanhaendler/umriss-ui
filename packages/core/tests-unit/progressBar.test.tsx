@@ -1,4 +1,4 @@
-/* The progress bar at the seam a caller has (core-foundations 04): how far a
+/* The progress bar at the seam a caller has: how far a
    task has come, as a screen reader hears it. A progress bar is not a meter -
    it carries no verdict and no tone - and without a value it says that the
    task runs without saying how far. */

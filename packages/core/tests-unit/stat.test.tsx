@@ -1,4 +1,4 @@
-/* The metric tile (judging-values 05). What is checked is what a person or a
+/* The metric tile. What is checked is what a person or a
    screen reader can perceive: the accessible name, the text, the role. Never
    the class that produced the colour – otherwise the test checks the
    stylesheet and not the statement.

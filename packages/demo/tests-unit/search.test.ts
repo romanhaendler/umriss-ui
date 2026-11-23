@@ -1,4 +1,4 @@
-/* The search fragment against the fixture package (.scratch/one-search 02):
+/* The search fragment against the fixture package:
    one entry per page, scenario and example, each with the address a page of
    the site carries - the path a prerendered page and the anchor on it. A find
    that lands on nothing is the one defect a reader cannot work around. */
@@ -65,7 +65,7 @@ describe("the search fragment", () => {
   });
 });
 
-/* Tokens and wording keys (.scratch/one-search 06): every row of a page's
+/* Tokens and wording keys: every row of a page's
    reference tables, landing on the row. A table with an English and a German
    column is a wording table, and its texts are the keywords - so that a
    string seen on screen, in either language, finds the key behind it. */
@@ -130,7 +130,7 @@ describe("the search fragment's tokens and wording keys", () => {
   });
 });
 
-/* Props (.scratch/one-search 04): one find per row of a page's props table,
+/* Props: one find per row of a page's props table,
    under the type that declares it, at the row's own anchor. */
 describe("the props in the search fragment", () => {
   const outline: readonly Rubric[] = [

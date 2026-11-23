@@ -163,7 +163,7 @@ export class ChartScene {
   tooltip: TooltipConfig | null = null;
   /** @internal */
   dataTable: { id: string; open: boolean } | null = null;
-  /** `Chart encoding` (charts-alternatives C3). */
+  /** `Chart encoding`. */
   private encoding: "color" | "marks" = "color";
   /** @internal */
   limits = new Map<number, LimitEntry>();
@@ -415,7 +415,7 @@ export class ChartScene {
     pushHoverSnapshot(this);
   }
 
-  /* The data table (charts-alternatives 01) registers like the legend: one per
+  /* The data table registers like the legend: one per
      chart. Whether it is open is the scene's, because two elements show it -
      the key in the legend and the panel. Opening it changes no pixel of the
      plot, so it only pushes the snapshot. */
@@ -458,7 +458,7 @@ export class ChartScene {
   }
 
   /** Each state's hatch by its name, across every band of the chart - so the
-      legend and each band agree (charts-alternatives 04).
+      legend and each band agree.
       @internal */
   stateHatches(): Map<string, Hatch> {
     const bands: (readonly StateEntry[])[] = [];
@@ -772,7 +772,7 @@ export class ChartScene {
   /** @internal */
   readonly percent = (v: number): string => this.wording.percent(formatValue(v, this.wording.locale));
 
-  /* ---------- The data table (charts-alternatives 01) ---------- */
+  /* ---------- The data table ---------- */
 
   /** What the data table lists: one table per x axis for the series on it, one
       per matrix - a matrix has two positions per value, and shares no rows.
@@ -782,7 +782,7 @@ export class ChartScene {
     return dataTableGroups(this);
   }
 
-  /* ---------- Cursor sync (charts-long-series 04) ----------
+  /* ---------- Cursor sync ----------
 
      Only the x position travels, in domain units: each chart draws its own
      crosshair there, on its x axis of the same id - or its first -, and the
@@ -913,7 +913,7 @@ export class ChartScene {
     return isHidden(this, config);
   }
 
-  /* ---------- Zoom and pan (charts-long-series 01) ----------
+  /* ---------- Zoom and pan ----------
 
      The schedule's model, not its code: Ctrl or ⌘ with the wheel zooms - a
      trackpad pinch arrives as exactly that -, a horizontal wheel or Shift pans,

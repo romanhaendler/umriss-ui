@@ -1,4 +1,4 @@
-/* Absent values in the model (umriss-table 07). The copy of tableModel is
+/* Absent values in the model. The copy of tableModel is
    extended by exactly this rule; the copied tests in tableModel.test.ts stay
    unchanged and green.
 

@@ -127,7 +127,7 @@ describe("Gaps", () => {
   });
 });
 
-/* charts-review, finding 16: the last segment ran to the end of the padded
+/* The last segment ran to the end of the padded
    domain - a state claimed for a time nobody reported, and none at all under
    `domain="data"`. It ends at the latest x of the chart's data; where that is
    the band's own last point, one median step after it; never beyond the

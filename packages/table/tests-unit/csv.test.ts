@@ -1,4 +1,4 @@
-/* CSV export (table-surface 01). The guarantee is twofold: the text can be read
+/* CSV export. The guarantee is twofold: the text can be read
    back in mechanically (separators, quotation marks and line breaks inside
    values cannot tear it apart), and it comes from the filtered set, not from the
    visible page. */

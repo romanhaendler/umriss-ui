@@ -97,7 +97,7 @@ describe("controlLimits - sigma out of the mean moving range", () => {
   });
 
   it("finds no outlier and no two-of-three beyond degenerate limits, and says so in DEV", async () => {
-    // charts-fixes 12: a constant reference window has sigma zero, and with the
+    // a constant reference window has sigma zero, and with the
     // limits on the centre line every value off it was an outlier. A fresh module:
     // the flat process above has used up the warning, which comes once.
     vi.resetModules();

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-/* chart-loading 02: a chart that is loading says so, as the table does
+/* a chart that is loading says so, as the table does
    (ADR-0042). Over nothing to show it holds its empty message back; over a
    course already drawn it keeps the course, marks the plot stale - dimmed and
    deaf to the pointer, by CSS - and ends a pointer's hover. Busy in both.
-   chart-loading 03: over nothing it shows a silhouette shaped by its first
+   over nothing it shows a silhouette shaped by its first
    series' kind, and its axes leave out their tick labels; when the answer is
    in, the silhouette fades out and the course in. */
 

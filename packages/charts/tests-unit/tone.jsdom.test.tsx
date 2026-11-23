@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-essentials 06: `tone` on Area, Bar and ControlChart as on Line and
+/* `tone` on Area, Bar and ControlChart as on Line and
    Scatter - a role the theme resolves. The legend chip shows what the canvas
    draws. */
 

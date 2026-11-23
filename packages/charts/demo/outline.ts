@@ -8,7 +8,7 @@
    follow. "Axes and area" is not something anybody imports; `XAxis`, `Line`
    and `ControlChart` are. A rubric sorts the sidebar and stands in no address
    (CONTEXT.md, "Rubric"). Getting started comes first, after the scenarios
-   page that opens the demo (.scratch/demo-rework/spec.md).
+   page that opens the demo.
 
    What is NOT here: the examples. They come from the files under
    `demo/examples/` and from nothing else. */
@@ -307,13 +307,11 @@ export const OUTLINE: readonly Rubric[] = [
   }),
 ];
 
-/* The page ids that changed, and where each stands now - an old link still
-   lands. Installation was called "Getting started" until the five demos
-   named their first page alike (.scratch/sidebar-tree). */
+/* Old page ids and the page each lands on now - an old link still lands. The id
+   "installation" is not the title "Getting started", which five demos share. */
 export const MOVED: Moved = {
   "getting-started": "installation",
-  /* Examples that moved to the pages of the chart's view (component-view 01,
-     02): an old anchor still lands on its example. */
+  /* Examples that now sit on the pages of the chart's view: an old anchor still lands on its example. */
   "axis/zoom-and-pan": "zoom-and-pan/gestures-and-keys",
   "axis/visible-domain": "zoom-and-pan/visible-domain",
   "chart/cursor-sync": "zoom-and-pan/cursor-sync",

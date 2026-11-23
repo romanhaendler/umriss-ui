@@ -1,4 +1,4 @@
-/* The view, as the tableState reports it (table-surface 02).
+/* The view, as the tableState reports it.
 
    The guarantee at stake: what is reported is what deviates from the default. An
    untouched table yields an empty view - whoever keeps it keeps nothing the user

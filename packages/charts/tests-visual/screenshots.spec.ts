@@ -63,7 +63,7 @@ test("A focused chart with an Active point", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`focused-active-point-${testInfo.project.name}.png`);
 });
 
-/* chart-loading 03: a course being reloaded, dimmed. The loop above
+/* A course being reloaded, dimmed. The loop above
    photographs the example before its reload, where only the silhouette
    stands; here the reload is out - past the stale delay, before the answer. */
 test("A course being reloaded", async ({ page }, testInfo) => {
@@ -77,7 +77,7 @@ test("A course being reloaded", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`reloading-${testInfo.project.name}.png`);
 });
 
-/* charts-alternatives 01: the data table open over the plot - every reading
+/* The data table open over the plot - every reading
    of a shift, and a week downsampled with its caption saying so. The loop
    above photographs both closed, with their key. */
 for (const exampleId of ["data-table", "a-week-as-a-table", "total-of-a-stack"]) {
@@ -94,7 +94,7 @@ for (const exampleId of ["data-table", "a-week-as-a-table", "total-of-a-stack"])
   });
 }
 
-/* component-view 04: 'Show all' over a zoomed chart, at rest - the pointer
+/* 'Show all' over a zoomed chart, at rest - the pointer
    gone, so neither tooltip nor crosshair. */
 test("Show all over a zoomed chart", async ({ page }, testInfo) => {
   await openExample(page, "zoom-and-pan", "gestures-and-keys");

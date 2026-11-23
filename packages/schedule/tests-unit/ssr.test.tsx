@@ -1,5 +1,5 @@
 // @vitest-environment node
-/* The schedule rendered on a server (platform-claims-proved 02): the canvas is
+/* The schedule rendered on a server: the canvas is
    there and empty - nothing may touch `getContext` before an effect. */
 
 import { describe, expect, it } from "vitest";

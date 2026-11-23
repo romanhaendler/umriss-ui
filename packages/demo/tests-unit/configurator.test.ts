@@ -1,4 +1,4 @@
-/* The configurator's two pure halves (.scratch/configurator): which control a
+/* The configurator's two pure halves: which control a
    prop becomes, read from the props reader's output for a fixture, and the
    code it writes for what is on screen. What the reader sees and copies -
    the panel itself is checked in the browser (core's `features-page.spec.ts`). */

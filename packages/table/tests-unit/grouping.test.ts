@@ -1,7 +1,6 @@
-/* The grouping pipeline (table-grouping 01): from the sorted filtered set to row
+/* The grouping pipeline: from the sorted filtered set to row
    groups, their aggregates, their order, and the lines a page shows. The case
-   is the prototype's - 13 orders on three lines for eight customers
-   (.scratch/table-grouping/prototype). */
+   has 13 orders on three lines for eight customers. */
 
 import { describe, expect, it } from "vitest";
 import { aggregate, periodStart, groupRows, linesOf, livePaths, pageLines } from "../src/model/grouping";

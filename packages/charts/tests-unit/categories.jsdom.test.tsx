@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* chart-rows-as-they-come 01, ADR-0052: a category is a value. The x axis
+/* ADR-0052: a category is a value. The x axis
    reads a string field and the library keeps the map from category to place -
    what a reader is told, under the tick, in the tooltip, the readout, the
    summary and the data table, is the category. */
@@ -296,7 +296,7 @@ describe("Zoom on a category axis", () => {
   });
 });
 
-/* chart-rows-as-they-come 02: the caller's own order, and what is written. */
+/* the caller's own order, and what is written. */
 const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const LATE = [
   { day: "Thu", minutes: 40 },

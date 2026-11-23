@@ -1,4 +1,4 @@
-/* The typing, checked by the compiler (umriss-table 06, 07, 09, 12).
+/* The typing, checked by the compiler.
 
    This file does not run; it is compiled, as part of `typecheck`. Every line
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
@@ -113,7 +113,7 @@ export function Columns() {
       {/* @ts-expect-error a sum on computed text */}
       <Column id="name" value={(a) => a.customer.name} label="Name" aggregate="sum" />
 
-      {/* aggregate (table-grouping 02): typed by the value. */}
+      {/* aggregate: typed by the value. */}
       <Column value="amount" label="Quantity" aggregate="sum" />
       <Column value="price" label="Preis" aggregate="avg" share={false} />
       <Column value="due" label="Due date" aggregate="range" />
@@ -327,7 +327,7 @@ export function RangeFilters() {
   );
 }
 
-/* Editing in grid mode (table-grid-mode 03): the core field fits the value. */
+/* Editing in grid mode: the core field fits the value. */
 export function Editing() {
   const { Table: Frame, Column } = useTable(orders, { rowKey: (a) => a.id });
   return (
@@ -391,7 +391,7 @@ export function CurrentRow() {
   );
 }
 
-/* Row filters (table-filters 08): the condition's type comes from `matches`. */
+/* Row filters: the condition's type comes from `matches`. */
 const atLeast = rowFilter({
   id: "atLeast",
   label: "At least",

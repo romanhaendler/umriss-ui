@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-alternatives 02 (C3): encoding by marks as the legend shows it - the
+/*  (C3): encoding by marks as the legend shows it - the
    chip carries the dash, marker and hatch the canvas draws, by the same palette
    place as the colour. Without `encoding` nothing changes. */
 
@@ -108,7 +108,7 @@ describe("The legend under encoding by marks", () => {
     expect(hatch).not.toBe("");
   });
 
-  /* charts-alternatives 04: an area shows its dash and its fill's hatch, as
+  /* an area shows its dash and its fill's hatch, as
      the plot draws it. */
   it("gives an area its dash and its hatched fill", async () => {
     const [, area] = await legendOf(
@@ -156,7 +156,7 @@ describe("The legend under encoding by marks", () => {
     expect(hatches[1]).not.toBe("");
   });
 
-  /* charts-alternatives 03 (C4): the contrast mode leaves the canvas alone,
+  /*  (C4): the contrast mode leaves the canvas alone,
      so the chart forces itself - and encodes by marks whatever it was told. */
   it("switches the marks on by itself under forced colours", async () => {
     const real = window.matchMedia;
@@ -170,7 +170,7 @@ describe("The legend under encoding by marks", () => {
     expect(b?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("7 4");
   });
 
-  /* charts-alternatives 04: the contrast mode takes a chip's background, so
+  /* the contrast mode takes a chip's background, so
      the tooltip's chips draw the legend's marks instead. */
   it("gives the tooltip the legend's marks under forced colours", async () => {
     const real = window.matchMedia;

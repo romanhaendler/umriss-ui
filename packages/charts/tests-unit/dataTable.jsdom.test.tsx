@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-alternatives 01: the data table a reader opens instead of walking
+/* the data table a reader opens instead of walking
    (C1, C2, C5). What a person observes: the disclosure key beside the legend,
    and the table it opens - its columns, its values in their formats, the
    visible domain, and the caption that says when rows stand for more. */

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
-/* The label of a limit in the axis band (props-to-examples 06, found while
-   writing LimitLine/05): a limit's own `color` goes to a stroke before its
+/* The label of a limit in the axis band: a limit's own `color` goes to a stroke before its
    text, the text stays legible in the axis's colour, and on an x axis it
    covers a tick label as it does on a y axis - the tick is left out, not shown
    half. jsdom measures nothing, so a text here is 7 px per character and one

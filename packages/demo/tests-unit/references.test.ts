@@ -1,4 +1,4 @@
-/* What a reader's text may name, and how (.scratch/props-table-hygiene, 03):
+/* What a reader's text may name, and how:
    no requirement number and no source path, and every ADR number a link to
    its file. The props reader's half - a flag with file and line - stands in
    `propsReader.test.ts`; the guard over every prerendered page of the five

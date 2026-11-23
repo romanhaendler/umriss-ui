@@ -70,8 +70,7 @@
     /* A course being reloaded dims as the table's rows do (ADR-0042): only
        after this delay, so that a quick answer never flickers. */
     --uc-delay-stale: var(--u-delay-stale, 200ms);
-    /* The shapes of the silhouette a chart shows while it waits for its rows
-       (chart-loading 03): faint in the text colour, as the table's
+    /* The shapes of the silhouette a chart shows while it waits for its rows: faint in the text colour, as the table's
        placeholders. */
     --uc-silhouette: color-mix(in srgb, var(--u-color-text, #18181b) 10%, transparent);
     /* The easing of the band that sweeps the silhouette: it swells as the

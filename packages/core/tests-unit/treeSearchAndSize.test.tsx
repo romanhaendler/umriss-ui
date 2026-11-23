@@ -1,4 +1,4 @@
-/* Search and virtualisation (tree-view 05).
+/* Search and virtualisation.
 
    The two stand together because they cross each other, not because they
    resemble each other: the search changes what the flattening contains, the

@@ -12,7 +12,7 @@ import { dstChoiceFor, resolveLocalTime, truncateInstant } from "../src/componen
 const EARLIER_0230 = new Date("2026-10-25T00:30:00Z"); // 02:30 CEST
 const LATER_0230 = new Date("2026-10-25T01:30:00Z"); // 02:30 CET
 
-/* library-audit 02: reopening always set the choice to "earlier" and shifted a
+/* reopening always set the choice to "earlier" and shifted a
    later value by an hour on the next "Apply". */
 describe("dstChoiceFor", () => {
   it("calls the earlier 02:30 earlier", () => {

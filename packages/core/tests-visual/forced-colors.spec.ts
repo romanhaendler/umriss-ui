@@ -1,5 +1,5 @@
 /* The library under forced colours - the Windows contrast mode, emulated
-   (forced-colors 01, 02). The browser repaints every colour with a system
+   The browser repaints every colour with a system
    colour and drops every box-shadow: the ring, the edges, a state that was
    only a surface. What survives is what the stylesheets give it - a
    transparent outline beside every ring and every edge, a system colour or an
@@ -42,7 +42,7 @@ for (const [pageId, exampleId, control, painted] of [
   });
 }
 
-/* segmented-control-inset 03: the inset track is a sunken ground and the
+/* The inset track is a sunken ground and the
    choice a lifted one - both repainted. The track keeps an edge, and the
    choice the system's selection colours, as in the field drawing. */
 test("An inset segmented control keeps its track and its choice under forced colours", async ({ page }, testInfo) => {

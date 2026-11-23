@@ -1,4 +1,4 @@
-/* IconButton (icon-button 02). A button that shows only an icon: its
+/* IconButton. A button that shows only an icon: its
    `aria-label` is required, it shows that name as a tooltip, and it is a Button underneath -
    so everything that holds a Button's element (a menu's anchor, a caller's
    ref) holds this one's too. */

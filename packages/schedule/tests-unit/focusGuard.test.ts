@@ -3,8 +3,7 @@
    is only rendered while a drag is in flight. The same reading as core's guard
    (`scripts/styles/focus.ts`).
 
-   The schedule put nothing into the tab order until lane groups arrived
-   (schedule-lane-groups 08): its grips are for the pointer and hidden from
+   The schedule put nothing into the tab order until lane groups arrived: its grips are for the pointer and hidden from
    assistive technology. The chevron that folds a group is a real button, and
    the plot has been a tab stop since schedule-a11y. */
 

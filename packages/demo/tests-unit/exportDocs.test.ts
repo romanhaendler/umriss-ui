@@ -1,5 +1,4 @@
-/* The gate's second class: an export of the entry or a subpath without JSDoc
-   (.scratch/api-index). Checked against two fixture packages - one with three
+/* The gate's second class: an export of the entry or a subpath without JSDoc. Checked against two fixture packages - one with three
    bare exports, one with the same exports explained. */
 
 import { afterEach, describe, expect, it, vi } from "vitest";

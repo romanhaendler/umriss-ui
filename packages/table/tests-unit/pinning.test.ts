@@ -1,4 +1,4 @@
-/* Pinned columns as pure model (table-column-pinning 01): the order they
+/* Pinned columns as pure model: the order they
    stand in, the declaration, the choice and what of it the view carries, and
    where a cell of a row sticks. */
 

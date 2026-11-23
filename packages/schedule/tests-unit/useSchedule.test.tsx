@@ -1,5 +1,4 @@
-/* useSchedule - the schedule is declared through a hook, as the table is
-   (ADR-0048, charts-bound-to-rows 08). */
+/* useSchedule - the schedule is declared through a hook, as the table is (ADR-0048). */
 
 import { describe, expect, it } from "vitest";
 import { act, render, renderHook } from "@testing-library/react";

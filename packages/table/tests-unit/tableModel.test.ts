@@ -83,8 +83,8 @@ describe("tableModel – paging", () => {
     expect(projection.visible).toHaveLength(1);
   });
 
-  /* Without a match the display used to say "page 1 of 1" while "next" was
-     disabled at the same time - the state contradicted itself. */
+  /* Without a match the display says "page 1 of 1" and "next" is disabled at the same time -
+     the state must not contradict itself. */
   it("stays free of contradiction on an empty result", () => {
     const projection = tableModel(ROWS, COLUMNS, { search: "gibtesnicht", pageSize: 2 });
     expect(projection.filtered).toHaveLength(0);

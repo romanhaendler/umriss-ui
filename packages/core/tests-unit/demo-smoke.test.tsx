@@ -6,8 +6,7 @@
    example that does not run at all shows up - the same proof costs the browser
    suite two pictures per example and a minute.
 
-   The three imports below still name the German modules of `demo/`, because
-   that directory is renamed by its own ticket. */
+   The three imports below name the German modules of `demo/`. */
 
 import { describe, expect, it, vi } from "vitest";
 import { StrictMode, act } from "react";
@@ -87,8 +86,7 @@ describe("Demo smoke test", () => {
   });
 
   /* A configurator renders in its page's first slot, and at rest its code is
-     the bare element - every control starts at its default
-     (.scratch/configurator). */
+     the bare element - every control starts at its default. */
   it("has a configurator on every page that can be configured", () => {
     expect(DEMO.configurators.map((one) => one.name).sort()).toEqual([
       "Alert", "Avatar", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",

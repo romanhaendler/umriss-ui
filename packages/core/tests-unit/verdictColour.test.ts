@@ -1,6 +1,5 @@
 /* No verdict colour without its word or glyph - ISA-101's redundancy rule in
-   the library's own stylesheets (alarm-standards 03; docs/design-language.md,
-   "Colour for the abnormal").
+   the library's own stylesheets.
 
    What can be checked and what cannot. Whether a colour on the screen stands
    beside a word is a question about the rendered page, and a rendered page

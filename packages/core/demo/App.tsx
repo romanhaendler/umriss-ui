@@ -3,8 +3,8 @@
 
    It was once called `Showcase`. That word stands on the avoid list of
    CONTEXT.md under "Scenario", and it no longer fitted either:
-   everything that used to stand here - twenty-one surfaces, their state and
-   their layers - now stands in `demo/examples/`, one file per example. The
+   the surfaces, their state and their layers stand in `demo/examples/`, one file
+   per example. The
    file IS the example: what runs is exactly what the reader sees. */
 
 import { Shell } from "@umriss-ui/demo";

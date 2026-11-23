@@ -1,10 +1,9 @@
-/* Removable label (foundation-primitives 04). What is tested is the
+/* Removable label. What is tested is the
    behaviour, not the appearance: who carries the tab stop, what the arrow
    keys do, what removes, and where the focus goes afterwards.
 
    The expected remove labels are the shipped German wording (`removeTag` and
-   `remove` of the wording catalogue) and stay German until ticket 13 moves
-   them. */
+   `remove` of the wording catalogue). */
 
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";

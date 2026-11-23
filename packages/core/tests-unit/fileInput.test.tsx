@@ -1,4 +1,4 @@
-/* The file input at the seam a caller has (core-layout-extras 03): the
+/* The file input at the seam a caller has: the
    native `<input type="file">` behind a key, so Space, Enter, a label and a
    form's `name` come from the platform, and a drop zone around it. The files
    are listed and reported; sending them anywhere is the application's.

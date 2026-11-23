@@ -253,7 +253,7 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   },
 
-  /* The danger button's type (library-audit 07). It stood as `#ffffff` in the
+  /* The danger button's type. It stood as `#ffffff` in the
      stylesheet and thereby past every check - in the dark theme white on the
      lighter danger surface measures 3.68:1. Now a token like
      `--u-color-on-accent`, and in the dark theme it reverses polarity as that

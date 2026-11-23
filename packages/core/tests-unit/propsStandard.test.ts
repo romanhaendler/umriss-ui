@@ -19,7 +19,7 @@ import { OUTLINE } from "../demo/outline";
 const SOURCE = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 
 /* ------------------------------------------------------------------ */
-/* A default in the comment is a contract (library-audit 04)           */
+/* A default in the comment is a contract */
 /* ------------------------------------------------------------------ */
 
 /* A prop's comment lands in the generated table and is therefore public

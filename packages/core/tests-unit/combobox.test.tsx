@@ -1,4 +1,4 @@
-/* A disabled option reacts to nothing (visuelle-wertigkeit 04): the pointer
+/* A disabled option reacts to nothing: the pointer
    does not move the list's cursor onto it. The arrow keys still reach it, so
    the list reads through in order. */
 

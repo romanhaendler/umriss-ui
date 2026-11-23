@@ -1,4 +1,4 @@
-/* Input's start and end slots (ticket 35, decision 8): a unit as text, or an
+/* Input's start and end slots: a unit as text, or an
    icon or an IconButton, inside the field's frame. The layout is in the
    browser; this is the half jsdom can see - where each slot stands, what a
    text slot adds to the width and to the description, and what an icon does

@@ -181,7 +181,7 @@ describe("A caller's handler runs beside the component's own", () => {
   });
 });
 
-/* core-passthrough P3: the components that took no `...rest` before take it
+/* the components that took no `...rest` before take it
    now, and a caller's handler runs first and may `preventDefault` - the
    component's own work follows unless it did. */
 describe("A caller's handler runs first and can prevent the component's own", () => {

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* What the built-in tooltip writes (charts-review, bug 6): a value in the
+/* What the built-in tooltip writes: a value in the
    format of its y axis, and an x value per x axis. It formatted every value
    with a fixed default and headed every hit with the primary hit's x axis - a
    percent axis read "0.42" beside ticks reading "42 %", and a second course on
@@ -102,7 +102,7 @@ describe("The built-in tooltip", () => {
     expect(points.map((p) => p.xValue)).toEqual([5, 105]);
   });
 
-  /* charts-essentials 02: a value format per series - "°C" without a render
+  /* a value format per series - "°C" without a render
      prop, and two series on one axis in two notations. */
   it("formats a value with its series' format before the axis' tickFormat", async () => {
     const scene = new ChartScene();
@@ -138,7 +138,7 @@ describe("The built-in tooltip", () => {
   });
 });
 
-/* charts-bound-to-rows Q27: a matrix' colour channel is `level` everywhere, so
+/* a matrix' colour channel is `level` everywhere, so
    the point a custom `render` reads carries it as `level`; `yValue` stays the
    cell's row, as it is the y position on every kind. */
 describe("A custom tooltip's render", () => {

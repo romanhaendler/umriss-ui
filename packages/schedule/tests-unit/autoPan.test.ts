@@ -1,5 +1,4 @@
-/* Auto-pan: how fast the plot pans along while a drag is near its edge
-   (schedule-refinement 02). Pixels per frame along one axis, from the pointer's
+/* Auto-pan: how fast the plot pans along while a drag is near its edge. Pixels per frame along one axis, from the pointer's
    position on that axis and the plot's size on it. */
 
 import { describe, expect, it } from "vitest";

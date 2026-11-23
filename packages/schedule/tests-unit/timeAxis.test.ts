@@ -1,5 +1,5 @@
 /* The time axis of the schedule: the fine step for a zoom, the ticks of the
-   fine band, the days of the coarse band, zoom and pan (schedule 03). Snapping
+   fine band, the days of the coarse band, zoom and pan. Snapping
    has its own file, `snap.test.ts`.
 
    The time zone is Europe/Berlin (vitest.config.ts). Expected instants are

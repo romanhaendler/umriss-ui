@@ -1,4 +1,4 @@
-/* What <LimitLine> and <LimitBand> register (charts-fixes 08).
+/* What <LimitLine> and <LimitBand> register.
 
    A limit on the x axis without an `axisId` looked for the y axis "y" on the
    x side, found nothing and drew nothing. Its default axis is now the one its

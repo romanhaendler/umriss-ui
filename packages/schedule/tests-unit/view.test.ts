@@ -1,4 +1,4 @@
-/* The schedule's view as data (ADR-0047, component-view 07): what a view
+/* The schedule's view as data (ADR-0047): what a view
    handed in is compared by, which groups fall out, and the span a schedule
    shows while its view names none. */
 

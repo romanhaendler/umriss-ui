@@ -1,5 +1,5 @@
 /* What the series layer puts on the canvas, against a recording context
-   (charts-review, bug 8; Q23). A point between two gaps is a lone `moveTo` in a
+. A point between two gaps is a lone `moveTo` in a
    line's path and a polygon without width in an area's fill - neither draws a
    pixel, so a reading a gap isolates vanished. Node has no canvas: the context
    and Path2D record what is done to them, and the test counts it. */
@@ -141,7 +141,7 @@ describe("A point between two gaps", () => {
   });
 });
 
-/* charts-essentials 03: a step line holds each sample until the next one - a
+/* a step line holds each sample until the next one - a
    horizontal, then the jump. A gap ends the hold at its x and lifts the pen. */
 describe("A step line", () => {
   it("holds each value until the next sample, and until a gap's x", () => {
@@ -174,7 +174,7 @@ describe("A step line", () => {
   });
 });
 
-/* charts-essentials 06: an area's outline takes a dash; the fill and a lone
+/* an area's outline takes a dash; the fill and a lone
    point's stroke stay solid. */
 describe("An area's dash", () => {
   it("dashes the outline and nothing else", () => {
@@ -223,7 +223,7 @@ describe("An area's dash", () => {
 });
 
 
-/* charts-review: at a zoomed edge the nearest reading can lie outside the
+/* At a zoomed edge the nearest reading can lie outside the
    plot, and the overlay layer is not clipped - its marker stood on the axis. */
 describe("The hover marker", () => {
   function markers(x: number) {
@@ -258,7 +258,7 @@ describe("The hover marker", () => {
   });
 });
 
-/* charts-alternatives 02 (C3): under encoding by marks a line's markers take
+/*  (C3): under encoding by marks a line's markers take
    their shape, and a bar is hatched across its fill - one stroke of lines,
    clipped to the bars, after their one fill. */
 describe("Marks on the canvas", () => {
@@ -294,7 +294,7 @@ describe("Marks on the canvas", () => {
   });
 });
 
-/* charts-stacking 02: a stacked bar stands on the stack below it - its foot
+/* a stacked bar stands on the stack below it - its foot
    channel -, not on the baseline. */
 describe("Stacked bars", () => {
   it("draw each bar from its own foot to its top, and leave a gap out", () => {
@@ -320,7 +320,7 @@ describe("Stacked bars", () => {
   });
 });
 
-/* charts-stacking 04: between two stacked segments a 1px line in the ground's
+/* between two stacked segments a 1px line in the ground's
    colour, so that neighbouring segments stay apart where their colours are
    alike - or, under forced colours, the same. */
 describe("The edge between stacked segments", () => {

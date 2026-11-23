@@ -1,4 +1,4 @@
-/* The seam for formatting and wording (consumable-package 01).
+/* The seam for formatting and wording.
 
    The characterisation in formatsCharacterisation.test.tsx holds down *what*
    comes out. Here stands *how* one changes it - and above all that one has to
@@ -100,7 +100,7 @@ describe("With a provider – the override reaches the component", () => {
   });
 });
 
-/* library-audit 03: words that stood in the component past the register. */
+/* words that stood in the component past the register. */
 describe("Wording that used to stand as a literal", () => {
 
   it("takes the shipped buttons without a provider", () => {
@@ -127,7 +127,7 @@ describe("Wording that used to stand as a literal", () => {
   });
 });
 
-/* library-audit 02: the panel of the range with time was named after a
+/* the panel of the range with time was named after a
    placeholder entry, and its clear × shared the entry of the range without
    time - an application could not name the two differently. */
 describe("A snooze's sentence takes a reason", () => {

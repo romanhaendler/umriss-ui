@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-a11y 03: what a screen reader hears. A polite readout after a key -
+/* what a screen reader hears. A polite readout after a key -
    never after the pointer -, written once the keys rest; and a summary the
    plot is described by, rebuilt when the visible domain moves. */
 

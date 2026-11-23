@@ -79,7 +79,7 @@ describe("resolveTheme", () => {
   });
 });
 
-/* charts-alternatives 03 (C4): a canvas is not forced by the contrast mode,
+/*  (C4): a canvas is not forced by the contrast mode,
    so under `forced-colors: active` the theme resolves to the system colours
    the page wears - played here by a stub, as the browser's part above. */
 describe("resolveTheme under forced colours", () => {

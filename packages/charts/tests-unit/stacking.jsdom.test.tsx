@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-stacking 02, 03: a stack as a reader meets it - the tooltip and the
+/* 03: a stack as a reader meets it - the tooltip and the
    readout name each series' own value and the stack's total (K4), the data
    table lists the own values, a hidden member gives up its place, and a
    normalised stack reads in percent (K5). */

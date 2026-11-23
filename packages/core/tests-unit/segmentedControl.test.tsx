@@ -1,4 +1,4 @@
-/* Segmented control (field-row-alignment 04). One choice out of a few short
+/* Segmented control. One choice out of a few short
    possibilities, drawn as one field - and in what it says and how the keys
    move, a radio group. What is checked is what a person observes: what the
    screen reader is told, where the tab stop sits, where the arrow keys lead
@@ -120,7 +120,7 @@ describe("SegmentedControl – the keys", () => {
   });
 });
 
-/* segmented-control-inset 03: the inset drawing and `fill` change the look,
+/* the inset drawing and `fill` change the look,
    never what is said or how the keys move. */
 describe("SegmentedControl – inset and filling, the same radio group", () => {
   it("is one tab stop whose arrow keys move, choose, skip and wrap", () => {

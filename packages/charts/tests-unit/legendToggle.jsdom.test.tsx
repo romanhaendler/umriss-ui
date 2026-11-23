@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* component-view 02 (ADR-0047): the legend hides and shows series through
+/*  (ADR-0047): the legend hides and shows series through
    the chart's view, without a prop or a state in the application. Every entry
    of a named series is a button; a click toggles at once and is reported
    whole. A hidden entry stays, drawn back; a hidden series leaves the extent
@@ -97,7 +97,7 @@ describe("The legend toggles by default", () => {
   });
 });
 
-/* component-view 03: a double click, Alt+click and Shift+Enter show only that
+/* a double click, Alt+click and Shift+Enter show only that
    series; on the only visible one, all. A single click stays immediate, so a
    double click arrives as two clicks first: its result does not depend on
    them. Whatever would leave nothing visible shows all, and the live region

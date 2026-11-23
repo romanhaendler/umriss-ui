@@ -17,7 +17,7 @@
    the demo itself. A page without a baseline therefore cannot exist – it would
    have a failing test.
 
-   The baseline file names stay as they are: the pictures belong to the ticket
+   The baseline file names stay as they are: the pictures belong to the change
    that rebuilds them. */
 
 import { test, expect, type Locator } from "@playwright/test";
@@ -41,7 +41,7 @@ for (const pageId of PAGES.filter((one) => one !== "api")) {
 }
 
 /* One per configurator, at rest - in the first example's slot, with its
-   short code open as it always is (.scratch/configurator). */
+   short code open as it always is. */
 for (const pageId of CONFIGURATOR_PAGES) {
   test(`Configurator ${pageId}`, async ({ page }, testInfo) => {
     await open(page, pageId);
@@ -142,7 +142,7 @@ test("The command palette's window in the resting state", async ({ page }, testI
   });
 });
 
-/* The drawer standing open, at both edges (core-foundations 03). The example
+/* The drawer standing open, at both edges. The example
    loop photographs its examples closed - a button - and the sheet at the edge
    is the one thing about it that is appearance. The drawer with a margin, because
    the drawer is its edge and the scrim over the page behind; after the
@@ -188,7 +188,7 @@ test("The popover open: width-from-anchor", async ({ page }, testInfo) => {
   });
 });
 
-/* The toast itself (toast-refinement 01). The example loop photographs the
+/* The toast itself. The example loop photographs the
    buttons that call toasts; the toasts stand at the window's edge, outside
    every example. Each is photographed at rest: toasts that stay until closed,
    or held by the pointer resting on them - an open deck stops every clock.
@@ -282,7 +282,7 @@ test("The toast deck on a phone", async ({ page }, testInfo) => {
   await toastRegion(page, "phone", testInfo.project.name);
 });
 
-/* The token table's first group (theming-and-wording-reference 01). Its
+/* The token table's first group. Its
    swatches take their column's theme whatever the page's: the dark column's
    swatch is dark on a light page, the light column's light on a dark one - a
    promise only pixels hold. */

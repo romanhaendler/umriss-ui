@@ -1,4 +1,4 @@
-/* The switch at the seam a caller has (core-foundations 01): a native
+/* The switch at the seam a caller has: a native
    checkbox under `role="switch"`, so Space, the label and a form come from the
    platform, and what is tested is what a user and a screen reader get. */
 

@@ -1,4 +1,4 @@
-/* Server mode in the model (table-server-mode 01, M1): the rows are the page a
+/* Server mode in the model: the rows are the page a
    server answered. The model passes them through as they came and only counts
    the pages from the server's total. */
 

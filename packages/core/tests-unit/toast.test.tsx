@@ -1,4 +1,4 @@
-/* The role of a message follows its tone (library-audit 03).
+/* The role of a message follows its tone.
 
    `Alert` always gave `warning` and `danger` `role="alert"`; the toast
    reported every tone politely through a shared `role="status"` region. An
@@ -33,7 +33,7 @@ const roleOfMessage = (tone: ToastTone) => {
   return screen.getByText("Saved").closest("[role]")?.getAttribute("role");
 };
 
-/* library-audit 07: the leaving duration stood there twice - 210 in Toast.tsx,
+/* the leaving duration stood there twice - 210 in Toast.tsx,
    200ms in the stylesheet. Now the component reads the token, and this test
    reads it too: out of tokens.css, not as a second number here.
 
@@ -95,7 +95,7 @@ describe("Toast – leaving", () => {
   });
 });
 
-/* Review finding: a live region that comes into the document with its text
+/* A live region that comes into the document with its text
    already in it is often not read out at all by a screen reader - with
    `status` all the more. The two regions therefore stand before the first
    message arrives, and the message is hung into the region of its tone. */
@@ -129,7 +129,7 @@ describe("Toast – role by tone", () => {
   });
 });
 
-/* toast-refinement 02: the options. Each test drives the public hook and reads
+/* the options. Each test drives the public hook and reads
    what a user or a caller observes - a button, a text, a reason. */
 type Api = ReturnType<typeof useToast>;
 
@@ -342,7 +342,7 @@ describe("Toast – limit", () => {
   });
 });
 
-/* toast-refinement 01: the deck. What is observable without layout: the
+/* the deck. What is observable without layout: the
    count and its name, where the focus goes, and whether the time runs. */
 describe("Toast – the deck", () => {
   afterEach(() => vi.useRealTimers());

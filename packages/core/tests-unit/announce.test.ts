@@ -1,4 +1,4 @@
-/* The shared announcer (listbox-announcements 01).
+/* The shared announcer.
 
    What a screen reader would hear is what the one polite region holds once
    the announcements rest - read here as its text, and as a NEW node each

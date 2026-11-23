@@ -1,4 +1,4 @@
-/* The title formula (search-visibility D8) against the fixture package: the
+/* The title formula against the fixture package: the
    one function the prerendering writes `<title>` with and the shell sets
    `document.title` with, so that a title after a click equals the title after
    a reload. */

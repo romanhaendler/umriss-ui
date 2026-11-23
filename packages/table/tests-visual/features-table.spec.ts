@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
 
 const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]`);
 
-/* ---------------- The position guard: Scenarios › find a late shipment (table-filters D1) ---------------- */
+/* ---------------- The position guard: Scenarios › find a late shipment ---------------- */
 
 test("The head of the table stays put while one searches, filters and resets", { tag: "@both-themes" }, async ({ page }) => {
   /* The conditions used to stand as a row of their own between the table
@@ -130,7 +130,7 @@ test.describe("Scenarios › find a late shipment", () => {
 
   /* The counterparts of the table tests from
      `packages/core/tests-visual/features-basics.spec.ts`, which ran there
-     against the order list that is now a scenario (umriss-table 14). */
+     against the order list that is a scenario. */
 
   test("A click on the header sorts ascending and descending", async ({ page }) => {
     const first = dataRows(page).first();

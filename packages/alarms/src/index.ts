@@ -21,7 +21,7 @@ export {
   ALARM_COLUMNS,
   alarmColumns,
   DEFAULT_ORDER,
-  /* alarm-standards 01 - new exports stand at the end (CONTRIBUTING.md). */
+  /* New exports stand at the end (CONTRIBUTING.md). */
   availabilityAt,
   isHidden,
   snooze,

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* The control chart brings no text along (library-audit 03).
+/* The control chart brings no text along.
 
    `@umriss-ui/charts` has decided to have no text layer: every string it draws
    comes from the caller. The control chart did not keep to that - "OEG", "UEG" and
@@ -159,7 +159,7 @@ describe("ControlChart - no text brought along", () => {
   });
 });
 
-/* charts-essentials 02: the value format reaches the line - and the violations,
+/* the value format reaches the line - and the violations,
    which are the same values. */
 describe("ControlChart - the value format", () => {
   it("passes format on to its line and its violations", async () => {

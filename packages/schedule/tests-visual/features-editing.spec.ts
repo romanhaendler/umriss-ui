@@ -1,4 +1,4 @@
-/* Editing through the seam (schedule 06, ADR-0023): a browser test performs the
+/* Editing through the seam (ADR-0023): a browser test performs the
    drag and asserts the findings shown on the ghost and the reported intent -
    not the pixel mechanics in between. Light only. */
 
@@ -322,7 +322,7 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
   await page.mouse.move(plot.x(8), plot.y("truck-118"), { steps: 6 });
   const label = example.locator("[data-ghost]");
   await expect(label).toBeVisible();
-  /* The same invariant the check of schedule-legibility 02 walks the pages
+  /* The same invariant the check walks the pages
      with - here in the one moment a static page cannot reach: a drag in
      flight. */
   expect(await overlayOffenders(page)).toEqual([]);
@@ -413,7 +413,7 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
 });
 
 /* ------------------------------------------------------------------ */
-/* A refusal one can see (schedule-lane-groups 01)                      */
+/* A refusal one can see                      */
 /* ------------------------------------------------------------------ */
 
 test("the lanes a subtask may not go to are marked the moment the drag begins", async ({ page }) => {
@@ -537,7 +537,7 @@ test("a drag from outside is marked and refused in the same language", async ({ 
 });
 
 /* ------------------------------------------------------------------ */
-/* Dragging over a fold (schedule-lane-groups 10)                       */
+/* Dragging over a fold                       */
 /* ------------------------------------------------------------------ */
 
 /** The folded group's row, in plot coordinates. */

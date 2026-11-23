@@ -1,11 +1,11 @@
-/* The root provider (consumable-package 02).
+/* The root provider.
 
    The most important block stands first: **without a provider** everything
    behaves as before. That is not an edge condition but the promise the
    step-by-step adoption of the library hangs on - one component from each sort
    that reads configuration at all.
 
-   The `density` prop was German until english-and-umriss-ui 31 - `dichte`, the
+   The `density` prop was German until  - `dichte`, the
    last public German left in the library. */
 
 import { describe, expect, it, vi } from "vitest";
@@ -263,7 +263,7 @@ function DensitySample({
 }
 const read = () => document.querySelector("[data-probe]")?.getAttribute("data-probe");
 
-/* library-audit 07: the setting was dead. `Density` and `useDensity` existed,
+/* the setting was dead. `Density` and `useDensity` existed,
    nobody read them - a provider with `density="compact"` changed nothing. Since
    then a component reads the setting with `useDensityFor` as the default of its
    `density`. The `data-density` attribute that came with it is gone again
@@ -271,7 +271,7 @@ const read = () => document.querySelector("[data-probe]")?.getAttribute("data-pr
    with that; that is work package B.13.
 
    The reader this was checked against - the table - has stood in
-   @umriss-ui/table since umriss-table 14 and carries its cases there
+   @umriss-ui/table and carries its cases there
    (`breiten.test.tsx`). What stays here is what
    @umriss-ui/core promises itself: the hook through which every component reads
    the setting. The delicate case stays the first one: a component that is

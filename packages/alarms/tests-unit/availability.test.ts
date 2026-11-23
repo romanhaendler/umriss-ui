@@ -1,4 +1,4 @@
-/* Availability - the second field beside the lifecycle (alarm-standards 01).
+/* Availability - the second field beside the lifecycle.
 
    ISA-18.2 knows, beside the lifecycle, three special states an alarm can be
    put into from any position: snoozed, suppressed, disabled (ISA: shelved,

@@ -58,8 +58,8 @@ describe("the toolbar's size", () => {
 });
 
 /* A control from @umriss-ui/core that a caller puts into the toolbar takes
-   the toolbar's size without a word (control-sizes 03, ADR-0041): it used to
-   stand at its own `md` beside the `sm` search unless the caller said `sm`. */
+   the toolbar's size without a word (ADR-0041): it stands at its own `md` beside the `sm`
+   search unless the caller says `sm`. */
 function OwnControls({ size, own }: { size?: "sm" | "md"; own?: "sm" | "md" }) {
   const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
   return (

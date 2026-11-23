@@ -120,7 +120,7 @@ describe("Tooltip", () => {
     expect(screen.queryByRole("tooltip")).toBeNull();
   });
 
-  /* library-audit 01: the tooltip always portalled to the body and thereby lay
+  /* the tooltip always portalled to the body and thereby lay
      behind the dialog inside a modal. It now takes the same rule as the
      popover - out of the same function. */
   describe("portal target", () => {

@@ -1,5 +1,5 @@
 /* The table under forced colours - the Windows contrast mode, emulated
-   (forced-colors 03). The suite stands with the shell
+   The suite stands with the shell
    (`@umriss-ui/demo/checks/forcedColors.ts`); here stand the states no first
    example shows: pinned blocks scrolled, bands, a whole group selected, selected rows -
    the last two ticked here, since no example rests selected - and a focused

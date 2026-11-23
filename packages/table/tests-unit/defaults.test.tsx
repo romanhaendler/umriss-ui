@@ -1,4 +1,4 @@
-/* Defaults by value type, `format`, `footer` (umriss-table 07).
+/* Defaults by value type, `format`, `footer`.
 
    Rendered under a UmrissProvider with formats that differ from the German
    ones: only that way is it visible that the cells use the seam and not

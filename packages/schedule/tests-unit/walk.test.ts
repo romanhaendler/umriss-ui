@@ -1,4 +1,4 @@
-/* The keyboard's walk as a pure module (schedule-a11y 01): which subtask a key
+/* The keyboard's walk as a pure module: which subtask a key
    leads to, over rows as the plot lays them out. Literals throughout - an hour
    is 3_600_000 ms, and the plan is small enough to read. */
 

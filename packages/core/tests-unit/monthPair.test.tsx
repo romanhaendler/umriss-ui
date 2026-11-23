@@ -1,5 +1,4 @@
-/* The month pair (range-panel-parts). The assurance that was previously only
-   asserted: the two months do not drift apart - the right one is always the
+/* The month pair. The assurance that the two months do not drift apart - the right one is always the
    month following the left one, and both are furnished alike. */
 
 import { describe, expect, it } from "vitest";

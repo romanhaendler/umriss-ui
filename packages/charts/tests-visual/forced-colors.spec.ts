@@ -1,4 +1,4 @@
-/* charts-alternatives 03 (C4): the charts under forced colours - the Windows
+/* The charts under forced colours - the Windows
    contrast mode, emulated. The browser forces every element's colours and
    none of a canvas' pixels, so the chart forces itself: its theme resolves to
    the system colours, and every series is told apart by its marks whatever

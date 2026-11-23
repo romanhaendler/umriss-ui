@@ -1,5 +1,5 @@
-/* <AlarmList> – the alarm list as an interface (shopfloor-instruments 02),
-   re-expressed in the interface of @umriss-ui/table (umriss-table 13).
+/* <AlarmList> – the alarm list as an interface,
+   re-expressed in the interface of @umriss-ui/table.
 
    It is the one existing component with real requirements - lifecycle state,
    flood marking, freshness, selection - and therefore the honest test of
@@ -26,7 +26,7 @@
    The table neither sorts nor pages here: the order - the worst first - the
    alarm model has already established, and no column is sortable.
 
-   A hidden alarm - snoozed, suppressed, disabled (alarm-standards 02) -
+   A hidden alarm - snoozed, suppressed, disabled -
    stays in the list too. It is drawn neutrally:
    no edge, its priority a word without its colour, its type muted, and its
    state stands there as a word. Colour is for what needs somebody now, and a

@@ -1,5 +1,5 @@
 // @vitest-environment node
-/* The table rendered on a server (platform-claims-proved 02): `renderToString`
+/* The table rendered on a server: `renderToString`
    in the node environment, where `window` and `document` do not exist. */
 
 import { describe, expect, it } from "vitest";

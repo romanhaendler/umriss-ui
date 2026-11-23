@@ -1,4 +1,4 @@
-/* The schedule holds its own view (ADR-0047, component-view 07): a start
+/* The schedule holds its own view (ADR-0047): a start
    through `initialView`, read once, every change the planner makes reported
    once through `onViewChange`, and `setView` and the setters on what `useSchedule` hands back. jsdom lays out nothing, so every
    element is given the plot's size: 800 by 200 pixels. */

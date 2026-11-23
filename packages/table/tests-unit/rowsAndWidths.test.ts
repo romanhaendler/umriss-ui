@@ -1,4 +1,4 @@
-/* Row details and column widths (table-surface 06 and 08).
+/* Row details and column widths.
 
    Both are state of the model, not of the presentation - which is why they
    stand here and not in a rendering test. The widths additionally stand in the

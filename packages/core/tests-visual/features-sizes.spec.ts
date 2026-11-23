@@ -139,7 +139,7 @@ const widthAt = (field: Locator, count: number) =>
 test("chars at the default count is the natural width, and every character counts", async ({ page }) => {
   await openExample(page, "sizes", "a-row-that-holds-still");
   const stage = example(page, "a-row-that-holds-still");
-  // Twenty for each: one count for every field that shows text (control-sizes 07).
+  // Twenty for each: one count for every field that shows text.
   for (const [field, natural] of [
     [stage.getByLabel("Search shipments").locator(".."), 20],
     [stage.getByLabel("Status").locator(".."), 20],
@@ -331,7 +331,7 @@ test("A checkbox or switch outside a field keeps its own height", async ({ page 
   expect(await height(page.getByRole("switch").first().locator(".."))).toBeLessThan(20);
 });
 
-/* segmented-control-inset 01: `fill` - the control takes its place's width,
+/* `fill` - the control takes its place's width,
    its segments share it equally, and the choice moves nothing. */
 for (const width of [1280, 320]) {
   test(`A filling segmented control takes its place and shares it equally (${width} px)`, async ({ page }) => {
@@ -359,7 +359,7 @@ for (const width of [1280, 320]) {
   });
 }
 
-/* segmented-control-inset 02: an icon stands on its word's line, at the size
+/* An icon stands on its word's line, at the size
    the control gives it, and stays whole where the word gives way. */
 test("A segment's icon stands on its word's line and stays whole in a narrow place", async ({ page }) => {
   await openExample(page, "segmentedcontrol", "a-theme-switch");
@@ -376,7 +376,7 @@ test("A segment's icon stands on its word's line and stays whole in a narrow pla
   expect(await word.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
 });
 
-/* segmented-control-inset 03: the inset drawing is a control's height at
+/* The inset drawing is a control's height at
    either size, its padding inside it - so it lines up with a field. */
 test("An inset segmented control is as tall as a field, at either size", async ({ page }) => {
   await openExample(page, "segmentedcontrol", "a-theme-switch");
@@ -396,7 +396,7 @@ test("An inset segmented control is as tall as a field, at either size", async (
   expect(await staged.evaluate((element) => (element as HTMLElement).offsetHeight)).toBe(await token("--u-control-height-sm"));
 });
 
-/* grid-column-widths 01: a grid of its own widths - a number is a column that
+/* A grid of its own widths - a number is a column that
    holds its width, "fill" takes the rest and is never widened by what it shows. */
 for (const width of [1280, 320]) {
   test(`A grid column of a number holds its width, and "fill" takes the rest (${width} px)`, async ({ page }) => {

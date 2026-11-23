@@ -42,7 +42,7 @@ describe("nearestIndex", () => {
   });
 });
 
-/* charts-fixes 10: a scatter under "nearest" was hit by x alone - a point
+/* a scatter under "nearest" was hit by x alone - a point
    straight above the pointer beat one right beside it. */
 describe("nearestPoint - x and y, in pixels", () => {
   // One unit is one pixel on both axes.

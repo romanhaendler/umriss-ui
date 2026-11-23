@@ -1,6 +1,6 @@
-/* Grouping in the interface (table-grouping 03): the option, the view, the
+/* Grouping in the interface: the option, the view, the
    group key without a column, the column menu and the chip in the table
-   toolbar. What the body draws is table-grouping 04. */
+   toolbar. */
 
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

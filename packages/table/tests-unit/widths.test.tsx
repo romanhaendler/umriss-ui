@@ -1,4 +1,4 @@
-/* Widths, sticky parts, density, virtualisation (umriss-table 10).
+/* Widths, sticky parts, density, virtualisation.
 
    The proof in the browser - that the column really sticks, that a virtualised
    table really scrolls smoothly - waits for the package's demo (spec, Testing
@@ -220,7 +220,7 @@ describe("Virtualisation", () => {
 
 /* Without a provider and without a statement, regular – the counterpart of
    "builds it without a provider as before" from `anbieter.test.tsx` in
-   @umriss-ui/core, which went with the table (umriss-table 14). */
+   @umriss-ui/core, which went with the table. */
 describe("Density without a provider", () => {
   it("builds a table without a provider and without a statement as regular", () => {
     const { container } = render(<List />);

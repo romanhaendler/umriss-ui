@@ -20,7 +20,7 @@ test.beforeEach(async ({ page }) => {
 const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]`);
 const x = async (where: Locator) => (await where.boundingBox())!.x;
 
-/* ---------------- The sticky row header sticks (umriss-table 10) ---------------- */
+/* ---------------- The sticky row header sticks ---------------- */
 
 test("the row header sticks while scrolling sideways, behind selection and expander, and nothing covers it", async ({ page }) => {
   await openExample(page, "width-and-pinning", "sticky-parts");
@@ -80,7 +80,7 @@ test("a sticky header row looks the same scrolled down as at rest", async ({ pag
   }
 });
 
-/* ---------------- Pinned to both sides (table-column-pinning 01) ---------------- */
+/* ---------------- Pinned to both sides ---------------- */
 
 test("both blocks stay while the hours scroll, each against its edge, and the shadow shows only over content", async ({ page }) => {
   await openExample(page, "width-and-pinning", "pinned-both-sides");
@@ -128,7 +128,7 @@ test("both blocks stay while the hours scroll, each against its edge, and the sh
   await expect.poll(() => shadow(cells.verdict)).toBe("hidden");
 });
 
-/* ---------------- Pinning in the column menu (table-column-pinning 02) ---------------- */
+/* ---------------- Pinning in the column menu ---------------- */
 
 test("the column menu pins a column to the end: it sticks there, and the focus stays on its key", async ({ page }) => {
   await openExample(page, "width-and-pinning", "pinned-both-sides");
@@ -160,7 +160,7 @@ test("the column menu pins a column to the end: it sticks there, and the focus s
   await expect(table.locator("thead th").nth(2)).toHaveText("Area");
 });
 
-/* ---------------- The quiet gesture (umriss-table 09) ---------------- */
+/* ---------------- The quiet gesture ---------------- */
 
 test("a row action rests in the secondary type and stands in the accent when its row is meant", async ({ page }) => {
   await openExample(page, "rowactions", "two-actions");
@@ -197,7 +197,7 @@ test("a row action rests in the secondary type and stands in the accent when its
   await expect.poll(() => colorOfLocator(open)).toBe(resting);
 });
 
-/* ---------------- The focus in the column menu (umriss-table 08) ---------------- */
+/* ---------------- The focus in the column menu ---------------- */
 
 test("after “move forward” the focus stands on the button of the column that moved, at the end of the list on its neighbour", async ({ page }) => {
   await openExample(page, "columnmenu", "show-hide-and-arrange");
@@ -216,7 +216,7 @@ test("after “move forward” the focus stands on the button of the column that
   await expect(menu.getByRole("button", { name: "Move Actual (k€) backward" })).toBeFocused();
 });
 
-/* ---------------- The download (umriss-table 08) ---------------- */
+/* ---------------- The download ---------------- */
 
 test("Export downloads shipments.csv, and in it stands the filtered set in the visible order", async ({ page }) => {
   await openExample(page, "export", "download-a-file");

@@ -1,7 +1,7 @@
-/* What a grouped table draws (table-grouping 04, ADR-0029): group headers for
+/* What a grouped table draws (ADR-0029): group headers for
    the outer levels, a span for the innermost, a group of one row as that row,
    folded groups as one line, and a page that begins inside a group. The case
-   is the prototype's: 13 orders on three lines for eight customers. */
+   has 13 orders on three lines for eight customers. */
 
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

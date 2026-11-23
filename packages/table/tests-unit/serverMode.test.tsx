@@ -1,4 +1,4 @@
-/* Server mode at the table's interface (table-server-mode 01 and 02): the request
+/* Server mode at the table's interface: the request
    goes out once per change, a fake server with latency answers, and loading,
    list filters, selection, grouping, export and grid mode behave as M1-M5 say.
    Without `server` nothing changes - the rest of the suite is that proof. */

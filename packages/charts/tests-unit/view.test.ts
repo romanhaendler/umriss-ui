@@ -1,4 +1,4 @@
-/* component-view 01 and 02 (ADR-0047): the chart's view model - compared by
+/* The chart's view model (ADR-0047) - compared by
    content, an echo of its own report ignored, unknown axis ids and series
    names out, zoom inside its limits, never every series hidden. */
 

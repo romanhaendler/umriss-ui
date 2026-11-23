@@ -1,4 +1,4 @@
-/* The visible window of the virtualised table (table-surface 09).
+/* The visible window of the virtualised table.
 
    Pure arithmetic, therefore checkable without a DOM. The expected values come
    from the rule - "which rows does the band between scrollTop and scrollTop +

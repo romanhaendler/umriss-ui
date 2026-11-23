@@ -1,4 +1,4 @@
-/* The schedule by keyboard (schedule-a11y 02-05): Tab into the plot, the keys
+/* The schedule by keyboard: Tab into the plot, the keys
    walking its subtasks and following a dependency, the pointer taking the
    active subtask over, the readout, and a proposed move. Observed through the
    DOM - the tooltip, the live region, what the example writes down. Behaviour

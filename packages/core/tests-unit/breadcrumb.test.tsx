@@ -1,4 +1,4 @@
-/* The breadcrumb at the seam a caller has (core-foundations 06): a navigation
+/* The breadcrumb at the seam a caller has: a navigation
    landmark with an ordered list, the current page marked, links and buttons
    as the caller gives them - and the fold of the middle levels into a menu,
    first as the arithmetic over measured widths and then as what a keyboard

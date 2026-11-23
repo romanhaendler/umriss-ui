@@ -1,4 +1,4 @@
-/* Pinned columns scrolled (table-column-pinning 01), light and dark through the
+/* Pinned columns scrolled, light and dark through the
    projects. The resting picture stands in `screenshots.spec.ts` - the end
    block's shadow already shows there, since the hours lie under it. Here stand
    the states a resting picture cannot show: scrolled into the middle (both

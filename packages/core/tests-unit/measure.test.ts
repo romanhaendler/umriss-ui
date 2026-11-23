@@ -1,4 +1,4 @@
-/* The two calculations of the multi-line field (foundation-primitives 01).
+/* The two calculations of the multi-line field.
    Both are pure so that they can be checked without a DOM: the height
    measurement itself needs a layout, the decision about what happens to the
    measured value does not. */

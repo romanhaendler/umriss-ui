@@ -1,4 +1,4 @@
-/* The context menu (schedule 01): a menu that opens at a point, not under a
+/* The context menu: a menu that opens at a point, not under a
    trigger. Tested the way the menu is - keyboard cycle, focus return, portal -
    plus its one novelty, the position. jsdom has no layout, so the position is
    observed where it can be: on the anchor the panel hangs from, which stands

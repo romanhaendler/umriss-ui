@@ -1,4 +1,4 @@
-/* FALLBACK_THEME is checked, not believed (library-audit 05).
+/* FALLBACK_THEME is checked, not believed.
 
    `@umriss-ui/charts` falls back over `var(--u-..., literal)` onto this
    package's tokens, and for the drawing loop, which knows no CSS variables,

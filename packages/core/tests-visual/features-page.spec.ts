@@ -1,8 +1,7 @@
 /* One page, checked against this demo: code toggle, page toggle, copy button.
    The tests stand with the shell (`@umriss-ui/demo/checks/page.ts`).
 
-   Beside them the configurator, which only this demo has
-   (.scratch/configurator): what the reader sees and copies on the Button page.
+   Beside them the configurator, which only this demo has: what the reader sees and copies on the Button page.
    And the API tables' type cells, which only the app draws more than the
    prerendered page: a long union broken, a definition previewed. */
 
@@ -15,7 +14,7 @@ import { ALL_PAGES, open, openExample } from "./navigation";
 
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/core" });
 
-/* A page without a configurator, which would take the first slot (.scratch/configurator). */
+/* A page without a configurator, which would take the first slot. */
 checkFirstExample({ open, pageId: "treeview", title: "A tree" });
 
 checkPage({
@@ -127,7 +126,7 @@ test.describe("The Button's configurator", () => {
   });
 });
 
-/* The type cells (.scratch/a11y-and-finish, 07): a long union one member a
+/* The type cells: a long union one member a
    line, and a link to a definition that previews it in core's Tooltip. */
 test.describe("The API tables' type cells", () => {
   test.skip(({ colorScheme }) => colorScheme === "dark", "behaviour tests once only (light)");

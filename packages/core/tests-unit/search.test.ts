@@ -1,4 +1,4 @@
-/* The matcher (command-palette 01). Pure functions, nothing mounted - the model
+/* The matcher. Pure functions, nothing mounted - the model
    is options.test.ts.
 
    What is pinned here is the *order*, not the formula. The numbers of the
@@ -194,7 +194,7 @@ describe("find – the caller's weight", () => {
   });
 });
 
-/* Keywords (one-search 01): a third tier behind the name and the group, for the
+/* Keywords: a third tier behind the name and the group, for the
    synonyms a reader brings from another library. A substring and not a
    subsequence - over a lede of sixty words a subsequence matches almost
    anything. */

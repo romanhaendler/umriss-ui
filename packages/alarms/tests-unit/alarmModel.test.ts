@@ -28,7 +28,7 @@ import { DEFAULT_WORDING, mergeLanguage } from "@umriss-ui/core";
 /* A fixed moment instead of a clock: 26.08.2026, 06:00 UTC. */
 const T0 = Date.UTC(2026, 7, 26, 6, 0, 0);
 
-/* library-audit 03: the seven column names stood in German in the pure module
+/* the seven column names stood in German in the pure module
    and reached the CSV header row and the column menu that way. The module can
    read no context; it is given the wording like `standardPresets`. */
 describe("alarmColumns – the label from the wording", () => {
@@ -36,8 +36,8 @@ describe("alarmColumns – the label from the wording", () => {
     columns.map((s) => ({ id: s.id, label: s.label, searchable: s.searchable, hideable: s.hideable }));
 
   it("ALARM_COLUMNS is the default wording's shape", () => {
-    // The labels before the rebuild, from the module's history - not from its
-    // new definition - and "Availability", which alarm-standards 01 added.
+    // The labels of the default wording, not read back from the module, and
+    // "Availability" among them.
     expect(ALARM_COLUMNS.map((s) => s.label)).toEqual([
       "Alarm",
       "State",

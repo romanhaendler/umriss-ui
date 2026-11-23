@@ -1,4 +1,4 @@
-/* charts-alternatives 01 (C1, C2): the rows of the data table as a pure
+/*  (C1, C2): the rows of the data table as a pure
    module - the visible domain, the series merged on their x, and above the
    limit the downsampled course with the count it stands for. */
 
@@ -82,7 +82,7 @@ describe("The rows of the data table", () => {
     expect(rows.x.length).toBeLessThanOrEqual(500);
   });
 
-  /* charts-alternatives 04: a band's code is a name, not a height - its lowest
+  /* a band's code is a name, not a height - its lowest
      and highest code say nothing. Thinned, it keeps where its state changes,
      as the keyboard walks it. */
   it("thins a band to its changes of state, not to its lowest and highest code", () => {

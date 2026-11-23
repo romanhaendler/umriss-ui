@@ -1,4 +1,4 @@
-/* Snapping: a wall-clock time onto a raster in local time (schedule 03).
+/* Snapping: a wall-clock time onto a raster in local time.
 
    The time zone is Europe/Berlin (vitest.config.ts); expected instants are ISO
    text with their offset, winter and summer. */

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-/* The wording tables (.scratch/theming-and-wording-reference, 04): an
+/* The wording tables: an
    interface and two objects in, the rows a reader sees out - and those rows
    the same in the HTML the page mounts and in the Markdown of the llms text. */
 

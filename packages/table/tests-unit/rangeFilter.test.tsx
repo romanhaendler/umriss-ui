@@ -1,4 +1,4 @@
-/* The range filter (table-filters 05): `filter="range"` for numbers and points
+/* The range filter: `filter="range"` for numbers and points
    in time, built with the same interface as a filter of one's own.
 
    Both bounds are inclusive, each may stay open, an absent value never matches.

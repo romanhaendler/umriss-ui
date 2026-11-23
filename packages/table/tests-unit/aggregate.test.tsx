@@ -1,4 +1,4 @@
-/* `aggregate` on a column (table-grouping 02).
+/* `aggregate` on a column.
    The footer is the aggregate over the filtered set. */
 
 import { render } from "@testing-library/react";
@@ -72,7 +72,7 @@ describe("aggregate in the footer", () => {
 });
 
 /* A sum and an average are computed, and their trailing digits are
-   arithmetic, not information (table-aggregate-digits 01): without a format a
+   arithmetic, not information: without a format a
    sum keeps the decimals of its most precise value, an average one more. */
 describe("a computed aggregate without float noise", () => {
   interface Item {

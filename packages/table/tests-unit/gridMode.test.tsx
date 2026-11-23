@@ -1,4 +1,4 @@
-/* Grid mode (table-grid-mode 02): `<Table grid>` at the table's public
+/* Grid mode: `<Table grid>` at the table's public
    interface - one tab stop, the Active cell walked by every key, a cell's own
    controls behind Enter and Escape, the Active cell surviving a sort, a
    hidden column and a virtual window. Without `grid` nothing changes. */
@@ -134,7 +134,7 @@ describe("Grid mode", () => {
     expect(box.getAttribute("tabindex")).toBe("-1");
   });
 
-  /* table-grid-mode 05: as in AG Grid and MUI - the key a checkbox answers
+  /* as in AG Grid and MUI - the key a checkbox answers
      to, from anywhere in its row. */
   it("selects the Active cell's row with Space, and deselects it with the next", () => {
     render(<Pumps />);

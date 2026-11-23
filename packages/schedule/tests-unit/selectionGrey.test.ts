@@ -1,5 +1,4 @@
-/* The selection greys the work the planner is not working with (schedule-
-   selection-emphasis 01): towards the grey of the colour's OWN lightness, never
+/* The selection greys the work the planner is not working with: towards the grey of the colour's OWN lightness, never
    towards the surface, which is `muted`'s channel. */
 
 import { describe, expect, it } from "vitest";

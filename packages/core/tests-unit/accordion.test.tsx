@@ -1,4 +1,4 @@
-/* The accordion at the seam a caller has (core-foundations 05): the APG
+/* The accordion at the seam a caller has: the APG
    disclosure pattern for sections - each header a button inside a heading,
    `aria-expanded` and `aria-controls` on it, the panel a region named by its
    header - with `single` and `multiple`, controlled and uncontrolled, and the

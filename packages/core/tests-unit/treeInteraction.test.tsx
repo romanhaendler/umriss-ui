@@ -1,4 +1,4 @@
-/* Operating the tree (tree-view 03). What is checked is what a person
+/* Operating the tree. What is checked is what a person
    observes: where the tab stop sits, where the arrow keys lead, what the
    screen reader gets to know and that activating and checking stay two
    gestures.

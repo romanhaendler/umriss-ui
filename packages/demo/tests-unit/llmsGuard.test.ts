@@ -1,5 +1,4 @@
-/* The completeness guard of the text for coding agents
-   (.scratch/ai-readable-docs, A4): every name a package exports appears in its
+/* The completeness guard of the text for coding agents: every name a package exports appears in its
    `llms-full.txt`. An export the text does not name is one an agent will not
    find, and guess at instead.
 
@@ -70,7 +69,7 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     const { full, pages: sitePages } = renderLlms({ packageDir, outline: OUTLINE, tables: types });
 
     /* No page sends its reader to a requirement they cannot see, and every
-       ADR it names is a link (.scratch/props-table-hygiene, 03). */
+       ADR it names is a link. */
     for (const page of sitePages) expect(siteLeaks(page.html), page.path).toEqual([]);
 
     /* The API section the app mounts (`Page.tsx`: the same call) is the one the
@@ -82,7 +81,7 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     }
 
     /* The keys of another page link its Keyboard section, and a page's
-       accessibility stands as a section of its own (.scratch/a11y-and-finish, 01). */
+       accessibility stands as a section of its own. */
     for (const page of OUTLINE.flatMap((rubric) => rubric.pages)) {
       const html = sitePages.find((one) => one.path === `${page.id}/`)!.html;
       for (const id of (page.keysOf ?? []).filter((one) => typeof one === "string")) {

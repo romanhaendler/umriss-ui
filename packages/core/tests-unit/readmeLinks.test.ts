@@ -1,4 +1,4 @@
-/* The gate over a package README's relative links (ticket 13).
+/* The gate over a package README's relative links.
 
    A README is read on npm, where only the package's `files` and what npm
    always adds (README, LICENSE, package.json) are present. A relative link

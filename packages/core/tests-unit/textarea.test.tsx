@@ -1,5 +1,4 @@
-/* The caller's onInput adds behaviour instead of taking it away
-   (library-audit 04).
+/* The caller's onInput adds behaviour instead of taking it away.
 
    `Textarea` set its own `onInput` and spread `...rest` afterwards. Whoever
    listened thereby overwrote the library's listener - the counter stood still

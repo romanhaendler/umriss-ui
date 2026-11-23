@@ -1,5 +1,4 @@
-/* What the three lists say through the shared announcer
-   (listbox-announcements 02): the count on opening and on every filter, the
+/* What the three lists say through the shared announcer: the count on opening and on every filter, the
    option the keys moved onto with the state VoiceOver leaves out, and in the
    multi-select what was added or removed where no checkbox said it.
 

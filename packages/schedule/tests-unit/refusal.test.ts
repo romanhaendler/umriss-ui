@@ -1,4 +1,4 @@
-/* The refused lanes of a gesture (schedule-lane-groups 01).
+/* The refused lanes of a gesture.
 
    The point of the module is that the caller's rule is asked ONCE per lane,
    when the gesture takes hold, and that the answer then stands for the whole
@@ -60,7 +60,7 @@ describe("the refused lanes of a gesture", () => {
   });
 });
 
-/* Blocked time, as "where a subtask may go" reads it (demo-rework 08): a
+/* Blocked time, as "where a subtask may go" reads it: a
    position is refused where the work would cover blocked time it did not
    cover already. */
 describe("blocked time in a gesture", () => {

@@ -2,9 +2,8 @@
    numbers with the provider's formats.
 
    The counterparts of the tests that ran in @umriss-ui/core against
-   `TableFilterStrip` and `TableFilter` (`sprache.test.tsx`) until the table left
-   there (umriss-table 14) – since table-filters 04 at the table toolbar, where
-   the conditions now stand.
+   `TableFilterStrip` and `TableFilter` (`sprache.test.tsx`), which the table now
+   holds in its own toolbar.
 
    The ratio shows both registers at once: the words come from the wording,
    which is English by default, and the notation from the formats, which are

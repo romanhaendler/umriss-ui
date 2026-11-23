@@ -104,7 +104,7 @@ describe("pareto - the cutoff crossing", () => {
   });
 });
 
-/* library-audit 03: `remainderName` had "Sonstige" as its default - a German word
+/* `remainderName` had "Sonstige" as its default - a German word
    in a package that has no text layer. Whoever collects names the remainder;
    whoever does not collect needs no name. */
 describe("pareto - the name of the remainder comes from the caller", () => {

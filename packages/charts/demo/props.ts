@@ -18,6 +18,5 @@ import { MOVED, OUTLINE } from "./outline.ts";
 
 const packageDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 /* The text for coding agents comes from the same tables, right after them:
-   `llms.txt` beside the demo, `docs/llms-full.md` into the npm package
-   (.scratch/ai-readable-docs). */
+   `llms.txt` beside the demo, `docs/llms-full.md` into the npm package. */
 generateLlms({ packageDir, outline: OUTLINE, moved: MOVED, tables: generateProps({ packageName: packageDir, outline: OUTLINE }) });

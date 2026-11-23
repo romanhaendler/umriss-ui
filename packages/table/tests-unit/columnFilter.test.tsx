@@ -1,4 +1,4 @@
-/* One interface for column filters, typed conditions (table-filters 03).
+/* One interface for column filters, typed conditions.
 
    The list filter and a filter of one's own go through the same door:
    `columnFilter({ matches, Input, describe })`. From outside one sets and reads

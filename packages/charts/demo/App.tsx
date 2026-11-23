@@ -1,8 +1,7 @@
 /* The application around the shell: what makes this demo a particular one,
    handed over - as in the demos of @umriss-ui/core and @umriss-ui/table. The
    shell itself is the same one (`@umriss-ui/demo`, ADR-0020), theme included;
-   what used to stand here was a second implementation of it, a thousand lines
-   long. */
+   a second implementation of it would be a thousand lines of drift from the shell. */
 
 import { Shell } from "@umriss-ui/demo";
 import { DEMO } from "./examples";

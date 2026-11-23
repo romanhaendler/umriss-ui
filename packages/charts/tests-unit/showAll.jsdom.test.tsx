@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* 'Show all' (component-view 04): once a zoomable x axis shows less than its
+/* 'Show all': once a zoomable x axis shows less than its
    own domain, the chart offers a control of its own that brings every zoomed
    axis back. A tab stop beside the plot, not in its application role; gone
    once nothing is zoomed, handing its focus to the plot. */

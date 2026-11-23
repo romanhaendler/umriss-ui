@@ -1,7 +1,6 @@
 /* What the scene does with limits, lanes and extra channels.
 
-   The cases here are the acceptance of the tickets judging-values 02/03 and
-   plant-at-a-glance 03: they hold down decisions that could otherwise be reversed
+   The cases here hold down decisions that could otherwise be reversed
    unnoticed - the default that a limit pulls the extent; that a lane does NOT pull
    its axis; that the value channel is null for every kind that does not need it. */
 
@@ -198,7 +197,7 @@ describe("Lanes do not pull their axis", () => {
   });
 
   it("does contribute the x extent of a state series, one step past its last point", () => {
-    // Its last state ends there (finding 16).
+    // Its last state ends there.
     const s = makeScene();
     s.registerSeries(stateSeries());
     expect(s.axisExtent("x", "x")).toEqual([0, 3]);
@@ -220,7 +219,7 @@ describe("The legend of a state series counts states, not series", () => {
     expect(new Set(s.legendItems().flatMap((i) => i.seriesIds))).toEqual(new Set([id]));
   });
 
-  /* charts-review, bug 5: three machines share one state list, and hovering
+  /* Three machines share one state list, and hovering
      "Fault" dimmed two of them - the entry named the first band only. */
   it("highlights every band that shares a state", () => {
     const s = makeScene();
@@ -239,7 +238,7 @@ describe("The legend of a state series counts states, not series", () => {
   });
 });
 
-/* charts-review, bugs 3 and 14: a matrix took a palette colour it never draws
+/* A matrix took a palette colour it never draws
    into its legend entry, and a state band and a matrix each used up a place of
    a six-colour palette - the line after them came out in its third colour. */
 describe("A state band and a matrix colour themselves", () => {
@@ -515,7 +514,7 @@ describe("Working time axis: the x channel stays ascending", () => {
   });
 
   it("does not re-materialise for a calendar of the same intervals", () => {
-    // An inline array is new on every render (charts-fixes 11).
+    // An inline array is new on every render.
     const s = sceneWithCalendar();
     s.axisExtent("x", "x");
     const before = s.seriesInOrder()[0]?.materialized;

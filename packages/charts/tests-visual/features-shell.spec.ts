@@ -36,8 +36,7 @@ checkShell({
 });
 
 test("the Installation page says how German reaches a chart, where the other demos have a switch", async ({ page }) => {
-  /* The shell suite asserts that this header carries no EN/DE switch; the
-     reason stands here (.scratch/language-switch). */
+  /* The shell suite asserts that this header carries no EN/DE switch. */
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
   await page.goto("/installation/");
   const sentence = page.getByRole("main").locator("p", { hasText: "The charts take German per chart" });

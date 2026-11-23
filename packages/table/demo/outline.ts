@@ -7,7 +7,7 @@
    say, which is the schedule's case and not core's (CONTEXT.md, **Page**): a
    page per component gave `Table` nineteen examples and `Column` twelve, and a
    reader who came for grid mode read past sorting, density and a server to
-   reach it. This reverses decision B of `.scratch/table-demo/spec.md`.
+   reach it.
 
    A feature that is a part imported by name - `Search`, `ColumnMenu`,
    `Export`, `Pagination`, `Toolbar`, `RowDetail`, `RowActions` -
@@ -624,10 +624,8 @@ export const OUTLINE: readonly Rubric[] = [
   apiIndexRubric("@umriss-ui/table"),
 ];
 
-/* The page ids that changed, and where each stands now - an old link still
-   lands. First table stood at `/table/table/`, an address that named the
-   package twice (.scratch/sidebar-tree); Server mode was called Manual mode
-   (ADR-0047). */
+/* Old page ids and the page each lands on now - an old link still lands. A page
+   address names a feature, not its package, and Server mode is the name ADR-0047 gives. */
 export const MOVED: Moved = { table: "first-table", "manual-mode": "server-mode" };
 
 /* The addresses follow from the outline; their format is known to the shell

@@ -1,5 +1,5 @@
 /* How a dependency is drawn: the route between its two ends and where on the
-   bars those ends sit (schedule-legibility 04).
+   bars those ends sit.
 
    The route decides the shape, the attach decides the corner - and neither
    decides whether the dependency is violated: that is what `leaves` and `arrives`

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* The violations reach the caller once per change (charts-fixes 07).
+/* The violations reach the caller once per change.
 
    A caller that keeps them in state renders anew with every report - and each
    render handed the control chart a new inline value function and a new origin, which

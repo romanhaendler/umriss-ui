@@ -1,5 +1,4 @@
-/* The workspace's own documents as pages of the site
-   (.scratch/concepts-and-changelog-pages, Testing Decisions): where a link
+/* The workspace's own documents as pages of the site: where a link
    inside a document leads once it is rendered, and what the page's head says. */
 
 import { describe, expect, it } from "vitest";

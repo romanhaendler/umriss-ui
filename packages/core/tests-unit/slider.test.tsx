@@ -1,4 +1,4 @@
-/* The slider at the seam a caller has (core-foundations 02): one value on a
+/* The slider at the seam a caller has: one value on a
    native range input, the keys of the APG slider pattern, marks, the readout
    and its `format`. The keys are the component's own and not left to the
    browser - PageUp and PageDown differ between engines, and a step that
@@ -60,7 +60,7 @@ describe("Slider", () => {
     expect(slider()).toHaveProperty("value", "10");
   });
 
-  /* Review finding: End went to a `max` off the step grid, and the browser
+  /* End went to a `max` off the step grid, and the browser
      then showed the thumb on the grid while the value said otherwise. */
   it("stays on the step grid where max does not lie on it", () => {
     render(<Slider aria-label="Batches" min={0} max={10} step={3} defaultValue={3} />);
@@ -91,7 +91,7 @@ describe("Slider", () => {
     expect(screen.queryByText("42")).toBeNull();
   });
 
-  /* control-sizes 09: the readout keeps the room of the longest value the
+  /* the readout keeps the room of the longest value the
      slider can show, not a fixed six characters. */
   it("gives its readout the room of its longest value", () => {
     const room = (text: string) => (screen.getByText(text) as HTMLElement).style.getPropertyValue("--_room");

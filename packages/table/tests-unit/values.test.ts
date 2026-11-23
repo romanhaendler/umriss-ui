@@ -1,4 +1,4 @@
-/* The defaults by value type (umriss-table 07) as pure calculation. The
+/* The defaults by value type as pure calculation. The
    component tests check the same rules once more in the cell - here stands what
    the rule IS, there that the table applies it. */
 

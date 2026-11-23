@@ -1,4 +1,4 @@
-/* The four pickers as components (library-audit 02).
+/* The four pickers as components.
 
    Up to here no test renders a picker: the pure modules below them - time,
    range, grid, the value contract - are checked, the interplay in the panel is
@@ -137,9 +137,8 @@ describe("An overridden preset", () => {
   });
 });
 
-/* The grid has one tab stop, on the active day. Paging used to leave that day
-   in the month paged away from, and with it the stop: after the arrow buttons
-   Tab went past the grid. The active day now travels along. */
+/* The grid has one tab stop, on the active day. The active day travels with the
+   paging, so the stop stays on the grid: after the arrow buttons Tab does not go past it. */
 describe("Paging with the arrows", () => {
   it("takes the active day - and the tab stop - into the new month", () => {
     render(<DatePicker value={new Date(2026, 0, 31)} onValueChange={vi.fn()} />);

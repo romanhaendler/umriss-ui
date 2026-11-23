@@ -6,9 +6,8 @@
    tables, read from the stylesheets that declare the tokens - core's and the
    charts', the latter as a file beside this package, not as an import.
 
-   The `outline` key is the shell's field name. What is still German behind it
-   is `propsReader.ts`'s own field names, which english-and-umriss-ui 05 recorded
-   as its one open deviation. */
+   The `outline` key is the shell's field name. What is German behind it
+   is `propsReader.ts`'s own field names. */
 
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -25,8 +24,7 @@ const tokensCss = readFileSync(join(packageDir, "src", "styles", "tokens.css"), 
 const chartsCss = readFileSync(join(packageDir, "..", "charts", "src", "styles", "charts.css"), "utf8");
 const coreTokens = readTokens(tokensCss);
 /* The text for coding agents comes from the same tables, right after them:
-   `llms.txt` beside the demo, `docs/llms-full.md` into the npm package
-   (.scratch/ai-readable-docs). */
+   `llms.txt` beside the demo, `docs/llms-full.md` into the npm package. */
 const pages = generateLlms({
   packageDir,
   outline: OUTLINE,
@@ -38,15 +36,14 @@ const pages = generateLlms({
 });
 
 /* The page as the site writes it carries a row for every key the running
-   objects have (theming-and-wording-reference 04). */
+   objects have. */
 const missing = missingAnchors(pages.find((page) => page.path === "language/")?.html ?? "");
 if (missing.length > 0) {
   process.stderr.write(`The Language page has no row for ${missing.length} wording key${missing.length === 1 ? "" : "s"}:\n${missing.map((id) => `  #${id}`).join("\n")}\n`);
   process.exit(1);
 }
 
-/* And one for every token the two stylesheets declare, counted on their text
-   (theming-and-wording-reference 01 and 02). */
+/* And one for every token the two stylesheets declare, counted on their text. */
 const theming = pages.find((page) => page.path === "theming/")?.html ?? "";
 const lost = [...missingTokens(tokensCss, theming), ...missingTokens(chartsCss, theming)];
 if (lost.length > 0) {

@@ -1,4 +1,4 @@
-/* Radio group (foundation-primitives 02). What is checked is what a person
+/* Radio group. What is checked is what a person
    observes: where the tab stop sits, where the arrow keys lead, what is
    chosen and what the screen reader is told.
 

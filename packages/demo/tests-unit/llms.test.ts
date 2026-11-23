@@ -391,8 +391,7 @@ describe("Types on this page (.scratch/types-without-holes)", () => {
 
 });
 
-/* A page without a table of its own shows the rows its examples use
-   (.scratch/props-to-examples, 02). */
+/* A page without a table of its own shows the rows its examples use. */
 describe("Props on this page", () => {
   const SHOWN: Record<string, TypeEntry> = {
     GaugeProps: {
@@ -540,7 +539,7 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
     expect(text).not.toContain("## The rest of the API");
   });
 
-  /* .scratch/one-search 05: what only the index shows is found there; the
+  /* 05: what only the index shows is found there; the
      Gauge as its page and `GaugeProps` by its props are found elsewhere. */
   it("puts every export it alone shows in the search, landing on its entry", () => {
     const exports = search.filter((one) => one.kind === "export");

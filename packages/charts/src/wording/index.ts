@@ -50,7 +50,7 @@ export interface ChartsWording {
       shown instead. */
   allShown: string;
   /** The control over a zoomed plot that brings every zoomed axis back to
-      its own domain (component-view 04). */
+      its own domain. */
   showAll: string;
   /** The data table's disclosure key, closed and open. */
   showData: string;
@@ -62,14 +62,14 @@ export interface ChartsWording {
   /** The table's caption: the visible stretch it lists, both ends formatted. */
   tableCaption: (from: string, to: string) => string;
   /** A box's numbers, top to bottom as drawn: the tooltip's rows, the
-      readout's parts and the data table's columns (box-plot B9). */
+      readout's parts and the data table's columns. */
   upperWhisker: string;
   upperQuartile: string;
   median: string;
   lowerQuartile: string;
   lowerWhisker: string;
   /** A box's outliers: the row's name, and the row's value - their count and
-      the first few values, the rest counted (box-plot B9). */
+      the first few values, the rest counted. */
   outliers: string;
   /** A box's optional readings: its mean, its notch's two bounds as one row,
       and how many values stand behind it. */

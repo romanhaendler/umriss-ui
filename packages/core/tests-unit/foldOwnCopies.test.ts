@@ -1,4 +1,4 @@
-/* The build folds the copies of `#own-styles` (control-sizes 06). What it has
+/* The build folds the copies of `#own-styles`. What it has
    to hold is the one thing that keeps every picture: of a rule that stands
    several times, the LAST copy stays where it stood, and nothing else moves. */
 

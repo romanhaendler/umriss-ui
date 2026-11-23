@@ -2,8 +2,7 @@
    example's own declared domain and lane height, not read from the component,
    so that a test aims where a person would.
 
-   Lanes are named, not numbered. Every example carries its own data since
-   schedule-lane-groups 04, so a shared table of lane indices would be a second
+   Lanes are named, not numbered. Every example carries its own data, so a shared table of lane indices would be a second
    list of what the examples contain, and it would drift the first time an
    example gained a lane. The order is read from the headers the example itself
    rendered - which is the same thing a person reads.
@@ -22,7 +21,7 @@ export const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, m
 export const LANE_HEIGHT = 44;
 
 /** The day the demo's plans run on. Several examples declare it - each in its
-    own file since schedule-lane-groups 04 - and a test that opens one of them
+    own file - and a test that opens one of them
     states the same two instants the example did. */
 export const DAY_OF_PLAN = [at(5, 30), at(18)] as const;
 

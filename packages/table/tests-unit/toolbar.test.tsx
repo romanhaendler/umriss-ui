@@ -1,5 +1,4 @@
-/* Table toolbar, search, column menu, export, paging, filters (umriss-table 08,
-   table-filters 04: the conditions stand in the table toolbar). */
+/* Table toolbar, search, column menu, export, paging, filters. */
 
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

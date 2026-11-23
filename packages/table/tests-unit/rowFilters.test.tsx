@@ -1,4 +1,4 @@
-/* Row filters (table-filters 08): a condition the application defines over the
+/* Row filters: a condition the application defines over the
    whole row, set by a control of its own, that the table treats as every other
    condition - in the ratio, under "Reset", in the view and in the report to a
    server. */

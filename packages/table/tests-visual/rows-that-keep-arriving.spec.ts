@@ -1,5 +1,5 @@
 /* What jsdom cannot show of a table under rows that change every second
-   (table-rows-that-keep-arriving 01): the real scroll position and the focus
+   the real scroll position and the focus
    under the row motion. The jsdom half stands in
    `tests-unit/rowsThatKeepArriving.test.tsx`.
 

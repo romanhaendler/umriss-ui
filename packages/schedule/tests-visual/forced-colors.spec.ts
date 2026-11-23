@@ -1,5 +1,5 @@
 /* The schedule under forced colours - the Windows contrast mode, emulated
-   (forced-colors 03). The browser forces the colours of every element around
+   The browser forces the colours of every element around
    the plot and none of the canvas' pixels, so the plot paints itself in the
    system colours (`FORCED` in sceneDraw.ts). The suite stands with the shell
    (`@umriss-ui/demo/checks/forcedColors.ts`); here stands the state no example

@@ -61,7 +61,7 @@ describe("materializeSeries", () => {
     expect(extent).toEqual({ xMin: 0, xMax: 4, yMin: 10, yMax: 30 });
   });
 
-  /* charts-review, bug 7: an infinity entered the extent, the extent was no
+  /* An infinity entered the extent, the extent was no
      longer finite, and the axis fell back to [0, 1] - every other value of the
      chart pressed flat against its edge. */
   it("treats ±Infinity in any channel as a gap outside the extent", () => {
@@ -274,7 +274,7 @@ describe("axisExtent - the extent per axis out of the bound series (R-4.13)", ()
   });
 });
 
-/* charts-long-series 02: `YAxis domain="visible"` fits what the x domain
+/* `YAxis domain="visible"` fits what the x domain
    shows, not the whole course. */
 describe("visibleExtent", () => {
   const course = materializeSeries(
@@ -409,7 +409,7 @@ describe("materializeSeries with a box's outliers", () => {
   });
 });
 
-/* box-plot 04: mean, notch bounds and count - named channels of their own,
+/* mean, notch bounds and count - named channels of their own,
    null where not given; the y values in the extent, the count not. */
 describe("materializeSeries with a box's mean, notch and count", () => {
   interface Box {

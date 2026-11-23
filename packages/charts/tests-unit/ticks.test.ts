@@ -138,7 +138,7 @@ describe("LinearScale", () => {
   });
 });
 
-/* charts-long-series 05 (Q24): a further axis takes the first axis' tick count
+/* A further axis takes the first axis' tick count
    and widens its own domain until its ticks fall on that grid. */
 describe("alignedTicks", () => {
   const first = { domain: [0, 100] as const, ticks: [0, 20, 40, 60, 80, 100] };

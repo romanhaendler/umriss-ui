@@ -1,5 +1,4 @@
-/* Shifting a whole task: one move per subtask, lengths and distances kept
-   (schedule-refinement 04). Expected values by hand, in minutes. */
+/* Shifting a whole task: one move per subtask, lengths and distances kept. Expected values by hand, in minutes. */
 
 import { describe, expect, it } from "vitest";
 import { shiftTask } from "../src/shiftTask";

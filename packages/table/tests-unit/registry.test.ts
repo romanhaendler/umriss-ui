@@ -1,4 +1,4 @@
-/* The registry (umriss-table 02, 06): what a new function on a column triggers
+/* The registry: what a new function on a column triggers
    and what it does not. The case at stake: a children function that comes into
    being on every render must not make the model recalculate - it sorts and
    filters nothing. */

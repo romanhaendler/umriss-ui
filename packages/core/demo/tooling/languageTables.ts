@@ -1,5 +1,4 @@
-/* The Language page's three tables (.scratch/theming-and-wording-reference,
-   04): every entry of `Wording`, of the charts' `ChartsWording` and of
+/* The Language page's three tables: every entry of `Wording`, of the charts' `ChartsWording` and of
    `Formats`, English beside German - read from the source by the shell's
    wording reader (`@umriss-ui/demo/tooling/wordingTable`), never listed by
    hand.

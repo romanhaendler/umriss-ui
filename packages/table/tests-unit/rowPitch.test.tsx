@@ -89,7 +89,7 @@ describe("the tip of a cut value", () => {
   });
 });
 
-/* A page holds its height (row-pitch 02, 03). */
+/* A page holds its height. */
 interface Shipment {
   id: string;
   depot: string;

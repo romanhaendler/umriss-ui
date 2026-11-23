@@ -1,4 +1,4 @@
-/* Ids the library builds out of the caller's values (library-audit 04).
+/* Ids the library builds out of the caller's values.
 
    A caller's value may contain anything, whitespace included - an id may not,
    where it is read by an IDREFS attribute: `aria-labelledby`,

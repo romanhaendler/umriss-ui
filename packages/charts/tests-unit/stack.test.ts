@@ -1,4 +1,4 @@
-/* Stacking (charts-stacking 01, 03): the sums behind a stacked bar or area.
+/* Stacking: the sums behind a stacked bar or area.
    A stack a few units off still looks like a stack, so the arithmetic is
    checked in literals. */
 

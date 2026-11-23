@@ -1,4 +1,4 @@
-/* The rows of a plot (schedule-lane-groups 07).
+/* The rows of a plot.
 
    Every y in the package will come from this module, so it is written
    test-first and the first thing asked of it is that it changes NOTHING: a
@@ -299,8 +299,7 @@ describe("what a gesture holds open", () => {
   /* A drag that rests over a folded group opens it for the gesture and lets go
      when the gesture ends. The one thing worth being sure of without a pointer
      is that the caller's list goes in unchanged and comes out unchanged: the
-     application did not fold anything, so it must never be told that it did
-     (schedule-lane-groups 10). */
+     application did not fold anything, so it must never be told that it did. */
   it("leaves the caller's list alone", () => {
     const callers = new Set(["hall", "line"]);
     const shown = effectiveCollapsed(callers, new Set(["line"]));

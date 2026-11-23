@@ -1,4 +1,4 @@
-/* The CSV follows the language in use (table-export-by-language 01): the
+/* The CSV follows the language in use: the
    decimal mark and the words for true and false come from the formats and the
    wording, the separator from the mark. Mounted, with `onExport`. */
 

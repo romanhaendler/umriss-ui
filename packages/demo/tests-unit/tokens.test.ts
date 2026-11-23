@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
-/* The token reader and the token table (.scratch/theming-and-wording-reference,
-   01): a small stylesheet in, the rows that come out. The HTML is read through
+/* The token reader and the token table: a small stylesheet in, the rows that come out. The HTML is read through
    the DOM, as the props table's test reads it. */
 
 import { readFileSync } from "node:fs";

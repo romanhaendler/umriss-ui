@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-review, the open points: what the scene hands the canvas and the HTML
+/* The open points: what the scene hands the canvas and the HTML
    layer for a caller's colour, a band's last state, an x limit's label at the
    right edge and the tooltip header over readings a second apart. jsdom has no
    2D context and measures nothing; where a size or a colour matters, a stub

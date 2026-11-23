@@ -19,7 +19,7 @@ const EXAMPLES = DEMO.examples;
 /** Named exceptions: pages without a props table, each with its reason.
 
     Most of them share one. Since the demo was cut by feature
-    (schedule-lane-groups 05 and 06) a chapter is one thing `<Schedule>` can
+ a chapter is one thing `<Schedule>` can
     do, and the props that do it are props of `<Schedule>` - whose table stands
     once, on *First schedule*. Repeating that table on thirteen chapters would
     be thirteen copies of one thing to keep true, and a reader who wants the

@@ -1,7 +1,7 @@
 /* The README's component table against the package's exports.
 
    The table had lost four components - TreeView, Stat,
-   CommandPalette, Popover - and nothing had noticed (library-audit 08). A list
+   CommandPalette, Popover - and nothing had noticed. A list
    maintained beside the code runs away from it; that is the same observation
    `props.ts` arose from, and the same place.
 

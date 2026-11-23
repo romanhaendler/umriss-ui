@@ -1,4 +1,4 @@
-/* Server mode in the browser (table-server-mode 02, 03), against the example's
+/* Server mode in the browser, against the example's
    fake server with its 400 ms: the previous page kept, dimmed, while an answer
    is out (ADR-0042), the next page, a list filter offering the server's values,
    and "select all" saying it selects the page. Behaviour, light only; the

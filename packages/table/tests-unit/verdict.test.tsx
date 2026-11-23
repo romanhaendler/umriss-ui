@@ -1,4 +1,4 @@
-/* VerdictColumn (umriss-table 12). */
+/* VerdictColumn. */
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

@@ -1,4 +1,4 @@
-/* The stepper at the seam a caller has (core-layout-extras 02): an ordered
+/* The stepper at the seam a caller has: an ordered
    list of steps, each done, current, upcoming or failed. The state is said as
    a word to a screen reader - `aria-current="step"` for the one being worked
    on, a hidden word for the others - and never by colour alone. Moving on is

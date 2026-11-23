@@ -1,4 +1,4 @@
-/* `required` on the FormField tells the screen reader too (library-audit 04).
+/* `required` on the FormField tells the screen reader too.
 
    The comment promised `aria-required` on the field; what was set was only the
    asterisk on the label, and that is `aria-hidden`. The context now carries the

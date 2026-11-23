@@ -1,4 +1,4 @@
-/* The typing, checked by the compiler (charts-bound-to-rows 08). This file does
+/* The typing, checked by the compiler. This file does
    not run; it is compiled, as part of `typecheck`. Every line under
    `@ts-expect-error` MUST yield an error. */
 

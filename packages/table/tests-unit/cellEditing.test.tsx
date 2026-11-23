@@ -1,4 +1,4 @@
-/* Editing in place (table-grid-mode 03): the edit lifecycle at the table's
+/* Editing in place: the edit lifecycle at the table's
    public interface - started by Enter, F2 or typing, committed by Enter or
    Tab, cancelled by Escape, held open by a message that does not validate,
    and reported, never applied. */
@@ -57,7 +57,7 @@ describe("Editing a cell", () => {
     expect(field.value).toBe("80");
   });
 
-  /* table-grid-mode 05: in a grid that edits, a cell that does not says so. */
+  /* in a grid that edits, a cell that does not says so. */
   it("marks every cell that does not edit read-only, and none that does", () => {
     render(<Loops onCellEdit={() => undefined} />);
     const cell = (text: string) => screen.getByText(text).closest("td, th")!;
@@ -131,7 +131,7 @@ describe("Editing a cell", () => {
     expect(field.getAttribute("aria-invalid")).toBe("true");
     expect(document.getElementById(field.getAttribute("aria-describedby")!)?.textContent).toBe("At most 120 °C");
     /* Seen beneath the cell in a popover, not inside the table: nothing in
-       it shifts (table-grid-mode 05). */
+       it shifts. */
     const shown = screen.getAllByText("At most 120 °C").filter((m) => !m.closest("table"));
     expect(shown).toHaveLength(1);
     /* Corrected, the message goes as the draft becomes right. */

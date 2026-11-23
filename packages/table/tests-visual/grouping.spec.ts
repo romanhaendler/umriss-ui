@@ -1,4 +1,4 @@
-/* The matrix of the grouped table (table-grouping 07), light and dark through
+/* The matrix of the grouped table, light and dark through
    the projects. The resting state of every example already stands in
    `screenshots.spec.ts`; here stand the states a resting picture does not
    show - hover on every line kind, a fold with the focus on it, a sticky header

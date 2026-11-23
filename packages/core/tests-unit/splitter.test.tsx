@@ -1,4 +1,4 @@
-/* The splitter at the seam a caller has (core-layout-extras 01): the APG
+/* The splitter at the seam a caller has: the APG
    window splitter - a focusable `role="separator"` whose value is the first
    pane's share in per cent, arrows that move it, Enter that collapses the
    first pane and brings it back. What jsdom cannot give is a width, so the

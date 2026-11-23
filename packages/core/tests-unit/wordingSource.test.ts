@@ -1,4 +1,4 @@
-/* Every text a component shows comes out of the wording (library-audit 03).
+/* Every text a component shows comes out of the wording.
 
    The rule had held for a long time - `lib/language/wording.ts` opens with it -
    and "Zurücksetzen" and "Fertig" still stood as literals in the table filter.

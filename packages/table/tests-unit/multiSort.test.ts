@@ -1,4 +1,4 @@
-/* Multi-level sorting (table-surface 04). The sort is an ordered list of
+/* Multi-level sorting. The sort is an ordered list of
    levels: the second level decides only what the first leaves open. A
    single-level list is the previous behaviour - which is exactly what the older
    tests in tableModel.test.ts check, and they stay unchanged. */

@@ -5,7 +5,7 @@ import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 
 export default defineConfig({
   root: "demo",
-  /* Every page's Markdown twin (.scratch/pages-as-markdown), written by
+  /* Every page's Markdown twin, written by
      `props` beside the tables: served at its address in `dev`, and copied
      into the build - the same files the site carries. */
   publicDir: ".generated/twins",
@@ -28,7 +28,7 @@ export default defineConfig({
         replacement: fileURLToPath(new URL("./src/lib/language/de.ts", import.meta.url)),
       },
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("./src/index.ts", import.meta.url)) },
-      /* The scenarios (control-room-demo, R1) are the one page of any demo
+      /* The scenarios are the one page of any demo
          that imports every package, as a consumer would. Their sources and not
          their `dist/`, for the reason the other demos give about core; and by
          alias rather than by a devDependency, because a devDependency of core

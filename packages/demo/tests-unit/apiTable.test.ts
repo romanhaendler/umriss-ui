@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-/* One props table, two writers (.scratch/types-without-holes, 01): the HTML the
+/* One props table, two writers: the HTML the
    app mounts and the prerendered page carries, and the Markdown of the llms
    text. Both are written from one model, and this holds them to it - a change
    to one writer fails here until the other follows.
@@ -44,7 +44,7 @@ const ENTRY: TypeEntry = {
   ],
 };
 
-/* Declared out of every order the table reads in (.scratch/props-table-hygiene, 01). */
+/* Declared out of every order the table reads in. */
 const GROUPED: TypeEntry = {
   name: "PickerProps",
   parameter: [],
@@ -457,7 +457,7 @@ describe("long unions and the preview of a definition (.scratch/a11y-and-finish,
   });
 });
 
-/* Every row names the examples that show it (.scratch/props-to-examples). */
+/* Every row names the examples that show it. */
 describe("Shown in", () => {
   const shown = (page: string, example: string, title: string, pageName: string) => ({ page, example, title, pageName });
   const DIAL: TypeEntry = {
@@ -514,7 +514,7 @@ describe("Shown in", () => {
   });
 });
 
-/* Feature pages show the props they are about (.scratch/props-to-examples, 02). */
+/* Feature pages show the props they are about. */
 describe("Props on this page", () => {
   const prop = (name: string, ...pages: string[]) => ({
     name,

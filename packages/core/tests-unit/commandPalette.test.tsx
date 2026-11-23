@@ -1,4 +1,4 @@
-/* The command palette (command-palette 04 and 06).
+/* The command palette.
 
    What is checked is what a person observes: where the arrow keys lead, what
    happens to the mark while typing, what is reported when Enter falls. What is
@@ -223,7 +223,7 @@ describe("Command palette - the keyboard", () => {
   });
 });
 
-/* library-audit 04: a row chose on every mousedown, including that of the right
+/* a row chose on every mousedown, including that of the right
    button - whoever wanted the context menu had already chosen. */
 describe("Command palette - only the main button chooses", () => {
   it("does not choose on a right click, but does on a left click", () => {
@@ -237,7 +237,7 @@ describe("Command palette - only the main button chooses", () => {
   });
 });
 
-/* library-audit 01: every gesture reported twice - once itself and once through
+/* every gesture reported twice - once itself and once through
    the close event that its own `dialog.close()` triggered. */
 describe("Command palette - onClose exactly once", () => {
   function CountHarness({ onClose }: { onClose: () => void }) {
@@ -499,8 +499,8 @@ describe("Command palette - the wording", () => {
 
   it("shows the foot only once something has been typed", () => {
     /* The one place at which two requirements of the spec contradict each other:
-       the foot is to be findable "on first use" (story 36), and the window is to
-       be ONLY the field in the resting state (story 50, ticket 05). Both at once
+       the foot is to be findable "on first use", and the window is to
+       be ONLY the field in the resting state. Both at once
        is impossible. The resting state wins, because it is what produces the
        growth movement the package is about in the first place - and the foot is
        there after the first keystroke, so before anybody needs any of the three

@@ -1,5 +1,5 @@
 // @vitest-environment node
-/* A calculation rendered on a server (platform-claims-proved 02): the list, its
+/* A calculation rendered on a server: the list, its
    rows and their amounts, the folded rows `hidden`. */
 
 import { describe, expect, it } from "vitest";

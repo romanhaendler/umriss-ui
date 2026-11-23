@@ -3,7 +3,7 @@
    tests.
 
    The project names ("charts-light" / "charts-dark") live in the root
-   playwright.config.ts and belong to no ticket of this package; they are read here
+   playwright.config.ts and belong to no feature of this package; they are read here
    as they stand. */
 
 import { test, expect, type Locator, type Page } from "@playwright/test";
@@ -393,7 +393,7 @@ test("scatter under \"nearest\": the hit follows the pointer up and down", async
 });
 
 /* ------------------------------------------------------------------------
-   Zoom and pan (charts-long-series 01).
+   Zoom and pan.
 
    The axis is `zoomable`, and the chart holds the span itself (ADR-0047):
    what is checked is the axis the reader sees, its tick labels. A week reads in days; a zoom far
@@ -447,7 +447,7 @@ test("zoom: Ctrl with the wheel zooms in around the pointer, a double click show
   await expect.poll(() => xLabels(example)).toEqual(week);
 });
 
-/* component-view 04: 'Show all' - there once zoomed, a tab stop after the
+/* 'Show all' - there once zoomed, a tab stop after the
    plot's, its key and its click bring the whole back; it goes, and the focus
    it had goes to the plot. */
 test("zoom: 'Show all' brings the whole back by key and by click", async ({ page }) => {
@@ -532,7 +532,7 @@ test("zoom: two fingers spread apart zoom in", async ({ page, context }) => {
 });
 
 /* ------------------------------------------------------------------------
-   Cursor sync (charts-long-series 04): three charts of one service share
+   Cursor sync: three charts of one service share
    `syncId`. The crosshair is found on each overlay as the mean column of its
    pixels - the hover marker sits on the crosshair, so it does not move it.
    ------------------------------------------------------------------------ */
@@ -600,7 +600,7 @@ test("cursor sync: one shared view zooms all three", async ({ page }) => {
   expect(after.some((l) => HOURS.test(l))).toBe(true);
 });
 
-/* component-view 02 (ADR-0047): the legend hides through the view, and the
+/* The legend (ADR-0047) hides through the view, and the
    view - zoom and hidden series - outlives a reload where it is kept. */
 
 test("a view kept outlives a reload and comes back on restore", async ({ page }) => {
@@ -633,7 +633,7 @@ test("a view kept outlives a reload and comes back on restore", async ({ page })
   await expect(billing()).toHaveAttribute("aria-pressed", "true");
 });
 
-/* component-view 03: a double click, Alt+click and Shift+Enter show only an
+/* A double click, Alt+click and Shift+Enter show only an
    entry's series, and all on the only one visible - in a real browser, whose
    double click arrives as two clicks first. */
 
@@ -657,7 +657,7 @@ test("the legend's gestures show only a series, and all again", async ({ page })
   await expect.poll(pressed).toEqual(["true", "true", "true"]);
 });
 
-/* charts-a11y: the chart as one tab stop (ADR-0030). */
+/* The chart as one tab stop (ADR-0030). */
 
 test("Tab reaches the plot, and the keys walk its Active point", async ({ page }) => {
   await openExample(page, "chart", "keyboard-and-screen-reader");

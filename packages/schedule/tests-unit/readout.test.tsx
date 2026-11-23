@@ -1,4 +1,4 @@
-/* What a screen reader hears of a schedule (schedule-a11y 04): the plot's role
+/* What a screen reader hears of a schedule: the plot's role
    and name, a summary it is described by, and a polite readout once the keys
    rest - never after the pointer. In English and in German. jsdom lays out
    nothing, so every element is given the plot's size: 800 by 200 pixels at the

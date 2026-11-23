@@ -596,7 +596,7 @@ export interface Wording {
   /** How many lanes a group holds, beside its name in the header. */
   scheduleLaneCount: (count: number) => string;
   /** What a screen reader calls the plot that takes the keys
-      (`aria-roledescription`, schedule-a11y S1). */
+      (`aria-roledescription`). */
   scheduleRoleDescription: string;
   /** The plot's own name, beside the figure that carries the caller's
       `aria-label`, so the caller's name is not heard twice. */

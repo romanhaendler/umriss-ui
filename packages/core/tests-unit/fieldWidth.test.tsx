@@ -1,4 +1,4 @@
-/* Where a field's width is said (control-sizes 02, ADR-0041): the root that
+/* Where a field's width is said (ADR-0041): the root that
    carries it, and what `chars` writes there. The layout itself - what the
    width does in a row, a column, a phone - stands in the browser suite
    (features-sizes.spec.ts); this is the half jsdom can see. */

@@ -37,7 +37,7 @@ checkShell({
      @umriss-ui/table.
 
      "ta" and "tab" went when the pages came to rank above every example
-     (one-search 02): the fourth row under "ta" became `Meter`, a page, whose
+     the fourth row under "ta" became `Meter`, a page, whose
      lede says "tables" and kept it under "tab". Under "se"
      the fourth row is `Slider`, which "multiselect" drops - "sel" did too,
      but finds more than the palette's fifty rows, so the list no longer
@@ -74,7 +74,7 @@ checkShell({
 
 /* The Language page shows languages itself: an example that sets its own
    provider keeps the languages its code names, under either choice of the
-   switch (.scratch/language-switch). */
+   switch. */
 test("the Language page's side-by-side example stays side by side with German on", async ({ page }) => {
   await page.goto("/language/");
   await page.getByRole("group", { name: "Language of the components" }).getByRole("button", { name: "Deutsch" }).click();

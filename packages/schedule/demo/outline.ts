@@ -4,7 +4,7 @@
    tables and the screenshot suite all read from it. One page per thing a
    reader looks up by name, as in the other demos.
 
-   Cut by FEATURE, not by component (schedule-lane-groups 05 and 06). The
+   Cut by FEATURE, not by component. The
    schedule is one component with some twenty-five things to say, and a demo
    whose pages are its four exports had to put seven of them on one page: a
    reader who came for the now line read past pan, zoom, the tooltip and the
@@ -518,8 +518,7 @@ export const OUTLINE: readonly Rubric[] = [
 ];
 
 /* Examples that moved, and where each stands now - an old anchor still lands.
-   Lane groups' 'controlled' folds from outside through the view now
-   (component-view 07). */
+   Lane groups' 'controlled' folds from outside through the view now. */
 export const MOVED: Moved = { "lane-groups/controlled": "lane-groups/fold-from-outside" };
 
 export const ADDRESSES = addresses(OUTLINE, MOVED);

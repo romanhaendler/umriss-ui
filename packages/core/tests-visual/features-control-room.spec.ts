@@ -1,4 +1,4 @@
-/* The control room's clock and its regions (control-room-demo, R3 and R4).
+/* The control room's clock and its regions.
 
    The plant's clock advances by what the wall clock says has passed, so these
    tests move the wall clock by hand - `setFixedTime` to a later instant - and
@@ -77,8 +77,7 @@ test("every region is a landmark, and its skip link moves the focus, not the add
   expect(page.url()).toBe(address);
 });
 
-/* A chart without `height` fills its card, and the card the row's height
-   (chart-fills-its-frame 01): measured boxes, polled - never a fixed wait. */
+/* A chart without `height` fills its card, and the card the row's height: measured boxes, polled - never a fixed wait. */
 test("the tile length chart fills its card beside the OEE, and follows the row both ways", async ({ page }) => {
   await openScenario(page, "watch-a-kiln-line");
   const quality = room(page).getByRole("region", { name: "Tile length", exact: true });

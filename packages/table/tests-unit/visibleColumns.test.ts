@@ -1,4 +1,4 @@
-/* Visible columns (table-surface 05). Hiding and reordering act together -
+/* Visible columns. Hiding and reordering act together -
    which is why the cases here check both at once and not only each on its own.
    The column count is derived, so that the empty state and the footer row go on
    spanning the table correctly. */

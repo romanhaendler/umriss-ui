@@ -1,10 +1,10 @@
-/* The guard over the README's component table (library-audit 08).
+/* The guard over the README's component table.
 
    What is checked is the reader against small texts, not the real README -
    `pnpm check:site` does that, and a second run here
    would need the compiler's whole program.
 
-   The fixture below is English, like the shipped README since ticket 14. The
+   The fixture below is English, like the shipped README. The
    one thing it may not change is the heading the reader searches for -
    `## Components` - which is the README's own: the two move together, or this
    check finds no section and reports every component as missing. */

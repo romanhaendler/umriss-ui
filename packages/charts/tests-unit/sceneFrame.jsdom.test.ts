@@ -96,7 +96,7 @@ describe("ChartScene across frames", () => {
     scene.unbind();
   });
 
-  /* charts-review, bug 3: the chip beside a cell's value showed a palette
+  /* The chip beside a cell's value showed a palette
      colour the matrix never draws, instead of the cell's own. */
   it("gives a matrix cell's tooltip chip the cell's colour", async () => {
     const root = document.createElement("div");
@@ -172,7 +172,7 @@ describe("ChartScene across frames", () => {
   });
 });
 
-/* charts-fixes 10: hit testing where bands, cells and points meet. */
+/* hit testing where bands, cells and points meet. */
 describe("ChartScene - the hit of a band beside points", () => {
   const band: StateSeriesConfig = {
     kind: "state",
@@ -258,7 +258,7 @@ describe("ChartScene - the hit of a band beside points", () => {
   });
 });
 
-/* charts-essentials 03: on a step line the value at the pointer is the sample
+/* on a step line the value at the pointer is the sample
    before it, held - not the nearer sample after it. */
 describe("ChartScene - the hit on a step line", () => {
   it("stays at the sample the pointer's hold began with", async () => {
@@ -289,7 +289,7 @@ describe("ChartScene - the hit on a step line", () => {
   });
 });
 
-/* charts-essentials 04: a hidden series is not drawn, so it is not hit. */
+/* a hidden series is not drawn, so it is not hit. */
 describe("ChartScene - a hidden series", () => {
   it("is not in the tooltip", async () => {
     const root = document.createElement("div");
@@ -314,7 +314,7 @@ describe("ChartScene - a hidden series", () => {
   });
 });
 
-/* charts-fixes 11: functions were compared by their source text, and every
+/* functions were compared by their source text, and every
    bound native function reads "function () { [native code] }". */
 describe("ChartScene - change detection of a native function", () => {
   it("updates the ticks when one bound Intl format replaces another", async () => {
@@ -344,7 +344,7 @@ describe("ChartScene - change detection of a native function", () => {
   });
 });
 
-/* charts-long-series 03: a downsampled line draws four points per pixel
+/* a downsampled line draws four points per pixel
    column, but the tooltip searches the raw data. */
 describe("ChartScene - the hit on a downsampled line", () => {
   it("names the reading under the pointer, not one the drawing kept", async () => {
@@ -370,7 +370,7 @@ describe("ChartScene - the hit on a downsampled line", () => {
   });
 });
 
-/* charts-review: hovering the legend entry of a hidden series dimmed every
+/* Hovering the legend entry of a hidden series dimmed every
    visible one - the highlight named only what is not drawn. */
 describe("ChartScene - the highlight of a hidden series", () => {
   it("dims nothing", async () => {
@@ -389,7 +389,7 @@ describe("ChartScene - the highlight of a hidden series", () => {
   });
 });
 
-/* charts-review: the cursor sync. Only the x position travels (Q21) - with or
+/* The cursor sync. Only the x position travels - with or
    without a tooltip - and a chart that leaves its group keeps no crosshair of
    it. */
 describe("ChartScene - cursor sync", () => {
@@ -434,7 +434,7 @@ describe("ChartScene - cursor sync", () => {
     a.setSyncId(null);
   });
 
-  // chart-loading 02: a chart being reloaded points at no shared position.
+  // a chart being reloaded points at no shared position.
   it("draws no shared crosshair while loading", async () => {
     const [a, b] = await pair();
     const plot = a.getLayoutSnapshot().layout.plot;
@@ -462,10 +462,9 @@ describe("ChartScene - cursor sync", () => {
   });
 });
 
-/* charts-review: zoom never reaches a span of no width, which no scale can
-   show - a single point's extent is one (component-view 01: at most the
-   data's extent). */
-/* chart-loading 02: a drag under way ends when the reload begins - its
+/* Zoom never reaches a span of no width, which no scale can
+   show - a single point's extent is one. */
+/* a drag under way ends when the reload begins - its
    captured pointer would pass the stale plot's pointer-events. */
 describe("ChartScene - a drag and loading", () => {
   it("pans no further once loading begins", async () => {

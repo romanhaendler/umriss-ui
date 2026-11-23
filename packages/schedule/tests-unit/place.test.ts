@@ -1,5 +1,4 @@
-/* The place intent: what it does to the data, and what it does not
-   (schedule-refinement 07). Creating a subtask is the caller's act, with the
+/* The place intent: what it does to the data, and what it does not. Creating a subtask is the caller's act, with the
    caller's identity - the intent only says what was asked for. */
 
 import { describe, expect, it } from "vitest";

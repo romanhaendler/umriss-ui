@@ -1,5 +1,4 @@
-/* The typing of `useChart` and `value`, checked by the compiler
-   (charts-bound-to-rows 02, ADR-0048).
+/* The typing of `useChart` and `value`, checked by the compiler (ADR-0048).
 
    This file does not run; it is compiled, as part of `typecheck`. Every line
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
@@ -135,7 +134,7 @@ export function NoData() {
 export const unused = [FreeChart, FreeLine, FreeXAxis, FreeYAxis];
 
 /* A matrix cell's colour reaches a custom tooltip as `level`, its channel's
-   name everywhere (charts-bound-to-rows Q27). */
+   name everywhere. */
 export function CellLevel(point: TooltipPoint<Latency>) {
   const level: number | undefined = point.level;
   // @ts-expect-error `value` names the y position, never the colour
@@ -143,7 +142,7 @@ export function CellLevel(point: TooltipPoint<Latency>) {
 }
 
 /* The props of a state band stay an interface: one that extends them keeps
-   compiling (chart-rows-as-they-come, D3 - nothing is taken away). */
+   compiling. */
 import type { StateBandProps } from "../src";
 export interface OwnBandProps extends StateBandProps<Latency> {
   title: string;

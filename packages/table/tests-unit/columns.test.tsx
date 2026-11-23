@@ -1,4 +1,4 @@
-/* Columns: binding, registration, value and presentation (umriss-table 06).
+/* Columns: binding, registration, value and presentation.
 
    The table now renders itself, so rendering gets component tests - the reverse
    of the rule from table-model, which held as long as the rendering belonged to

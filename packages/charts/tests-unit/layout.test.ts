@@ -49,11 +49,10 @@ function find(axes: readonly AxisLayout[], key: string): AxisLayout {
   return hit;
 }
 
-/* library-audit 03: the default labelling of a working time axis ran through
+/* the default labelling of a working time axis ran through
    `toLocaleString(undefined, …)` and thereby depended on the machine - in a
    workspace whose other package nails the notation down. A screenshot from a
-   colleague would not have matched one's own. Since charts-essentials 01 the
-   notation is en-GB by level, the same as a time axis without a calendar
+   colleague would not have matched one's own. The notation is en-GB by level, the same as a time axis without a calendar
    (timeAxis.test.ts) - fixed, never the machine's. */
 describe("computeLayout - working time without a formatter of its own", () => {
   it("labels the clock in en-GB and asks for no locale", () => {
@@ -404,7 +403,7 @@ describe("computeLayout - ticks and the edge collision", () => {
   });
 });
 
-/* charts-fixes 08: "labels of x limits get no band space". A y limit's label
+/* "labels of x limits get no band space". A y limit's label
    stands beside the ticks and is as wide as it is - the band has to widen for
    it (above). An x limit's label stands in the row of the tick labels, and that
    row is one tick line high in every x band. So the label fits exactly when it is
@@ -425,7 +424,7 @@ describe("computeLayout - the label of an x limit", () => {
   });
 });
 
-/* charts-fixes 09: a working-time axis stood its day and half-day ticks on
+/* a working-time axis stood its day and half-day ticks on
    UTC's midnight and labelled them in local time - "01:00" under a day change
    in CET - and took explicit ticks as working time. The tests run under
    Europe/Berlin (vitest.config.ts). */
@@ -480,7 +479,7 @@ describe("computeLayout - ticks of a working-time axis", () => {
   });
 });
 
-/* charts-long-series 05: `alignTicks` on a further y axis puts its ticks on
+/* `alignTicks` on a further y axis puts its ticks on
    the rows of the first y axis' grid. */
 describe("computeLayout - alignTicks", () => {
   function layout(align: boolean, firstPosition: "left" | "right" = "left") {

@@ -1,4 +1,4 @@
-/* The button group and the split button (foundation-primitives 07).
+/* The button group and the split button.
 
    The core of the check: the main action and the trigger are two separate ways.
    A click on the main action must not open anything, and a click on the trigger

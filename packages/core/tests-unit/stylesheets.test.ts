@@ -1,4 +1,4 @@
-/* The components read tokens instead of copying them out (library-audit 07).
+/* The components read tokens instead of copying them out.
 
    The colour discipline of the stylesheets was almost complete - three literals
    in 4,650 lines - and each of the three was a defect: the modal's scrim dimmed
@@ -89,7 +89,7 @@ describe("Stylesheets of the components", () => {
   });
 });
 
-/* ---------------- The vocabulary (visuelle-wertigkeit 01) ---------------- */
+/* ---------------- The vocabulary ---------------- */
 
 const LIBRARY = import.meta.glob(
   [
@@ -227,7 +227,7 @@ describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
     expect(missing).toEqual([]);
   });
 
-  /* Reduced motion drops the path, never the state (visuelle-wertigkeit 02). A
+  /* Reduced motion drops the path, never the state. A
      focus style that arrived by an animation would vanish with it: where a
      rule answers to focus, it shows the focus by itself. */
   it("lets no focus style hang on an animation", () => {
@@ -262,7 +262,7 @@ describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
   });
 });
 
-/* ---------------- The interaction-state canon (visuelle-wertigkeit 04) ----------------
+/* ---------------- The interaction-state canon ----------------
 
    The canon settles by what MEANS a state comes about, not how strongly
    (CONTEXT.md, **Interaction-state canon**): hover changes the surface, active
@@ -351,7 +351,7 @@ function unguarded(css: string, selector: string): string[] {
    outer ring away and its neighbours paint over it - the token, not a copy. */
 const RING = /^(?:none|(?:inset )?var\(--u-focus-ring(?:-danger)?\)|var\(--uc-focus-ring\))$/;
 
-/* The ring's outline (forced-colors 01): transparent, so it paints nothing
+/* The ring's outline: transparent, so it paints nothing
    beside the ring - until forced colours drop the ring's box-shadow and paint
    the outline in the system's text colour. Two pixels at no offset, where the
    ring lies. */
@@ -384,7 +384,7 @@ function hoverTakesRing(selector: string, body: Declarations): boolean {
   return body.some(([property]) => /^(?:box-shadow|outline)$/.test(property));
 }
 
-/* The edge's outline (forced-colors 02): the library draws every edge and
+/* The edge's outline: the library draws every edge and
    every card's and overlay's depth as a box-shadow, and forced colours drop
    them all - a button became a word, a field a line of text, a menu text
    floating over the page. One transparent pixel of outline where the edge

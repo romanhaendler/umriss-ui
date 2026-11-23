@@ -1,4 +1,4 @@
-/* Where a bar's label lies, and when there is none (schedule-legibility 03).
+/* Where a bar's label lies, and when there is none.
 
    The label belongs to the main time - not to the lead-in, which is not the work
    - and it is the visible part of it: a bar that began before the view keeps
@@ -25,9 +25,8 @@ function box(mainFrom: number, mainTo: number, extra: Partial<SubtaskBox> = {}):
 
 describe("barLabelBox", () => {
   it("keeps its full height, whatever the bar says besides its colour", () => {
-    /* Until schedule-lane-groups 02 a muted bar was drawn at half height and
-       its label shrank with it. Muted now says it in SATURATION, so no
-       appearance takes height from a label any more. */
+    /* A muted bar is not drawn at half height, because its label would shrink with it.
+       Muted says it in SATURATION, so no appearance takes height from a label. */
     const plain = barLabelBox(box(100, 300), 800)!;
     for (const appearance of [["muted"], ["provisional"], ["open"], ["muted", "open"]] as const) {
       const marked = barLabelBox(box(100, 300, { subtask: { id: "s", task: "t", lane: "l", from: 0, to: 0, appearance: [...appearance] } }), 800)!;

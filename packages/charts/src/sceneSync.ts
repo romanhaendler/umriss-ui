@@ -1,4 +1,4 @@
-/* Cursor sync (charts-long-series 04) and the loading state that ends it: the
+/* Cursor sync and the loading state that ends it: the
    groups of charts that share a `syncId`, and the pointer's x position going
    to all of them. Functions over the scene; the scene holds a `SyncState`. */
 

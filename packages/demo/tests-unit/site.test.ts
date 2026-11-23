@@ -1,6 +1,5 @@
 /* The built site's guard and its forwarders: what a search engine and a
-   reader with an old link meet (.scratch/sidebar-tree, Testing Decisions,
-   seam 1). */
+   reader with an old link meet. */
 
 import { describe, expect, it } from "vitest";
 import { HOSTED_HOST } from "../src/address";

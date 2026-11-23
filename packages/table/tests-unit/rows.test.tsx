@@ -1,4 +1,4 @@
-/* Row detail and row actions (umriss-table 09). */
+/* Row detail and row actions. */
 
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

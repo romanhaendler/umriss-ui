@@ -1,6 +1,6 @@
-/* The alarm list as an interface (shopfloor-instruments 02). Pulled from
-   @umriss-ui/core to @umriss-ui/table (umriss-table 13): what changed were the
-   import paths and the names of the props on <AlarmList> (library-audit 09) -
+/* The alarm list as an interface. Pulled from
+   @umriss-ui/core to @umriss-ui/table: what changed were the
+   import paths and the names of the props on <AlarmList> -
    nothing else.
 
    The case that stands first is the reason for the whole component: the
@@ -289,7 +289,7 @@ describe("A flood is marked, not suppressed", () => {
   });
 });
 
-/* library-audit 03: an override of the wording reaches the column names - in
+/* an override of the wording reaches the column names - in
    the list's header row and in the projection a caller builds a column menu and
    a CSV header row from. */
 describe("Column names from the wording", () => {
@@ -322,8 +322,8 @@ describe("Column names from the wording", () => {
   });
 });
 
-/* The density (library-audit 07), pulled here from `anbieter.test.tsx` in
-   @umriss-ui/core when the alarm list left there (umriss-table 14). It is the
+/* The density, pulled here from `anbieter.test.tsx` in
+   @umriss-ui/core when the alarm list left there. It is the
    case where it gets delicate: compact of its own accord – a provider that says
    nothing about the density must not pull it to "regular". */
 describe("Density of the alarm list", () => {
@@ -357,7 +357,7 @@ describe("Density of the alarm list", () => {
   });
 });
 
-/* alarm-standards 02: hidden, never absent. A snoozed or
+/* hidden, never absent. A snoozed or
    out-of-service alarm stays in the list, drawn neutrally with its state as a
    word, and the list counts them. The German wording is asserted as the
    subject, not as a leftover. The pinned time zone is Europe/Berlin: the snooze
@@ -457,7 +457,7 @@ describe("Hidden", () => {
     expect(screen.getByText("Unterdrückt oder zurückgestellt: 3")).toBeTruthy();
   });
 
-  /* alarm-standards 05: the availability is a small badge before the
+  /* the availability is a small badge before the
      lifecycle - the word alone, so the state column holds one line; until
      when and by whom stand in its tooltip and in what is spoken. */
   it("shows a snooze as a short badge, the rest in its tooltip and in what is spoken", async () => {
@@ -478,7 +478,7 @@ describe("Hidden", () => {
     }
   });
 
-  /* A snooze's reason is the sentence's last word (alarm-snooze-reason-shown 01):
+  /* A snooze's reason is the sentence's last word:
      in the tip and in what is spoken; the badge stays one word. */
   describe("a snooze's reason", () => {
     const withReason = (reason?: string) => {

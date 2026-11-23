@@ -157,9 +157,8 @@ export class Registry {
   stickyRowHeader = false;
 
   /* Without a pagination bar the table does not page: one that stops quietly at
-     the tenth row because nobody put one there is a trap (found at the alarm
-     list, umriss-table 13). Without a table toolbar, but with a search or a
-     column filter, the table puts one there itself (table-filters 04):
+     the tenth row because nobody put one there is a trap. Without a table toolbar, but with a search or a
+     column filter, the table puts one there itself:
      conditions and the ratio need a place, and a place that came into being
      only with the first condition would shift the table. */
   private parts = new Map<PartKind, Set<string>>();

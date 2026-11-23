@@ -206,7 +206,7 @@ describe("The extent per axis across series kinds", () => {
   });
 });
 
-/* library-audit 03: "Series n" stays the last resort of the legend - the package
+/* "Series n" stays the last resort of the legend - the package
    has no text layer, and a default name is exactly the kind of text it is not to
    bring along. It stays, but it is conspicuous.
 
@@ -242,7 +242,7 @@ describe("A series without a name", () => {
   });
 });
 
-/* library-audit 05: the palette followed the place in the registration. A series
+/* the palette followed the place in the registration. A series
    that deregistered and registered again - a legend toggle, a conditional child -
    landed at the end, and EVERY series of the chart changed colour: A/B/C in
    blue/pink/green became B/C/A in blue/pink/green. "Blue is the temperature" held
@@ -297,8 +297,8 @@ describe("The palette follows the name", () => {
     expect(colorsByName(scene).Beta).toBe(before);
   });
 
-  /* Review finding: the rename left the old name standing on the place, and a new
-     series under the old name got the colour of the renamed one. */
+  /* A rename leaves the old name standing on the place, and a new series under the
+     old name must not get the colour of the renamed one. */
   it("does not give a name a rename has left behind the colour of the renamed series", () => {
     const scene = new ChartScene();
     scene.registerSeries(lineSeries({ name: "A" }));
@@ -354,7 +354,7 @@ describe("The palette follows the name", () => {
   });
 });
 
-/* charts-review, bug 2: the check ran for the first materialised series only,
+/* The check ran for the first materialised series only,
    and warned falsely for a matrix, whose x values run row-major and are
    legitimately unsorted. Freshly imported for the same reason as above. */
 describe("The sortedness check (R-2.6)", () => {
@@ -495,7 +495,7 @@ describe("validate - DEV invariants", () => {
   });
 
   it("reports a limit with an unknown axis reference, as for a series", () => {
-    // It used to draw nothing, silently.
+    // A missing value must not draw nothing, silently.
     const scene = new ChartScene();
     scene.registerAxis(xAxis());
     scene.registerAxis(yAxis());
@@ -554,7 +554,7 @@ describe("Snapshots", () => {
   });
 });
 
-/* charts-essentials 04, component-view 02: a hidden series is hidden by name
+/* a hidden series is hidden by name
    through the view. It keeps its legend entry and its colour, and gives up its
    say in the extent. */
 describe("A hidden series", () => {
@@ -606,7 +606,7 @@ describe("A hidden series", () => {
 });
 
 
-/* charts-long-series 02: `domain="visible"` on a y axis - the extent of what
+/* `domain="visible"` on a y axis - the extent of what
    the x domain shows. */
 describe("A y axis on the visible domain", () => {
   const course = [

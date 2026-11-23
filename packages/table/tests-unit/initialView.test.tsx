@@ -1,5 +1,4 @@
-/* The view as a starting state, over registered columns (umriss-table 11,
-   table-filters 01).
+/* The view as a starting state, over registered columns.
 
    The difficulty is the timing: the hook is called before a column has
    registered. What is decided: the view is taken over on the first render and

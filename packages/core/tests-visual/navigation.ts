@@ -5,8 +5,7 @@
    moves here with it. The waiting stands with the shell (`@umriss-ui/demo`),
    because it waits on it.
 
-   The outline import still names the German module of `demo/`; that directory
-   is renamed by its own ticket. */
+   The outline import names the German module of `demo/`, under the name that directory has. */
 
 import type { Locator, Page } from "@playwright/test";
 import { navigation } from "@umriss-ui/demo/checks/navigation";

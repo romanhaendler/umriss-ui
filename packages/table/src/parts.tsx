@@ -300,7 +300,7 @@ export function buildParts(registry: Registry): Parts {
 }
 
 /* The table toolbar the table puts up itself when it has a search or a column
-   filter and no toolbar stands (table-filters 04). It carries only conditions,
+   filter and no toolbar stands. It carries only conditions,
    the ratio and the way back. */
 function OwnToolbar({ registry }: { registry: Registry }) {
   useSyncExternalStore(registry.subscribe, registry.bodyVersion, registry.bodyVersion);

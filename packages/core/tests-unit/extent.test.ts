@@ -1,4 +1,4 @@
-/* `chars` as a field's width (control-sizes 02, ADR-0041): the pure half -
+/* `chars` as a field's width (ADR-0041): the pure half -
    which count reaches the stylesheet, and when the field is fixed to it. What
    the count does in a real layout stands in the browser suite
    (features-widths.spec.ts). */

@@ -1,4 +1,4 @@
-/* The resting message (foundation-primitives 03).
+/* The resting message.
 
    The point of it: the role follows the tone and is not the caller's decision.
    Whoever were allowed to set it would set it wrongly at some point - and a

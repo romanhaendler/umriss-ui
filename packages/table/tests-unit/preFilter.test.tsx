@@ -1,4 +1,4 @@
-/* The pre-filter (table-filters 02): which rows a table has at all.
+/* The pre-filter: which rows a table has at all.
 
    Regression tests for the defects the spec found:
    D3 - the figures and the empty state counted rows the application's filter

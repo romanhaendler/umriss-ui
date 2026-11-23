@@ -1,4 +1,4 @@
-/* Grid mode in the browser (table-grid-mode 02, 03): what jsdom cannot show
+/* Grid mode in the browser: what jsdom cannot show
    - the real Tab order, the ring the Active cell draws, a virtual window
    scrolling a row in for the keys, an edit that the example applies and the
    date picker's pick. Behaviour, light only; the pictures are the examples'
@@ -92,7 +92,7 @@ test("a capacity outside its range keeps the editor open with the message; Tab c
   await expect(field).toBeFocused();
   await expect(field).toHaveAttribute("aria-invalid", "true");
   /* The message hangs beneath the cell in a popover, and nothing in the table
-     shifts - the editor lies over the cell at its size (table-grid-mode 05). */
+     shifts - the editor lies over the cell at its size. */
   const message = page.getByText("Between 4 and 40 hours a week", { exact: true }).and(page.locator("[aria-hidden='true']"));
   await expect(message).toBeVisible();
   expect((await message.boundingBox())!.y).toBeGreaterThanOrEqual(cell!.y + cell!.height);
@@ -141,7 +141,7 @@ test("in a virtual window the keys walk to rows never rendered, and the grid scr
 test("the keys keep the Active cell clear of the sticky head and the pinned block", async ({ page }) => {
   /* The scroll area's scroll-padding is the head's height and the blocks'
      widths: the browser's own scroll into view stops short of them
-     (table-grid-mode 05). Narrow, so that it scrolls both ways - and no
+     Narrow, so that it scrolls both ways - and no
      narrower, or the start block takes more than the table leaves it and
      scrolls with the rest (`blocksThatStick`). */
   await page.setViewportSize({ width: 500, height: 900 });

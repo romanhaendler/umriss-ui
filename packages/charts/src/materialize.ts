@@ -270,7 +270,7 @@ export function categoryPlaces<T>(
 }
 
 /** A box's further numbers, top to bottom as drawn: the order of its tooltip
-    rows, readout and table columns (box-plot B9). */
+    rows, readout and table columns. */
 export const BOX_KEYS = ["upperWhisker", "upperQuartile", "lowerQuartile", "lowerWhisker"] as const;
 
 /** A box's optional numbers. */
@@ -281,8 +281,7 @@ export const BOX_EXTRA_KEYS = ["mean", "notchUpper", "notchLower", "count"] as c
 const BOX_EXTENT_EXTRAS: readonly (typeof BOX_EXTRA_KEYS)[number][] = ["mean", "notchUpper", "notchLower"];
 
 /** Index of the first box whose numbers are not lower whisker ≤ lower
-    quartile ≤ median ≤ upper quartile ≤ upper whisker, otherwise -1 (DEV
-    check, box-plot 04). A gap is in order. */
+    quartile ≤ median ≤ upper quartile ≤ upper whisker, otherwise -1. A gap is in order. */
 export function firstDisorderedBox(series: MaterializedSeries): number {
   const box = series.box;
   if (box === null) return -1;

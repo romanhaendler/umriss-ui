@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-/* Zoom and pan through the chart's view (component-view 01, ADR-0047): only
-   where the x axis is `zoomable`, by gesture and by key (charts-a11y 04),
+/* Zoom and pan through the chart's view (ADR-0047): only
+   where the x axis is `zoomable`, by gesture and by key,
    within the zoom limits, reported whole through `onViewChange`, and two
    charts kept in step through `onViewChange` and `setView`. */
 

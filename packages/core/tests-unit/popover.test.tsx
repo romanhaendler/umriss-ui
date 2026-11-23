@@ -169,7 +169,7 @@ describe("Popover – portal target", () => {
   });
 });
 
-/* visuelle-wertigkeit 02: the panel unfolds from its trigger and leaves
+/* the panel unfolds from its trigger and leaves
    faster than it came. Under reduced motion the path is dropped, never the
    state change - the panel then appears and goes at once, but it appears. The
    exit token is set on every element, as in toast.test.tsx: jsdom loads no

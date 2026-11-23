@@ -1,4 +1,4 @@
-/* The modal closes once (library-audit 01).
+/* The modal closes once.
 
    Before, every gesture reported `onClose` twice: once from the gesture
    itself and once more when the choreography called `dialog.close()` at the
@@ -69,7 +69,7 @@ describe("Modal – onClose exactly once", () => {
   /* The case the listener on the element is there for in the first place: the
      browser closes the dialog itself (a form with method="dialog", a second
      Escape without user activation). That has to keep arriving. */
-  /* Review finding: a second Escape without user activation sends `cancel` as
+  /* A second Escape without user activation sends `cancel` as
      non-cancelable and closes the dialog anyway. Then the cancelling reported
      and right after it the close event did too. In the browser both lie in the
      same task, before any effect - hence in one act. */

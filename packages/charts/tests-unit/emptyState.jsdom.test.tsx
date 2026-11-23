@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* charts-essentials 05: a chart without anything to show says so. It drew an
+/* a chart without anything to show says so. It drew an
    empty frame on [0, 1] and said nothing. Axes and frame stay; the words stand
    in the middle of the plot area. jsdom lays nothing out, so the plot is given
    a size of its own. */

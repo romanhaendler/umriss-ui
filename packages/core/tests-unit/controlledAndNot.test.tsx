@@ -1,4 +1,4 @@
-/* Rule 2 of the README for the two that did not meet it (core-passthrough 05):
+/* Rule 2 of the README for the two that did not meet it:
    `Tabs` were controlled only, `Card` uncontrolled only. Both now take the
    pattern of the other fields - `value`/`defaultValue` with `onValueChange`,
    `collapsed`/`defaultCollapsed` with `onCollapsedChange` - and are tested at

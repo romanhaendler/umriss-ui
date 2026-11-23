@@ -1,4 +1,4 @@
-/* Pinned columns in a rendered table (table-column-pinning 01): the blocks in
+/* Pinned columns in a rendered table: the blocks in
    head, body, foot and export, what sticks with them, the view, and the lines of
    a grouped and of a virtualised table.
 

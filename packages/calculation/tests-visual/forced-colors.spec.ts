@@ -1,5 +1,5 @@
 /* The calculation under forced colours - the Windows contrast mode, emulated
-   (forced-colors 03). The suite stands with the shell
+   The suite stands with the shell
    (`@umriss-ui/demo/checks/forcedColors.ts`); here stands the state no example
    rests in. The verdicts need nothing of their own: each keeps its word. */
 

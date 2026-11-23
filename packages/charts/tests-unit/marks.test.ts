@@ -1,4 +1,4 @@
-/* charts-alternatives 02 (C3): the marks a palette place gives a series - the
+/*  (C3): the marks a palette place gives a series - the
    pure mapping, and the geometry the canvas and the legend draw from it. */
 
 import { describe, expect, it } from "vitest";
@@ -47,7 +47,7 @@ describe("The marks of a palette place", () => {
   });
 });
 
-/* charts-alternatives 04: a state is hatched by its name, so two bands that
+/* a state is hatched by its name, so two bands that
    list one state at different places hatch it alike - and the legend, which
    shows it once, agrees with both. */
 describe("The hatch of a state", () => {
