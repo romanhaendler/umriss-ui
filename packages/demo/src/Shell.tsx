@@ -192,6 +192,19 @@ export function Shell({ demo, sentence, german }: ShellProps) {
   return (
     <ShownGerman value={language === "de" ? german : undefined}>
       <div className="shell">
+        {/* The first stop of the page: the header holds a dozen links ahead of
+            the content. It moves the focus itself - an `href` to an id would
+            be taken for an address by the route. */}
+        <a
+          className="shellSkip"
+          href={BASE}
+          onClick={(event) => {
+            event.preventDefault();
+            document.getElementById("content")?.focus();
+          }}
+        >
+          Skip to content
+        </a>
         {/* One bar for every page of every demo: the way to the front page, to
             the four other packages and out of the site. The wordmark and the
             other packages leave this demo, so they are plain links and a full
@@ -247,7 +260,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
         <div className="shellBody">
           {!narrow && rail}
 
-          <main className="shellContent">
+          <main className="shellContent" id="content" tabIndex={-1}>
             {page === undefined ? (
               <Scenarios demo={demo} sentence={sentence} />
             ) : (

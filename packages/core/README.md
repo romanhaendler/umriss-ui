@@ -594,3 +594,5 @@ caller's, and umriss shows the reader's time unless the application names a zone
 ([ADR-0076](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0076-an-application-names-the-time-zone-its-instants-are-shown-in.md)); a dashboard
 a user arranges is its own package, `@umriss-ui/dashboard`
 ([ADR-0064](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0064-a-dashboard-a-user-arranges-is-a-sequence-on-fixed-columns.md)).
+
+A skip link belongs to an application's page frame and core has no frame, so the application provides it (`VisuallyHidden` with `focusable` is the piece to build it from).

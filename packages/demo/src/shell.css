@@ -47,6 +47,42 @@ body {
   backdrop-filter: saturate(160%) blur(10px);
 }
 
+/* The skip link: clipped away until it has the focus, then over the header's
+   top left. Clipped and not `display: none`, which would take it out of the
+   tab order. */
+.shellSkip {
+  position: fixed;
+  top: var(--u-space-2);
+  left: var(--u-space-2);
+  z-index: 30;
+  padding: var(--u-space-2) var(--u-space-3);
+  border-radius: var(--u-radius-sm);
+  background: var(--u-color-surface);
+  color: var(--u-color-text);
+  font-size: var(--u-text-sm);
+  text-decoration: none;
+}
+
+.shellSkip:not(:focus) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.shellSkip:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* The main region takes the focus from the skip link, and draws no ring
+   around the page. */
+.shellContent:focus {
+  outline: none;
+}
+
 /* The wordmark: the site's one name, leading to its front page. */
 .shellMark {
   flex: none;
