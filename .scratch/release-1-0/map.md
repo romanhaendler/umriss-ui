@@ -71,6 +71,9 @@ beyond the map.
 - [What of the tokens and the wording changes before 1.0](issues/20-what-of-the-tokens-and-the-wording-changes-before-1-0.md):
   what sizes with the text becomes rem; 48 tokens and two factors are the measures; names and keys are frozen
   as they stand, two tokens renamed, `qualityGood` gone; the joined sentences stay as a known limit.
+- [The releases up to 1.0](issues/22-the-releases-up-to-1-0.md): `0.57.0` without a break, `0.58.0` with
+  every break as the candidate, then `1.0.0`; ten specs, five for each of the two minors, and the acceptance
+  as a list. **The destination is reached: no ticket is open.**
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
