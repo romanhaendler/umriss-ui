@@ -288,6 +288,42 @@ describe("editing by key proposes what the drag would", () => {
     expect(scene.getSnapshot().spoken?.refused).toBe(true);
   });
 
+  describe("a step that blocked time refuses is read out, as the lead chord's is", () => {
+    const refusedBy = (blocked: { lane: string; from: number; to: number }, chord: KeyboardEventInit) => {
+      vi.useFakeTimers();
+      const { scene, intents } = sceneWith({ intents: ["move", "stretch", "lane"] });
+      scene.registerLayer({ kind: "blocked", data: [{ id: "b", ...blocked }] });
+      onP2(scene);
+      expect(scene.key(key(chord.shiftKey === true ? "ArrowRight" : "ArrowDown", { altKey: true, ...chord }))).toBe(true);
+      vi.advanceTimersByTime(500);
+      expect(intents).toEqual([]);
+      expect(scene.getSnapshot().spoken?.refused).toBe(true);
+    };
+
+    it("for a stretch into it", () => refusedBy({ lane: "press", from: 5 * HOUR, to: 6 * HOUR }, { shiftKey: true }));
+    it("for a change to a lane where it would lie in it", () => refusedBy({ lane: "weld", from: 4 * HOUR, to: 5 * HOUR }, {}));
+
+    it("for a move that finds no way over it", () => {
+      vi.useFakeTimers();
+      const { scene, intents } = sceneWith({ intents: ["move"] });
+      scene.registerLayer({ kind: "blocked", data: [{ id: "b", lane: "press", from: 5 * HOUR, to: 5000 * HOUR }] });
+      onP2(scene);
+      scene.key(key("ArrowRight", { altKey: true }));
+      vi.advanceTimersByTime(500);
+      expect(intents).toEqual([]);
+      expect(scene.getSnapshot().spoken?.refused).toBe(true);
+    });
+
+    it("and says nothing of a step nothing refuses", () => {
+      vi.useFakeTimers();
+      const { scene } = sceneWith();
+      onP2(scene);
+      scene.key(key("ArrowRight", { altKey: true }));
+      vi.advanceTimersByTime(500);
+      expect(scene.getSnapshot().spoken?.refused).toBe(false);
+    });
+  });
+
   it("proposes nothing the caller does not handle", () => {
     const { scene, intents } = sceneWith({ intents: [] });
     onP2(scene);

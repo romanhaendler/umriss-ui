@@ -212,9 +212,11 @@ export class SceneKeys {
     if (vertical !== 0) {
       const lane = this.laneBeside(s.lane, vertical);
       if (lane !== null && intents.includes("lane") && (this.host.handlers().canMoveTo?.(s, lane) ?? true)) {
+        /* Blocked time on the other lane refuses the change, as it refuses a drag. */
+        const refused = entersBlockedTime({ ...s, lane }, s, this.host.data.blocked);
         gestures.byKeyboard = true;
-        this.host.handlers().onIntent?.({ kind: "lane", subtask: s.id, lane });
-        this.scheduleReadout();
+        if (!refused) this.host.handlers().onIntent?.({ kind: "lane", subtask: s.id, lane });
+        this.scheduleReadout(refused);
       }
       return true;
     }
@@ -223,6 +225,7 @@ export class SceneKeys {
     const step = raster.step > 0 ? raster : { step: this.host.view.step(), offset: 0 };
     const blocked = this.host.data.blocked;
     let intent: Intent | null = null;
+    let refused = false;
     if (!event.shiftKey && intents.includes("move")) {
       /* Blocked time is stepped OVER, not into: a key that stopped in front
          of it would lock a keyboard user behind a colleague's leave, where a
@@ -236,17 +239,19 @@ export class SceneKeys {
         from = next;
         if (!entersBlockedTime(moved(from), s, blocked)) break;
       }
-      if (from !== s.from && !entersBlockedTime(moved(from), s, blocked)) intent = { kind: "move", subtask: s.id, from, to: moved(from).to };
+      refused = from !== s.from && entersBlockedTime(moved(from), s, blocked);
+      if (from !== s.from && !refused) intent = { kind: "move", subtask: s.id, from, to: moved(from).to };
     } else if (event.shiftKey && intents.includes("stretch")) {
       /* The drag's floor: a main time never shorter than a step or a minute. */
       const to = Math.max(gestures.shifted(s.to, direction * step.step, step), s.from + Math.max(step.step, MINUTE));
-      if (to !== s.to && !entersBlockedTime({ ...s, to }, s, blocked)) intent = { kind: "stretch", subtask: s.id, from: s.from, to };
+      refused = to !== s.to && entersBlockedTime({ ...s, to }, s, blocked);
+      if (to !== s.to && !refused) intent = { kind: "stretch", subtask: s.id, from: s.from, to };
     }
     /* An edit is the keys' act, on a subtask the pointer showed them too. */
     gestures.byKeyboard = true;
     if (intent !== null) this.host.handlers().onIntent?.(intent);
     /* The caller applies it, or not; either way the readout says what stands. */
-    this.scheduleReadout();
+    this.scheduleReadout(refused);
     return true;
   }
 

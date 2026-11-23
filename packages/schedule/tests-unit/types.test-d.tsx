@@ -72,3 +72,10 @@ export function Names() {
     </>
   );
 }
+
+/* The schedule and the charts each declare `ZoomLimits`; nothing but this holds
+the two equal. */
+declare const ownLimits: import("../src").ZoomLimits;
+declare const chartsLimits: import("@umriss-ui/charts").ZoomLimits;
+export const limitsFromOwn: import("@umriss-ui/charts").ZoomLimits = ownLimits;
+export const limitsFromCharts: import("../src").ZoomLimits = chartsLimits;

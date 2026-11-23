@@ -123,3 +123,37 @@ test("A focused schedule with an active subtask", async ({ page }, testInfo) => 
   await expect(tooltip(example)).toContainText("t-03-2");
   await expect(example).toHaveScreenshot(`keyboard-active-${testInfo.project.name}.png`);
 });
+
+test("Alt+I and Alt+O change the lead-in and the lead-out, the live region reads the new length, and AltGr+I does nothing", { tag: "@quick" }, async ({ page }) => {
+  behaviour();
+  await openExample(page, "stretch", "change-lead-in-and-lead-out");
+  const example = page.locator('[data-example="change-lead-in-and-lead-out"]');
+  await tabIn(page, example);
+  /* The first tour, already the active one; the arrow stays on its lane. */
+  await page.keyboard.press("ArrowRight");
+  await expect(tooltip(example)).toContainText("T-01");
+  const live = example.locator("[aria-live='polite']");
+  /* "Lead-in 1 hr 15 min" as minutes; -1 where the readout does not name it. */
+  const lead = async (word: string): Promise<number> => {
+    const said = new RegExp(`${word} ([^,]*)`).exec((await live.textContent()) ?? "")?.[1];
+    if (said === undefined) return -1;
+    const hours = /(\d+) hrs?/.exec(said)?.[1];
+    const minutes = /(\d+) min/.exec(said)?.[1];
+    return Number(hours ?? 0) * 60 + Number(minutes ?? 0);
+  };
+  /* The example starts T-01 with a lead-in of 30 minutes and a lead-out of 15. */
+  for (const [code, word, start] of [["KeyI", "Lead-in", 30], ["KeyO", "Lead-out", 15]] as const) {
+    await page.keyboard.press(`Alt+${code}`);
+    await expect.poll(() => lead(word)).toBeGreaterThan(start);
+    const longer = await lead(word);
+    await page.keyboard.press(`Alt+Shift+${code}`);
+    await expect.poll(() => lead(word)).toBeLessThan(longer);
+  }
+  /* Ctrl with Alt is AltGr on Windows: the key is the keyboard's own character, not the chord. */
+  const said = await live.textContent();
+  const before = await tooltip(example).textContent();
+  await page.keyboard.press("Control+Alt+KeyI");
+  await page.waitForTimeout(500);
+  expect(await live.textContent()).toBe(said);
+  expect(await tooltip(example).textContent()).toBe(before);
+});
