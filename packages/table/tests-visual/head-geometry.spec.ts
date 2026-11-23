@@ -73,17 +73,18 @@ const RULES: Rule[] = [
   /* A left-aligned head's label starts where its values start; a right-aligned head's last part ends where they end;
      a centred head's parts, as a group, and its values stand on the cell's centre line. */
   ({ parts, align, content }) => {
-    if (!align?.labelInk || !align.valueInk) return [];
+    if (!align?.labelInk) return [];
     if (align.side === "center") {
       const boxes = [parts.label, parts.rank, parts.arrow, parts.funnel].flatMap((b) => (b ? [b] : []));
       const mid = (Math.min(...boxes.map((b) => b.left)) + Math.max(...boxes.map((b) => b.right))) / 2;
       const line = (content.left + content.right) / 2;
       const out: string[] = [];
       if (Math.abs(mid - line) > TOLERANCE) out.push(`head parts are ${(mid - line).toFixed(1)}px off the cell's centre line`);
-      const values = (align.valueInk.left + align.valueInk.right) / 2;
+      const values = align.valueInk ? (align.valueInk.left + align.valueInk.right) / 2 : line;
       if (Math.abs(values - line) > TOLERANCE) out.push(`values are ${(values - line).toFixed(1)}px off the cell's centre line`);
       return out;
     }
+    if (!align.valueInk) return [];
     if (align.side === "start") {
       const d = align.labelInk.left - align.valueInk.left;
       return Math.abs(d) > TOLERANCE ? [`label starts ${d.toFixed(1)}px off the values' left edge`] : [];
