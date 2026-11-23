@@ -347,15 +347,15 @@ The speeds in [`docs/capabilities.md`](https://github.com/romanhaendler/umriss-u
 * The demo, in a checkout: `pnpm dev:table` (port 4175). It is the documentation — one page per
   feature, each with running examples and their source, and the props tables
   generated from `src/` where a page documents a type, each prop linked to the
-  examples that show it. An API index lists every export, one search finds
-  across all five packages, and the header switches the examples to German.
+  examples that show it. Every export is listed in [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/table/API.md), one search finds
+  across all seven packages, and the header switches the examples to German.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
   and an index of every export with its comment and its declaration. The running documentation of a version is opened as [the repository README describes](https://github.com/romanhaendler/umriss-ui#see-it-running): check out the tag `<package>-v<version>`, then `pnpm start`.
 * [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
-  language all five packages share.
+  language all seven packages share.
 * [`../core/README.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/README.md) — the component library underneath.
 
 ## Testing

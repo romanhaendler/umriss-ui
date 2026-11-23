@@ -54,7 +54,7 @@ choose; there is no hosted site.
 </tr>
 </table>
 
-Three commands open it. They need Node 22 and pnpm 9 (`corepack enable` gives
+Three commands open it. They need Node 22 and pnpm (`corepack enable` gives
 you the pnpm the repository names):
 
 ```bash
@@ -76,7 +76,7 @@ examples together with the source that produced them and a props table generated
 from `src/` — there is no prose description of a component that could drift away
 from the component. Every row of a props table links the examples that show it,
 and the build stops at a prop no example shows, unless its package names it
-as an exception with the reason. 27 core pages open with a configurator. Each
+as an exception with the reason. Some core pages open with a configurator. Each
 package has an API index of every export; one search (⌘K) finds pages, props,
 exports, tokens and wording keys across all seven packages;
 the header switches the examples between English and German (the charts take
@@ -113,8 +113,11 @@ can be overridden:
 most theme switchers already do; one of your own writes
 `html.dark { color-scheme: dark }`. **Fonts** are not loaded: Geist is
 recommended and used when present (`@fontsource/geist-sans`,
-`@fontsource/geist-mono`), the system fonts otherwise. **Browsers:** Chrome 123,
-Firefox 120, Safari 17.5 or newer — the tokens use `light-dark()`.
+`@fontsource/geist-mono`), the system fonts otherwise. **Browsers:** Chrome 125,
+Firefox 121, Safari 17.5 or newer — the first that ship everything the source
+relies on (`light-dark()`, `:has()`, `round()`); a test derives the three numbers
+from the source. Right-to-left
+layout is not supported.
 
 ## The demos
 
@@ -148,6 +151,8 @@ second checkout running them at the same time sets a base of its own.
   produced them.
 * **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — setup, commands, and how work is
   organised here.
+* **[`SECURITY.md`](SECURITY.md)** — how to report a vulnerability, and which
+  versions get a fix.
 
 **For a coding agent**, an installable skill points it at the documentation above
 and states the rules it would otherwise get wrong (`skills/umriss-ui/SKILL.md`):

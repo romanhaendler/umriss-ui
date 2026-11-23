@@ -126,7 +126,7 @@ source and the props table generated from `src/`, each prop linked to the
 examples that show it; the scenario walks through a dispatcher's start screen
 at other widths, while it is rearranged, when something goes wrong and what the
 application governs. An API index lists every export, one search finds across
-all six packages, and the header switches the examples to German. What is not
+all seven packages, and the header switches the examples to German. What is not
 built yet and what never will be stands in ADR-0064. The vocabulary - dashboard,
 widget, widget type, widget size, options, catalogue - stands in `CONTEXT.md`
 under "Dashboards". Every export is listed in [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/dashboard/API.md).

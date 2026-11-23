@@ -219,8 +219,8 @@ Done from this list: **blocked time** per lane and **milestones**.
 
 * The demo, in a checkout: `pnpm dev:schedule` (port 4176). It is the documentation — every page shows
   running examples with their source and the props table generated from `src/`,
-  each prop linked to the examples that show it. An API index lists every
-  export, one search finds across all five packages, and the header switches
+  each prop linked to the examples that show it. Every export is listed in
+  [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/schedule/API.md), one search finds across all seven packages, and the header switches
   the examples to German.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
@@ -232,7 +232,7 @@ Done from this list: **blocked time** per lane and **milestones**.
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
 * [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
-  language all five packages share.
+  language all seven packages share.
 
 ## Testing
 

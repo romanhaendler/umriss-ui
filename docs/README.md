@@ -16,6 +16,7 @@ what a reader has — the filename is what they are looking for.
 | how wide and how tall a control is, and how a new field is built for it | [`design-language.md`](design-language.md), "Sizes" — the decision in [`adr/0041-a-fields-width-never-follows-what-it-shows.md`](adr/0041-a-fields-width-never-follows-what-it-shows.md) |
 | which industrial standards umriss follows (ISA-18.2, ISA-101), and where it does not | [`standards.md`](standards.md) |
 | how this repository is worked in | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
+| how to report a vulnerability, and which versions get a fix | [`../SECURITY.md`](../SECURITY.md) |
 | how a version is published to npm | [`releasing.md`](releasing.md) |
 | what is tested, and how | [`testing.md`](testing.md) |
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/table/docs/capabilities.md`](../packages/table/docs/capabilities.md), [`../packages/schedule/docs/capabilities.md`](../packages/schedule/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |

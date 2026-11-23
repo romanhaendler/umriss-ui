@@ -171,8 +171,8 @@ installed calculation (an input changed, the result read) with exactly those fil
 The demo is the documentation; in a checkout, `pnpm dev:calculation` (port 4177)
 opens it. Every page shows running examples with
 their source and the props table generated from `src/`, each prop linked to the
-examples that show it; an API index lists every export, one search finds
-across all five packages, and the header switches the examples to German. The
+examples that show it; every export is listed in [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/calculation/API.md), one search finds
+across all seven packages, and the header switches the examples to German. The
 vocabulary — calculation, quantity, result, given, operator, operand,
 derivation, reference — stands in `CONTEXT.md` under "Calculations".
 

@@ -148,7 +148,7 @@ anew when the attributes of the root element or of an ancestor of a chart (a `.d
 `color-scheme` on a container) or the system preference change; `invalidateTheme()` covers any other switch.
 The text sizes (`--uc-size-tick`, `-title`, `-legend`, `-tooltip`) are in `rem` and grow with the root size. **Fonts** are not
 loaded: Geist when the application has it, the system fonts otherwise.
-**Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer.
+**Browsers:** Chrome 125, Firefox 121, Safari 17.5 or newer.
 
 ## What it can do
 
@@ -217,7 +217,7 @@ const copy = async () =>
 
 What it deliberately cannot do — animations, a log scale, pie, donut and
 radar — stands in the same record, with the reason,
-and across all five packages in
+and across all seven packages in
 [ADR-0032](https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md). Stacking is not among
 them: bars and areas stack (`stack`, `normalize`). Horizontal bars are the
 next kind to come (ADR-0059).
@@ -252,8 +252,8 @@ passes `useFormats().timeZone` to the chart; see core's README on formats.
 
 * The demo, in a checkout: `pnpm dev:charts` (port 4174). It is the documentation — every page
   shows running examples with their source and the props table generated from
-  `src/`, each prop linked to the examples that show it. An API index lists
-  every export, and one search finds across all five packages.
+  `src/`, each prop linked to the examples that show it. Every export is listed in
+  [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/charts/API.md), and one search finds across all seven packages.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
@@ -262,7 +262,7 @@ passes `useFormats().timeZone` to the chart; see core's README on formats.
 * [`docs/capabilities.md`](https://github.com/romanhaendler/umriss-ui/blob/main/packages/charts/docs/capabilities.md) — every capability with the
   level at which it is proved.
 * [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md) — the design
-  language all five packages share.
+  language all seven packages share.
 
 ## Testing
 

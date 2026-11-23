@@ -6,7 +6,7 @@ Guiding idea: **precise and quiet, with palpable quality** – depth comes from
 soft shadows and fine light edges, not from hard outlines or effects.
 
 The design language — "Ink & Paper", the dark theme, motion — is written down
-once for all five packages in [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md).
+once for all seven packages in [`../../docs/design-language.md`](https://github.com/romanhaendler/umriss-ui/blob/main/docs/design-language.md).
 
 ## Use
 
@@ -15,9 +15,9 @@ pnpm add @umriss-ui/core
 ```
 
 The demo is the documentation.
-Every prop of a props table is linked to the examples that show it, 27 pages
-open with a configurator, an API index lists every export, one search finds
-across all five packages, and the header switches the examples to German.
+Every prop of a props table is linked to the examples that show it, some pages
+open with a configurator, every export is listed in [API.md](https://github.com/romanhaendler/umriss-ui/blob/main/packages/core/API.md), one search finds
+across all seven packages, and the header switches the examples to German.
 For a coding agent the same material stands as one Markdown file inside the
 installed package, `docs/llms-full.md`, pinned to that version — every page
 with its examples' source, its props tables and why it is built as it is, and
@@ -266,16 +266,16 @@ Where a build lowers `light-dark()` (Vite 8 and Next 16 by default), a mode set
 only from JavaScript or through a variable - next-themes, MUI, Mantine, an
 inline `style` - stays light. Then write one rule such as
 `[data-theme="dark"] { color-scheme: dark; }`, or raise the CSS target to the
-browser floor: Vite `build: { cssTarget: ["chrome123", "firefox120", "safari17.5"] }`,
+browser floor: Vite `build: { cssTarget: ["chrome125", "firefox121", "safari17.5"] }`,
 Next a `browserslist` in `package.json`
-(`"chrome >= 123", "firefox >= 120", "safari >= 17.5"`).
+(`"chrome >= 125", "firefox >= 121", "safari >= 17.5"`).
 
 **Fonts are the application's.** The tokens name Geist first and end in the
 system fonts; nothing is loaded. Geist is recommended — `@fontsource/geist-sans`
 (400, 500, 600) and `@fontsource/geist-mono` (400) — and any other face is one
 token away.
 
-**Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer. `light-dark()` is
+**Browsers:** Chrome 125, Firefox 121, Safari 17.5 or newer. `light-dark()` is
 older nowhere; an older browser discards the tokens and shows the interface
 unstyled. An application checks the floor itself with
 `CSS.supports("color", "light-dark(red, red)")`.
