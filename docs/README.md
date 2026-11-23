@@ -7,6 +7,7 @@ what a reader has — the filename is what they are looking for.
 |---|---|
 | what umriss is and how to install it | [`../README.md`](../README.md) |
 | how a component is used, with running code | the demo of its package — `pnpm start` for all of them at the version checked out, or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard`, `pnpm dev:alarms` |
+| what a package exports, and the props, options and returns of each | `packages/<package>/API.md` - generated from `src/` and checked in; the surface ADR-0083 promises |
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |

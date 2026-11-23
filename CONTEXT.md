@@ -1,8 +1,9 @@
 # umriss
 
-The shared vocabulary of this workspace. All six packages —
+The shared vocabulary of this workspace. All seven packages —
 `@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
-`@umriss-ui/schedule`, `@umriss-ui/calculation` and `@umriss-ui/dashboard` — speak it.
+`@umriss-ui/schedule`, `@umriss-ui/calculation`, `@umriss-ui/dashboard` and
+`@umriss-ui/alarms` — speak it.
 
 The codebase is English throughout: identifiers, file and directory names,
 comments, prose, and the text the library ships. Each term below names one
@@ -24,9 +25,8 @@ branches rename the same concept without talking to each other.
 ## Language
 
 A prop and the identifier behind it are the same word. The accessible name is
-spelled `aria-label` on every component, the native spelling (ADR-0068); the
-old `ariaLabel` of Table, Chart, Schedule, TreeView, Popover and ContextMenu
-works for one more minor and warns.
+spelled `aria-label` on every component, the native spelling (ADR-0068); no
+component takes `ariaLabel` any more.
 
 
 ## Design language
@@ -1555,7 +1555,7 @@ use the plain English name, for it is the one name a caller has to type.
 
 What the rename left behind as a rule rather than as a record: where a word is
 taken twice over, which German is an identifier and which is display text, and
-which output conventions are deliberately still German.
+which output conventions follow the language in use.
 
 **The register rule.** German nouns are capitalised, so a *lowercase* German
 word in `de.ts` or `wording.ts` is an identifier and never display text. The
@@ -1563,13 +1563,10 @@ exceptions are `von`, `bis` and `ab`, which also stand in the German sentences �
 and those are replaced only in parameter position and inside `${…}`.
 `pageOfPages` still reads `Seite ${page} von ${total}`.
 
-**One output convention is still German and is not a name.** `DEFAULT_FORMATS`
-was `de-DE` throughout until ADR-0024 made it English and shipped
-`GERMAN_FORMATS` beside the German wording. What stays German is the CSV
-export: the decimal comma and the semicolon, argued in `model/csv.ts`, and
-`ja`/`nein`, which `values.ts` argues are data rather than labels, "lower case,
-the way a spreadsheet filters them". It is a machine format for a spreadsheet
-and wants its own ticket, not a rename.
+**The CSV export follows the language in use.** `DEFAULT_FORMATS` was `de-DE` throughout until
+ADR-0024 made it English and shipped `GERMAN_FORMATS` beside the German wording. The CSV export follows
+the language too (ADR-0061): its separator, its decimal mark and the words for true and false arrive
+as `CsvConventions`, argued in `model/csv.ts`.
 
 One name the table needed and this file did not have: **Projection**, the
 model's computed output — visible columns, the filtered set, the page — and is

@@ -62,3 +62,9 @@ an application that did nothing wrong.
 - What the tokens cannot reach today - a component's inner spacing, its
   radius where it has none of its own - is a gap in the token set, filled when
   an application needs it, not a reason to publish a selector.
+
+## Amendment 2026-11-23: the counts, and what may change
+
+The counts in the Context are those of the decision. Today core declares 130 `--u-` tokens and the charts
+33 `--uc-`, and about 130 `data-*` attributes stand in the source of the seven packages. A token's value may
+change in a minor; the measures a layout hangs on change only in a major (ADR-0083).
