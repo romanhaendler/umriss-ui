@@ -76,6 +76,10 @@ beyond the map.
 - [Tokens and wording as surface](issues/09-tokens-and-wording.md): 163 tokens, none unread, German complete;
   about 48 tokens are measures; the space tokens are px beside rem; names and key prefixes follow no one
   scheme; one token is read and declared nowhere.
+- [The documents agree with the source](issues/10-the-documents-agree-with-the-source.md): no document claims
+  what the source lacks; the generator of `API.md` skips components a hook returns and members written as
+  methods; counts, package lists and two glossary entries have drifted; sixteen ADRs state their status twice
+  and differently.
 
 ## Not yet specified
 
