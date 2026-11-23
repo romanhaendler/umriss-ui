@@ -82,9 +82,13 @@ export function defineReferenced(
     /* A definition stands on a page: its texts are a reader's, like a row's. */
     shown.add(declaration);
     flagAt(ctx, declaration, "reference", "(its comment)", check(description));
-    if (hasMembers(declaration)) {
+    /* An intersection (`Omit<A, "x"> & { y: B }`) reads as a table where it has
+       members; one that has none stays a declaration. */
+    const intersection = ts.isTypeAliasDeclaration(declaration) && ts.isIntersectionTypeNode(declaration.type);
+    const read = hasMembers(declaration) || intersection ? readType(ctx, declaration) : undefined;
+    if (read !== undefined && (!intersection || read.props.length > 0)) {
       flagHeader(ctx, declaration, false);
-      const entry = readType(ctx, declaration);
+      const entry = read;
       types[name] = { ...entry, definition: { description, ...(from === undefined ? {} : { from }) } };
       queue.push(...entry.props.flatMap((p) => p.references ?? []));
     } else {

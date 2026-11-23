@@ -64,7 +64,26 @@ function signatureTypes(declaration: string): { takes: string[]; gives: string[]
 }
 
 /** A type longer than a line is cut: the wording's groups are whole objects. */
-const short = (type: string) => (flat(type).length > 80 ? `${flat(type).slice(0, 79)}…` : flat(type));
+const short = (type: string) => {
+  if (flat(type).length <= 80) return flat(type);
+  /* A union of function types is the member's whole signature: the forms are the point. */
+  const union = (ts.createSourceFile("type.ts", `type T = ${type};`, ts.ScriptTarget.Latest, true).statements[0] as ts.TypeAliasDeclaration).type;
+  const forms = ts.isUnionTypeNode(union) ? union.types.map((one) => (ts.isParenthesizedTypeNode(one) ? one.type : one)) : [];
+  return forms.length > 0 && forms.every(ts.isFunctionTypeNode) ? flat(type) : `${flat(type).slice(0, 79)}…`;
+};
+
+/** The members of a union alias as they are written: literals as such, named
+    types by name, an object by its fields (a literal field with its value). */
+function unionMembers(declaration: string): string | undefined {
+  const alias = ts.createSourceFile("type.ts", declaration, ts.ScriptTarget.Latest, true).statements[0];
+  if (alias === undefined || !ts.isTypeAliasDeclaration(alias) || !ts.isUnionTypeNode(alias.type)) return undefined;
+  const one = (type: ts.TypeNode): string =>
+    ts.isParenthesizedTypeNode(type) ? one(type.type)
+    : ts.isTypeReferenceNode(type) ? type.typeName.getText()
+    : ts.isTypeLiteralNode(type) ? `{ ${type.members.map((member) => `${member.name?.getText() ?? ""}${ts.isPropertySignature(member) && member.type !== undefined && ts.isLiteralTypeNode(member.type) ? `: ${member.type.getText()}` : ""}`).join(", ")} }`
+    : flat(type.getText());
+  return alias.type.types.map(one).join(" | ");
+}
 
 /** A method's function type as a method is written: `<R>(a: A): R`. */
 function asMethod(type: string): string {
@@ -78,8 +97,8 @@ function asMethod(type: string): string {
 const written = (prop: PropEntry) =>
   `${prop.name}${prop.optional ? "?" : ""}${prop.method === true ? asMethod(prop.type) : `: ${short(prop.type)}`}`;
 
-function rows(entry: TypeEntry): string[] {
-  return entry.props.map((prop) => {
+function rows(props: readonly PropEntry[]): string[] {
+  return props.map((prop) => {
     const sentence = firstSentence(prop.description);
     return (
       `- ${written(prop)}` +
@@ -104,7 +123,8 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
     /* A type's members by name, so that "does it take X" finds an answer; the
        props types of components stand in full below. */
     const members = one.kind === "type" && !one.name.endsWith("Props") ? (entries[one.name]?.props ?? []).map((prop) => (prop.method === true ? written(prop) : prop.name)) : [];
-    return `- ${one.name}${sentence === "" ? "" : ` — ${sentence}`}${members.length === 0 || members.length > 100 ? "" : ` [${members.join(", ")}]`}`;
+    const values = one.kind === "type" ? unionMembers(one.declaration) : undefined;
+    return `- ${one.name}${sentence === "" ? "" : ` — ${sentence}`}${values === undefined ? "" : ` = ${values}`}${members.length === 0 || members.length > 100 ? "" : ` [${members.join(", ")}]`}`;
   };
   const subpaths = [...new Set(exports.flatMap((one) => (one.subpath === undefined ? [] : [one.subpath])))];
   const sections = [
@@ -117,7 +137,7 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
      `typeof Name` (its props are `NameProps`), a named type whose declaration is one, or an interface
      of call signatures (the last stands for the rest). Only where the one
      parameter is named types - `A & B` included - and one has a table. */
-  const propsOf = (type: string, depth = 0): string | undefined => {
+  const propsOf = (type: string, depth = 0): string | PropEntry[] | undefined => {
     if (depth > 4) return undefined;
     const source = /^(type|interface)\s/.test(type) ? type : `type T = ${type};`;
     const statement = ts.createSourceFile("type.ts", source, ts.ScriptTarget.Latest, true).statements[0];
@@ -134,13 +154,30 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
       return declaration === undefined ? undefined : propsOf(declaration, depth + 1);
     }
     /* A component renders: a function that gives something else back is a setter. */
-    const call = calls.at(-1);
-    if (call?.type === undefined || call.type.getText().replace(/ReactNode|ReactElement|JSX\.Element|null|[\s|]/g, "") !== "") return undefined;
-    const parameter = call.parameters[0]?.type;
-    const parts: readonly ts.TypeNode[] = parameter === undefined ? [] : ts.isIntersectionTypeNode(parameter) ? parameter.types : [parameter];
-    const named = parts.filter((part): part is ts.TypeReferenceNode => ts.isTypeReferenceNode(part));
-    if (parts.length === 0 || named.length < parts.length) return undefined;
-    return named.map((part) => part.typeName.getText()).find(hasTable);
+    if (calls.length === 0 || calls.some((call) => call.type === undefined || call.type.getText().replace(/ReactNode|ReactElement|JSX\.Element|null|[\s|]/g, "") !== "")) return undefined;
+    const partsOf = (call: ts.SignatureDeclaration): readonly ts.TypeNode[] => {
+      const parameter = call.parameters[0]?.type;
+      return parameter === undefined ? [] : ts.isIntersectionTypeNode(parameter) ? parameter.types : [parameter];
+    };
+    const last = partsOf(calls.at(-1)!);
+    const named = last.filter((part): part is ts.TypeReferenceNode => ts.isTypeReferenceNode(part));
+    if (calls.length === 1 && last.length > 0 && named.length === last.length) return named.map((part) => part.typeName.getText()).find(hasTable);
+    /* A named type's members and those of the tables it is also made of. */
+    const withAlso = (name: string): readonly PropEntry[] => [...(entries[name]?.props ?? []), ...(entries[name]?.alsoTakes ?? []).flatMap(withAlso)];
+    /* Inline objects or several forms: every member of every form, once by name. */
+    const merged = new Map<string, PropEntry>();
+    for (const part of calls.flatMap(partsOf)) {
+      const found: readonly PropEntry[] = ts.isTypeLiteralNode(part)
+        ? part.members.filter(ts.isPropertySignature).map((member) => ({
+            name: member.name.getText(),
+            type: member.type === undefined ? "unknown" : flat(member.type.getText()),
+            optional: member.questionToken !== undefined,
+            description: ts.getJSDocCommentsAndTags(member).filter(ts.isJSDoc).map((doc) => ts.getTextOfJSDocComment(doc.comment) ?? "").join(" "),
+          }))
+        : ts.isTypeReferenceNode(part) ? withAlso(part.typeName.getText()) : [];
+      for (const one of found) if (!merged.has(one.name)) merged.set(one.name, one);
+    }
+    return merged.size === 0 ? undefined : [...merged.values()];
   };
 
   /* Props, options and returns. A type with no members of its own is no table. */
@@ -151,7 +188,7 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
       if (entry === undefined || entry.props.length === 0) continue;
       tabled.add(name);
       /* The wording is a table of 260 labels: counted, not listed. */
-      out.push(`#### ${heading} (${name})`, "", ...(entry.props.length > 100 ? [`${entry.props.length} members; see \`docs/llms-full.md\`.`] : rows(entry)), "");
+      out.push(`#### ${heading} (${name})`, "", ...(entry.props.length > 100 ? [`${entry.props.length} members; see \`docs/llms-full.md\`.`] : rows(entry.props)), "");
     }
   };
   for (const kind of ["component", "hook"] as const) {
@@ -171,7 +208,8 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
         for (const name of new Set(gives)) {
           for (const prop of entries[name]?.props ?? []) {
             const props = propsOf(prop.type);
-            if (props !== undefined) table(`props of ${prop.name}`, [props]);
+            if (typeof props === "string") table(`props of ${prop.name}`, [props]);
+            else if (props !== undefined) out.push(`#### props of ${prop.name} (all forms)`, "", ...rows(props), "");
           }
         }
         if (out.length === mark) {

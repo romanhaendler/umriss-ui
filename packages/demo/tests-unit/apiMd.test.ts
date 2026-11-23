@@ -73,6 +73,37 @@ describe("apiMd", () => {
     expect(text).toContain("- Ref [exportAs<R>(format: Format<R>, rows?: Z[]): R]");
   });
 
+  it("prints the members of a union alias after its sentence, uncut", () => {
+    const union = (name: string, declaration: string) => ({ ...type(name), description: "Says.", declaration });
+    const text = apiMd({
+      packageName: "@x/y",
+      exports: [
+        union("Route", 'type Route = "curve" | "straight" | "orthogonal";'),
+        union("Either", "type Either = Alpha | Beta<string>;"),
+        union("Hit", 'type Hit = { readonly kind: "a"; readonly x: number } | { readonly kind: "none" } | { y: string };'),
+      ],
+      entries: {},
+    });
+    expect(text).toContain('- Route — Says. = "curve" | "straight" | "orthogonal"');
+    expect(text).toContain("- Either — Says. = Alpha | Beta");
+    expect(text).toContain('- Hit — Says. = { kind: "a", x } | { kind: "none" } | { y }');
+  });
+
+  it("tables a component given as several forms or an inline object, and keeps a function union whole", () => {
+    const long = "((row: Row) => void) | ((selected: Selected extends true ? Row[] | AllMatching : Row[]) => void)";
+    const text = apiMd({
+      packageName: "@x/y",
+      exports: [hook, type("Thing")],
+      entries: {
+        Thing: { name: "Thing", parameter: [], omitted: [], props: [{ ...prop, name: "Many", type: "ManyComponent<Z>" }, { ...prop, name: "Inline", type: "(props: {\n /** Names it. */\n label: string; size?: number }) => null" }] },
+        ManyComponent: { name: "ManyComponent", parameter: [], omitted: [], props: [], definition: { description: "", declaration: "interface ManyComponent<Z> { (props: { a: string }): ReactNode; (props: Base & { b?: number; onSelect: " + long + " }): ReactNode; }" } },
+        Base: { name: "Base", parameter: [], omitted: [], props: [{ ...prop, name: "id", type: "string" }] },
+      },
+    });
+    expect(text).toContain("#### props of Many (all forms)\n\n- a: string\n- id: string\n- b?: number\n- onSelect: " + long);
+    expect(text).toContain("#### props of Inline (all forms)\n\n- label: string — Names it.\n- size?: number");
+  });
+
   it("tables a props type no component reaches, and throws for one without an entry", () => {
     const entries = { LoneProps: { name: "LoneProps", parameter: [], omitted: [], props: [{ ...prop, name: "a", type: "string" }] } };
     expect(apiMd({ packageName: "@x/y", exports: [type("LoneProps")], entries })).toContain("## Other props\n\n#### props (LoneProps)\n\n- a: string");
