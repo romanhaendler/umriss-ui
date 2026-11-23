@@ -15,7 +15,10 @@ in [`docs/testing.md`](docs/testing.md); the map of every other document is
 ## First run
 
 1. `pnpm install`
-2. `npx playwright install chromium`
+2. `npx playwright install chromium` (the full suite); add `firefox webkit`
+   (`--with-deps` on Linux) to run the layout checks of the other two engines:
+   `ENGINES=firefox,webkit pnpm test:visual:quick <package>`. CI runs them on
+   every push; what runs where stands in `docs/testing.md`
 3. `pnpm test:unit && pnpm test:visual`
 
 The third step builds the seven demos and takes the screenshot baselines into
@@ -32,8 +35,8 @@ which `pnpm test:visual:update` creates and which are then checked in.
 * `pnpm typecheck` – `typecheck` and `typecheck:demo` of every package;
   `typecheck:demo` generates the props first and checks `demo/` (core's control
   room page reaches the other packages' sources there)
-* `pnpm check:site` – the gates of the demos: `props` in every package, and core's
-  README table
+* `pnpm check:site` – the gates of the demos: `props` in every package (it checks each `API.md`),
+  the README links of every package, and core's README table
 * `pnpm semgrep` – Semgrep over the seven packages' `src` and the workflows with the rule sets
   vendored in `.semgrep/`, in the pinned container image (needs Docker); CI runs the same script
   and any finding fails it. Accept a finding only with `nosemgrep: <rule-id>` and a reason at its line
@@ -51,11 +54,14 @@ which `pnpm test:visual:update` creates and which are then checked in.
   public entry, and nothing imports any of them.
 
 The accessibility check runs inside the same Playwright suite and needs no
-command of its own. It checks a sample of pages one at a time, in both themes,
+command of its own. It checks every page of each demo (the list the outline
+gives) one at a time, in both themes,
 against WCAG 2.1 AA – axe's "best-practice" rules are deliberately not included:
 a check that reports opinions as errors gets switched off rather than read. The
-suppression list in the file is empty, and a test of its own holds that every
-future entry must carry a reason.
+tolerated list in `packages/demo/checks/accessibility.ts` holds two entries, the
+muted text's colour pair in the light and in the dark theme, each with its
+reason; the list of open findings is empty, and a test of its own holds that
+every entry carries a reason.
 
 For the charts part only:
 

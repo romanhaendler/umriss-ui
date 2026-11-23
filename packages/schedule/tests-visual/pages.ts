@@ -29,7 +29,7 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
   (e) => NOT_PHOTOGRAPHED[e.exampleId] === undefined,
 );
 
-/** A sample for the accessibility check: the scenarios page with its
+/** A sample for the forced-colours check: the scenarios page with its
     context menu, the first schedule, the lanes with their headers in markup,
     the lane groups with the only buttons the schedule puts into the tab
     order, and the findings listed as text. */

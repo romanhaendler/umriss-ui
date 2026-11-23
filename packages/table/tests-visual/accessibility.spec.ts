@@ -1,4 +1,4 @@
-/* Accessibility check of a sample of pages of the demo of @umriss-ui/table, light
+/* Accessibility check of every page of the demo of @umriss-ui/table, light
    and dark, against WCAG 2.1 AA.
 
    The standards, the tolerated colour pairs and the reading of the findings come
@@ -10,14 +10,14 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
-import { SAMPLE } from "./pages";
+import { PAGES } from "./pages";
 import { allWithCode, open } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
-for (const pageId of SAMPLE) {
+for (const pageId of PAGES) {
   test(`Page ${pageId} is accessible`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const result = await new AxeBuilder({ page }).include(`[data-block="${pageId}"]`).withTags(STANDARDS).analyze();

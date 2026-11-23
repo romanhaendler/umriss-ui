@@ -23,5 +23,5 @@ export type { ExampleAddress };
 
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
 
-/** A sample for the accessibility check: every page - there are three. */
+/** A sample for the forced-colours check: every page - there are three. */
 export const SAMPLE = PAGES;

@@ -12,7 +12,7 @@ mechanics.
 |---|---|
 | Source | <https://github.com/romanhaendler/umriss-ui> |
 | Packages | the npm org <https://www.npmjs.com/org/umriss-ui> |
-| Checks | `.github/workflows/ci.yml` — lint, types, `check:site`, unit tests, build. The screenshot suite stays local (its baselines are darwin's) |
+| Checks | `.github/workflows/ci.yml` — lint, types, `check:site`, unit tests, build, `check:dist`, Semgrep. The screenshot suite stays local (its baselines are darwin's) |
 | Publishing | `.github/workflows/publish.yml` — on every push to `main`, every version not on npm yet |
 
 ## Tags on npm
@@ -102,7 +102,11 @@ publishes the tarball, and the job that holds the token has no pnpm at all
    (desktop), Numbers, LibreOffice and Google Sheets, after looking at the demo
    by hand and before publishing: no repair prompt, and a date, a boolean, a
    leading-zero text and an umlaut intact. No test can do this.
-   `test:visual` is the one check the workflow cannot run.
+   `test:visual` is the one check the workflow cannot run. The `@quick` checks
+   in Chromium, Firefox and WebKit run in CI on every push (`ci.yml`, job
+   `browsers`); before pushing, run them locally with
+   `ENGINES=firefox,webkit pnpm test:visual:quick <package>` (Firefox in the
+   Playwright Linux container where it does not start on the machine).
 4. Push to `main`. The run is under *Actions → Publish*; if one package fails,
    the rest of that run stops, and the next push — or *Run workflow* on the
    same page — publishes what is still missing.

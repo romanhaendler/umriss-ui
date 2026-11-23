@@ -43,17 +43,16 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
 );
 
 /** The pages that open with a configurator: one file each in
-    `demo/configurators/`, named after its page (.scratch/configurator). */
+    `demo/configurators/`, named after its page. */
 export const CONFIGURATOR_PAGES: readonly string[] = readdirSync(join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "configurators"))
   .filter((file) => file.endsWith(".tsx"))
   .map((file) => file.slice(0, -".tsx".length).toLowerCase());
 
-/** A sample for the accessibility check.
+/** A sample for the forced-colours check.
 
-    Every page in both themes would mean two axe runs per page; that is minutes
-    for an answer that rarely differs between two pages of the same sort. What
-    is taken is therefore, per rubric, the one that carries the most
-    interaction, plus the scenarios page. */
+    Every page would be minutes for an answer that rarely differs between two
+    pages of the same sort. What is taken is therefore, per rubric, the one
+    that carries the most interaction, plus the scenarios page. */
 export const SAMPLE = [
   "scenarios",
   "button",

@@ -4,7 +4,9 @@
 # The full visual suite (20-50 minutes), on macOS because the baselines are
 # -darwin. Started by hand (Actions → Visual → Run workflow) until a run has
 # been green; then `push: branches: [main]` goes back in beside the dispatch.
-# Locally: `pnpm test:visual:quick <package>`.
+# Locally: `pnpm test:visual:quick <package>`. The @quick checks in Chromium,
+# Firefox and WebKit run on every push in ci.yml (job `browsers`), without
+# screenshots; this workflow is the only place the screenshots are compared.
 name: Visual
 
 on:

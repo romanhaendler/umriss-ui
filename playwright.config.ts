@@ -25,6 +25,15 @@ const wanted = asked?.length ? asked : ALL;
 const unknown = wanted.filter((d) => !ALL.includes(d));
 if (unknown.length) throw new Error(`DEMOS: unknown ${unknown.join(", ")}; known: ${ALL.join(", ")}`);
 
+/* ENGINES=firefox,webkit adds, per demo, a light project of that engine that
+   runs only the tests tagged @quick (unset = Chromium's projects alone). */
+const ENGINES = { firefox: devices["Desktop Firefox"], webkit: devices["Desktop Safari"] } as const;
+const engines = (process.env.ENGINES?.split(",").map((e) => e.trim()).filter(Boolean) ?? []).filter(
+  (e) => e !== "chromium",
+);
+const badEngine = engines.filter((e) => !(e in ENGINES));
+if (badEngine.length) throw new Error(`ENGINES: unknown ${badEngine.join(", ")}; known: chromium, firefox, webkit`);
+
 export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -54,6 +63,22 @@ export default defineConfig({
         name: `${pkg === "core" ? "ui" : pkg}-${colorScheme === "dark" ? "dark" : "light"}`,
         testDir: `packages/${pkg}/tests-visual`,
         use: { baseURL: `http://localhost:${portOf(pkg)}`, colorScheme },
+      })),
+    ),
+    /* Layout checks only: the baselines are Chromium's, so no screenshot is compared here. */
+    ...wanted.flatMap((pkg) =>
+      (engines as (keyof typeof ENGINES)[]).map((engine) => ({
+        name: `${pkg === "core" ? "ui" : pkg}-quick-${engine}`,
+        testDir: `packages/${pkg}/tests-visual`,
+        grep: /@quick/,
+        ignoreSnapshots: true,
+        use: {
+          ...ENGINES[engine],
+          viewport: { width: 1280, height: 900 },
+          deviceScaleFactor: 1,
+          baseURL: `http://localhost:${portOf(pkg)}`,
+          colorScheme: "light" as const,
+        },
       })),
     ),
     /* The table's geometry checks measure layout, which differs by engine:

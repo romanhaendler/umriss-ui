@@ -34,6 +34,29 @@ jobs:
       - run: pnpm build
       - run: pnpm -r check:dist
 
+  # The layout checks (tests tagged @quick) of the seven demos in the three engines the
+  # README names. They compare no screenshot, so they run on Linux; one demo at a time
+  # keeps a runner's memory enough.
+  browsers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: "@quick in Chromium, Firefox and WebKit"
+        run: |
+          for pkg in core charts table schedule calculation dashboard alarms; do
+            ENGINES=chromium,firefox,webkit pnpm test:visual:quick "$pkg" || exit 1
+          done
+
   # The image is pinned by digest inside the script; the rule sets are vendored in
   # .semgrep/. Nothing is sent to the Semgrep app and the job holds no secrets.
   semgrep:

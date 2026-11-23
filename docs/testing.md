@@ -51,8 +51,9 @@ kind is for.
   demo shell's tooling (props reader, generated text for agents, addresses).
   They run per package. The charts' range is proved there: the pointer in
   `tests-unit/range.jsdom.test.tsx`, the axes in `rangeAxes.jsdom.test.tsx`, the
-  keys and the readout in `rangeKeys.jsdom.test.tsx`; no Playwright test draws
-  its band yet, so the band is looked at in the demo.
+  keys and the readout in `rangeKeys.jsdom.test.tsx`; its band is drawn by one
+  Playwright test (`charts/tests-visual/features-interaction.spec.ts`, an Alt drag)
+  and looked at in the demo.
   The XLSX writer is proved there without Excel: `xlsxWriter.test.ts` unzips the
   result with a test-only reader of stored ZIPs, checks every CRC-32 against
   Node's `zlib`, parses each part as XML and reads the sheet back (cell types,
@@ -243,6 +244,15 @@ re-sorts them should expect baselines to wander.
   phone and narrow-width layout checks, and the shell's sideways-scroll checks.
   A test that should belong takes the tag in its `test(...)` or `describe(...)`
   call; nothing else lists them. It does not replace the full run.
+  `ENGINES=firefox,webkit` (comma-separated; `chromium` is always the default)
+  adds those engines' projects, `<package>-quick-firefox` and `-quick-webkit`: light
+  only, the `@quick` tests alone, and no screenshot is compared (the baselines are
+  Chromium's), so they run on Linux too. `ENGINES=webkit` alone runs only WebKit.
+  Install the engines once with `npx playwright install --with-deps firefox webkit`
+  (`--with-deps` needs root on Linux). CI runs all three on every push (`ci.yml`, job
+  `browsers`); the table's two geometry specs run in WebKit in the full suite as well.
+  A check that differs by engine for a reason that is not the library's carries
+  `test.skip(browserName === "...", "<reason>")` with that reason.
 * **Full:** `pnpm test:visual` (20-50 minutes). `DEMOS=table,charts`
   (comma-separated, unset = all) limits `webServer` and `projects` to those
   packages, in any playwright call.

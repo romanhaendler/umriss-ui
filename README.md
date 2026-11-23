@@ -161,6 +161,10 @@ and states the rules it would otherwise get wrong (`skills/umriss-ui/SKILL.md`):
 npx skills add romanhaendler/umriss-ui --skill umriss-ui
 ```
 
+## Accessibility
+
+The components are built to WCAG 2.1 AA. Every page of all seven demos, in the light and the dark theme, is checked with [axe](https://github.com/dequelabs/axe-core) against its A and AA rules, and two colour pairs of the muted text are tolerated with a written reason (see [`CONTRIBUTING.md`](CONTRIBUTING.md)). That is an aim and an automatic check: no conformance is declared, and no screen reader run stands behind it.
+
 ## Maturity
 
 The seven packages are released together under one number, which is `0.x` for now (from `0.34.0`, the dashboard from `0.40.0`, alarms from `0.47.0`). A peer is named `^0.x.0`, so a minor moves the peer ranges and a patch does not; a rename keeps its old name for one further minor, with a warning, and the minor after removes it; fixes go into the latest minor only; TypeScript 5.4 is the floor. [The upgrade promise](docs/adr/0066-one-number-peers-over-the-minor-a-rename-lives-one-minor.md) states it in full. All seven are released under `latest`. The release

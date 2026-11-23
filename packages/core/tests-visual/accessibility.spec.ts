@@ -1,5 +1,4 @@
-/* Automatic accessibility check over the demo pages, light and dark
-   (consumable-package 04).
+/* Automatic accessibility check over the demo pages, light and dark.
 
    Not a new level of testing, but one more file in the browser suite that
    already exists. That is exactly what makes the check cheap: the demo is the
@@ -10,10 +9,8 @@
    say which component has it, and a red test should not drag eleven other pages
    with it.
 
-   A SAMPLE is checked and not every page: two axe runs per page are minutes for
-   an answer that rarely differs between two pages of the same sort. The
-   selection stands in `pages.ts` and names, per rubric, the one that carries
-   the most interaction.
+   Every page is checked, from the list of pages the outline gives
+   (`pages.ts`); none is left out for being like another.
 
    Beside it a run with all code blocks OPEN - the state the check had never
    seen, and the only one in which coloured text stands on the sunken surface.
@@ -30,7 +27,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { TOLERATED, STANDARDS, OPEN, findings } from "@umriss-ui/demo/checks/accessibility";
-import { CONFIGURATOR_PAGES, SAMPLE } from "./pages";
+import { CONFIGURATOR_PAGES, PAGES } from "./pages";
 import { allWithCode, open } from "./navigation";
 import { failToSave } from "./insideAModal";
 
@@ -39,7 +36,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
-for (const pageId of SAMPLE) {
+for (const pageId of PAGES) {
   test(`Page ${pageId} is accessible`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const result = await new AxeBuilder({ page })
@@ -53,9 +50,8 @@ for (const pageId of SAMPLE) {
   });
 }
 
-/* Every configurator, the sample or not: its panel is built for each page
-   from that page's props, so one passing says nothing about the next
-   (.scratch/configurator 03). */
+/* Every configurator: its panel is built for each page
+   from that page's props, so one passing says nothing about the next. */
 for (const pageId of CONFIGURATOR_PAGES) {
   test(`Configurator ${pageId} is accessible`, async ({ page }, testInfo) => {
     await open(page, pageId);
@@ -107,7 +103,7 @@ test("a toast inside a modal is accessible", async ({ page }, testInfo) => {
 });
 
 test("every tolerated colour carries a written reason", () => {
-  /* The ticket's rule as a test: never across the board. An entry without a
+  /* The rule as a test: never across the board. An entry without a
      reason is a switching-off that disguises itself as a decision. */
   for (const entry of TOLERATED) {
     expect(entry.reason.length, `${entry.foreground} on ${entry.background}`).toBeGreaterThan(40);

@@ -6,7 +6,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
-import { SAMPLE } from "./pages";
+import { PAGES } from "./pages";
 import { open } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
-for (const pageId of SAMPLE) {
+for (const pageId of PAGES) {
   test(`Page ${pageId} is accessible`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const result = await new AxeBuilder({ page }).include(`[data-block="${pageId}"]`).withTags(STANDARDS).analyze();

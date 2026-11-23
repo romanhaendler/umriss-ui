@@ -6,10 +6,10 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
-import { SAMPLE } from "./pages";
+import { PAGES } from "./pages";
 import { open } from "./navigation";
 
-for (const pageId of SAMPLE) {
+for (const pageId of PAGES) {
   test(`Page ${pageId} is accessible`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const result = await new AxeBuilder({ page }).include(`[data-block="${pageId}"]`).withTags(STANDARDS).analyze();
