@@ -129,7 +129,7 @@ describe("Conditions in the table toolbar", () => {
     act(() => current!.setFilter("line", ["L2"]));
     fireEvent.click(screen.getByRole("button", { name: "Remove Line: L2" }));
     expect(texts()).toEqual(["Quantity1, 5 +1"]);
-    expect(current!.filter).toEqual({ amount: [1, 5, 9] });
+    expect(current!.conditions).toEqual({ amount: [1, 5, 9] });
     expect(rowHeaders(container)).toEqual(["A-1", "B-4"]);
   });
 
@@ -162,7 +162,7 @@ describe("Conditions in the table toolbar", () => {
     act(() => current!.toggleColumn("amount"));
     fireEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(current!.search).toBe("");
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(current!.hidden).toEqual(["amount"]);
     expect(current!.filtered).toHaveLength(4);
     expect(screen.queryByRole("button", { name: "Reset" })).toBeNull();

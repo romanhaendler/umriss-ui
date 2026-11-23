@@ -170,7 +170,7 @@ export interface CellEdit<Z, Key extends RowKey = string> {
   /** The editor's value: text for `"text"`, a number or null for
       `"number"`, a day or null for `"date"`, an instant or null for `"dateTime"`, a boolean
       for `"boolean"`, an option for `"select"`. */
-  value: unknown;
+  value: string | number | boolean | Date | null;
   row: Z;
 }
 
@@ -178,13 +178,13 @@ export interface CellEdit<Z, Key extends RowKey = string> {
 export interface RowSave<Z, Key extends RowKey = string> {
   rowKey: Key;
   /** The columns the draft changed, by column id, with their editors' values. */
-  changes: Readonly<Record<string, unknown>>;
+  changes: Readonly<Record<string, string | number | boolean | Date | null>>;
   row: Z;
 }
 
 /** A new row the user saved: every column that edits, by column id. */
 export interface RowAdd {
-  values: Readonly<Record<string, unknown>>;
+  values: Readonly<Record<string, string | number | boolean | Date | null>>;
 }
 
 /** A row the user asked to delete, and confirmed. */
@@ -201,7 +201,7 @@ export interface ColumnBase {
   /** Names the column in its header, in the column menu and in the header row of the export. */
   label: string;
   /** This column names the row: row header cells, never hideable, the column
-      `stickyRowHeader` pins, and the name by which the row's selection, expander and
+      `pin="start"` pins, and the name by which the row's selection, expander and
       actions are read out. At most one per table. */
   rowHeader?: boolean;
   /** Right-aligned with tabular figures.
@@ -370,16 +370,16 @@ export interface ColumnComponent<Z> {
 /* --- Group keys ----------------------------------------------------------- */
 
 /** What every group key takes, whatever its value. */
-export interface GroupByBase {
+export interface GroupKeyBase {
   /** Names the group key where a grouping is chosen, and in the grouping's tag in the table toolbar. */
   label: string;
 }
 
 /** A value the table can be grouped by without being a column: no cell, no
     export, no entry among the columns - only where a grouping is chosen. */
-export interface GroupByComponent<Z> {
+export interface GroupKeyComponent<Z> {
   <W extends string | number | boolean | Date | Absent>(
-    props: GroupByBase & {
+    props: GroupKeyBase & {
       /** The id is required where the value is a function. */
       id: string;
       value: (row: Z) => W;
@@ -388,7 +388,7 @@ export interface GroupByComponent<Z> {
     },
   ): ReactNode;
   <K extends Field<Z>>(
-    props: GroupByBase & {
+    props: GroupKeyBase & {
       /** A field of the row; supplies the id at the same time. */
       value: K;
       id?: string;
@@ -397,6 +397,12 @@ export interface GroupByComponent<Z> {
     },
   ): ReactNode;
 }
+
+/** @deprecated since 0.58 - use GroupKeyBase. */
+export type GroupByBase = GroupKeyBase;
+
+/** @deprecated since 0.58 - use GroupKeyComponent. */
+export type GroupByComponent<Z> = GroupKeyComponent<Z>;
 
 /** The properties of a column, as `column()` supplies them. */
 export type ColumnPreset<P, K extends Field<P> = Field<P>> = FieldColumn<P, K>;
@@ -451,6 +457,9 @@ export interface RowActionsProps {
       for a pinned block - the application decides, by its own measure. A
       column pinned to the end takes the actions with it regardless.
       @default true */
+  pinned?: boolean;
+  /** The old name of `pinned`.
+      @deprecated since 0.58 - use pinned. */
   pin?: boolean;
 }
 
@@ -467,7 +476,7 @@ interface ActionBase<Z> {
 
 /** The props of `Action`: one action on a row, or with `bulk` on a list of
     rows - then it also stands in the table toolbar for the selection. */
-export type ActionProps<Z, S extends boolean = false, Key extends RowKey = string> =
+export type ActionProps<Z, Key extends RowKey = string, S extends boolean = false> =
   | (ActionBase<Z> & {
       bulk?: false;
       /** Gets the row the action was triggered on. */
@@ -510,9 +519,6 @@ export interface TableProps<Z, Key extends RowKey = string> extends Omit<HTMLAtt
   selectable?: boolean;
   /** Keeps the header row visible while scrolling. */
   stickyHeader?: boolean;
-  /** Keeps the row header column visible while scrolling sideways - the same as
-      `pin="start"` on the row header. */
-  stickyRowHeader?: boolean;
   /** Discreet zebra stripes. */
   striped?: boolean;
   /** How tightly the rows stand.
@@ -572,6 +578,10 @@ export interface TableProps<Z, Key extends RowKey = string> extends Omit<HTMLAtt
   onRowDelete?: (remove: RowDelete<Z, Key>) => void;
   /** Columns, `RowDetail`, `RowActions` and the unbound parts. */
   children?: ReactNode;
+  /** Keeps the row header column visible while scrolling sideways - the same as
+      `pin="start"` on the row header.
+      @deprecated since 0.58 - use pin="start" on the row-header column. */
+  stickyRowHeader?: boolean;
 }
 
 /* --- Conditions ----------------------------------------------------------- */
@@ -884,7 +894,7 @@ export interface TableSnapshot<Z, Key extends RowKey = string> {
   toggleRow: (key: Key) => void;
   /** The conditions of the column filters and row filters by id, in the order
       in which they were set. Whatever fits no column and no row filter is absent. */
-  filter: Readonly<Record<string, unknown>>;
+  conditions: Readonly<Record<string, unknown>>;
   /** Sets the condition of a column filter or a row filter; `null` clears it.
       Back to page one. A condition that does not fit the kind of the filter – a
       range on a list filter, a column without a filter, a row filter not in
@@ -910,9 +920,9 @@ export interface TableSnapshot<Z, Key extends RowKey = string> {
   /** Folds a group or unfolds it. A group of one row does not fold. */
   toggleFold: (path: string) => void;
   /** Folds every group that has more than one row. */
-  foldAll: () => void;
+  foldAllGroups: () => void;
   /** Unfolds every group. */
-  unfoldAll: () => void;
+  unfoldAllGroups: () => void;
   /** Tree rows: the keys of the open branches. */
   branches: readonly Key[];
   /** Tree rows: opens a branch or closes it. */
@@ -924,13 +934,11 @@ export interface TableSnapshot<Z, Key extends RowKey = string> {
   /** The part of the state an application can keep; whatever still stands as
       the options set it up is absent. */
   view: TableView;
-  /** The filtered set in the visible columns as text for a spreadsheet - in
-      server mode the page. A grouped table writes its rows in the groups' order,
-      folded groups' rows too, with no group line; a tree adds its level column. */
-  asCsv: () => string;
-  /** The same rows and columns written by a format: `csv` for text, a format
-      of one's own for anything else. `asCsv()` is `exportAs(csv)`. With
-      `rows`, those rows instead of the filtered set. */
+  /** The filtered set in the visible columns written by a format: `csv` for
+      text for a spreadsheet, a format of one's own for anything else. In server
+      mode the page. A grouped table writes its rows in the groups' order,
+      folded groups' rows too, with no group line; a tree adds its level column.
+      With `rows`, those rows instead of the filtered set. */
   exportAs<R>(format: ExportFormat<R>, rows?: readonly Z[]): R;
   /** The selected rows within the filtered set as tab-separated text under a
       header line - the text Ctrl+C writes. `""` with nothing selected. */
@@ -948,6 +956,18 @@ export interface TableSnapshot<Z, Key extends RowKey = string> {
       frame is exactly as tall as the parent. `false` in a flowing parent and
       with `maxHeight`. It does not depend on the Pagination. */
   framed: boolean;
+  /** The old name of `conditions`.
+      @deprecated since 0.58 - use conditions. */
+  filter: Readonly<Record<string, unknown>>;
+  /** The old name of `foldAllGroups`.
+      @deprecated since 0.58 - use foldAllGroups. */
+  foldAll: () => void;
+  /** The old name of `unfoldAllGroups`.
+      @deprecated since 0.58 - use unfoldAllGroups. */
+  unfoldAll: () => void;
+  /** The old way to write the filtered set as CSV text; `exportAs(csv)` is the same.
+      @deprecated since 0.58 - use exportAs(csv). */
+  asCsv: () => string;
 }
 
 /** What a part without a row type needs from a table – for `of`. */
@@ -960,18 +980,21 @@ export type TableRef = Omit<TableSnapshot<unknown, any>, "setFilter" | "conditio
 
 /** What `useTable` returns: the table's state, and its parts typed at the
     row. Pass it as `of` to a part that stands outside the table. */
-export interface Table<Z, S extends boolean = false, Key extends RowKey = string> extends TableSnapshot<Z, Key> {
+export interface Table<Z, Key extends RowKey = string, S extends boolean = false> extends TableSnapshot<Z, Key> {
   Table: (props: TableProps<Z, Key>) => ReactNode;
   Column: ColumnComponent<Z>;
   VerdictColumn: VerdictColumnComponent<Z>;
   RowDetail: (props: RowDetailProps<Z>) => ReactNode;
   RowActions: (props: RowActionsProps) => ReactNode;
-  Action: (props: ActionProps<Z, S, Key>) => ReactNode;
-  GroupBy: GroupByComponent<Z>;
+  Action: (props: ActionProps<Z, Key, S>) => ReactNode;
+  GroupKey: GroupKeyComponent<Z>;
   /** Brings the row with this key into view and returns `true`: in a paged table its page, in a scroll area, virtual or not, the scroll to it. `false`, with nothing changed, for a key the table does not have, a row a search, a condition or the `preFilter` hides, a row inside a folded group or branch, or a table not mounted; nothing is unfolded and no filter cleared. In server mode it reaches the rows of the page it holds. */
   scrollToRow: (key: Key) => boolean;
   /** In grid mode, brings the row into view as `scrollToRow` does, makes the cell of that row and column the Active cell and moves the focus to it. Outside grid mode, for a column the table does not show, and wherever `scrollToRow` returns `false`, it returns `false` and changes nothing. */
   focusCell: (key: Key, column: string) => boolean;
+  /** The old name of `GroupKey`.
+      @deprecated since 0.58 - use GroupKey. */
+  GroupBy: GroupKeyComponent<Z>;
 }
 
 /** A column or group key the table can be grouped by. The columns stand in the

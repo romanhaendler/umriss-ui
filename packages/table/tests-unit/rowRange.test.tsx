@@ -88,9 +88,9 @@ describe("A range of rows", () => {
 
   it("skips the rows of a folded group", () => {
     render(<Items grouped />);
-    act(() => current!.foldAll());
+    act(() => current!.foldAllGroups());
     const g2 = current!.folded.find((path) => path.includes("G2"))!;
-    act(() => current!.unfoldAll());
+    act(() => current!.unfoldAllGroups());
     act(() => current!.toggleFold(g2));
     click("a05");
     shiftClick("a25");

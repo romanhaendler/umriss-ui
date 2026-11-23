@@ -58,7 +58,7 @@ export function probeStale(name: string | undefined, held: unknown, next: unknow
 
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next major release; use ${replacement}.`);
 
 const NO_ROWS: readonly never[] = [];
 

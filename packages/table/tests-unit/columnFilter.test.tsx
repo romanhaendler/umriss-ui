@@ -86,10 +86,10 @@ describe("t.setFilter and t.filter", () => {
   it("sets a condition, reads it back and lifts it with null", () => {
     render(<List />);
     act(() => current!.setFilter("line", ["L1"]));
-    expect(current!.filter).toEqual({ line: ["L1"] });
+    expect(current!.conditions).toEqual({ line: ["L1"] });
     expect(filteredNumbers()).toEqual(["T-1", "T-4"]);
     act(() => current!.setFilter("line", null));
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(filteredNumbers()).toEqual(["T-1", "T-2", "T-3", "T-4"]);
   });
 
@@ -116,7 +116,7 @@ describe("t.setFilter and t.filter", () => {
     const setUnchecked = current!.setFilter as (column: string, condition: unknown) => void;
     act(() => setUnchecked("line", { from: 1 }));
     act(() => setUnchecked("number", ["T-1"]));
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(filteredNumbers()).toHaveLength(4);
     expect(warning).toHaveBeenCalledTimes(2);
   });
@@ -155,7 +155,7 @@ describe("A filter of one's own", () => {
     expect(input.dataset.values).toBe("0,40");
     expect(input.dataset.column).toBe("level:Stock");
     fireEvent.click(within(input).getByRole("button", { name: "only empty" }));
-    expect(current!.filter).toEqual({ level: "empty" });
+    expect(current!.conditions).toEqual({ level: "empty" });
     expect(within(input).getByTestId("condition").textContent).toBe("empty");
     expect(filteredNumbers()).toEqual(["T-1"]);
   });
@@ -174,10 +174,10 @@ describe("D6: a condition goes with its column", () => {
     act(() => current!.setFilter("line", ["L1"]));
     expect(filteredNumbers()).toEqual(["T-1", "T-4"]);
     rerender(<List withLine={false} />);
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(filteredNumbers()).toHaveLength(4);
     rerender(<List withLine />);
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(filteredNumbers()).toHaveLength(4);
   });
 
@@ -185,7 +185,7 @@ describe("D6: a condition goes with its column", () => {
     render(<List />);
     act(() => current!.setFilter("line", ["L1"]));
     act(() => current!.toggleColumn("line"));
-    expect(current!.filter).toEqual({ line: ["L1"] });
+    expect(current!.conditions).toEqual({ line: ["L1"] });
     expect(filteredNumbers()).toEqual(["T-1", "T-4"]);
   });
 });

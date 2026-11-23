@@ -177,6 +177,22 @@ Ctrl+Shift+Z (Cmd on a Mac) is the redo. The keys of an open editor stay the fie
 so Ctrl+Z there undoes the typing. A new edit clears the redo history. The
 recipe is the last example of the Edits page, with two buttons beside the table.
 
+## Three kinds of state the application can hold
+
+The table keeps its own state and lets the application hold three parts of it, each
+in a way of its own. They are not unified, and 1.0 keeps them as they stand.
+
+| State | Hand it in | Hear it | Move it later |
+| --- | --- | --- | --- |
+| The view: sort, search, filters, page, widths, order, grouping | `initialView`, read once, as React reads `defaultValue` | `onViewChange(view)`, the whole view, for every change the reader makes | `t.setView(view)` |
+| The selection | `selection`, the object `useTableSelection` returns | `onSelectionChange(keys, all)` | the object's own `toggle`, `set` and `clear` |
+| The current row | `currentRow`, controlled only, with no start value | `onCurrentRowChange(key, row)` | the application sets `currentRow` |
+
+Page, sort and search have no controlled form of their own: `t.setPage`, `t.toggleSort`
+and `t.setSearch` change them, and they travel inside the view. `defaultSort`,
+`defaultGrouping` and `defaultBranches` are not start values: they are the baseline
+that `t.view` leaves out, so a view that equals it stays empty.
+
 ## Styles
 
 Nothing to import. `dist/table.js` loads its own stylesheet, and

@@ -518,6 +518,8 @@ export type AlarmColumn =
  * label, though, lands in the column menu and the CSV header row, and that is
  * why it comes from the wording: the module is pure and can read no context, so
  * it is given one - like `standardPresets`.
+ *
+ * @experimental a minor release may change it.
  */
 export const alarmColumns = (wording: Wording): readonly ModelColumn<AlarmRow, AlarmColumn>[] => [
   {
@@ -542,7 +544,8 @@ export const alarmColumns = (wording: Wording): readonly ModelColumn<AlarmRow, A
   { id: "frequency", label: wording.alarmColumnFrequency, value: (row) => row.frequency },
 ];
 
-/** The columns with the default labels - for callers without a wording. */
+/** The columns with the default labels - for callers without a wording.
+    @experimental a minor release may change it. */
 export const ALARM_COLUMNS: readonly ModelColumn<AlarmRow, AlarmColumn>[] = alarmColumns(DEFAULT_WORDING);
 
 /** In service before hidden, then priority, then acknowledgement, then time -
@@ -552,7 +555,8 @@ export const ALARM_COLUMNS: readonly ModelColumn<AlarmRow, AlarmColumn>[] = alar
 
     Availability stands first because a snoozed alarm of high priority is a
     decision already taken; above an active one of medium priority it would
-    take the first glance from the alarm nobody has decided about. */
+    take the first glance from the alarm nobody has decided about.
+    @experimental a minor release may change it. */
 export const DEFAULT_ORDER: readonly SortLevel<AlarmColumn>[] = [
   { column: "availability", direction: "asc" },
   { column: "priority", direction: "asc" },
@@ -569,9 +573,9 @@ export interface AlarmInput {
   /** The catalogue of conditions. An alarm whose type is missing is not thrown
       away. */
   types: readonly AlarmType[];
-  /** Milliseconds. The age and every window hang on it; nothing reads a
-      clock. */
-  asOf: number;
+  /** A `Date` or milliseconds since the epoch. The age and every window hang on
+      it; nothing reads a clock. */
+  asOf: Date | number;
   /** Without it `frequency` counts every occurrence up to the as-of time and
       `chatters` stays false. */
   chatter?: ChatterRule;
@@ -588,7 +592,8 @@ export interface AlarmInput {
 
 /** What `alarmModel` returns: the table's projection of the alarm rows -
     filtered, sorted, paged -, and beside it the flood and the counts the list
-    announces. Give it to `AlarmList` as `view`. */
+    announces. Give it to `AlarmList` as `view`.
+    @experimental a minor release may change it. */
 export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> {
   /** The flood that was detected, when a rule was given and it applies. A
       marking beside the complete list, not a replacement for it. */
@@ -625,6 +630,8 @@ const unknownType = (id: string): AlarmType => ({
  *
  * `input.sort` without a statement means the default order; expressly `null`
  * means input order.
+ *
+ * @experimental a minor release may change it.
  */
 export function alarmModel(
   input: AlarmInput,
@@ -633,12 +640,12 @@ export function alarmModel(
   const {
     alarms,
     types,
-    asOf,
     chatter,
     flood,
     keepDone = false,
     columns = ALARM_COLUMNS,
   } = input;
+  const asOf = input.asOf instanceof Date ? input.asOf.getTime() : input.asOf;
 
   const catalogue = new Map(types.map((type) => [type.id, type]));
   const frequency = frequencyByType(alarms, chatter?.windowMs ?? Infinity, asOf);

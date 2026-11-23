@@ -2,5 +2,11 @@
   "SearchProps.className": "(a) pass-through: a class on the field",
   "ToolbarProps.className": "(a) pass-through: a class on the toolbar",
   "PaginationProps.className": "(a) pass-through: a class on the bar",
-  "VerdictBase.align": "(f) twin of `ColumnBase.align`: the same side, shown on Column"
+  "VerdictBase.align": "(f) twin of `ColumnBase.align`: the same side, shown on Column",
+  "TableSnapshot.filter": "(g) deprecated alias: the old name of conditions",
+  "TableSnapshot.foldAll": "(g) deprecated alias: the old name of foldAllGroups",
+  "TableSnapshot.unfoldAll": "(g) deprecated alias: the old name of unfoldAllGroups",
+  "TableProps.stickyRowHeader": "(g) deprecated alias: pin=\"start\" on the row-header column",
+  "TableSnapshot.asCsv": "(g) deprecated alias: the old name of exportAs(csv)",
+  "RowActionsProps.pin": "(g) deprecated alias: the old name of pinned"
 }

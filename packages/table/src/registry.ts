@@ -645,7 +645,7 @@ export class Registry {
     if (this.projectionCache?.hook === hook && this.projectionCache.columns === columns) return this.projectionCache.projection;
     const input: TableInput<unknown> = {
       search: b.search,
-      filter: hook.filter,
+      preFilter: hook.filter,
       sort: b.sort,
       page: b.page,
       pageSize: b.virtual || hook.tree ? 0 : b.pageSize,

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_WORDING } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { useTable } from "../src";
+import { csv, useTable } from "../src";
 import type { Table } from "../src";
 import source from "../src/VerdictColumn.tsx?raw";
 
@@ -99,7 +99,7 @@ describe("Sorting and exporting", () => {
 
   it("exports the value, not the verdict", () => {
     render(<Log />);
-    const lines = current!.asCsv().replace("﻿", "").split("\r\n");
+    const lines = current!.exportAs(csv).replace("﻿", "").split("\r\n");
     /* The export takes its separator and decimal mark from the language
        (ADR-0061) - in English a comma and a point - and never went through
        the display formats. */

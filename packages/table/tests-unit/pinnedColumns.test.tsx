@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { ColumnMenu, useTable } from "../src";
+import { ColumnMenu, csv, useTable } from "../src";
 import type { Table, TableView } from "../src";
 
 interface Machine {
@@ -38,13 +38,11 @@ const capture = (t: Table<Machine>) => {
 function Plant({
   initialView,
   grouping,
-  stickyRowHeader = false,
   declared = true,
   actionsPin,
 }: {
   initialView?: TableView;
   grouping?: string[];
-  stickyRowHeader?: boolean;
   declared?: boolean;
   actionsPin?: boolean;
 }) {
@@ -52,7 +50,7 @@ function Plant({
   capture(t);
   const { Table: Frame, Column, RowActions, Action, RowDetail } = t;
   return (
-    <Frame selectable stickyRowHeader={stickyRowHeader}>
+    <Frame selectable>
       <ColumnMenu />
       <Column value="line" label="Line" />
       <Column value="area" label="Area" />
@@ -61,7 +59,7 @@ function Plant({
       <Column value="tag" label="Tag" rowHeader pin={declared ? "start" : undefined} />
       <Column value="scrap" label="Scrap" aggregate="sum" />
       <RowDetail>{(m) => m.tag}</RowDetail>
-      <RowActions pin={actionsPin}>
+      <RowActions pinned={actionsPin}>
         <Action onSelect={() => {}}>Open</Action>
       </RowActions>
     </Frame>
@@ -98,7 +96,7 @@ describe("the pinned blocks", () => {
 
   it("go into the export in the order they stand", () => {
     render(<Plant />);
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Tag,Line,Area,Output,Scrap,Verdict");
+    expect(current!.exportAs(csv).replace("﻿", "").split("\r\n")[0]).toBe("Tag,Line,Area,Output,Scrap,Verdict");
   });
 
   it("leave a table without pins as it was - only its row actions stick, at the end", () => {
@@ -109,20 +107,13 @@ describe("the pinned blocks", () => {
     expect(Array.from(head.cells).map((c) => c.className.includes("pinned"))).toEqual([...Array(8).fill(false), true]);
   });
 
-  it("leave the row actions in the flow with `pin={false}`, and take them along behind a column pinned to the end", () => {
+  it("leave the row actions in the flow with `pinned={false}`, and take them along behind a column pinned to the end", () => {
     const { container, rerender } = render(<Plant declared={false} actionsPin={false} />);
     expect(container.querySelector("[style*='--_table-pin-']")).toBeNull();
     rerender(<Plant declared={false} />);
     expect(place(Array.from(headRow(container).cells).at(-1)!)).toBe("end 0");
     rerender(<Plant actionsPin={false} />);
     expect(places(headRow(container)).slice(-2)).toEqual(["end 1", "end 0"]);
-  });
-
-  it("stickyRowHeader is `pin=\"start\"` on the row header, and nothing the view carries", () => {
-    const { container } = render(<Plant declared={false} stickyRowHeader />);
-    expect(labels(container).slice(2, 4)).toEqual(["Tag", "Line"]);
-    expect(current!.pinned).toEqual({ tag: "start" });
-    expect(current!.view.pinned).toBeUndefined();
   });
 
   it("measure their offsets off the head row, one per place", () => {

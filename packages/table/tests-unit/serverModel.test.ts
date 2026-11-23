@@ -30,7 +30,7 @@ describe("tableModel – server mode", () => {
     const projection = tableModel(PAGE, COLUMNS, {
       server: { rowCount: 1_000_000 },
       search: "aur",
-      filter: (z) => z.budget > 150,
+      preFilter: (z) => z.budget > 150,
       sort: { column: "budget", direction: "asc" },
       page: 4,
       pageSize: 2,

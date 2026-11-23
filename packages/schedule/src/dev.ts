@@ -24,4 +24,4 @@ export const warnOnce = (reason: string, message: string): void => warnOnceFor(P
 
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next major release; use ${replacement}.`);

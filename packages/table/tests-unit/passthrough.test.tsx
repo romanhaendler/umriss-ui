@@ -51,12 +51,12 @@ const CASES: Record<string, PassThroughCase> = {
 
 /* The parts of the hook that stand in the JSX, beside the exports. */
 const { result, unmount } = renderHook(() => useTable(ORDERS, { rowKey: (o) => o.id }));
-const { Table, Column, VerdictColumn, RowDetail, RowActions, Action, GroupBy } = result.current;
+const { Table, Column, VerdictColumn, RowDetail, RowActions, Action, GroupKey } = result.current;
 unmount();
 
 passThroughGuard(
   "table",
-  { ...table, Table, Column, VerdictColumn, RowDetail, RowActions, Action, GroupBy },
+  { ...table, Table, Column, VerdictColumn, RowDetail, RowActions, Action, GroupKey },
   CASES,
   {
     Column: "declares a column for the table; no element of its own stands in the page",
@@ -65,7 +65,7 @@ passThroughGuard(
     RowDetail: "declares what opens under a row; the table draws it in the row's place",
     RowActions: "declares the actions of a row; the table draws the menu in its cell",
     Action: "one entry of RowActions, which the table draws",
-    GroupBy: "declares a key to group by; it renders no element",
+    GroupKey: "declares a key to group by; it renders no element",
   },
 );
 

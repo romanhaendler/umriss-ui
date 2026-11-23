@@ -75,7 +75,7 @@ describe("scrollToRow", () => {
 
   it("returns false and changes nothing for what the table does not show", () => {
     render(<Paged grouping="group" rows={ROWS} />);
-    act(() => t().foldAll());
+    act(() => t().foldAllGroups());
     let found = true;
     act(() => void (found = t().scrollToRow("1") || t().scrollToRow("nope")));
     expect(found).toBe(false);

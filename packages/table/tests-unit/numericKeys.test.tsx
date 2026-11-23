@@ -18,8 +18,8 @@ const PUMPS: Pump[] = [
   { id: 2, name: "Two", kids: [{ id: 21, name: "Child" }] },
 ];
 
-let latest: Table<Pump, false, number | string> | null = null;
-const capture = (t: Table<Pump, false, number | string>) => {
+let latest: Table<Pump, number | string> | null = null;
+const capture = (t: Table<Pump, number | string>) => {
   latest = t;
 };
 

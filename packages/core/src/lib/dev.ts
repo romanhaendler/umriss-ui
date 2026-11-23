@@ -33,7 +33,7 @@ export function warnOnce(pkg: string, reason: string, message: string): void {
 
 /** The one wording of a renamed name that still works. */
 export const warnDeprecated = (old: string, replacement: string): void =>
-  warnOnce("@umriss-ui/core", `deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
+  warnOnce("@umriss-ui/core", `deprecated:${old}`, `${old} is deprecated and goes in the next major release; use ${replacement}.`);
 
 let watchingLowered = false;
 let foundLoweredSheet = false;

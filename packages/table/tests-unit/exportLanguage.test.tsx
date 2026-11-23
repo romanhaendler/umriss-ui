@@ -6,7 +6,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { Export, Toolbar, useTable } from "../src";
+import { Export, Toolbar, csv, useTable } from "../src";
 import type { Table } from "../src";
 
 interface Part {
@@ -72,8 +72,8 @@ describe("Export follows the language", () => {
     expect(run({ formats })[0]).toBe("Name;Weight;Fine");
   });
 
-  it("gives asCsv() the English text without a provider", () => {
+  it("gives exportAs(csv) the English text without a provider", () => {
     render(<Parts />);
-    expect(current!.asCsv()).toBe('﻿Name,Weight,Fine\r\n"Bolt, long",3.5,yes\r\nNut,2,no');
+    expect(current!.exportAs(csv)).toBe('﻿Name,Weight,Fine\r\n"Bolt, long",3.5,yes\r\nNut,2,no');
   });
 });

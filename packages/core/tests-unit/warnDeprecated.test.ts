@@ -17,7 +17,7 @@ describe("warnDeprecated", () => {
     warnDeprecated("oldName", "newName");
     warnDeprecated("oldName", "newName");
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith("@umriss-ui/core: oldName is deprecated and goes in the next minor release; use newName.");
+    expect(warn).toHaveBeenCalledWith("@umriss-ui/core: oldName is deprecated and goes in the next major release; use newName.");
     warnDeprecated("otherName", "newName");
     expect(warn).toHaveBeenCalledTimes(2);
   });

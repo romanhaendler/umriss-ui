@@ -53,7 +53,7 @@ export type { TableSelection } from "./model/useTableSelection";
    `request.folded` does. */
 export { groupPath } from "./model/grouping";
 export type { ServerGroup } from "./types";
-export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
+export type { AggregateOptions, AggregateFunction, GroupKeyComponent, GroupingId } from "./types";
 
 /* Grid mode and editing in place (ADR-0034, ADR-0036). */
 export type { CellEdit, CellEditorProps, EditFor, EditOptions, RowAdd, RowDelete, RowSave } from "./types";
@@ -79,7 +79,7 @@ export type { ToolbarSize } from "./toolbarSize";
 
 /* The types a header, a cell or a definition on a page names, so that the
    gate finds no name a reader cannot import. */
-export type { ColumnBase, Displayable, FieldColumn, GroupByBase, IsDisplayable, ValuePaths, VerdictBase } from "./types";
+export type { ColumnBase, Displayable, FieldColumn, GroupKeyBase, IsDisplayable, ValuePaths, VerdictBase } from "./types";
 export type { DatePeriod, RowGroup } from "./model/grouping";
 
 /* The types the API index names in a hook's or a function's signature, so
@@ -87,7 +87,7 @@ export type { DatePeriod, RowGroup } from "./model/grouping";
    hook's `Column` (ADR-0017). */
 export type { Computed, NumberField } from "./types";
 export type { ModelColumn, TableInput, TreeInput } from "./model/tableModel";
-export type { AggregateColumn, AggregateKind, GroupLevel, OwnAggregate } from "./model/grouping";
+export type { AggregateColumn, AggregateKind, GroupLevel } from "./model/grouping";
 
 /* New exports, at the end by the workspace's rule: the order decides the order
    of the module styles in the bundle. */
@@ -101,3 +101,7 @@ export type { Line } from "./model/grouping";
 /* The group head over columns; at the end, by the workspace's rule for new exports. */
 export { ColumnGroup } from "./columnGroup";
 export type { ColumnGroupProps } from "./columnGroup";
+
+/* Old names, kept for this minor. */
+export type { GroupByBase, GroupByComponent } from "./types";
+export type { OwnAggregate } from "./model/grouping";

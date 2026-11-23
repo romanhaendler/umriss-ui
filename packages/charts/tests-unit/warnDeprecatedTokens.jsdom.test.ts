@@ -28,7 +28,7 @@ describe("warnDeprecatedTokens", () => {
     return { warn, warnDeprecatedTokens };
   };
   const wording = (old: string, replacement: string) =>
-    `@umriss-ui/charts: ${old} is deprecated and goes in the next minor release; use ${replacement}.`;
+    `@umriss-ui/charts: ${old} is deprecated and goes in the next major release; use ${replacement}.`;
 
   it("warns once for a name the page sets and once for one it reads", async () => {
     sheet(".a { --u-old-set: red; } .b { color: var(--u-old-read, blue); }");

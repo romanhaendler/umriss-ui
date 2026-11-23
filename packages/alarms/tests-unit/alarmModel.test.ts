@@ -23,7 +23,7 @@ import {
   type AlarmType,
   type Priority,
 } from "../src/alarmModel";
-import { DEFAULT_WORDING, mergeLanguage } from "@umriss-ui/core";
+import { DEFAULT_WORDING } from "@umriss-ui/core";
 
 /* A fixed moment instead of a clock: 26.08.2026, 06:00 UTC. */
 const T0 = Date.UTC(2026, 7, 26, 6, 0, 0);
@@ -52,7 +52,7 @@ describe("alarmColumns – the label from the wording", () => {
   });
 
   it("takes every label from the wording passed in", () => {
-    const { wording } = mergeLanguage({ wording: { alarmColumnAge: "Alarm age", alarmColumnAcknowledgement: "Ack" } });
+    const wording = { ...DEFAULT_WORDING, alarmColumnAge: "Alarm age", alarmColumnAcknowledgement: "Ack" };
     const labels = new Map(alarmColumns(wording).map((s) => [s.id, s.label]));
     expect(labels.get("age")).toBe("Alarm age");
     expect(labels.get("acknowledgement")).toBe("Ack");
@@ -60,7 +60,7 @@ describe("alarmColumns – the label from the wording", () => {
   });
 
   it("passes the caller's columns into the projection", () => {
-    const { wording } = mergeLanguage({ wording: { alarmColumnLifecycleState: "Lifecycle" } });
+    const wording = { ...DEFAULT_WORDING, alarmColumnLifecycleState: "Lifecycle" };
     const projection = alarmModel({ alarms: [], types: [], asOf: T0, columns: alarmColumns(wording) });
     expect(projection.columns.find((s) => s.id === "lifecycle")?.label).toBe("Lifecycle");
   });
@@ -140,7 +140,7 @@ describe("alarmModel – the fleeting alarm", () => {
   it("disappears only through a filter that expressly wants active ones only", () => {
     const projection = alarmModel(
       { alarms: FOUR, types: TYPES, asOf: T0 },
-      { filter: (row) => isActive(row.lifecycle) },
+      { preFilter: (row) => isActive(row.lifecycle) },
     );
     // The caller may do that - but it is his decision, not the model's, and
     // that is exactly why the state is one field with four values.

@@ -98,7 +98,7 @@ export function FilterPanel({
       className={styles.filterPanel}
     >
       <Input
-        condition={snapshot.filter[id] ?? null}
+        condition={snapshot.conditions[id] ?? null}
         setCondition={(condition) => snapshot.setFilter(id, condition)}
         values={values}
         column={{ id, label }}
@@ -131,7 +131,7 @@ export function ColumnFilterButton({
   const button = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const { id, label } = entry.spec;
-  const active = id in hook.publicSnapshot.filter;
+  const active = id in hook.publicSnapshot.conditions;
 
   return (
     <>
@@ -187,7 +187,7 @@ export function Conditions({ registry, hook }: { registry: Registry; hook: HookS
   /* A row filter's condition stands here only with a `describe`: without one
      the application's control is where it shows. */
   type Item = { id: string; text: string } & ({ rowFilter: RowFilter<unknown, unknown> } | { entry: ColumnEntry });
-  const list = Object.entries(hook.publicSnapshot.filter).flatMap(([id, condition]): Item[] => {
+  const list = Object.entries(hook.publicSnapshot.conditions).flatMap(([id, condition]): Item[] => {
     const rowFilter = hook.rowFilters.get(id);
     if (rowFilter) return rowFilter.describe ? [{ id, rowFilter, text: rowFilter.describe(condition) }] : [];
     const entry = registry.columnById(id);

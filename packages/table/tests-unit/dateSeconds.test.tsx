@@ -6,7 +6,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { useTable } from "../src";
+import { csv, useTable } from "../src";
 import type { Table } from "../src";
 
 interface Reading {
@@ -61,7 +61,7 @@ describe("a Date column with seconds", () => {
 
   it("keeps the CSV's ISO timestamp", () => {
     render(<Readings format="dateTimeWithSeconds" />);
-    const text = current!.asCsv();
+    const text = current!.exportAs(csv);
     expect(text).toContain(new Date(2026, 2, 17, 9, 5, 3).toISOString());
     expect(text).not.toContain("17/03/2026");
   });

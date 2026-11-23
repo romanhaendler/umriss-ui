@@ -2,7 +2,7 @@ import { Text } from "@umriss-ui/core";
 import { useTable } from "../../../src";
 
 export const title = "Keep the header and the names in view";
-export const lead = "`stickyHeader` holds the header row while the rows scroll, `stickyRowHeader` the name column while the days scroll sideways.";
+export const lead = "`stickyHeader` holds the header row while the rows scroll, `pin` on the name column holds it while the days scroll sideways.";
 
 /* `width` is an initial width: a table over the full width shares out the
    space it has, so the minimum width that makes it scroll comes from the
@@ -48,9 +48,9 @@ export default function StickyParts() {
   return (
     <>
       <style>{STYLE}</style>
-      <Table className="week-table" selectable stickyHeader stickyRowHeader maxHeight="300px" aria-label="Planned hours per day">
+      <Table className="week-table" selectable stickyHeader maxHeight="300px" aria-label="Planned hours per day">
         <Column value="team" label="Team" width={96} />
-        <Column value="name" label="Person" rowHeader width={160} />
+        <Column value="name" label="Person" rowHeader pin="start" width={160} />
         {DAYS.map((day, d) => (
           <Column key={day} id={day} label={day} value={(p) => p.hours[d]} width={96} />
         ))}

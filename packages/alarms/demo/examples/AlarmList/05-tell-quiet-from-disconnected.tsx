@@ -17,8 +17,8 @@ const FRESHNESS = { stale: 5 * MIN, lost: 30 * MIN };
 export default function TellQuietFromDisconnected() {
   return (
     <Stack gap={4}>
-      <AlarmList view={EMPTY} asOf={NOW - 20_000} freshness={FRESHNESS} aria-label="Alerts, live feed" />
-      <AlarmList view={EMPTY} asOf={NOW - 45 * MIN} freshness={FRESHNESS} aria-label="Alerts, feed lost" />
+      <AlarmList view={EMPTY} asOf={NOW - 20_000} ages={FRESHNESS} aria-label="Alerts, live feed" />
+      <AlarmList view={EMPTY} asOf={NOW - 45 * MIN} ages={FRESHNESS} aria-label="Alerts, feed lost" />
     </Stack>
   );
 }

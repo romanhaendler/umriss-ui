@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ComponentPropsWithRef } from "react";
-import { Badge, Button, VisuallyHidden, useFormats, useFreshness, useWording } from "@umriss-ui/core";
+import { Badge, Button, VisuallyHidden, useFormats, useFreshness, useWording, warnOnce } from "@umriss-ui/core";
 import type { FreshnessAges, FreshnessReading } from "@umriss-ui/core";
 import { PRIORITIES, RATE_WINDOW_MS, isHidden } from "./alarmModel";
 import type { AlarmProjection, AlarmRow, Priority } from "./alarmModel";
@@ -26,6 +26,9 @@ export interface AlarmBannerProps extends Omit<ComponentPropsWithRef<"section">,
   /** When the data was true. */
   asOf?: Date | number | null;
   /** From when the data counts as stale and from when as disconnected. Without them the banner shows no freshness. Every alarm stays shown and counted either way. */
+  ages?: FreshnessAges;
+  /** The old name of `ages`.
+      @deprecated since 0.58 - use ages. */
   freshness?: FreshnessAges;
 }
 
@@ -34,12 +37,14 @@ const waiting = (row: AlarmRow) => row.lifecycle === "active-unacknowledged" && 
 /**
  * The worst active, unacknowledged alarm in service on every screen, the count per priority, and one tap to the list or to acknowledge. It interrupts a screen reader only for a new alarm of higher priority than the one shown, never for a count.
  */
-export function AlarmBanner({ asOf, freshness: ages, ...rest }: AlarmBannerProps) {
+export function AlarmBanner({ asOf, ages: given, freshness, ...rest }: AlarmBannerProps) {
+  if (freshness !== undefined) warnOnce("@umriss-ui/alarms", "deprecated:AlarmBanner freshness", "AlarmBanner freshness is deprecated and goes in the next major release; use ages.");
+  const ages = given ?? freshness;
   if (asOf === undefined || ages === undefined) return <Body {...rest} reading={null} />;
   return <WithFreshness {...rest} asOf={asOf} ages={ages} />;
 }
 
-function WithFreshness({ asOf, ages, ...rest }: Omit<AlarmBannerProps, "asOf" | "freshness"> & { asOf: Date | number | null; ages: FreshnessAges }) {
+function WithFreshness({ asOf, ages, ...rest }: Omit<AlarmBannerProps, "asOf" | "ages" | "freshness"> & { asOf: Date | number | null; ages: FreshnessAges }) {
   return <Body {...rest} reading={useFreshness(asOf, ages)} />;
 }
 
@@ -52,7 +57,7 @@ function Body({
   className,
   ref,
   ...rest
-}: Omit<AlarmBannerProps, "asOf" | "freshness"> & { reading: FreshnessReading | null }) {
+}: Omit<AlarmBannerProps, "asOf" | "ages" | "freshness"> & { reading: FreshnessReading | null }) {
   const wording = useWording();
   const formats = useFormats();
   const rows = view.filtered.filter(waiting);

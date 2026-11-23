@@ -1,4 +1,4 @@
-/* The parts the hook hands out: Table, Column, RowDetail, RowActions, Action, GroupBy.
+/* The parts the hook hands out: Table, Column, RowDetail, RowActions, Action, GroupKey.
    They come into being ONCE per hook call and keep their identity - a new
    identity per render would remount every column (Ticket 02). The state of the
    table they read from the registry, which the hook writes on every pass.
@@ -11,7 +11,7 @@
 import { useContext, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "./cx";
-import { DEV, warnOnce } from "./dev";
+import { DEV, warnDeprecated, warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
 import { HeadingContext } from "./columnGroup";
 import type { Heading } from "./columnGroup";
@@ -69,7 +69,7 @@ interface RuntimeColumnProps {
   validate?: ColumnSpec["validate"];
 }
 
-interface RuntimeGroupByProps {
+interface RuntimeGroupKeyProps {
   id?: string;
   value: string | ((row: never) => unknown);
   label: string;
@@ -90,9 +90,10 @@ export interface Parts {
   Table: (props: TableProps<unknown, RowKey>) => ReactNode;
   Column: (props: RuntimeColumnProps) => ReactNode;
   RowDetail: (props: { children: (row: never) => ReactNode }) => ReactNode;
-  RowActions: (props: { children: ReactNode; pin?: boolean }) => ReactNode;
+  RowActions: (props: { children: ReactNode; pinned?: boolean; pin?: boolean }) => ReactNode;
   Action: (props: RuntimeActionProps) => ReactNode;
-  GroupBy: (props: RuntimeGroupByProps) => ReactNode;
+  GroupKey: (props: RuntimeGroupKeyProps) => ReactNode;
+  GroupBy: (props: RuntimeGroupKeyProps) => ReactNode;
 }
 
 function specFrom(props: RuntimeColumnProps, heading: Heading | null): ColumnSpec {
@@ -196,11 +197,13 @@ export function buildParts(registry: Registry): Parts {
 
   /* ------------------------------------------------------ RowActions, Action */
 
-  function RowActions({ children, pin = true }: { children: ReactNode; pin?: boolean }): ReactNode {
+  function RowActions({ children, pinned, pin }: { children: ReactNode; pinned?: boolean; pin?: boolean }): ReactNode {
     const key = useId();
-    registry.registerActionGroup(key, pin);
+    if (pin !== undefined) warnDeprecated("RowActions pin", "pinned");
+    const sticks = pinned ?? pin ?? true;
+    registry.registerActionGroup(key, sticks);
     useRegistered(registry, key, () => registry.removeActionGroup(key), () => {
-      registry.registerActionGroup(key, pin);
+      registry.registerActionGroup(key, sticks);
     }, false);
     return <>{children}</>;
   }
@@ -222,9 +225,9 @@ export function buildParts(registry: Registry): Parts {
     return <span hidden data-umriss-action={key} />;
   }
 
-  /* --------------------------------------------------------------- GroupBy */
+  /* -------------------------------------------------------------- GroupKey */
 
-  function GroupBy(props: RuntimeGroupByProps): ReactNode {
+  function GroupKey(props: RuntimeGroupKeyProps): ReactNode {
     const key = useId();
     const field = typeof props.value === "string" ? props.value : undefined;
     const id = props.id ?? field ?? props.label;
@@ -246,11 +249,17 @@ export function buildParts(registry: Registry): Parts {
     return <span hidden data-umriss-groupkey={key} />;
   }
 
+  function GroupBy(props: RuntimeGroupKeyProps): ReactNode {
+    warnDeprecated("GroupBy", "GroupKey");
+    return GroupKey(props);
+  }
+
   /* ----------------------------------------------------------------- Table */
 
   function Table(props: TableProps<unknown, RowKey>): ReactNode {
     // All idempotent (registry.ts, guarantee 1).
     registry.beginPass();
+    if (props.stickyRowHeader !== undefined) warnDeprecated("Table stickyRowHeader", 'pin="start" on the row-header column');
     registry.setStickyRowHeader(props.stickyRowHeader === true);
     registry.setTableGroupable(props.groupable !== false);
     registry.setRowAdding(props.grid === true && props.onRowAdd !== undefined);
@@ -294,7 +303,7 @@ export function buildParts(registry: Registry): Parts {
     );
   }
 
-  const parts: Parts = { Table, Column, RowDetail, RowActions, Action, GroupBy };
+  const parts: Parts = { Table, Column, RowDetail, RowActions, Action, GroupKey, GroupBy };
   link(Table, registry);
   return parts;
 }

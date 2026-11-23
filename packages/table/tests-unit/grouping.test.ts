@@ -272,7 +272,7 @@ describe("tableModel with a grouping", () => {
 
   it("filters, sorts, then groups, and pages over the lines", () => {
     const projection = tableModel(ORDERS, columns, {
-      filter: (o) => o.customer !== "Otto & Söhne",
+      preFilter: (o) => o.customer !== "Otto & Söhne",
       sort: { column: "quantity", direction: "desc" },
       pageSize: 4,
       grouping: { levels: [byLine, byCustomer], folded: new Set() },
@@ -284,7 +284,7 @@ describe("tableModel with a grouping", () => {
     // Groups stay in their order - quantity carries no aggregate -, the rows
     // within them follow the sort.
     expect(projection.visible.map((o) => o.id)).toEqual(["A-1041", "A-1044", "A-1052"]);
-    expect(tableModel(ORDERS, columns, { filter: (o) => o.customer !== "Otto & Söhne", sort: { column: "quantity", direction: "desc" }, pageSize: 4, page: 2, grouping: { levels: [byLine, byCustomer], folded: new Set() } }).visible.map((o) => o.id)).toEqual(["A-1043", "A-1049", "A-1055"]);
+    expect(tableModel(ORDERS, columns, { preFilter: (o) => o.customer !== "Otto & Söhne", sort: { column: "quantity", direction: "desc" }, pageSize: 4, page: 2, grouping: { levels: [byLine, byCustomer], folded: new Set() } }).visible.map((o) => o.id)).toEqual(["A-1043", "A-1049", "A-1055"]);
   });
 
   it("without a grouping has no lines and pages over rows as before", () => {

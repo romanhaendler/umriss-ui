@@ -34,7 +34,7 @@ import { Registry, fnEqual } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csv, selectionText, sheetOf } from "./export";
-import { DEV, asRows, probeStale, warnOnce } from "./dev";
+import { DEV, asRows, probeStale, warnDeprecated, warnOnce } from "./dev";
 import { focusCell, scrollToRow } from "./reach";
 import { satisfies, filterOf, checkCondition, reviveCondition } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
@@ -210,11 +210,11 @@ function effectiveWidths(
     that hears every change of it, and in server mode the server's count and
     the handler that hears every request.
     @returns The table's state and its parts: `Table`, `Column`,
-    `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
+    `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupKey`. Pass it
     as `of` to a part that stands outside the table. */
-export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: Extract<TableOptions<Z, Key>, { server: true }>): Table<Z, true, Key>;
-export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: TableOptions<Z, Key>): Table<Z, false, Key>;
-export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey>): Table<Z, boolean, RowKey> {
+export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: Extract<TableOptions<Z, Key>, { server: true }>): Table<Z, Key, true>;
+export function useTable<Z, Key extends RowKey = string>(rows: readonly Z[], options: TableOptions<Z, Key>): Table<Z, Key, false>;
+export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey>): Table<Z, RowKey, boolean> {
   /* A rowKey that is not a function would crash in the first row read: the table shows no rows instead. */
   const keyed = typeof options.rowKey === "function";
   const rowKeyType = typeof options.rowKey;
@@ -460,7 +460,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     rowKey,
     pageSize: options.pageSize,
     defaultSort: options.defaultSort,
-    filter,
+    preFilter: filter,
     initialView: start,
     virtual: server ? undefined : options.virtual,
     grouping,
@@ -854,7 +854,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
       ...(formats.timeZone && { wallClock: (d: Date) => zoneFields(d, formats.timeZone) }),
     });
 
-  const snapshot: TableSnapshot<Z, RowKey> = {
+  const snapshot: Omit<TableSnapshot<Z, RowKey>, "filter" | "foldAll" | "unfoldAll" | "asCsv"> = {
     rows,
     filtered: b.filtered as Z[],
     visible: (paginates || isTree ? b.visible : b.filtered) as Z[],
@@ -881,7 +881,7 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     autoSizeColumns: () => fitAllColumns(registry.frameTable, b.setWidth),
     expanded: b.expanded,
     toggleRow: b.toggleRow,
-    filter: Object.fromEntries(effective),
+    conditions: Object.fromEntries(effective),
     setFilter: setFilter as SetFilter<Z>,
     conditionOf: <B,>(own: RowFilter<Z, B>) => (effective.find(([id]) => id === own.id)?.[1] ?? null) as B | null,
     selection: reportedSelection,
@@ -891,12 +891,12 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     setView,
     folded,
     toggleFold,
-    foldAll: () => {
+    foldAllGroups: () => {
       registry.noteFocusBeforeFold();
       /* A server's page names its own groups: the folds of the others stay. */
       setFoldedState((old) => (server ? [...new Set([...old, ...foldablePaths(b.groups)])] : foldablePaths(b.groups)));
     },
-    unfoldAll: () => {
+    unfoldAllGroups: () => {
       registry.noteFocusBeforeFold();
       setFoldedState([]);
     },
@@ -907,7 +907,6 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     },
     unfoldAllBranches: () => setBranchesState([...liveBranches, ...openUnloaded]),
     foldAllBranches: () => setBranchesState([]),
-    asCsv: () => exportAs(csv),
     exportAs,
     selectionAsText: () => selectionText(registry, formats, wording),
     virtual,
@@ -962,5 +961,30 @@ export function useTable<Z>(given: readonly Z[], options: TableOptions<Z, RowKey
     focusCell: (key: RowKey, column: string) => focusCell(registry, key, column),
   };
   /* Sound: `parts` and `snapshot` are built from the same `Z` rows; only the spread loses it. */
-  return { ...snapshot, ...parts, ...reach } as unknown as Table<Z, false, RowKey>;
+  const returned = {
+    ...snapshot,
+    ...parts,
+    ...reach,
+    foldAll: () => {
+      warnDeprecated("t.foldAll", "t.foldAllGroups");
+      snapshot.foldAllGroups();
+    },
+    unfoldAll: () => {
+      warnDeprecated("t.unfoldAll", "t.unfoldAllGroups");
+      snapshot.unfoldAllGroups();
+    },
+    asCsv: () => {
+      warnDeprecated("t.asCsv", "t.exportAs(csv)");
+      return exportAs(csv);
+    },
+  };
+  /* A getter, so that the warning comes with the read and not with a spread of the hook's result. */
+  Object.defineProperty(returned, "filter", {
+    enumerable: true,
+    get: () => {
+      warnDeprecated("t.filter", "t.conditions");
+      return snapshot.conditions;
+    },
+  });
+  return returned as unknown as Table<Z, RowKey, false>;
 }

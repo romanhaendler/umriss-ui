@@ -50,7 +50,7 @@ export default function SnoozeAndHide() {
     () =>
       alarmModel(
         { alarms: alerts, types: ALERT_TYPES, asOf: NOW },
-        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
+        hiddenOnly ? { preFilter: (row) => isHidden(row.availability) } : {},
       ),
     [alerts, hiddenOnly],
   );

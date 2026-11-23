@@ -26,7 +26,7 @@ const SHIPMENTS: Shipment[] = [
 const QUICK_FILTERS: readonly Status[] = ["out for delivery", "failed attempt"];
 
 /* The table holds the condition; the buttons only ask it to change and read
-   `t.filter` to show which one stands. That is why the column's funnel, the
+   `t.conditions` to show which one stands. That is why the column's funnel, the
    chip in the toolbar, "Reset" and `t.view` all agree with them without a
    line of synchronisation. `setFilter` takes the
    condition of the column's filter - for `filter="list"` the chosen values -
@@ -42,7 +42,7 @@ export default function ConditionsFromOutside() {
     <Stack gap={3}>
       <Stack direction="row" gap={2} wrap>
         {QUICK_FILTERS.map((status) => {
-          const active = JSON.stringify(t.filter.status) === JSON.stringify([status]);
+          const active = JSON.stringify(t.conditions.status) === JSON.stringify([status]);
           return (
             <Button
               key={status}

@@ -35,7 +35,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentPropsWithRef, KeyboardEvent } from "react";
-import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, formatDuration, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, ConfirmDialog, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, formatDuration, useFreshness, useDensityFor, useFormats, useWording, warnOnce } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { Pagination, useTable } from "@umriss-ui/table";
 import type { TableSelection } from "@umriss-ui/table";
@@ -98,7 +98,7 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
   /** From when the data counts as stale and from when as disconnected. Without
       them the list shows no freshness – a time without a rule for when it is
       too old is no information. */
-  freshness?: FreshnessAges;
+  ages?: FreshnessAges;
   /** `"regular"` or `"compact"`; compact reduces the row height for very dense views.
       @default the density of the `UmrissProvider`, else `"compact"` */
   density?: "regular" | "compact";
@@ -110,12 +110,15 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
       rows. */
   maxHeight?: string;
   /** The view of hidden alarms is on. The list does not filter - the
-      projection does, with the table's own `filter` and `isHidden`; this
+      projection does, with the table's own `preFilter` and `isHidden`; this
       only says what the switch shows. */
   hiddenOnly?: boolean;
   /** Offers the view as a switch beside its count. Without it the count
       stands as text. */
   onHiddenOnlyChange?: (hiddenOnly: boolean) => void;
+  /** The old name of `ages`.
+      @deprecated since 0.58 - use ages. */
+  freshness?: FreshnessAges;
 }
 
 /** The panel behind "Snooze" when a reason is asked for. Its draft lives here
@@ -234,14 +237,16 @@ function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): {
     the whole table every minute. */
 const LIVE_INTERVAL_MS = 2000;
 
-type BodyProps = Omit<AlarmListProps, "asOf" | "freshness">;
+type BodyProps = Omit<AlarmListProps, "asOf" | "ages" | "freshness">;
 
 /** The list of alarms, operable: a table over the rows of `alarmModel`, with
     priority, lifecycle state and age, the acknowledgement of one alarm or of
-    the selection, and - with `asOf` and `freshness` - how old the data is. It
+    the selection, and - with `asOf` and `ages` - how old the data is. It
     acknowledges nothing itself: it hands the ids to `onAcknowledge`. */
 export function AlarmList(props: AlarmListProps) {
-  const { asOf, freshness: ages, ...rest } = props;
+  const { asOf, ages: given, freshness, ...rest } = props;
+  if (freshness !== undefined) warnOnce("@umriss-ui/alarms", "deprecated:AlarmList freshness", "AlarmList freshness is deprecated and goes in the next major release; use ages.");
+  const ages = given ?? freshness;
   if (asOf === undefined || ages === undefined) {
     return <Body {...rest} freshness={null} />;
   }

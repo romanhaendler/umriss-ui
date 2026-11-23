@@ -68,7 +68,7 @@ export function TableToolbar({
   let right: ReactNode = null;
   if (registry && hook) {
     const snapshot = hook.publicSnapshot;
-    const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
+    const restricted = snapshot.search !== "" || Object.keys(snapshot.conditions).length > 0;
     /* The selection WITHIN the filtered set - the same set the user sees and
        the one "select all" acts on. What lies outside stays selected but is
        not treated along with it: a button that does more than it announces is

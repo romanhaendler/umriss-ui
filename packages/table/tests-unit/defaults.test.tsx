@@ -8,7 +8,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 import { UmrissProvider } from "@umriss-ui/core";
-import { useTable } from "../src";
+import { csv, useTable } from "../src";
 import type { Table } from "../src";
 
 interface Reading {
@@ -163,7 +163,7 @@ describe("Absent values", () => {
 describe("Export", () => {
   it("leaves numbers as numbers with the formats' decimal mark - even behind a percent format", () => {
     render(<Log />);
-    const lines = current!.asCsv().replace("﻿", "").split("\r\n");
+    const lines = current!.exportAs(csv).replace("﻿", "").split("\r\n");
     expect(lines[0]).toBe("Name,Menge,Anteil,Gemessen,Geprüft,Kennung,Lücke");
     expect(lines[1]).toBe("Basalt,1204.5,0.4,2026-03-17T08:00:00.000Z,yes,K-9,");
     expect(lines[2]).toBe("Änderung,3,,2026-03-16T08:00:00.000Z,no,K-10,4");
@@ -176,7 +176,7 @@ describe("Export", () => {
       current!.toggleColumn("measuredAt");
       current!.setOrder(["amount"]);
     });
-    const lines = current!.asCsv().replace("﻿", "").split("\r\n");
+    const lines = current!.exportAs(csv).replace("﻿", "").split("\r\n");
     expect(lines).toHaveLength(2);
     expect(lines[0]).toBe("Menge,Name,Anteil,Geprüft,Kennung,Lücke");
     expect(lines[1]).toBe("10,Cirrus,0.5,yes,K-2,2");

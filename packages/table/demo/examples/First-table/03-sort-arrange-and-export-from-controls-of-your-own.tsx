@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button, Checkbox, Select, Stack } from "@umriss-ui/core";
-import { useTable } from "../../../src";
+import { csv, useTable } from "../../../src";
 import type { TableRef } from "../../../src";
 
 export const title = "Sort, arrange and export from controls of your own";
-export const lead = "`t.toggleSort`, `t.toggleColumn` and `t.setOrder` change what the headers and the column menu change; `t.sort`, `t.hidden` and `t.order` say how it stands. `t.asCsv()` is the text an export writes.";
+export const lead = "`t.toggleSort`, `t.toggleColumn` and `t.setOrder` change what the headers and the column menu change; `t.sort`, `t.hidden` and `t.order` say how it stands. `t.exportAs(csv)` is the text an export writes.";
 
 interface Service {
   id: string;
@@ -30,7 +30,7 @@ const COLUMNS = [
 ] as const;
 
 /* Written once for every table of the application. In server mode the table
-   holds one page of the server's, and that is all `asCsv` can write - so the
+   holds one page of the server's, and that is all `exportAs(csv)` can write - so the
    button says so instead of pretending to copy the whole list. */
 function CopyAsCsv({ of }: { of: TableRef }) {
   const [copied, setCopied] = useState(false);
@@ -38,7 +38,7 @@ function CopyAsCsv({ of }: { of: TableRef }) {
     <Button
       size="sm"
       onClick={() => {
-        void navigator.clipboard.writeText(of.asCsv()).then(() => setCopied(true));
+        void navigator.clipboard.writeText(of.exportAs(csv)).then(() => setCopied(true));
       }}
     >
       {copied ? "Copied" : of.server ? "Copy this page as CSV" : "Copy as CSV"}

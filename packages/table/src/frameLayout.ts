@@ -126,7 +126,7 @@ export function frameLayout({
      filtered set's belong - the footer shows the server's totals, or none; under
      an error the totals are the old request's, so none. */
   const footerShown = (snapshot.server ? hook.totals !== undefined && hook.error === undefined : !loading) && dataColumns.some((e) => e.spec.aggregate);
-  const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
+  const restricted = snapshot.search !== "" || Object.keys(snapshot.conditions).length > 0;
 
   return {
     snapshot,

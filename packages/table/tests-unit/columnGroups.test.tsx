@@ -4,7 +4,7 @@
 
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { ColumnGroup, ColumnMenu, Export, Toolbar, useTable } from "../src";
+import { ColumnGroup, ColumnMenu, Export, Toolbar, csv, useTable } from "../src";
 import type { ExportFormat, ExportSheet, Table } from "../src";
 
 const ROWS = [{ id: "a", name: "Bolt", jan: 1, feb: 2, mar: 3, apr: 4 }];
@@ -87,7 +87,7 @@ describe("reordering in the column menu", () => {
     expect(disabled("Move Mar backward")).toBe(true);
     expect(disabled("Move Feb forward")).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Move Feb forward" }));
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Name,Q1 · Feb,Q1 · Jan,Q1 · Mar,Apr");
+    expect(current!.exportAs(csv).replace("﻿", "").split("\r\n")[0]).toBe("Name,Q1 · Feb,Q1 · Jan,Q1 · Mar,Apr");
   });
 });
 
@@ -138,7 +138,7 @@ describe("a virtual table with groups", () => {
 describe("the export", () => {
   it("writes one header row with \"<group> · <column>\"", () => {
     render(<Report />);
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Name,Q1 · Jan,Q1 · Feb,Q1 · Mar,Apr");
+    expect(current!.exportAs(csv).replace("﻿", "").split("\r\n")[0]).toBe("Name,Q1 · Jan,Q1 · Feb,Q1 · Mar,Apr");
   });
 
   it("hands the same labels to a format of one's own, which is what XLSX writes", () => {

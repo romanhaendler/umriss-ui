@@ -1,7 +1,7 @@
 import { ColumnMenu, Toolbar, useTable } from "../../../src";
 
 export const title = "Group by a value that is no column";
-export const lead = "`GroupBy` declares a group key computed from the row, here the day an incident opened; it has no cell and no export.";
+export const lead = "`GroupKey` declares a group key computed from the row, here the day an incident opened; it has no cell and no export.";
 
 interface Incident {
   id: string;
@@ -26,13 +26,13 @@ const INCIDENTS: Incident[] = [
 const dayOf = (d: Date) => `${d.getDate()} March, ${d.toLocaleDateString("en-GB", { weekday: "long" })}`;
 
 export default function KeyThatIsNoColumn() {
-  const { Table, Column, GroupBy } = useTable(INCIDENTS, { rowKey: (i) => i.id, defaultGrouping: "day" });
+  const { Table, Column, GroupKey } = useTable(INCIDENTS, { rowKey: (i) => i.id, defaultGrouping: "day" });
   return (
     <Table aria-label="Incidents by day">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>
-      <GroupBy id="day" value={(i) => dayOf(i.opened)} label="Day" />
+      <GroupKey id="day" value={(i) => dayOf(i.opened)} label="Day" />
       <Column value="id" label="Incident" rowHeader />
       <Column value="service" label="Service" />
       <Column value="opened" label="Opened" format="dateTime" />

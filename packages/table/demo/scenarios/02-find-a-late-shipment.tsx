@@ -326,7 +326,7 @@ export default function FindALateShipment() {
         <Column value="delay" label="Delay (min)" aggregate="max" />
 
         <RowDetail>{(r) => <Detail row={r} />}</RowDetail>
-        <RowActions pin={wide}>
+        <RowActions pinned={wide}>
           <Action onSelect={(r) => setMessage(`${r.id}: ${r.customer} notified`)}>Notify</Action>
           <Action bulk tone="danger" onSelect={(list) => setToArchive(list)}>
             Archive

@@ -170,7 +170,7 @@ describe("alarmModel - hidden, never absent", () => {
   it("is a view by the table's own filter: only what is hidden", () => {
     const projection = alarmModel(
       { alarms: ALARMS, types: TYPES, asOf: T0 },
-      { filter: (row) => isHidden(row.availability) },
+      { preFilter: (row) => isHidden(row.availability) },
     );
     expect(ids(projection.filtered)).toEqual(["snoozed-high", "disabled-high"]);
     expect(projection.hiddenAlarms).toBe(2);

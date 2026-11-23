@@ -203,7 +203,7 @@ export function Actions() {
 
 export function Grouping() {
   const t = useTable(orders, { rowKey: (a) => a.id, defaultGrouping: ["status", "shift"] });
-  const { Table: Frame, Column, GroupBy } = t;
+  const { Table: Frame, Column, GroupKey } = t;
   return (
     <Frame groupable>
       <Column value="due" label="Due" group="month" />
@@ -213,17 +213,17 @@ export function Grouping() {
       <Column value="amount" label="Quantity" group="month" />
       {/* @ts-expect-error groupValue yields an object */}
       <Column value="amount" label="Quantity" groupValue={(n) => ({ n })} />
-      <GroupBy value="status" label="Status" />
-      <GroupBy id="shift" value={(a) => (a.due.getHours() < 14 ? "Early" : "Late")} label="Shift" />
-      <GroupBy value="due" label="Month" group="month" />
+      <GroupKey value="status" label="Status" />
+      <GroupKey id="shift" value={(a) => (a.due.getHours() < 14 ? "Early" : "Late")} label="Shift" />
+      <GroupKey value="due" label="Month" group="month" />
       {/* @ts-expect-error a field the row does not have */}
-      <GroupBy value="plant" label="Plant" />
+      <GroupKey value="plant" label="Plant" />
       {/* @ts-expect-error a computed group key without an id */}
-      <GroupBy value={(a) => a.number} label="Number" />
+      <GroupKey value={(a) => a.number} label="Number" />
       {/* @ts-expect-error a group key over an object */}
-      <GroupBy id="customer" value={(a) => a.customer} label="Customer" />
+      <GroupKey id="customer" value={(a) => a.customer} label="Customer" />
       {/* @ts-expect-error group on text */}
-      <GroupBy value="number" label="Number" group="year" />
+      <GroupKey value="number" label="Number" group="year" />
     </Frame>
   );
 }

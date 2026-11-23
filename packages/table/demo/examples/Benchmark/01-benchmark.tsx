@@ -97,8 +97,8 @@ interface Handle {
   toggleSort: (column: string) => void;
   setSearch: (search: string) => void;
   setPage: (page: number) => void;
-  foldAll: () => void;
-  unfoldAll: () => void;
+  foldAllGroups: () => void;
+  unfoldAllGroups: () => void;
   toggleColumn: (column: string) => void;
 }
 
@@ -260,7 +260,7 @@ export default function Benchmark() {
         <Button size="sm" data-role="measure-page" onClick={() => void repeat("page", mode === "paged", (i) => t().setPage(2 + i), () => t().setPage(1))}>
           Page
         </Button>
-        <Button size="sm" data-role="measure-fold" onClick={() => void repeat("fold", mode === "grouped", () => t().foldAll(), () => t().unfoldAll())}>
+        <Button size="sm" data-role="measure-fold" onClick={() => void repeat("fold", mode === "grouped", () => t().foldAllGroups(), () => t().unfoldAllGroups())}>
           Fold
         </Button>
         <Button size="sm" data-role="measure-hide" onClick={() => void repeat("hide", true, () => t().toggleColumn("region"), () => t().toggleColumn("region"))}>

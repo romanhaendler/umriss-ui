@@ -100,7 +100,7 @@ describe("operators", () => {
   it("ignores a term without its value and lifts a condition that is only such terms", () => {
     render(<List />);
     act(() => current!.setFilter("name", one("contains", "")));
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     act(() =>
       current!.setFilter("name", {
         terms: [
@@ -139,10 +139,10 @@ describe("the input", () => {
     const p = within(panel());
     fireEvent.change(p.getAllByLabelText("Operator")[0]!, { target: { value: "startsWith" } });
     fireEvent.change(p.getAllByLabelText("Value")[0]!, { target: { value: "baz" } });
-    expect(current!.filter).toEqual({ name: { terms: [{ operator: "startsWith", value: "baz" }] } });
+    expect(current!.conditions).toEqual({ name: { terms: [{ operator: "startsWith", value: "baz" }] } });
     fireEvent.change(p.getAllByLabelText("Operator")[1]!, { target: { value: "isEmpty" } });
     fireEvent.click(p.getByRole("radio", { name: "or" }));
-    expect(current!.filter).toEqual({
+    expect(current!.conditions).toEqual({
       name: { join: "or", terms: [{ operator: "startsWith", value: "baz" }, { operator: "isEmpty" }] },
     });
     expect(ids()).toEqual(["3", "4", "5"]);

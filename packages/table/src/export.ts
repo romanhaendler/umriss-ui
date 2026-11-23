@@ -38,7 +38,7 @@ export function visibleColumns(registry: Registry): ColumnEntry[] {
     the same thing. */
 export function resetSearchAndFilters(snapshot: TableSnapshot<unknown, RowKey>) {
   snapshot.setSearch("");
-  for (const id of Object.keys(snapshot.filter)) snapshot.setFilter(id, null);
+  for (const id of Object.keys(snapshot.conditions)) snapshot.setFilter(id, null);
 }
 
 /** The three conventions the language decides: the decimal mark is the

@@ -200,7 +200,7 @@ describe("Acknowledging", () => {
       const [highOnly, setHighOnly] = useState(false);
       const projection = alarmModel(
         { alarms: ALARMS, types: TYPES, asOf: NOW },
-        { filter: highOnly ? (row) => row.priority === "high" : undefined },
+        { preFilter: highOnly ? (row) => row.priority === "high" : undefined },
       );
       // The selection knows all three, independently of the filter.
       const selection = useTableSelection(ALARMS.map((m) => m.id));
@@ -257,7 +257,7 @@ describe("Empty is not the same as empty", () => {
       <AlarmList
         view={projectionOf([])}
         asOf={null}
-        freshness={{ stale: 5 * MIN, lost: 30 * MIN }}
+        ages={{ stale: 5 * MIN, lost: 30 * MIN }}
       />,
     );
     expect(screen.getByText(DEFAULT_WORDING.alarmNoneDisconnected)).toBeTruthy();
@@ -423,7 +423,7 @@ describe("Hidden", () => {
       const [hiddenOnly, setHiddenOnly] = useState(false);
       const view = alarmModel(
         { alarms: [...ALARMS, ...HIDDEN], types: TYPES, asOf: NOW },
-        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
+        hiddenOnly ? { preFilter: (row) => isHidden(row.availability) } : {},
       );
       return <AlarmList view={view} hiddenOnly={hiddenOnly} onHiddenOnlyChange={setHiddenOnly} />;
     }

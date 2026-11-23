@@ -1,1 +1,4 @@
-{}
+{
+  "AlarmListProps.freshness": "(g) deprecated alias: the old name of ages",
+  "AlarmBannerProps.freshness": "(g) deprecated alias: the old name of ages"
+}

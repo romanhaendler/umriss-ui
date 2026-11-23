@@ -100,7 +100,7 @@ describe("folding", () => {
 
   it("folds a group header to itself; everything folded is a summary of the lines", () => {
     const { container } = render(<Orders />);
-    act(() => current!.foldAll());
+    act(() => current!.foldAllGroups());
     expect(kinds(container)).toEqual(["header", "header", "header"]);
     // Folded all the way, the customers inside Line 3 stay folded when it opens.
     fireEvent.click(screen.getByRole("button", { name: "Unfold Line 3, 3" }));
@@ -259,7 +259,7 @@ describe("the focus survives a fold", () => {
   it("does so for Fold all, too", () => {
     render(<Orders selectable />);
     box("A-1057").focus();
-    act(() => current!.foldAll());
+    act(() => current!.foldAllGroups());
     expect(document.activeElement).toBe(fold("Unfold Line 2, 4"));
   });
 

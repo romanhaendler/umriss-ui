@@ -29,7 +29,7 @@ describe("AlarmBanner", () => {
   it("says what holds without unacknowledged alarms", () => {
     const { rerender } = render(<AlarmBanner view={view([alarm("1", "c", "active-acknowledged")])} />);
     expect(screen.getByText("No unacknowledged alarms")).toBeTruthy();
-    rerender(<AlarmBanner view={view([])} asOf={NOW - 3_600_000} freshness={{ stale: 1000, lost: 2000 }} />);
+    rerender(<AlarmBanner view={view([])} asOf={NOW - 3_600_000} ages={{ stale: 1000, lost: 2000 }} />);
     expect(screen.getAllByText(/connection/i).length).toBeGreaterThan(0);
     expect(screen.queryByText("No unacknowledged alarms")).toBeNull();
   });
@@ -109,7 +109,7 @@ describe("AlarmBanner", () => {
   it("counts per priority over the filtered set", () => {
     const filtered = alarmModel(
       { alarms: [alarm("1", "c"), alarm("2", "l")], types: TYPES, asOf: NOW },
-      { filter: (row) => row.priority === "low" },
+      { preFilter: (row) => row.priority === "low" },
     );
     expect(filtered.unacknowledgedByPriority).toEqual({ critical: 0, high: 0, medium: 0, low: 1 });
   });

@@ -8,7 +8,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { UmrissProvider } from "@umriss-ui/core";
 import { within } from "@testing-library/react";
-import { ColumnMenu, Pagination, useTable } from "../src";
+import { ColumnMenu, Pagination, csv, useTable } from "../src";
 import type { Table } from "../src";
 
 interface Order {
@@ -34,10 +34,10 @@ function List({ density, sticky = false }: { density?: "regular" | "compact"; st
   capture(t);
   const { Table: Frame, Column } = t;
   return (
-    <Frame selectable density={density} stickyRowHeader={sticky} stickyHeader>
+    <Frame selectable density={density} stickyHeader>
       <ColumnMenu />
       <Column value="line" label="Line" resizable width={120} />
-      <Column value="number" label="Order" rowHeader />
+      <Column value="number" label="Order" rowHeader pin={sticky ? "start" : undefined} />
     </Frame>
   );
 }
@@ -143,7 +143,7 @@ describe("Sticky parts and density", () => {
 
   it("the sticky row header stands first in the column menu and in the export as well", () => {
     render(<List sticky />);
-    expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Order,Line");
+    expect(current!.exportAs(csv).replace("﻿", "").split("\r\n")[0]).toBe("Order,Line");
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const menu = screen.getByRole("dialog");
     expect(within(menu).getAllByRole("checkbox").map((k) => k.closest("label")!.textContent)).toEqual(["Order", "Line"]);

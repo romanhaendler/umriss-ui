@@ -264,7 +264,7 @@ export const OUTLINE: readonly Rubric[] = [
           "No bar to drag headers onto: grouping is chosen in the column menu.",
           "In [server mode](#/server-mode) the server groups: the request carries `grouping`, the answer `groups`, and a page counts lines.",
         ],
-        types: ["GroupByBase"],
+        types: ["GroupKeyBase"],
         exports: ["useTable"],
       },
       {

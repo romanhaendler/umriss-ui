@@ -1,6 +1,6 @@
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useTable } from "../src";
+import { csv, useTable } from "../src";
 import type { Table } from "../src";
 import { asCsv } from "../src/model/csv";
 
@@ -43,25 +43,25 @@ describe("the export writes what the screen shows", () => {
   it("writes a grouped table in the groups' order, folded groups included", () => {
     render(<Host />);
     act(() => current!.setGrouping(["grp"]));
-    expect(lines(current!.asCsv()).map((l) => l[0])).toEqual(["b", "d", "a", "c"]);
-    act(() => current!.foldAll());
-    expect(lines(current!.asCsv()).map((l) => l[0])).toEqual(["b", "d", "a", "c"]);
+    expect(lines(current!.exportAs(csv)).map((l) => l[0])).toEqual(["b", "d", "a", "c"]);
+    act(() => current!.foldAllGroups());
+    expect(lines(current!.exportAs(csv)).map((l) => l[0])).toEqual(["b", "d", "a", "c"]);
     act(() => current!.selection.set(["a", "b"], true));
     expect(current!.selectionAsText().split("\n").slice(1).map((l) => l[0])).toEqual(["b", "a"]);
   });
 
   it("a column with format date writes days even when an exported row has a time, and one without by the screen", () => {
     const { unmount } = render(<Host format="date" />);
-    expect(lines(current!.asCsv()).map((l) => l.split(",")[3])).toEqual(["2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20"]);
+    expect(lines(current!.exportAs(csv)).map((l) => l.split(",")[3])).toEqual(["2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20"]);
     unmount();
     render(<Host format="dateTime" rows={ROWS.filter((r) => r.id !== "b")} />);
-    expect(lines(current!.asCsv()).map((l) => l.split(",")[3])).toEqual(ROWS.filter((r) => r.id !== "b").map((r) => r.when.toISOString()));
+    expect(lines(current!.exportAs(csv)).map((l) => l.split(",")[3])).toEqual(ROWS.filter((r) => r.id !== "b").map((r) => r.when.toISOString()));
   });
 
   it("a column without format keeps its day when a search leaves only midnights", () => {
     render(<Host />);
     act(() => current!.setSearch("d"));
-    expect(lines(current!.asCsv()).map((l) => l.split(",")[3])).toEqual([ROWS[3]!.when.toISOString()]);
+    expect(lines(current!.exportAs(csv)).map((l) => l.split(",")[3])).toEqual([ROWS[3]!.when.toISOString()]);
   });
 
   it("leaves out an object column with a warning, but keeps a mixed one that has text somewhere", () => {
@@ -71,11 +71,11 @@ describe("the export writes what the screen shows", () => {
       { ...ROWS[1]!, thing: "text" },
     ];
     render(<Host rows={rows} extra />);
-    expect(lines(current!.asCsv())[1]!.split(",").slice(-1)).toEqual(["text"]);
-    expect(lines(current!.asCsv())[0]!.split(",").slice(-1)).toEqual([""]);
+    expect(lines(current!.exportAs(csv))[1]!.split(",").slice(-1)).toEqual(["text"]);
+    expect(lines(current!.exportAs(csv))[0]!.split(",").slice(-1)).toEqual([""]);
     warn.mockClear();
     render(<Host rows={ROWS.map((r) => ({ ...r, thing: { a: 1 } }))} extra />);
-    current!.asCsv();
+    current!.exportAs(csv);
     expect(warn.mock.calls.some((c) => String(c[0]).includes('"thing"'))).toBe(true);
     warn.mockRestore();
   });

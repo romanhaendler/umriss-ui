@@ -12,6 +12,7 @@
 
 import { DEFAULT_FORMATS, treeModel } from "@umriss-ui/core";
 import type { FlatteningEntry, NodeReader } from "@umriss-ui/core";
+import { warnDeprecated } from "../dev";
 import type { RowKey } from "../types";
 import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
 import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
@@ -20,7 +21,8 @@ import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 export type SortDirection = "asc" | "desc";
 
 /** A column as the model reads it - what sorting, search, hiding and the
-    export need of it, not its presentation. */
+    export need of it, not its presentation.
+    @experimental a minor release may change it. */
 export interface ModelColumn<Z, K extends string = string> {
   id: K;
   /** Human-readable label – for the column menu and the CSV header row.
@@ -35,7 +37,7 @@ export interface ModelColumn<Z, K extends string = string> {
       text differs from the sort key (dates, numbers, booleans). */
   searchValue?: (row: Z) => string | undefined;
   /** Takes part in the free-text search.
-      @default false */
+      @default `true` where the value is text, `false` otherwise */
   searchable?: boolean;
   /** May the user switch this column away? `false` for columns that identify
       the row – without them the table is no longer readable.
@@ -60,11 +62,12 @@ export interface SortLevel<K extends string = string> {
 }
 
 /** The view's state the model computes a table from, beside its rows and
-    columns: search, filter, sort, page, hidden columns, order, grouping, tree. */
+    columns: search, filter, sort, page, hidden columns, order, grouping, tree.
+    @experimental a minor release may change it. */
 export interface TableInput<Z = unknown, K extends string = string> {
   search?: string;
   /** An additional filter beside the free-text search, e.g. a status choice. */
-  filter?: (row: Z) => boolean;
+  preFilter?: (row: Z) => boolean;
   /** One level or several. A single level means the same as a list holding
       only it. */
   sort?: SortLevel<K> | readonly SortLevel<K>[] | null;
@@ -95,10 +98,14 @@ export interface TableInput<Z = unknown, K extends string = string> {
       model then sorts every level on its own, filters by core's path rule and
       pages nothing. */
   tree?: TreeInput<Z>;
+  /** The old name of `preFilter`.
+      @deprecated since 0.58 - use preFilter. */
+  filter?: (row: Z) => boolean;
 }
 
 /** Tree rows for the model: how a row is keyed, how its children are read,
-    and which branches are open. */
+    and which branches are open.
+    @experimental a minor release may change it. */
 export interface TreeInput<Z> {
   key: (row: Z) => RowKey;
   /** `undefined` a leaf, an array a branch - the rule of core's reader. */
@@ -115,7 +122,8 @@ export interface TreeInput<Z> {
 export const lineCount = (projection: Pick<TableProjection<unknown>, "lines" | "shown" | "filtered">) =>
   (projection.lines ?? projection.shown ?? projection.filtered).length;
 
-/** The table's pipeline as a pure function - filter, sort, page over rows and model columns. */
+/** The table's pipeline as a pure function - filter, sort, page over rows and model columns.
+    @experimental a minor release may change it. */
 export interface TableProjection<Z, K extends string = string> {
   /** The visible columns in their order – the basis for the header row, the
       column menu and the CSV export. */
@@ -182,6 +190,12 @@ const defaultCompare = (a: string | number, b: string | number): number =>
     ? a - b
     : DEFAULT_FORMATS.compareText(String(a), String(b));
 
+/* The input's pre-filter; the old name `filter` still works and warns once. */
+function preFilterOf<Z>(input: Pick<TableInput<Z>, "preFilter" | "filter">) {
+  if (input.filter && !input.preFilter) warnDeprecated("tableModel filter", "preFilter");
+  return input.preFilter ?? input.filter;
+}
+
 /* The free-text search and the additional filter together. */
 function matcherOf<Z, K extends string>(
   columns: readonly ModelColumn<Z, K>[],
@@ -189,11 +203,13 @@ function matcherOf<Z, K extends string>(
   filter: ((row: Z) => boolean) | undefined,
 ) {
   const term = (search ?? "").trim().toLowerCase();
-  const searchColumns = columns.filter((s) => s.searchable && (s.searchValue || s.value));
+  const searchColumns = columns.filter((s) => s.searchable !== false && (s.searchValue || s.value));
   const matchesSearch = (row: Z) =>
     !term ||
     searchColumns.some((s) => {
       const value = s.searchValue ? s.searchValue(row) : s.value!(row);
+      /* Undeclared, a column is searched as the table's is: where its value is text. */
+      if (s.searchable === undefined && typeof value !== "string") return false;
       return !absent(value) && String(value).toLowerCase().includes(term);
     });
   return { term, matches: (row: Z) => matchesSearch(row) && (filter ? filter(row) : true) };
@@ -275,9 +291,9 @@ function sorterOf<Z, K extends string>(
 export function filterSort<Z, K extends string = string>(
   rows: readonly Z[],
   columns: readonly ModelColumn<Z, K>[],
-  input: Pick<TableInput<Z, K>, "search" | "filter" | "sort">,
+  input: Pick<TableInput<Z, K>, "search" | "preFilter" | "filter" | "sort">,
 ): { filtered: Z[]; levels: readonly SortLevel<K>[] } {
-  const { matches } = matcherOf(columns, input.search, input.filter);
+  const { matches } = matcherOf(columns, input.search, preFilterOf(input));
   const { levels, sorted } = sorterOf(columns, input.sort);
   return { filtered: sorted(rows.filter(matches)), levels };
 }
@@ -342,7 +358,8 @@ const visibleOf = <Z, K extends string>(
   return hidden?.length ? ordered.filter((s) => s.hideable === false || !hidden.includes(s.id)) : ordered;
 };
 
-/** The table's pipeline as a pure function - filter, sort, page over rows and model columns. */
+/** The table's pipeline as a pure function - filter, sort, page over rows and model columns.
+    @experimental a minor release may change it. */
 export function tableModel<Z, K extends string = string>(
   rows: readonly Z[],
   columns: readonly ModelColumn<Z, K>[],
@@ -379,9 +396,9 @@ export function tableModel<Z, K extends string = string>(
   }
 
   if (input.tree) {
-    const { term, matches } = matcherOf(columns, input.search, input.filter);
+    const { term, matches } = matcherOf(columns, input.search, preFilterOf(input));
     const { sorted } = sorterOf(columns, input.sort);
-    return treeProjection(rows, input.tree, sorted, term || input.filter ? matches : undefined, visibleOf(columns, hidden, order));
+    return treeProjection(rows, input.tree, sorted, term || preFilterOf(input) ? matches : undefined, visibleOf(columns, hidden, order));
   }
 
   const { filtered, levels } = filterSort(rows, columns, input);

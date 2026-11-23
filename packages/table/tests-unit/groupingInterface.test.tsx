@@ -4,7 +4,7 @@
 
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ColumnMenu, Toolbar, useTable } from "../src";
+import { ColumnMenu, Toolbar, csv, useTable } from "../src";
 import type { Table, TableView } from "../src";
 
 interface Order {
@@ -43,7 +43,7 @@ function Orders({
 }) {
   const t = useTable(ORDERS, { rowKey: (o) => o.id, defaultGrouping, initialView: start });
   capture(t);
-  const { Table: Frame, Column, GroupBy } = t;
+  const { Table: Frame, Column, GroupKey } = t;
   return (
     <Frame groupable={groupable}>
       <Toolbar>
@@ -56,7 +56,7 @@ function Orders({
       <Column value="tags" label="Tags">
         {(tags) => tags.join(", ")}
       </Column>
-      <GroupBy id="shift" value={(o) => shiftOf(o.start)} label="Shift" />
+      <GroupKey id="shift" value={(o) => shiftOf(o.start)} label="Shift" />
     </Frame>
   );
 }
@@ -80,9 +80,9 @@ describe("the grouping as state", () => {
     render(<Orders start={{ grouping: ["line", "customer"], folded }} />);
     expect(current!.grouping).toEqual(["line", "customer"]);
     expect(current!.view.folded).toEqual(folded);
-    act(() => current!.unfoldAll());
+    act(() => current!.unfoldAllGroups());
     expect(current!.view.folded).toBeUndefined();
-    act(() => current!.foldAll());
+    act(() => current!.foldAllGroups());
     // Line 1 and Line 2, Brenner and Kessler on Line 1, Brenner on Line 2.
     expect(current!.view.folded).toHaveLength(5);
   });
@@ -125,7 +125,7 @@ describe("the column menu", () => {
     render(<Orders />);
     const menu = within(openMenu());
     expect(menu.queryByRole("checkbox", { name: "Shift" })).toBeNull();
-    expect(current!.asCsv().split("\n")[0]).not.toContain("Shift");
+    expect(current!.exportAs(csv).split("\n")[0]).not.toContain("Shift");
   });
 
   it("offers no grouping in a table that says groupable={false}", () => {

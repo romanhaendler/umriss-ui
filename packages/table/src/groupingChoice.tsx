@@ -106,8 +106,8 @@ export function GroupingTag({ registry, hook }: { registry: Registry; hook: Hook
             </MenuItem>
           ))}
           <MenuSeparator />
-          <MenuItem onSelect={snapshot.unfoldAll}>{wording.unfoldAll}</MenuItem>
-          <MenuItem onSelect={snapshot.foldAll}>{wording.foldAll}</MenuItem>
+          <MenuItem onSelect={snapshot.unfoldAllGroups}>{wording.unfoldAll}</MenuItem>
+          <MenuItem onSelect={snapshot.foldAllGroups}>{wording.foldAll}</MenuItem>
         </Menu>
       </Tag>
     </TagGroup>

@@ -41,6 +41,14 @@ describe("tableModel – the order of the steps", () => {
     expect(tableModel(ROWS, COLUMNS, { search: "300" }).filtered).toHaveLength(0);
   });
 
+  it("searches a column that does not say where its value is text, as the table's column does, and never one that says false", () => {
+    const undeclared = [column<Row>("projekt", { value: (z) => z.project }), column<Row>("budget", { value: (z) => z.budget })];
+    expect(ids(tableModel(ROWS, undeclared, { search: "auror" }).filtered)).toEqual(["p1"]);
+    expect(tableModel(ROWS, undeclared, { search: "300" }).filtered).toHaveLength(0);
+    const refused = [column<Row>("projekt", { value: (z) => z.project, searchable: false })];
+    expect(tableModel(ROWS, refused, { search: "auror" }).filtered).toHaveLength(0);
+  });
+
   it("sorts text by German collation", () => {
     const projection = tableModel(ROWS, COLUMNS, {
       sort: { column: "projekt", direction: "asc" },
@@ -116,14 +124,14 @@ describe("tableModel – the additional filter", () => {
   it("joins free-text search and filter with AND", () => {
     const projection = tableModel(ROWS, COLUMNS, {
       search: "a",
-      filter: (z) => z.budget >= 200,
+      preFilter: (z) => z.budget >= 200,
     });
     // Aurora (300) matches both; Basalt and Dorado (100 each) drop out.
     expect(ids(projection.filtered)).toEqual(["p1"]);
   });
 
   it("acts even without a search term", () => {
-    const projection = tableModel(ROWS, COLUMNS, { filter: (z) => z.budget === 100 });
+    const projection = tableModel(ROWS, COLUMNS, { preFilter: (z) => z.budget === 100 });
     expect(ids(projection.filtered)).toEqual(["p2", "p4"]);
   });
 });

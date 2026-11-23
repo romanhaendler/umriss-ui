@@ -125,10 +125,12 @@ export function editingActions(input: GridInput) {
       return false;
     }
     const changed = Object.keys(drafts).filter((id) => !same(drafts[id], columnById(id)?.read(row)));
-    if (editing.line === NEW_LINE) onRowAdd?.({ values: drafts });
+    /* The drafts are what the editors hand in, typed apart from their column; the report names them. */
+    const reported = drafts as RowAdd["values"];
+    if (editing.line === NEW_LINE) onRowAdd?.({ values: reported });
     else if (editing.row) {
-      if (changed.length > 0) onRowSave?.({ rowKey: rowKey(row), changes: Object.fromEntries(changed.map((id) => [id, drafts[id]])), row });
-    } else if (changed.length > 0) onCellEdit?.({ rowKey: rowKey(row), columnId: editing.column, value: drafts[editing.column], row });
+      if (changed.length > 0) onRowSave?.({ rowKey: rowKey(row), changes: Object.fromEntries(changed.map((id) => [id, reported[id] as CellEdit<never>["value"]])), row });
+    } else if (changed.length > 0) onCellEdit?.({ rowKey: rowKey(row), columnId: editing.column, value: reported[editing.column] as CellEdit<never>["value"], row });
     if (focus) grid.focus.want("cell");
     setState((s) => ({ ...s, editing: null }));
     return true;

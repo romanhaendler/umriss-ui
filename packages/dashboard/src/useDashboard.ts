@@ -249,7 +249,7 @@ export function useDashboard({ defaultView, initialView, allowEdit = true, onVie
     redo: parts.redo,
     reset: parts.reset,
     catalogue: () => {
-      warnOnce("@umriss-ui/dashboard", "deprecated:useDashboard catalogue", "useDashboard's catalogue() is deprecated and goes in the next minor release; use openCatalogue().");
+      warnOnce("@umriss-ui/dashboard", "deprecated:useDashboard catalogue", "useDashboard's catalogue() is deprecated and goes in the next major release; use openCatalogue().");
       parts.openCatalogue();
     },
   };

@@ -128,7 +128,7 @@ export default function WorkThroughTheAlerts() {
     () =>
       alarmModel(
         { alarms: alerts, types: ALERT_TYPES, asOf: NOW },
-        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
+        hiddenOnly ? { preFilter: (row) => isHidden(row.availability) } : {},
       ),
     [alerts, hiddenOnly],
   );
@@ -158,7 +158,7 @@ export default function WorkThroughTheAlerts() {
           view={view}
           selection={selection}
           asOf={LOADED - 40_000}
-          freshness={{ stale: 5 * MIN, lost: 30 * MIN }}
+          ages={{ stale: 5 * MIN, lost: 30 * MIN }}
           hiddenOnly={hiddenOnly}
           onAcknowledge={(ids) => {
             setAlerts((current) => acknowledge(current, ids, NOW).alarms);

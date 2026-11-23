@@ -70,7 +70,7 @@ describe("Numbers", () => {
     render(<List />);
     act(() => current!.setFilter("amount", { from: 100 }));
     act(() => current!.setFilter("amount", {}));
-    expect(current!.filter).toEqual({});
+    expect(current!.conditions).toEqual({});
     expect(numbers()).toHaveLength(5);
   });
 
@@ -115,7 +115,7 @@ describe("The input of the range", () => {
     render(<List />);
     fireEvent.click(screen.getByRole("button", { name: "Filter Quantity" }));
     fireEvent.change(within(panel()).getByLabelText("From"), { target: { value: "300" } });
-    expect(current!.filter).toEqual({ amount: { from: 300 } });
+    expect(current!.conditions).toEqual({ amount: { from: 300 } });
     expect(numbers()).toEqual(["A-2", "A-3", "A-4"]);
   });
 
@@ -124,7 +124,7 @@ describe("The input of the range", () => {
     fireEvent.click(screen.getByRole("button", { name: "Filter Quantity" }));
     fireEvent.change(within(panel()).getByLabelText("From"), { target: { value: "500" } });
     fireEvent.change(within(panel()).getByLabelText("To"), { target: { value: "100" } });
-    expect(current!.filter).toEqual({ amount: { from: 500 } });
+    expect(current!.conditions).toEqual({ amount: { from: 500 } });
     expect(within(panel()).getByLabelText("From").getAttribute("aria-invalid")).toBe("true");
     expect(within(panel()).getByLabelText("To").getAttribute("aria-invalid")).toBe("true");
   });

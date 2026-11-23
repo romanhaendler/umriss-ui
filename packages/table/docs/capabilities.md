@@ -22,7 +22,7 @@ median of five runs, except as noted.
 | Sort | sorting by the duration column |
 | Search | one search text set, then cleared |
 | Page | page 2 and on turned (paged only) |
-| Fold | `foldAll` on the grouped table (grouped only) |
+| Fold | `foldAllGroups` on the grouped table (grouped only) |
 | Hide column | one column hidden |
 | Re-render | the caller renders again with nothing changed, accessors written inline |
 

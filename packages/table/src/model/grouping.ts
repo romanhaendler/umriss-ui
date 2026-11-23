@@ -9,10 +9,12 @@
 
 import { DEFAULT_FORMATS, zoneDayStart, zoneFields, zoneInstant } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
+import type { AggregateFunction } from "../types";
 import { filterKey, isAbsent } from "../values";
 import type { SortLevel } from "./tableModel";
 
-/** One level of the grouping: what a row is grouped by on it. */
+/** One level of the grouping: what a row is grouped by on it.
+    @experimental a minor release may change it. */
 export interface GroupLevel<Z> {
   id: string;
   /** The grouping value - the column's value, or what `groupValue` or a date
@@ -25,18 +27,20 @@ export interface GroupLevel<Z> {
 }
 
 /** The built-in aggregates. `range` is for points in time: the earliest and
-    the latest. */
+    the latest.
+    @experimental a minor release may change it. */
 export type AggregateKind = "sum" | "avg" | "min" | "max" | "range" | "count" | "distinct";
 
-/** An aggregate of one's own: the values present and the group's rows. */
-export type OwnAggregate<Z = never> = (values: readonly unknown[], rows: readonly Z[]) => unknown;
-
-/** A column that carries an aggregate, as the pipeline needs it. */
+/** A column that carries an aggregate, as the pipeline needs it.
+    @experimental a minor release may change it. */
 export interface AggregateColumn<Z> {
   id: string;
   read: (row: Z) => unknown;
-  aggregate: AggregateKind | OwnAggregate<Z>;
+  aggregate: AggregateKind | AggregateFunction<unknown, Z>;
 }
+
+/** @deprecated since 0.58 - use AggregateFunction. */
+export type OwnAggregate<Z = never> = AggregateFunction<unknown, Z>;
 
 const numeric = (value: unknown): number | undefined =>
   value instanceof Date ? value.getTime() : typeof value === "number" && !Number.isNaN(value) ? value : undefined;
@@ -96,7 +100,8 @@ export interface GroupingInput<Z> {
   aggregates?: readonly AggregateColumn<Z>[];
 }
 
-/** The rows of the filtered set that share one grouping value on one level. */
+/** The rows of the filtered set that share one grouping value on one level.
+    @experimental a minor release may change it. */
 export interface RowGroup<Z> {
   /** Identifies the group across renders and in the view: the keys of its
       path, outermost first. */
@@ -276,7 +281,8 @@ export function periodText(period: DatePeriod, start: Date, formats: Formats, wo
 /* --- Lines ------------------------------------------------------------------- */
 
 /** One line of a grouped table. A header heads a group of an outer level; a row
-    of the innermost level stands in its span; a folded span is one line. */
+    of the innermost level stands in its span; a folded span is one line.
+    @experimental a minor release may change it. */
 export type Line<Z> =
   | {
       kind: "header";

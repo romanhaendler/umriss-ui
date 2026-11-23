@@ -99,7 +99,7 @@ describe("tree rows - search and conditions", () => {
   });
 
   it("follows a condition by the same rule as the search", () => {
-    const projection = tableModel(UNITS, COLUMNS, { tree: tree(), filter: (u) => (u as Unit).budget === 110 });
+    const projection = tableModel(UNITS, COLUMNS, { tree: tree(), preFilter: (u) => (u as Unit).budget === 110 });
     expect(ids(projection.visible)).toEqual(["w", "wh", "wh2"]);
   });
 

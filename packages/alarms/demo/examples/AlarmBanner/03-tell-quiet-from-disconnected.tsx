@@ -16,8 +16,8 @@ export const lead = "Pass `asOf` and `freshness`: an empty banner on a live feed
 export default function TellQuietFromDisconnected() {
   return (
     <Stack gap={3}>
-      <AlarmBanner view={EMPTY} asOf={NOW - 20_000} freshness={FRESHNESS} aria-label="Alerts, live feed" />
-      <AlarmBanner view={EMPTY} asOf={NOW - 45 * MIN} freshness={FRESHNESS} aria-label="Alerts, feed lost" />
+      <AlarmBanner view={EMPTY} asOf={NOW - 20_000} ages={FRESHNESS} aria-label="Alerts, live feed" />
+      <AlarmBanner view={EMPTY} asOf={NOW - 45 * MIN} ages={FRESHNESS} aria-label="Alerts, feed lost" />
     </Stack>
   );
 }

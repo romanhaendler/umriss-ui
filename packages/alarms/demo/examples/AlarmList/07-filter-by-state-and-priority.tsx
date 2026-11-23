@@ -27,7 +27,7 @@ const ALERTS: readonly Alarm[] = [
 
 export const title = "Filter by state and priority";
 
-export const lead = "The list does not filter, the projection does: pass `filter` to `alarmModel` with the state and priority your own controls hold.";
+export const lead = "The list does not filter, the projection does: pass `preFilter` to `alarmModel` with the state and priority your own controls hold.";
 
 export default function FilterByStateAndPriority() {
   const [state, setState] = useState<LifecycleState | "">("");
@@ -36,7 +36,7 @@ export default function FilterByStateAndPriority() {
     () =>
       alarmModel(
         { alarms: ALERTS, types: ALERT_TYPES, asOf: NOW },
-        { filter: (row) => (state === "" || row.lifecycle === state) && (priority === "" || row.priority === priority) },
+        { preFilter: (row) => (state === "" || row.lifecycle === state) && (priority === "" || row.priority === priority) },
       ),
     [state, priority],
   );

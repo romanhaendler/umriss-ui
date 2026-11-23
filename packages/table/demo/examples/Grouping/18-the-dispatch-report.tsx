@@ -192,7 +192,7 @@ const partOf = (d: Date) => (d.getHours() < 12 ? "Morning" : "Afternoon");
 const onTime = (_values: readonly number[], stops: readonly StopRow[]) => stops.filter((s) => s.delay === 0).length / stops.length;
 
 export default function DispatchReport() {
-  const { Table, Column, VerdictColumn, GroupBy, RowActions, Action } = useTable(STOPS, {
+  const { Table, Column, VerdictColumn, GroupKey, RowActions, Action } = useTable(STOPS, {
     rowKey: (s) => s.id,
     defaultGrouping: ["depot", "part"],
   });
@@ -203,7 +203,7 @@ export default function DispatchReport() {
         <ColumnMenu />
         <Export filename="deliveries.csv" />
       </Toolbar>
-      <GroupBy id="part" value={(s) => partOf(s.window)} label="Part of the day" />
+      <GroupKey id="part" value={(s) => partOf(s.window)} label="Part of the day" />
       <Column value="id" label="Shipment" rowHeader />
       <Column value="depot" label="Depot" />
       <Column value="tour" label="Tour" aggregate="distinct" />

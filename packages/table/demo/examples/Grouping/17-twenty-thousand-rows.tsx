@@ -39,7 +39,7 @@ const partOf = (d: Date) => (d.getHours() < 6 ? "Night" : d.getHours() < 12 ? "M
 
 export default function TwentyThousand() {
   const requests = useMemo(() => generate(20_000), []);
-  const { Table, Column, GroupBy } = useTable(requests, {
+  const { Table, Column, GroupKey } = useTable(requests, {
     rowKey: (r) => r.id,
     defaultGrouping: ["service", "part"],
     virtual: true,
@@ -50,7 +50,7 @@ export default function TwentyThousand() {
       <Column value="at" label="Received" format="dateTime" aggregate="range" />
       <Column value="duration" label="Duration (ms)" format={{ decimals: 0 }} aggregate="avg" />
       <Column value="size" label="Size (kB)" format={{ decimals: 1 }} aggregate="max" />
-      <GroupBy id="part" value={(r) => partOf(r.at)} label="Part of the day" />
+      <GroupKey id="part" value={(r) => partOf(r.at)} label="Part of the day" />
     </Table>
   );
 }

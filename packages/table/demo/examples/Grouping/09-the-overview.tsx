@@ -96,10 +96,10 @@ export default function Overview() {
         <Column value="actual" label="Actual (€)" aggregate="sum" />
       </Table>
       <Stack direction="row" gap={2}>
-        <Button size="sm" onClick={t.foldAll}>
+        <Button size="sm" onClick={t.foldAllGroups}>
           Fold all
         </Button>
-        <Button size="sm" onClick={t.unfoldAll}>
+        <Button size="sm" onClick={t.unfoldAllGroups}>
           Unfold all
         </Button>
       </Stack>

@@ -50,7 +50,7 @@ export interface TableStateOptions<Z, K extends string> {
    * An additional filter beside the free-text search. A change leaves the page
    * standing; the model clamps it.
    */
-  filter?: (row: Z) => boolean;
+  preFilter?: (row: Z) => boolean;
   /**
    * The starting state, as the application kept it. Heeded on the first
    * render; a view handed in later goes through `restart`.
@@ -161,7 +161,7 @@ export function useTableState<Z, K extends string = string>(
   columns: readonly ModelColumn<Z, K>[],
   options: TableStateOptions<Z, K>,
 ): TableState<Z, K> {
-  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, server, tree } = options;
+  const { rowKey, preFilter, defaultSort = null, initialView, virtual, grouping, server, tree } = options;
 
   /* What a view sets, and what it leaves out falls back to: the start as well
      as a view handed in later (`restart`). */
@@ -211,8 +211,8 @@ export function useTableState<Z, K extends string = string>(
      them whole. */
   const staged = !server && !tree;
   const sortedSet = useMemo(
-    () => (staged ? filterSort(rows, columns, { search, filter, sort }) : null),
-    [staged, rows, columns, search, filter, sort],
+    () => (staged ? filterSort(rows, columns, { search, preFilter, sort }) : null),
+    [staged, rows, columns, search, preFilter, sort],
   );
   const groupLevels = grouping?.levels.length ? grouping : undefined;
   const groups = useMemo(
@@ -230,8 +230,8 @@ export function useTableState<Z, K extends string = string>(
     () =>
       sortedSet
         ? pageStage(columns, { page, pageSize: modelPageSize, hidden, order }, sortedSet.filtered, groups && lines ? { groups, lines } : undefined)
-        : tableModel(rows, columns, { search, filter, sort, page, pageSize: modelPageSize, hidden, order, grouping, server, tree }),
-    [sortedSet, groups, lines, columns, page, modelPageSize, hidden, order, rows, search, filter, sort, grouping, server, tree],
+        : tableModel(rows, columns, { search, preFilter, sort, page, pageSize: modelPageSize, hidden, order, grouping, server, tree }),
+    [sortedSet, groups, lines, columns, page, modelPageSize, hidden, order, rows, search, preFilter, sort, grouping, server, tree],
   );
 
   /* A page the rows no longer reach is written back as the clamped one, so
