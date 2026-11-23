@@ -33,10 +33,11 @@
    - and where a package ships `dist/xlsx.js` (the XLSX writer's entry): it imports nothing, is at most
      4 kB minified and gzipped, and the main entry holds no part of the writer,
    - and the packed `docs/llms-full.md`, read without any site, names none,
-   - and the changelog has a heading of the package's version, and every
-     "Changed" entry under it a `Migration:` item,
-   - and no `@deprecated` marker in `src/` is older than the package's own
-     minor (ADR-0066).
+   - and the changelog has a heading of the package's version, every "Changed"
+     entry under it a `Migration:` item, and from 1.0.0 a "Changed" only under
+     a major heading,
+   - and no `@deprecated` marker in `src/` is older than the rules of the
+     package's version allow (ADR-0066 for 0.x, ADR-0083 from 1.0.0).
 
    Run from a package directory: `node --experimental-strip-types
    ../../scripts/check-dist.ts <entry.js> <stylesheet.css> [client.js]` - the packages call
@@ -47,6 +48,7 @@ import { appendFileSync, existsSync, copyFileSync, mkdirSync, mkdtempSync, readd
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { gzipSync } from "node:zlib";
+import { changelogProblems, manifestProblems, markerProblem, peerProblems } from "./distRules.ts";
 import { dirname, join, resolve } from "node:path";
 import { transform } from "lightningcss";
 import { HOSTED_HOST, SITE } from "../packages/demo/src/address.ts";
@@ -133,20 +135,12 @@ for (const [file, text] of shipped) {
   if (text.includes("import.meta")) problems.push(`dist/${file} contains import.meta`);
 }
 
-/* A renamed name keeps its old form for one minor (ADR-0066): a marker names
-   `since 0.<N>`, N is the package's minor or the next, so the release of the
-   minor after N cannot go out while the old name stands. */
+/* A renamed name keeps its old form until the rules of its version end it (`distRules.ts`). */
 const version = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
-const packageMinor = Number(/^0\.(\d+)\./.exec(version)?.[1]);
 for (const file of readdirSync("src", { recursive: true, encoding: "utf8" }).filter((f) => /\.(tsx?|css)$/.test(f))) {
   readFileSync(join("src", file), "utf8").split("\n").forEach((line, index) => {
-    if (!line.includes("@deprecated")) return;
-    const minor = /@deprecated since 0\.(\d+)\b/.exec(line)?.[1];
-    const at = `src/${file}:${index + 1}`;
-    if (minor === undefined) problems.push(`${at}: @deprecated names no "since 0.<N>"`);
-    else if (Number(minor) !== packageMinor && Number(minor) !== packageMinor + 1) {
-      problems.push(`${at}: deprecated since 0.${minor}, the package is ${version}; remove it`);
-    }
+    const problem = markerProblem(version, line);
+    if (problem) problems.push(`src/${file}:${index + 1}: ${problem}`);
   });
 }
 
@@ -302,11 +296,15 @@ try {
   rmSync(runnerRoot, { recursive: true, force: true });
 }
 
-/* The public packages release in step under one number, and each umriss peer is
-   written `workspace:^0.<minor>.0` of that number (pnpm packs `^0.<minor>.0`),
-   so a patch of the same minor is accepted and a minor release has to move it. */
+/* The public packages release in step under one number, and each umriss peer
+   follows it (`distRules.ts`). */
 {
-  const own = JSON.parse(readFileSync("package.json", "utf8")) as { version: string; peerDependencies?: Record<string, string> };
+  const own = JSON.parse(readFileSync("package.json", "utf8")) as {
+    version: string;
+    engines?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+  };
+  problems.push(...manifestProblems(own));
   const versions = readdirSync("..").flatMap((dir) => {
     try {
       const other = JSON.parse(readFileSync(join("..", dir, "package.json"), "utf8")) as { name: string; version: string; private?: boolean };
@@ -318,28 +316,11 @@ try {
   if (new Set(versions.map((line) => line.split(" ")[1])).size > 1) {
     problems.push(`the public packages carry more than one version:\n${versions.map((line) => `  ${line}`).join("\n")}`);
   }
-  const expected = `workspace:^0.${own.version.split(".")[1]}.0`;
-  for (const [peer, range] of Object.entries(own.peerDependencies ?? {})) {
-    if (peer.startsWith("@umriss-ui/") && range !== expected) problems.push(`peer ${peer} reads ${range}, expected ${expected}`);
-  }
+  problems.push(...peerProblems(own.version, own.peerDependencies));
 }
 
-/* The changelog's section of this version has its heading, and every top-level
-   entry under its `### Changed` carries a nested `Migration:` item with text
-   after it. Earlier sections predate the rule. */
-{
-  const version = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
-  const changelog = readFileSync("CHANGELOG.md", "utf8");
-  const start = changelog.indexOf(`\n## ${version} \u2013 `);
-  if (start < 0) problems.push(`CHANGELOG.md: no heading for ${version}`);
-  else {
-    const section = changelog.slice(start + 1).split(/\n## /)[0];
-    const changed = /\n### Changed\n([\s\S]*?)(?=\n### |$)/.exec(section)?.[1] ?? "";
-    for (const entry of changed.split(/\n(?=- )/).filter((text) => text.startsWith("- "))) {
-      if (!/^ {2}- Migration: *\S/m.test(entry)) problems.push(`CHANGELOG.md ${version}: the entry ${/\*\*[^*]+\*\*/.exec(entry)?.[0] ?? entry.slice(0, 60)} has no "Migration:" item`);
-    }
-  }
-}
+/* The changelog's section of this version follows the rules of `distRules.ts`. */
+problems.push(...changelogProblems(version, readFileSync("CHANGELOG.md", "utf8")));
 
 /* A calculation written in a Server Component, rendered the way React's Flight
    renderer does (`scripts/flight/`): the server half runs under the

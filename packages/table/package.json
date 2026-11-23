@@ -81,10 +81,13 @@
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts table.js table.css"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "peerDependencies": {
     "@umriss-ui/core": "workspace:^0.56.0",
-    "react": ">=19",
-    "react-dom": ">=19"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
     "@fontsource/geist-mono": "^5.3.0",

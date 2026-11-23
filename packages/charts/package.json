@@ -83,9 +83,12 @@
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
     "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts charts.js charts.css"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
     "@fontsource/geist-mono": "^5.3.0",
