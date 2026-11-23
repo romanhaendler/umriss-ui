@@ -31,6 +31,7 @@ import type { ColumnEntry, Registry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
 import { warnOnce } from "./dev";
+import { scrollToRow } from "./reach";
 import { lineIndex, placeOf } from "./model/gridWalk";
 import type { GridLine, GridPosition } from "./model/gridWalk";
 import { NEW_LINE, useGridState } from "./gridState";
@@ -249,7 +250,16 @@ export function GridFocus({
     /* The cell the focus stood in left the document - its row scrolled out of
        a virtual window, or was removed: the focus goes to the cell now at its
        place, in view, not to the body. */
-    if (grid.focus.lost() && document.activeElement === document.body) (stop ?? fallback)?.focus({ preventScroll: true });
+    if (grid.focus.lost() && document.activeElement === document.body) {
+      /* Its row is still among the lines but stands at another index: the
+         order changed under the focus. The focus follows the row by its key -
+         scrolled into view, the sticky head kept clear - not the cell now at
+         its old place. A row scrolled away stays at its index and is not chased. */
+      const now = active ? indexOf.get(active.line) : undefined;
+      const moved = now !== undefined && now !== active!.lineIndex ? lines[now]!.row : undefined;
+      if (moved !== undefined && registry.hook && scrollToRow(registry, registry.hook.rowKey(moved), active!.column)) return;
+      (stop ?? fallback)?.focus({ preventScroll: true });
+    }
   });
   return null;
 }

@@ -89,6 +89,40 @@ describe("Ctrl+Home deep in a virtual grid", () => {
   });
 });
 
+describe("A re-sort with the focus in a grid", () => {
+  const MANY = Array.from({ length: 1000 }, (_, i) => ({ id: String(i), tag: `M-${String(i).padStart(4, "0")}` }));
+  function Sortable({ rows, virtual }: { rows: typeof MANY; virtual: boolean }) {
+    const t = useTable(rows, { rowKey: (m) => m.id, virtual, defaultSort: { column: "tag", direction: "asc" } });
+    const { Table: Frame, Column } = t;
+    return (
+      <>
+        <button onClick={() => t.toggleSort("tag")}>flip</button>
+        <Frame grid maxHeight="100px">
+          <Column value="tag" label="Tag" rowHeader />
+        </Frame>
+      </>
+    );
+  }
+
+  it.each([true, false])("keeps the focus on the same row by its key, virtual %s", (virtual) => {
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
+    render(<Sortable rows={MANY} virtual={virtual} />);
+    act(() => cellOf("M-0003").focus());
+    act(() => screen.getByText("flip").click());
+    expect(active().textContent).toBe("M-0003");
+    expect(line()).toBe("row:3");
+  });
+
+  it("keeps the position where the row is no longer among the rows", () => {
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
+    const { rerender } = render(<Sortable rows={MANY} virtual />);
+    act(() => cellOf("M-0003").focus());
+    rerender(<Sortable rows={MANY.filter((m) => m.id !== "3")} virtual />);
+    expect(active()).not.toBe(document.body);
+    expect(line()).toBe("row:4");
+  });
+});
+
 describe("The column groups' row", () => {
   it("is reached by ArrowUp from the head and left by ArrowDown; its blank cells are no gridcells", () => {
     const { container } = render(<Editable rows={PUMPS} grouped />);
