@@ -7,13 +7,15 @@
          canvas.uc-layer-overlay  crosshair and hover markers
          .uc-axes                 axes, ticks, titles (HTML)
          .uc-tooltip              tooltip (HTML)
-       <Legend/>   optional, placed above or below the plot area through CSS order
+       <Legend/>   optional; before the plot in the DOM at the top or left, after it at the bottom or
+                   right, and CSS order draws it there
 
    Canvas access happens exclusively inside effects (SSR-safe).
    Accessibility baseline: role="img" + aria-label on the plot,
    canvas elements aria-hidden. */
 
 import {
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -60,7 +62,8 @@ export interface ChartProps extends Omit<HTMLAttributes<HTMLDivElement>, "childr
       (ADR-0050).
       @default fills the frame, at least 300 px */
   height?: number;
-  /** Outer spacing of the plot area in CSS pixels. */
+  /** Outer spacing of the plot area in CSS pixels.
+      @default 8 */
   padding?: number | Partial<Padding>;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
@@ -148,10 +151,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   } = props;
 
   const provided = useContext(ChartsWordingContext);
-  const wording = useMemo<ChartsWording>(
-    () => ({ ...DEFAULT_CHARTS_WORDING, ...provided, ...wordingProp }),
-    [provided, wordingProp],
-  );
+  const wording = useMemo<ChartsWording>(() => ({ ...DEFAULT_CHARTS_WORDING, ...provided, ...wordingProp }), [provided, wordingProp]);
   if (timeZone !== undefined) checkZone(timeZone);
   const empty = emptyProp ?? wording.empty;
 
@@ -189,10 +189,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   );
 
   if (label === undefined && labelledBy === undefined) {
-    warnOnce(
-      "chart-arialabel",
-      "Chart without aria-label - please set a meaningful description (R-7.6).",
-    );
+    warnOnce("chart-arialabel", "Chart without aria-label - please set a meaningful description (R-7.6).");
   }
 
   // DOM binding, ResizeObserver (coalesced onto a rAF in the scene), DPR.
@@ -311,7 +308,11 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     () => scene.getHoverSnapshot().tooltip !== null,
     () => false,
   );
-  const keyed = useSyncExternalStore(scene.subscribeLayout, () => hasHits || scene.keyed(), () => false);
+  const keyed = useSyncExternalStore(
+    scene.subscribeLayout,
+    () => hasHits || scene.keyed(),
+    () => false,
+  );
 
   /* Loading over a course keeps the course, stale - as laid out, so that
      the stale state ends with the frame that draws the answer. */
@@ -331,9 +332,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     width: width === "100%" ? "100%" : `${width}px`,
     // Without a number: 100% where the frame has a definite height, auto where
     // it has none, and the floor either way (ADR-0050).
-    ...(height === undefined
-      ? { height: "100%", minHeight: 300 }
-      : { height: `${height}px` }),
+    ...(height === undefined ? { height: "100%", minHeight: 300 } : { height: `${height}px` }),
     ...style,
   };
 
@@ -346,62 +345,64 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     scene.pointerMove(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
   };
 
+  // The legend stands in the DOM where it is drawn, so that Tab follows the picture. Keyed siblings, so that a change
+  // of side moves the nodes and remounts nothing; a chart without a legend keeps the children first.
+  const legendFirst = useLayoutPart(scene, (s) => s.legend === null || s.legend.placement === "top" || s.legend.placement === "left");
+  const kids = <Fragment key="children">{children}</Fragment>;
+  // The image is the plot area, not the root: the root contains the legend, and the descendants of an image are
+  // presentational to a screen reader. The legend stands beside it and stays reachable.
+  const plot = (
+    <div
+      key="plot"
+      ref={plotRef}
+      className="uc-plot"
+      role={keyed ? "application" : "img"}
+      aria-roledescription={keyed ? wording.roleDescription : undefined}
+      aria-label={label}
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy === undefined ? summaryId : `${summaryId} ${describedBy}`}
+      aria-busy={loading || undefined}
+      data-stale={stale || undefined}
+      data-arriving={arriving || undefined}
+      tabIndex={keyed ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (scene.key(e.nativeEvent)) e.preventDefault();
+      }}
+      onFocus={(e) => scene.focus(focusVisible(e.currentTarget))}
+      onBlur={() => scene.blur()}
+      onPointerMove={onPointerMove}
+      // A touch has no hover: the tap shows the tooltip, and the leave that
+      // follows every lifted finger would take it straight away again. A
+      // tap on empty plot ends it, as does one outside (the effect above).
+      onPointerDown={(e) => {
+        scene.pointerDown(e.nativeEvent);
+        onPointerMove(e);
+      }}
+      onPointerUp={(e) => scene.pointerUp(e.nativeEvent)}
+      onPointerCancel={(e) => scene.pointerUp(e.nativeEvent)}
+      onClick={(e) => scene.click(e.nativeEvent)}
+      onDoubleClick={() => scene.resetZoom()}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== "touch") scene.pointerLeave();
+      }}
+    >
+      <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
+      <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />
+      <AxesHtml scene={scene} empty={empty} silhouette={silhouette} />
+      <TooltipHtml scene={scene} />
+    </div>
+  );
+
   return (
     <ChartContext value={scene}>
-      <div
-        {...rest}
-        ref={setRoot}
-        className={className ? `uc-root ${className}` : "uc-root"}
-        style={containerStyle}
-      >
-        {/* The image is the plot area, not the root: the root contains the
-            legend, and the descendants of an image are presentational to a
-            screen reader. The legend stands beside it and stays reachable. */}
-        <div
-          ref={plotRef}
-          className="uc-plot"
-          role={keyed ? "application" : "img"}
-          aria-roledescription={keyed ? wording.roleDescription : undefined}
-          aria-label={label}
-          aria-labelledby={labelledBy}
-          aria-describedby={describedBy === undefined ? summaryId : `${summaryId} ${describedBy}`}
-          aria-busy={loading || undefined}
-          data-stale={stale || undefined}
-          data-arriving={arriving || undefined}
-          tabIndex={keyed ? 0 : undefined}
-          onKeyDown={(e) => {
-            if (scene.key(e.nativeEvent)) e.preventDefault();
-          }}
-          onFocus={(e) => scene.focus(focusVisible(e.currentTarget))}
-          onBlur={() => scene.blur()}
-          onPointerMove={onPointerMove}
-          // A touch has no hover: the tap shows the tooltip, and the leave that
-          // follows every lifted finger would take it straight away again. A
-          // tap on empty plot ends it, as does one outside (the effect above).
-          onPointerDown={(e) => {
-            scene.pointerDown(e.nativeEvent);
-            onPointerMove(e);
-          }}
-          onPointerUp={(e) => scene.pointerUp(e.nativeEvent)}
-          onPointerCancel={(e) => scene.pointerUp(e.nativeEvent)}
-          onClick={(e) => scene.click(e.nativeEvent)}
-          onDoubleClick={() => scene.resetZoom()}
-          onPointerLeave={(e) => {
-            if (e.pointerType !== "touch") scene.pointerLeave();
-          }}
-        >
-          <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
-          <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />
-          <AxesHtml scene={scene} empty={empty} silhouette={silhouette} />
-          <TooltipHtml scene={scene} />
-        </div>
+      <div {...rest} ref={setRoot} className={className ? `uc-root ${className}` : "uc-root"} style={containerStyle}>
+        {legendFirst ? [kids, plot] : [plot, kids]}
         <ShowAll scene={scene} plotRef={plotRef} label={wording.showAll} />
         {/* What a screen reader hears: the readout after a
             key, and the summary the plot is described by. Beside the plot,
             not in it: an image's descendants are presentational. */}
         <div ref={readoutRef} className="uc-sr" aria-live="polite" />
         <div ref={summaryRef} id={summaryId} className="uc-sr" />
-        {children}
       </div>
     </ChartContext>
   );
@@ -469,12 +470,7 @@ function ShowAllButton(props: {
   }, [plotRef]);
 
   return (
-    <button
-      ref={ref}
-      type="button"
-      className={bottom ? "uc-show-all uc-show-all-bottom" : "uc-show-all"}
-      onClick={() => scene.resetZoom()}
-    >
+    <button ref={ref} type="button" className={bottom ? "uc-show-all uc-show-all-bottom" : "uc-show-all"} onClick={() => scene.resetZoom()}>
       {label}
     </button>
   );

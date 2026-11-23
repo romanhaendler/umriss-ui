@@ -52,6 +52,14 @@ async function render(props: Parameters<typeof Probe>[0]): Promise<HTMLElement> 
 }
 
 describe("A matrix' colour bar", () => {
+  it("stands before the plot in the DOM, so that Tab reaches it first", async () => {
+    const host = await render({});
+    const legend = host.querySelector(".uc-legend");
+    const plot = host.querySelector(".uc-plot");
+    expect(legend).not.toBeNull();
+    expect(legend!.compareDocumentPosition(plot!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("shows one box per step and the range's ends in the matrix' format", async () => {
     const host = await render({ coloring: gradient });
     expect(host.querySelectorAll(".uc-legend-step")).toHaveLength(9);

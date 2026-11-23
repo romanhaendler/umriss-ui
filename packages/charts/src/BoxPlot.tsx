@@ -64,7 +64,8 @@ export interface BoxPlotProps<T> {
       judgement, not the library's. */
   tone?: "ok" | "warning" | "alarm";
   /** Width as a fraction of the step, as a bar's: boxes and bars on one x axis
-      share this fraction and stand side by side. */
+      share this fraction and stand side by side.
+      @default 0.8 */
   boxWidth?: number;
 }
 

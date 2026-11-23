@@ -31,14 +31,16 @@ export interface LineProps<T> {
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
   tone?: "ok" | "warning" | "alarm";
-  /** Line width in CSS pixels. */
+  /** Line width in CSS pixels.
+      @default 1.5 */
   strokeWidth?: number;
   /** Dash pattern as a run of lengths in CSS pixels.
       @default a solid line */
   dash?: readonly number[];
   /** When the individual points are drawn as marks: `auto` every point up to
       60 points and above that only a point between two gaps - it has no line
-      to be seen by - `always`, or `never`, not even that one. */
+      to be seen by - `always`, or `never`, not even that one.
+      @default "auto" */
   markers?: "auto" | "always" | "never";
   /** Sample-and-hold: each value holds as a horizontal until the next sample
       and jumps there - a target, a digital signal. A gap ends the hold at

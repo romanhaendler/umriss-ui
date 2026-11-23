@@ -49,10 +49,12 @@ export interface AreaProps<T> {
       `tickFormat`. The total stays the readings' own sum, written in the
       series' `format`. */
   normalize?: boolean;
-  /** Opacity of the fill, from 0 to 1; the outline stays fully opaque. */
+  /** Opacity of the fill, from 0 to 1; the outline stays fully opaque.
+      @default 0.18 */
   fillOpacity?: number;
   /** Width of the outline along the upper edge in CSS pixels; 0 leaves it
-      out. */
+      out.
+      @default 1.5 */
   strokeWidth?: number;
   /** Dash pattern of the outline as a run of lengths in CSS pixels. The fill
       stays whole.

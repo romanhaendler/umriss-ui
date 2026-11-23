@@ -12,8 +12,6 @@ import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 
 interface CommonProps {
-  /** Axis id, through which series bind themselves. */
-  id?: string;
   /** Axis title. */
   label?: string;
   /** Target value; the 1-2-5 algorithm may deviate. */
@@ -47,6 +45,9 @@ interface CommonProps {
 
 /** The props of `XAxis`. */
 export interface XAxisProps<T> extends CommonProps {
+  /** Axis id, through which series bind themselves.
+      @default "x" */
+  id?: string;
   /** Where a row lies on this axis: a field of the row, compared by its
       name, or a function of it, compared by its source text as a series' is
       (`ValueFunction`) - with the same closure limit. A number is a position,
@@ -63,10 +64,12 @@ export interface XAxisProps<T> extends CommonProps {
       longer -, `"data"` keeps it, a pair is fixed: numbers, on a time axis
       milliseconds or two `Date`s, on a category axis places. On a `zoomable`
       axis it is the start: what the axis shows while the chart's view names
-      no span for it. */
+      no span for it.
+      @default "nice" */
   domain?: "nice" | "data" | readonly [number, number] | readonly [Date, Date];
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
-      a series counts in a unit of its own. */
+      a series counts in a unit of its own.
+      @default "bottom" */
   position?: "bottom" | "top";
   /** The values are instants: milliseconds since the epoch, or with `time`
       said ISO 8601 strings as an API sends them, read by the platform's rule -
@@ -105,10 +108,14 @@ export interface XAxisProps<T> extends CommonProps {
     its rows from a string or a `StateBand` names its `lane`; the first stands
     at the top (ADR-0052). */
 export interface YAxisProps extends CommonProps {
+  /** Axis id, through which series bind themselves.
+      @default "y" */
+  id?: string;
   /** As on the x axis, and `"visible"`: what the series show inside their x
       axis' domain - a zoomed hour gets the hour's range, not the week's -,
       widened to ticks as `"nice"` is. Where the x domain is not fixed that is
-      every point. */
+      every point.
+      @default "nice" */
   domain?: "nice" | "data" | "visible" | readonly [number, number];
   /** On a further y axis: take the first y axis' tick count and widen this
       axis' domain until its ticks fall on that one's grid lines, the steps
@@ -116,7 +123,8 @@ export interface YAxisProps extends CommonProps {
       the first y axis it changes nothing. */
   alignTicks?: boolean;
   /** Which edge the axis stands at. Several y axes per side are stacked
-      outwards, so that extents of clearly different magnitude stay readable. */
+      outwards, so that extents of clearly different magnitude stay readable.
+      @default "left" */
   position?: "left" | "right";
 }
 

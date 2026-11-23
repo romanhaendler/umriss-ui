@@ -83,7 +83,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    /* The legend stands after the plot in the DOM and above it by `order`: Tab follows what the eye sees. */
+    /* The legend stands before the plot in the DOM at the top or left and after it at the bottom or right, and `order`
+       draws it there: Tab follows what the eye sees. */
     reading-flow: flex-visual;
     font-family: var(--uc-font);
     color: var(--uc-color-text);

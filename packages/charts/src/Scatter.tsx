@@ -35,7 +35,8 @@ export interface ScatterProps<T> {
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
   tone?: "ok" | "warning" | "alarm";
-  /** Point radius in CSS pixels. */
+  /** Point radius in CSS pixels.
+      @default 3 */
   radius?: number;
 }
 

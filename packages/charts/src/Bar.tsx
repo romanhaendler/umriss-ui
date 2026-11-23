@@ -54,8 +54,9 @@ export interface BarProps<T> {
       `tickFormat`. The total stays the readings' own sum, written in the
       series' `format`. */
   normalize?: boolean;
-  /** Width as a fraction of the step; just under 1, so that neighbours do not
-      touch. Several bar series share this fraction. */
+  /** Width as a fraction of the step; the rest is the gap between neighbours.
+      Several bar series share this fraction.
+      @default 0.8 */
   barWidth?: number;
 }
 

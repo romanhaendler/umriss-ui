@@ -77,3 +77,40 @@ describe("A side legend", () => {
     expect(legend(host).className).toBe("uc-legend uc-legend-top");
   });
 });
+
+describe("The legend's place in the DOM", () => {
+  const placements = ["top", "left", "bottom", "right"] as const;
+
+  function Placed({ placement }: { placement: (typeof placements)[number] }) {
+    const { Chart, XAxis, YAxis, Line } = useChart(data);
+    return (
+      <Chart aria-label="Placed legend" height={200}>
+        <XAxis value="t" />
+        <YAxis />
+        <Line value="a" name="A" />
+        <Legend placement={placement} />
+      </Chart>
+    );
+  }
+
+  const before = (host: HTMLElement) => !!(legend(host).compareDocumentPosition(host.querySelector(".uc-plot")!) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  it.each(placements)("follows where a legend at the %s is drawn", async (placement) => {
+    chartOf(600);
+    const r = await renderChart(<Placed placement={placement} />);
+    unmount = r.unmount;
+    expect(before(r.host)).toBe(placement === "top" || placement === "left");
+  });
+
+  it("moves the legend's nodes when the side changes, and mounts none again", async () => {
+    chartOf(600);
+    const r = await renderChart(<Placed placement="top" />);
+    unmount = r.unmount;
+    const button = r.host.querySelector(".uc-legend button");
+    expect(button).not.toBeNull();
+    await r.rerender(<Placed placement="bottom" />);
+    expect(r.host.querySelector(".uc-legend button")).toBe(button);
+    expect(before(r.host)).toBe(false);
+    expect(r.host.querySelectorAll(".uc-legend")).toHaveLength(1);
+  });
+});
