@@ -23,6 +23,7 @@ export {
   DEFAULT_ORDER,
   /* New exports stand at the end (CONTRIBUTING.md). */
   availabilityAt,
+  lifecycleAt,
   isHidden,
   snooze,
   unsnooze,

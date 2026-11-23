@@ -9,9 +9,10 @@ import styles from "./PriorityMark.module.css";
 export interface PriorityMarkProps extends Omit<ComponentPropsWithRef<"span">, "children"> {
   /** The level, as a shape and its number: 1 a diamond, 2 a triangle, 3 a square, 4 a circle. */
   priority: Priority;
-  /** The alarm's lifecycle as the list knows it. The mark of an active, unacknowledged alarm in service flashes at 1 Hz (umriss's choice; no source gives a rate); under reduced motion it carries a steady ring instead. */
+  /** The alarm's lifecycle as the list knows it. The mark of an active, unacknowledged alarm in service flashes at 1 Hz (umriss's choice; no source gives a rate); under reduced motion it carries a steady ring instead. Without it the mark does not flash. */
   lifecycle?: LifecycleState;
-  /** Whether the alarm is in service (the default). Any other availability draws the mark in the neutral tone and keeps its number. */
+  /** Any availability but in service draws the mark in the neutral tone and keeps its number.
+   * @default "in-service" */
   availability?: Availability;
 }
 

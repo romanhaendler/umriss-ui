@@ -9,7 +9,7 @@
     gap: var(--u-space-2) var(--u-space-3);
     min-width: 0;
     padding: var(--u-space-2) var(--u-space-3);
-    border: 1px solid var(--u-color-border);
+    border: 1px solid var(--u-edge-color);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
     color: var(--u-color-text);

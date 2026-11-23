@@ -220,7 +220,7 @@ export interface ReturnBand {
   /** The bound that triggered the alarm. Stands here so that the condition is
       described completely in one place - for the decision about resolving it is
       expressly not read. */
-  limit: number;
+  limit?: number;
   /** The value the reading must come back past before the alarm resolves. */
   returnTo: number;
 }

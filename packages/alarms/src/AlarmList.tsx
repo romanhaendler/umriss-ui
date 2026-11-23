@@ -87,9 +87,8 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
       choice, so exactly one reason is reported. */
   snoozeReasons?: readonly string[];
   /** The durations on offer, in milliseconds. Which are permitted is the
-      application's rule, so there is no default list; empty or missing, there is no
-      snooze action.
-      @default no default */
+      application's rule; empty or missing, there is no snooze action.
+      @default none - the application names them */
   snoozeDurations?: readonly number[];
   /** Gets the ids whose snooze the operator wants to end early. Shown, beside
       "Acknowledge", only with this handler and a selection. */
@@ -100,7 +99,7 @@ export interface AlarmListProps extends Omit<ComponentPropsWithRef<"div">, "chil
       them the list shows no freshness – a time without a rule for when it is
       too old is no information. */
   freshness?: FreshnessAges;
-  /** "compact" reduces the row height for very dense views.
+  /** `"regular"` or `"compact"`; compact reduces the row height for very dense views.
       @default the density of the `UmrissProvider`, else `"compact"` */
   density?: "regular" | "compact";
   /** Height of the list's scroll area, e.g. `"480px"`: a list of hundreds of
