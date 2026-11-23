@@ -3,6 +3,7 @@
 export type { ScheduleProps } from "./Schedule";
 export type { LaneProps, SubtasksProps, DependenciesProps } from "./parts";
 export type { ScheduleHit, ScheduleInteraction } from "./scene";
+export type { SubtaskPart } from "./sceneView";
 
 /* The pure modules: the arithmetic a caller runs over its own data - the
    findings as data, and the cascade the schedule never applies itself. */

@@ -82,7 +82,8 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   headerWidth?: number;
   /** A working calendar: the intervals in which time counts. Nights and
       weekends outside them are cut out of the axis. Without intervals every
-      hour counts, as on the wall clock.
+      hour counts, as on the wall clock. Its type, `CalendarInput`, and
+      `workingCalendar`, which builds one, come from `@umriss-ui/charts`.
       @default [] */
   calendar?: CalendarInput;
   /** The narrowest and widest time span zoom may reach, in milliseconds.
@@ -157,7 +158,7 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
       would say nothing; a bar that began before the view keeps its text at the
       view's edge. */
   label?: (subtask: Subtask) => string;
-  /** The tooltip on a hovered subtask or dependency: its order, its times, its
+  /** The tooltip on a hovered subtask, milestone or dependency: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
   tooltip?: false | ((target: ScheduleTooltipTarget) => ReactNode);
@@ -173,8 +174,9 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
       meanwhile.
       @default false */
   loading?: boolean;
-  /** `Lane`, `Dependencies` and `Subtasks`, in the order they are to stand and
-      be drawn. */
+  /** `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`,
+      `Milestones` and `DataTable`, in the order they are to stand and be
+      drawn. */
   children?: ReactNode;
 }
 

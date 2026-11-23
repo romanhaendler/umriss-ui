@@ -32,9 +32,13 @@ import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, TICK_SPACING, wallClockWithin, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
+/** The three parts of a subtask's bar: the lead-in before the main time, the
+    main time, and the lead-out after it. */
+export type SubtaskPart = "leadIn" | "main" | "leadOut";
+
 /** What a pointer is on. */
 export type ScheduleHit =
-  | { readonly kind: "subtask"; readonly subtask: Subtask; readonly part: "leadIn" | "main" | "leadOut" }
+  | { readonly kind: "subtask"; readonly subtask: Subtask; readonly part: SubtaskPart }
   | { readonly kind: "dependency"; readonly dependency: Dependency }
   | { readonly kind: "milestone"; readonly milestone: Milestone }
   | { readonly kind: "lane"; readonly lane: string }

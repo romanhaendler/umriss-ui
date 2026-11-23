@@ -257,7 +257,7 @@ export class SceneData {
   }
 }
 
-/** What a tooltip is about: the hovered subtask or dependency, with what the
+/** What a tooltip is about: the hovered subtask, milestone or dependency, with what the
     schedule knows about it. */
 export type ScheduleTooltipTarget =
   | {

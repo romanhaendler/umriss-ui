@@ -22,6 +22,7 @@ import {
   toWorkingTimeClamped,
   toWallClock,
   type CalendarInput,
+  type ZoomLimits,
   type WorkingTimeTick,
 } from "@umriss-ui/charts";
 
@@ -128,11 +129,8 @@ export function timeText(formats: Formats, instant: number): string {
     : text;
 }
 
-/** The narrowest and the widest span zoom may reach. */
-export interface ZoomLimits {
-  readonly min: number;
-  readonly max: number;
-}
+/* The charts' type: one declaration for both packages. */
+export type { ZoomLimits };
 
 /** Zoom by `factor` (below 1 is closer) around `anchor`, which keeps its place;
     the span stays within the limits. */
