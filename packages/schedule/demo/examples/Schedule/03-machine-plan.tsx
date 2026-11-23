@@ -55,20 +55,20 @@ const STEPS: readonly Subtask[] = [
 ];
 
 const MOVES: readonly Dependency[] = [
-  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", lag: min(10) },
-  { id: "t-2041-2", from: "a-2041-2", to: "a-2041-3", lag: min(20) },
-  { id: "t-2042-1", from: "a-2042-1", to: "a-2042-2", lag: min(15) },
-  { id: "t-2042-2", from: "a-2042-2", to: "a-2042-3", lag: min(30), leaves: "main" },
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
+  { id: "t-2041-1", predecessor: "a-2041-1", successor: "a-2041-2", lag: min(10) },
+  { id: "t-2041-2", predecessor: "a-2041-2", successor: "a-2041-3", lag: min(20) },
+  { id: "t-2042-1", predecessor: "a-2042-1", successor: "a-2042-2", lag: min(15) },
+  { id: "t-2042-2", predecessor: "a-2042-2", successor: "a-2042-3", lag: min(30), leaves: "main" },
+  { id: "t-2043-1", predecessor: "a-2043-1", successor: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has 10 minutes to reach the paint shop's
      lead-in at 11:40 - it takes 25: a violated dependency, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
-  { id: "t-2044-1", from: "a-2044-1", to: "a-2044-2", lag: min(20) },
-  { id: "t-2044-2", from: "a-2044-2", to: "a-2044-3", lag: min(60), arrives: "main" },
-  { id: "t-2045-1", from: "a-2045-1", to: "a-2045-2", lag: min(15) },
-  { id: "t-2045-2", from: "a-2045-2", to: "a-2045-3", lag: min(15) },
-  { id: "t-2046-1", from: "a-2046-1", to: "a-2046-2", lag: min(20) },
-  { id: "t-2046-2", from: "a-2046-2", to: "a-2046-3", lag: min(10), leaves: "main" },
+  { id: "t-2043-2", predecessor: "a-2043-2", successor: "a-2043-3", lag: min(25) },
+  { id: "t-2044-1", predecessor: "a-2044-1", successor: "a-2044-2", lag: min(20) },
+  { id: "t-2044-2", predecessor: "a-2044-2", successor: "a-2044-3", lag: min(60), arrives: "main" },
+  { id: "t-2045-1", predecessor: "a-2045-1", successor: "a-2045-2", lag: min(15) },
+  { id: "t-2045-2", predecessor: "a-2045-2", successor: "a-2045-3", lag: min(15) },
+  { id: "t-2046-1", predecessor: "a-2046-1", successor: "a-2046-2", lag: min(20) },
+  { id: "t-2046-2", predecessor: "a-2046-2", successor: "a-2046-3", lag: min(10), leaves: "main" },
 ];
 
 export const title = "Plan a day in the machine shop";
@@ -85,7 +85,7 @@ export default function MachinePlan() {
       aria-label="Machine shop, Tuesday 17 March"
       height={380}
       now={HALF_PAST_TEN}
-      label={(step) => NAMES.get(step.task) ?? step.task}
+      barLabel={(step) => NAMES.get(step.task) ?? step.task}
     >
       {STATIONS.map((station) => (
         <Lane key={station.id} id={station.id} label={station.label} />

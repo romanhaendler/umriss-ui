@@ -117,9 +117,9 @@ describe("a step", () => {
 describe("along a dependency", () => {
   const byId = new Map(WORK.map((x) => [x.id, x] as const));
   const T: Dependency[] = [
-    { id: "t1", from: "a2", to: "c1", lag: H },
-    { id: "t2", from: "c1", to: "a3", lag: H },
-    { id: "dangling", from: "c2", to: "nowhere", lag: H },
+    { id: "t1", predecessor: "a2", successor: "c1", lag: H },
+    { id: "t2", predecessor: "c1", successor: "a3", lag: H },
+    { id: "dangling", predecessor: "c2", successor: "nowhere", lag: H },
   ];
   const at = (kind: "subtask" | "dependency", id: string) => ({ kind, id });
 

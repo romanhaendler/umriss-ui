@@ -50,7 +50,7 @@ function plan({ lanes, subtasks }: { lanes: number; subtasks: number }): Plan {
     const lane = 1 + (j % others);
     const from = T0 + Math.floor(j / others) * 30 * MINUTE;
     work.push({ id: `s-${j}`, task: `task-${lane}`, lane: `lane-${lane}`, from, to: from + 20 * MINUTE, name: `Work ${j}` });
-    if (j >= others) dependencies.push({ id: `d-${j}`, from: `s-${j - others}`, to: `s-${j}`, lag: 0 });
+    if (j >= others) dependencies.push({ id: `d-${j}`, predecessor: `s-${j - others}`, successor: `s-${j}`, lag: 0 });
   }
   return { lanes: laneIds, tasks, subtasks: work, dependencies };
 }

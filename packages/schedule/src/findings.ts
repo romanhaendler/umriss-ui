@@ -11,7 +11,7 @@
    holds subtasks, not a measurement series, and this runs when the data
    changes, not per frame. */
 
-import { arrival, departure, occupied, type BlockedTime, type Subtask, type Dependency } from "./model";
+import { arrival, departure, occupied, predecessorOf, successorOf, type BlockedTime, type Subtask, type Dependency } from "./model";
 
 /** Two subtasks covering the same time on one lane. */
 export interface Overlap {
@@ -115,8 +115,8 @@ export function violatedDependencies(subtasks: readonly Subtask[], dependencies:
   const byId = new Map(subtasks.map((s) => [s.id, s] as const));
   const found: ViolatedDependency[] = [];
   for (const dependency of dependencies) {
-    const from = byId.get(dependency.from);
-    const to = byId.get(dependency.to);
+    const from = byId.get(predecessorOf(dependency));
+    const to = byId.get(successorOf(dependency));
     if (from === undefined || to === undefined) continue;
     const leaves = departure(dependency, from);
     const arrives = arrival(dependency, to);

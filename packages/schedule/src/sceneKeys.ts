@@ -9,7 +9,7 @@
 
 import { MINUTE } from "@umriss-ui/charts";
 import { milestoneMark, slotAt } from "./geometry";
-import type { Intent } from "./model";
+import { predecessorOf, successorOf, type Dependency, type Intent } from "./model";
 import { entersBlockedTime } from "./refusal";
 import type { SceneData, ScheduleTooltipTarget } from "./sceneData";
 import type { SceneGestures, SceneHandlers } from "./sceneGestures";
@@ -19,6 +19,9 @@ import { alongDependency, stepSubtask, walkRows, type Active, type WalkMove, typ
 /** A milestone in the walk's shape. The key keeps its id apart from every
     subtask's, whatever the caller named them. */
 const MILESTONE = "\u0000milestone:";
+
+/** The subtask a dependency leaves, or null where there is none. */
+const predecessorId = (dependency: Dependency | undefined): string | null => (dependency === undefined ? null : predecessorOf(dependency));
 
 /** The readout waits for the keys to rest this long - the charts' pause: a
     held key speaks where it stops, not at every step on the way. */
@@ -59,6 +62,8 @@ export interface KeyHost {
 /** What the live region reads: the target and the lane it stands on. */
 export interface Spoken {
   readonly target: ScheduleTooltipTarget | null;
+  /** Set where a key was refused: blocked time is the only reason. */
+  readonly refused?: boolean;
   /** Set where a zoom key spoke: the span in view, two wall-clock instants,
       and no target. */
   readonly span?: readonly [number, number];
@@ -156,7 +161,7 @@ export class SceneKeys {
           ? at.id
           : at.kind === "milestone"
             ? MILESTONE + at.id
-            : (data.dependencies.find((t) => t.id === at.id)?.from ?? null);
+            : (predecessorId(data.dependencies.find((t) => t.id === at.id)));
     /* The milestones stand in the walk beside the work, by their time. */
     const stops: Walked[] = [...data.subtasks, ...data.milestones.map((m) => ({ id: MILESTONE + m.id, lane: m.lane, from: m.at, to: m.at }))];
     let rows = walkRows(view.rows, stops);
@@ -183,10 +188,12 @@ export class SceneKeys {
   }
 
   /** Alt+←/→ proposes a move by one step of the raster, Alt+Shift+←/→ a new
-      end, Alt+↑/↓ a change to the lane above or below - the intents a drag
+      end, Alt+↑/↓ a change to the lane above or below, Alt+I and Alt+O a longer
+      lead-in and lead-out (Shift: shorter) - the intents a drag
       reports (ADR-0023), and only where the caller handles them. Nothing is
       applied here. */
   private edit(event: KeyboardEvent): boolean {
+    if (event.code === "KeyI" || event.code === "KeyO") return this.lead(event.code === "KeyI" ? "leadIn" : "leadOut", event);
     const hover = this.host.gestures.hover;
     const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     const vertical = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
@@ -238,6 +245,35 @@ export class SceneKeys {
     if (intent !== null) this.host.handlers().onIntent?.(intent);
     /* The caller applies it, or not; either way the readout says what stands. */
     this.scheduleReadout();
+    return true;
+  }
+
+  /** Alt+I lengthens the lead-in by one step of the raster, Alt+O the lead-out;
+      with Shift they shorten it, never below nothing. The physical key is read
+      (`code`), because Option+I on a Mac types another character. The intent is
+      the drag's, and where the longer part would run into blocked time it is
+      refused and the live region says so. */
+  private lead(side: "leadIn" | "leadOut", event: KeyboardEvent): boolean {
+    const gestures = this.host.gestures;
+    const hover = gestures.hover;
+    /* The key is the plot's even where it proposes nothing. */
+    if (gestures.loading || hover.kind !== "subtask" || !this.host.view.options.intents.includes(side)) return true;
+    const s = hover.subtask;
+    const raster = gestures.snapStep();
+    const step = raster.step > 0 ? raster : { step: this.host.view.step(), offset: 0 };
+    const longer = event.shiftKey ? -1 : 1;
+    const before = side === "leadIn" ? s.leadIn ?? 0 : s.leadOut ?? 0;
+    const at =
+      side === "leadIn"
+        ? gestures.shifted(s.from - before, -longer * step.step, step)
+        : gestures.shifted(s.to + before, longer * step.step, step);
+    const length = Math.max(0, side === "leadIn" ? s.from - at : at - s.to);
+    const refused = length !== before && entersBlockedTime({ ...s, [side]: length }, s, this.host.data.blocked);
+    gestures.byKeyboard = true;
+    if (length !== before && !refused) {
+      this.host.handlers().onIntent?.(side === "leadIn" ? { kind: "leadIn", subtask: s.id, leadIn: length } : { kind: "leadOut", subtask: s.id, leadOut: length });
+    }
+    this.scheduleReadout(refused);
     return true;
   }
 
@@ -294,8 +330,8 @@ export class SceneKeys {
       return mark === null ? null : { x0: mark.x - mark.half, x1: mark.x + mark.half, y0: mark.y - mark.half, y1: mark.y + mark.half };
     }
     const dependency = this.host.data.dependencies.find((t) => t.id === at.id);
-    const from = dependency === undefined ? undefined : box(dependency.from);
-    const to = dependency === undefined ? undefined : box(dependency.to);
+    const from = dependency === undefined ? undefined : box(predecessorOf(dependency));
+    const to = dependency === undefined ? undefined : box(successorOf(dependency));
     if (from === undefined || to === undefined) return null;
     return {
       x0: Math.min(from.mainTo, to.mainFrom),
@@ -331,7 +367,7 @@ export class SceneKeys {
 
   /** The readout, written once the keys rest - and only while they still hold
       the hover: a pointer that took it over in the pause is not spoken for. */
-  private scheduleReadout(): void {
+  private scheduleReadout(refused = false): void {
     if (this.timer !== null) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.timer = null;
@@ -339,7 +375,7 @@ export class SceneKeys {
       if (!this.host.gestures.byKeyboard) return;
       const target = this.host.data.tooltipTargetFor(hover);
       if (target === null) return;
-      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1 };
+      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1, refused };
       this.host.spokenChanged();
     }, READOUT_REST);
   }

@@ -203,7 +203,7 @@ export default function SprintAroundLeave() {
           intents={["move", "lane"]}
           canMoveTo={(item, lane) => teamOf(item.lane) === teamOf(lane)}
           onIntent={onIntent}
-          label={(item) => item.name ?? ""}
+          barLabel={(item) => item.name ?? ""}
         >
           {(["Web", "Apps"] as const).map((team) => (
             <LaneGroup key={team} id={team} label={`${team} team`}>

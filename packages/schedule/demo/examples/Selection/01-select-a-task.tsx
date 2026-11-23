@@ -21,9 +21,9 @@ const LEGS: readonly Subtask[] = [
 ];
 
 const TRANSFERS: readonly Dependency[] = [
-  { id: "t-2041", from: "c-2041-1", to: "c-2041-2", lag: 20 * 60_000 },
-  { id: "t-2041-b", from: "c-2041-2", to: "c-2041-3", lag: 20 * 60_000 },
-  { id: "t-2042", from: "c-2042-1", to: "c-2042-2", lag: 20 * 60_000 },
+  { id: "t-2041", predecessor: "c-2041-1", successor: "c-2041-2", lag: 20 * 60_000 },
+  { id: "t-2041-b", predecessor: "c-2041-2", successor: "c-2041-3", lag: 20 * 60_000 },
+  { id: "t-2042", predecessor: "c-2042-1", successor: "c-2042-2", lag: 20 * 60_000 },
 ];
 
 export default function SelectATask() {

@@ -14,10 +14,10 @@ function subtask(id: string, from: number, to: number, extra: Partial<Subtask> =
   return { id, task: "t", lane: id, from: at(from), to: at(to), ...extra };
 }
 
-const link = (id: string, from: string, to: string, lag: number): Dependency => ({
+const link = (id: string, predecessor: string, successor: string, lag: number): Dependency => ({
   id,
-  from,
-  to,
+  predecessor,
+  successor,
   lag: lag * MIN,
 });
 

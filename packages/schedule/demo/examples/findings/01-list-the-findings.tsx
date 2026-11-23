@@ -21,7 +21,7 @@ const WORK: readonly Subtask[] = [
 ];
 
 /* The build may start only a morning after the design is done. */
-const HANDOVERS: readonly Dependency[] = [{ id: "design-to-build", from: "design", to: "build", lag: 4 * 60 * 60_000 }];
+const HANDOVERS: readonly Dependency[] = [{ id: "design-to-build", predecessor: "design", successor: "build", lag: 4 * 60 * 60_000 }];
 
 const LEAVE: readonly BlockedTime[] = [{ id: "arjun-holiday", lane: "arjun", from: day(18, 0), to: day(21, 0), label: "Holiday" }];
 

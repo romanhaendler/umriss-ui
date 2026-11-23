@@ -37,12 +37,12 @@ const LEGS: readonly Subtask[] = [
 ];
 
 const HANDOVERS: readonly Dependency[] = [
-  { id: "h-01-1", from: "t-01-1", to: "t-01-2", lag: min(10) },
-  { id: "h-03-1", from: "t-03-1", to: "t-03-2", lag: min(45) },
-  { id: "h-04-2", from: "t-04-2", to: "t-04-3", lag: min(60), arrives: "main" },
+  { id: "h-01-1", predecessor: "t-01-1", successor: "t-01-2", lag: min(10) },
+  { id: "h-03-1", predecessor: "t-03-1", successor: "t-03-2", lag: min(45) },
+  { id: "h-04-2", predecessor: "t-04-2", successor: "t-04-3", lag: min(60), arrives: "main" },
   /* Leaves the van at 11:30 and has ten minutes to reach the e-van's loading
      at 11:40 - the transfer takes twenty-five. */
-  { id: "h-03-2", from: "t-03-2", to: "t-03-3", lag: min(25) },
+  { id: "h-03-2", predecessor: "t-03-2", successor: "t-03-3", lag: min(25) },
 ];
 
 export default function FirstSchedule() {

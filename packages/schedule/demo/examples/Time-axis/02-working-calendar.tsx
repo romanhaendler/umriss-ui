@@ -22,8 +22,8 @@ const LEGS: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "unload", from: "line-haul", to: "round", lag: 20 * 60_000 },
-  { id: "collect", from: "round", to: "returns", lag: 45 * 60_000 },
+  { id: "unload", predecessor: "line-haul", successor: "round", lag: 20 * 60_000 },
+  { id: "collect", predecessor: "round", successor: "returns", lag: 45 * 60_000 },
 ];
 
 export default function WorkingCalendar() {

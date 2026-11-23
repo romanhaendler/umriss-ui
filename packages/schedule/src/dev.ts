@@ -21,3 +21,7 @@ export const DEV: boolean = detectDev();
 const PACKAGE = "@umriss-ui/schedule";
 
 export const warnOnce = (reason: string, message: string): void => warnOnceFor(PACKAGE, reason, message);
+
+/** The one wording of a renamed name that still works. */
+export const warnDeprecated = (old: string, replacement: string): void =>
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);

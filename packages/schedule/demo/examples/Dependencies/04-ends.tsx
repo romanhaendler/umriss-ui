@@ -4,7 +4,7 @@ import type { Subtask, Task, Dependency, DependencyEnds } from "../../../src";
 
 export const title = "Mark the ends with a dot";
 
-export const lead = "`ends=\"dot\"` marks where each line is anchored, a help while reading; `\"none\"` keeps a plan of many short handovers quiet.";
+export const lead = "`endMarks=\"dot\"` marks where each line is anchored, a help while reading; `\"none\"` keeps a plan of many short handovers quiet.";
 
 /* Picture only, like `route` and `attach`; a single dependency may say
    otherwise for itself. */
@@ -21,8 +21,8 @@ const WORK: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "to-build", from: "design", to: "build", lag: min(15) },
-  { id: "to-test", from: "build", to: "test", lag: min(15) },
+  { id: "to-build", predecessor: "design", successor: "build", lag: min(15) },
+  { id: "to-test", predecessor: "build", successor: "test", lag: min(15) },
 ];
 
 function Variant({ ends }: { ends: DependencyEnds }) {
@@ -30,9 +30,9 @@ function Variant({ ends }: { ends: DependencyEnds }) {
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
-        ends=&quot;{ends}&quot;
+        endMarks=&quot;{ends}&quot;
       </Text>
-      <Schedule aria-label={`Design, build and test, ends ${ends}`} height={188} attach="nearest" ends={ends}>
+      <Schedule aria-label={`Design, build and test, ends ${ends}`} height={188} attach="nearest" endMarks={ends}>
         <Lane id="noah" label="Noah Fischer" />
         <Lane id="arjun" label="Arjun Mehta" />
         <Lane id="eva" label="Eva Novak" />

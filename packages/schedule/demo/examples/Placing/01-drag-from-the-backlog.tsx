@@ -28,7 +28,7 @@ const TODAY: readonly Subtask[] = [
   { id: "w-108", task: "portal", lane: "eva", from: at(11, 30), to: at(12, 15), name: "Test plan for sign-in" },
 ];
 
-const HANDOVERS: readonly Dependency[] = [{ id: "h-101", from: "w-101", to: "w-108", lag: 20 * 60_000 }];
+const HANDOVERS: readonly Dependency[] = [{ id: "h-101", predecessor: "w-101", successor: "w-108", lag: 20 * 60_000 }];
 
 /* The backlog: what the drag carries, and a label for the list. */
 const BACKLOG: readonly (PlacingItem & { label: string })[] = [

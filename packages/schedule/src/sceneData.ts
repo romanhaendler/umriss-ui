@@ -8,7 +8,7 @@
 
 import type { ReactNode } from "react";
 import { inBlockedTime, violatedDependencies, overlapDepth, overlaps, type InBlockedTime, type ViolatedDependency, type Overlap } from "./findings";
-import type { BlockedTime, Milestone, Subtask, Task, Dependency } from "./model";
+import { predecessorOf, successorOf, type BlockedTime, type Milestone, type Subtask, type Task, type Dependency } from "./model";
 import { DEV, warnOnce } from "./dev";
 import type { ScheduleHit } from "./sceneView";
 
@@ -205,7 +205,7 @@ export class SceneData {
           warnOnce(`task:${s.id}`, `subtask "${s.id}" names the task "${s.task}", which is not among the tasks of its Subtasks layer; it is drawn muted. Add the task, or correct the subtask's task.`);
     }
     for (const d of this.dependencies)
-      for (const end of [d.from, d.to])
+      for (const end of [predecessorOf(d), successorOf(d)])
         if (!this.subtaskById.has(end)) warnOnce(`end:${d.id}:${end}`, `dependency "${d.id}" names the subtask "${end}", and no subtask has that id; the dependency is left out.`);
     if (this.lanes.length === 0) return;
     const declared = new Set(this.lanes.map((l) => l.id));
@@ -220,7 +220,7 @@ export class SceneData {
 
   /** The task a dependency belongs to: its departing subtask's. */
   taskOfDependency(dependency: Dependency): string | null {
-    return this.subtaskById.get(dependency.from)?.task ?? null;
+    return this.subtaskById.get(predecessorOf(dependency))?.task ?? null;
   }
 
   /** What a tooltip is about: the hovered subtask or dependency with what this
@@ -233,7 +233,7 @@ export class SceneData {
         .map((o) => this.subtaskById.get(o.first === id ? o.second : o.first))
         .filter((s): s is Subtask => s !== undefined);
       const violatedDependencies = this.dependencies
-        .filter((t) => t.from === id || t.to === id)
+        .filter((t) => predecessorOf(t) === id || successorOf(t) === id)
         .map((t) => this.violatedById.get(t.id))
         .filter((l): l is ViolatedDependency => l !== undefined);
       const blocked = this.inBlocked
@@ -250,8 +250,8 @@ export class SceneData {
       kind: "dependency",
       dependency,
       task: task !== null ? this.tasks.get(task) : undefined,
-      from: this.subtaskById.get(dependency.from),
-      to: this.subtaskById.get(dependency.to),
+      from: this.subtaskById.get(predecessorOf(dependency)),
+      to: this.subtaskById.get(successorOf(dependency)),
       violated: this.violatedById.get(dependency.id),
     };
   }

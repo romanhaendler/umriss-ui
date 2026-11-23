@@ -130,7 +130,7 @@ describe("what a planner reads", () => {
   it("reads a dependency without lag without '0 min'", () => {
     const target: ScheduleTooltipTarget = {
       kind: "dependency",
-      dependency: { id: "d", from: "a", to: "b", lag: 0 },
+      dependency: { id: "d", predecessor: "a", successor: "b", lag: 0 },
       task: undefined,
       from: undefined,
       to: undefined,

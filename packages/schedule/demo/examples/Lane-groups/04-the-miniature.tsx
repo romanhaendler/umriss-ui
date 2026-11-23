@@ -35,9 +35,9 @@ const LEGS: Subtask[] = [
 
 const HANDOVERS: Dependency[] = [
   /* Out of the truck, outside the depot group, into a van inside it. */
-  { id: "h-1", from: "t-01-1", to: "t-01-2", lag: min(20) },
-  { id: "h-2", from: "t-03-1", to: "t-03-2", lag: min(30) },
-  { id: "h-3", from: "t-03-2", to: "t-03-3", lag: min(20) },
+  { id: "h-1", predecessor: "t-01-1", successor: "t-01-2", lag: min(20) },
+  { id: "h-2", predecessor: "t-03-1", successor: "t-03-2", lag: min(30) },
+  { id: "h-3", predecessor: "t-03-2", successor: "t-03-3", lag: min(20) },
 ];
 
 const FOUND = findings(LEGS, HANDOVERS);

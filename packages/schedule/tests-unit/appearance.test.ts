@@ -9,26 +9,26 @@ import { resolveAppearance } from "../src/appearance";
 
 describe("resolveAppearance", () => {
   it("draws a plain bar where nothing is said", () => {
-    expect(resolveAppearance(undefined)).toEqual({ dashed: false, hatched: false, muted: false, open: false });
+    expect(resolveAppearance(undefined)).toMatchObject({ provisional: false, fixed: false, muted: false, open: false });
   });
 
   it("dashes a provisional bar", () => {
-    expect(resolveAppearance(["provisional"])).toMatchObject({ dashed: true, hatched: false });
+    expect(resolveAppearance(["provisional"])).toMatchObject({ provisional: true, fixed: false });
   });
 
   it("hatches a fixed bar", () => {
-    expect(resolveAppearance(["fixed"])).toMatchObject({ dashed: false, hatched: true });
+    expect(resolveAppearance(["fixed"])).toMatchObject({ provisional: false, fixed: true });
   });
 
   it("lets the later of the two contradicting ones win", () => {
-    expect(resolveAppearance(["provisional", "fixed"])).toMatchObject({ dashed: false, hatched: true });
-    expect(resolveAppearance(["fixed", "provisional"])).toMatchObject({ dashed: true, hatched: false });
+    expect(resolveAppearance(["provisional", "fixed"])).toMatchObject({ provisional: false, fixed: true });
+    expect(resolveAppearance(["fixed", "provisional"])).toMatchObject({ provisional: true, fixed: false });
   });
 
   it("combines what does not contradict", () => {
-    expect(resolveAppearance(["fixed", "muted", "open"])).toEqual({
-      dashed: false,
-      hatched: true,
+    expect(resolveAppearance(["fixed", "muted", "open"])).toMatchObject({
+      provisional: false,
+      fixed: true,
       muted: true,
       open: true,
     });

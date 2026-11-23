@@ -22,7 +22,7 @@ import {
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
 import { slotOf } from "./rows";
-import type { Milestone, Subtask } from "./model";
+import { predecessorOf, successorOf, type Milestone, type Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import { drawBlocked, drawOverlap, drawRefusedLanes, drawViolatedInFolds } from "./sceneMarks";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -220,11 +220,11 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
   for (const overlap of overlaps) drawOverlap(ctx, input, viewport, overlap);
   const violatedIds = new Set(violated.map((l) => l.dependency));
   for (const dependency of input.data.dependencies) {
-    if (dependency.from !== ghost.id && dependency.to !== ghost.id) continue;
-    const other = view.boxById.get(dependency.from === ghost.id ? dependency.to : dependency.from);
+    if (predecessorOf(dependency) !== ghost.id && successorOf(dependency) !== ghost.id) continue;
+    const other = view.boxById.get(predecessorOf(dependency) === ghost.id ? successorOf(dependency) : predecessorOf(dependency));
     if (other === undefined) continue;
     const path =
-      dependency.from === ghost.id
+      predecessorOf(dependency) === ghost.id
         ? dependencyPath(viewport, dependency, box, other, view.options)
         : dependencyPath(viewport, dependency, other, box, view.options);
     drawDependency(ctx, input, path, true, violatedIds.has(dependency.id));
@@ -377,7 +377,7 @@ export function barFace(
 ): { fill: string | null; onDark: boolean } {
   /* A hollow bar IS the surface, so what lies on it takes the page's own text
      colour - which is what `onDark: false` asks the label's CSS for. */
-  if (look.dashed) return { fill: null, onDark: false };
+  if (look.provisional) return { fill: null, onDark: false };
   const fill = look.muted ? mix(colour, colours.surface, 0.5) : colour;
   /* Which of the two colours a label may take reads better on this fill -
      measured, not decided by a threshold: a muted bar is the task colour mixed
@@ -537,7 +537,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
         bar on a light page reads as the bar beginning a few pixels later, not
         as a mark, and the dark scheme has the same problem with the other
         colour. A mark on a bar has to be surrounded by the bar. */
-  if (look.hatched) {
+  if (look.fixed) {
     const cap = Math.max(1, Math.min(CAP, Math.floor((width - 2 * CAP_INSET) / 3)));
     const inset = width >= 4 * cap ? CAP_INSET : 0;
     const shrink = height >= 4 * CAP_INSET ? CAP_INSET : 0;
@@ -551,7 +551,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   if (look.open) fadeOpen(ctx, box, top, height, colours.surface, view.width);
 
   /* 5. Outline. */
-  if (look.dashed) {
+  if (look.provisional) {
     /* Planned, not released: with no fill of its own, the outline is the bar,
        and it survives a colour a caller chose badly. Full weight in the task
        colour, so a hollow bar is still that order's. */

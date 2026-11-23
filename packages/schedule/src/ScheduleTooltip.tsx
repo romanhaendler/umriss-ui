@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { MINUTE } from "@umriss-ui/charts";
 import { formatDuration, useFormats, useWording } from "@umriss-ui/core";
 import { timeText } from "./timeAxis";
+import { predecessorOf, successorOf } from "./model";
 import type { ScheduleTooltipTarget } from "./scene";
 import styles from "./Schedule.module.css";
 
@@ -76,7 +77,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
   return [
     task?.name ?? task?.id ?? dependency.id,
     lagText(wording, duration, dependency.lag),
-    wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to),
+    wording.scheduleRoute(from?.name ?? predecessorOf(dependency), to?.name ?? successorOf(dependency)),
     ...(violated === undefined ? [] : [wording.scheduleViolatedBy(duration(violated.shortBy))]),
   ].join(", ");
 }
@@ -131,7 +132,7 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
   return (
     <>
       <span className={styles.tooltipHead}>{task?.name ?? task?.id ?? dependency.id}</span>
-      <span>{wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to)}</span>
+      <span>{wording.scheduleRoute(from?.name ?? predecessorOf(dependency), to?.name ?? successorOf(dependency))}</span>
       <span>{lagText(wording, duration, dependency.lag)}</span>
       {violated !== undefined && <span className={styles.finding}>{wording.scheduleViolatedBy(duration(violated.shortBy))}</span>}
     </>

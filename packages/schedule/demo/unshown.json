@@ -1,3 +1,6 @@
 {
-  "ScheduleProps.ref": "(a) pass-through: the root element"
+  "ScheduleProps.ref": "(a) pass-through: the root element",
+  "ScheduleProps.ends": "(g) deprecated alias: the old name of endMarks",
+  "ScheduleProps.label": "(g) deprecated alias: the old name of barLabel",
+  "Dependency.ends": "(g) deprecated alias: the old name of endMarks"
 }

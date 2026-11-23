@@ -72,7 +72,7 @@ describe("malformed data", () => {
 
   it("warns about a dependency naming no subtask", () => {
     const warn = warnings();
-    render(<Plan subtasks={[sub("dsub1")]} dependencies={[{ id: "dep1", from: "dsub1", to: "missing1", lag: 0 }]} />);
+    render(<Plan subtasks={[sub("dsub1")]} dependencies={[{ id: "dep1", predecessor: "dsub1", successor: "missing1", lag: 0 }]} />);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(textOf(warn)).toMatch(/dep1.*missing1/);
   });
@@ -83,8 +83,8 @@ describe("malformed data", () => {
       <Plan
         subtasks={[sub("twin1"), sub("twin1")]}
         dependencies={[
-          { id: "dtwin1", from: "twin1", to: "twin1", lag: 0 },
-          { id: "dtwin1", from: "twin1", to: "twin1", lag: 0 },
+          { id: "dtwin1", predecessor: "twin1", successor: "twin1", lag: 0 },
+          { id: "dtwin1", predecessor: "twin1", successor: "twin1", lag: 0 },
         ]}
         lanes={["ltwin1", "ltwin1", "l"]}
       />,
@@ -103,7 +103,7 @@ describe("malformed data", () => {
 
   it("is silent for a correct plan, a lane declared last, no lanes yet and no tasks", () => {
     const warn = warnings();
-    render(<Plan subtasks={[sub("ok1"), sub("ok1b")]} dependencies={[{ id: "dok1", from: "ok1", to: "ok1b", lag: 0 }]} lanesLast />);
+    render(<Plan subtasks={[sub("ok1"), sub("ok1b")]} dependencies={[{ id: "dok1", predecessor: "ok1", successor: "ok1b", lag: 0 }]} lanesLast />);
     render(<Plan subtasks={[sub("ok2"), sub("ok3", { lane: "later" })]} lanes={[]} tasks={[]} />);
     render(<Plan subtasks={[sub("ok4")]} tasks={[]} />);
     expect(warn).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe("malformed data", () => {
       return (
         <Schedule aria-label="Plan">
           <Lane id="l" label="l" />
-          <Dependencies data={[{ id: "dearly1", from: "early1", to: "early1b", lag: 0 }]} />
+          <Dependencies data={[{ id: "dearly1", predecessor: "early1", successor: "early1b", lag: 0 }]} />
           <Subtasks data={[sub("early1"), sub("early1b")]} tasks={TASKS} />
         </Schedule>
       );
@@ -162,7 +162,7 @@ describe("layers registering in turn", () => {
       <Schedule aria-label="Plan">
         <Lane id="l" label="l" />
         <Subtasks data={[sub("split-a")]} tasks={TASKS} />
-        <Dependencies data={[{ id: "split-dep", from: "split-a", to: missing ? "split-gone" : "split-b", lag: 0 }]} />
+        <Dependencies data={[{ id: "split-dep", predecessor: "split-a", successor: missing ? "split-gone" : "split-b", lag: 0 }]} />
         <Subtasks data={[sub("split-b")]} tasks={TASKS} />
       </Schedule>
     );

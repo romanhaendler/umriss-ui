@@ -3,9 +3,9 @@ import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Draw one handover its own way";
 
-export const lead = "A dependency's own `attach` and `ends` override the schedule's for that one line: here the sign-off joins the middles and marks its ends, the rest stay quiet.";
+export const lead = "A dependency's own `attach` and `endMarks` override the schedule's for that one line: here the sign-off joins the middles and marks its ends, the rest stay quiet.";
 
-/* Picture only, like the schedule's own `attach` and `ends`: the finding
+/* Picture only, like the schedule's own `attach` and `endMarks`: the finding
    follows from `leaves` and `arrives` alone. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
@@ -21,16 +21,16 @@ const WORK: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "to-build", from: "design", to: "build", lag: min(15) },
-  { id: "to-test", from: "build", to: "test", lag: min(15) },
+  { id: "to-build", predecessor: "design", successor: "build", lag: min(15) },
+  { id: "to-test", predecessor: "build", successor: "test", lag: min(15) },
   /* The one that matters: the designer signs off what was tested. */
-  { id: "to-sign-off", from: "test", to: "sign-off", lag: min(15), attach: "centre", ends: "dot" },
+  { id: "to-sign-off", predecessor: "test", successor: "sign-off", lag: min(15), attach: "centre", endMarks: "dot" },
 ];
 
 export default function OneHandoverDrawnItsOwnWay() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(12, 30)] } });
   return (
-    <Schedule aria-label="Design, build, test and a sign-off drawn its own way" height={188} attach="nearest" ends="none">
+    <Schedule aria-label="Design, build, test and a sign-off drawn its own way" height={188} attach="nearest" endMarks="none">
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="arjun" label="Arjun Mehta" />
       <Lane id="eva" label="Eva Novak" />

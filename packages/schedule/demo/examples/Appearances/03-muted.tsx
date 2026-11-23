@@ -21,7 +21,7 @@ export default function Muted() {
     <Schedule
       aria-label="Our team's work above, another team's below"
       height={144}
-      label={() => "Checkout migration"}
+      barLabel={() => "Checkout migration"}
     >
       <Lane id="ours" label="Payments" />
       <Lane id="theirs" label="Identity" />

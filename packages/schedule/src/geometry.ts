@@ -17,6 +17,7 @@ import {
   arrival,
   departure,
   occupied,
+  endMarksOf,
   type Milestone,
   type Subtask,
   type Dependency,
@@ -187,7 +188,7 @@ export function barLabelBox(
      hatch across a bar's face was taken away for exactly that reason. So the
      label of a capped bar begins after its cap and stops before the other
      one. */
-  const capped = resolveAppearance(box.subtask.appearance).hatched ? CAP_INSET + CAP + 1 : 0;
+  const capped = resolveAppearance(box.subtask.appearance).fixed ? CAP_INSET + CAP + 1 : 0;
   const x = Math.max(box.mainFrom + capped, 0);
   const width = Math.min(box.mainTo - capped, plotWidth) - x;
   if (width < MIN_LABEL_WIDTH) return null;
@@ -254,7 +255,7 @@ export function dependencyPath(
 ): DependencyPath {
   const route = dependency.route ?? style.route;
   const attach = dependency.attach ?? style.attach;
-  const ends = dependency.ends ?? style.ends;
+  const ends = endMarksOf(dependency) ?? style.ends;
   const x1 = xOf(view, departure(dependency, from.subtask));
   const x2 = xOf(view, arrival(dependency, to.subtask));
   const y1 = attachY(attach, from, to);

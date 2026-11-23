@@ -18,8 +18,8 @@ const START: readonly Subtask[] = [
 
 /* Each step waits for the one before it; a hand-over takes a morning. */
 const HANDOVERS: readonly Dependency[] = [
-  { id: "to-build", from: "design", to: "build", lag: 4 * 60 * 60_000 },
-  { id: "to-test", from: "build", to: "test", lag: 4 * 60 * 60_000 },
+  { id: "to-build", predecessor: "design", successor: "build", lag: 4 * 60 * 60_000 },
+  { id: "to-test", predecessor: "build", successor: "test", lag: 4 * 60 * 60_000 },
 ];
 
 export default function RippleOnEveryDrag() {

@@ -25,9 +25,9 @@ const START: readonly Subtask[] = [
 ];
 
 const DRIVES: readonly Dependency[] = [
-  { id: "d01-1", from: "t01-1", to: "t01-2", lag: min(20) },
-  { id: "d01-2", from: "t01-2", to: "t01-3", lag: min(20) },
-  { id: "d02-1", from: "t02-1", to: "t02-2", lag: min(20) },
+  { id: "d01-1", predecessor: "t01-1", successor: "t01-2", lag: min(20) },
+  { id: "d01-2", predecessor: "t01-2", successor: "t01-3", lag: min(20) },
+  { id: "d02-1", predecessor: "t02-1", successor: "t02-2", lag: min(20) },
 ];
 
 export default function MoveAWholeTour() {

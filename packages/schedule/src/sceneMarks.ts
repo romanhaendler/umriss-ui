@@ -3,7 +3,7 @@
    Functions over what they are given, like the rest of the drawing. */
 
 import { slotAt, xOf, type Viewport } from "./geometry";
-import type { BlockedTime } from "./model";
+import { successorOf, type BlockedTime } from "./model";
 import { rowAt } from "./rows";
 import type { DrawInput } from "./sceneDraw";
 
@@ -76,7 +76,7 @@ export function drawViolatedInFolds(ctx: CanvasRenderingContext2D, input: DrawIn
   if (data.violatedById.size === 0) return;
   for (const violated of data.violatedById.values()) {
     const dependency = data.dependencies.find((t) => t.id === violated.dependency);
-    const to = dependency === undefined ? undefined : data.subtaskById.get(dependency.to);
+    const to = dependency === undefined ? undefined : data.subtaskById.get(successorOf(dependency));
     if (to === undefined) continue;
     const slot = slotAt(viewport, to.lane);
     if (slot === null || !slot.miniature) continue;

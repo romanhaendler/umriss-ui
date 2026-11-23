@@ -95,7 +95,7 @@ export default function OfficeHours() {
       aria-label="Sprint 14 of the web team, office hours only"
       calendar={OFFICE_HOURS}
       height={280}
-      label={(item) => item.name ?? item.id}
+      barLabel={(item) => item.name ?? item.id}
     >
       {WEB_TEAM.map((person) => (
         <Lane key={person.id} id={person.id} label={person.name} />

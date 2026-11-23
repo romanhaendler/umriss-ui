@@ -45,7 +45,7 @@ const subtasks: Subtask[] = [
   { id: "cut", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadOut: 10 * 60_000 },
   { id: "mill", task: "a-2041", lane: "mill", from: at(8), to: at(10), leadIn: 30 * 60_000 },
 ];
-const dependencies: Dependency[] = [{ id: "move", from: "cut", to: "mill", lag: 15 * 60_000 }];
+const dependencies: Dependency[] = [{ id: "move", predecessor: "cut", successor: "mill", lag: 15 * 60_000 }];
 
 export function Plan() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5), at(12)] } });
@@ -95,11 +95,11 @@ subtask under the application's own id.
 
 ## What a bar says
 
-`label` writes a line into every bar, cut off where the bar is too narrow and
+`barLabel` writes a line into every bar, cut off where the bar is too narrow and
 left out where nothing would be readable. `appearance` adds what a colour
 cannot say - `"provisional"`, `"fixed"`, `"muted"`, `"open"` - and `progress`
 draws the share that is done as a rail along the bar. `route`, `anchor` and
-`ends` decide how a dependency is drawn, per schedule or per dependency, without
+`endMarks` decide how a dependency is drawn, per schedule or per dependency, without
 touching what a finding says.
 
 Each appearance owns exactly **one** property of the drawing, so several on one
@@ -171,8 +171,10 @@ reported in turn. Without a span the schedule shows the extent of its subtasks.
 `view`, `setView`, `setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` stand on what the
 hook hands back. `setDomain(span)` zooms to a span of two instants; `setDomain(null)` fits the work.
 
+The schedule hands an id wherever it reports to the application - an intent names a `subtask` by id, a finding names a `dependency` by id - and the record wherever it hands one to a render function or a hit: `barLabel` and `tooltip` receive the subtask, a hit carries the subtask or the dependency itself.
+
 The schedule is a composite: its `ref`, `className`, `style`, `id` and `data-*` reach the root `<div>`;
-`aria-label` (required) and `aria-labelledby` name the figure and the plot, and your `aria-describedby`
+`aria-label` or `aria-labelledby` (one of the two is required) names the figure and the plot, and your `aria-describedby`
 is joined to the plot's summary.
 
 ## Blocked time

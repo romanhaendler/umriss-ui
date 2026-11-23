@@ -200,8 +200,8 @@ const DRIVES: readonly Dependency[] = TOURS.flatMap((tour) => {
   const bars = START.filter((one) => one.task === tour.id);
   return bars.slice(1).map((next, i) => ({
     id: `${next.id}-drive`,
-    from: bars[i]!.id,
-    to: next.id,
+    predecessor: bars[i]!.id,
+    successor: next.id,
     lag: next.from - bars[i]!.to,
   }));
 });
@@ -248,7 +248,7 @@ export default function TourPlan() {
           height={470}
           intents={["move"]}
           onIntent={apply}
-          label={(bar) => bar.name ?? ""}
+          barLabel={(bar) => bar.name ?? ""}
         >
           {DEPOTS.map((depot) => (
             <LaneGroup key={depot.id} id={depot.id} label={depot.name}>

@@ -19,7 +19,7 @@ const LEGS: readonly Subtask[] = [
   { id: "c-2041-2", task: "c-2041", lane: "van-402", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
 ];
 
-const TRANSFERS: readonly Dependency[] = [{ id: "t-2041-1", from: "c-2041-1", to: "c-2041-2", lag: min(10) }];
+const TRANSFERS: readonly Dependency[] = [{ id: "t-2041-1", predecessor: "c-2041-1", successor: "c-2041-2", lag: min(10) }];
 
 const describe = (interaction: ScheduleInteraction): string => {
   const { hit } = interaction;

@@ -31,7 +31,7 @@ function Plan() {
     <Schedule aria-label="Plan of week 12">
       <Lane id="press" label="Press" />
       <Lane id="paint" label="Paint shop" />
-      <Dependencies data={[{ id: "t", from: "c", to: "p", lag: 5_400_000 }]} />
+      <Dependencies data={[{ id: "t", predecessor: "c", successor: "p", lag: 5_400_000 }]} />
       <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }, { id: "o2", color: "blue", name: "Order 2" }]} />
     </Schedule>
   );

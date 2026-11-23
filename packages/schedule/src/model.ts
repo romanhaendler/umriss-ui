@@ -6,6 +6,7 @@
    @umriss-ui/charts' time arithmetic speaks. */
 
 import type { SubtaskAppearance } from "./appearance";
+import { warnDeprecated } from "./dev";
 
 /** One whole undertaking. It is never drawn as a thing of its own: it shows as
     the colour its subtasks share, and in selection, which takes all of it. */
@@ -90,13 +91,34 @@ export interface Milestone {
 
 /** Two subtasks of one task in order: the later one may not begin before the
     earlier one ends plus a lag. Always from an end to a start. */
-export interface Dependency {
+export type Dependency = DependencyFields & (DependencyNamed | DependencyLegacy);
+
+/** A dependency named by its two subtasks. */
+interface DependencyNamed {
+  /** The id of the subtask it leaves. */
+  readonly predecessor: string;
+  /** The id of the subtask it arrives at. */
+  readonly successor: string;
+  /** @deprecated since 0.58 - use `predecessor`. */
+  readonly from?: string;
+  /** @deprecated since 0.58 - use `successor`. */
+  readonly to?: string;
+}
+
+/** A dependency written before `predecessor` and `successor`: read as it was
+    for this minor, and warned about once. */
+interface DependencyLegacy {
+  /** @deprecated since 0.58 - use `predecessor`. */
+  readonly from: string;
+  /** @deprecated since 0.58 - use `successor`. */
+  readonly to: string;
+  readonly predecessor?: string;
+  readonly successor?: string;
+}
+
+interface DependencyFields {
   /** The caller's identity of the dependency. */
   readonly id: string;
-  /** The id of the subtask it leaves. */
-  readonly from: string;
-  /** The id of the subtask it arrives at. */
-  readonly to: string;
   /** The least time between the two anchors; zero where the successor may
       begin as soon as the predecessor ends. */
   readonly lag: number;
@@ -119,7 +141,32 @@ export interface Dependency {
   readonly attach?: DependencyAttachment;
   /** Whether this one's ends are marked with a dot, where it is not marked
       like the rest. Also picture only. */
+  readonly endMarks?: DependencyEnds;
+  /** The old name of `endMarks`.
+      @deprecated since 0.58 - use `endMarks`. */
   readonly ends?: DependencyEnds;
+}
+
+/** The id of the subtask a dependency leaves; one still written with `from` is
+    read as it was and warned about once. */
+export function predecessorOf(dependency: Dependency): string {
+  if (dependency.predecessor !== undefined) return dependency.predecessor;
+  warnDeprecated("Dependency.from", "Dependency.predecessor");
+  return dependency.from as string;
+}
+
+/** The id of the subtask a dependency arrives at; see `predecessorOf`. */
+export function successorOf(dependency: Dependency): string {
+  if (dependency.successor !== undefined) return dependency.successor;
+  warnDeprecated("Dependency.to", "Dependency.successor");
+  return dependency.to as string;
+}
+
+/** Whether a dependency's ends carry a dot, where it says so itself. */
+export function endMarksOf(dependency: Dependency): DependencyEnds | undefined {
+  if (dependency.endMarks !== undefined) return dependency.endMarks;
+  if (dependency.ends !== undefined) warnDeprecated("Dependency.ends", "Dependency.endMarks");
+  return dependency.ends;
 }
 
 /** How a dependency is drawn between its two ends: a curve that leaves and

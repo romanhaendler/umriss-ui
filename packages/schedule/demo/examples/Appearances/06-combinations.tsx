@@ -55,7 +55,7 @@ export default function Combinations() {
     <Schedule
       aria-label="Bars carrying several appearances at once"
       height={230}
-      label={(leg) => NAMES[leg.id] ?? leg.id}
+      barLabel={(leg) => NAMES[leg.id] ?? leg.id}
     >
       {LANES.map((lane) => (
         <Lane key={lane.id} id={lane.id} label={lane.label} />

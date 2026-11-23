@@ -20,7 +20,7 @@ export default function Fixed() {
     <Schedule
       aria-label="A round that may move above, a booked slot below"
       height={144}
-      label={(leg) => (leg.id === "nailed" ? "T-05 · booked slot" : "T-05")}
+      barLabel={(leg) => (leg.id === "nailed" ? "T-05 · booked slot" : "T-05")}
     >
       <Lane id="movable" label="May move" />
       <Lane id="nailed" label="Fixed" />

@@ -18,9 +18,9 @@ const WORK: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "to-build", from: "layout", to: "build", lag: min(20) },
-  { id: "to-test", from: "build", to: "test", lag: min(20) },
-  { id: "to-polish", from: "test", to: "polish", lag: min(20) },
+  { id: "to-build", predecessor: "layout", successor: "build", lag: min(20) },
+  { id: "to-test", predecessor: "build", successor: "test", lag: min(20) },
+  { id: "to-polish", predecessor: "test", successor: "polish", lag: min(20) },
 ];
 
 export default function Curve() {

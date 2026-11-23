@@ -18,7 +18,7 @@ const LEGS: Subtask[] = [
   { id: "round", task: "t-03", lane: "van", from: at(9, 15), to: at(10, 30), leadIn: min(15) },
 ];
 
-const HANDOVERS: Dependency[] = [{ id: "transfer", from: "line-haul", to: "round", lag: min(40) }];
+const HANDOVERS: Dependency[] = [{ id: "transfer", predecessor: "line-haul", successor: "round", lag: min(40) }];
 
 export default function ViolatedDependency() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });

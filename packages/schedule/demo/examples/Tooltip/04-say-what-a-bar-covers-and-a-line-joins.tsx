@@ -18,8 +18,8 @@ const WORK: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "to-build", from: "design", to: "build", lag: min(15) },
-  { id: "to-test", from: "build", to: "test", lag: min(15) },
+  { id: "to-build", predecessor: "design", successor: "build", lag: min(15) },
+  { id: "to-test", predecessor: "build", successor: "test", lag: min(15) },
 ];
 
 const LEAVE: BlockedTime[] = [{ id: "arjun-dentist", lane: "arjun", from: at(11), to: at(12), label: "Dentist" }];

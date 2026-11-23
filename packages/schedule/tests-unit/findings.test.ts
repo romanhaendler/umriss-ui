@@ -81,12 +81,12 @@ describe("violatedDependencies", () => {
 
   it("finds nothing where the dependency fits", () => {
     // leaves after the lead-out (70), arrives before the lead-in (80): 10 minutes.
-    const dependency: Dependency = { id: "x", from: "cut", to: "press", lag: 10 * MIN };
+    const dependency: Dependency = { id: "x", predecessor: "cut", successor: "press", lag: 10 * MIN };
     expect(violatedDependencies([cut, press], [dependency])).toEqual([]);
   });
 
   it("finds a dependency that does not fit, and by how much", () => {
-    const dependency: Dependency = { id: "x", from: "cut", to: "press", lag: 25 * MIN };
+    const dependency: Dependency = { id: "x", predecessor: "cut", successor: "press", lag: 25 * MIN };
     expect(violatedDependencies([cut, press], [dependency])).toEqual([
       { dependency: "x", departure: at(70), arrival: at(80), shortBy: 15 * MIN },
     ]);
@@ -94,7 +94,7 @@ describe("violatedDependencies", () => {
 
   it("anchors at the main time where the dependency says so", () => {
     // leaves at the main end (60), arrives at the main start (100): 40 minutes.
-    const dependency: Dependency = { id: "x", from: "cut", to: "press", lag: 45 * MIN, leaves: "main", arrives: "main" };
+    const dependency: Dependency = { id: "x", predecessor: "cut", successor: "press", lag: 45 * MIN, leaves: "main", arrives: "main" };
     expect(violatedDependencies([cut, press], [dependency])).toEqual([
       { dependency: "x", departure: at(60), arrival: at(100), shortBy: 5 * MIN },
     ]);
@@ -102,14 +102,14 @@ describe("violatedDependencies", () => {
 
   it("finds a successor that starts before its predecessor ends", () => {
     const early = subtask("press", "press", 30, 90);
-    const dependency: Dependency = { id: "x", from: "cut", to: "press", lag: 0 };
+    const dependency: Dependency = { id: "x", predecessor: "cut", successor: "press", lag: 0 };
     expect(violatedDependencies([cut, early], [dependency])).toEqual([
       { dependency: "x", departure: at(70), arrival: at(30), shortBy: 40 * MIN },
     ]);
   });
 
   it("passes over a dependency whose subtasks are not in the data", () => {
-    const dependency: Dependency = { id: "x", from: "cut", to: "missing", lag: 5 * MIN };
+    const dependency: Dependency = { id: "x", predecessor: "cut", successor: "missing", lag: 5 * MIN };
     expect(violatedDependencies([cut], [dependency])).toEqual([]);
   });
 });
@@ -118,7 +118,7 @@ describe("findings", () => {
   it("gives both kinds at once", () => {
     const result = findings(
       [subtask("a", "press", 0, 60), subtask("b", "press", 30, 90)],
-      [{ id: "x", from: "a", to: "b", lag: 0 }],
+      [{ id: "x", predecessor: "a", successor: "b", lag: 0 }],
     );
     expect(result.overlaps).toHaveLength(1);
     expect(result.violatedDependencies).toEqual([{ dependency: "x", departure: at(60), arrival: at(30), shortBy: 30 * MIN }]);

@@ -15,7 +15,7 @@ const subtasks: Subtask[] = [
   { id: "build", task: "portal", lane: "arjun", from: at(12), to: at(15, 30), leadIn: min(30) },
 ];
 
-const dependencies: Dependency[] = [{ id: "handover", from: "design", to: "build", lag: min(15) }];
+const dependencies: Dependency[] = [{ id: "handover", predecessor: "design", successor: "build", lag: min(15) }];
 
 export default function SmallestSchedule() {
   const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(8), at(16)] } });

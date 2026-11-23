@@ -55,3 +55,20 @@ export function Refs() {
     </>
   );
 }
+
+/* Either name names the schedule; a dependency is named by its subtasks. */
+export function Names() {
+  const { Schedule: Plan } = useSchedule();
+  const named: import("../src").Dependency = { id: "d", predecessor: "a", successor: "b", lag: 0 };
+  // @ts-expect-error - one of the two ends is not enough.
+  const half: import("../src").Dependency = { id: "d", predecessor: "a", lag: 0 };
+  return (
+    <>
+      <Plan aria-labelledby="title" barLabel={(s) => s.id} endMarks="none" />
+      <Plan aria-label="Plan" aria-labelledby="title" />
+      {/* @ts-expect-error - neither name is given. */}
+      <Plan aria-describedby="x" />
+      {[named, half]}
+    </>
+  );
+}

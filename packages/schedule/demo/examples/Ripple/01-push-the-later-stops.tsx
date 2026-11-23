@@ -22,9 +22,9 @@ const START: readonly Subtask[] = [
 ];
 
 const DRIVES: readonly Dependency[] = [
-  { id: "drive-1", from: "stop-1", to: "stop-2", lag: min(20) },
-  { id: "drive-2", from: "stop-2", to: "stop-3", lag: min(20) },
-  { id: "drive-3", from: "stop-3", to: "stop-4", lag: min(20) },
+  { id: "drive-1", predecessor: "stop-1", successor: "stop-2", lag: min(20) },
+  { id: "drive-2", predecessor: "stop-2", successor: "stop-3", lag: min(20) },
+  { id: "drive-3", predecessor: "stop-3", successor: "stop-4", lag: min(20) },
 ];
 
 const LATE: MoveIntent = { kind: "move", subtask: "stop-1", from: at(8, 10), to: at(8, 20) };

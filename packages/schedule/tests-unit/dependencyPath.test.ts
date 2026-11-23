@@ -47,7 +47,7 @@ const above = boxOn(subtask("c", "one", 40, 60));
 const sameLane = boxOn(subtask("d", "two", 40, 60));
 const fromSecond = boxOn(subtask("e", "two", 0, 20));
 
-const move: Dependency = { id: "x", from: "a", to: "b", lag: 5 * MIN };
+const move: Dependency = { id: "x", predecessor: "a", successor: "b", lag: 5 * MIN };
 
 /* The fixture, worked out by hand: lanes are forty pixels high, a bar is
    nineteen of them and sits ten below the lane's top. So lane 1 holds its bar

@@ -24,8 +24,8 @@ const LEGS: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "outer-handover", from: "o-1", to: "o-2", lag: min(60) },
-  { id: "inner-handover", from: "i-1", to: "i-2", lag: min(60), leaves: "main", arrives: "main" },
+  { id: "outer-handover", predecessor: "o-1", successor: "o-2", lag: min(60) },
+  { id: "inner-handover", predecessor: "i-1", successor: "i-2", lag: min(60), leaves: "main", arrives: "main" },
 ];
 
 export default function Anchors() {

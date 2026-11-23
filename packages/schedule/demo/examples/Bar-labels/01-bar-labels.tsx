@@ -3,7 +3,7 @@ import type { Subtask, Task } from "../../../src";
 
 export const title = "Write into the bars";
 
-export const lead = "`label` returns the text for each bar: here the work item's name, cut where the bar is narrow and left out of the short reviews.";
+export const lead = "`barLabel` returns the text for each bar: here the work item's name, cut where the bar is narrow and left out of the short reviews.";
 
 /* Pan into the afternoon: a bar that begins before the view keeps its text at
    the edge, the way the day band keeps its date. */
@@ -38,7 +38,7 @@ export default function BarLabels() {
     <Schedule
       aria-label="Tuesday, 17 March, with the work items written in"
       height={196}
-      label={(subtask) => subtask.name ?? subtask.id}
+      barLabel={(subtask) => subtask.name ?? subtask.id}
     >
       {PEOPLE.map((person) => (
         <Lane key={person.id} id={person.id} label={person.label} />

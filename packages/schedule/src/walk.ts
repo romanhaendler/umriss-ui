@@ -12,7 +12,7 @@
    subtask into view, as a drag near the edge pans along (ADR-0033). */
 
 import { rowAt, type Row, type Rows } from "./rows";
-import type { Subtask, Dependency } from "./model";
+import { predecessorOf, successorOf, type Subtask, type Dependency } from "./model";
 
 /** What the walk can stand on: a subtask, or a milestone made into the shape
     of one (`at` as both ends). */
@@ -123,11 +123,11 @@ export function alongDependency(
   if (at.kind === "milestone") return at;
   if (at.kind === "dependency") {
     const dependency = dependencies.find((t) => t.id === at.id);
-    const end = dependency === undefined ? undefined : direction === "out" ? dependency.to : dependency.from;
+    const end = dependency === undefined ? undefined : direction === "out" ? successorOf(dependency) : predecessorOf(dependency);
     return end !== undefined && subtasks.has(end) ? { kind: "subtask", id: end } : at;
   }
   const dependency = dependencies.find(
-    (t) => (direction === "out" ? t.from : t.to) === at.id && subtasks.has(direction === "out" ? t.to : t.from),
+    (t) => (direction === "out" ? predecessorOf(t) : successorOf(t)) === at.id && subtasks.has(direction === "out" ? successorOf(t) : predecessorOf(t)),
   );
   return dependency === undefined ? at : { kind: "dependency", id: dependency.id };
 }

@@ -73,9 +73,10 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Lets go of the active subtask." },
           { key: "Alt+← / Alt+→", action: "Proposes a move by one step of the raster, where the application handles `move`." },
           { key: "Alt+Shift+← / →", action: "Proposes a new end, where the application handles `stretch`." },
+          { key: "Alt+I / Alt+O", action: "Proposes a lead-in or a lead-out one raster step longer, where the application handles `leadIn` or `leadOut`; with Shift, one step shorter. Refused, and said so, where it would run into blocked time." },
         ],
         accessibility: [
-          "The schedule is a figure named by `aria-label`, and its plot one tab stop with the role `application`, read as \"schedule\" (`aria-roledescription`), named alike and described by a summary: the lanes, the subtasks in view, the visible span, the findings by kind, then the keys. The canvas is hidden from a reader; the lane headers are text, and a group's fold button is named \"Fold group\" or \"Unfold group\" with the group's label. `aria-label` is required - name what the plan shows, \"Plan of week 38\".",
+          "The schedule is a figure named by `aria-label` or `aria-labelledby`, and its plot one tab stop with the role `application`, read as \"schedule\" (`aria-roledescription`), named alike and described by a summary: the lanes, the subtasks in view, the visible span, the findings by kind, then the keys. The canvas is hidden from a reader; the lane headers are text, and a group's fold button is named \"Fold group\" or \"Unfold group\" with the group's label. One of `aria-label` and `aria-labelledby` is required - name what the plan shows, \"Plan of week 38\".",
           "When a key comes to rest, a polite live region beside the plot reads the active subtask: its lane, task and name, the day and the times, and every finding on it by name - an overlap, a dependency short by how much, blocked time. On a dependency it reads the task, the lag and where the line runs. A pointer announces nothing; [Findings as data](#/findings) gives the application the same findings to list. The words are core's wording, so under `@umriss-ui/core/wording/de` the plot is read as \"Belegungsplan\".",
           "Under forced colours the plot paints itself in the system colours: the work in the text colour, told apart by lane and label; the active subtask in the selection colour; findings marked by a dash; grips and the ghost's label outlined. With reduced motion a group's chevron turns without its movement.",
         ],
@@ -177,7 +178,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Dependencies",
         sentence: "Lines from one subtask's end to the next one's start within a task, with the lag that must pass between them (also called links or predecessors). A lag that does not fit is marked, not repaired.",
         about: [
-          "`leaves` and `arrives` say what a dependency connects - the main time, or the outer edge of the lead-out and the lead-in - and so decide whether it is violated. `attach`, `ends` and `route` only change how the line is drawn.",
+          "`leaves` and `arrives` say what a dependency connects - the main time, or the outer edge of the lead-out and the lead-in - and so decide whether it is violated. `attach`, `endMarks` and `route` only change how the line is drawn.",
           "Nothing moves to make a dependency fit. [Ripple](#/ripple) computes the moves that would, for the application to run or not.",
         ],
         alternatives: [{ when: "The shape of the line", use: "routes" }],
@@ -434,7 +435,10 @@ export const OUTLINE: readonly Rubric[] = [
           "`stretch` enables the two edges of the main time. `leadIn` and `leadOut` add a grip at the outer edge of each; the grips show on the selected subtask only, so click a bar first.",
           "Stretching the main time leaves the lead-in and the lead-out as long as they were.",
         ],
-        keys: [{ key: "Alt+Shift+← Alt+Shift+→", action: "Proposes ending the active subtask one raster step earlier or later." }],
+        keys: [
+          { key: "Alt+Shift+← Alt+Shift+→", action: "Proposes ending the active subtask one raster step earlier or later." },
+          { key: "Alt+I Alt+O", action: "Proposes a longer lead-in or lead-out by one raster step; with Shift, a shorter one." },
+        ],
         limits: ["A main time never becomes shorter than one raster step, or a minute without a raster."],
         keysOf: ["schedule"],
         types: [],

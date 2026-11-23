@@ -21,9 +21,9 @@ const WORK: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "design-build", from: "design", to: "build", lag: min(15) },
-  { id: "copy-docs", from: "copy", to: "docs", lag: min(15) },
-  { id: "build-test", from: "build", to: "test", lag: min(15) },
+  { id: "design-build", predecessor: "design", successor: "build", lag: min(15) },
+  { id: "copy-docs", predecessor: "copy", successor: "docs", lag: min(15) },
+  { id: "build-test", predecessor: "build", successor: "test", lag: min(15) },
 ];
 
 /* As the planning system hands it over. */

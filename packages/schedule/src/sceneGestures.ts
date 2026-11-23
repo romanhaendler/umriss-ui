@@ -12,7 +12,7 @@ import { autoPanSpeed } from "./autoPan";
 import { wallClockWithin } from "./timeAxis";
 import { violatedDependencies, overlaps, type ViolatedDependency, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
-import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
+import { occupied, predecessorOf, successorOf, type Intent, type PlaceIntent, type Subtask } from "./model";
 import { entersBlockedTime, refusedLanes } from "./refusal";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
 import type { ScheduleHit } from "./sceneView";
@@ -876,7 +876,7 @@ export class SceneGestures {
     const assessed = [...others, ghost];
     const own = (o: Overlap) => o.first === ghost.id || o.second === ghost.id;
     /* A dependency is judged against both its ends, wherever they lie. */
-    const touching = data.dependencies.filter((t) => t.from === ghost.id || t.to === ghost.id);
+    const touching = data.dependencies.filter((t) => predecessorOf(t) === ghost.id || successorOf(t) === ghost.id);
     const ends = ghost.id === PLACING ? data.subtasks : data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
     return { overlaps: overlaps(assessed).filter(own), violated: violatedDependencies(ends, touching) };
   }

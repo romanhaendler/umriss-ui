@@ -22,9 +22,9 @@ const STOPS: Subtask[] = [
 ];
 
 const DRIVES: Dependency[] = [
-  { id: "d-01-1", from: "t-01-1", to: "t-01-2", lag: min(20) },
-  { id: "d-01-2", from: "t-01-2", to: "t-01-3", lag: min(25) },
-  { id: "d-02-1", from: "t-02-1", to: "t-02-2", lag: min(25) },
+  { id: "d-01-1", predecessor: "t-01-1", successor: "t-01-2", lag: min(20) },
+  { id: "d-01-2", predecessor: "t-01-2", successor: "t-01-3", lag: min(25) },
+  { id: "d-02-1", predecessor: "t-02-1", successor: "t-02-2", lag: min(25) },
 ];
 
 export default function StopsOfATour() {

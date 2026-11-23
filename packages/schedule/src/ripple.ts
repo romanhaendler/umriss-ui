@@ -10,7 +10,7 @@
    main time keeping its length, and never pulled earlier: room that opens up is
    the planner's to use. The push carries down the chain. */
 
-import { applyIntent, arrival, departure, type Intent, type MoveIntent, type Subtask, type Dependency } from "./model";
+import { applyIntent, arrival, departure, predecessorOf, successorOf, type Intent, type MoveIntent, type Subtask, type Dependency } from "./model";
 
 /** The moves that push every successor whose dependency no longer fits after
     `intent` - transitively, in the order they were first pushed. The subtask the
@@ -28,9 +28,9 @@ export function ripple(
   const current = new Map(subtasks.map((s) => [s.id, applyIntent(s, intent)] as const));
   const leaving = new Map<string, Dependency[]>();
   for (const dependency of dependencies) {
-    const list = leaving.get(dependency.from) ?? [];
+    const list = leaving.get(predecessorOf(dependency)) ?? [];
     list.push(dependency);
-    leaving.set(dependency.from, list);
+    leaving.set(predecessorOf(dependency), list);
   }
 
   const moved = new Map<string, MoveIntent>();
@@ -44,8 +44,8 @@ export function ripple(
     const from = current.get(id);
     if (from === undefined) continue;
     for (const dependency of leaving.get(id) ?? []) {
-      if (dependency.to === intent.subtask) continue;
-      const to = current.get(dependency.to);
+      if (successorOf(dependency) === intent.subtask) continue;
+      const to = current.get(successorOf(dependency));
       if (to === undefined) continue;
       const shortBy = departure(dependency, from) + dependency.lag - arrival(dependency, to);
       if (!(shortBy > 0)) continue;

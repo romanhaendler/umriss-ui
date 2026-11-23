@@ -20,7 +20,7 @@ const START: readonly Subtask[] = [
 /* Start-to-start: the build may begin an hour after the spec begins, which is
    a lag of one hour less the spec's three hours. */
 const LINKS: readonly Dependency[] = [
-  { id: "spec-starts-build", from: "spec", to: "build", lag: HOUR - 3 * HOUR, route: "orthogonal", ends: "dot" },
+  { id: "spec-starts-build", predecessor: "spec", successor: "build", lag: HOUR - 3 * HOUR, route: "orthogonal", endMarks: "dot" },
 ];
 
 export default function UndoIntents() {

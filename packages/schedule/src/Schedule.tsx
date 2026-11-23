@@ -44,6 +44,7 @@ import {
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { AngleGlyph, Skeleton, VisuallyHidden, useFormats, useTimeZoneLabel, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
+import { warnDeprecated } from "./dev";
 import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
@@ -56,10 +57,19 @@ import styles from "./Schedule.module.css";
     reads itself. `ref`, `className`, `style` and the rest reach the root; the
     name (`aria-label`, `aria-labelledby`) reaches the figure root and the plot,
     and a `aria-describedby` of yours is joined to the plot's summary. */
-export type ScheduleProps = ScheduleOwnProps & {
-  /** What the schedule shows, for a screen reader: "Plan of week 38". */
-  "aria-label": string;
-};
+export type ScheduleProps = ScheduleOwnProps &
+  (
+    | {
+        /** What the schedule shows, for a screen reader: "Plan of week 38". One of `aria-label` and `aria-labelledby` is required. */
+        "aria-label": string;
+        "aria-labelledby"?: string;
+      }
+    | {
+        /** The id of the element that names the schedule, as an alternative to `aria-label`. */
+        "aria-labelledby": string;
+        "aria-label"?: string;
+      }
+  );
 
 interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "aria-label"> {
   /** Receives the root element. */
@@ -92,7 +102,9 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   /** The raster a drag lands on: `"ticks"` - the fine band's current step -, a
       step in milliseconds from local midnight, a step with an offset (shifts at
       06:00, 14:00 and 22:00 are eight hours offset by six), or `false` for none.
-      It shapes the ghost and the intent, never the data.
+      It shapes the ghost and the intent, never the data. `"ticks"` follows the
+      zoom: zoomed in, the raster is finer; a number or a step with an offset
+      stays as given at every zoom.
       @default "ticks" */
   snap?: "ticks" | number | SnapRaster | false;
   /** The intents the caller handles. Each one enables its interaction; none
@@ -151,13 +163,13 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
       help while a plan is being read, and noise in a plan full of short moves.
       A dependency may say otherwise for itself.
       @default "dot" */
-  ends?: DependencyEnds;
+  endMarks?: DependencyEnds;
   /** What stands written in a bar: a function from a subtask to a line of
       text, or nothing for bars without text. The text is cut off with an
       ellipsis where the bar is too narrow for it and left out where even that
       would say nothing; a bar that began before the view keeps its text at the
       view's edge. */
-  label?: (subtask: Subtask) => string;
+  barLabel?: (subtask: Subtask) => string;
   /** The tooltip on a hovered subtask, milestone or dependency: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
@@ -178,6 +190,12 @@ interface ScheduleOwnProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
       `Milestones` and `DataTable`, in the order they are to stand and be
       drawn. */
   children?: ReactNode;
+  /** The old name of `endMarks`.
+      @deprecated since 0.58 - use `endMarks`. */
+  ends?: DependencyEnds;
+  /** The old name of `barLabel`.
+      @deprecated since 0.58 - use `barLabel`. */
+  label?: (subtask: Subtask) => string;
 }
 
 const NO_INTENTS: readonly IntentKind[] = [];
@@ -219,8 +237,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     placing,
     route = "curve",
     attach = "centre",
-    ends = "dot",
-    label,
+    endMarks: endMarksProp,
+    ends: endsOld,
+    barLabel: barLabelProp,
+    label: labelOld,
     tooltip,
     now,
     loading = false,
@@ -230,6 +250,10 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
     ...rest
   } = props;
   const name = { "aria-label": nameLabel, "aria-labelledby": labelledBy };
+  if (endsOld !== undefined) warnDeprecated("Schedule ends", "endMarks");
+  if (labelOld !== undefined) warnDeprecated("Schedule label", "barLabel");
+  const ends = endMarksProp ?? endsOld ?? "dot";
+  const label = barLabelProp ?? labelOld;
 
   /* One id per schedule, so that two on a page do not both claim
      `#…-group-presses` for their chevron's `aria-controls`. */
@@ -702,6 +726,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
         </div>
         {/* Beside the plot and out of the grid's flow (absolutely placed). */}
         <VisuallyHidden aria-live="polite">
+          {spoken?.refused === true && <span key={`refused-`}>{wording.scheduleInBlockedTime(undefined)}</span>}
           {spoken?.span !== undefined && <span key={spoken.count}>{wording.scheduleVisibleRange(instant(spoken.span[0]), instant(spoken.span[1]))}</span>}
           {spoken !== null && spoken.target !== null && (
             <ScheduleReadout

@@ -29,7 +29,7 @@ const WORK: Subtask[] = [
   { id: "p3", task: "b", lane: "press", from: 20 * HOUR, to: 21 * HOUR },
   { id: "w1", task: "a", lane: "weld", from: 3 * HOUR, to: 4 * HOUR },
 ];
-const DEPENDENCIES: Dependency[] = [{ id: "t1", from: "p1", to: "w1", lag: HOUR / 2 }];
+const DEPENDENCIES: Dependency[] = [{ id: "t1", predecessor: "p1", successor: "w1", lag: HOUR / 2 }];
 
 function sceneWith(options: Partial<SceneOptions> = {}) {
   const scene = new ScheduleScene({ domain: [0, 8 * HOUR] });
@@ -218,6 +218,44 @@ describe("editing by key proposes what the drag would", () => {
     /* One hour long, a step of one hour: shorter it cannot get. */
     keyed.scene.key(key("ArrowLeft", { altKey: true, shiftKey: true }));
     expect(keyed.intents).toHaveLength(1);
+  });
+
+  it("lengthens the lead-in with Alt+I and the lead-out with Alt+O by one step, and Shift shortens them", () => {
+    const { scene, intents } = sceneWith({ intents: ["leadIn", "leadOut"] });
+    onP2(scene);
+    scene.key(key("i", { altKey: true, code: "KeyI" }));
+    scene.key(key("ø", { altKey: true, code: "KeyO" }));
+    expect(intents).toEqual([
+      { kind: "leadIn", subtask: "p2", leadIn: HOUR },
+      { kind: "leadOut", subtask: "p2", leadOut: HOUR },
+    ]);
+    /* Nothing to shorten where there is no lead: no intent. */
+    scene.key(key("I", { altKey: true, shiftKey: true, code: "KeyI" }));
+    expect(intents).toHaveLength(2);
+  });
+
+  it("shortens a lead the data has, never below nothing", () => {
+    const { scene, intents } = sceneWith({ intents: ["leadIn"] });
+    scene.updateLayer(3, {
+      kind: "subtasks",
+      data: [{ id: "m", task: "a", lane: "press", from: 4 * HOUR, to: 5 * HOUR, leadIn: 2 * HOUR }],
+      tasks: [{ id: "a", color: "red" }],
+    });
+    scene.focus(true);
+    scene.key(key("I", { altKey: true, shiftKey: true, code: "KeyI" }));
+    scene.key(key("I", { altKey: true, shiftKey: true, code: "KeyI" }));
+    expect(intents[0]).toEqual({ kind: "leadIn", subtask: "m", leadIn: HOUR });
+  });
+
+  it("refuses a lead-out that would run into blocked time, and says so", () => {
+    vi.useFakeTimers();
+    const { scene, intents } = sceneWith({ intents: ["leadOut"] });
+    scene.registerLayer({ kind: "blocked", data: [{ id: "b", lane: "press", from: 5 * HOUR, to: 6 * HOUR }] });
+    onP2(scene);
+    expect(scene.key(key("o", { altKey: true, code: "KeyO" }))).toBe(true);
+    vi.advanceTimersByTime(500);
+    expect(intents).toEqual([]);
+    expect(scene.getSnapshot().spoken?.refused).toBe(true);
   });
 
   it("proposes nothing the caller does not handle", () => {

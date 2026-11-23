@@ -27,7 +27,7 @@ import {
   type Viewport,
 } from "./geometry";
 import { effectiveCollapsed, GROUP_HEAD_HEIGHT, layOutRows, rowAt, slotOf, type Rows } from "./rows";
-import type { IntentKind, Milestone, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
+import { predecessorOf, successorOf, type IntentKind, type Milestone, type Subtask, type Dependency, type DependencyAttachment, type DependencyEnds, type DependencyRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, TICK_SPACING, wallClockWithin, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
@@ -200,8 +200,8 @@ export class SceneView {
     }
     this.laidPaths = [];
     for (const dependency of this.data.dependencies) {
-      const from = this.boxById.get(dependency.from);
-      const to = this.boxById.get(dependency.to);
+      const from = this.boxById.get(predecessorOf(dependency));
+      const to = this.boxById.get(successorOf(dependency));
       if (from === undefined || to === undefined) continue;
       this.laidPaths.push(dependencyPath(view, dependency, from, to, this.options));
     }

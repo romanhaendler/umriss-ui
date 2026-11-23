@@ -20,7 +20,7 @@ const PLACE: PlaceIntent = {
 };
 
 const EXISTING: Subtask = { id: "a-1", task: "a", lane: "press", from: at(0), to: at(30) };
-const DEPENDENCY: Dependency = { id: "t", from: "a-1", to: "a-2", lag: 5 * MIN };
+const DEPENDENCY: Dependency = { id: "t", predecessor: "a-1", successor: "a-2", lag: 5 * MIN };
 
 describe("a place intent", () => {
   it("leaves every existing subtask as it is", () => {

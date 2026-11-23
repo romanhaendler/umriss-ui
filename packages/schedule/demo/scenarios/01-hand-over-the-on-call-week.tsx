@@ -138,7 +138,7 @@ export default function HandOver() {
           now={NOW}
           intents={["lane"]}
           onIntent={onIntent}
-          label={(duty) => duty.name ?? ""}
+          barLabel={(duty) => duty.name ?? ""}
         >
           {ENGINEERS.map((engineer) => (
             <Lane key={engineer.id} id={engineer.id} label={engineer.name} />

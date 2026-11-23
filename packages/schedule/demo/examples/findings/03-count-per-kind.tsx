@@ -28,8 +28,8 @@ const LEGS: readonly Subtask[] = [
 ];
 
 const TRANSFERS: readonly Dependency[] = [
-  { id: "t-2043-1", from: "c-2043-1", to: "c-2043-2", lag: min(45) },
-  { id: "t-2043-2", from: "c-2043-2", to: "c-2043-3", lag: min(25) },
+  { id: "t-2043-1", predecessor: "c-2043-1", successor: "c-2043-2", lag: min(45) },
+  { id: "t-2043-2", predecessor: "c-2043-2", successor: "c-2043-3", lag: min(25) },
 ];
 
 export default function CountPerKind() {

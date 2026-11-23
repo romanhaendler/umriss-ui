@@ -23,9 +23,9 @@ const STEPS: Subtask[] = [
 ];
 
 const HANDOVERS: Dependency[] = [
-  { id: "to-review", from: "build", to: "review", lag: min(20) },
-  { id: "to-deploy", from: "review", to: "deploy", lag: min(20) },
-  { id: "to-verify", from: "deploy", to: "verify", lag: min(20) },
+  { id: "to-review", predecessor: "build", successor: "review", lag: min(20) },
+  { id: "to-deploy", predecessor: "review", successor: "deploy", lag: min(20) },
+  { id: "to-verify", predecessor: "deploy", successor: "verify", lag: min(20) },
 ];
 
 function Variant({ attach }: { attach: DependencyAttachment }) {
