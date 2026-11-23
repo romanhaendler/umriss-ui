@@ -65,6 +65,9 @@ beyond the map.
   the registry's types leave the index; `tone` becomes `verdict`; `row` and `state` on `Matrix` and
   `StateBand`; a chart's name is required by type; a series stays identified by its name; the rest is frozen
   as it stands.
+- [What of the schedule's surface changes before 1.0](issues/19-what-of-the-schedules-surface-changes-before-1-0.md):
+  `predecessor` / `successor` on a dependency, `barLabel`, `endMarks`, the resolved appearance's four words;
+  lead-in and lead-out by keyboard; "an id in data, the record in what is handed out" stands as the rule.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.

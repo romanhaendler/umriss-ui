@@ -36,8 +36,9 @@ What stands:
   order**; **no Shift+Space range in the grid**. All three were expressly declined before (the shakedown
   spec's decision 6, ADR-0032), which is what the acceptance criteria ask for. They stay declined.
 - **The schedule's keyboard cannot change a lead-in or lead-out** (`packages/schedule/src/sceneKeys.ts:183-210`).
-  A new chord and a new intent kind, which breaks an exhaustive `switch` on the intent's `kind`. Asked in
-  "What of the schedule's surface changes before 1.0".
+  A new chord only: the intent kinds `leadIn` and `leadOut` exist (`packages/schedule/src/model.ts:186,195`),
+  so nothing breaks; the findings file is wrong where it says a new kind is needed. Decided in "What of the
+  schedule's surface changes before 1.0": added before 1.0.
 
 What only a run tells, checked on the candidate with the acceptance criteria: focus in a virtual grid under a
 live re-sort; the two focus rings side by side; the skip link's ring (it is the demo shell's, not core's); a
