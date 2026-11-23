@@ -16,6 +16,9 @@ stands, and under which name or shape?
 - **`ResolvedAppearance`'s members**: `dashed` and `hatched`, or what they mean.
 - **`label`**: `barLabel` on `Schedule`, and `label` or `name` on the records.
 - **A dependency's presentation**: `route`, `attach`, `ends`, and `ends` as a string.
+- **A lead-in or lead-out by keyboard**: the one keyboard item of the shakedowns that stands and was never
+  declined ("Which keyboard items of the shakedowns still stand"). A new chord and a new kind of intent,
+  which breaks an exhaustive `switch` on the intent's `kind`: before 1.0, or declined.
 - **Selection**: controlled whole (task and subtask, with a default), or as it stands; in `ScheduleView` or
   not.
 

@@ -1,7 +1,7 @@
 # What of core's surface changes before 1.0
 
 Type:   grilling
-Status: open
+Status: claimed
 Blocked by: 01
 
 ## Question

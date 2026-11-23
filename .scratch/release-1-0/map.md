@@ -88,14 +88,15 @@ beyond the map.
   what the source lacks; the generator of `API.md` skips components a hook returns and members written as
   methods; counts, package lists and two glossary entries have drifted; sixteen ADRs state their status twice
   and differently.
+- [Which keyboard items of the shakedowns still stand](issues/21-which-keyboard-items-of-the-shakedowns-still-stand.md):
+  of thirty, 21 are fixed, three stay declined as before, the legend's Tab order is fixed before 1.0, the
+  schedule's lead-in by keyboard goes to the schedule's decision; four need a run on the candidate.
 
 ## Not yet specified
 
 - **The polishing points themselves.** Each review returns candidates; which are taken before 1.0, and which
   break a caller and so go to the maintainer, can only be asked once they are on the table. Expect one
   decision ticket per review, perhaps per package.
-- **Which keyboard items are fixed and which declined**: hangs on "Which keyboard items of the shakedowns
-  still stand".
 - **The order of the releases up to 1.0**, and how the taken points are cut into specs: hangs on the points
   and on how breaking changes reach 1.0.
 
