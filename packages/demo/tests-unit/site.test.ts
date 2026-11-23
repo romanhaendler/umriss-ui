@@ -62,7 +62,7 @@ describe("the built site's guard", () => {
   });
 });
 
-describe("the guard over the text for agents (.scratch/pages-as-markdown)", () => {
+describe("the guard over the text for agents", () => {
   const alternate = (href: string) => `<link rel="alternate" type="text/markdown" href="${href}" />`;
   const twinPages = [
     { url: HOME, name: "@umriss-ui/charts", twin: `${HOME}index.md` },
@@ -111,7 +111,7 @@ describe("the guard over the text for agents (.scratch/pages-as-markdown)", () =
   });
 });
 
-describe("the guard over the front page (.scratch/site-front-page)", () => {
+describe("the guard over the front page", () => {
   const ROOT = "https://example.test/umriss-ui/";
   const sitemap = [
     ROOT,
@@ -205,7 +205,7 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
   });
 });
 
-describe("the type links' guard (.scratch/types-without-holes)", () => {
+describe("the type links' guard", () => {
   const search = `${HOME}search/`;
   const view = `${HOME}view/`;
   const linked = new Map([
@@ -235,7 +235,7 @@ describe("the type links' guard (.scratch/types-without-holes)", () => {
   });
 });
 
-describe("the guard over the document pages (.scratch/concepts-and-changelog-pages)", () => {
+describe("the guard over the document pages", () => {
   const SITE = "https://example.test/umriss-ui/";
   const document = `${SITE}standards/`;
   const github = "https://github.com/romanhaendler/umriss-ui";
@@ -281,7 +281,7 @@ describe("the guard over the document pages (.scratch/concepts-and-changelog-pag
   });
 });
 
-describe("the site's search index (.scratch/one-search 03)", () => {
+describe("the site's search index", () => {
   const SITE = "https://example.test/umriss-ui/";
   const sitemap = [SITE, `${SITE}core/`, `${SITE}core/select/`, `${SITE}table/width-and-pinning/`];
   const pages = new Map([
@@ -319,7 +319,7 @@ describe("the site's search index (.scratch/one-search 03)", () => {
   });
 });
 
-describe("the guard over \"What's new\" (.scratch/concepts-and-changelog-pages)", () => {
+describe("the guard over \"What's new\"", () => {
   const SITE = "https://example.test/umriss-ui/";
   const changelogs = [`${SITE}core/changelog/`, `${SITE}table/changelog/`];
   const pages = new Map(changelogs.map((url) => [url, '<main class="document"><h2 id="v0-24-0">0.24.0 – Now (Oct. 2026)</h2></main>']));

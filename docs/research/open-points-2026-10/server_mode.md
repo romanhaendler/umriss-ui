@@ -16,7 +16,7 @@ Gathered on 2026-10-11 for the grilling of the open points, from the repository 
 - Export: writes the page; the button says so (`exportPageLabel`).
 - Pagination vs virtualisation: pages only. `virtual` is ignored (warn). No infinite or lazy scroll, no cache. Each page change is a request.
 - Loading/late answers: `loading` shows the previous page dimmed with skeleton rows, keeps column widths, sets `aria-busy`. Toolbar count is the server count only. The table has no request id, no abort, no stale-answer check, no cache. Out-of-order answers are the caller's to handle: rows and rowCount are simply whatever is passed in.
-- Specs: .scratch/table-server-mode/spec.md (done, 2026-09-24; M3 grouping and "infinite scroll (paging only)" out of scope; decided on standing trust). .scratch/table-server-mode-2/spec.md (needs-triage; research first, then a grilling).
+- Specs: the delivered spec `table-server-mode` (done, 2026-09-24; M3 grouping and "infinite scroll (paging only)" out of scope; decided on standing trust). the delivered spec `table-server-mode-2` (needs-triage; research first, then a grilling).
 
 ## 2. Capability matrix
 

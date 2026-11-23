@@ -72,7 +72,7 @@ const GROUPED: TypeEntry = {
   })),
 };
 
-describe("the groups of a table (.scratch/props-table-hygiene)", () => {
+describe("the groups of a table", () => {
   const names = (entry: TypeEntry) => tableModel(entry).groups.map((group) => [group.title, group.rows.map((one) => one.name)]);
 
   it("reads Main, then Events, Accessibility and Styling - a controlled triple together, the deprecated last", () => {
@@ -111,7 +111,7 @@ const grown = (count: number): TypeEntry => ({
   ],
 });
 
-describe("folding a long table (.scratch/props-table-hygiene, 02)", () => {
+describe("folding a long table", () => {
   const fold = (count: number) => {
     const host = document.createElement("div");
     host.innerHTML = tableHtml(tableModel(grown(count)));
@@ -394,7 +394,7 @@ describe("Types on this page", () => {
   });
 });
 
-describe("long unions and the preview of a definition (.scratch/a11y-and-finish, 07)", () => {
+describe("long unions and the preview of a definition", () => {
   const UNIONS: TypeEntry = {
     name: "SwitchProps",
     parameter: [],

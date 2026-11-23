@@ -21,16 +21,17 @@ what a reader has — the filename is what they are looking for.
 | what is tested, and how | [`testing.md`](testing.md) |
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/table/docs/capabilities.md`](../packages/table/docs/capabilities.md), [`../packages/schedule/docs/capabilities.md`](../packages/schedule/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | what was worked on here until 2026-10-11 (frozen; the commit history carries on) | [`journal.md`](journal.md) |
-| where the work stands today and what comes next | [`../.scratch/open-points-roadmap/next.md`](../.scratch/open-points-roadmap/next.md) |
-| what was still open in October 2026, what was decided about it and in which order it is built | [`research/open-points-2026-10/`](research/open-points-2026-10/), [`../.scratch/open-points-roadmap/spec.md`](../.scratch/open-points-roadmap/spec.md) |
+| where the work stands today and what comes next | [`../.scratch/release-1-0/map.md`](../.scratch/release-1-0/map.md) |
+| what was still open in October 2026, what was decided about it and in which order it is built | [`research/open-points-2026-10/`](research/open-points-2026-10/) |
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/) |
 | what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/) |
 | how other chart libraries take their data, and what follows for the charts | [`research/chart-data-input-2026-10/`](research/chart-data-input-2026-10/) |
 | how dashboards that users arrange themselves are built elsewhere, what their users ask for, and what follows for a dashboard package | [`research/user-dashboards-2026-10/`](research/user-dashboards-2026-10/) (`report.md` is the synthesis, in German) |
 | how a table in a pane of fixed height should fill it and page, how other grids, design systems and control-room software do it, and what follows for the table | [`research/table-height-and-paging-2026-10/`](research/table-height-and-paging-2026-10/) (`report.md` is the synthesis, in German) |
+| how umriss compares, feature by feature, with other data grids, component libraries and form libraries | [`research/matrices-2026-10/`](research/matrices-2026-10/) (the table, the core and the form libraries) |
 | how a coding agent reads a package's documentation | `docs/llms-full.md` inside the installed package, the version in the lockfile; the local site (`pnpm start`) has `llms.txt` beside each demo, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
-| how the packed packages are put into real applications and customers' hands to find what the own checks cannot see, and who those customers are | [`agents/shakedown/`](agents/shakedown/) - the findings of the last run stand in [`../.scratch/shakedown/`](../.scratch/shakedown/) |
+| how the packed packages are put into real applications and customers' hands to find what the own checks cannot see, and who those customers are | [`agents/shakedown/`](agents/shakedown/) |
 | what a document used to be called | **What moved**, below |
 
 ## What moved, September 2026

@@ -30,13 +30,11 @@ look wrong, set traps or fall short. The maintainer then decides whether the lib
 
 ## Already known
 
-The last run's findings stand in `/Users/romanhaendler/cc/umriss/.scratch/shakedown/*.md`; read the ones
-for your packages before you start. Report a known finding again only where your host makes it worse or
-different, or where it is still there after a fix was claimed. Workarounds so a known finding does not
+The coordinator hands you the findings of the last run for your packages; read them before you start. Report a known finding again only where your host makes it worse or different, or where it is still there after a fix was claimed. Workarounds so a known finding does not
 drown the rest, until it is fixed:
 - production builds lower `light-dark()` and leave the styles collapsed: set `build.cssTarget: "chrome123"`
   (Vite) or a modern `browserslist` (Next), unless your task is the build itself;
-- Vitest needs `server.deps.inline: [/@umriss-ui/]`; jsdom needs polyfills (`cross-package.md`).
+- Vitest needs `server.deps.inline: [/@umriss-ui/]`; jsdom needs polyfills.
 
 ## What counts as a finding
 

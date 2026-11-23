@@ -262,7 +262,7 @@ describe("the site's pages (ADR-0037)", () => {
   });
 });
 
-describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
+describe("the pages' Markdown twins", () => {
   const byPath = new Map(twins.map((one) => [one.path, one.text]));
   /** The header every twin carries under its name. */
   const header = (page: string) =>
@@ -317,7 +317,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
   });
 });
 
-describe("Types on this page (.scratch/types-without-holes)", () => {
+describe("Types on this page", () => {
   /* The Gauge names `Limit`, which has no table: it is defined on the Gauge's
      page, and so is `Bound`, which only `Limit` names. `Bound` names the
      Meter's props, which have a table on the Meter's page - a link, not a
@@ -375,7 +375,7 @@ describe("Types on this page (.scratch/types-without-holes)", () => {
     expect(sitePages.find((one) => one.path === "meter/")!.html).toContain('id="type-MeterProps"');
   });
 
-  it("carries no preview of a definition: the prerendered page and the twin have the link (.scratch/a11y-and-finish, 07)", () => {
+  it("carries no preview of a definition: the prerendered page and the twin have the link", () => {
     const twin = twinTexts.find((one) => one.path === "gauge.md")!.text;
     for (const written of [gaugeHtml, twin]) {
       expect(written).not.toContain("tooltip");
@@ -419,7 +419,7 @@ describe("Props on this page", () => {
   });
 });
 
-describe("the API index (.scratch/api-index, ADR-0044)", () => {
+describe("the API index (ADR-0044)", () => {
   /* The fixture's outline with the index as its last rubric. The fixture
      exports a component with a page (`Gauge`) and one without
      (`GaugeNeedle`), a hook with its tags, a function, two constants - one

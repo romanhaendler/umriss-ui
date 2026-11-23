@@ -8,7 +8,7 @@ Core's fields answered the same question in four ways. `Input` handed an event t
 `SegmentedControl`, `Slider` and `FileInput` handed a value to the same name. A host that wires a
 form library (react-hook-form's `register` and `Controller`, Formik) had to know, field by field,
 which of the two it held; the third shakedown put eleven hosts and a matrix of form libraries
-against it (`.scratch/shakedown-2026-10-31/form-libraries-matrix.md`). Some fields were always
+against it (`docs/research/matrices-2026-10/form-libraries-matrix.md`). Some fields were always
 controlled, some could not start from a value, and `value={undefined}` crashed the Combobox and
 made React complain on the RadioGroup.
 

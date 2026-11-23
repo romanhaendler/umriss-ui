@@ -7,7 +7,7 @@ designer, an operator-screen developer). The workspace's own checks run against 
 against the tarball, in the consumer's toolchain, and finds what those checks cannot see.
 
 Run it before a release that changes a dependency floor, a build tool or the styling, and otherwise every
-few minors. The first run was 2026-10-24; its findings stand in `.scratch/shakedown/`.
+few minors. The first run was 2026-10-24; what it found was fixed in the releases that followed.
 
 ## Steps
 
@@ -22,7 +22,7 @@ few minors. The first run was 2026-10-24; its findings stand in `.scratch/shaked
    awake (`caffeinate -i`) for the length of the run.
 4. **Verify.** Every finding the coordinator reports as a defect is reproduced or confirmed in the source by
    the coordinating session itself, and marked ✓. A subagent's report is a lead, not a fact.
-5. **Write down.** One file per package under `.scratch/shakedown/` (`core.md`, `table.md`, …) plus
+5. **Write down.** One file per package in a folder under `.scratch/` (`core.md`, `table.md`, …) plus
    `cross-package.md`, `design-family.md`, `agent-docs.md`, `mobile-touch.md` and `wishes.md`, each with
    `Status: needs-triage`, the findings ranked, the wishes with their three proofs, and what held up. On a
    rerun, compare with the last run: what is fixed, what is new, what came back.

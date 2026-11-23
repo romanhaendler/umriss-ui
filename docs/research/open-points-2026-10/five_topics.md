@@ -91,7 +91,7 @@ Gathered on 2026-10-11 from the repository at 5d31cd85, for the grilling of the 
 - ADR-0003: an active node is not a selection.
 - ADR-0023: components report, the application decides.
 - ADR-0047: a component holds its own view.
-- The `onSelect` spec (`.scratch/charts-on-select/spec.md`) and the range-selection spec (`.scratch/chart-range-selection-and-navigator/spec.md`) exist; I did not read them. Range selection and a navigator are "Not built" (ADR-0056).
+- The `onSelect` spec (the delivered spec `charts-on-select`) and the range-selection spec (the delivered spec `chart-range-selection-and-navigator`) exist; I did not read them. Range selection and a navigator are "Not built" (ADR-0056).
 
 ## 5. Arrangeable dashboard
 

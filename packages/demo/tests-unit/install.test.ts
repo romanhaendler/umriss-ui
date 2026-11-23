@@ -29,7 +29,7 @@ describe("installCommand", () => {
   });
 });
 
-describe("dependencyLine (.scratch/site-front-page)", () => {
+describe("dependencyLine", () => {
   it("says a package with no umriss peers stands alone", () => {
     expect(dependencyLine({ name: "@umriss-ui/charts", peerDependencies: REACT })).toBe("stands alone");
     expect(dependencyLine({ name: "@umriss-ui/fixture" })).toBe("stands alone");

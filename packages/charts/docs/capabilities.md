@@ -517,8 +517,7 @@ Wanted, not yet built (charts-review Q12). The entries pointing at a spec are no
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 * **A navigator.** A small overview of the whole course under the plot, its
-  window the span in view. It waits for a design session of its own:
-  `.scratch/chart-navigator/spec.md`.
+  window the span in view. It waits for a design session of its own (`.scratch/chart-navigator/spec.md`).
 * **Horizontal bars.** The next kind: a ranking with long names, read by name
   (ADR-0059).
 * **Sankey.** What flows where, from stage to stage (ADR-0059).

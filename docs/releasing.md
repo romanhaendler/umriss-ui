@@ -88,7 +88,7 @@ publishes the tarball, and the job that holds the token has no pnpm at all
    an entry that lacks its line (earlier sections are not checked). A changelog has no `## Unreleased` section:
    nothing is written to it during development.
 2. The package's `README.md` read against what it now claims. Every roadmap
-   line against the open work under `.scratch/` — work that
+   line against the open work (`.scratch/release-1-0/map.md`) — work that
    is done leaves the roadmap; a figure only by a link to the record that
    holds it (the charts' benchmark stands once, in `docs/capabilities.md`); a
    "cannot" against ADR-0032. No test holds this: a README is prose, and a lint

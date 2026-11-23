@@ -4,14 +4,14 @@ Date: 2026-10-02. Basis: `pnpm build:pages` on `main` @ 3b2fa14 (built locally, 
 
 ## 0. What shapes it (intent, deliberately decided)
 
-- **"No documentation website beside the demos."** `docs/README.md` ("What is deliberately not here"): "The demos are the documentation for the components … the demos, prerendered, are the website. A site that hosts this prose beside them is still a product decision with a spec of its own." Same in `.scratch/docs-structure/spec.md:120`.
+- **"No documentation website beside the demos."** `docs/README.md` ("What is deliberately not here"): "The demos are the documentation for the components … the demos, prerendered, are the website. A site that hosts this prose beside them is still a product decision with a spec of its own." Same in `the delivered spec `docs-structure`:120`.
 - **"No prose copy of the demos."** (`docs/README.md`) – a component is described only where it runs; props tables generated from `src/`.
-- **ADR-0037 / `.scratch/search-visibility/spec.md`**: every page a path with prerendered text (heading, lead, every example's source, props tables) inside `#root`; app replaces it via `createRoot` (no hydration). Front page = "hub": title, link to every page, sitemap, canonical, og, JSON-LD. D14: "The demos look exactly as before." Revised 2 Oct: front page named `umriss-ui`, one og-image for all pages. Out of scope: own domain, blog, translated pages, backlinks.
-- **`.scratch/demo-rework/spec.md`** (+ `research-component-pages.md`, MUI/React Aria/Polaris/AG Grid/… survey): Scenarios page first in every demo (Polaris pattern: job-titled screens, numbered callouts, "Built from", code collapsed); component page skeleton rubric · H1 · lede (≤60 words, no praise) · import line · about (≤3 paragraphs) · first example w/o heading · Examples · When to use something else · Keyboard · API · Known limits (→ ADR-0032). No "Why" section. Five invented worlds (operations, logistics, controlling, planning, plant). Positioning ADR-0035.
-- **`.scratch/demo-as-documentation/spec.md`** (origin brief: "wie zB bei MUI … Ausführliche Beispiele inklusive Code. Bessere Strukturierung"): refused a TS/JS toggle, **refused "the component-gallery landing page (it answers the same question as the sidebar, more expensively)"**, refused colourful syntax theme.
-- **`.scratch/demo-consolidation/spec.md`** / ADR-0020: one shell (`packages/demo`) for all five demos.
-- **`.scratch/ai-readable-docs/spec.md`**: `llms.txt` + `llms-full.txt` per package, `docs/llms-full.md` shipped in npm; no MCP server.
-- **`.scratch/visuelle-wertigkeit/spec.md`**: "the goal is … a library that looks high-grade" (component design language, not the site).
+- **ADR-0037 / the delivered spec `search-visibility`**: every page a path with prerendered text (heading, lead, every example's source, props tables) inside `#root`; app replaces it via `createRoot` (no hydration). Front page = "hub": title, link to every page, sitemap, canonical, og, JSON-LD. D14: "The demos look exactly as before." Revised 2 Oct: front page named `umriss-ui`, one og-image for all pages. Out of scope: own domain, blog, translated pages, backlinks.
+- **the delivered spec `demo-rework`** (+ `research-component-pages.md`, MUI/React Aria/Polaris/AG Grid/… survey): Scenarios page first in every demo (Polaris pattern: job-titled screens, numbered callouts, "Built from", code collapsed); component page skeleton rubric · H1 · lede (≤60 words, no praise) · import line · about (≤3 paragraphs) · first example w/o heading · Examples · When to use something else · Keyboard · API · Known limits (→ ADR-0032). No "Why" section. Five invented worlds (operations, logistics, controlling, planning, plant). Positioning ADR-0035.
+- **the delivered spec `demo-as-documentation`** (origin brief: "wie zB bei MUI … Ausführliche Beispiele inklusive Code. Bessere Strukturierung"): refused a TS/JS toggle, **refused "the component-gallery landing page (it answers the same question as the sidebar, more expensively)"**, refused colourful syntax theme.
+- **the delivered spec `demo-consolidation`** / ADR-0020: one shell (`packages/demo`) for all five demos.
+- **the delivered spec `ai-readable-docs`**: `llms.txt` + `llms-full.txt` per package, `docs/llms-full.md` shipped in npm; no MCP server.
+- **the delivered spec `visuelle-wertigkeit`**: "the goal is … a library that looks high-grade" (component design language, not the site).
 - Shell code comment `packages/demo/src/Shell.tsx:16-18`: "The shell is built from plain elements and not from the building blocks it shows: surroundings made of the exhibit itself blur what is being examined." (Exception: the Cmd-K palette is the library's `CommandPalette`.)
 
 ## 1. Front page (site root `/umriss-ui/`)
@@ -141,7 +141,7 @@ Example pages observed:
 18. **Theming/tokens/design language, accessibility, standards, changelog, ADR-0032 not on the site** – only GitHub (`docs/design-language.md`, `docs/standards.md`, `packages/*/CHANGELOG.md`).
 19. **Palette searches names/titles only**, not ledes, props or prose – `Shell.tsx:60-83`.
 20. **No playground / sandbox / live prop controls**; examples are fixed files.
-21. **llms-full grew past the self-set 200 kB MCP threshold** (core 580 kB) – `.scratch/ai-readable-docs/spec.md` A3; llms.txt not linked from inside the demos.
+21. **llms-full grew past the self-set 200 kB MCP threshold** (core 580 kB) – the delivered spec `ai-readable-docs` A3; llms.txt not linked from inside the demos.
 22. **Front-page monospace falls back to a Courier-like font** – `build-pages.mjs:163` `code { font: 600 .95rem ui-monospace, monospace }`.
 
 ## Strengths worth keeping (for the comparison)
