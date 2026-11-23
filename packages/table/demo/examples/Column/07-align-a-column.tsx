@@ -36,7 +36,7 @@ export default function AlignAColumn() {
           {(s) => <Badge tone={TONE[s]}>{s}</Badge>}
         </Column>
         <Column value="bin" label="Bin" align="center" sortable={false} />
-        <Column value="stock" label="Stock" numeric align="center" width={110} sortable aggregate="sum" />
+        <Column value="stock" label="Stock" numeric align="center" sortable aggregate="sum" />
         <Column value="lot" label="Lot" align="start" />
         <Column value="supplier" label="Supplier" align="end" width={120} sortable />
       </Table>
