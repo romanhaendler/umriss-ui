@@ -115,7 +115,7 @@ export default function AServiceOverview() {
           <Card key={service.id}>
             <CardHeader eyebrow={service.team} title={service.name} />
             <CardBody>
-              <Grid minItemWidth="130px" gap={3}>
+              <Grid minItemWidth="8.125rem" gap={3}>
                 <Stat
                   label="p95 latency"
                   value={now?.p95}

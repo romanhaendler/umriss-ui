@@ -561,7 +561,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
                 key={header.key}
                 id={rowId(header)}
                 className={styles.header}
-                style={{ height: `${header.height}px`, paddingLeft: `calc(var(--u-space-3) + ${header.depth} * var(--u-space-3))` }}
+                style={{ height: `${header.height}px`, paddingLeft: `${12 + header.depth * 12}px` }}
                 data-lane={header.lane}
                 data-group={header.group}
                 data-row={header.kind}

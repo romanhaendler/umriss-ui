@@ -287,6 +287,13 @@ moves, at another one spacing, icons and sheets grow with the type beside them.
 What stays px does not depend on the text: the radii, the hairlines and edges, the
 focus ring and the hit areas (24 px, WCAG 2.5.8).
 
+**Inside a surface whose own size is px, the room stays px.** A lane header of a
+px width and a px row height, a hit area, a tile a caller sizes in px: the padding
+that has to fit that size is px, or derived from the measure, not read from the
+rem space scale; otherwise at a large root font size the padding grows and the
+text has less room on a surface that did not. Where the surface can grow or
+wrap instead, it does, and the space scale applies.
+
 **A measure is a token a caller's layout hangs on**: the size of a box, the room
 between boxes, the width a column or a sheet takes, the layering. A changed value
 of a measure is a major change from `1.0.0` on; any other token (a colour, an edge,
