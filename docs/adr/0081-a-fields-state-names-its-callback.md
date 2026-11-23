@@ -1,6 +1,6 @@
 # A field's state names its callback
 
-Status: accepted
+Status: accepted, amended on 2026-11-23 (CommandPalette's onChoose is onSelect since 0.58)
 Date:   2026-10-31
 
 Core's fields answered the same question in four ways. `Input` handed an event to `onChange`,
@@ -87,3 +87,8 @@ Every caller of a core field moves from `onChange` to `onValueChange`; the old n
 goes. Hosts get one rule to learn. A field whose application passes `value={undefined}` is controlled
 and empty, which differs from React's native inputs: a bare `<Input value={undefined}>` no longer
 types freely.
+
+## Amendment 2026-11-23
+
+`CommandPalette`'s `onChoose` is `onSelect` since 0.58; `onChoose` works for that minor and warns. The
+rest of the paragraph on callbacks that report an event stands.

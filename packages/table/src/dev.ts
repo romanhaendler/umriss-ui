@@ -4,7 +4,7 @@
    appears once per reason - a table renders often, and nobody reads a console
    full of repetitions. */
 
-import { hasWarned, warnOnce as warnOnceFor } from "@umriss-ui/core";
+import { warnOnce as warnOnceFor } from "@umriss-ui/core";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -20,7 +20,16 @@ export const DEV: boolean = detectDev();
 
 const PACKAGE = "@umriss-ui/table";
 
-export const warnOnce = (reason: string, message: string): void => warnOnceFor(PACKAGE, reason, message);
+const told = new Set<string>();
+
+export const warnOnce = (reason: string, message: string): void => {
+  told.add(reason);
+  warnOnceFor(PACKAGE, reason, message);
+};
+
+/** The one wording of a renamed name that still works. */
+export const warnDeprecated = (old: string, replacement: string): void =>
+  warnOnce(`deprecated:${old}`, `${old} is deprecated and goes in the next minor release; use ${replacement}.`);
 
 const NO_ROWS: readonly never[] = [];
 
@@ -53,7 +62,7 @@ const differs = (a: unknown, b: unknown): boolean => {
     Never changes which function is held. */
 export function probeStale(who: string, held: unknown, next: unknown, rows: readonly unknown[], arg?: (row: unknown) => unknown): void {
   const key = `stale:${who}`;
-  if (!DEV || held === next || hasWarned(PACKAGE, key) || typeof held !== "function" || typeof next !== "function") return;
+  if (!DEV || held === next || told.has(key) || typeof held !== "function" || typeof next !== "function") return;
   const way = who === "The rowKey" ? "Carry the value in the rows." : "Carry the value in the rows, or give the column a `key` that changes with it.";
   try {
     for (let i = 0; i < Math.min(rows.length, 1000); i++) {

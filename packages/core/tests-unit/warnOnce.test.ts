@@ -26,7 +26,7 @@ describe("warnOnce", () => {
 
   it("reports whether a package has been warned for a reason", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { hasWarned, warnOnce } = await import("../src");
+    const { hasWarned, warnOnce } = await import("../src/lib/dev");
     expect(hasWarned("@umriss-ui/table", "stale")).toBe(false);
     warnOnce("@umriss-ui/table", "stale", "warned");
     expect(hasWarned("@umriss-ui/table", "stale")).toBe(true);

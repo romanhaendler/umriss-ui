@@ -136,10 +136,6 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
         if (event.key === "Enter") connection.registry.settleSearch(true);
       }}
       clearable
-      onClear={() => {
-        connection.registry.markTyped(false);
-        snapshot.setSearch("");
-      }}
       placeholder={placeholder ?? wording.tableSearchPlaceholder}
       aria-label={name ?? wording.tableSearchLabel}
     />

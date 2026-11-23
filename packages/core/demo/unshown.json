@@ -15,5 +15,8 @@
   "DateTimeRangePickerProps.max": "(f) twin: reads as DatePickerProps.max, which its example shows",
   "MeterProps.showLabel": "(g) deprecated alias: the old name of showValue",
   "ProgressBarProps.showLabel": "(g) deprecated alias: the old name of showValue",
-  "CommandPaletteProps.onChoose": "(g) deprecated alias: the old name of onSelect"
+  "CommandPaletteProps.onChoose": "(g) deprecated alias: the old name of onSelect",
+  "InputProps.onClear": "(g) deprecated alias: the cross reports through onValueChange",
+  "SelectProps.onClear": "(g) deprecated alias: the cross reports through onValueChange",
+  "TreeSearchProps.onClear": "(g) deprecated alias: the cross reports through onValueChange"
 }

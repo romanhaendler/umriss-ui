@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormField, Grid, Input } from "../../../src";
 
 export const title = "Clear the field";
-export const lead = "Set `clearable` on a controlled field with `onClear`; the cross appears only while there is content.";
+export const lead = "Set `clearable` on a field; the cross clears it, reports through `onValueChange`, and appears only while there is content.";
 
 export default function ClearTheField() {
   const [tracking, setTracking] = useState("FP-4471-2026-0317");
@@ -15,7 +15,6 @@ export default function ClearTheField() {
           clearable
           value={tracking}
           onValueChange={setTracking}
-          onClear={() => setTracking("")}
         />
       </FormField>
       <FormField label="Search shipments" hint="Still empty, so no cross.">
@@ -24,7 +23,6 @@ export default function ClearTheField() {
           placeholder="Name, street or number"
           value={search}
           onValueChange={setSearch}
-          onClear={() => setSearch("")}
         />
       </FormField>
     </Grid>

@@ -9,7 +9,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { DEFAULT_FORMATS, LanguageProvider, mergeLanguage, useFormats, useTimeZoneLabel } from "../src";
+import { DEFAULT_FORMATS, LanguageProvider, useFormats, useTimeZoneLabel } from "../src";
+import { mergeLanguage } from "../src/lib/language";
 import { GERMAN_FORMATS } from "../src/lib/language/de";
 
 const AT = new Date("2026-03-17T03:30:00Z");

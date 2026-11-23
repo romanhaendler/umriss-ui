@@ -729,7 +729,7 @@ function ControlRoomBody() {
           now={now}
           selectedTask={batch}
           onSelectedTaskChange={(task) => setBatch(task)}
-          label={(subtask) => BATCH_NAMES.get(subtask.task) ?? subtask.task}
+          barLabel={(subtask) => BATCH_NAMES.get(subtask.task) ?? subtask.task}
         >
           {LANES.map((lane) => (
             <Lane key={lane.id} id={lane.id} label={lane.label} />

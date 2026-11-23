@@ -116,6 +116,8 @@ export interface Tree<K, S extends TreeKey = string> {
    * it already lies inside the tree - otherwise a state change from outside
    * would tear the focus away. An explicit request, however, is exactly the
    * opposite of an incidental change, and for that it needs a sign.
+   *
+   * @experimental a counter a view reacts to; a minor release may replace it.
    */
   revealCount: number;
   /** Set where virtualisation runs; goes to `<TreeView virtual={…}>`. */

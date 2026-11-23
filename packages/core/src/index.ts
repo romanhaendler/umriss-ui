@@ -40,9 +40,33 @@ export * from "./components/VisuallyHidden";
 /* The window arithmetic and its hook stand for themselves; the tree and
    @umriss-ui/table use them. No styles - the place in the list is a matter of
    indifference to the bundle. */
-export * from "./lib/virtual";
+export { visibleWindow } from "./lib/virtual";
+export type { RowWindow } from "./lib/virtual";
 export * from "./lib/useVirtual";
-export * from "./lib/language";
+export {
+  DEFAULT_FORMATS,
+  DEFAULT_LANGUAGE,
+  DEFAULT_SEPARATORS,
+  DEFAULT_WORDING,
+  LanguageProvider,
+  formatsFor,
+  separatorsOf,
+  useFormats,
+  useLanguage,
+  useTimeZoneLabel,
+  useWording,
+  writeNumber,
+} from "./lib/language";
+export type {
+  Formats,
+  Language,
+  LanguageOptions,
+  LanguageProviderProps,
+  NumberFormat,
+  NumberOptions,
+  Separators,
+  Wording,
+} from "./lib/language";
 export * from "./lib/provider";
 export * from "./lib/glyphs";
 
@@ -57,7 +81,7 @@ export * from "./lib/duration";
 export * from "./lib/useFreshness";
 export * from "./lib/useContextMenuTrigger";
 export { createLongPress } from "./lib/longPress";
-export type { LongPress, PressPoint, PressPointer } from "./lib/longPress";
+export type { LongPress, PressPointer } from "./lib/longPress";
 
 /* The context menu stands at the end for the same rule. It
    brings no stylesheet of its own - it wears the menu's - so no baseline can
@@ -91,7 +115,7 @@ export type { RefProp } from "./lib/refProp";
 
 /* The development warning of the packages that depend on core: once per package and reason, silent in
    production, the package named in the prefix. */
-export { hasWarned, warnOnce } from "./lib/dev";
+export { warnOnce } from "./lib/dev";
 
 /* The segmented control stands at the end for the
    same rule, not at "RadioGroup" beside its mechanics. */

@@ -11,6 +11,7 @@ import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { mergeRefs } from "../../lib/mergeRefs";
+import { warnDeprecated } from "../../lib/dev";
 import { announce, silence } from "../../lib/announce";
 import { Listbox, optionId } from "../../lib/listbox";
 import type { ListboxItem } from "../../lib/listbox";
@@ -21,16 +22,16 @@ import type { ListboxItem } from "../../lib/listbox";
    it (ADR-0041). */
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
-export interface SelectProps<T extends string | number = string> extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size" | "value" | "defaultValue">, RefProp<HTMLSelectElement> {
+export interface SelectProps<T extends string | number = string> extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size" | "value" | "defaultValue" | "multiple">, RefProp<HTMLSelectElement> {
   /** The chosen option's value; `null` and `undefined` mean the empty option.
       With it the field is controlled; `defaultValue` starts an uncontrolled one. */
-  value?: T | readonly string[] | null;
+  value?: T | null;
   /** Uncontrolled: the value to start at. */
-  defaultValue?: T | readonly string[] | null;
+  defaultValue?: T | null;
   /** Runs with the chosen option's value on every choice, `null` for the
       empty option. A number comes back as a number when the option is a
-      `<option value={1}>` among the select's own children. Not for a
-      `multiple` select, which reports through `onChange` as the platform does. */
+      `<option value={1}>` among the select's own children. A select of
+      several values is a `MultiSelect`. */
   onValueChange?: (value: T | null) => void;
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
@@ -46,11 +47,12 @@ export interface SelectProps<T extends string | number = string> extends Omit<Se
   invalid?: boolean;
   /**
    * Shows a × once a selection has been made, which fades in on hover/focus
-   * and empties the selection. Requires a controlled field (value) and
-   * onClear; sensible for optional selects with a placeholder option.
+   * and empties the selection, controlled or not, and reports `null` through
+   * `onValueChange`; sensible for optional selects with a placeholder option.
    */
   clearable?: boolean;
-  /** Called by the ×; resets the selection to the placeholder option. */
+  /** The old way to clear: called after the × has cleared the field.
+      @deprecated since 0.58 - use onValueChange. */
   onClear?: () => void;
 }
 
@@ -89,11 +91,13 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
   const field = useFormField();
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;
-  const hasSelection = clearable && !rest.multiple && String(value ?? defaultValue ?? "") !== "";
+  const controlled = isControlled(props);
+  /* An uncontrolled field's choice lives in the select: the × follows it through what the choices report. */
+  const [picked, setPicked] = useState(String(defaultValue ?? ""));
+  const hasSelection = clearable && (controlled ? String(value ?? "") : picked) !== "";
 
-  /* `multiple` is a list box without a popup, and a disabled select opens
-     nothing: both stay the system's. */
-  const ownList = !rest.multiple && !disabled;
+  /* A disabled select opens nothing: it stays the system's. */
+  const ownList = !disabled;
   const selectRef = useRef<HTMLSelectElement>(null);
   const listboxId = useId();
   const [open, setOpen] = useState(false);
@@ -142,6 +146,19 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
     element.selectedIndex = index;
     element.dispatchEvent(new Event("input", { bubbles: true }));
     element.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  /* The × does what choosing the empty option would, so that the callbacks and a form's listeners see it. */
+  const clear = () => {
+    const element = selectRef.current;
+    if (!element) return;
+    element.value = "";
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+    if (onClear) {
+      warnDeprecated("Select onClear", "onValueChange");
+      onClear();
+    }
   };
 
   const moveTo = (index: number) => {
@@ -227,10 +244,11 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
         {...valueProps}
         {...rest}
         onChange={
-          onChange || onValueChange
+          onChange || onValueChange || (clearable && !controlled)
             ? (event) => {
+                if (!controlled) setPicked(event.target.value);
                 onChange?.(event);
-                if (!rest.multiple) onValueChange?.(event.target.value === "" ? null : ((numberOptions(children).get(event.target.value) ?? event.target.value) as T));
+                onValueChange?.(event.target.value === "" ? null : ((numberOptions(children).get(event.target.value) ?? event.target.value) as T));
               }
             : undefined
         }
@@ -264,7 +282,7 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
           aria-label={wording.clearSelection}
           className={styles.clear}
           onMouseDown={(event) => event.preventDefault() /* focus stays on the select */}
-          onClick={() => onClear?.()}
+          onClick={clear}
         >
           <CrossGlyph />
         </button>

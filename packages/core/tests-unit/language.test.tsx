@@ -70,7 +70,7 @@ describe("mergeLanguage – overriding entry by entry", () => {
 
 describe("Without a provider – the tested normal case", () => {
   it("labels the clear cross in the text field in English", () => {
-    render(<Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />);
+    render(<Input value="etwas" onChange={() => {}} clearable />);
     expect(screen.getByLabelText("Clear input")).toBeTruthy();
   });
 
@@ -84,7 +84,7 @@ describe("With a provider – the override reaches the component", () => {
   it("carries an overridden entry into the text field", () => {
     render(
       <LanguageProvider wording={{ clearInput: "Eingabe leeren" }}>
-        <Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />
+        <Input value="etwas" onChange={() => {}} clearable />
       </LanguageProvider>,
     );
     expect(screen.getByLabelText("Eingabe leeren")).toBeTruthy();

@@ -32,7 +32,7 @@ import { isControlled, useFormReset } from "../../lib/useFieldValue";
 export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols" | "value">, RefProp<HTMLTextAreaElement> {
   /** The text; `null` and `undefined` mean empty. With it the field is
       controlled; `defaultValue` starts an uncontrolled one. */
-  value?: string | number | readonly string[] | null;
+  value?: string | null;
   /** Runs with the new text on every edit. `onChange` stays for the event -
       what `register` and Formik read. */
   onValueChange?: (value: string) => void;

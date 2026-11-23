@@ -42,7 +42,6 @@ export default function ARowThatHoldsStill() {
           value={search}
           onValueChange={setSearch}
           clearable
-          onClear={() => setSearch("")}
         />
         <Select ref={statusRef} aria-label="Status" defaultValue="">
           <option value="">Every status</option>

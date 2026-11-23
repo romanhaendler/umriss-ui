@@ -45,9 +45,11 @@ export interface PopoverProps {
    * a non-focusable shell and the actual trigger sits inside it.
    *
    * @default anchorRef
+   * @experimental for builders of composite fields; a minor release may change it.
    */
   focusRef?: RefObject<HTMLElement | null>;
-  /** Further elements whose click does not count as an outside click (e.g. the clear ×). */
+  /** Further elements whose click does not count as an outside click (e.g. the clear ×).
+      @experimental for builders of composite fields; a minor release may change it. */
   insideRefs?: ReadonlyArray<RefObject<HTMLElement | null>>;
   /** Where the surface points as long as there is room. Where there is none,
       it flips to the other side and clamps to the edge of the window. */
@@ -77,10 +79,12 @@ export interface PopoverProps {
   /** Additional class on the surface. */
   className?: string;
   /** A Tab past the last control of the panel, or a Shift+Tab before its first, closes it and
-      moves on from the anchor, so that the focus never falls to the page's end. */
+      moves on from the anchor, so that the focus never falls to the page's end.
+      @experimental for builders of composite fields; a minor release may change it. */
   closeOnTabOut?: boolean;
   /** Runs when the focus leaves any element of the surface (it bubbles from
-      the panel and from what is portalled out of it). */
+      the panel and from what is portalled out of it).
+      @experimental for builders of composite fields; a minor release may change it. */
   onBlur?: (event: FocusEvent<HTMLDivElement>) => void;
   /** What stands in the surface. */
   children: ReactNode;

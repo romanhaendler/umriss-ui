@@ -1,7 +1,9 @@
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { isControlled } from "../../lib/useFieldValue";
+import { mergeRefs } from "../../lib/mergeRefs";
+import { warnDeprecated } from "../../lib/dev";
 import { useFormField } from "../FormField";
 import type { RefProp } from "../../lib/refProp";
 import styles from "./Input.module.css";
@@ -15,7 +17,7 @@ import { CrossGlyph } from "../../lib/glyphs";
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "value">, RefProp<HTMLInputElement> {
   /** The text; `null` and `undefined` mean empty. With it the field is
       controlled; `defaultValue` starts an uncontrolled one. */
-  value?: string | number | readonly string[] | null;
+  value?: string | null;
   /** Runs with the new text on every edit. `onChange` stays for the event -
       what `register` and Formik read. */
   onValueChange?: (value: string) => void;
@@ -42,11 +44,12 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   numeric?: boolean;
   /**
    * Shows a gently appearing cross where there is content, which clears the
-   * input. Requires a controlled field (value) and onClear.
+   * field, controlled or not, and reports the empty text through
+   * `onValueChange` and `onChange`.
    */
   clearable?: boolean;
-  /** Called by the cross. Clearing belongs to the caller: only it knows
-      whether "empty" here is the empty text or no value at all. */
+  /** The old way to clear: called after the cross has cleared the field.
+      @deprecated since 0.58 - use onValueChange. */
   onClear?: () => void;
 }
 
@@ -67,7 +70,22 @@ export function Input(props: InputProps) {
   /* `undefined` and `null` read as empty: the field stays controlled once it was given a `value`. */
   const controlled = isControlled(props);
   const valueProps = controlled ? { value: value ?? "" } : {};
-  const hasContent = String(value ?? rest.defaultValue ?? "").length > 0;
+  /* An uncontrolled field's text lives in the input: the cross follows it through what the edits report. */
+  const [typed, setTyped] = useState(String(rest.defaultValue ?? ""));
+  const hasContent = (controlled ? String(value ?? "") : typed).length > 0;
+  const inputRef = useRef<HTMLInputElement>(null);
+  /* The cross does what typing the empty text would: the native value is set and `input` is dispatched, so that
+     `onChange`, `onValueChange` and a form's listeners see it, and a controlled field is put back by React unless its owner follows. */
+  const clear = () => {
+    const input = inputRef.current;
+    if (!input) return;
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    if (onClear) {
+      warnDeprecated("Input onClear", "onValueChange");
+      onClear();
+    }
+  };
   const hasStart = start !== undefined && start !== null && start !== false && start !== "";
   const hasEnd = end !== undefined && end !== null && end !== false && end !== "";
 
@@ -101,7 +119,7 @@ export function Input(props: InputProps) {
         </span>
       )}
       <input
-        ref={ref}
+        ref={mergeRefs(inputRef, ref)}
         id={id ?? field?.id}
         disabled={disabled}
         aria-describedby={describedBy}
@@ -112,8 +130,9 @@ export function Input(props: InputProps) {
         {...rest}
         /* Without a handler there is none to give React: its own warning for a controlled field with none stands. */
         onChange={
-          onChange || onValueChange
+          onChange || onValueChange || (clearable && !controlled)
             ? (event) => {
+                if (!controlled) setTyped(event.target.value);
                 onChange?.(event);
                 onValueChange?.(event.target.value);
               }
@@ -127,7 +146,7 @@ export function Input(props: InputProps) {
           aria-label={wording.clearInput}
           className={styles.clear}
           onMouseDown={(event) => event.preventDefault() /* focus stays in the field */}
-          onClick={() => onClear?.()}
+          onClick={clear}
         >
           <CrossGlyph />
         </button>

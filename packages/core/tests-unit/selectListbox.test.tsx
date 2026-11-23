@@ -73,15 +73,8 @@ describe("Select - its own list", () => {
     expect(listbox()).toBeNull();
   });
 
-  it("stays native with multiple and when disabled", () => {
-    const { rerender } = render(
-      <Select aria-label="Cost centre" multiple defaultValue={[]}>
-        {CENTRES}
-      </Select>,
-    );
-    expect(press(screen.getByRole("listbox"))).toBe(true);
-    expect(screen.getAllByRole("listbox")).toHaveLength(1);
-    rerender(
+  it("stays native when disabled", () => {
+    render(
       <Select aria-label="Cost centre" disabled defaultValue="">
         {CENTRES}
       </Select>,

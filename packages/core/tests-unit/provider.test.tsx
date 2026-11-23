@@ -44,7 +44,7 @@ function ToastSample({ duration }: { duration?: number }) {
 
 describe("Without a provider – the checked normal case", () => {
   it("labels an input as before", () => {
-    render(<Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />);
+    render(<Input value="etwas" onChange={() => {}} clearable />);
     expect(screen.getByLabelText("Clear input")).toBeTruthy();
   });
 
@@ -224,7 +224,7 @@ describe("Wording through the root provider", () => {
   it("reaches the component that uses the entry", () => {
     render(
       <UmrissProvider language={{ wording: { clearInput: "Clear input" } }}>
-        <Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />
+        <Input value="etwas" onChange={() => {}} clearable />
       </UmrissProvider>,
     );
     expect(screen.getByLabelText("Clear input")).toBeTruthy();
@@ -243,7 +243,7 @@ describe("Wording through the root provider", () => {
     render(
       <UmrissProvider language={{ wording: { clearInput: "Eingabe leeren" } }}>
         <UmrissProvider toast={{ duration: 1000 }}>
-          <Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />
+          <Input value="etwas" onChange={() => {}} clearable />
         </UmrissProvider>
       </UmrissProvider>,
     );

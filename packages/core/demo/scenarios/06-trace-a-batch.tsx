@@ -110,7 +110,7 @@ export default function TraceABatch() {
             height={120}
             selectedTask={batch}
             onSelectedTaskChange={(task) => setBatch(task)}
-            label={(subtask) => BATCHES.find((one) => one.id === subtask.task)?.name ?? subtask.task}
+            barLabel={(subtask) => BATCHES.find((one) => one.id === subtask.task)?.name ?? subtask.task}
           >
             <Lane id="kiln" label="Kiln K1" />
             <Subtasks data={STEPS} tasks={TASKS} />

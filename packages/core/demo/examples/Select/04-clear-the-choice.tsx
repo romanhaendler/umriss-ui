@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormField, Select, Stack, Text } from "../../../src";
 
 export const title = "Clear the choice";
-export const lead = "For an optional choice set `clearable` with `onClear`; the cross appears once something is chosen.";
+export const lead = "For an optional choice set `clearable`; the cross, which reports `null` through `onValueChange`, appears once something is chosen.";
 
 export default function ClearTheChoice() {
   const [owner, setOwner] = useState("helen");
@@ -10,7 +10,7 @@ export default function ClearTheChoice() {
   return (
     <Stack gap={3} style={{ maxWidth: 320 }}>
       <FormField label="Filter by budget owner">
-        <Select clearable value={owner} onValueChange={(value) => setOwner(value ?? "")} onClear={() => setOwner("")}>
+        <Select clearable value={owner} onValueChange={(value) => setOwner(value ?? "")}>
           <option value="" disabled>
             All owners
           </option>

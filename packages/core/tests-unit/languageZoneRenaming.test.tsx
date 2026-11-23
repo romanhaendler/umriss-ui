@@ -4,7 +4,8 @@
    Time zone of the run: Europe/Berlin (vitest.config.ts). */
 
 import { expect, it } from "vitest";
-import { DEFAULT_FORMATS, mergeLanguage } from "../src";
+import { DEFAULT_FORMATS } from "../src";
+import { mergeLanguage } from "../src/lib/language";
 
 const AT = new Date("2026-03-17T03:30:00Z");
 

@@ -1,8 +1,7 @@
 /* The Select page's configurator: which props its panel offers, in its order,
    the name it starts with - a field without a `FormField` around it needs one
    of its own - and its options. A native select keeps its own choice, so the
-   code needs no state; `clearable` is left out, because it needs a controlled
-   value and `onClear`. Their values and defaults come from `SelectProps`
+   code needs no state; `clearable` is left out, because its example shows it. Their values and defaults come from `SelectProps`
    (`@umriss-ui/demo`, `tooling/configurator.ts`). */
 
 import { Select } from "../../src";
