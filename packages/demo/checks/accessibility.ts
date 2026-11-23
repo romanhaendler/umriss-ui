@@ -38,28 +38,7 @@ export interface Exception {
   reason: string;
 }
 
-export const EXCEPTIONS: readonly Exception[] = [
-  {
-    foreground: "#8b8b8b",
-    background: "#ffffff",
-    upTo: 3.5,
-    reason:
-      "Muted text on the surface, light. Already recorded in " +
-      "packages/core/tests-unit/contrast.test.ts as a deliberate exception and held " +
-      "there against 3:1: the token carries labels, units and hints, never body " +
-      "text. Axe applies 4.5:1 to every small text and does not know this " +
-      "distinction. Whoever promotes the token to body text has to darken it and " +
-      "strike both exceptions.",
-  },
-  {
-    foreground: "#77777e",
-    background: "#161618",
-    upTo: 4.2,
-    reason:
-      "The same pair in the dark theme (measured 4.07:1). See the reason for the " +
-      "light exception and packages/core/tests-unit/contrast.test.ts.",
-  },
-];
+export const EXCEPTIONS: readonly Exception[] = [];
 
 /**
  * Findings that are real and still open - not defined away, but named and

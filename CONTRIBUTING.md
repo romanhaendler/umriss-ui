@@ -58,10 +58,9 @@ command of its own. It checks every page of each demo (the list the outline
 gives) one at a time, in both themes,
 against WCAG 2.1 AA – axe's "best-practice" rules are deliberately not included:
 a check that reports opinions as errors gets switched off rather than read. The
-tolerated list in `packages/demo/checks/accessibility.ts` holds two entries, the
-muted text's colour pair in the light and in the dark theme, each with its
-reason; the list of open findings is empty, and a test of its own holds that
-every entry carries a reason.
+tolerated list in `packages/demo/checks/accessibility.ts` is empty, and so is
+the list of open findings; a test of its own holds that any entry a later change
+adds carries a reason.
 
 For the charts part only:
 

@@ -163,7 +163,7 @@ npx skills add romanhaendler/umriss-ui --skill umriss-ui
 
 ## Accessibility
 
-The components are built to WCAG 2.1 AA. Every page of all seven demos, in the light and the dark theme, is checked with [axe](https://github.com/dequelabs/axe-core) against its A and AA rules, and two colour pairs of the muted text are tolerated with a written reason (see [`CONTRIBUTING.md`](CONTRIBUTING.md)). That is an aim and an automatic check: no conformance is declared, and no screen reader run stands behind it.
+The components are built to WCAG 2.1 AA. Every page of all seven demos, in the light and the dark theme, is checked with [axe](https://github.com/dequelabs/axe-core) against its A and AA rules, and no colour pair is tolerated: the list of exceptions is empty (see [`CONTRIBUTING.md`](CONTRIBUTING.md)). That is an aim and an automatic check: no conformance is declared, and no screen reader run stands behind it.
 
 ## Maturity
 
