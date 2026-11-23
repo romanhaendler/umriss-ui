@@ -1,8 +1,8 @@
 # A navigator shows the whole course
 
-Status: needs-triage
+Status: after 1.0 - needs a design session of its own
 Date:   2026-10-11
-Origin: moved out of `.scratch/chart-range-selection-and-navigator/spec.md`
+Origin: split off from the spec of the chart's range selection, which is built
 (its questions Q5-Q10 and the tickets that belonged to them), corrected against
 `docs/research/open-points-2026-10/range_and_navigator.md`. Roadmap row C5:
 the navigator is a piece of its own, later, with a design session of its own.

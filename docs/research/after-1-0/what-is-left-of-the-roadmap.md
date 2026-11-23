@@ -1,6 +1,6 @@
 # From the open points to work: what is left
 
-Status: ready-for-agent
+Status: after 1.0 - capabilities that can be added without a break
 Date:   2026-10-11, cut to the unbuilt rest 2026-11-23
 Origin: the scan of the workspace against comparable libraries on 10 Oct 2026 and a grilling over everything
 that was still open. The facts it stood on are in `docs/research/open-points-2026-10/`.
@@ -14,7 +14,7 @@ spec of its own before it is built.
 
 | # | Question | Decision |
 | --- | --- | --- |
-| C5 | The navigator | Its own piece, with its own grilling: `.scratch/chart-navigator/spec.md`. |
+| C5 | The navigator | Its own piece, with its own grilling: [`chart-navigator.md`](chart-navigator.md). |
 | C6 | The set of chart kinds | Open, by the same test as before: a kind is added when it answers a question no kind there answers better, and each gets an ADR saying which question. |
 | C7 | Which kinds | Horizontal bars first (a ranking with long names). Sankey with a case of its own (what flows where). A bullet graph, in core beside `Meter`. A treemap later. |
 | C8 | Foreign renderers | Still none. Opening means the library builds more kinds, not that others build them in. |
