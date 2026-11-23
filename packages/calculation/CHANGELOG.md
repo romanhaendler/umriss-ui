@@ -14,6 +14,21 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.57.0 – Released in step: the true browser floors, Node 22 and React `^19` (Nov. 2026)
+
+### Added
+
+- **`API.md` lists the whole surface:** the members of a union beside its name. What is marked `@experimental` will stand under a heading of its own, and a deprecated member last in its table.
+
+### Changed
+
+- **The package names Node 22 in `engines` and peers `react` and `react-dom` as `^19`** (was `>=19`), so that a later React is not promised before it has run (ADR-0083).
+  - Migration: nothing on Node 22 and React 19.
+
+### Fixed
+
+- **The browser floors are the ones the source needs: Chrome 125, Firefox 121, Safari 17.5.** The documents named Chrome 123 and Firefox 120, though `round()` and `:has()` were in use; nothing changes in a browser. A test now derives the three numbers from the source. A build that pins `cssTarget` or `browserslist` to `chrome123` or `firefox120` raises them to `chrome125` and `firefox121`.
+
 ## 0.56.0 – Released in step with the table (Nov. 2026)
 
 No change of its own; the number moves with the table, whose columns now take `align` and stand at the start, centred or at the end.

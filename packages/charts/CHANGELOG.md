@@ -30,6 +30,23 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.57.0 – `API.md` lists the props of the chart's parts; a legend is reached in the order it is drawn (Nov. 2026)
+
+### Added
+
+- **`API.md` lists the whole surface:** the props of `Chart`, the axes and the series parts under `useChart`, and `Scale`'s `toPx`, `fromPx` and `ticks`. What is marked `@experimental` will stand under a heading of its own, and a deprecated member last in its table.
+
+### Changed
+
+- **The package names Node 22 in `engines` and peers `react` and `react-dom` as `^19`** (was `>=19`), so that a later React is not promised before it has run (ADR-0083).
+  - Migration: nothing on Node 22 and React 19.
+
+### Fixed
+
+- **Tab reaches a legend in the order it is drawn:** before the plot at the top or left, after it at the bottom or right, in every browser.
+- **The browser floors are the ones the source needs: Chrome 125, Firefox 121, Safari 17.5.** The documents named Chrome 123 and Firefox 120, though `round()` and `:has()` were in use; nothing changes in a browser. A test now derives the three numbers from the source. A build that pins `cssTarget` or `browserslist` to `chrome123` or `firefox120` raises them to `chrome125` and `firefox121`.
+- **`API.md` states the defaults the code applies:** `Bar`'s `barWidth` (0.8, documented as "just under 1"), `Line`'s `strokeWidth` and `markers`, `Area`'s `fillOpacity` and `strokeWidth`, `BoxPlot`'s `boxWidth`, `Scatter`'s `radius`, `Chart`'s `padding`, and the axes' `id`, `position` and `domain`. `LinearScale` stands under "Classes".
+
 ## 0.56.0 – Released in step with the table (Nov. 2026)
 
 No change of its own; the number moves with the table, whose columns now take `align` and stand at the start, centred or at the end.

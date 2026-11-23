@@ -27,6 +27,26 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.57.0 – `API.md` lists the whole surface; `Tone` and three props types (Nov. 2026)
+
+### Added
+
+- **`API.md` lists the whole surface:** a member written as a method, and the members of a union beside its name. What is marked `@experimental` will stand under a heading of its own, and a deprecated member last in its table.
+- **`Tone`,** the five tones as one exported type, and the props types `ToneGlyphProps`, `CalendarGlyphProps` and `FormFieldBoundaryProps`.
+- **`presets` of `DateRangePicker` and `DateTimeRangePicker` takes a `readonly` array.**
+- **Examples** for `defaultValue` on `FileInput`, `DateTimePicker` and `DateTimeRangePicker`, and for `ToneGlyph`, `CalendarGlyph` and `FormFieldBoundary`.
+
+### Changed
+
+- **The package names Node 22 in `engines` and peers `react` and `react-dom` as `^19`** (was `>=19`), so that a later React is not promised before it has run (ADR-0083).
+  - Migration: nothing on Node 22 and React 19.
+
+### Fixed
+
+- **The browser floors are the ones the source needs: Chrome 125, Firefox 121, Safari 17.5.** The documents named Chrome 123 and Firefox 120, though `round()` and `:has()` were in use; nothing changes in a browser. A test now derives the three numbers from the source. A build that pins `cssTarget` or `browserslist` to `chrome123` or `firefox120` raises them to `chrome125` and `firefox121`.
+- **`API.md` prints each glyph's own default size** (9, 10, 12 or 16), not 12 for all.
+- **The doc sentences of `UmrissConfig` and `useFormField`** say what the code does; the parameter names in `Wording` are English.
+
 ## 0.56.0 – Released in step with the table (Nov. 2026)
 
 No change of its own; the number moves with the table, whose columns now take `align` and stand at the start, centred or at the end.

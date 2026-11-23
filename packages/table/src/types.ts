@@ -5,7 +5,7 @@
    compile and what must not. */
 
 import type { HTMLAttributes, ReactNode } from "react";
-import type { Formats, LimitSet, NumberFormat, RefProp, Wording } from "@umriss-ui/core";
+import type { Formats, LimitSet, NumberOptions, RefProp, Wording } from "@umriss-ui/core";
 import type { TableRequest, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
@@ -15,7 +15,9 @@ import type { DateFormat, ExportCell } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
 
-export type { NumberFormat };
+/** How a number column is written: `"percent"`, `"count"`, or Intl's number
+    options plus `decimals`; the same shape as core's `NumberFormat`. */
+export type NumberFormat = "percent" | "count" | NumberOptions;
 
 /* --- Values --------------------------------------------------------------- */
 

@@ -26,6 +26,25 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.57.0 – `API.md` lists the props of `Table`, `Column` and `Action`; three examples (Nov. 2026)
+
+### Added
+
+- **`API.md` lists the whole surface:** the props of `Table`, `Column`, `VerdictColumn`, `GroupBy`, `RowDetail`, `RowActions` and `Action` under `useTable`, `exportAs`, the members of `TableRef`, and the whole signature of the bulk action's `onSelect`. What is marked `@experimental` will stand under a heading of its own, and a deprecated member last in its table.
+- **Examples** for a list filter set through `initialView`, a filter on a boolean column, and `Search`'s `onValueChange`.
+
+### Changed
+
+- **The properties the table sets on itself for pinning and header levels are named `--_table-*`** (were `--u-table-*` and `--u-header-level`); they carried the tokens' prefix and were never tokens.
+  - Migration: nothing, unless a stylesheet of your own read them.
+- **The package names Node 22 in `engines` and peers `react` and `react-dom` as `^19`** (was `>=19`), so that a later React is not promised before it has run (ADR-0083).
+  - Migration: nothing on Node 22 and React 19.
+
+### Fixed
+
+- **The browser floors are the ones the source needs: Chrome 125, Firefox 121, Safari 17.5.** The documents named Chrome 123 and Firefox 120, though `round()` and `:has()` were in use; nothing changes in a browser. A test now derives the three numbers from the source. A build that pins `cssTarget` or `browserslist` to `chrome123` or `firefox120` raises them to `chrome125` and `firefox121`.
+- **`API.md` states `resizable`'s default,** and `TableView`'s doc comments name the folded groups, the open branches and the row filters' conditions.
+
 ## 0.56.0 – A column says where its values stand (Nov. 2026)
 
 ### Added

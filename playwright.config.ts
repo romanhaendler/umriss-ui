@@ -25,12 +25,11 @@ const wanted = asked?.length ? asked : ALL;
 const unknown = wanted.filter((d) => !ALL.includes(d));
 if (unknown.length) throw new Error(`DEMOS: unknown ${unknown.join(", ")}; known: ${ALL.join(", ")}`);
 
-/* ENGINES=firefox,webkit adds, per demo, a light project of that engine that
-   runs only the tests tagged @quick (unset = Chromium's projects alone). */
-const ENGINES = { firefox: devices["Desktop Firefox"], webkit: devices["Desktop Safari"] } as const;
-const engines = (process.env.ENGINES?.split(",").map((e) => e.trim()).filter(Boolean) ?? []).filter(
-  (e) => e !== "chromium",
-);
+/* ENGINES=chromium,firefox,webkit adds, per demo, a light project of each
+   named engine that runs only the tests tagged @quick and compares no
+   screenshot (unset = Chromium's projects alone, with their baselines). */
+const ENGINES = { chromium: devices["Desktop Chrome"], firefox: devices["Desktop Firefox"], webkit: devices["Desktop Safari"] } as const;
+const engines = process.env.ENGINES?.split(",").map((e) => e.trim()).filter(Boolean) ?? [];
 const badEngine = engines.filter((e) => !(e in ENGINES));
 if (badEngine.length) throw new Error(`ENGINES: unknown ${badEngine.join(", ")}; known: chromium, firefox, webkit`);
 
@@ -65,7 +64,7 @@ export default defineConfig({
         use: { baseURL: `http://localhost:${portOf(pkg)}`, colorScheme },
       })),
     ),
-    /* Layout checks only: the baselines are Chromium's, so no screenshot is compared here. */
+    /* Layout checks only: the baselines are darwin Chromium's, so no screenshot is compared here. */
     ...wanted.flatMap((pkg) =>
       (engines as (keyof typeof ENGINES)[]).map((engine) => ({
         name: `${pkg === "core" ? "ui" : pkg}-quick-${engine}`,

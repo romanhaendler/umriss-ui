@@ -244,7 +244,7 @@ re-sorts them should expect baselines to wander.
   phone and narrow-width layout checks, and the shell's sideways-scroll checks.
   A test that should belong takes the tag in its `test(...)` or `describe(...)`
   call; nothing else lists them. It does not replace the full run.
-  `ENGINES=firefox,webkit` (comma-separated; `chromium` is always the default)
+  `ENGINES=firefox,webkit` (comma-separated; `chromium` can be named too)
   adds those engines' projects, `<package>-quick-firefox` and `-quick-webkit`: light
   only, the `@quick` tests alone, and no screenshot is compared (the baselines are
   Chromium's), so they run on Linux too. `ENGINES=webkit` alone runs only WebKit.

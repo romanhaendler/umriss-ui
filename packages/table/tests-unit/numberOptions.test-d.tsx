@@ -19,7 +19,8 @@ export function Columns() {
   );
 }
 
-/* The table's `NumberFormat` is core's, exported again: assignable both ways. */
+/* The table declares its own `NumberFormat` (the props gate wants a local
+   declaration); it and core's stay assignable both ways. */
 
 declare const own: NumberFormat;
 declare const core: CoreNumberFormat;

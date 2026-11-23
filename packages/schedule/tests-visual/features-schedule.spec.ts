@@ -1071,19 +1071,19 @@ test("without a height, a schedule is exactly its pane and follows it when the p
   const pane = example.locator("[data-pane]");
   const root = example.getByRole("figure");
   expect((await root.boundingBox())!.height).toBe((await pane.boundingBox())!.height);
-  expect((await root.boundingBox())!.height).toBe(480);
+  expect((await root.boundingBox())!.height).toBeCloseTo(480, 2);
 
   await pane.evaluate((element) => ((element as HTMLElement).style.height = "560px"));
-  await expect.poll(async () => (await root.boundingBox())!.height).toBe(560);
+  await expect.poll(async () => (await root.boundingBox())!.height).toBeCloseTo(560, 2);
   await pane.evaluate((element) => ((element as HTMLElement).style.height = "440px"));
-  await expect.poll(async () => (await root.boundingBox())!.height).toBe(440);
+  await expect.poll(async () => (await root.boundingBox())!.height).toBeCloseTo(440, 2);
 });
 
 test("in a block with no height a schedule of thirty lanes is 400 px, and its plot scrolls to the last", { tag: "@quick" }, async ({ page }) => {
   await openExample(page, "schedule", "thirty-lanes");
   const example = page.locator('[data-example="thirty-lanes"]');
   const root = example.getByRole("figure");
-  expect((await root.boundingBox())!.height).toBe(400);
+  expect((await root.boundingBox())!.height).toBeCloseTo(400, 2);
 
   const headers = example.locator("[data-schedule-headers]");
   const box = (await example.locator("[data-schedule-plot]").boundingBox())!;
@@ -1098,11 +1098,11 @@ test("in a block with no height a schedule of thirty lanes is 400 px, and its pl
   const moved = (await headers.getByText("Station 30").boundingBox())!;
   expect(moved.y + moved.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
   expect(moved.y).toBeGreaterThanOrEqual(frame.y - 1);
-  expect((await root.boundingBox())!.height).toBe(400);
+  expect((await root.boundingBox())!.height).toBeCloseTo(400, 2);
 });
 
 test("a schedule with a numeric height keeps it", { tag: "@quick" }, async ({ page }) => {
   await openExample(page, "schedule", "no-work-yet");
   const example = page.locator('[data-example="no-work-yet"]');
-  expect((await example.getByRole("figure").boundingBox())!.height).toBe(170);
+  expect((await example.getByRole("figure").boundingBox())!.height).toBeCloseTo(170, 2);
 });

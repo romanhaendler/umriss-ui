@@ -41,9 +41,10 @@ test("The typed field, Today and Clear stand in one row at 375 px, with no overf
   await page.setViewportSize({ width: 375, height: 800 });
   await openExample(page, "datepicker", "pick-a-day");
   const example = page.locator('[data-example="pick-a-day"]');
-  // A day must be picked first, or the panel has no Clear.
+  // A day must be picked first, or the panel has no Clear. The comma after the
+  // weekday is the engine's Intl: WebKit on Linux writes none.
   await example.getByRole("button", { name: "Delivery date" }).click();
-  await page.getByRole("dialog", { name: "Delivery date" }).getByRole("button", { name: /, 15 / }).first().click();
+  await page.getByRole("dialog", { name: "Delivery date" }).getByRole("button", { name: /,? 15 / }).first().click();
   await example.getByRole("button", { name: "Delivery date" }).click();
 
   const panel = page.getByRole("dialog", { name: "Delivery date" });
