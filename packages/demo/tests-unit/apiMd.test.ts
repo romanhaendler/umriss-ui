@@ -125,6 +125,37 @@ describe("apiMd", () => {
     expect(apiMd({ packageName: "@x/y", exports: [hookOpts, type("Opts")], entries: { Opts: { ...entries.Opts, props: entries.Opts.props.slice(0, 2) } } })).not.toContain("## Experimental\n");
   });
 
+  it("writes a function's signature, a constant's type and a class's public members", () => {
+    const text = apiMd({
+      packageName: "@x/y",
+      exports: [
+        { ...exported, name: "acknowledge", kind: "function", description: "Acknowledges.", declaration: "declare function acknowledge<T extends Alarm>(alarms: readonly T[], at?: Date): Result<T>;" },
+        { ...exported, name: "LIMIT", kind: "constant", description: "The cap.", declaration: "declare const LIMIT: 12;" },
+        { ...exported, name: "Scale", kind: "constant", description: "A scale.", declaration: "declare class Scale { private m; constructor(domain: number[]); toPx(v: number): number; readonly range: number; }" },
+      ],
+      entries: {},
+    });
+    expect(text).toContain("- acknowledge<T extends Alarm>(alarms: readonly T[], at?: Date): Result<T> — Acknowledges.");
+    expect(text).toContain("- LIMIT: 12 — The cap.");
+    expect(text).toContain("- Scale — A scale.\n  - constructor(domain: number[])\n  - toPx(v: number): number\n  - readonly range: number\n");
+    expect(text).not.toContain("private m");
+  });
+
+  it("gives a record type's members with their types in full, and counts a huge one", () => {
+    const members = (n: number) => Array.from({ length: n }, (_, i) => ({ ...prop, name: `k${i}`, type: "string" }));
+    const text = apiMd({
+      packageName: "@x/y",
+      exports: [type("Alarm"), type("Huge")],
+      entries: {
+        Alarm: { name: "Alarm", parameter: [], omitted: [], props: [{ ...prop, name: "id", type: "string", description: "Its id." }, { ...prop, name: "raised", type: "number", optional: true, description: "When." }] },
+        Huge: { name: "Huge", parameter: [], omitted: [], props: members(101) },
+      },
+    });
+    expect(text).toContain("- Alarm [id, raised]");
+    expect(text).toContain("## Types in full\n\n### Alarm\n\n- id: string — Its id.\n- raised?: number — When.\n");
+    expect(text).toContain("### Huge\n\n101 members;");
+  });
+
   it("tables a props type no component reaches, and throws for one without an entry", () => {
     const entries = { LoneProps: { name: "LoneProps", parameter: [], omitted: [], props: [{ ...prop, name: "a", type: "string" }] } };
     expect(apiMd({ packageName: "@x/y", exports: [type("LoneProps")], entries })).toContain("## Other props\n\n#### props (LoneProps)\n\n- a: string");

@@ -81,7 +81,9 @@ export interface CommandPaletteProps
     RefProp<HTMLDialogElement> {
   /** Controlled like the modal: opening is the caller's decision. */
   open: boolean;
-  /** Reports every wish to close - Escape, an outside click, a choice. */
+  /** Reports every wish to close - Escape, an outside click, the close button -
+      and never a choice: `onSelect` closes the palette itself where the choice
+      ends the work. */
   onClose: () => void;
   /** The candidates that are searched. They belong to the caller: the palette
       keeps no memory and does not reorder them. */

@@ -34,7 +34,7 @@ export interface ControlLimits {
   readonly lower: number;
 }
 
-/** Where the limits come from. There are exactly these two possibilities. */
+/** Where the limits come from: a centre and sigma the caller gives, or a reference window named by indices into the values - half-open, `from` up to but not `to`, never x values. There are exactly these two possibilities. */
 export type ControlLimitOrigin =
   /** From a baseline the caller has fixed. Taken as it is - even where the
       series would yield something else out of itself. */

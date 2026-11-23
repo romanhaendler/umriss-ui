@@ -119,6 +119,33 @@ function rows(props: readonly PropEntry[], own: Readonly<Record<string, string>>
   });
 }
 
+/** A declaration as it is written after its keywords: `f<T>(a: A, b?: B): R`. */
+const bare = (node: ts.Node) => flat(node.getText()).replace(/^(export )?(declare )?(function |const |let |var )/, "").replace(/;$/, "");
+
+/** What an export's declaration says of its use, one entry per line after the
+    name: a function's signatures, a class's constructor and public members,
+    a constant's type where it is short. */
+function usage(one: ExportedDeclaration): { head: string; below: string[] } {
+  const statements = ts.createSourceFile("d.ts", one.declaration, ts.ScriptTarget.Latest, true).statements;
+  if (one.kind === "function") {
+    const signatures = statements.filter(ts.isFunctionDeclaration).map(bare);
+    const typed = statements.filter(ts.isVariableStatement).map(bare);
+    const all = signatures.length > 0 ? signatures : typed;
+    if (all.length === 1) return { head: all[0]!.replace(/^(\w+): /, "$1"), below: [] };
+    return { head: one.name, below: all };
+  }
+  if (one.kind === "constant") {
+    const klass = statements.find(ts.isClassDeclaration);
+    if (klass !== undefined) {
+      const open = (member: ts.ClassElement) => !(ts.getCombinedModifierFlags(member as ts.Declaration) & (ts.ModifierFlags.Private | ts.ModifierFlags.Protected)) && !ts.isIndexSignatureDeclaration(member);
+      return { head: one.name, below: klass.members.filter(open).map(bare) };
+    }
+    const type = statements.filter(ts.isVariableStatement).flatMap((statement) => statement.declarationList.declarations).find((one) => one.type !== undefined)?.type;
+    return { head: type === undefined || flat(type.getText()).length > 80 ? one.name : `${one.name}: ${flat(type.getText())}`, below: [] };
+  }
+  return { head: one.name, below: [] };
+}
+
 export interface ApiMdJob {
   packageName: string;
   exports: readonly ExportedDeclaration[];
@@ -134,7 +161,8 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
        props types of components stand in full below. */
     const members = one.kind === "type" && !one.name.endsWith("Props") ? (entries[one.name]?.props ?? []).map((prop) => (prop.method === true ? written(prop) : prop.name)) : [];
     const values = one.kind === "type" ? unionMembers(one.declaration) : undefined;
-    return `- ${one.name}${sentence === "" ? "" : ` — ${sentence}`}${values === undefined ? "" : ` = ${values}`}${members.length === 0 || members.length > 100 ? "" : ` [${members.join(", ")}]`}`;
+    const { head, below } = usage(one);
+    return `- ${head}${sentence === "" ? "" : ` — ${sentence}`}${values === undefined ? "" : ` = ${values}`}${members.length === 0 || members.length > 100 ? "" : ` [${members.join(", ")}]`}${below.map((text) => `\n  - ${text}`).join("")}`;
   };
   const subpaths = [...new Set(exports.flatMap((one) => (one.subpath === undefined ? [] : [one.subpath])))];
   const stable = exports.filter((one) => one.experimental === undefined);
@@ -143,13 +171,22 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
     ...subpaths.map((subpath) => ({ title: `${packageName}/${subpath}`, list: stable.filter((one) => one.subpath === subpath) })),
   ].filter((section) => section.list.length > 0);
   for (const { title, list } of sections) out.push(`## ${title}`, "", ...[...list].sort(byName).map(line), "");
+  /* A type with members that is no props type: each member with its type and
+     optional mark. The wording's hundreds of labels are counted, not listed. */
+  const full = (name: string) => {
+    const entry = entries[name];
+    if (entry === undefined || entry.props.length === 0) return;
+    out.push(`### ${name}`, "", ...(entry.props.length > 100 ? [`${entry.props.length} members; see \`docs/llms-full.md\`.`] : rows(entry.props)), "");
+  };
   /* What may change in a minor: marked exports, and marked members as `Type.member`. */
   const experimental = [
     ...exports.filter((one) => one.experimental !== undefined).map((one) => ({ name: one.name, text: line(one) })),
     ...Object.values(entries).flatMap((entry) => entry.props.filter((prop) => prop.experimental !== undefined).map((prop) => ({ name: `${entry.name}.${prop.name}`, text: `- ${entry.name}.${prop.name}${firstSentence(prop.description) === "" ? "" : ` — ${firstSentence(prop.description)}`}` }))),
   ].sort(byName);
-  if (experimental.length > 0) out.push("## Experimental", "", ...experimental.map((one) => one.text), "");
-
+  if (experimental.length > 0) {
+    out.push("## Experimental", "", ...experimental.map((one) => one.text), "");
+    for (const one of exports.filter((one) => one.experimental !== undefined && one.kind === "type" && !one.name.endsWith("Props"))) full(one.name);
+  }
   /* The props type a component's type is a function of: a function type, a
      `typeof Name` (its props are `NameProps`), a named type whose declaration is one, or an interface
      of call signatures (the last stands for the rest). Only where the one
@@ -246,6 +283,12 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
   if (rest.some((name) => entries[name]!.props.length > 0)) {
     out.push("## Other props", "");
     table("props", rest);
+  }
+  const records = exports.filter((one) => one.kind === "type" && !one.name.endsWith("Props") && !tabled.has(one.name) && (entries[one.name]?.props.length ?? 0) > 0).sort(byName);
+  const standing = records.filter((one) => one.experimental === undefined);
+  if (standing.length > 0) {
+    out.push("## Types in full", "");
+    for (const one of standing) full(one.name);
   }
   return `${out.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd()}\n`;
 }

@@ -41,6 +41,9 @@
     gap: var(--u-space-2);
     max-width: var(--u-dashboard-max-width, 1560px);
     padding-block: var(--u-space-3);
+    /* The editing mode's outline lies inside the edge: the bar's first and
+       last control keep clear of it. */
+    padding-inline: 2px;
   }
 
   .mode {
