@@ -1,7 +1,7 @@
 # What 1.0 promises
 
 Type:   grilling
-Status: open
+Status: claimed
 
 ## Question
 

@@ -1,7 +1,7 @@
 # The surface of charts
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

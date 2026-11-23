@@ -40,6 +40,19 @@ beyond the map.
 
 ## Decisions so far
 
+- [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
+  `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
+  React is peered without an upper bound.
+- [The surface of the table](issues/06-the-surface-of-the-table.md): seven groups of candidates that break a
+  caller (a condition's three names, open and closed sets, pinning said twice, `GroupBy`, the hook's return,
+  `unknown` in the grid's reports, the public model); `API.md` leaves out parts it says it lists.
+- [Accessibility and browsers: claimed and checked](issues/12-accessibility-and-browsers-claimed-and-checked.md):
+  CI runs no browser, Firefox runs nowhere although it is claimed, axe samples to WCAG 2.1 AA without a level
+  being promised, no screen reader run is recorded.
+- [What `.scratch` still holds](issues/14-what-scratch-still-holds.md): two open tickets, both only a person
+  can close; eleven folders are done and deletable once the pointers from `docs/` are set right; no
+  `SECURITY.md`; two undecided design notes.
+
 ## Not yet specified
 
 - **The polishing points themselves.** Each review returns candidates; which are taken before 1.0, and which
@@ -54,3 +67,7 @@ beyond the map.
 - **The last gate**: whether a shakedown against the candidate belongs to the acceptance criteria.
 
 ## Out of scope
+
+- **The chart navigator and the unbuilt rest of the roadmap's package C** (horizontal bars, stacked overlap
+  in the schedule, the utilisation line, a timeline, saved views, Sankey and bullet graph): capabilities, and
+  each can be added after 1.0 without a break ([What `.scratch` still holds](issues/14-what-scratch-still-holds.md)).

@@ -1,7 +1,7 @@
 # What the demos leave unfinished
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

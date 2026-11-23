@@ -1,7 +1,7 @@
 # Tokens and wording as surface
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

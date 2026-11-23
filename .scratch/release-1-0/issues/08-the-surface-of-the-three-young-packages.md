@@ -1,7 +1,7 @@
 # The surface of the three young packages
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 

@@ -1,7 +1,7 @@
 # The surface of core
 
 Type:   research
-Status: open
+Status: claimed
 
 ## Question
 
