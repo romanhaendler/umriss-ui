@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/table",
-  "version": "0.57.0",
+  "version": "0.58.0",
   "description": "React data table for data-dense applications - sorting, filtering, grouping, aggregates, virtualisation. Declared the way it reads: columns as JSX, typed against their rows.",
   "license": "MIT",
   "author": "Roman Händler",
@@ -85,7 +85,7 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@umriss-ui/core": "workspace:^0.57.0",
+    "@umriss-ui/core": "workspace:^0.58.0",
     "react": "^19",
     "react-dom": "^19"
   },

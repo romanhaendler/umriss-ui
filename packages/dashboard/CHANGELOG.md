@@ -13,6 +13,19 @@ one section before an upgrade reads that one.
 
 The dashboard joins the other five packages' one number at its first version: they are released together, and a package without a change of its own still gets a heading for it.
 
+## 0.58.0 – The candidate for 1.0: `openCatalogue()`, the stored view is promised (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **`DashboardView` is the supported storage format - an addition is a minor release**, renaming or removing `widgets`, `type` or `size` a major one.
+
+### Changed
+
+- **`catalogue()` in `useDashboard`'s return is `openCatalogue()`.**
+  - Migration: Call `openCatalogue()`; `catalogue()` works for this minor with a warning and is removed in 1.0.0. The prop `catalogue` of `Dashboard` stays.
+
 ## 0.57.0 – `API.md` lists the props of `Dashboard`; an example of the editing actions (Nov. 2026)
 
 ### Added

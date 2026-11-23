@@ -30,6 +30,31 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.58.0 – The candidate for 1.0: `verdict`, a name required by type, the registry's types leave the index (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **Development warnings for two series of one name and for an unnamed series**, whose legend entry cannot hide it; `ChartPerf` and `onPerf` are marked experimental.
+
+### Changed
+
+- **The type `Side` is `LimitSide`.**
+  - Migration: Use `LimitSide`; `Side` works for this minor and is removed in 1.0.0.
+- **A series' verdict colour is `verdict` (was `tone`) on `Line`, `Area`, `Bar`, `Scatter`, `BoxPlot` and `ControlChart`.**
+  - Migration: Rename `tone` to `verdict`; `tone` works for this minor with a warning and is removed in 1.0.0.
+- **`Matrix` takes `row` and `StateBand` takes `state` in place of `value`.**
+  - Migration: Rename `value` to `row` on a `Matrix` and to `state` on a `StateBand`; `value` works for this minor with a warning and is removed in 1.0.0.
+- **The registry's types are no longer exported**: `AxisConfig`, `SeriesBase`, `SeriesConfig`, `SeriesKind`, the seven series configs, `LimitConfig`, `LimitLineConfig`, `LimitBandConfig`, `LegendConfig`, `TooltipConfig`, `MaterializedSeries`, `BoxChannels`, `Padding`, `Rect`, `ResolvedTheme`, `DataTableGroup` and `ParetoOptions`.
+  - Migration: Derive what you need from a component's props (`ChartProps["padding"]`) or declare your own type.
+- **`ChartProps` no longer takes a div's `onSelect`, `title` or `color`.**
+  - Migration: Drop them, or put them on an element around the chart.
+- **The role of a `LimitLine` or `LimitBand` is `"specification"` or `"control"`; `"zone"` is the control chart's own.**
+  - Migration: Give a limit with `role="zone"` the role `"control"` or `"specification"`.
+- **A `Chart` must be given `aria-label` or `aria-labelledby` by type.**
+  - Migration: Name every chart that compiled without a name; at run time nothing changes.
+
 ## 0.57.0 – `API.md` lists the props of the chart's parts; a legend is reached in the order it is drawn (Nov. 2026)
 
 ### Added

@@ -62,7 +62,24 @@ test("A pressed button is scaled by the press token", { tag: "@quick" }, async (
   const scaleWhilePressed = async () => {
     await button.hover();
     await page.mouse.down();
-    const scale = await button.evaluate((element) => new Promise<number>((done) => setTimeout(() => done(new DOMMatrix(getComputedStyle(element).transform).a), 400)));
+    /* The press takes a transition, and on a busy machine `:active` arrives late: read until the scale has left 1 and
+       stands still, three seconds at most. */
+    const scale = await button.evaluate(
+      (element) =>
+        new Promise<number>((done) => {
+          const started = performance.now();
+          let last = 1;
+          const read = () => {
+            const now = new DOMMatrix(getComputedStyle(element).transform).a;
+            if ((now < 1 && now === last) || performance.now() - started > 3000) done(now);
+            else {
+              last = now;
+              setTimeout(read, 100);
+            }
+          };
+          read();
+        }),
+    );
     await page.mouse.move(0, 0);
     await page.mouse.up();
     return scale;

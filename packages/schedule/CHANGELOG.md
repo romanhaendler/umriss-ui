@@ -18,6 +18,29 @@ moves from here under the rule above.
 
 ---
 
+## 0.58.0 – The candidate for 1.0: `predecessor` and `successor`, `barLabel`, a lead by keyboard (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **Alt+I and Alt+O lengthen the active subtask's lead-in and lead-out by one raster step**, with Shift they shorten it; a refusal by blocked time is read out.
+- **`aria-labelledby` alone names a schedule.**
+- **After Alt+I or Alt+O the live region reads the lead-in or lead-out and its new length.**
+
+### Changed
+
+- **A dependency names its `predecessor` and `successor` (were `from` and to).**
+  - Migration: Rename `from` to `predecessor` and to to `successor` on every dependency; the old names are read for this minor with a warning and removed in 1.0.0.
+- **`Schedule`'s `label` is `barLabel`, and `ends` on `Schedule` and on a dependency is `endMarks`.**
+  - Migration: Rename them; the old names work for this minor with a warning and are removed in 1.0.0.
+- **The resolved appearance is `{ provisional, fixed, muted, open }`.**
+  - Migration: Read `provisional` for `dashed` and `fixed` for `hatched`; the old two work for this minor and are removed in 1.0.0.
+
+### Fixed
+
+- **Moving, stretching and changing lane by keyboard read out a refusal by blocked time**; a lane change by keyboard into blocked time is refused, as a drag refuses it.
+
 ## 0.57.0 – `API.md` lists the props of the schedule's parts; `SubtaskPart` (Nov. 2026)
 
 ### Added

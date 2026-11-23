@@ -26,6 +26,27 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.58.0 – The candidate for 1.0: `conditions`, `GroupKey`, one way to pin and one way to export (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **The README states the three kinds of state an application can hold.**
+
+### Changed
+
+- **`t.filter` is `t.conditions`**, `t.foldAll` and `t.unfoldAll` are `t.foldAllGroups` and `t.unfoldAllGroups`, `GroupBy` (with `GroupByBase` and `GroupByComponent`) is `GroupKey`, `pin` on `RowActions` is `pinned`, and the model's input `filter` is `preFilter`.
+  - Migration: Use the new names; the old ones work for this minor with a warning and are removed in 1.0.0.
+- **`stickyRowHeader` and `t.asCsv()` are deprecated.**
+  - Migration: Put `pin="start"` on the row-header column and call `t.exportAs(csv)`; both old forms work for this minor with a warning and are removed in 1.0.0.
+- **`Table<Z, S, Key>` and `ActionProps<Z, S, Key>` are `Table<Z, Key, S>` and `ActionProps<Z, Key, S>`.**
+  - Migration: Swap the second and third type argument (`Table<Row, false, number>` becomes `Table<Row, number>`).
+- **`CellEdit.value`**, `RowSave.changes` and `RowAdd.values` are typed `string | number | boolean | Date | null` (were `unknown`).
+  - Migration: Code that assigned them to another type narrows or casts.
+- **The pure model (`tableModel`**, `TableProjection`, `TableInput`, `TreeInput`, `ModelColumn`, `AggregateColumn`, `AggregateKind`, `GroupLevel`, `RowGroup`, `Line`) is experimental; a model column's unset `searchable` follows the column (text is searched); `OwnAggregate` is `AggregateFunction`.
+  - Migration: Nothing in a table built with `useTable`; a direct caller of `tableModel` says `searchable: false` on a text column it does not want searched.
+
 ## 0.57.0 – `API.md` lists the props of `Table`, `Column` and `Action`; three examples (Nov. 2026)
 
 ### Added

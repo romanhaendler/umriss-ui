@@ -27,6 +27,40 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.58.0 – The candidate for 1.0: one word for density, the new names, rem for what sizes with the text (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **`UmrissProvider` warns once in development about a stylesheet that uses a renamed token.**
+- **`@experimental` marks `useTree`'s `revealCount` and `Popover`'s `focusRef`**, `insideRefs`, `closeOnTabOut` and `onBlur`; `API.md` lists them apart.
+
+### Changed
+
+- **`UmrissProvider`'s density is `"regular" | "compact"`; `"comfortable"` still works for this minor and warns.**
+  - Migration: Write `density="regular"` for `"comfortable"`; the old word is removed in 1.0.0.
+- **`useDensity()` returns `undefined` where no provider set a density (it returned `"comfortable"`).**
+  - Migration: Read `undefined` as not set and apply your own default.
+- **`showLabel` on `Meter` and `ProgressBar` is `showValue`**, `CommandPalette`'s `onChoose` is `onSelect`, `MenuItem`'s `tone` `"default"` is `"neutral"`, and the types `Key`, `Direction`, `Align` and `Side` are `TreeKey`, `TreeDirection`, `PopoverAlign` and `LimitSide`.
+  - Migration: Use the new names; the old ones work for this minor with a warning and are removed in 1.0.0.
+- **The space scale `--u-space-1` to `--u-space-8`**, the icon sizes, the buttons' paddings and the widths of modal, drawer and toast are rem, each equal to its former px at a `16px` root.
+  - Migration: Nothing moves at a `16px` root; at another root they grow with the text - set the token to a px value to pin one.
+- **`--u-control-height-xs` is removed.**
+  - Migration: Write the height where you read it (it was `1.125rem`).
+- **`--u-shadow-sticky` is `--u-color-shadow-sticky`, and `--u-color-edge-hover` is `--u-edge-color-hover`.**
+  - Migration: Use the new names; the old ones work for this minor, a development warning names them, and 1.0.0 removes them.
+- **`qualityGood` is removed from `Wording`, `DEFAULT_WORDING` and `GERMAN_WORDING`; nothing displayed it.**
+  - Migration: Delete `qualityGood` from a wording object you hand in; it has no replacement.
+- **The cross of `clearable` on `Input`**, `Select` and `TreeSearch` clears the field, controlled or not, and reports the empty value through `onValueChange` and `onChange`; `onClear` is deprecated.
+  - Migration: Handle the clearing in `onValueChange`; `onClear` is still called for this minor with a warning and is removed in 1.0.0.
+- **`value` of `Input` and `Textarea` is `string | null` (no number, no list).**
+  - Migration: Pass `String(n)`.
+- **`Select` no longer takes the native `multiple`, and its `value` and `defaultValue` are `T | null`.**
+  - Migration: Use `MultiSelect` for several values.
+- **`hasWarned`, `mergeLanguage`, `scrollForRow`, `RowPlacement`, `WindowInput` and `PressPoint` are no longer exported.**
+  - Migration: They were internals; to merge a wording spread `DEFAULT_WORDING`, to build a language use `UmrissProvider` or `LanguageProvider`.
+
 ## 0.57.0 – `API.md` lists the whole surface; `Tone` and three props types (Nov. 2026)
 
 ### Added

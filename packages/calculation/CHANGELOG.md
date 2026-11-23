@@ -14,6 +14,10 @@ From 0.34.0 the packages share one number - five, six from 0.40.0, when the dash
 
 ---
 
+## 0.58.0 – The candidate for 1.0, released in step (Nov. 2026)
+
+No change of its own; the number moves with the other six, whose surface is frozen with this minor. The calculation's density was `"regular" | "compact"` already, the word core now uses too.
+
 ## 0.57.0 – Released in step: the true browser floors, Node 22 and React `^19` (Nov. 2026)
 
 ### Added

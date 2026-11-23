@@ -12,6 +12,21 @@ own**, no matter which digit rose, with a `Migration:` line.
 
 Alarms joins the other six packages' one number at its first version.
 
+## 0.58.0 – The candidate for 1.0: `ages`, and the model is experimental (Nov. 2026)
+
+This is the last minor before `1.0.0`, and the surface is frozen with it. Every old name below works for this minor, warns once in development, and is removed in `1.0.0`; nothing else will differ between the two.
+
+### Added
+
+- **`AlarmInput`'s `asOf` takes a `Date` as well as milliseconds.**
+
+### Changed
+
+- **`freshness` on `AlarmList` and `AlarmBanner` is `ages`.**
+  - Migration: Pass `ages`; `freshness` works for this minor with a warning and is removed in 1.0.0.
+- **`alarmModel`, `AlarmProjection`, `alarmColumns`, `ALARM_COLUMNS` and `DEFAULT_ORDER` are experimental.**
+  - Migration: Nothing now; they may change in a minor.
+
 ## 0.57.0 – `lifecycleAt` is exported; the banner draws its border (Nov. 2026)
 
 ### Added
