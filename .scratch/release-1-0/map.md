@@ -68,6 +68,9 @@ beyond the map.
 - [What of the schedule's surface changes before 1.0](issues/19-what-of-the-schedules-surface-changes-before-1-0.md):
   `predecessor` / `successor` on a dependency, `barLabel`, `endMarks`, the resolved appearance's four words;
   lead-in and lead-out by keyboard; "an id in data, the record in what is handed out" stands as the rule.
+- [What of the tokens and the wording changes before 1.0](issues/20-what-of-the-tokens-and-the-wording-changes-before-1-0.md):
+  what sizes with the text becomes rem; 48 tokens and two factors are the measures; names and keys are frozen
+  as they stand, two tokens renamed, `qualityGood` gone; the joined sentences stay as a known limit.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
@@ -108,11 +111,7 @@ beyond the map.
 
 ## Not yet specified
 
-- **The polishing points themselves.** Each review returns candidates; which are taken before 1.0, and which
-  break a caller and so go to the maintainer, can only be asked once they are on the table. Expect one
-  decision ticket per review, perhaps per package.
-- **The order of the releases up to 1.0**, and how the taken points are cut into specs: hangs on the points
-  and on how breaking changes reach 1.0.
+Nothing: the last patch became "The releases up to 1.0".
 
 ## Out of scope
 
