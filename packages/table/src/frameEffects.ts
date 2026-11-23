@@ -25,11 +25,11 @@ export function useStickyHeaderHeights(tableRef: TableRef, stickyHeader: boolean
     if (!table || !stickyHeader) return;
     const head = table.tHead?.getBoundingClientRect().height ?? 0;
     const headerHeight = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
-    table.style.setProperty("--u-table-head", `${head}px`);
+    table.style.setProperty("--_table-head", `${head}px`);
     /* The column row sticks under the row of a group's cells. */
     const grouped = table.tHead && table.tHead.rows.length > 1 ? table.tHead.rows[0]!.getBoundingClientRect().height : 0;
-    table.style.setProperty("--u-table-head-group-row", `${grouped}px`);
-    table.style.setProperty("--u-table-group-header", `${headerHeight}px`);
+    table.style.setProperty("--_table-head-group-row", `${grouped}px`);
+    table.style.setProperty("--_table-group-header", `${headerHeight}px`);
     /* The browser's own scroll into view - a focused cell, a walked one -
        keeps what it brings in clear of the head. */
     table.parentElement?.style.setProperty("scroll-padding-top", `${head}px`);

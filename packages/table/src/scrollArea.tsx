@@ -48,12 +48,12 @@ export function PinPlacement({
     const cells = Array.from(columnRow(table)?.cells ?? []);
     let startWidth = 0;
     for (let i = 0; i < start; i++) {
-      table.style.setProperty(`--u-table-pin-start-${i}`, `${startWidth}px`);
+      table.style.setProperty(`--_table-pin-start-${i}`, `${startWidth}px`);
       startWidth += cells[i]?.getBoundingClientRect().width ?? 0;
     }
     let endWidth = 0;
     for (let i = 0; i < end; i++) {
-      table.style.setProperty(`--u-table-pin-end-${i}`, `${endWidth}px`);
+      table.style.setProperty(`--_table-pin-end-${i}`, `${endWidth}px`);
       endWidth += cells[cells.length - 1 - i]?.getBoundingClientRect().width ?? 0;
     }
     /* Other columns in a block are other widths. */
@@ -67,8 +67,8 @@ export function PinPlacement({
     onSticking(sticking);
     if (!sticking.start) startWidth = 0;
     if (!sticking.end) endWidth = 0;
-    table.style.setProperty("--u-table-pin-start", `${startWidth}px`);
-    table.style.setProperty("--u-table-pin-end", `${endWidth}px`);
+    table.style.setProperty("--_table-pin-start", `${startWidth}px`);
+    table.style.setProperty("--_table-pin-end", `${endWidth}px`);
     if (startWidth) scroller.style.setProperty("scroll-padding-left", `${startWidth}px`);
     if (endWidth) scroller.style.setProperty("scroll-padding-right", `${endWidth}px`);
     markUnder(scroller);
@@ -95,7 +95,7 @@ export function ViewWidth({ table: tableRef }: { table: RefObject<HTMLTableEleme
   useLayoutEffect(() => {
     const scroller = tableRef.current?.parentElement;
     if (!scroller) return;
-    const measure = () => scroller.style.setProperty("--u-table-view", `${scroller.clientWidth}px`);
+    const measure = () => scroller.style.setProperty("--_table-view", `${scroller.clientWidth}px`);
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(measure);

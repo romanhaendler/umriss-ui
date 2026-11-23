@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
+import type { RowKey } from "../types";
 
 /** What `useTableSelection` returns: the selected keys and the gestures on
     them. Give it to `useTable` as `selection` when the application holds the
     selection. */
-export interface TableSelection<T extends string | number> {
+export interface TableSelection<T extends RowKey> {
   /** The keys currently selected. */
   selected: ReadonlySet<T>;
   isSelected: (id: T) => boolean;
@@ -37,7 +38,7 @@ export interface TableSelection<T extends string | number> {
  * and supplies the states for "select all" (including indeterminate).
  * What the selection means in the domain stays the application's business.
  */
-export function useTableSelection<T extends string | number>(ids: readonly T[]): TableSelection<T> {
+export function useTableSelection<T extends RowKey>(ids: readonly T[]): TableSelection<T> {
   const [selected, setSelected] = useState<ReadonlySet<T>>(new Set());
   const [allMatching, setAllMatching] = useState(false);
   const [except, setExcept] = useState<ReadonlySet<T>>(new Set());

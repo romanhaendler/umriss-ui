@@ -121,7 +121,7 @@ describe("a page that begins inside a group", () => {
   });
 });
 
-describe("selecting a group (table-grouping 05)", () => {
+describe("selecting a group", () => {
   it("selects every row of a group header – on other pages and in folded groups as well", () => {
     render(<Orders paged selectable />);
     fireEvent.click(screen.getByRole("button", { name: "Fold Otto & Söhne, 3" }));
@@ -145,7 +145,7 @@ describe("selecting a group (table-grouping 05)", () => {
   });
 });
 
-describe("the treegrid (table-grouping 05)", () => {
+describe("the treegrid", () => {
   it("is a treegrid while grouped, with levels, folds and positions", () => {
     const { container } = render(<Orders />);
     expect(screen.getByRole("treegrid")).toBeTruthy();
@@ -238,7 +238,7 @@ describe("one level (ADR-0029, Q27)", () => {
   });
 });
 
-describe("the focus survives a fold (table-grouping 05)", () => {
+describe("the focus survives a fold", () => {
   const fold = (name: string) => screen.getByRole("button", { name });
   const box = (id: string) => screen.getByRole("checkbox", { name: `Select ${id}` });
 

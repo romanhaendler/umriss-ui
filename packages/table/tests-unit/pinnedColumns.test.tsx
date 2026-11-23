@@ -104,14 +104,14 @@ describe("the pinned blocks", () => {
   it("leave a table without pins as it was - only its row actions stick, at the end", () => {
     const { container } = render(<Plant declared={false} />);
     expect(labels(container).slice(2, 8)).toEqual(["Line", "Area", "Output", "Verdict", "Tag", "Scrap"]);
-    expect(container.querySelector("[style*='--u-table-pin-start-']")).toBeNull();
+    expect(container.querySelector("[style*='--_table-pin-start-']")).toBeNull();
     const head = container.querySelector("thead tr") as HTMLTableRowElement;
     expect(Array.from(head.cells).map((c) => c.className.includes("pinned"))).toEqual([...Array(8).fill(false), true]);
   });
 
   it("leave the row actions in the flow with `pin={false}`, and take them along behind a column pinned to the end", () => {
     const { container, rerender } = render(<Plant declared={false} actionsPin={false} />);
-    expect(container.querySelector("[style*='--u-table-pin-']")).toBeNull();
+    expect(container.querySelector("[style*='--_table-pin-']")).toBeNull();
     rerender(<Plant declared={false} />);
     expect(place(Array.from(headRow(container).cells).at(-1)!)).toBe("end 0");
     rerender(<Plant actionsPin={false} />);
@@ -129,8 +129,8 @@ describe("the pinned blocks", () => {
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ width: 50 } as DOMRect);
     const { container } = render(<Plant />);
     const table = container.querySelector("table")!;
-    expect(table.style.getPropertyValue("--u-table-pin-start-2")).toBe("100px");
-    expect(table.style.getPropertyValue("--u-table-pin-end-1")).toBe("50px");
+    expect(table.style.getPropertyValue("--_table-pin-start-2")).toBe("100px");
+    expect(table.style.getPropertyValue("--_table-pin-end-1")).toBe("50px");
     vi.restoreAllMocks();
   });
 });
@@ -225,7 +225,7 @@ describe("a virtualised table", () => {
   });
 });
 
-describe("pinning in the column menu (table-column-pinning 02)", () => {
+describe("pinning in the column menu", () => {
   const openMenu = () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     return screen.getByRole("dialog");

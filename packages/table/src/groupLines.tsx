@@ -311,7 +311,7 @@ export function GroupLine({
       data-row={virtual ? absolute : undefined}
       aria-rowindex={ariaRow}
       data-index={index}
-      style={header ? ({ "--u-header-level": group.level } as CSSProperties) : undefined}
+      style={header ? ({ "--_table-header-level": group.level } as CSSProperties) : undefined}
       aria-level={header ? group.level + 1 : depth}
       aria-expanded={open}
       aria-posinset={siblings.indexOf(group) + 1 || undefined}

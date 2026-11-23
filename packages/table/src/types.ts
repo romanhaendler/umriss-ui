@@ -5,20 +5,17 @@
    compile and what must not. */
 
 import type { HTMLAttributes, ReactNode } from "react";
-import type { Formats, LimitSet, RefProp, Wording } from "@umriss-ui/core";
+import type { Formats, LimitSet, NumberFormat, RefProp, Wording } from "@umriss-ui/core";
 import type { TableRequest, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { RowFilter } from "./rowFilter";
-import type { NumberOptions } from "@umriss-ui/core";
 import type { DateFormat, ExportCell } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
 
-/** How a number column is written: `"percent"`, `"count"`, or Intl's number
-    options plus `decimals`; the same shape as core's `NumberFormat`. */
-export type NumberFormat = "percent" | "count" | NumberOptions;
+export type { NumberFormat };
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -223,7 +220,8 @@ export interface ColumnBase {
   flex?: number;
   /** The least width of a column with `flex`, in pixels. */
   minWidth?: number;
-  /** Shows the drag grip on the header cell. */
+  /** Shows the drag grip on the header cell.
+      @default false */
   resizable?: boolean;
   /** Keeps the column in view while the table scrolls sideways: in a block
       before every other column, or after them. The user can change it in the
@@ -405,9 +403,7 @@ export type ColumnPreset<P, K extends Field<P> = Field<P>> = FieldColumn<P, K>;
 
 /** What every verdict column takes, whether its value is a field or a
     function. */
-export interface VerdictBase {
-  /** Names the column in its header, in the column menu and in the header row of the export. */
-  label: string;
+export interface VerdictBase extends Pick<ColumnBase, "label" | "width" | "flex" | "minWidth" | "resizable" | "pin"> {
   /** The limit set every value is read against. */
   limits: LimitSet;
   /** How the value and its excess are written. */
@@ -419,20 +415,6 @@ export interface VerdictBase {
   /** The side the whole column stands on: flush at the start, centred, or flush at the end.
       @default "end" */
   align?: "start" | "center" | "end";
-  /** Initial width in pixels.
-      @default the browser's */
-  width?: number;
-  /** A share of the width the other columns leave, so that the table fills its
-      frame: two columns with `flex={1}` split it equally. A width, declared or
-      dragged by hand, ends the flex of that column.
-      @default none: the column is as wide as its content */
-  flex?: number;
-  /** The least width of a column with `flex`, in pixels. */
-  minWidth?: number;
-  /** Shows the drag grip on the header cell. */
-  resizable?: boolean;
-  /** Keeps the column in view while the table scrolls sideways, before or after every other column. */
-  pin?: Pin;
   /** A verdict column has no list filter: four verdicts are filtered through the sort. */
   filter?: never;
   /** `"worst"`: the worst verdict among the rows – in the footer and in a

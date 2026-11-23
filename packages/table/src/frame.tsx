@@ -297,7 +297,7 @@ export function Frame({
           }}
           onBlur={gridEvents?.onBlur}
           data-depth={lines ? grouping.length : undefined}
-          style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
+          style={lines ? ({ "--_table-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
           {...name}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */

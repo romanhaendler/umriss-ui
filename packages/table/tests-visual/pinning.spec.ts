@@ -41,7 +41,7 @@ test("scrolled to the end: nothing lies under the end block, its shadow is gone"
   await expect(page.locator(`[data-example="${ID}"]`)).toHaveScreenshot(shot("end", info.project.name));
 });
 
-test("the column menu with a column pinned to each side (table-column-pinning 02)", async ({ page }, info) => {
+test("the column menu with a column pinned to each side", async ({ page }, info) => {
   await openExample(page, "width-and-pinning", ID);
   await page.locator(`[data-example="${ID}"]`).getByRole("button", { name: "Columns" }).click();
   const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
@@ -61,7 +61,7 @@ test("grouped and scrolled: a group header's label and aggregates stick in their
   await expect(table).toHaveScreenshot(shot("grouped", info.project.name));
 });
 
-test("a sticking group line lies over the pinned cells of the rows it passes (table-column-pinning 04)", async ({ page }) => {
+test("a sticking group line lies over the pinned cells of the rows it passes", async ({ page }) => {
   await openExample(page, "grid-mode", "the-whole-grid");
   const example = page.locator(`[data-example="the-whole-grid"]`);
   await example

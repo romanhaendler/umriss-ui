@@ -204,7 +204,7 @@
   }
 
   .sticky thead tr + tr .th {
-    top: var(--u-table-head-group-row, 0px);
+    top: var(--_table-head-group-row, 0px);
   }
 
   /* ---- Cells ----------------------------------------------------------- */
@@ -715,7 +715,7 @@
     position: sticky;
     left: 0;
     box-sizing: border-box;
-    width: var(--u-table-view, auto);
+    width: var(--_table-view, auto);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1316,12 +1316,12 @@
   }
 
   /* Under a sticky header the group headers stick as well, each level below the one
-     above it; the heights come from the table (parts.tsx, `--u-table-head` and
-     `--u-table-group-header`). */
+     above it; the heights come from the table (parts.tsx, `--_table-head` and
+     `--_table-group-header`). */
   .sticky tbody tr.groupHeader > .td {
     background: var(--u-color-surface-sunken);
     position: sticky;
-    top: calc(var(--u-table-head, 0px) + var(--u-header-level, 0) * var(--u-table-group-header, 0px));
+    top: calc(var(--_table-head, 0px) + var(--_table-header-level, 0) * var(--_table-group-header, 0px));
     z-index: 1;
   }
 
@@ -1346,7 +1346,7 @@
        without it the two read through each other. */
     background: var(--u-color-surface);
     position: sticky;
-    top: calc(var(--u-table-head, 0px) + var(--u-header-levels, 0) * var(--u-table-group-header, 0px));
+    top: calc(var(--_table-head, 0px) + var(--_table-header-levels, 0) * var(--_table-group-header, 0px));
   }
 
   .table tbody tr.groupHeader:hover > .td {

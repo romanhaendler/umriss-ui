@@ -38,14 +38,14 @@ export function pinnedCell(blocks: PinBlocks, first: number, last = first): Pinn
        padding by the block's width - it is in view wherever it sticks. */
     style: start
       ? {
-          left: `var(--u-table-pin-start-${pin.at}, 0px)`,
-          scrollMarginLeft: "calc(-1 * var(--u-table-pin-start, 0px))",
-          scrollMarginRight: "var(--u-table-pin-start, 0px)",
+          left: `var(--_table-pin-start-${pin.at}, 0px)`,
+          scrollMarginLeft: "calc(-1 * var(--_table-pin-start, 0px))",
+          scrollMarginRight: "var(--_table-pin-start, 0px)",
         }
       : {
-          right: `var(--u-table-pin-end-${pin.at}, 0px)`,
-          scrollMarginRight: "calc(-1 * var(--u-table-pin-end, 0px))",
-          scrollMarginLeft: "var(--u-table-pin-end, 0px)",
+          right: `var(--_table-pin-end-${pin.at}, 0px)`,
+          scrollMarginRight: "calc(-1 * var(--_table-pin-end, 0px))",
+          scrollMarginLeft: "var(--_table-pin-end, 0px)",
         },
   };
 }

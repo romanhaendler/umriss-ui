@@ -441,7 +441,7 @@ const scenarioFaults = (page: Page) =>
           if (Number(n) < Number(k) && m.left < other.right && other.left < m.right && m.top < other.bottom && other.top < m.bottom) faults.push(`${id}: marks ${n} and ${k} on each other`);
         }
       }
-      if (stage.querySelector('td[style*="--u-table-pin"], th[style*="--u-table-pin"]')) faults.push(`${id}: a pinned block`);
+      if (stage.querySelector('td[style*="--_table-pin"], th[style*="--_table-pin"]')) faults.push(`${id}: a pinned block`);
     }
     const root = document.documentElement;
     if (root.scrollWidth > root.clientWidth) faults.push(`the page scrolls sideways by ${root.scrollWidth - root.clientWidth} px`);
@@ -462,7 +462,7 @@ test("from a stage of 640 px the marks stand at their corners and a table keeps 
     await expect(stage).not.toHaveAttribute("data-narrow");
   }
   if (p.pinnedScenario === undefined) return;
-  await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--u-table-pin"]`).first()).toBeAttached();
+  await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--_table-pin"]`).first()).toBeAttached();
 });
 
 /* Previous and next: at the foot of every page, in the

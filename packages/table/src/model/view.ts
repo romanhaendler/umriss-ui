@@ -8,14 +8,18 @@
 
 import type { SortLevel } from "./tableModel";
 import type { Pin } from "./pinning";
+import type { RowKey } from "../types";
 
 /** Search, conditions, sort levels, page, page size, hidden columns, order,
-    dragged widths, the grouping and the pinned columns. Whatever is at its
+    dragged widths, the grouping, the pinned columns, the folded groups and the
+    open branches. Whatever is at its
     default is absent. The pre-filter never belongs to it: it is a function of
     the application. */
 export interface TableView<K extends string = string> {
   search?: string;
-  /** The conditions of the column filters, per column. A condition for a column
+  /** The conditions of the column filters and of the row filters, by column id
+      or filter id: a `ListCondition`, a `RangeCondition` or a `TextCondition` for
+      a column, whatever a filter of one's own defines. A condition for an id
       that does not exist, or whose filter is of another kind, falls out. */
   conditions?: Readonly<Record<string, unknown>>;
   sort?: readonly SortLevel<K>[];
@@ -30,7 +34,7 @@ export interface TableView<K extends string = string> {
   /** The paths of the folded groups. A path that no longer occurs falls out. */
   folded?: readonly string[];
   /** Tree rows: the keys of the open branches. A key that no longer occurs falls out. */
-  branches?: readonly (string | number)[];
+  branches?: readonly RowKey[];
   /** The pinned columns, whole, once the user's choice deviates from what the
       columns declare - `{}` when every declared pin was undone. A column that
       does not exist falls out. */

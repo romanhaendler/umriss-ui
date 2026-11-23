@@ -104,7 +104,7 @@ export function lineIndex(lines: readonly GridLine[]): Map<string, number> {
 /** The key of a row's line - the one the table, the walk and the editor
     name it by. */
 /* A number key is marked, so that the lines of `1` and `"1"` differ. */
-export const rowLine =(rowKey: string | number): string => `row:${typeof rowKey === "number" ? "#" : ""}${rowKey}`;
+export const rowLine = (rowKey: RowKey): string => `row:${typeof rowKey === "number" ? "#" : ""}${rowKey}`;
 
 /** One line of the grid. */
 export interface GridLine<Z = unknown> {
@@ -128,7 +128,7 @@ export interface GridInput<Z> {
   /** The body: its lines when grouped, its rows otherwise - all of them, not
       only the window a virtual table renders. */
   body: { lines: readonly Line<Z>[] } | { rows: readonly Z[] };
-  rowKey: (row: Z) => string | number;
+  rowKey: (row: Z) => RowKey;
   /** The rows whose detail stands open. */
   expanded: ReadonlySet<RowKey>;
   /** Whether a footer row stands. */
