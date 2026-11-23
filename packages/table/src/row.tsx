@@ -5,10 +5,10 @@ import { useContext } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { AngleGlyph, Button, Checkbox, Spinner } from "@umriss-ui/core";
 import type { FlatteningEntry, Formats, Wording } from "@umriss-ui/core";
-import { cx } from "./cx";
+import { cx, sideClass } from "./cx";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
 import type { RowKey, TableProps } from "./types";
-import { asText, isAbsent, isRightAligned } from "./values";
+import { asText, isAbsent, isRightAligned, sideOf } from "./values";
 import type { Line } from "./model/grouping";
 import { SpanCell } from "./groupLines";
 import { Absent } from "./aggregateValue";
@@ -440,7 +440,7 @@ function Cell({
       scope={spec.rowHeader ? "row" : undefined}
       /* The fold's own label is not part of the row's name. */
       aria-label={spec.rowHeader && tree ? rowName : undefined}
-      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
+      className={cx(styles.td, rightAligned && styles.numeric, sideClass(sideOf(kind, spec.rightAligned, spec.align)), spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
       style={pin.style}
       data-edit={editKind}
       data-editing={editor ? spec.id : undefined}

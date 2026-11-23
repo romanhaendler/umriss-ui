@@ -3,13 +3,13 @@
 
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useTimeZoneLabel } from "@umriss-ui/core";
-import { cx } from "./cx";
+import { cx, sideClass } from "./cx";
 import { ColumnFilterButton } from "./filter";
 import { filterOf } from "./columnFilter";
 import { contentWidth } from "./flexWidths";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
 import type { PinnedCell } from "./pinned";
-import { isDateFormat, isRightAligned } from "./values";
+import { isDateFormat, isRightAligned, sideOf } from "./values";
 import styles from "./Table.module.css";
 
 export function HeaderCell({
@@ -162,7 +162,7 @@ export function HeaderCell({
       tabIndex={spec.resizable && !sortable ? 0 : undefined}
       onKeyDown={handleKeyDown}
       data-flex={flexing ? spec.flex : undefined}
-      className={cx(styles.th, rightAligned && styles.numeric, width !== undefined && styles.sized, pin.className)}
+      className={cx(styles.th, rightAligned && styles.numeric, sideClass(sideOf(kind, spec.rightAligned, spec.align)), width !== undefined && styles.sized, pin.className)}
       style={{
         ...(width !== undefined ? { width } : {}),
         ...(flexing && spec.minWidth !== undefined ? { minWidth: spec.minWidth } : {}),

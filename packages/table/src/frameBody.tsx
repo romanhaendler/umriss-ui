@@ -9,7 +9,7 @@ import styles from "./Table.module.css";
 import { resetSearchAndFilters } from "./export";
 import type { HookSnapshot, Registry } from "./registry";
 import type { RowKey, TableProps } from "./types";
-import { isRightAligned } from "./values";
+import { sideOf } from "./values";
 import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
 import { GroupLine } from "./groupLines";
@@ -112,11 +112,11 @@ export function newRowBody(ctx: BodyContext, fresh: { fresh?: unknown }) {
   );
 }
 
-function rightAlignment(ctx: BodyContext) {
+function sides(ctx: BodyContext) {
   const { registry, hook, layout } = ctx;
   return [
-    ...Array.from({ length: layout.controlColumns + (layout.spanEntry ? 1 : 0) }, () => false),
-    ...layout.dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
+    ...Array.from({ length: layout.controlColumns + (layout.spanEntry ? 1 : 0) }, () => "start" as const),
+    ...layout.dataColumns.map((e) => sideOf(registry.kindOf(e, hook.rows), e.spec.rightAligned, e.spec.align)),
   ];
 }
 
@@ -129,7 +129,7 @@ function loadingBody(ctx: BodyContext) {
         /* A page's worth, or the lines the page last held: nothing below
            moves while the answer is on its way. */
         rows={ctx.pageSize ? ctx.heldLines || ctx.pageSize : undefined}
-        rightAligned={rightAlignment(ctx)}
+        sides={sides(ctx)}
       />
     </tbody>
   );
@@ -293,7 +293,7 @@ export function renderBody(ctx: BodyContext, loading: boolean, stale: boolean): 
       body: (
         <tbody>
           {standing.map((row, i) => renderRow(ctx, row, i, i))}
-          <LoadingRows columns={layout.columnCount} rows={fresh} rightAligned={rightAlignment(ctx)} />
+          <LoadingRows columns={layout.columnCount} rows={fresh} sides={sides(ctx)} />
           {fresh ? null : ctx.filler}
         </tbody>
       ),

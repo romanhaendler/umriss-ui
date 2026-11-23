@@ -63,6 +63,10 @@ export function columnKind<Z>(rows: readonly Z[], read: (row: Z) => unknown): Va
 export const isRightAligned = (kind: ValueKind, numeric: boolean | undefined): boolean =>
   numeric ?? kind === "number";
 
+/** The side a column stands on: its `align`, else the end for figures. */
+export const sideOf = (kind: ValueKind, numeric: boolean | undefined, align: "start" | "center" | "end" | undefined) =>
+  align ?? (isRightAligned(kind, numeric) ? "end" : "start");
+
 /**
  * The text a cell shows without `children`, or null for a kind that cannot
  * show itself as text. An absent value never arrives here.

@@ -164,6 +164,10 @@ const decimalsOf = (n: number): number => {
 const sameYear = ([from, to]: [unknown, unknown], timeZone: string | undefined): boolean =>
   from instanceof Date && to instanceof Date && zoneFields(from, timeZone).year === zoneFields(to, timeZone).year;
 
+/** The side an aggregate cell stands on: the column's `align`, else the end for figures. */
+export const aggregateSide = (entry: ColumnEntry, rows: readonly unknown[], known?: { value: unknown }) =>
+  entry.spec.align ?? (aggregateIsNumeric(entry, rows, known) ? "end" : "start");
+
 /** Whether an aggregate stands right-aligned in tabular figures: counts and
     numbers do, a point in time or a range of them follows its column. */
 export function aggregateIsNumeric(entry: ColumnEntry, rows: readonly unknown[], known?: { value: unknown }): boolean {

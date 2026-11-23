@@ -66,6 +66,7 @@ const signatureOf = (a: ColumnSpec): string =>
     a.share,
     a.rowHeader,
     a.rightAligned,
+    a.align,
     a.width,
     a.flex,
     a.minWidth,

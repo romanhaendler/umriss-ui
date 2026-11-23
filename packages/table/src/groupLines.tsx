@@ -14,8 +14,8 @@ import { useRef } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Checkbox, announce } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
-import { cx } from "./cx";
-import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
+import { cx, sideClass } from "./cx";
+import { AggregateValue, aggregateIsNumeric, aggregateSide } from "./aggregateValue";
 import { useCountTo } from "./motion";
 import type { ColumnEntry, HookSnapshot } from "./registry";
 import { aggregate, periodText, sizeOf } from "./model/grouping";
@@ -436,7 +436,7 @@ function AggregateCell({
   const rows = served ? total : group.rows;
   const written = <AggregateValue entry={entry} rows={rows} {...(served ? { given: value } : { known: value })} formats={formats} wording={wording} />;
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, rows, served ? undefined : value) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, rows, served ? undefined : value) && styles.numeric, sideClass(aggregateSide(entry, rows, served ? undefined : value)), styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
       {bar ? (
         <span className={styles.shareHost}>
           {written}

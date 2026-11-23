@@ -50,6 +50,7 @@ interface RuntimeColumnProps {
   share?: boolean;
   rowHeader?: boolean;
   numeric?: boolean;
+  align?: "start" | "center" | "end";
   width?: number;
   flex?: number;
   minWidth?: number;
@@ -119,6 +120,7 @@ function specFrom(props: RuntimeColumnProps, heading: Heading | null): ColumnSpe
     share: props.share,
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,
+    align: props.align === "start" || props.align === "center" || props.align === "end" ? props.align : undefined,
     width: props.width,
     flex: props.flex,
     minWidth: props.minWidth,

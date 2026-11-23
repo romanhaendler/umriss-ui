@@ -208,6 +208,11 @@ export interface ColumnBase {
   /** Right-aligned with tabular figures.
       @default decided by the first value present */
   numeric?: boolean;
+  /** The side the whole column stands on - label with its tools, values, footer,
+      aggregates and loading rows: flush at the start, centred, or flush at the end.
+      It decides the side alone; `numeric` keeps deciding the figures.
+      @default `"end"` for a numeric column, otherwise `"start"` */
+  align?: "start" | "center" | "end";
   /** Initial width in pixels.
       @default the browser's */
   width?: number;
@@ -411,6 +416,9 @@ export interface VerdictBase {
       weight the existing order stays) – or by the value.
       @default "verdict" */
   sortBy?: "verdict" | "value";
+  /** The side the whole column stands on: flush at the start, centred, or flush at the end.
+      @default "end" */
+  align?: "start" | "center" | "end";
   /** Initial width in pixels.
       @default the browser's */
   width?: number;

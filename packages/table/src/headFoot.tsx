@@ -3,12 +3,12 @@
 
 import { Button, Checkbox, VisuallyHidden } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
-import { cx } from "./cx";
+import { cx, sideClass } from "./cx";
 import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
 import type { RowKey, TableProps } from "./types";
 import { NOT_PINNED, pinnedCell, withEdge } from "./pinned";
 import type { PinnedCell } from "./pinned";
-import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
+import { AggregateValue, aggregateIsNumeric, aggregateSide } from "./aggregateValue";
 import { HeaderCell } from "./headerCell";
 import { groupEdges } from "./columnGroup";
 import type { Heading } from "./columnGroup";
@@ -195,7 +195,7 @@ function FooterCell({
   const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
   if (totals) {
     return (
-      <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)} style={pin.style} data-footer={kind}>
+      <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, sideClass(aggregateSide(entry, rows)), pin.className)} style={pin.style} data-footer={kind}>
         {busy ? (
           <span aria-hidden="true" className={styles.skeleton} style={{ width: "60%" }} />
         ) : (
@@ -207,7 +207,7 @@ function FooterCell({
   }
   return (
     <td
-      className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)}
+      className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, sideClass(aggregateSide(entry, rows)), pin.className)}
       style={pin.style}
       data-footer={kind}
       title={topLevel ? wording.footerTopLevel : undefined}

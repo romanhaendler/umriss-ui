@@ -38,6 +38,7 @@ export interface ColumnSpec {
   heading?: Heading;
   rowHeader: boolean;
   rightAligned?: boolean;
+  align?: "start" | "center" | "end";
   width?: number;
   flex?: number;
   minWidth?: number;

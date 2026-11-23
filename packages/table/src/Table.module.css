@@ -309,8 +309,14 @@
     padding-right: var(--u-space-3);
   }
 
-  .numeric {
+  /* The side a column stands on, set on every cell of the column alike; the
+     figures (`.numeric`) are another matter. */
+  .alignEnd {
     text-align: right;
+  }
+
+  .alignCenter {
+    text-align: center;
   }
 
   .td.numeric {
@@ -354,8 +360,12 @@
     contain-intrinsic-inline-size: calc(var(--_table-width) - var(--u-space-2) - var(--u-space-3));
   }
 
-  .numeric > .value {
+  .alignEnd > .value {
     margin-left: auto;
+  }
+
+  .alignCenter > .value {
+    margin-inline: auto;
   }
 
   /* The whole of a cut value, drawn as core's tooltip (parts.tsx,
@@ -604,10 +614,14 @@
   }
 
   /* Every head reads the same way - label, arrow, funnel - so each tool
-     sits beside its own label. A numeric head sets that group flush right:
-     it ends where the figures below it end. */
-  .numeric .thFlex {
+     sits beside its own label. An aligned head sets that group on the
+     column's side: it ends or centres where the values below it do. */
+  .alignEnd .thFlex {
     justify-content: flex-end;
+  }
+
+  .alignCenter .thFlex {
+    justify-content: center;
   }
 
   /* A head with a width (ADR-0042): the column is that wide, whatever its
@@ -630,9 +644,14 @@
     grid-template-columns: minmax(0, max-content);
   }
 
-  .sized.numeric .headLine,
-  .sized.numeric .thFlex {
+  .sized.alignEnd .headLine,
+  .sized.alignEnd .thFlex {
     justify-content: end;
+  }
+
+  .sized.alignCenter .headLine,
+  .sized.alignCenter .thFlex {
+    justify-content: center;
   }
 
   .sized .headLabel {
@@ -715,9 +734,13 @@
   }
 
   /* A placeholder stands where its column's values will: at the right in a
-     numeric column. */
-  .numeric > .skeleton {
+     aligned column. */
+  .alignEnd > .skeleton {
     margin-left: auto;
+  }
+
+  .alignCenter > .skeleton {
+    margin-inline: auto;
   }
 
   .skeleton {

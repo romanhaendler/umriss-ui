@@ -4,17 +4,17 @@
 import { createContext, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import type { VirtualRows } from "@umriss-ui/core";
-import { cx } from "./cx";
+import { cx, sideClass } from "./cx";
 import styles from "./Table.module.css";
 
-export function LoadingRows({ columns, rightAligned = [], rows = 4 }: { columns: number; rightAligned?: readonly boolean[]; rows?: number }) {
+export function LoadingRows({ columns, sides = [], rows = 4 }: { columns: number; sides?: readonly ("start" | "center" | "end")[]; rows?: number }) {
   const widths = [72, 48, 60, 40, 56, 64];
   return (
     <>
       {Array.from({ length: rows }, (_, z) => (
         <tr key={z} aria-hidden="true">
           {Array.from({ length: columns }, (_, s) => (
-            <td key={s} className={cx(styles.td, rightAligned[s] && styles.numeric)}>
+            <td key={s} className={cx(styles.td, sides[s] && sideClass(sides[s]!))}>
               <span className={styles.skeleton} style={{ width: `${widths[(z + s) % widths.length]}%` }} />
             </td>
           ))}
