@@ -364,7 +364,10 @@ for (const width of [1280, 320]) {
 test("A segment's icon stands on its word's line and stays whole in a narrow place", async ({ page }) => {
   await openExample(page, "segmentedcontrol", "a-theme-switch");
   const control = example(page, "a-theme-switch").getByRole("radiogroup", { name: "Theme" });
-  const size = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-icon-size")));
+  const size = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    return Number.parseFloat(root.getPropertyValue("--u-icon-size")) * Number.parseFloat(root.fontSize);
+  });
   const icon = control.getByRole("radio", { name: "System" }).locator("+ * svg");
   const word = control.getByText("System", { exact: true });
   const middle = (rect: { y: number; height: number }) => rect.y + rect.height / 2;

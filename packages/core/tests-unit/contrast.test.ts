@@ -528,7 +528,7 @@ const QUIET_GROUNDS = [
   "--u-color-danger-subtle",
   "--u-color-danger-subtle-pressed",
 ] as const;
-const EDGES = ["--u-edge-color", "--u-edge-color-strong", "--u-hairline", "--u-hairline-strong", "--u-color-edge-hover"] as const;
+const EDGES = ["--u-edge-color", "--u-edge-color-strong", "--u-hairline", "--u-hairline-strong", "--u-edge-color-hover"] as const;
 const EDGE_GROUNDS = ["--u-color-bg", "--u-color-surface", "--u-color-surface-sunken", "--u-color-surface-raised"] as const;
 const MORE_TEXT = 7; // WCAG AAA, normal text (1.4.6)
 

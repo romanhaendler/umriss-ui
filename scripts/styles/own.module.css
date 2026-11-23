@@ -30,13 +30,12 @@
 
   /* A dense surface - the table at `density="compact"` - takes its small
      controls a step smaller: at 26 px a field or button filled a compact row
-     edge to edge. Both heights are core's tokens; this is the one place that
-     trades the one for the other. */
+     edge to edge. This is the one place that takes the smaller height. */
   /* Only under a fine pointer: under a finger a field's type is 16 px (below)
      and a target wants its size. */
   @media (pointer: fine) {
     .dense {
-      --u-control-height-sm: var(--u-control-height-xs);
+      --u-control-height-sm: 1.125rem;
     }
   }
 

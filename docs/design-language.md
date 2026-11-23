@@ -278,6 +278,44 @@ the build folds the copies into the last one; core's stylesheet 228 kB to
 place asks. A row too full for it says `chars` on the field that can be
 narrower.
 
+## Tokens: what is a measure, and how a token is named
+
+**What sizes with the text is rem.** The space scale `--u-space-1..8`, the icon
+sizes, the buttons' paddings, and the widths of the modal, the drawer and the
+toast are rem, each equal to its former px at a 16px root: at that root nothing
+moves, at another one spacing, icons and sheets grow with the type beside them.
+What stays px does not depend on the text: the radii, the hairlines and edges, the
+focus ring and the hit areas (24 px, WCAG 2.5.8).
+
+**A measure is a token a caller's layout hangs on**: the size of a box, the room
+between boxes, the width a column or a sheet takes, the layering. A changed value
+of a measure is a major change from `1.0.0` on; any other token (a colour, an edge,
+a shadow, a radius, a duration) may change in a minor.
+
+| Where | Measures |
+|---|---|
+| Core, 38 | the space scale (8); the control heights `--u-control-height`, `-sm` (2); the type sizes `--u-text-xs` to `-2xl`, `--u-text-mono`, `--u-label-size` (8); the leading `--u-leading-none`, `-tight`, `-normal` (3); the icon sizes and button paddings (4); `--u-label-width`, `--u-drawer-width`, `--u-modal-width-sm/-md/-lg`, `--u-toast-width` and the four `--u-toast-inset-*` (10); `--u-z-popover`, `-toast`, `-tooltip` (3) |
+| Charts, 6 | `--uc-size-tick`, `-title`, `-legend`, `-tooltip`, `--uc-leading-label`, `-text` |
+| Dashboard, 3 | `--u-dashboard-row`, `-gap`, `-max-width` |
+| Table | no token of its own: the row's pitch is derived from the tokens above and two factors in its stylesheet, 1.46 for the line and 1.63; they are measures as well |
+
+Not measures: every colour, edge and shadow, the radii, the focus ring, the
+material blur and scrim, the easings and durations, and the fonts, the tracking,
+the weights and `--u-transform-caps`. They change what the text looks like, not
+the boxes a layout is made of.
+
+**A new token is named** `--u-<role>-<part>-<variant>`, the thing first and the
+variant last: a colour is `--u-color-<name>`, an edge colour `--u-edge-color-<variant>`,
+a size `--u-<thing>-size` or `--u-<thing>-width`, a step `-sm`, `-md`, `-lg` or a number.
+Colour goes where the name says what the token holds: `--u-color-shadow-sticky` is a
+colour, not a shadow. A package's own tokens carry its prefix (`--uc-` for the
+charts). The names that were settled before this scheme stand as they are.
+
+**Two families are declared by no sheet of core**: the dashboard's three tokens are
+read by `Dashboard.module.css` with a fallback, and the chart palette `--u-chart-1..6`
+is set by the application and read by the charts with a fallback. Both are API and
+stand with the token list.
+
 ## Rows: a table holds still
 
 Decided in `row-pitch` (ADR-0042). The promise is the one the widths gave a
