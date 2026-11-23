@@ -43,6 +43,9 @@ beyond the map.
 - [What 1.0 promises](issues/01-what-1-0-promises.md): ADR-0083 - semver from `1.0.0`, the surface is
   `API.md`, the token names and the wording keys; a rename lives until the next major; `@experimental` is
   exempt; raising React is a major, raising TypeScript, Node or a browser a minor.
+- [How breaking changes reach 1.0](issues/02-how-breaking-changes-reach-1-0.md): in the last `0.x` minors by
+  ADR-0066; one last minor is the candidate and freezes the surface; no `rc`; `1.0.0` only removes the old
+  names; the guide starts at `0.56.0`.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
@@ -83,7 +86,6 @@ beyond the map.
   and a person or screenshots in front of them.
 - **The order of the releases up to 1.0**, and how the taken points are cut into specs: hangs on the points
   and on how breaking changes reach 1.0.
-- **The guide from `0.x` to `1.0`**: where it stands and what it is assembled from.
 - **The last gate**: whether a shakedown against the candidate belongs to the acceptance criteria.
 
 ## Out of scope
