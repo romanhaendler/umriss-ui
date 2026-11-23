@@ -6,7 +6,7 @@
 import ts from "typescript";
 import { referencesOf, unexported, type Ctx } from "./propsContext.ts";
 import { readType } from "./propsInherit.ts";
-import { descriptionOf, expansionOf, textOf, type Declaration } from "./propsSyntax.ts";
+import { descriptionOf, expansionOf, isMember, textOf, type Declaration } from "./propsSyntax.ts";
 import type { Flag, TypeEntry } from "./propsReader.ts";
 
 /** A flag that belongs to a declaration as a whole: its comment, its
@@ -41,7 +41,7 @@ const hasMembers = (declaration: Declaration): boolean => {
     : ts.isTypeLiteralNode(declaration.type)
       ? declaration.type.members
       : undefined;
-  return members !== undefined && members.every(ts.isPropertySignature);
+  return members !== undefined && members.every(isMember);
 };
 
 /** Adds the definitions to `types`. `declarations` are the types by name,

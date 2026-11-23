@@ -13,6 +13,8 @@ import {
   isExported,
   isValue,
   membersOf,
+  signatureOf,
+  type Member,
   omittedNames,
   propName,
   reference,
@@ -66,14 +68,16 @@ const POLYMORPH = "the chosen element";
 const UNKNOWN_ELEMENT = "the rendered element";
 
 /** One member as an entry, with the default its `@default` tag names. */
-export const entryOf = (ctx: Ctx, member: ts.PropertySignature, substitutions: ReadonlyMap<string, string> = new Map()): PropEntry => {
+export const entryOf = (ctx: Ctx, member: Member, substitutions: ReadonlyMap<string, string> = new Map()): PropEntry => {
   const fromTag = tagOf(member, "default");
   const deprecated = tagOf(member, "deprecated");
-  const expansion = member.type === undefined ? undefined : expansionOf(ctx.checker, member.type);
-  const references = member.type === undefined ? [] : referencesOf(ctx, member.type);
+  const method = ts.isMethodSignature(member);
+  const expansion = method || member.type === undefined ? undefined : expansionOf(ctx.checker, member.type);
+  const references = method ? referencesOf(ctx, member) : member.type === undefined ? [] : referencesOf(ctx, member.type);
   const entry: PropEntry = {
     name: propName(member),
-    type: member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
+    type: method ? substitute(signatureOf(member), substitutions) : member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
+    ...(method ? { method: true as const } : {}),
     ...(expansion === undefined ? {} : { expansion }),
     optional: member.questionToken !== undefined,
     ...(fromTag === undefined ? {} : { defaultValue: fromTag }),

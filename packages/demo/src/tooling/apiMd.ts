@@ -10,7 +10,7 @@
 
 import ts from "typescript";
 import type { ExportedDeclaration } from "./exportDocs.ts";
-import type { TypeEntry } from "./propsReader.ts";
+import type { PropEntry, TypeEntry } from "./propsReader.ts";
 
 const GROUPS = [
   ["component", "Components"],
@@ -66,11 +66,23 @@ function signatureTypes(declaration: string): { takes: string[]; gives: string[]
 /** A type longer than a line is cut: the wording's groups are whole objects. */
 const short = (type: string) => (flat(type).length > 80 ? `${flat(type).slice(0, 79)}…` : flat(type));
 
+/** A method's function type as a method is written: `<R>(a: A): R`. */
+function asMethod(type: string): string {
+  const alias = ts.createSourceFile("type.ts", `type T = ${type};`, ts.ScriptTarget.Latest, true).statements[0] as ts.TypeAliasDeclaration;
+  const fn = alias.type as ts.FunctionTypeNode;
+  const generics = fn.typeParameters === undefined ? "" : `<${fn.typeParameters.map((one) => flat(one.getText())).join(", ")}>`;
+  return `${generics}(${fn.parameters.map((one) => flat(one.getText())).join(", ")}): ${flat(fn.type.getText())}`;
+}
+
+/** A member as it is written: `name?: type`, a method `name(parameters): result`. */
+const written = (prop: PropEntry) =>
+  `${prop.name}${prop.optional ? "?" : ""}${prop.method === true ? asMethod(prop.type) : `: ${short(prop.type)}`}`;
+
 function rows(entry: TypeEntry): string[] {
   return entry.props.map((prop) => {
     const sentence = firstSentence(prop.description);
     return (
-      `- ${prop.name}${prop.optional ? "?" : ""}: ${short(prop.type)}` +
+      `- ${written(prop)}` +
       (sentence === "" ? "" : ` — ${sentence}`) +
       (prop.deprecated === undefined ? "" : " (deprecated)") +
       (prop.defaultValue === undefined ? "" : ` (default: ${flat(prop.defaultValue)})`)
@@ -91,7 +103,7 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
     const sentence = firstSentence(one.description);
     /* A type's members by name, so that "does it take X" finds an answer; the
        props types of components stand in full below. */
-    const members = one.kind === "type" && !one.name.endsWith("Props") ? (entries[one.name]?.props ?? []).map((prop) => prop.name) : [];
+    const members = one.kind === "type" && !one.name.endsWith("Props") ? (entries[one.name]?.props ?? []).map((prop) => (prop.method === true ? written(prop) : prop.name)) : [];
     return `- ${one.name}${sentence === "" ? "" : ` — ${sentence}`}${members.length === 0 || members.length > 100 ? "" : ` [${members.join(", ")}]`}`;
   };
   const subpaths = [...new Set(exports.flatMap((one) => (one.subpath === undefined ? [] : [one.subpath])))];
@@ -101,11 +113,43 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
   ].filter((section) => section.list.length > 0);
   for (const { title, list } of sections) out.push(`## ${title}`, "", ...[...list].sort(byName).map(line), "");
 
+  /* The props type a component's type is a function of: a function type, a
+     `typeof Name` (its props are `NameProps`), a named type whose declaration is one, or an interface
+     of call signatures (the last stands for the rest). Only where the one
+     parameter is named types - `A & B` included - and one has a table. */
+  const propsOf = (type: string, depth = 0): string | undefined => {
+    if (depth > 4) return undefined;
+    const source = /^(type|interface)\s/.test(type) ? type : `type T = ${type};`;
+    const statement = ts.createSourceFile("type.ts", source, ts.ScriptTarget.Latest, true).statements[0];
+    const node = statement !== undefined && ts.isTypeAliasDeclaration(statement) ? statement.type : undefined;
+    const hasTable = (name: string) => (entries[name]?.props.length ?? 0) > 0;
+    let calls: readonly ts.SignatureDeclaration[] = [];
+    if (statement !== undefined && ts.isInterfaceDeclaration(statement)) calls = statement.members.filter(ts.isCallSignatureDeclaration);
+    else if (node !== undefined && ts.isFunctionTypeNode(node)) calls = [node];
+    else if (node !== undefined && ts.isTypeQueryNode(node)) {
+      const props = `${node.exprName.getText()}Props`;
+      return hasTable(props) ? props : undefined;
+    } else if (node !== undefined && ts.isTypeReferenceNode(node)) {
+      const declaration = entries[node.typeName.getText()]?.definition?.declaration;
+      return declaration === undefined ? undefined : propsOf(declaration, depth + 1);
+    }
+    /* A component renders: a function that gives something else back is a setter. */
+    const call = calls.at(-1);
+    if (call?.type === undefined || call.type.getText().replace(/ReactNode|ReactElement|JSX\.Element|null|[\s|]/g, "") !== "") return undefined;
+    const parameter = call.parameters[0]?.type;
+    const parts: readonly ts.TypeNode[] = parameter === undefined ? [] : ts.isIntersectionTypeNode(parameter) ? parameter.types : [parameter];
+    const named = parts.filter((part): part is ts.TypeReferenceNode => ts.isTypeReferenceNode(part));
+    if (parts.length === 0 || named.length < parts.length) return undefined;
+    return named.map((part) => part.typeName.getText()).find(hasTable);
+  };
+
   /* Props, options and returns. A type with no members of its own is no table. */
+  const tabled = new Set<string>();
   const table = (heading: string, names: readonly string[]) => {
     for (const name of new Set(names)) {
       const entry = entries[name];
       if (entry === undefined || entry.props.length === 0) continue;
+      tabled.add(name);
       /* The wording is a table of 260 labels: counted, not listed. */
       out.push(`#### ${heading} (${name})`, "", ...(entry.props.length > 100 ? [`${entry.props.length} members; see \`docs/llms-full.md\`.`] : rows(entry)), "");
     }
@@ -122,6 +166,14 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
       table(kind === "component" ? "props" : "options", [...takes, ...(kind === "component" ? [`${one.name}Props`] : [])]);
       if (kind === "hook") {
         table("returns", gives);
+        /* The components a hook hands back: their props stand here, where a
+           caller looks for them. */
+        for (const name of new Set(gives)) {
+          for (const prop of entries[name]?.props ?? []) {
+            const props = propsOf(prop.type);
+            if (props !== undefined) table(`props of ${prop.name}`, [props]);
+          }
+        }
         if (out.length === mark) {
           const type = ts.createSourceFile("d.ts", one.declaration, ts.ScriptTarget.Latest, true).statements.map((s) => s.getText()).join(" ");
           out.push(`\`${flat(type)}\``, "");
@@ -129,6 +181,16 @@ export function apiMd({ packageName, exports, entries }: ApiMdJob): string {
       }
       if (out.length === mark) out.splice(before, out.length - before);
     }
+  }
+  /* A props type no component or hook reaches is tabled all the same; one
+     with no entry at all cannot be, and that stops the writer. */
+  const open = exports.filter((one) => one.kind === "type" && one.name.endsWith("Props")).map((one) => one.name);
+  const missing = open.filter((name) => entries[name] === undefined);
+  if (missing.length > 0) throw new Error(`${missing.map((name) => `\`${name}\``).join(", ")} exported with no table - did \`pnpm props\` run?`);
+  const rest = open.filter((name) => !tabled.has(name));
+  if (rest.some((name) => entries[name]!.props.length > 0)) {
+    out.push("## Other props", "");
+    table("props", rest);
   }
   return `${out.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd()}\n`;
 }

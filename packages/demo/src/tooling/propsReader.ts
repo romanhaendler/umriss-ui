@@ -38,12 +38,15 @@ import ts from "typescript";
 import { parametersNamed, type Ctx } from "./propsContext.ts";
 import { defineReferenced, flagHeader } from "./propsDefinitions.ts";
 import { readType } from "./propsInherit.ts";
-import { isExported, type Declaration } from "./propsSyntax.ts";
+import { isExported, type Declaration, type Member } from "./propsSyntax.ts";
 
 export interface PropEntry {
   name: string;
-  /** The type, exactly as it stands in the source. */
+  /** The type, exactly as it stands in the source; for a `method`, the
+      function type it is: `(rows: Z[]) => R`. */
   type: string;
+  /** Set where the member is written as a method. */
+  method?: true;
   /** Where the type is one named alias of the library (or an array of one)
       that comes to literals only: its values, `"sm" | "md"` for `ButtonSize`. */
   expansion?: string;
@@ -251,8 +254,8 @@ export function readProps(
     flags: [],
     isPublic,
     check,
-    sources: new WeakMap<PropEntry, ts.PropertySignature>(),
-    members: new WeakMap<PropEntry, readonly ts.PropertySignature[]>(),
+    sources: new WeakMap<PropEntry, Member>(),
+    members: new WeakMap<PropEntry, readonly Member[]>(),
   };
   const { gaps, flags } = ctx;
 

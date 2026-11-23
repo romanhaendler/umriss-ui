@@ -18,19 +18,29 @@ export const descriptionOf = (checker: ts.TypeChecker, name: ts.Node): string =>
   return ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
 };
 
-export const propName = (member: ts.PropertySignature): string =>
+/** A named member: a property, or a method written as one. */
+export type Member = ts.PropertySignature | ts.MethodSignature;
+
+export const isMember = (member: ts.TypeElement): member is Member =>
+  ts.isPropertySignature(member) || ts.isMethodSignature(member);
+
+export const propName = (member: Member): string =>
   ts.isStringLiteral(member.name) || ts.isIdentifier(member.name)
     ? member.name.text
     : member.name.getText(member.getSourceFile());
 
-/** Named props only: methods and index signatures are not. */
-export const membersOf = (node: ts.Node): ts.PropertySignature[] => {
+/** A method as the function type it is: `<R>(format: F, rows?: Z[]) => R`. */
+export const signatureOf = (member: ts.MethodSignature): string =>
+  `${member.typeParameters === undefined ? "" : `<${member.typeParameters.map(textOf).join(", ")}>`}(${member.parameters.map(textOf).join(", ")}) => ${member.type === undefined ? "void" : textOf(member.type)}`;
+
+/** Named members only: index and call signatures are not. */
+export const membersOf = (node: ts.Node): Member[] => {
   const members = ts.isInterfaceDeclaration(node)
     ? node.members
     : ts.isTypeLiteralNode(node)
       ? node.members
       : undefined;
-  return members === undefined ? [] : members.filter(ts.isPropertySignature);
+  return members === undefined ? [] : members.filter(isMember);
 };
 
 /** A reference to a named type, taken apart into name and arguments.
@@ -88,7 +98,7 @@ export const substitute = (text: string, substitutions: ReadonlyMap<string, stri
     all tags only `@default` and `@deprecated` are read - `@remarks`,
     `@since` and the rest are dropped with the description they are not part
     of. */
-export const tagOf = (member: ts.PropertySignature, name: string): string | undefined => {
+export const tagOf = (member: Member, name: string): string | undefined => {
   const tag = ts.getJSDocTags(member).find((t) => t.tagName.text === name);
   return tag === undefined ? undefined : (ts.getTextOfJSDocComment(tag.comment) ?? "").replace(/\s+/g, " ").trim();
 };

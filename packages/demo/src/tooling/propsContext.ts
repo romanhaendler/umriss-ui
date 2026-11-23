@@ -4,7 +4,7 @@
 
 import ts from "typescript";
 import type { Flag, Gap, PropEntry, TypeEntry } from "./propsReader.ts";
-import { declarationOf, type Declaration } from "./propsSyntax.ts";
+import { declarationOf, type Declaration, type Member } from "./propsSyntax.ts";
 
 export interface Ctx {
   checker: ts.TypeChecker;
@@ -26,10 +26,10 @@ export interface Ctx {
   check: (text: string) => readonly string[];
   /** The member an entry is read from - for reporting a gap and checking a
       default, even where the entry ends up as a copy in another table. */
-  sources: WeakMap<PropEntry, ts.PropertySignature>;
+  sources: WeakMap<PropEntry, Member>;
   /** Every member an entry is read from - more than one where arms or
       branches merge: a use of any of them shows the row. */
-  members: WeakMap<PropEntry, readonly ts.PropertySignature[]>;
+  members: WeakMap<PropEntry, readonly Member[]>;
 }
 
 /** The names among these that no entry exports - none where no entries
@@ -79,7 +79,7 @@ export const withPlace = (ctx: Ctx, from: PropEntry, to: PropEntry, ...also: rea
   return to;
 };
 
-export const placeOf = (member: ts.PropertySignature): { file: string; line: number } => {
+export const placeOf = (member: Member): { file: string; line: number } => {
   const file = member.getSourceFile();
   return { file: file.fileName, line: file.getLineAndCharacterOfPosition(member.getStart(file)).line + 1 };
 };
