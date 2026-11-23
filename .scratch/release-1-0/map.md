@@ -54,6 +54,10 @@ beyond the map.
   `t.conditions`, `foldAllGroups`, `pinned`, `GroupKey`, `Table<Z, Key, S>`, typed grid reports; `asCsv` and
   `stickyRowHeader` go; the pure model is `@experimental`; the view's keys and the rest are frozen as they
   stand.
+- [What of core's surface changes before 1.0](issues/16-what-of-cores-surface-changes-before-1-0.md):
+  density is `"regular" | "compact"` everywhere; `Wording` is handed in as a part; `clearable` clears through
+  `onValueChange`; `showValue`, `onSelect`, `neutral`, four type names; six exports and one token go; two
+  things are `@experimental`.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
