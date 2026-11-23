@@ -31,8 +31,10 @@ import type { RefProp } from "../refProp";
 /** The props of a glyph: an SVG's attributes and its edge length. */
 export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "children">, RefProp<SVGSVGElement> {
   /**
-   * Edge length in pixels. The default is the size the glyph is drawn at in
-   * the components.
+   * Edge length in pixels. Each glyph has the size it is drawn at in the
+   * components.
+   *
+   * @default the glyph's own size
    */
   size?: number;
 }

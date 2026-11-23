@@ -59,6 +59,8 @@ export interface PropEntry {
   defaultIsPhrase?: true;
   /** The `@deprecated` tag's sentence; set, even empty, where the prop is. */
   deprecated?: string;
+  /** The `@experimental` tag's sentence; set, even empty, where the prop is. */
+  experimental?: string;
   /** The types of the library the type names, in the order they stand - each
       has a table or a definition. */
   references?: readonly string[];
@@ -95,6 +97,9 @@ export interface TypeEntry {
   /** Types of THIS library the type is also made of and which have a table of
       their own - named rather than copied out. */
   alsoTakes?: readonly string[];
+  /** Where functions that share this props type set a default differently, the
+      row has none and each function's own stands here: function, then prop. */
+  defaultsBy?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   /** Set where the type has no table and a table names it: what "Types on
       this page" shows of it. */
   definition?: Definition;

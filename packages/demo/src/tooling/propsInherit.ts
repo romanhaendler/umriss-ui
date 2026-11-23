@@ -71,6 +71,7 @@ const UNKNOWN_ELEMENT = "the rendered element";
 export const entryOf = (ctx: Ctx, member: Member, substitutions: ReadonlyMap<string, string> = new Map()): PropEntry => {
   const fromTag = tagOf(member, "default");
   const deprecated = tagOf(member, "deprecated");
+  const experimental = tagOf(member, "experimental");
   const method = ts.isMethodSignature(member);
   const expansion = method || member.type === undefined ? undefined : expansionOf(ctx.checker, member.type);
   const references = method ? referencesOf(ctx, member) : member.type === undefined ? [] : referencesOf(ctx, member.type);
@@ -83,6 +84,7 @@ export const entryOf = (ctx: Ctx, member: Member, substitutions: ReadonlyMap<str
     ...(fromTag === undefined ? {} : { defaultValue: fromTag }),
     ...(fromTag !== undefined && !isValue(fromTag) ? { defaultIsPhrase: true as const } : {}),
     ...(deprecated === undefined ? {} : { deprecated }),
+    ...(experimental === undefined ? {} : { experimental }),
     ...(references.length === 0 ? {} : { references }),
     description: descriptionOf(ctx.checker, member.name),
   };
@@ -166,6 +168,7 @@ export const mergeArms = (ctx: Ctx, arms: readonly (readonly PropEntry[])[]): Pr
     /* Deprecated in one arm is deprecated: the arm that forbids it beside
        its new name does not carry the tag. */
     const deprecated = present.find((p) => p.deprecated !== undefined)?.deprecated;
+    const experimental = present.find((p) => p.experimental !== undefined)?.experimental;
     /* The values belong to the one name; two shapes are no name. */
     const { expansion, ...rest } = first;
     const references = [...new Set(shaped.flatMap((p) => p.references ?? []))];
@@ -175,6 +178,7 @@ export const mergeArms = (ctx: Ctx, arms: readonly (readonly PropEntry[])[]): Pr
         ...rest,
         ...(expansion === undefined || shapes.length > 1 ? {} : { expansion }),
         ...(deprecated === undefined ? {} : { deprecated }),
+        ...(experimental === undefined ? {} : { experimental }),
         ...(references.length === 0 ? {} : { references }),
         type,
         optional: present.length < arms.length || present.some((p) => p.optional),
@@ -280,7 +284,7 @@ export function readType(ctx: Ctx, declaration: Declaration, depth = 0): TypeEnt
   const done = ctx.cache.get(declaration);
   if (done !== undefined) return done;
 
-  const defaults = defaultValues(ctx, declaration);
+  const { values: defaults, byFunction } = defaultValues(ctx, declaration);
   const parameter = (declaration.typeParameters ?? []).map(textOf);
 
   const props: PropEntry[] = [];
@@ -375,6 +379,7 @@ export function readType(ctx: Ctx, declaration: Declaration, depth = 0): TypeEnt
     omitted: [...new Set(omitted)].sort(),
     props: unique,
     ...(alsoTakes.length === 0 ? {} : { alsoTakes }),
+    ...(Object.keys(byFunction).length === 0 ? {} : { defaultsBy: byFunction }),
   };
   ctx.cache.set(declaration, entry);
   return entry;

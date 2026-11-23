@@ -13,8 +13,10 @@ export const belongsTo = (
   parameter: ts.ParameterDeclaration,
   declaration: Declaration,
 ): boolean => {
-  if (parameter.type !== undefined && declarationOf(checker, parameter.type) === declaration) return true;
-  return false;
+  const type = parameter.type;
+  if (type === undefined) return false;
+  /* `GlyphProps & { range?: boolean }` is still a function of `GlyphProps`. */
+  return (ts.isIntersectionTypeNode(type) ? type.types : [type]).some((part) => declarationOf(checker, part) === declaration);
 };
 
 /** The default values a component sets while unpacking its props.
@@ -24,15 +26,19 @@ export const belongsTo = (
     worse than an empty column. The props are unpacked in the parameter list
     (`({ size = "md" }: ButtonProps)`) or in the body (`const { height = 300 }
     = props`), and both count. */
-export const defaultValues = (ctx: Ctx, declaration: Declaration): Map<string, ts.Expression> => {
+export const defaultValues = (ctx: Ctx, declaration: Declaration): { values: Map<string, ts.Expression>; byFunction: Record<string, Record<string, string>> } => {
   const { checker } = ctx;
   const values = new Map<string, ts.Expression>();
+  /* Several functions may share one props type (the glyphs): what they set
+     differently is no default of the type, and stands per function. */
+  const all = new Map<string, Map<string, ts.Expression>>();
+  let own = new Map<string, ts.Expression>();
   const take = (pattern: ts.ObjectBindingPattern): void => {
     for (const element of pattern.elements) {
       if (element.initializer === undefined) continue;
       const name = element.propertyName ?? element.name;
       if (ts.isIdentifier(name) || ts.isStringLiteral(name)) {
-        values.set(name.text, element.initializer);
+        own.set(name.text, element.initializer);
       }
     }
   };
@@ -61,17 +67,33 @@ export const defaultValues = (ctx: Ctx, declaration: Declaration): Map<string, t
     ) {
       const first = node.parameters[0]!;
       if (belongsTo(checker, first, declaration)) {
+        own = new Map();
         if (ts.isObjectBindingPattern(first.name)) take(first.name);
         else if (ts.isIdentifier(first.name) && node.body !== undefined) {
           const props = checker.getSymbolAtLocation(first.name);
           if (props !== undefined) takeFromBody(node.body, props);
         }
+        const called = ts.isFunctionDeclaration(node) ? node.name?.text : ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name) ? node.parent.name.text : undefined;
+        if (called !== undefined) all.set(called, own);
+        for (const [name, value] of own) values.set(name, value);
       }
     }
     ts.forEachChild(node, visit);
   };
   visit(declaration.getSourceFile());
-  return values;
+  const differs = new Set<string>();
+  for (const one of all.values()) {
+    for (const [name, value] of one) {
+      if (all.size > 1 && [...all.values()].some((other) => textOf(other.get(name) ?? value) !== textOf(value) || !other.has(name))) differs.add(name);
+    }
+  }
+  for (const name of differs) values.delete(name);
+  const byFunction: Record<string, Record<string, string>> = {};
+  for (const [called, one] of all) {
+    const set = [...one].filter(([name]) => differs.has(name)).map(([name, value]) => [name, textOf(value)] as const);
+    if (set.length > 0) byFunction[called] = Object.fromEntries(set);
+  }
+  return { values, byFunction };
 };
 
 /** What a constant in the pattern stands for: `DEFAULT_LANE_HEIGHT` is

@@ -104,6 +104,27 @@ describe("apiMd", () => {
     expect(text).toContain("#### props of Inline (all forms)\n\n- label: string — Names it.\n- size?: number");
   });
 
+  it("lists what is experimental apart, and a deprecated member last", () => {
+    const entries = {
+      Opts: {
+        name: "Opts",
+        parameter: [],
+        omitted: [],
+        props: [
+          { ...prop, name: "a", type: "string", description: "First." },
+          { ...prop, name: "old", type: "string", description: "Gone soon.", deprecated: "Use `c`." },
+          { ...prop, name: "c", type: "string", description: "Third.", experimental: "" },
+        ],
+      },
+    };
+    const hookOpts = { ...hook, declaration: "function useThing(o: Opts): void;" };
+    const text = apiMd({ packageName: "@x/y", exports: [hookOpts, { ...type("Beta"), description: "Early.", experimental: "" }, type("Opts")], entries });
+    expect(text).toContain("- a: string — First.\n- c: string — Third. (experimental)\n- old: string — Gone soon. (deprecated)");
+    expect(text).toContain("## Experimental\n\n- Beta — Early.\n- Opts.c — Third.");
+    expect(text.split("## Types")[1]!.split("## ")[0]).not.toContain("Beta");
+    expect(apiMd({ packageName: "@x/y", exports: [hookOpts, type("Opts")], entries: { Opts: { ...entries.Opts, props: entries.Opts.props.slice(0, 2) } } })).not.toContain("## Experimental\n");
+  });
+
   it("tables a props type no component reaches, and throws for one without an entry", () => {
     const entries = { LoneProps: { name: "LoneProps", parameter: [], omitted: [], props: [{ ...prop, name: "a", type: "string" }] } };
     expect(apiMd({ packageName: "@x/y", exports: [type("LoneProps")], entries })).toContain("## Other props\n\n#### props (LoneProps)\n\n- a: string");

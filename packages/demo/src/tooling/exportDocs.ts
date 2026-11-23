@@ -103,6 +103,8 @@ export interface ExportedDeclaration {
   returns?: string;
   /** The `@deprecated` sentence; set, even empty, where the export is. */
   deprecated?: string;
+  /** The `@experimental` sentence; set, even empty, where the export is. */
+  experimental?: string;
   /** The type names the declaration uses, in the order they stand - the
       library's among them, which the index links. */
   references: readonly string[];
@@ -181,6 +183,7 @@ export function exportedDeclarations(packageDir: string): ExportedDeclaration[] 
       const tags = target.getJsDocTags(checker);
       const tagText = (tag: ts.JSDocTagInfo) => ts.displayPartsToString(tag.text).trim();
       const deprecated = tags.find((tag) => tag.name === "deprecated");
+      const experimental = tags.find((tag) => tag.name === "experimental");
       const returns = tags.find((tag) => tag.name === "returns" || tag.name === "return");
       const doc = {
         ...(subpath === undefined ? {} : { subpath }),
@@ -194,6 +197,7 @@ export function exportedDeclarations(packageDir: string): ExportedDeclaration[] 
           }),
         ...(returns === undefined ? {} : { returns: tagText(returns) }),
         ...(deprecated === undefined ? {} : { deprecated: tagText(deprecated) }),
+        ...(experimental === undefined ? {} : { experimental: tagText(experimental) }),
       };
       if (declaration === undefined) return { name: exported.name, text: "", declaration: "", references: [], ...doc };
       const emittedFile = declarationsOf(declaration.getSourceFile());

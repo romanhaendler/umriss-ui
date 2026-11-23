@@ -95,7 +95,7 @@ export const substitute = (text: string, substitutions: ReadonlyMap<string, stri
   substitutions.size === 0 ? text : text.replace(/[A-Za-z_$][\w$]*/g, (identifier) => substitutions.get(identifier) ?? identifier);
 
 /** A member's tag, its text on one line; `undefined` where it has none. Of
-    all tags only `@default` and `@deprecated` are read - `@remarks`,
+    all tags only `@default`, `@deprecated` and `@experimental` are read - `@remarks`,
     `@since` and the rest are dropped with the description they are not part
     of. */
 export const tagOf = (member: Member, name: string): string | undefined => {
