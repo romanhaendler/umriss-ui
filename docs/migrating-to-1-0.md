@@ -10,6 +10,13 @@ through the warnings until none is left; an application that runs on `0.58.0` wi
 `1.0.0`, which removes the old names and changes nothing else. The seven packages move together under one
 number, so they are raised together.
 
+**Where the warnings are.** In development only: a production build says nothing. Several appear only when the
+old name is used, not when the page loads: a menu item's tone when the menu opens, `onClear` when the cross is
+pressed, `t.asCsv()`, `t.foldAll()` and `catalogue()` when they are called. So click through the application
+once on the development server, with the console open, before calling it clean. A renamed type (`Key`, `Side`,
+`Align`, `Direction`, `GroupByBase`, `GroupByComponent`, `OwnAggregate`) warns nowhere and still compiles on
+`0.58.0`: search for it.
+
 **What needs a look although nothing warns** stands under its package below: a type that became narrower, an
 export that is gone, a default that reads differently. Each line says what to do.
 
@@ -27,8 +34,8 @@ From `1.0.0` on a break costs a major ([ADR-0083](adr/0083-from-1-0-a-break-cost
 
 - **`UmrissProvider`'s density is `"regular" | "compact"`; `"comfortable"` still works for this minor and warns.**
   - Migration: Write `density="regular"` for `"comfortable"`; the old word is removed in 1.0.0.
-- **`useDensity()` returns `undefined` where no provider set a density (it returned `"comfortable"`).**
-  - Migration: Read `undefined` as not set and apply your own default.
+- **`useDensity()` returns `undefined` where no provider set a density (it returned `"comfortable"`).** Under a provider that still says `density="comfortable"` it returns `"regular"`.
+  - Migration: Read `undefined` as not set and apply your own default; a comparison with `"comfortable"` in your own code becomes one with `"regular"`. Nothing warns here.
 - **`showLabel` on `Meter` and `ProgressBar` is `showValue`**, `CommandPalette`'s `onChoose` is `onSelect`, `MenuItem`'s `tone` `"default"` is `"neutral"`, and the types `Key`, `Direction`, `Align` and `Side` are `TreeKey`, `TreeDirection`, `PopoverAlign` and `LimitSide`.
   - Migration: Use the new names; the old ones work for this minor with a warning and are removed in 1.0.0.
 - **The space scale `--u-space-1` to `--u-space-8`**, the icon sizes, the buttons' paddings and the widths of modal, drawer and toast are rem, each equal to its former px at a `16px` root.
@@ -62,7 +69,7 @@ From `1.0.0` on a break costs a major ([ADR-0083](adr/0083-from-1-0-a-break-cost
 - **`t.filter` is `t.conditions`**, `t.foldAll` and `t.unfoldAll` are `t.foldAllGroups` and `t.unfoldAllGroups`, `GroupBy` (with `GroupByBase` and `GroupByComponent`) is `GroupKey`, `pin` on `RowActions` is `pinned`, and the model's input `filter` is `preFilter`.
   - Migration: Use the new names; the old ones work for this minor with a warning and are removed in 1.0.0.
 - **`stickyRowHeader` and `t.asCsv()` are deprecated.**
-  - Migration: Put `pin="start"` on the row-header column and call `t.exportAs(csv)`; both old forms work for this minor with a warning and are removed in 1.0.0.
+  - Migration: Put `pin="start"` on the row-header column and call `t.exportAs(csv)`, with `csv` imported from `@umriss-ui/table`; both old forms work for this minor with a warning and are removed in 1.0.0.
 - **`Table<Z, S, Key>` and `ActionProps<Z, S, Key>` are `Table<Z, Key, S>` and `ActionProps<Z, Key, S>`.**
   - Migration: Swap the second and third type argument (`Table<Row, false, number>` becomes `Table<Row, number>`).
 - **`CellEdit.value`**, `RowSave.changes` and `RowAdd.values` are typed `string | number | boolean | Date | null` (were `unknown`).
@@ -86,13 +93,13 @@ From `1.0.0` on a break costs a major ([ADR-0083](adr/0083-from-1-0-a-break-cost
 - **`Matrix` takes `row` and `StateBand` takes `state` in place of `value`.**
   - Migration: Rename `value` to `row` on a `Matrix` and to `state` on a `StateBand`; `value` works for this minor with a warning and is removed in 1.0.0.
 - **The registry's types are no longer exported**: `AxisConfig`, `SeriesBase`, `SeriesConfig`, `SeriesKind`, the seven series configs, `LimitConfig`, `LimitLineConfig`, `LimitBandConfig`, `LegendConfig`, `TooltipConfig`, `MaterializedSeries`, `BoxChannels`, `Padding`, `Rect`, `ResolvedTheme`, `DataTableGroup` and `ParetoOptions`.
-  - Migration: Derive what you need from a component's props (`ChartProps["padding"]`) or declare your own type.
+  - Migration: Derive what a component's props carry from them (`ChartProps["padding"]`); for the registry's own shapes (`SeriesConfig`, `SeriesKind` and the like) there is nothing to derive from: declare your own type.
 - **`ChartProps` no longer takes a div's `onSelect`, `title` or `color`.**
   - Migration: Drop them, or put them on an element around the chart.
 - **The role of a `LimitLine` or `LimitBand` is `"specification"` or `"control"`; `"zone"` is the control chart's own.**
   - Migration: Give a limit with `role="zone"` the role `"control"` or `"specification"`.
 - **A `Chart` must be given `aria-label` or `aria-labelledby` by type.**
-  - Migration: Name every chart that compiled without a name; at run time nothing changes.
+  - Migration: Name every chart that compiled without a name. At run time nothing changes: a chart without a name is drawn, and warns in development as it did before.
 
 ## `@umriss-ui/schedule`
 
@@ -103,8 +110,8 @@ From `1.0.0` on a break costs a major ([ADR-0083](adr/0083-from-1-0-a-break-cost
 
 ### In 0.58.0
 
-- **A dependency names its `predecessor` and `successor` (were `from` and to).**
-  - Migration: Rename `from` to `predecessor` and to to `successor` on every dependency; the old names are read for this minor with a warning and removed in 1.0.0.
+- **A dependency names its `predecessor` and `successor` (were `from` and `to`).**
+  - Migration: Rename `from` to `predecessor` and `to` to `successor` on every dependency; the old names are read for this minor with a warning and removed in 1.0.0.
 - **`Schedule`'s `label` is `barLabel`, and `ends` on `Schedule` and on a dependency is `endMarks`.**
   - Migration: Rename them; the old names work for this minor with a warning and are removed in 1.0.0.
 - **The resolved appearance is `{ provisional, fixed, muted, open }`.**
@@ -142,3 +149,12 @@ From `1.0.0` on a break costs a major ([ADR-0083](adr/0083-from-1-0-a-break-cost
   - Migration: Pass `ages`; `freshness` works for this minor with a warning and is removed in 1.0.0.
 - **`alarmModel`, `AlarmProjection`, `alarmColumns`, `ALARM_COLUMNS` and `DEFAULT_ORDER` are experimental.**
   - Migration: Nothing now; they may change in a minor.
+
+## What looks different
+
+Nothing warns for these, and no code changes; they are named so that a screenshot test is not a surprise.
+
+- **`AlarmBanner` draws its border** (since `0.57.0`): it read a token that did not exist. The banner is two pixels
+  taller, and what stands below it sits two pixels lower.
+- **Spacing grows with the root font size** (since `0.58.0`): at a 16px root nothing moves; at another root the
+  space scale, the icons, the buttons' paddings and the widths of modal, drawer and toast follow the text.
