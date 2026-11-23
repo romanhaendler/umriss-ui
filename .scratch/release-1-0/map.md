@@ -64,6 +64,12 @@ beyond the map.
 - [The surface of the three young packages](issues/08-the-surface-of-the-three-young-packages.md): the
   calculation and the dashboard read as fit to freeze; the alarms are the least settled, and their surface is
   partly the table's model.
+- [The surface of charts](issues/05-the-surface-of-charts.md): no alias left; eight groups of candidates that
+  break a caller, among them twenty exported internal types, `tone` against the glossary, and a series
+  identified by its optional name.
+- [The surface of the schedule](issues/07-the-surface-of-the-schedule.md): no alias left, the view's names
+  match charts and the table; six groups of candidates that break a caller, the largest `from` / `to` with
+  three meanings; `API.md` has no component props.
 
 ## Not yet specified
 
