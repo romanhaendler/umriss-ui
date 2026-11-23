@@ -1,7 +1,7 @@
 # The acceptance criteria
 
 Type:   grilling
-Status: open
+Status: claimed
 Blocked by: 12, 13
 
 ## Question

@@ -46,6 +46,10 @@ beyond the map.
 - [How breaking changes reach 1.0](issues/02-how-breaking-changes-reach-1-0.md): in the last `0.x` minors by
   ADR-0066; one last minor is the candidate and freezes the surface; no `rc`; `1.0.0` only removes the old
   names; the guide starts at `0.56.0`.
+- [What of the table's surface changes before 1.0](issues/15-what-of-the-tables-surface-changes-before-1-0.md):
+  `t.conditions`, `foldAllGroups`, `pinned`, `GroupKey`, `Table<Z, Key, S>`, typed grid reports; `asCsv` and
+  `stickyRowHeader` go; the pure model is `@experimental`; the view's keys and the rest are frozen as they
+  stand.
 - [What the packages ship](issues/13-what-the-packages-ship.md): the manifests and the publish path are sound;
   `check:dist` and some prose assume `0.x` and block a `1.0.0` until changed; no Node floor is written, and
   React is peered without an upper bound.
