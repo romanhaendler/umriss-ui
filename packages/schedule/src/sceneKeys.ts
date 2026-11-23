@@ -64,6 +64,8 @@ export interface Spoken {
   readonly target: ScheduleTooltipTarget | null;
   /** Set where a key was refused: blocked time is the only reason. */
   readonly refused?: boolean;
+  /** Set where a lead chord proposed a length: the readout names it, since the data may not have changed yet. */
+  readonly lead?: { readonly side: "leadIn" | "leadOut"; readonly length: number };
   /** Set where a zoom key spoke: the span in view, two wall-clock instants,
       and no target. */
   readonly span?: readonly [number, number];
@@ -273,7 +275,7 @@ export class SceneKeys {
     if (length !== before && !refused) {
       this.host.handlers().onIntent?.(side === "leadIn" ? { kind: "leadIn", subtask: s.id, leadIn: length } : { kind: "leadOut", subtask: s.id, leadOut: length });
     }
-    this.scheduleReadout(refused);
+    this.scheduleReadout(refused, length !== before && !refused ? { side, length } : undefined);
     return true;
   }
 
@@ -367,7 +369,7 @@ export class SceneKeys {
 
   /** The readout, written once the keys rest - and only while they still hold
       the hover: a pointer that took it over in the pause is not spoken for. */
-  private scheduleReadout(refused = false): void {
+  private scheduleReadout(refused = false, lead?: Spoken["lead"]): void {
     if (this.timer !== null) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.timer = null;
@@ -375,7 +377,7 @@ export class SceneKeys {
       if (!this.host.gestures.byKeyboard) return;
       const target = this.host.data.tooltipTargetFor(hover);
       if (target === null) return;
-      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1, refused };
+      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1, refused, ...(lead === undefined ? {} : { lead }) };
       this.host.spokenChanged();
     }, READOUT_REST);
   }

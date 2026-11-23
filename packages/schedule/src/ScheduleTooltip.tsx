@@ -42,7 +42,7 @@ export function lagText(wording: { scheduleDependency: string }, duration: (ms: 
     by its name - the findings are spoken, never only coloured. The lane's
     label is the header's own node, so an application's label is read as it
     is shown. */
-export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarget; lane: ReactNode }): ReactNode {
+export function ScheduleReadout({ target, lane, lead }: { target: ScheduleTooltipTarget; lane: ReactNode; lead?: { side: "leadIn" | "leadOut"; length: number } | undefined }): ReactNode {
   const formats = useFormats();
   const wording = useWording();
   const duration = useDuration();
@@ -56,6 +56,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
       ...target.overlapping.map((other) => wording.scheduleOverlapWith(other.name ?? other.id)),
       ...target.violatedDependencies.map((violated) => wording.scheduleViolatedBy(duration(violated.shortBy))),
       ...target.blocked.map((blocked) => wording.scheduleInBlockedTime(blocked.label)),
+      ...(lead === undefined ? [] : [`${lead.side === "leadIn" ? wording.scheduleLeadIn : wording.scheduleLeadOut} ${duration(lead.length)}`]),
     ];
     return (
       <>

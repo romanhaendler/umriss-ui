@@ -294,7 +294,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
             onClose={() => setPaletteOpen(false)}
             items={candidates}
             maxFinds={MAX_FINDS}
-            onChoose={(address) => {
+            onSelect={(address) => {
               /* Another package's find is that demo's page, a full navigation:
                  the site keeps it in a directory beside this one. */
               if (!address.startsWith(`/${ownId}/`)) {

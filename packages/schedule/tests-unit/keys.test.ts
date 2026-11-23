@@ -234,6 +234,36 @@ describe("editing by key proposes what the drag would", () => {
     expect(intents).toHaveLength(2);
   });
 
+  it("has the readout name the lead that changed and its new length, zero included", () => {
+    vi.useFakeTimers();
+    const { scene } = sceneWith({ intents: ["leadIn", "leadOut"] });
+    onP2(scene);
+    scene.key(key("i", { altKey: true, code: "KeyI" }));
+    vi.advanceTimersByTime(500);
+    expect(scene.getSnapshot().spoken?.lead).toEqual({ side: "leadIn", length: HOUR });
+    scene.key(key("ø", { altKey: true, code: "KeyO" }));
+    vi.advanceTimersByTime(500);
+    expect(scene.getSnapshot().spoken?.lead).toEqual({ side: "leadOut", length: HOUR });
+    /* Not applied by the caller: shortening a lead the data lacks changes nothing and names nothing. */
+    scene.key(key("O", { altKey: true, shiftKey: true, code: "KeyO" }));
+    vi.advanceTimersByTime(500);
+    expect(scene.getSnapshot().spoken?.lead).toBeUndefined();
+  });
+
+  it("names a lead shortened to nothing", () => {
+    vi.useFakeTimers();
+    const { scene } = sceneWith({ intents: ["leadOut"] });
+    scene.updateLayer(3, {
+      kind: "subtasks",
+      data: [{ id: "m", task: "a", lane: "press", from: 4 * HOUR, to: 5 * HOUR, leadOut: HOUR }],
+      tasks: [{ id: "a", color: "red" }],
+    });
+    scene.focus(true);
+    scene.key(key("O", { altKey: true, shiftKey: true, code: "KeyO" }));
+    vi.advanceTimersByTime(500);
+    expect(scene.getSnapshot().spoken?.lead).toEqual({ side: "leadOut", length: 0 });
+  });
+
   it("shortens a lead the data has, never below nothing", () => {
     const { scene, intents } = sceneWith({ intents: ["leadIn"] });
     scene.updateLayer(3, {

@@ -732,6 +732,7 @@ export function Schedule(props: ScheduleProps & { scene: ScheduleScene }): React
             <ScheduleReadout
               key={spoken.count}
               target={spoken.target}
+              lead={spoken.lead}
               lane={spoken.lane === null ? null : (scene.data.lanes.find((lane) => lane.id === spoken.lane)?.label ?? spoken.lane)}
             />
           )}
