@@ -70,6 +70,9 @@ beyond the map.
 - [The surface of the schedule](issues/07-the-surface-of-the-schedule.md): no alias left, the view's names
   match charts and the table; six groups of candidates that break a caller, the largest `from` / `to` with
   three meanings; `API.md` has no component props.
+- [Tokens and wording as surface](issues/09-tokens-and-wording.md): 163 tokens, none unread, German complete;
+  about 48 tokens are measures; the space tokens are px beside rem; names and key prefixes follow no one
+  scheme; one token is read and declared nowhere.
 
 ## Not yet specified
 

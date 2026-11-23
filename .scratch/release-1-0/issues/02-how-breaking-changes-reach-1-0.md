@@ -1,7 +1,7 @@
 # How breaking changes reach 1.0
 
 Type:   grilling
-Status: open
+Status: claimed
 Blocked by: 01
 
 ## Question
