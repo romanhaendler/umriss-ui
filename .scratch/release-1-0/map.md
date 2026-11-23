@@ -46,6 +46,10 @@ beyond the map.
 - [How breaking changes reach 1.0](issues/02-how-breaking-changes-reach-1-0.md): in the last `0.x` minors by
   ADR-0066; one last minor is the candidate and freezes the surface; no `rc`; `1.0.0` only removes the old
   names; the guide starts at `0.56.0`.
+- [The acceptance criteria](issues/03-the-acceptance-criteria.md): fourteen conditions on the candidate - the
+  gates green, the maintainer's applications without a warning, three browsers each run in CI with floors
+  derived from the source, axe on every page, muted text at 4.5:1, one VoiceOver pass, the keyboard items
+  settled, the demos looked through, a small shakedown of two tasks, `.scratch/` empty.
 - [What of the table's surface changes before 1.0](issues/15-what-of-the-tables-surface-changes-before-1-0.md):
   `t.conditions`, `foldAllGroups`, `pinned`, `GroupKey`, `Table<Z, Key, S>`, typed grid reports; `asCsv` and
   `stickyRowHeader` go; the pure model is `@experimental`; the view's keys and the rest are frozen as they
@@ -90,11 +94,10 @@ beyond the map.
 - **The polishing points themselves.** Each review returns candidates; which are taken before 1.0, and which
   break a caller and so go to the maintainer, can only be asked once they are on the table. Expect one
   decision ticket per review, perhaps per package.
-- **How the demos look.** The review of the demos reads their text; judging the look needs the sites built
-  and a person or screenshots in front of them.
+- **Which keyboard items are fixed and which declined**: hangs on "Which keyboard items of the shakedowns
+  still stand".
 - **The order of the releases up to 1.0**, and how the taken points are cut into specs: hangs on the points
   and on how breaking changes reach 1.0.
-- **The last gate**: whether a shakedown against the candidate belongs to the acceptance criteria.
 
 ## Out of scope
 
