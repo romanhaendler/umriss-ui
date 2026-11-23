@@ -153,6 +153,8 @@ second checkout running them at the same time sets a base of its own.
   organised here.
 * **[`SECURITY.md`](SECURITY.md)** — how to report a vulnerability, and which
   versions get a fix.
+* **[`docs/migrating-to-1-0.md`](docs/migrating-to-1-0.md)** — what a caller
+  changes on the way from `0.56` to `1.0`, package by package.
 
 **For a coding agent**, an installable skill points it at the documentation above
 and states the rules it would otherwise get wrong (`skills/umriss-ui/SKILL.md`):

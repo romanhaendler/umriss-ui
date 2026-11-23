@@ -9,6 +9,7 @@ what a reader has — the filename is what they are looking for.
 | how a component is used, with running code | the demo of its package — `pnpm start` for all of them at the version checked out, or `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation`, `pnpm dev:dashboard`, `pnpm dev:alarms` |
 | what a package exports, and the props, options and returns of each | `packages/<package>/API.md` - generated from `src/` and checked in; the surface ADR-0083 promises |
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
+| what I change on the way from `0.56` to `1.0` | [`migrating-to-1-0.md`](migrating-to-1-0.md) |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |
 | what umriss deliberately does not build, and what to do instead | [`adr/0032-what-umriss-is-not.md`](adr/0032-what-umriss-is-not.md), [`adr/0059-the-set-of-chart-kinds-is-open.md`](adr/0059-the-set-of-chart-kinds-is-open.md), [`adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md`](adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) |
